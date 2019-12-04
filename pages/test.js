@@ -28,7 +28,7 @@ const RandomColor = () => {
   return c.toString();
 };
 
-const Home = () => {
+const Test = () => {
   let swipeEvents = {};
   var e = null;
 
@@ -122,7 +122,7 @@ const Home = () => {
   return (
     <div className={'main-layout'} {...TouchEvents(touchListener)}>
       <Head>
-        <title>Home</title>
+        <title>Test</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Nav />
@@ -231,4 +231,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Test;
