@@ -5,6 +5,7 @@ const url = require("url");
 const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
 const fileUpload = require("express-fileupload");
+const bodyParser = require("body-parser");
 
 const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5555;
@@ -50,12 +51,21 @@ if (!dev && cluster.isMaster) {
         maxAge: dev ? "0" : "365d"
       })
     );
+
+    server.use(
+      fileUpload({
+        limits: { fileSize: 50 * 1024 * 1024 }
+      })
+    );
+
     server.post("/api/upload", function(req, res) {
-      if(!req.files || Object.keys(req.files).length === 0) {
+      /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
       }
-
-      console.log("API upload: ", req.files); // the uploaded file object
+*/
+      const file = req.files.file;
+      const data = file.data.toString("base64");
+      console.log("API upload: ", data.slice(0, 32)); // the uploaded file object
     });
 
     // Example server-side routing
