@@ -6,10 +6,46 @@ const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
 const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
+const graphqlHTTP = require("express-graphql");
+const graphql = require("graphql");
+
+var schema = new graphql.GraphQLSchema({
+  query: new graphql.GraphQLObjectType({
+    name: "items",
+    fields: {
+      id: { type: graphql.GraphQLInt },
+      author: { type: graphql.GraphQLString },
+      image: { type: graphql.GraphQLString }
+    }
+  }),
+  mutation: new graphql.GraphQLObjectType({
+    //⚠️ NOT mutiation
+    name: "Mutation",
+    fields: () => ({
+      incrementCounter: {
+        type: graphql.GraphQLInt,
+        resolve: () => ++counter
+      }
+    })
+  })
+});
 
 const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5555;
 
+const insertItem = ({ id, image, author }) => {
+  return `mutation MyMutation {
+  __typename
+  insert_items(objects: {id: ${id}, author: "${author}", image: "${image}"}) {
+    affected_rows
+    returning {
+      author
+      id
+      image
+    }
+  }
+}`;
+};
 // Multi-process to utilize all CPU cores.
 if (!dev && cluster.isMaster) {
   console.log(`Node cluster master ${process.pid} is running`);
@@ -53,6 +89,25 @@ if (!dev && cluster.isMaster) {
     );
 
     server.use(
+      "https://wild-beauty.herokuapp.com/v1/graphql",
+      graphqlHTTP({
+        schema: schema,
+        graphiql: true
+      })
+    );
+
+    server.use(
+      "https://wild-beauty.herokuapp.com/v1/graphql",
+      graphqlHTTP(request => {
+        return {
+          schema: schema,
+          context: { startTime: Date.now() },
+          graphiql: true,
+          extensions
+        };
+      })
+    );
+    server.use(
       fileUpload({
         limits: { fileSize: 50 * 1024 * 1024 }
       })
@@ -66,6 +121,18 @@ if (!dev && cluster.isMaster) {
       const file = req.files.file;
       const data = file.data.toString("base64");
       console.log("API upload: ", data.slice(0, 32)); // the uploaded file object
+
+      const q = "{ images {id image author } }";
+      graphql.graphql(schema, "{ id name }").then(result => {
+        // Prints
+        // {
+        //   data: { hello: "world" }
+        // }
+        console.log(result);
+      });
+      graphql.graphql(schema, insertItem({ id: 30, author: "x", image: "x.jpg" })).then(result => {
+        console.log(result);
+      });
     });
 
     // Example server-side routing

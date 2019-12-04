@@ -71,7 +71,7 @@ const Panes = () => {
             e = e.parentElement;
           }
         }
-        if(e.tagName.toLowerCase() == "html" || !hasLayerClass) {
+        if((e.tagName && e.tagName.toLowerCase() == "html") || !hasLayerClass) {
           return cancel();
         }
         if(e) Element.setCSS(e, { zIndex });
