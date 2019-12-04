@@ -1,5 +1,5 @@
-import { RootStore } from './RootStore.js';
-import Util from '../utils/util.js';
+import { RootStore } from "./RootStore.js";
+import Util from "../utils/util.js";
 
 export let appStores = {
   RootStore
@@ -31,7 +31,7 @@ export function getOrCreateStore(isServer = false, preFetchObj = {}, pageProps =
     return stores;
   }
   if(window !== undefined) {
-    const __NEXT_MOBX_STORE__ = '__NEXT_MOBX_STORE__';
+    const __NEXT_MOBX_STORE__ = "__NEXT_MOBX_STORE__";
     // Create store if unavailable on the client and set it on the window object
     if(!window[__NEXT_MOBX_STORE__]) {
       window[__NEXT_MOBX_STORE__] = stores;

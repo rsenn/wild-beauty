@@ -1,6 +1,6 @@
-import { isPoint, Point, PointList } from './dom.js';
-import { trkl } from './trkl.js';
-import { ScrollDisabler } from '../utils/scrollHandler.js';
+import { isPoint, Point, PointList } from "./dom.js";
+import { trkl } from "./trkl.js";
+import { ScrollDisabler } from "../utils/scrollHandler.js";
 
 export function MovementListener(handler, options) {
   var start = null;
@@ -32,8 +32,8 @@ export function MovementListener(handler, options) {
     let currentTarget = nativeEvent ? nativeEvent.currentTarget : event.currentTarget;
 
     var type = event.type.toLowerCase();
-    var started = type.endsWith('start') || type.endsWith('down');
-    var ends = type.endsWith('end') || type.endsWith('cancel') || type.endsWith('up');
+    var started = type.endsWith("start") || type.endsWith("down");
+    var ends = type.endsWith("end") || type.endsWith("cancel") || type.endsWith("up");
 
     if(!started && !ends && start === null) return;
 
@@ -47,7 +47,7 @@ export function MovementListener(handler, options) {
       end.distance = Point.distance(end, { x, y });
       //end.type = 'touchend';$
 
-      self.handler({ ...end, type: 'touchend', end });
+      self.handler({ ...end, type: "touchend", end });
 
       self.handler.start(null);
       self.handler.end(end);
@@ -62,12 +62,12 @@ export function MovementListener(handler, options) {
 
     let num = touches.length;
 
-    const getPos = (obj, prefix) => ({ x: obj[prefix + 'X'], y: obj[prefix + 'Y'] });
+    const getPos = (obj, prefix) => ({ x: obj[prefix + "X"], y: obj[prefix + "Y"] });
     [...touches].forEach((touch, touchNum) => {
       let { rotationAngle, target } = touch;
-      let client = getPos(touch, 'client');
-      let page = getPos(touch, 'page');
-      let radius = getPos(touch, 'radius');
+      let client = getPos(touch, "client");
+      let page = getPos(touch, "page");
+      let radius = getPos(touch, "radius");
       let newpos = { radius, rotationAngle, target, currentTarget, button, buttons, ...client };
       let angle;
       if(started) {
@@ -75,7 +75,7 @@ export function MovementListener(handler, options) {
         points = new PointList();
         newpos.prev = null;
         starttime = Date.now();
-        start = { type: 'touchstart', index, num, time: 0, ...newpos, client, page };
+        start = { type: "touchstart", index, num, time: 0, ...newpos, client, page };
         started = false;
         end = null;
         move = { ...start, x: 0, y: 0 };
@@ -86,7 +86,7 @@ export function MovementListener(handler, options) {
         let distance = Point.distance(newpos, move);
         angle = /* options.angle ?*/ (Point.angle(newpos, move) * 180) / Math.PI; /* : undefined*/
         if(distance < options.step) return;
-        move = { type, index, ...newpos, distance, angle, type: 'touchmove' };
+        move = { type, index, ...newpos, distance, angle, type: "touchmove" };
       }
       index++;
 
@@ -95,7 +95,7 @@ export function MovementListener(handler, options) {
       if(ends) {
         end = move;
         active = false;
-        move.type = 'touchend';
+        move.type = "touchend";
         /*   move.x = prev.x;
         move.y = prev.y;*/
       }
@@ -155,7 +155,7 @@ export function MultitouchListener(handler, options) {
 
   options = { num: 1, noscroll: true, ...options };
 
-  const getPos = (obj, prefix) => ({ x: obj[prefix + 'X'], y: obj[prefix + 'Y'] });
+  const getPos = (obj, prefix) => ({ x: obj[prefix + "X"], y: obj[prefix + "Y"] });
 
   function cancel() {
     start = {};
@@ -170,8 +170,8 @@ export function MultitouchListener(handler, options) {
 
   var self = function(event) {
     var type = event.type;
-    var started = type.endsWith('start') || type.endsWith('down');
-    var ends = type.endsWith('end') || type.endsWith('cancel') || type.endsWith('up');
+    var started = type.endsWith("start") || type.endsWith("down");
+    var ends = type.endsWith("end") || type.endsWith("cancel") || type.endsWith("up");
 
     let num = event.touches && event.touches.length;
     //let touches = num > 0 ? event.touches : [event];
@@ -191,7 +191,7 @@ export function MultitouchListener(handler, options) {
       return { ...touch, radius, ...client };
     });*/
 
-    type = type || 'touchmove';
+    type = type || "touchmove";
     move = { type, index, num, time: 0, ...event };
 
     if(started) {
@@ -250,8 +250,8 @@ export function TurnListener(handler, options) {
   return MultitouchListener(
     MovementListener(event => {
       const { points, x, y } = event;
-      const type = event.type || '';
-      var end = type.endsWith('up') || type.endsWith('cancel') || type.endsWith('end') || event.active === false;
+      const type = event.type || "";
+      var end = type.endsWith("up") || type.endsWith("cancel") || type.endsWith("end") || event.active === false;
       //if(type != 'touchmove') console.log('type = ', type);
       if(points.length >= 2) {
         center = points.avg();
@@ -315,17 +315,17 @@ export const MouseEvents = listener => ({
 });
 
 export const addTouchListeners = (listener, element, passive = true) => {
-  element.addEventListener('touchstart', listener, { passive });
-  element.addEventListener('touchend', listener, { passive });
-  element.addEventListener('touchmove', listener, { passive });
-  element.addEventListener('touchcancel', listener, { passive });
+  element.addEventListener("touchstart", listener, { passive });
+  element.addEventListener("touchend", listener, { passive });
+  element.addEventListener("touchmove", listener, { passive });
+  element.addEventListener("touchcancel", listener, { passive });
   return element;
 };
 
 export const addMouseListeners = (listener, element, passive = true) => {
-  element.addEventListener('mousedown', listener, { passive });
-  element.addEventListener('mouseup', listener, { passive });
-  element.addEventListener('mousemove', listener, { passive });
+  element.addEventListener("mousedown", listener, { passive });
+  element.addEventListener("mouseup", listener, { passive });
+  element.addEventListener("mousemove", listener, { passive });
   return element;
 };
 

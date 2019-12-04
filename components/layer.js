@@ -1,18 +1,18 @@
-import React, { useRef } from 'react';
-import Link from 'next/link';
-import Util from '../utils/util.js';
-import { devtools, assign_to } from '../utils/devtools.js';
-import { trkl } from '../utils/trkl.js';
-import { Point, Size, Rect, Element, SVG } from '../utils/dom.js';
-import { lazyInitializer } from '../utils/lazyInitializer.js';
-import { SvgOverlay } from '../utils/svg-overlay.js';
+import React, { useRef } from "react";
+import Link from "next/link";
+import Util from "../utils/util.js";
+import { devtools, assign_to } from "../utils/devtools.js";
+import { trkl } from "../utils/trkl.js";
+import { Point, Size, Rect, Element, SVG } from "../utils/dom.js";
+import { lazyInitializer } from "../utils/lazyInitializer.js";
+import { SvgOverlay } from "../utils/svg-overlay.js";
 
-if ('window' in global) {
+if ("window" in global) {
   assign_to(window);
   window.layers = [];
 }
 
-export function Layer({ style, inline, flex, children, border, margin, padding, background, overflow = 'visible', opacity, x, y, w, h }) {
+export function Layer({ style, inline, flex, children, border, margin, padding, background, overflow = "visible", opacity, x, y, w, h }) {
   var rect = w && h ? new Rect({ x: 0, y: 0, width: w, height: h }) : new Rect();
   var refContainer = useRef(null);
   var handler = trkl();
@@ -24,7 +24,7 @@ export function Layer({ style, inline, flex, children, border, margin, padding, 
       handler(value);
     }
   };
-  var dt = flex ? 'flex' : 'block';
+  var dt = flex ? "flex" : "block";
   var st = {
     ...style,
     border,
@@ -32,25 +32,25 @@ export function Layer({ style, inline, flex, children, border, margin, padding, 
     background,
     overflow,
     opacity,
-    display: (inline ? 'inline-' : '') + dt,
+    display: (inline ? "inline-" : "") + dt,
     padding
   };
   var box = lazyInitializer(() => Element.rect(ref.current));
   var client = lazyInitializer(() => {
-    return 'window' in global ? new Size(window.innerWidth, window.innerHeight) : new Size({ width: 0, height: 0 });
+    return "window" in global ? new Size(window.innerWidth, window.innerHeight) : new Size({ width: 0, height: 0 });
   });
   box.subscribe(rect => {
-    console.log('New element rect: ', rect);
+    console.log("New element rect: ", rect);
   });
   handler.subscribe(e => {
     // console.log('Element: ', e);
     do {
       box(Element.rect(e));
     } while(0); //(e = e.parentNode));
-    console.log('layer element: ', { box, client });
+    console.log("layer element: ", { box, client });
   });
 
-  if(!st.position) st.position = 'relative';
+  if(!st.position) st.position = "relative";
   if(Size.area(box) > 0) {
     if(!st.minWidth && !st.minHeight) {
       st.minWidth = rect.width;
@@ -66,7 +66,7 @@ export function Layer({ style, inline, flex, children, border, margin, padding, 
     <React.Fragment>
       <div ref={ref} className="layer" style={st}>
         <div className="layout">{children}</div>
-        <SvgOverlay className={'svg'} />
+        <SvgOverlay className={"svg"} />
       </div>
       <style jsx>
         {`

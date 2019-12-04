@@ -34,7 +34,7 @@ const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5555;
 
 const insertItem = ({ id, image, author }) => {
-  return `mutation MyMutation {
+  return `mutation Mutation {
   __typename
   insert_items(objects: {id: ${id}, author: "${author}", image: "${image}"}) {
     affected_rows

@@ -36,10 +36,10 @@
 	"buffers":
 	[
 		{
-			"contents": "getPrng\n() =>\nmaxZIndex\ne =>\ne =>\n(a, b) =>\nRandomColor\nPanes\nevent =>\ncontainsClass\ne =>\nitem =>\nevent =>\nonError\nonImage",
+			"contents": "getPrng\n() =>\nmaxZIndex\ne =>\ne =>\n(a, b) =>\nRandomColor\nPanes\nevent =>\ncontainsClass\ne =>\nitem =>\nevent =>\nonError\nonImage\nresponse =>",
 			"settings":
 			{
-				"buffer_size": 122,
+				"buffer_size": 134,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
@@ -58,7 +58,7 @@
 			"file": "pages/show.js",
 			"settings":
 			{
-				"buffer_size": 6293,
+				"buffer_size": 6424,
 				"line_ending": "Unix"
 			}
 		},
@@ -66,7 +66,16 @@
 			"file": "pages/panes.js",
 			"settings":
 			{
-				"buffer_size": 6088,
+				"buffer_size": 6204,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "wild-beauty.sublime-project",
+			"settings":
+			{
+				"buffer_size": 2466,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -411,7 +420,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 122,
+						"buffer_size": 134,
 						"regions":
 						{
 						},
@@ -429,6 +438,14 @@
 								{
 									"characters": ".#",
 									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
 								}
 							],
 							"current_file": "/home/roman/wild-beauty/pages/panes.js",
@@ -436,64 +453,68 @@
 							"symkeys":
 							[
 								[
-									791,
-									806
+									879,
+									894
 								],
 								[
-									848,
-									853
+									936,
+									941
 								],
 								[
-									882,
-									899
+									970,
+									987
 								],
 								[
-									959,
-									963
+									1042,
+									1046
 								],
 								[
-									1047,
-									1051
+									1125,
+									1129
 								],
 								[
-									1075,
-									1084
+									1153,
+									1162
 								],
 								[
-									1120,
-									1139
+									1198,
+									1217
 								],
 								[
-									1202,
-									1215
+									1280,
+									1293
 								],
 								[
-									1576,
-									1584
+									1654,
+									1662
 								],
 								[
-									1841,
-									1869
+									1919,
+									1947
 								],
 								[
-									1889,
-									1893
+									1967,
+									1971
 								],
 								[
-									1947,
-									1954
+									1998,
+									2005
 								],
 								[
-									3175,
-									3183
+									3192,
+									3200
 								],
 								[
-									3355,
-									3373
+									3372,
+									3390
 								],
 								[
-									3387,
-									3405
+									3404,
+									3422
+								],
+								[
+									4244,
+									4255
 								]
 							],
 							"symlist":
@@ -512,7 +533,8 @@
 								"item =>",
 								"event =>",
 								"onError",
-								"onImage"
+								"onImage",
+								"response =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -520,7 +542,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -557,9 +579,19 @@
 								{
 									"characters": ".#",
 									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
 								}
 							],
 							"syntax": "Packages/CSS3/CSS3.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true,
 							"typescript_plugin_format_options":
 							{
 								"convertTabsToSpaces": true,
@@ -571,7 +603,7 @@
 						"translation.y": 276.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -580,15 +612,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6293,
+						"buffer_size": 6424,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								476,
-								476
+								0,
+								0
 							]
 						],
 						"settings":
@@ -597,6 +629,14 @@
 							[
 								{
 									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
 									"selector": "text.html"
 								},
 								{
@@ -619,7 +659,7 @@
 						"translation.y": 2484.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -628,15 +668,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6088,
+						"buffer_size": 6204,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								753,
-								753
+								10,
+								10
 							]
 						],
 						"settings":
@@ -645,6 +685,14 @@
 							[
 								{
 									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
 									"selector": "text.html"
 								},
 								{
@@ -668,6 +716,45 @@
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "wild-beauty.sublime-project",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2466,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1,
+								1
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JSON (JavaScriptNext).tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -734,7 +821,7 @@
 		"height": 110.0
 	},
 	"pinned_build_system": "Run next.js server in development mode",
-	"project": "wild-flower.sublime-project",
+	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
 		"height": 84.0
@@ -828,7 +915,7 @@
 	{
 	},
 	"show_minimap": true,
-	"show_open_files": false,
+	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
 	"side_bar_width": 150.0,

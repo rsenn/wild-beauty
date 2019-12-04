@@ -1,10 +1,10 @@
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 
 const links = [
   // { href: '/', label: 'Home' },
-  { href: '/test', label: 'Gallery' },
-  { href: '/panes', label: 'Panes' }
+  { href: "/test", label: "Gallery" },
+  { href: "/panes", label: "Panes" }
 ].map(link => {
   link.key = `nav-link-${link.href}-${link.label}`;
   return link;

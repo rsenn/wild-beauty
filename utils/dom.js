@@ -1,21 +1,21 @@
-var ReactDOM = require('react-dom').ReactDOM;
-var SvgPath = require('./svg-path.js');
+var ReactDOM = require("react-dom").ReactDOM;
+var SvgPath = require("./svg-path.js");
 
-import Util from './util.js';
+import Util from "./util.js";
 
 export function dom() {
   let args = [...arguments];
   let ret = Util.array();
 
   const extend = (e, functions) => {
-    const keys = [...Util.members(functions)].filter(key => ['callee', 'caller', 'arguments', 'call', 'bind', 'apply', 'prototype', 'constructor', 'length'].indexOf(key) == -1 && typeof functions[key] == 'function');
+    const keys = [...Util.members(functions)].filter(key => ["callee", "caller", "arguments", "call", "bind", "apply", "prototype", "constructor", "length"].indexOf(key) == -1 && typeof functions[key] == "function");
     for(let key of keys) if(e[key] === undefined) e[key] = functions[key].bind(functions, e);
     /* function() {
           return functions[key].apply(functions, [this, ...arguments]);
         };*/
   };
 
-  args = args.map(arg => (typeof arg == 'string' ? Element.findAll(arg) : arg));
+  args = args.map(arg => (typeof arg == "string" ? Element.findAll(arg) : arg));
 
   for(let e of args) {
     if(e instanceof SVGSVGElement) extend(e, SVG);
@@ -37,7 +37,7 @@ export function dom() {
  * @return     {(Object|Point|boolean|string)}  True if number, False otherwise.
  */
 export const isNumber = a => {
-  return String(a).replace(/^[0-9]*$/, '') == '';
+  return String(a).replace(/^[0-9]*$/, "") == "";
 };
 
 export function Align(arg) {}
@@ -66,20 +66,20 @@ export function Point(arg) {
 
   arg = args.shift();
 
-  if(typeof arg === 'number') {
+  if(typeof arg === "number") {
     p.x = parseFloat(arg);
     p.y = parseFloat(args.shift());
-  } else if(typeof arg === 'string') {
-    const matches = [...arg.matchAll(new RegExp('/([-+]?d*.?d+)(?:[eE]([-+]?d+))?/g'))];
+  } else if(typeof arg === "string") {
+    const matches = [...arg.matchAll(new RegExp("/([-+]?d*.?d+)(?:[eE]([-+]?d+))?/g"))];
     p.x = parseFloat(matches[0]);
     p.y = parseFloat(matches[1]);
-  } else if(typeof arg == 'object' && arg !== null && (arg.x !== undefined || arg.y !== undefined)) {
+  } else if(typeof arg == "object" && arg !== null && (arg.x !== undefined || arg.y !== undefined)) {
     p.x = arg.x;
     p.y = arg.y;
-  } else if(typeof arg == 'object' && arg !== null && arg.length > 0 && arg[0] !== undefined && arg[1] !== undefined) {
+  } else if(typeof arg == "object" && arg !== null && arg.length > 0 && arg[0] !== undefined && arg[1] !== undefined) {
     p.x = parseFloat(arg.shift());
     p.y = parseFloat(arg.shift());
-  } else if(typeof args[0] === 'number' && typeof args[1] === 'number') {
+  } else if(typeof args[0] === "number" && typeof args[1] === "number") {
     p.x = args[0];
     p.y = args[1];
     args.shift(2);
@@ -120,12 +120,12 @@ Point.prototype.move_rel = function(x, y) {
 };
 
 Point.set = (p, fn) => {
-  if(typeof fn != 'function') return Point.apply(p, [...arguments]);
+  if(typeof fn != "function") return Point.apply(p, [...arguments]);
 
   return fn(p.x, p.y);
 };
 Point.prototype.set = function(fn) {
-  if(typeof fn != 'function') {
+  if(typeof fn != "function") {
     Point.apply(this, [...arguments]);
     return this;
   }
@@ -250,22 +250,22 @@ Point.toString = point => {
   return Point.prototype.toString.call(point);
 };
 Point.prototype.toString = function(brackets = true) {
-  return (brackets ? '{' : '') + 'x:' + this.x.toFixed(3) + ',y:' + this.y.toFixed(3) + (brackets ? '}' : '');
+  return (brackets ? "{" : "") + "x:" + this.x.toFixed(3) + ",y:" + this.y.toFixed(3) + (brackets ? "}" : "");
 };
 Point.prototype.toSource = function() {
-  return '{x:' + this.x.toFixed(3) + ',y:' + this.y.toFixed(3) + '}';
+  return "{x:" + this.x.toFixed(3) + ",y:" + this.y.toFixed(3) + "}";
 };
 
 Point.toCSS = function() {
   const point = this instanceof Point ? this : Point.apply(Point, arguments);
   return {
-    left: point.x + 'px',
-    top: point.y + 'px'
+    left: point.x + "px",
+    top: point.y + "px"
   };
 };
 Point.prototype.toCSS = Point.toCSS;
 
-Point.match = new RegExp('/([0-9.]+,[0-9.]+)/');
+Point.match = new RegExp("/([0-9.]+,[0-9.]+)/");
 
 Point.inside = (p, rect) => p.x >= rect.x && p.x < rect.x + rect.width && (p.y >= rect.y && p.y < rect.y + rect.height);
 
@@ -297,7 +297,7 @@ export function Unit(str) {
             return `${number}${this.name}`;
           }
         };
-  u.name = str.replace(/^[a-z]*/, '');
+  u.name = str.replace(/^[a-z]*/, "");
   return u;
 }
 
@@ -311,14 +311,14 @@ export function PointList(points) {
 
   if(args.length == 1 && args[0] instanceof Array) args = args[0];
 
-  if(typeof points === 'string') {
+  if(typeof points === "string") {
     const matches = [...points.matchAll(/[-.0-9,]+/g)];
 
     //console.log('points: ', points);
     //console.log('matches: ', matches);
 
     for(let i = 0; i < matches.length; i++) {
-      const coords = String(matches[i]).split(',');
+      const coords = String(matches[i]).split(",");
       ret.push(Point(coords));
     }
   } else if(args[0] && args[0].length == 2) {
@@ -370,11 +370,11 @@ PointList.prototype.removeSegment = function(index) {
 
 PointList.prototype.toPath = function(options = {}) {
   const { relative = false, close = false } = options;
-  let out = '';
+  let out = "";
   for(let i = 0; i < this.length; i++) {
-    out += (i == 0 ? 'M' : 'L') + this[i].x.toFixed(3) + ',' + this[i].y.toFixed(3) + ' ';
+    out += (i == 0 ? "M" : "L") + this[i].x.toFixed(3) + "," + this[i].y.toFixed(3) + " ";
   }
-  if(close) out += 'Z';
+  if(close) out += "Z";
   return out;
 };
 
@@ -389,7 +389,7 @@ PointList.copy = plist => PointList.prototype.clone.call(plist);
 PointList.prototype.toPolar = function(tfn) {
   //console.log('toPolar [' + this.length + ']');
   let ret = new PointList();
-  let t = typeof tfn == 'function' ? tfn : (x, y) => ({ x: (x * 180) / Math.PI, y });
+  let t = typeof tfn == "function" ? tfn : (x, y) => ({ x: (x * 180) / Math.PI, y });
   ret.splice.apply(ret, [
     0,
     ret.length,
@@ -406,7 +406,7 @@ PointList.toPolar = plist => PointList.prototype.toPolar.call(plist);
 
 PointList.prototype.fromPolar = function(tfn) {
   let ret = new PointList();
-  let t = typeof tfn == 'function' ? tfn : (x, y) => ({ x: (x * Math.PI) / 180, y });
+  let t = typeof tfn == "function" ? tfn : (x, y) => ({ x: (x * Math.PI) / 180, y });
   ret.splice.apply(ret, [
     0,
     ret.length,
@@ -595,7 +595,7 @@ PointList.prototype.lines = function(closed = false) {
 };
 
 PointList.prototype.toString = function() {
-  return '[' + this.map(point => (point.toString && !(point instanceof DOMPoint) ? point.toString() : Point.toString(point))).join(',\n  ') + ']';
+  return "[" + this.map(point => (point.toString && !(point instanceof DOMPoint) ? point.toString() : Point.toString(point))).join(",\n  ") + "]";
 };
 
 PointList.toString = plist => PointList.prototype.toString.call(plist);
@@ -619,7 +619,7 @@ export function Size(arg) {
   }
   //console.log.apply(console, ['Size(', ...args, ')']);
 
-  if(typeof arg == 'object') {
+  if(typeof arg == "object") {
     if(arg.width !== undefined || arg.height !== undefined) {
       arg = args.shift();
       obj.width = arg.width;
@@ -634,7 +634,7 @@ export function Size(arg) {
       obj.height = arg.bottom - arg.top;
     }
   } else {
-    while(typeof arg == 'object' && (arg instanceof Array || 'length' in arg)) {
+    while(typeof arg == "object" && (arg instanceof Array || "length" in arg)) {
       args = [...arg];
       arg = args[0];
     }
@@ -650,15 +650,15 @@ export function Size(arg) {
       let w = args.shift();
       let h = args.shift();
 
-      if(typeof w == 'object' && 'baseVal' in w) w = w.baseVal.value;
-      if(typeof h == 'object' && 'baseVal' in h) h = h.baseVal.value;
+      if(typeof w == "object" && "baseVal" in w) w = w.baseVal.value;
+      if(typeof h == "object" && "baseVal" in h) h = h.baseVal.value;
 
-      obj.width = typeof w == 'number' ? w : parseFloat(w.replace(/[^-.0-9]*$/, ''));
-      obj.height = typeof h == 'number' ? h : parseFloat(h.replace(/[^-.0-9]*$/, ''));
+      obj.width = typeof w == "number" ? w : parseFloat(w.replace(/[^-.0-9]*$/, ""));
+      obj.height = typeof h == "number" ? h : parseFloat(h.replace(/[^-.0-9]*$/, ""));
 
       obj.units = {
-        width: typeof w == 'number' ? 'px' : w.replace(obj.width.toString(), ''),
-        height: typeof h == 'number' ? 'px' : h.replace(obj.height.toString(), '')
+        width: typeof w == "number" ? "px" : w.replace(obj.width.toString(), ""),
+        height: typeof h == "number" ? "px" : h.replace(obj.height.toString(), "")
       };
     }
   }
@@ -670,7 +670,7 @@ export function Size(arg) {
   if(!(obj instanceof Size)) return obj;
 }
 
-Size.convertUnits = (size, w = 'window' in global ? window : null) => {
+Size.convertUnits = (size, w = "window" in global ? window : null) => {
   if(w === null) return size;
   const view = {
     vw: w.innerWidth,
@@ -698,8 +698,8 @@ Size.toCSS = function(arg) {
   const size = arg && arg.width !== undefined ? arg : this;
   let ret = {};
 
-  if(size.width !== undefined) ret.width = size.width + (size.units && 'width' in size.units ? size.units.width : 'px');
-  if(size.height !== undefined) ret.height = size.height + (size.units && 'height' in size.units ? size.units.height : 'px');
+  if(size.width !== undefined) ret.width = size.width + (size.units && "width" in size.units ? size.units.width : "px");
+  if(size.height !== undefined) ret.height = size.height + (size.units && "height" in size.units ? size.units.height : "px");
   return ret;
 };
 Size.prototype.toCSS = Size.toCSS;
@@ -739,7 +739,7 @@ export function Rect(arg) {
   let args = arg instanceof Array ? arg : [...arguments];
   let ret;
 
-  if(typeof args[0] == 'number') {
+  if(typeof args[0] == "number") {
     arg = args;
   } else {
     arg = args.shift();
@@ -772,31 +772,31 @@ export function Rect(arg) {
     obj.height = parseFloat(arg.height);
     ret = 1;
   } else if(arg && arg.length >= 4 && arg.slice(0, 4).every(arg => !isNaN(parseFloat(arg)))) {
-    obj.x = typeof arg[0] === 'number' ? arg[0] : parseFloat(arg[0]);
-    obj.y = typeof arg[1] === 'number' ? arg[1] : parseFloat(arg[1]);
-    obj.width = typeof arg[2] === 'number' ? arg[2] : parseFloat(arg[2]);
-    obj.height = typeof arg[3] === 'number' ? arg[3] : parseFloat(arg[3]);
+    obj.x = typeof arg[0] === "number" ? arg[0] : parseFloat(arg[0]);
+    obj.y = typeof arg[1] === "number" ? arg[1] : parseFloat(arg[1]);
+    obj.width = typeof arg[2] === "number" ? arg[2] : parseFloat(arg[2]);
+    obj.height = typeof arg[3] === "number" ? arg[3] : parseFloat(arg[3]);
     ret = 4;
   } else if(arg && arg.length >= 2 && arg.slice(0, 2).every(arg => !isNaN(parseFloat(arg)))) {
-    obj.width = typeof arg[0] === 'number' ? arg[0] : parseFloat(arg[0]);
-    obj.height = typeof arg[1] === 'number' ? arg[1] : parseFloat(arg[1]);
+    obj.width = typeof arg[0] === "number" ? arg[0] : parseFloat(arg[0]);
+    obj.height = typeof arg[1] === "number" ? arg[1] : parseFloat(arg[1]);
     ret = 2;
   } else if(arg instanceof Array) {
     let argc;
     let argi = 0;
     if(arg.length >= 4) {
-      argc = typeof arg[0] == 'number' ? 2 : 1;
+      argc = typeof arg[0] == "number" ? 2 : 1;
       Point.apply(obj, arg.slice(0, argc));
       argi = argc;
     }
-    argc = typeof arg[argi] == 'number' ? 2 : 1;
+    argc = typeof arg[argi] == "number" ? 2 : 1;
     Size.apply(obj, arg.slice(argi, argc));
 
     ret = argi + argc;
   }
 
   if(obj.round === undefined) {
-    Object.defineProperty(obj, 'round', {
+    Object.defineProperty(obj, "round", {
       value: function() {
         return Rect.round(this);
       },
@@ -894,12 +894,12 @@ Rect.prototype.area = function() {
   return this.width * this.height;
 };
 Rect.prototype.toString = function() {
-  return this.x + ',' + this.y + ' ' + this.width + 'x' + this.height;
+  return this.x + "," + this.y + " " + this.width + "x" + this.height;
 };
-Rect.toString = rect => rect.x + ',' + rect.y + ' ' + rect.width + 'x' + rect.height;
+Rect.toString = rect => rect.x + "," + rect.y + " " + rect.width + "x" + rect.height;
 
-Rect.toSource = (r = this) => '{x:' + r.x + ',y:' + r.y + ',width:' + r.width + ',height:' + r.height + '}';
-Rect.prototype.toSource = (r = this) => 'new Rect(' + (r ? r.x + ',' + r.y + ',' + r.width + ',' + r.height : '') + ')';
+Rect.toSource = (r = this) => "{x:" + r.x + ",y:" + r.y + ",width:" + r.width + ",height:" + r.height + "}";
+Rect.prototype.toSource = (r = this) => "new Rect(" + (r ? r.x + "," + r.y + "," + r.width + "," + r.height : "") + ")";
 
 Rect.equal = (a, b) => a.x == b.x && a.y == b.y && a.width == b.width && a.height == b.height;
 
@@ -948,7 +948,7 @@ Rect.union = (a, b) => {
 
 Util.defineGetterSetter(
   Rect.prototype,
-  'x1',
+  "x1",
   function() {
     return this.x;
   },
@@ -959,7 +959,7 @@ Util.defineGetterSetter(
   }
 );
 
-Object.defineProperty(Rect.prototype, 'x2', {
+Object.defineProperty(Rect.prototype, "x2", {
   get: function() {
     return this.x + this.width;
   },
@@ -968,7 +968,7 @@ Object.defineProperty(Rect.prototype, 'x2', {
   },
   enumerable: true
 });
-Object.defineProperty(Rect.prototype, 'y1', {
+Object.defineProperty(Rect.prototype, "y1", {
   get: function() {
     return this.y;
   },
@@ -978,7 +978,7 @@ Object.defineProperty(Rect.prototype, 'y1', {
     this.y -= extend;
   }
 });
-Object.defineProperty(Rect.prototype, 'y2', {
+Object.defineProperty(Rect.prototype, "y2", {
   get: function() {
     return this.y + this.height;
   },
@@ -987,7 +987,7 @@ Object.defineProperty(Rect.prototype, 'y2', {
   }
 });
 Rect.area = r => r.width * r.height;
-Object.defineProperty(Rect.prototype, 'area', {
+Object.defineProperty(Rect.prototype, "area", {
   get: function() {
     return Rect.area(this);
   }
@@ -996,14 +996,14 @@ Object.defineProperty(Rect.prototype, 'area', {
 Rect.center = r => new Point(r.x + r.width / 2, r.y + r.height / 2);
 //Rect.prototype.center = function() { return new Point(this.x + this.width / 2, this.y + this.height / 2); }
 
-Object.defineProperty(Rect.prototype, 'center', {
+Object.defineProperty(Rect.prototype, "center", {
   get: function() {
     return Rect.center(this);
   }
 });
 
 Rect.path = (r, clockwise = true) => ({
-  d: clockwise ? 'M' + r.x + ' ' + r.y + ' h' + r.width + ' v' + r.height + ' h-' + r.width + 'z' : 'M' + r.x + ' ' + r.y + ' v' + r.height + ' h' + r.width + ' v-' + r.height + 'z'
+  d: clockwise ? "M" + r.x + " " + r.y + " h" + r.width + " v" + r.height + " h-" + r.width + "z" : "M" + r.x + " " + r.y + " v" + r.height + " h" + r.width + " v-" + r.height + "z"
 });
 
 Object.assign(Rect.prototype, {
@@ -1033,7 +1033,7 @@ Rect.toCSS = function() {
 Rect.prototype.toCSS = Rect.toCSS;
 
 Rect.set = function(rect, element) {
-  let e = typeof element === 'string' ? Element.find(element) : element;
+  let e = typeof element === "string" ? Element.find(element) : element;
   Element.move(e, rect);
   Element.resize(e, rect);
   return rect;
@@ -1121,13 +1121,13 @@ export function TRBL(arg) {
   let ret = this instanceof TRBL ? this : {};
   let args = [...arguments];
 
-  if(typeof arg === 'object') {
+  if(typeof arg === "object") {
     Object.keys(arg).forEach(k => {
       const matches = /(top|right|bottom|left)$/i.exec(k);
       ret[matches[0].toLowerCase()] = parseInt(arg[k]);
     });
   } else if(arg) {
-    if(typeof arg === 'string') arg = [...arg.matchAll(/^[0-9.]+(|px|em|rem|pt|cm|mm)$/g)];
+    if(typeof arg === "string") arg = [...arg.matchAll(/^[0-9.]+(|px|em|rem|pt|cm|mm)$/g)];
     else if(arg.length == 4) arg = arg.map(v => parseInt(v));
 
     ret.top = arg[0];
@@ -1165,13 +1165,13 @@ TRBL.neg = (trbl = this) => ({
 TRBL.prototype.isNaN = function() {
   return isNaN(this.top) || isNaN(this.right) || isNaN(this.bottom) || isNaN(this.left);
 };
-Object.defineProperty(TRBL.prototype, 'inset', {
+Object.defineProperty(TRBL.prototype, "inset", {
   get() {
     return rect => Rect.inset(rect, this);
   }
 });
 
-Object.defineProperty(TRBL.prototype, 'outset', {
+Object.defineProperty(TRBL.prototype, "outset", {
   get() {
     return rect => Rect.outset(rect, this);
   }
@@ -1213,12 +1213,12 @@ TRBL.union = (trbl, other) => ({
 
 TRBL.toRect = trbl => new Rect(trbl.left, trbl.top, trbl.right - trbl.left, trbl.bottom - trbl.top);
 
-TRBL.prototype.toString = function(unit = 'px') {
-  return '' + this.top + '' + unit + ' ' + this.right + '' + unit + ' ' + this.bottom + '' + unit + ' ' + this.left;
-  '' + unit;
+TRBL.prototype.toString = function(unit = "px") {
+  return "" + this.top + "" + unit + " " + this.right + "" + unit + " " + this.bottom + "" + unit + " " + this.left;
+  "" + unit;
 };
 TRBL.prototype.toSource = function() {
-  return '{top:' + this.top + ',right:' + this.right + ',bottom:' + this.bottom + ',left:' + this.left + '}';
+  return "{top:" + this.top + ",right:" + this.right + ",bottom:" + this.bottom + ",left:" + this.left + "}";
 };
 
 /**
@@ -1229,7 +1229,7 @@ TRBL.prototype.toSource = function() {
 export function Matrix(arg) {
   let ret = this instanceof Matrix ? this : [0, 0, 0, 0, 0, 0];
 
-  if(typeof arg === 'string') {
+  if(typeof arg === "string") {
     if(/matrix\([^)]*\)/.test(arg)) {
       let [a, b, c, d, tx, ty] = [...arg.matchAll(/[-.0-9]+/g)].map(m => parseFloat(m[0]));
       ret.xx = a;
@@ -1252,14 +1252,14 @@ export function Matrix(arg) {
         cmd = parts[i++];
         args = [];
         while(i < parts.length && parts[i].charCodeAt(0) <= 57) args.push(parseFloat(parts[i++]));
-        if(cmd == '') break;
+        if(cmd == "") break;
 
-        if(cmd == 'matrix') {
+        if(cmd == "matrix") {
           const other = new DOMMatrix(args);
           m = m.multiply(other);
         } else {
-          if(m[cmd + 'Self'] === undefined) throw new Error('No such transform command: ' + cmd);
-          m[cmd + 'Self'].apply(m, args);
+          if(m[cmd + "Self"] === undefined) throw new Error("No such transform command: " + cmd);
+          m[cmd + "Self"].apply(m, args);
         }
         //console.log('Matrix ', { cmd, args,  m });
       }
@@ -1289,10 +1289,10 @@ export function Matrix(arg) {
   if(!(this instanceof Matrix)) return Object.assign(ret, Matrix.prototype);
 }
 
-export const isMatrix = m => m instanceof Matrix || (m.length !== undefined && m.length == 6 && m.every(el => typeof el == 'number'));
+export const isMatrix = m => m instanceof Matrix || (m.length !== undefined && m.length == 6 && m.every(el => typeof el == "number"));
 
-Matrix.keys = ['xx', 'xy', 'x0', 'yx', 'yy', 'y0'];
-Matrix.keySeq = ['xx', 'yx', 'xy', 'yy', 'x0', 'y0'];
+Matrix.keys = ["xx", "xy", "x0", "yx", "yy", "y0"];
+Matrix.keySeq = ["xx", "yx", "xy", "yy", "x0", "y0"];
 Matrix.keyIndex = {
   xx: 0,
   a: 0,
@@ -1310,7 +1310,7 @@ Matrix.keyIndex = {
   f: 5
 };
 //Matrix.keyABC = { a: 0, b: 3, c: 1, d: 4, e: 2, f: 5 };
-Matrix.keyABC = ['a', 'c', 'e', 'b', 'd', 'f'];
+Matrix.keyABC = ["a", "c", "e", "b", "d", "f"];
 
 Matrix.prototype = new Array(6);
 Matrix.prototype.constructor = Matrix;
@@ -1424,11 +1424,11 @@ Matrix.prototype.inverse = function() {
   return Matrix.fromDOMMatrix(this, Matrix.toDOMMatrix(this).inverse());
 };
 
-['multiply', 'translate', 'scale', 'scale3d', 'rotate', 'rotateFromVector', 'rotateAxisAngle', 'skewX', 'skewY'].forEach(method => {
-  Matrix.prototype[method + '_self'] = function() {
+["multiply", "translate", "scale", "scale3d", "rotate", "rotateFromVector", "rotateAxisAngle", "skewX", "skewY"].forEach(method => {
+  Matrix.prototype[method + "_self"] = function() {
     let dom = Matrix.toDOMMatrix(this);
-    Matrix.call(this, dom[method + 'Self'].apply(dom, arguments));
-    console.log(method + '_self ', this);
+    Matrix.call(this, dom[method + "Self"].apply(dom, arguments));
+    console.log(method + "_self ", this);
     return this;
   };
   Matrix.prototype[method] = function() {
@@ -1449,7 +1449,7 @@ Matrix.operation = function(name) {
 };
 
 Matrix.t = function(op, ...args) {
-  let fn = typeof op === 'string' ? Matrix.operation(op) : op;
+  let fn = typeof op === "string" ? Matrix.operation(op) : op;
   let m = fn.apply(Matrix, Array.from(args));
 
   //console.log('transformation matrix: ' + this.toString());
@@ -1460,7 +1460,7 @@ Matrix.t = function(op, ...args) {
 Matrix.init = function() {
   let args = [...arguments];
   let matrix = args.length > 6 ? args.shift() : new Matrix();
-  const abcdef = 'abcdef';
+  const abcdef = "abcdef";
 
   Matrix.keys.forEach((key, i) => (matrix[i] = args[Matrix.keySeq.indexOf(key)]));
 
@@ -1481,7 +1481,7 @@ Matrix.translate = function(tx, ty) {
 
 Matrix.scale = function(sx, sy) {
   let args = [...arguments];
-  if(typeof args[0] == 'number') return Matrix.init_scale.call(new Matrix(), sx, sy);
+  if(typeof args[0] == "number") return Matrix.init_scale.call(new Matrix(), sx, sy);
   let m = args.shift();
   return Matrix.prototype.multiply.call(m, Matrix.init_scale.apply(Matrix, args));
 };
@@ -1504,17 +1504,17 @@ Matrix.prototype.toArray = function() {
 };
 
 Matrix.prototype.toString = function() {
-  let r = Matrix.keys.map((key, i) => `${key}: ${this[i]}`).join(', ');
-  return '{ ' + r + ' }';
+  let r = Matrix.keys.map((key, i) => `${key}: ${this[i]}`).join(", ");
+  return "{ " + r + " }";
 };
 Matrix.toString = m => {
-  let r = '';
+  let r = "";
   for(let i = 0; i < m.length; i++) {
-    if(r.length) r += ', ';
-    if(i == Math.floor(m.length / 2)) r += '\n  ';
+    if(r.length) r += ", ";
+    if(i == Math.floor(m.length / 2)) r += "\n  ";
     r += Util.pad(m[i].toString(), 3) + m[i];
   }
-  return '[' + r + ' ]';
+  return "[" + r + " ]";
 };
 
 Matrix.prototype.toDOMMatrix = function() {
@@ -1529,7 +1529,7 @@ Matrix.fromDOMMatrix = dom => {
 };
 
 Matrix.prototype.toSVG = function() {
-  return 'matrix(' + ['a', 'b', 'c', 'd', 'e', 'f'].map(k => this[Matrix.keyIndex[k]]).join(',') + ')';
+  return "matrix(" + ["a", "b", "c", "d", "e", "f"].map(k => this[Matrix.keyIndex[k]]).join(",") + ")";
 };
 Matrix.toSVG = m => Matrix.prototype.toSVG.call(m);
 
@@ -1666,20 +1666,20 @@ export function Line(x1, y1, x2, y2) {
     obj.y2 = parseFloat(args[1].y);
     ret = 2;
   } else if(arg && arg.length >= 4 && arg.slice(0, 4).every(arg => !isNaN(parseFloat(arg)))) {
-    obj.x1 = typeof arg[0] === 'number' ? arg[0] : parseFloat(arg[0]);
-    obj.y1 = typeof arg[1] === 'number' ? arg[1] : parseFloat(arg[1]);
-    obj.x2 = typeof arg[2] === 'number' ? arg[2] : parseFloat(arg[2]);
-    obj.y2 = typeof arg[3] === 'number' ? arg[3] : parseFloat(arg[3]);
+    obj.x1 = typeof arg[0] === "number" ? arg[0] : parseFloat(arg[0]);
+    obj.y1 = typeof arg[1] === "number" ? arg[1] : parseFloat(arg[1]);
+    obj.x2 = typeof arg[2] === "number" ? arg[2] : parseFloat(arg[2]);
+    obj.y2 = typeof arg[3] === "number" ? arg[3] : parseFloat(arg[3]);
     ret = 4;
   } else {
     ret = 0;
   }
 
-  if(!isLine(obj)) console.log('ERROR: is not a line: ', [...arguments]);
+  if(!isLine(obj)) console.log("ERROR: is not a line: ", [...arguments]);
   if(!(this instanceof Line)) return obj;
 }
 
-export const isLine = obj => ['x1', 'y1', 'x2', 'y2'].every(prop => obj[prop] !== undefined);
+export const isLine = obj => ["x1", "y1", "x2", "y2"].every(prop => obj[prop] !== undefined);
 
 Line.intersect = (a, b) => {
   const ma = (a[0].y - a[1].y) / (a[0].x - a[1].x); // slope of line 1
@@ -1698,7 +1698,7 @@ Line.prototype[1] = Line.prototype.b = new Point();
 /*Util.defineGetter(Line.prototype, 0, function() { return this.a; });
 Util.defineGetter(Line.prototype, 1, function() { return this.b; });
 */
-['a', 0].forEach(prop =>
+["a", 0].forEach(prop =>
   Util.defineGetterSetter(
     Line.prototype,
     prop,
@@ -1706,7 +1706,7 @@ Util.defineGetter(Line.prototype, 1, function() { return this.b; });
       let p = new Point(this.x1, this.y1);
       Util.defineGetterSetter(
         p,
-        'x',
+        "x",
         () => {
           return this.x1;
         },
@@ -1717,7 +1717,7 @@ Util.defineGetter(Line.prototype, 1, function() { return this.b; });
       );
       Util.defineGetterSetter(
         p,
-        'y',
+        "y",
         () => {
           return this.y1;
         },
@@ -1735,7 +1735,7 @@ Util.defineGetter(Line.prototype, 1, function() { return this.b; });
     false
   )
 );
-['b', 1].forEach(prop =>
+["b", 1].forEach(prop =>
   Util.defineGetterSetter(
     Line.prototype,
     prop,
@@ -1743,7 +1743,7 @@ Util.defineGetter(Line.prototype, 1, function() { return this.b; });
       let p = new Point(this.x2, this.y2);
       Util.defineGetterSetter(
         p,
-        'x',
+        "x",
         () => {
           return this.x2;
         },
@@ -1754,7 +1754,7 @@ Util.defineGetter(Line.prototype, 1, function() { return this.b; });
       );
       Util.defineGetterSetter(
         p,
-        'y',
+        "y",
         () => {
           return this.y2;
         },
@@ -1813,7 +1813,7 @@ Line.transform = (line, matrix) => {
 
 Line.prototype.inspect = function() {
   const { x1, y1, x2, y2 } = this;
-  return 'Line{ ' + inspect({ x1, y1, x2, y2 }) + ' }';
+  return "Line{ " + inspect({ x1, y1, x2, y2 }) + " }";
 };
 
 /*
@@ -1844,8 +1844,8 @@ export function RGBA(r = 0, g = 0, b = 0, a = 255) {
     ret.a = a;
   } else if(args.length == 1) {
     const arg = args[0];
-    if(typeof arg === 'string') {
-      if(arg.startsWith('#')) {
+    if(typeof arg === "string") {
+      if(arg.startsWith("#")) {
         c = arg.length >= 7 ? /^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})?$/i.exec(arg) : /^#?([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])?$/i.exec(arg);
 
         let mul = arg.length >= 7 ? 1 : 17;
@@ -1856,8 +1856,8 @@ export function RGBA(r = 0, g = 0, b = 0, a = 255) {
         ret.g = parseInt(c[2], 16) * mul;
         ret.b = parseInt(c[3], 16) * mul;
         ret.a = c.length > 3 ? parseInt(c[4], 16) * mul : 255;
-      } else if(arg.toLowerCase().startsWith('rgb')) {
-        c = arg.match(new RegExp('/[d.]+/g')).map(x => parseFloat(x));
+      } else if(arg.toLowerCase().startsWith("rgb")) {
+        c = arg.match(new RegExp("/[d.]+/g")).map(x => parseFloat(x));
 
         c = [...c].slice(1);
 
@@ -1865,7 +1865,7 @@ export function RGBA(r = 0, g = 0, b = 0, a = 255) {
         ret.g = Math.round(c[1]);
         ret.b = Math.round(c[2]);
         ret.a = Math.round(c.length > 3 && !isNaN(c[3]) ? c[3] : 255);
-      } else if(typeof arg === 'object' && arg.r !== undefined) {
+      } else if(typeof arg === "object" && arg.r !== undefined) {
         ret.r = arg.r;
         ret.g = arg.g;
         ret.b = arg.b;
@@ -1879,7 +1879,7 @@ export function RGBA(r = 0, g = 0, b = 0, a = 255) {
   if(!(ret instanceof RGBA)) return ret; //Object.setPrototypeOf(ret, RGBA.prototype);
 }
 
-RGBA.properties = ['r', 'g', 'b', 'a'];
+RGBA.properties = ["r", "g", "b", "a"];
 export const isRGBA = obj => RGBA.properties.every(prop => obj.hasOwnProperty(prop));
 
 RGBA.fromHex = (hex, alpha = 255) => {
@@ -1894,7 +1894,7 @@ RGBA.fromHex = (hex, alpha = 255) => {
 
 RGBA.prototype.hex = function() {
   const { r, g, b, a } = RGBA.clamp(RGBA.round(this));
-  return '#' + ('0000000' + ((r << 16) | (g << 8) | b).toString(16)).slice(-6) + (a !== undefined ? ('0' + a.toString(16)).slice(-2) : '');
+  return "#" + ("0000000" + ((r << 16) | (g << 8) | b).toString(16)).slice(-6) + (a !== undefined ? ("0" + a.toString(16)).slice(-2) : "");
 };
 
 RGBA.toHex = rgba => RGBA.prototype.hex.call(rgba);
@@ -1914,12 +1914,12 @@ RGBA.normalize = (rgba, from = 255, to = 1.0) => ({
   b: (rgba.b * to) / from,
   a: (rgba.a * to) / from
 });
-RGBA.prototype.css = () => prop => (prop ? prop + ':' : '') + 'rgba(' + this.r + ', ' + this.g + ', ' + this.b + ', ' + (this.a / 255).toFixed(3) + ')';
+RGBA.prototype.css = () => prop => (prop ? prop + ":" : "") + "rgba(" + this.r + ", " + this.g + ", " + this.b + ", " + (this.a / 255).toFixed(3) + ")";
 
 RGBA.prototype.toString = function(a) {
   if(a === undefined) a = this.a;
-  if(a >= 255) return 'rgb(' + this.r + ', ' + this.g + ', ' + this.b + ')';
-  else return 'rgba(' + this.r + ', ' + this.g + ', ' + this.b + ', ' + (a / 255).toFixed(3) + ')';
+  if(a >= 255) return "rgb(" + this.r + ", " + this.g + ", " + this.b + ")";
+  else return "rgba(" + this.r + ", " + this.g + ", " + this.b + ", " + (a / 255).toFixed(3) + ")";
 };
 
 RGBA.prototype.normalize = function(from = 255, to = 1.0) {
@@ -2044,7 +2044,7 @@ export function HSLA(h = 0, s = 0, l = 0, a = 1.0) {
     ret.a = a;
   } else {
     const arg = args[0];
-    if(typeof arg === 'string') {
+    if(typeof arg === "string") {
       const matches = /hsla\(\s*([0-9.]+)\s*,\s*([0-9.]+%?)\s*,\s*([0-9.]+%?),\s*([0-9.]+)\s*\)/g.exec(arg) || /hsl\(\s*([0-9.]+)\s*,\s*([0-9.]+%?)\s*,\s*([0-9.]+%?)\s*\)/g.exec(arg);
 
       if(matches != null) matches = [...matches].slice(1);
@@ -2054,8 +2054,8 @@ export function HSLA(h = 0, s = 0, l = 0, a = 1.0) {
     ret.l = c[2];
     ret.a = c[3] !== undefined ? c[3] : 1.0;
 
-    ['h', 's', 'l', 'a'].forEach(channel => {
-      if(ret[channel].endsWith('%')) ret[channel] = parseFloat(ret[channel].slice(0, ret[channel].length - 1));
+    ["h", "s", "l", "a"].forEach(channel => {
+      if(ret[channel].endsWith("%")) ret[channel] = parseFloat(ret[channel].slice(0, ret[channel].length - 1));
       else ret[channel] = parseFloat(ret[channel]);
     });
   }
@@ -2064,10 +2064,10 @@ export function HSLA(h = 0, s = 0, l = 0, a = 1.0) {
   if(!(ret instanceof HSLA)) return ret;
 }
 
-HSLA.properties = ['h', 's', 'l', 'a'];
+HSLA.properties = ["h", "s", "l", "a"];
 export const isHSLA = obj => HSLA.properties.every(prop => obj.hasOwnProperty(prop));
 
-HSLA.setcss = hsla => prop => (prop ? prop + ':' : '') + 'hsla(' + hsla.h + ',' + hsla.s + '%,' + hsla.l + '%,' + hsla.a + ')';
+HSLA.setcss = hsla => prop => (prop ? prop + ":" : "") + "hsla(" + hsla.h + "," + hsla.s + "%," + hsla.l + "%," + hsla.a + ")";
 
 HSLA.prototype.css = function() {
   const hsla = HSLA.clamp(HSLA.round(this));
@@ -2222,7 +2222,7 @@ export class Node {
 export class Element extends Node {
   static create() {
     let args = [...arguments];
-    let { tagName, ns, children, ...props } = typeof args[0] == 'object' ? args.shift() : { tagName: args.shift(), ...args.shift() };
+    let { tagName, ns, children, ...props } = typeof args[0] == "object" ? args.shift() : { tagName: args.shift(), ...args.shift() };
     let parent = args.shift();
 
     //console.log('Element.create ', { tagName, props, parent });
@@ -2231,12 +2231,12 @@ export class Element extends Node {
     let e = ns ? d.createElementNS(ns, tagName) : d.createElement(tagName);
     for(let k in props) {
       const value = props[k];
-      if(k == 'parent') {
+      if(k == "parent") {
         parent = props[k];
         continue;
-      } else if(k == 'className') k = 'class';
-      if(k == 'style' && typeof value === 'object') Element.setCSS(e, value);
-      else if(k.startsWith('on') || k.startsWith('inner')) e[k] = value;
+      } else if(k == "className") k = "class";
+      if(k == "style" && typeof value === "object") Element.setCSS(e, value);
+      else if(k.startsWith("on") || k.startsWith("inner")) e[k] = value;
       else e.setAttribute(k, value);
     }
     if(children && children.length) children.forEach(obj => Element.create(obj, e));
@@ -2282,7 +2282,7 @@ export class Element extends Node {
   }
 
   static find(arg, parent) {
-    return typeof arg === 'string' ? (parent ? parent.querySelector(arg) : document.querySelector(arg)) : arg;
+    return typeof arg === "string" ? (parent ? parent.querySelector(arg) : document.querySelector(arg)) : arg;
   }
 
   static findAll(arg, parent) {
@@ -2298,22 +2298,22 @@ export class Element extends Node {
    * @return     {<type>}  { description_of_the_return_value }
    */
   static attr(element, attrs_or_name) {
-    const e = typeof element === 'string' ? Element.find(element) : element;
-    if(!Util.isArray(attrs_or_name) && typeof attrs_or_name === 'object' && e) {
+    const e = typeof element === "string" ? Element.find(element) : element;
+    if(!Util.isArray(attrs_or_name) && typeof attrs_or_name === "object" && e) {
       for(let key in attrs_or_name) {
-        const name = Util.decamelize(key, '-');
+        const name = Util.decamelize(key, "-");
         const value = attrs_or_name[key];
         /*        console.log('attr(', e, ', ', { name, key, value, }, ')')
-         */ if(key.startsWith('on') && !/svg/.test(e.namespaceURI)) e[key] = value;
+         */ if(key.startsWith("on") && !/svg/.test(e.namespaceURI)) e[key] = value;
         else if(e.setAttribute) e.setAttribute(name, value);
         else e[key] = value;
       }
       return e;
     }
-    if(typeof attrs_or_name === 'function') {
+    if(typeof attrs_or_name === "function") {
       attrs_or_name(e.attributes, e);
       return e;
-    } else if(typeof attrs_or_name === 'string') {
+    } else if(typeof attrs_or_name === "string") {
       attrs_or_name = [attrs_or_name];
     } else {
       attrs_or_name = e.getAttributeNames();
@@ -2324,7 +2324,7 @@ export class Element extends Node {
       acc[key] = isNaN(parseFloat(value)) ? value : parseFloat(value);
       return acc;
     }, {});
-    if(typeof arguments[1] == 'string') return ret[attrs_or_name[0]];
+    if(typeof arguments[1] == "string") return ret[attrs_or_name[0]];
     return ret;
   }
 
@@ -2332,9 +2332,9 @@ export class Element extends Node {
     let e = elem;
     while(e) {
       if(e.style) {
-        if(e.style.position == '') e.style.position = 'relative';
-        if(e.style.left == '') e.style.left = '0px';
-        if(e.style.top == '') e.style.top = '0px';
+        if(e.style.position == "") e.style.position = "relative";
+        if(e.style.left == "") e.style.left = "0px";
+        if(e.style.top == "") e.style.top = "0px";
       }
       e = e.offsetParent || e.parentNode;
     }
@@ -2360,7 +2360,7 @@ export class Element extends Node {
     let element = args.shift();
     if(args.length > 0 && (isRect(args) || isRect(args[0]))) return Element.setRect.apply(Element, arguments);
     const { round = true, relative_to = null, scroll_offset = true } = options;
-    const e = typeof element === 'string' ? Element.find(element) : element;
+    const e = typeof element === "string" ? Element.find(element) : element;
     if(!e || !e.getBoundingClientRect) {
       return new Rect(0, 0, 0, 0);
     }
@@ -2384,11 +2384,11 @@ export class Element extends Node {
   }
 
   static setRect(element, rect, anchor = Anchor.LEFT | Anchor.TOP) {
-    const e = typeof element === 'string' ? Element.find(element) : element;
+    const e = typeof element === "string" ? Element.find(element) : element;
     //console.log('Element.setRect(', element, ',', rect, ', ', anchor, ') ');
-    if(typeof anchor == 'string') e.style.position = anchor;
-    const position = e.style.position || rect.position || 'relative';
-    const pelement = position == 'fixed' ? e.documentElement || document.body : e.parentNode;
+    if(typeof anchor == "string") e.style.position = anchor;
+    const position = e.style.position || rect.position || "relative";
+    const pelement = position == "fixed" ? e.documentElement || document.body : e.parentNode;
     const prect = Element.rect(pelement, { round: false });
     //Rect.align(rect, prect, anchor);
 
@@ -2401,37 +2401,37 @@ export class Element extends Node {
     switch (Anchor.horizontal(anchor)) {
       case Anchor.LEFT:
       default:
-        css.left = Math.round(trbl.left - ptrbl.left) + 'px';
-        remove = 'right';
+        css.left = Math.round(trbl.left - ptrbl.left) + "px";
+        remove = "right";
         break;
       case Anchor.RIGHT:
-        css.right = Math.round(trbl.right - ptrbl.right) + 'px';
-        remove = 'left';
+        css.right = Math.round(trbl.right - ptrbl.right) + "px";
+        remove = "left";
         break;
     }
     switch (Anchor.vertical(anchor)) {
       case Anchor.TOP:
       default:
-        css.top = Math.round(trbl.top - ptrbl.top) + 'px';
-        remove = 'bottom';
+        css.top = Math.round(trbl.top - ptrbl.top) + "px";
+        remove = "bottom";
         break;
       case Anchor.BOTTOM:
-        css.bottom = Math.round(trbl.bottom - ptrbl.bottom) + 'px';
-        remove = 'top';
+        css.bottom = Math.round(trbl.bottom - ptrbl.bottom) + "px";
+        remove = "top";
         break;
     }
     if(e.style.removeProperty) e.style.removeProperty(remove);
     else e.style[remove] = undefined;
     css.position = position;
-    css.width = Math.round(isNaN(rect.width) ? rect.width : prect.width) + 'px';
-    css.height = Math.round(isNaN(rect.height) ? rect.height : prect.height) + 'px';
+    css.width = Math.round(isNaN(rect.width) ? rect.width : prect.width) + "px";
+    css.height = Math.round(isNaN(rect.height) ? rect.height : prect.height) + "px";
     //console.log('Element.setRect ', css);
     Element.setCSS(e, css);
     return e;
   }
 
-  static position(element, pos = 'absolute') {
-    if(typeof element == 'string') element = Element.find(element);
+  static position(element, pos = "absolute") {
+    if(typeof element == "string") element = Element.find(element);
     const { x, y } = element.getBoundingClientRect();
     return new Point({ x, y });
   }
@@ -2440,7 +2440,7 @@ export class Element extends Node {
     let [e, ...rest] = [...arguments];
     let { x = Element.position(element).x, y = Element.position(element).y } = new Point(rest);
     let to = { x, y };
-    let position = pos || Element.getCSS(element, 'position') || 'relative';
+    let position = pos || Element.getCSS(element, "position") || "relative";
     let off;
     //console.log('Element.move ', { element, to, position });
     const getValue = prop => {
@@ -2451,7 +2451,7 @@ export class Element extends Node {
       return parseFloat(matches[1]);
     };
 
-    const current = new Point({ x: getValue('left') || 0, y: getValue('top') || 0 });
+    const current = new Point({ x: getValue("left") || 0, y: getValue("top") || 0 });
     off = new Point(Element.rect(element, { round: false }));
     //   off = Point.diff(off, current);
     Point.add(current, Point.diff(to, off));
@@ -2461,7 +2461,7 @@ export class Element extends Node {
       to.y -= off.y;
     }*/
     let css = Point.toCSS(current);
-    console.log('Element.move: ', { position, to, css, off, current });
+    console.log("Element.move: ", { position, to, css, off, current });
     //console.log('move newpos: ', Point.toCSS(pt));
     Element.setCSS(element, { ...css, position });
     return element;
@@ -2472,7 +2472,7 @@ export class Element extends Node {
     let e = Element.find(args.shift());
     let size = new Size(args);
     const css = Size.toCSS(size);
-    console.log('Element.resize: ', { e, size, css });
+    console.log("Element.resize: ", { e, size, css });
     Element.setCSS(e, css);
     return e;
   }
@@ -2498,7 +2498,7 @@ export class Element extends Node {
   static getPointsXYWH = ({ x, y, w, h }) => [{ x, y }, { x: x + w, y: y + h }];
 
   static cumulativeOffset = (element, relative_to = null) => {
-    if(typeof element == 'string') element = Element.find(element);
+    if(typeof element == "string") element = Element.find(element);
     let p = { x: 0, y: 0 };
     do {
       p.y += element.offsetTop || 0;
@@ -2507,34 +2507,34 @@ export class Element extends Node {
     return p;
   };
 
-  static getTRBL(element, prefix = '') {
-    const names = ['Top', 'Right', 'Bottom', 'Left'].map(pos => prefix + (prefix == '' ? pos.toLowerCase() : pos));
+  static getTRBL(element, prefix = "") {
+    const names = ["Top", "Right", "Bottom", "Left"].map(pos => prefix + (prefix == "" ? pos.toLowerCase() : pos));
     return new TRBL(Element.getCSS(element, names));
   }
 
-  static setTRBL(element, trbl, prefix = 'margin') {
-    const attrs = ['Top', 'Right', 'Bottom', 'Left'].reduce((acc, pos) => {
-      const name = prefix + (prefix == '' ? pos.toLowerCase() : pos);
+  static setTRBL(element, trbl, prefix = "margin") {
+    const attrs = ["Top", "Right", "Bottom", "Left"].reduce((acc, pos) => {
+      const name = prefix + (prefix == "" ? pos.toLowerCase() : pos);
       return { ...acc, [name]: trbl[pos.toLowerCase()] };
     }, {});
     //console.log('Element.setTRBL ', attrs);
     return Element.setCSS(element, attrs);
   }
 
-  static margin = element => Element.getTRBL(element, 'margin');
-  static padding = element => Element.getTRBL(element, 'padding');
-  static border = element => Element.getTRBL(element, 'border');
+  static margin = element => Element.getTRBL(element, "margin");
+  static padding = element => Element.getTRBL(element, "padding");
+  static border = element => Element.getTRBL(element, "border");
 
   static setCSS = (element, prop, value) => {
-    if(typeof element == 'string') element = Element.find(element);
-    if(typeof prop == 'string' && typeof value == 'string') prop = { [prop]: value };
+    if(typeof element == "string") element = Element.find(element);
+    if(typeof prop == "string" && typeof value == "string") prop = { [prop]: value };
 
     //console.log('Element.setCSS ', { element, toCSS });
     for(let key in prop) {
       let value = prop[key];
       const propName = Util.decamelize(key);
-      if(typeof value == 'function') {
-        if('subscribe' in value) {
+      if(typeof value == "function") {
+        if("subscribe" in value) {
           value.subscribe = newval => element.style.setProperty(propName, newval);
           value = value();
         }
@@ -2545,7 +2545,7 @@ export class Element extends Node {
   };
 
   static getCSS = (element, property = undefined, receiver = null) => {
-    element = typeof element === 'string' ? Element.find(element) : element;
+    element = typeof element === "string" ? Element.find(element) : element;
 
     const w = window !== undefined ? window : global.window;
     const d = document !== undefined ? document : global.document;
@@ -2564,13 +2564,13 @@ export class Element extends Node {
     let ret = {};
     if(receiver == null) {
       receiver = result => {
-        if(typeof result == 'object') {
+        if(typeof result == "object") {
           try {
-            Object.defineProperty(result, 'cssText', {
+            Object.defineProperty(result, "cssText", {
               get: function() {
                 return Object.entries(this)
-                  .map(([k, v]) => `${Util.decamelize(k, '-')}: ${v};\n`)
-                  .join('');
+                  .map(([k, v]) => `${Util.decamelize(k, "-")}: ${v};\n`)
+                  .join("");
               },
               enumerable: false
             });
@@ -2581,7 +2581,7 @@ export class Element extends Node {
     }
     if(property !== undefined) {
       ret =
-        typeof property === 'string'
+        typeof property === "string"
           ? style[property]
           : property.reduce((ret, key) => {
               ret[key] = style[key];
@@ -2592,14 +2592,14 @@ export class Element extends Node {
         const stylesheet = keys[i];
         const key = Util.camelize(stylesheet);
         const val = style[stylesheet] || style[key];
-        if(val && val.length > 0 && val != 'none') ret[key] = val;
+        if(val && val.length > 0 && val != "none") ret[key] = val;
       }
     }
     return receiver(ret);
   };
 
   static xpath(elt, relative_to = null) {
-    let path = '';
+    let path = "";
     //console.log('relative_to: ', relative_to);
     for(; elt && elt.nodeType == 1; elt = elt.parentNode) {
       const xname = Element.unique(elt);
@@ -2607,7 +2607,7 @@ export class Element extends Node {
       if(elt == relative_to) {
         break;
       }
-      path = '/' + path;
+      path = "/" + path;
     }
     return path;
   }
@@ -2619,23 +2619,23 @@ export class Element extends Node {
   }
 
   static dump(elem) {
-    let str = '';
+    let str = "";
     function dumpElem(child, accu, root, depth) {
       const rect = Rect.round(Element.rect(child, elem));
-      accu += '  '.repeat((depth > 0 ? depth : 0) + 1) + ' ' + Element.xpath(child, child);
-      [...child.attributes].forEach(attr => (accu += ' ' + attr.name + "='" + attr.value + "'"));
-      if(Rect.area(rect) > 0) accu += ' ' + Rect.toString(rect);
-      ['margin', 'border', 'padding'].forEach(name => {
-        let trbl = Element.getTRBL(elem, 'margin');
-        if(!trbl.null()) accu += ' ' + name + ': ' + trbl + '';
+      accu += "  ".repeat((depth > 0 ? depth : 0) + 1) + " " + Element.xpath(child, child);
+      [...child.attributes].forEach(attr => (accu += " " + attr.name + "='" + attr.value + "'"));
+      if(Rect.area(rect) > 0) accu += " " + Rect.toString(rect);
+      ["margin", "border", "padding"].forEach(name => {
+        let trbl = Element.getTRBL(elem, "margin");
+        if(!trbl.null()) accu += " " + name + ": " + trbl + "";
       });
       return accu;
     }
-    str = dumpElem(elem, '');
+    str = dumpElem(elem, "");
     str = Element.walk(
       elem.firstElementChild,
       (e, a, r, d) => {
-        if(e && e.attributes) return dumpElem(e, a + '\n', r, d);
+        if(e && e.attributes) return dumpElem(e, a + "\n", r, d);
         return null;
       },
       str
@@ -2665,21 +2665,21 @@ export class Element extends Node {
 
   static name(elem) {
     let name = elem.tagName.toLowerCase();
-    if(elem.id && elem.id.length) name += '#' + elem.id;
-    else if(elem.class && elem.class.length) name += '.' + elem.class;
+    if(elem.id && elem.id.length) name += "#" + elem.id;
+    else if(elem.class && elem.class.length) name += "." + elem.class;
     return name;
   }
 
   static unique(elem) {
     let name = elem.tagName.toLowerCase();
-    if(elem.id && elem.id.length) return name + '#' + elem.id;
-    const classNames = String(elem.className).split(new RegExp('/[ \t]/'));
+    if(elem.id && elem.id.length) return name + "#" + elem.id;
+    const classNames = String(elem.className).split(new RegExp("/[ \t]/"));
     for(let i = 0; i < classNames.length; i++) {
       let res = document.getElementsByClassName(classNames[i]);
-      if(res && res.length === 1) return name + '.' + classNames[i];
+      if(res && res.length === 1) return name + "." + classNames[i];
     }
     if(elem.nextElementSibling || elem.previousElementSibling) {
-      return name + '[' + Element.idx(elem) + ']';
+      return name + "[" + Element.idx(elem) + "]";
     }
     return name;
   }
@@ -2687,15 +2687,15 @@ export class Element extends Node {
   static factory(delegate = {}, parent = null) {
     let root = parent;
     if(root === null) {
-      if(typeof delegate.append_to !== 'function') {
+      if(typeof delegate.append_to !== "function") {
         root = delegate;
         delegate = {};
       } else {
-        root = 'body';
+        root = "body";
       }
     }
     const { append_to, create, setattr, setcss } = delegate;
-    if(typeof root === 'string') root = Element.find(root);
+    if(typeof root === "string") root = Element.find(root);
     if(!delegate.root) delegate.root = root;
     if(!delegate.append_to) {
       delegate.append_to = function(elem, parent) {
@@ -2721,7 +2721,7 @@ export class Element extends Node {
       if(style) delegate.setcss(elem, style);
       if(children && children.length) {
         for(let i = 0; i < children.length; i++) {
-          if(typeof children[i] === 'string') {
+          if(typeof children[i] === "string") {
             elem.innerHTML += children[i];
           } else {
             const { tagName, parent, ...childProps } = children[i];
@@ -2745,7 +2745,7 @@ export class Element extends Node {
   }
 
   static remove(element) {
-    const e = typeof element === 'string' ? Element.find(element) : element;
+    const e = typeof element === "string" ? Element.find(element) : element;
     if(e && e.parentNode) {
       const parent = e.parentNode;
       parent.removeChild(e);
@@ -2797,7 +2797,7 @@ export class CSS {
     if(!doc) doc = window.document;
 
     const getStyleMap = (obj, key) => {
-      let rule = Util.find(obj, item => item['selectorText'] == key);
+      let rule = Util.find(obj, item => item["selectorText"] == key);
       return Util.adapter(
         rule,
         obj => (obj && obj.styleMap && obj.styleMap.size !== undefined ? obj.styleMap.size : 0),
@@ -2806,7 +2806,7 @@ export class CSS {
           obj.styleMap
             .getAll(key)
             .map(v => String(v))
-            .join(' ')
+            .join(" ")
       );
     };
     const getStyleSheet = (obj, key) => {
@@ -2829,7 +2829,7 @@ export class CSS {
     });
     return ret;
   }
-  static classes(selector = '*') {
+  static classes(selector = "*") {
     return Element.findAll(selector)
       .filter(e => e.classList.length)
       .map(e => [...e.classList])
@@ -2845,7 +2845,7 @@ export class Container {
       append_to: function(elem, p = null) {
         if(p == null) {
           if(this.root == null) {
-            this.root = document.createElement('div');
+            this.root = document.createElement("div");
             this.append_to(this.root, parent);
           }
           p = this.root;
@@ -2858,17 +2858,17 @@ export class Container {
 }
 
 export class SVG extends Element {
-  static ns = 'http://www.w3.org/2000/svg';
+  static ns = "http://www.w3.org/2000/svg";
 
   static create(name, attr, parent) {
     var svg = document.createElementNS(SVG.ns, name);
 
-    if(name == 'svg') {
-      attr.version = '1.1';
+    if(name == "svg") {
+      attr.version = "1.1";
       attr.xmlns = SVG.ns;
     }
 
-    Util.foreach(attr, (value, name) => svg.setAttribute(Util.decamelize(name, '-'), value));
+    Util.foreach(attr, (value, name) => svg.setAttribute(Util.decamelize(name, "-"), value));
     if(parent && parent.appendChild) parent.appendChild(svg);
     return svg;
   }
@@ -2877,30 +2877,30 @@ export class SVG extends Element {
     let delegate = {
       create: tag => document.createElementNS(SVG.ns, tag),
       append_to: elem => parent.appendChild(elem),
-      setattr: (elem, name, value) => name != 'ns' && elem.setAttributeNS(document.namespaceURI, Util.decamelize(name, '-'), value),
-      setcss: (elem, css) => elem.setAttributeNS(null, 'style', css)
+      setattr: (elem, name, value) => name != "ns" && elem.setAttributeNS(document.namespaceURI, Util.decamelize(name, "-"), value),
+      setcss: (elem, css) => elem.setAttributeNS(null, "style", css)
     };
     if(size == null) size = Size(Rect.round(Element.rect(parent)));
     const { width, height } = size;
 
-    if(parent && parent.tagName == 'svg') delegate.root = parent;
+    if(parent && parent.tagName == "svg") delegate.root = parent;
     else if(this !== SVG && this && this.appendChild) delegate.root = this;
     else {
-      delegate.root = SVG.create('svg', { width, height, viewBox: '0 0 ' + width + ' ' + height + '' }, parent);
+      delegate.root = SVG.create("svg", { width, height, viewBox: "0 0 " + width + " " + height + "" }, parent);
     }
 
-    if(!delegate.root.firstElementChild || delegate.root.firstElementChild.tagName != 'defs') {
-      SVG.create('defs', {}, delegate.root);
+    if(!delegate.root.firstElementChild || delegate.root.firstElementChild.tagName != "defs") {
+      SVG.create("defs", {}, delegate.root);
     }
 
     delegate.append_to = function(elem, p) {
       var root = p || this.root;
 
-      if(elem.tagName.indexOf('Gradient') != -1) {
-        root = root.querySelector('defs');
+      if(elem.tagName.indexOf("Gradient") != -1) {
+        root = root.querySelector("defs");
       }
 
-      if(typeof root.append == 'function') root.append(elem);
+      if(typeof root.append == "function") root.append(elem);
       else root.appendChild(elem);
       //console.log('append_to ', elem, ', root=', root);
     };
@@ -2908,14 +2908,14 @@ export class SVG extends Element {
   }
 
   static matrix(element, screen = false) {
-    let e = typeof element === 'string' ? Element.find(element) : element;
-    let fn = screen ? 'getScreenCTM' : 'getCTM';
+    let e = typeof element === "string" ? Element.find(element) : element;
+    let fn = screen ? "getScreenCTM" : "getCTM";
     if(e && e[fn]) return Matrix.fromDOMMatrix(e[fn]());
     return null;
   }
 
   static bbox(element, options = { parent: null, absolute: false }) {
-    let e = typeof element === 'string' ? Element.find(element, options.parent) : element;
+    let e = typeof element === "string" ? Element.find(element, options.parent) : element;
     let bb;
     if(e && e.getBBox) {
       bb = new Rect(e.getBBox());
@@ -2930,7 +2930,7 @@ export class SVG extends Element {
   }
 
   static gradient(type, { stops, factory = SVG.create, parent = null, line = false, ...props }) {
-    var defs = factory('defs', {}, parent);
+    var defs = factory("defs", {}, parent);
     const map = new Map(stops instanceof Array ? stops : Object.entries(stops));
 
     let rect = {};
@@ -2941,11 +2941,11 @@ export class SVG extends Element {
     }
     //    const { x1, y1, x2, y2 } = line;
 
-    let grad = factory(type + '-gradient', { ...props, ...rect }, defs);
+    let grad = factory(type + "-gradient", { ...props, ...rect }, defs);
 
     map.forEach((color, o) => {
       //console.log('color:' + color + ' o:' + o);
-      factory('stop', { offset: Math.round(o * 100) + '%', stopColor: color }, grad);
+      factory("stop", { offset: Math.round(o * 100) + "%", stopColor: color }, grad);
     });
 
     return grad;
@@ -2957,7 +2957,7 @@ export class SVG extends Element {
       return SVG.create.call(SVG, tag, props, parent || this.element);
     };
     ret.element = elem.ownerSVGElement;
-    Util.defineGetterSetter(ret, 'rect', function() {
+    Util.defineGetterSetter(ret, "rect", function() {
       return Element.rect(this.element);
     });
     return ret;
@@ -2970,17 +2970,17 @@ export class SVG extends Element {
 
 export class ReactComponent {
   static factory = (render_to, root) => {
-    if(typeof render_to === 'string') render_to = Element.find(append_to);
-    if(typeof render_to !== 'function') {
+    if(typeof render_to === "string") render_to = Element.find(append_to);
+    if(typeof render_to !== "function") {
       root = root || render_to;
-      render_to = component => require('react-dom').render(component, root || render_to);
+      render_to = component => require("react-dom").render(component, root || render_to);
     }
     let ret = function render_factory(Tag, { parent, children, ...props }, is_root = true) {
       const elem = (
         <Tag {...props}>
           {Array.isArray(children)
             ? children.map((child, key) => {
-                if(typeof child === 'object') {
+                if(typeof child === "object") {
                   const { tagName, ...props } = child;
                   return render_factory(tagName, { key, ...props }, false);
                 }
@@ -3000,12 +3000,12 @@ export class ReactComponent {
   static object() {
     let ret = [];
     for(let arg of [...arguments]) {
-      if(!typeof arg == 'object' || arg === null || !arg) continue;
+      if(!typeof arg == "object" || arg === null || !arg) continue;
 
       const tagName = arg.type && arg.type.name;
       let { children, ...props } = arg.props || {};
       let obj = { tagName, ...props };
-      if(typeof arg.key == 'string') obj.key = arg.key;
+      if(typeof arg.key == "string") obj.key = arg.key;
       if(!children) children = arg.children;
 
       if(React.Children.count(children) > 0) {
@@ -3023,21 +3023,21 @@ export class ReactComponent {
     for(let prop in props) {
       let value = props[prop];
 
-      if(typeof value == 'function') {
-        value = ' ()=>{} ';
-      } else if(typeof value == 'object') {
-        value = Util.inspect(value, { indent: '', newline: '\n', depth: 10, spacing: ' ' });
-        value = value.replace(/(,?)(\n?[\s]+|\s+)/g, '$1 ');
-      } else if(typeof value == 'string') {
+      if(typeof value == "function") {
+        value = " ()=>{} ";
+      } else if(typeof value == "object") {
+        value = Util.inspect(value, { indent: "", newline: "\n", depth: 10, spacing: " " });
+        value = value.replace(/(,?)(\n?[\s]+|\s+)/g, "$1 ");
+      } else if(typeof value == "string") {
         value = `'${value}'`;
       }
       str += ` ${prop}={${value}}`;
     }
 
     if(!children || !children.length) {
-      str += ' />';
+      str += " />";
     } else {
-      str += '>';
+      str += ">";
       str += `</${tagName}>`;
     }
     return str;
@@ -3121,13 +3121,13 @@ ElementRectProxy.prototype = {
   },
   changeRect: function(fn = (rect, e) => rect) {
     let r = Element.getRect(this.element);
-    if(typeof fn == 'function') r = fn(r, this.element);
+    if(typeof fn == "function") r = fn(r, this.element);
 
     Element.setRect(this.element, r);
   },
   setRect: function(arg) {
     let rect = arg;
-    if(typeof arg == 'function') {
+    if(typeof arg == "function") {
       rect = arg(this.getRect());
     }
     Element.rect(this.element, rect);
@@ -3155,7 +3155,7 @@ const computedSetter = (proxy, compute) =>
 export const ElementXYProps = element => {
   Util.defineGetterSetter(
     element,
-    'x',
+    "x",
     function() {
       return Element.getRect(this).x;
     },
@@ -3165,7 +3165,7 @@ export const ElementXYProps = element => {
   );
   Util.defineGetterSetter(
     element,
-    'y',
+    "y",
     function() {
       return Element.getRect(this).y;
     },
@@ -3178,7 +3178,7 @@ export const ElementXYProps = element => {
 export const ElementWHProps = element => {
   Util.defineGetterSetter(
     element,
-    'w',
+    "w",
     function() {
       return Element.getRect(this).width;
     },
@@ -3188,7 +3188,7 @@ export const ElementWHProps = element => {
   );
   Util.defineGetterSetter(
     element,
-    'h',
+    "h",
     function() {
       return Element.getRect(this).height;
     },
@@ -3200,10 +3200,10 @@ export const ElementWHProps = element => {
 
 export const ElementPosProps = (element, proxy) => {
   proxy = proxy || new ElementRectProxy(element);
-  Util.defineGetterSetter(element, 'x', () => proxy.getPos().x, x => proxy.setPos({ x }));
+  Util.defineGetterSetter(element, "x", () => proxy.getPos().x, x => proxy.setPos({ x }));
   Util.defineGetterSetter(
     element,
-    'x1',
+    "x1",
     () => proxy.getPos().x,
     value =>
       proxy.setRect(rect => {
@@ -3214,7 +3214,7 @@ export const ElementPosProps = (element, proxy) => {
   );
   Util.defineGetterSetter(
     element,
-    'x2',
+    "x2",
     () => proxy.getRect(rect => rect.x + rect.width),
     value =>
       proxy.setRect(rect => {
@@ -3223,10 +3223,10 @@ export const ElementPosProps = (element, proxy) => {
         return rect;
       })
   );
-  Util.defineGetterSetter(element, 'y', () => proxy.getPos().y, y => proxy.setPos({ y }));
+  Util.defineGetterSetter(element, "y", () => proxy.getPos().y, y => proxy.setPos({ y }));
   Util.defineGetterSetter(
     element,
-    'y1',
+    "y1",
     () => proxy.getPos().y,
     value =>
       proxy.setRect(rect => {
@@ -3237,7 +3237,7 @@ export const ElementPosProps = (element, proxy) => {
   );
   Util.defineGetterSetter(
     element,
-    'y2',
+    "y2",
     () => proxy.getRect(rect => rect.y + rect.height),
     value =>
       proxy.setRect(rect => {
@@ -3250,10 +3250,10 @@ export const ElementPosProps = (element, proxy) => {
 
 export const ElementSizeProps = (element, proxy) => {
   proxy = proxy || new ElementRectProxy(element);
-  Util.defineGetterSetter(element, 'w', () => proxy.getRect().width, width => proxy.setSize({ width }));
-  Util.defineGetterSetter(element, 'width', () => proxy.getRect().width, width => proxy.setSize({ width }));
-  Util.defineGetterSetter(element, 'h', () => proxy.getRect().height, width => proxy.setSize({ height }));
-  Util.defineGetterSetter(element, 'height', () => proxy.getRect().height, width => proxy.setSize({ height }));
+  Util.defineGetterSetter(element, "w", () => proxy.getRect().width, width => proxy.setSize({ width }));
+  Util.defineGetterSetter(element, "width", () => proxy.getRect().width, width => proxy.setSize({ width }));
+  Util.defineGetterSetter(element, "h", () => proxy.getRect().height, width => proxy.setSize({ height }));
+  Util.defineGetterSetter(element, "height", () => proxy.getRect().height, width => proxy.setSize({ height }));
 };
 
 export const ElementRectProps = (element, proxy) => {
@@ -3297,10 +3297,10 @@ export const CSSTransformSetters = element => ({
 });
 
 export class Transition {
-  property = 'none';
-  delay = '';
-  duration = '';
-  timing = '';
+  property = "none";
+  delay = "";
+  duration = "";
+  timing = "";
 
   constructor(property, delay, duration, timing) {
     this.property = property;
@@ -3327,10 +3327,10 @@ export class TransitionList extends Array {
 
   get css() {
     return {
-      transitionDelay: this.propertyList('delay').join(', '),
-      transitionDuration: this.propertyList('duration').join(', '),
-      transitionProperty: this.propertyList('property').join(', '),
-      transitionTimingFunction: this.propertyList('timing').join(', ')
+      transitionDelay: this.propertyList("delay").join(", "),
+      transitionDuration: this.propertyList("duration").join(", "),
+      transitionProperty: this.propertyList("property").join(", "),
+      transitionTimingFunction: this.propertyList("timing").join(", ")
     };
   }
 }
@@ -3350,7 +3350,7 @@ export const isTimer = inst => {};
 export const isTree = inst => {};
 export const isCSS = inst => {};
 export const isContainer = inst => {};
-export const isSVG = inst => inst.tagName.toLowerCase() == 'svg';
+export const isSVG = inst => inst.tagName.toLowerCase() == "svg";
 
 export const isReactComponent = inst => {};
 export const isRenderer = inst => {};
