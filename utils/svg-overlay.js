@@ -77,7 +77,20 @@ export class SvgOverlay extends React.Component {
         ref
       );
       SVG.create("defs", {}, svg);
-      SVG.create("rect", { x: 100, y: 100, width: 100, height: 100, stroke: "#000", strokeWidth: 2, fill: "rgb(0,255,0)", "fill-opacity": 0.5 }, svg);
+      SVG.create(
+        "rect",
+        {
+          x: 100,
+          y: 100,
+          width: 100,
+          height: 100,
+          stroke: "#000",
+          strokeWidth: 2,
+          fill: "rgb(0,255,0)",
+          "fill-opacity": 0.5
+        },
+        svg
+      );
 
       console.log("SvgOverlay: ", { svg, rect });
 
@@ -89,7 +102,8 @@ export class SvgOverlay extends React.Component {
   createPaths = () => {
     const f = this.factory();
 
-    if(typeof f == "function") f("rect", { width: 100, height: 100, x: 50, y: 50, stroke: "red", strokeWidth: "4" });
+    if(typeof f == "function")
+      f("rect", { width: 100, height: 100, x: 50, y: 50, stroke: "red", strokeWidth: "4" });
   };
 
   render() {

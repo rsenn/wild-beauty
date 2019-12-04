@@ -1,5 +1,25 @@
 import React from "react";
-import dom, { TRBL, CSS, CSSTransformSetters, Element, ElementRectProxy, ElementSizeProps, ElementTransformation, ElementXYProps, Line, Matrix, Point, PointList, Rect, RGBA, Size, SVG, Timer, ReactComponent, Node } from "../utils/dom.js";
+import dom, {
+  TRBL,
+  CSS,
+  CSSTransformSetters,
+  Element,
+  ElementRectProxy,
+  ElementSizeProps,
+  ElementTransformation,
+  ElementXYProps,
+  Line,
+  Matrix,
+  Point,
+  PointList,
+  Rect,
+  RGBA,
+  Size,
+  SVG,
+  Timer,
+  ReactComponent,
+  Node
+} from "../utils/dom.js";
 import { SvgOverlay, SvgPathTracer } from "./svg-overlay.js";
 import { SvgPath } from "./svg-path.js";
 import Util from "./util.js";
@@ -37,7 +57,9 @@ if (["development", "test", "local"].indexOf(env) != -1 && "window" in global) {
       .unique()
       .match(/bp3/);
 
-    dom.Element.findAll("*[class~=bp3]").forEach(e => newClasses.concat(String(e.class).split(/ /g)));
+    dom.Element.findAll("*[class~=bp3]").forEach(e =>
+      newClasses.concat(String(e.class).split(/ /g))
+    );
 
     newClasses = newClasses.filter(i => classes.indexOf(i) == -1);
 
@@ -99,7 +121,10 @@ export const colors = (() => {
       // console.log("colors ",{ key, color });
       const c = typeof color == "string" ? new RGBA(color) : color;
       f("div", {
-        innerHTML: ((typeof key == "number" ? key.toFixed(2) : key) + ": " + c.toString()).replace(/ /g, "&nbsp;"),
+        innerHTML: ((typeof key == "number" ? key.toFixed(2) : key) + ": " + c.toString()).replace(
+          / /g,
+          "&nbsp;"
+        ),
         style: {
           margin: "auto",
           //  opacity: c.a / 255,
@@ -193,7 +218,9 @@ export function gradient(element) {
     element,
     steps: nodes.map(e => {
       const offset = Element.attr(e, "offset");
-      const color = RGBA.fromHex(e.getAttribute("stopColor") || e.getAttribute("stop-color") || "#00000000");
+      const color = RGBA.fromHex(
+        e.getAttribute("stopColor") || e.getAttribute("stop-color") || "#00000000"
+      );
       return {
         color,
         offset,
@@ -203,7 +230,9 @@ export function gradient(element) {
       };
     }),
     toString() {
-      return Util.decamelize(e.tagName) + "(0deg, " + this.steps.map(s => s.toString()).join(", ") + ");";
+      return (
+        Util.decamelize(e.tagName) + "(0deg, " + this.steps.map(s => s.toString()).join(", ") + ");"
+      );
     },
     [Symbol.iterator]: () =>
       new (class GradientIterator {
@@ -538,22 +567,29 @@ export async function img(name, arg = {}) {
 
   let list = root.images
     ? root.images
-    : (root.images = new HashList(obj => (obj.firstElementChild.id || obj.xpath).replace(/(^|[^A-Za-z0-9])[FfEe][NnAa]([^A-Za-z0-9]|$)/, "$1XX$2"), function(arg) {
-        let e = Element.find(arg);
-        let svg = Element.find("svg", e);
-        /*let xpath = arg.xpath || Element.xpath(svg);
+    : (root.images = new HashList(
+        obj =>
+          (obj.firstElementChild.id || obj.xpath).replace(
+            /(^|[^A-Za-z0-9])[FfEe][NnAa]([^A-Za-z0-9]|$)/,
+            "$1XX$2"
+          ),
+        function(arg) {
+          let e = Element.find(arg);
+          let svg = Element.find("svg", e);
+          /*let xpath = arg.xpath || Element.xpath(svg);
       if(xpath && xpath.replace) xpath = xpath.replace(/.*\//, '');*/
-        Element.attr(svg, { "data-name": svg.id });
-        let r = new Rect(0, 0, svg.getAttribute("width"), svg.getAttribute("height"));
-        r = Rect.round(r);
-        let width = this.width + r.width;
-        /*  r.x += width;
+          Element.attr(svg, { "data-name": svg.id });
+          let r = new Rect(0, 0, svg.getAttribute("width"), svg.getAttribute("height"));
+          r = Rect.round(r);
+          let width = this.width + r.width;
+          /*  r.x += width;
         this.width = width;*/
-        Element.setRect(e, r);
-        //console.log("HashList ctor ", { width, r, id });
-        return e;
-        //return { e, r, id, xpath, svg };
-      }));
+          Element.setRect(e, r);
+          //console.log("HashList ctor ", { width, r, id });
+          return e;
+          //return { e, r, id, xpath, svg };
+        }
+      ));
 
   return new Promise(async (resolve, reject) => {
     let path = name.indexOf(".") == -1 ? name + ".svg" : name;
@@ -781,7 +817,9 @@ export function walk(element) {
       let rstr = Rect.toString(rect);
 
       if(strs.length != 2 && strs.length > 0 && str.length) {
-        global.lines[1].push("  " + str + " ".repeat(Math.max(0, 80 - str.length)) + `/* ${key} */`);
+        global.lines[1].push(
+          "  " + str + " ".repeat(Math.max(0, 80 - str.length)) + `/* ${key} */`
+        );
       }
       //str = (line.length != 2 ? `/* ${key} */\n/* ${rstr} */\n` : "") + str;
       else if(Rect.area(rect)) global.lines[0].push(str);
@@ -806,7 +844,9 @@ export function measure(element) {
 
 export function trackElements() {
   const elements = Element.findAll.apply(this, arguments);
-  const rects = elements.map(e => rect(e, "none", "#" + Util.hex(Math.round(Math.random() * 0xfff)), e));
+  const rects = elements.map(e =>
+    rect(e, "none", "#" + Util.hex(Math.round(Math.random() * 0xfff)), e)
+  );
 
   window.trackingRects = rects;
 

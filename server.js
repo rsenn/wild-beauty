@@ -56,7 +56,9 @@ if (!dev && cluster.isMaster) {
   }
 
   cluster.on("exit", (worker, code, signal) => {
-    console.error(`Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`);
+    console.error(
+      `Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`
+    );
   });
 } else {
   const nextApp = next({ dir: ".", dev });
