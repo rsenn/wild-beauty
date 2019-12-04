@@ -1,0 +1,53 @@
+#!/bin/sh
+
+if ! type envdir >/dev/null 2>/dev/null; then
+  envdir() {
+    for VF in "$1"/*; do
+      VAR=${1##*/}
+      eval "export $VAR=\"\$(cat \"\$VF\")\""
+    done
+  }
+fi
+
+exec 9>&1
+
+exec envdir ./env sh -c '
+  cd ../..
+  NAME=${PWD##*/}
+  : ${HOSTNAME=`hostname`}
+ 
+  case "$APP_ENV:$NODE_ENV:$NAME:${HOSTNAME%%.*}" in
+    *:*:prod*:* | prod*:*:*:*) 
+      ENVIRONMENT=production
+      PORT=8080
+      CMD=start
+      unset NODE_OPTIONS
+
+      if [ ! -d .next ]; then
+        "$NEXT" build
+      fi
+    ;;
+    *:*:local*:* | local*:*:*:*) 
+
+    ;;
+    *:*:*:"ubuntu-1024mb-london-01")
+        HOST=185.247.116.188
+        APP_ENV=test
+    ;;
+  esac
+
+  INSPECT_PORT=9551
+
+  export NODE_OPTIONS="--inspect=${HOST:-0.0.0.0}:${INSPECT_PORT}"
+  : ${APP_ENV:=local}
+  : ${NODE_ENV:=development}
+  : ${CMD:=dev}
+
+  #env |sort 1>&9
+
+  set -x
+  export HOST PORT APP_ENV NODE_ENV
+
+  exec node server.js 2>&1
+  #exec "$NEXT" $CMD -H "$HOST" -p "$PORT"
+' 2>&1
