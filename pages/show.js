@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Nav from '../components/nav.js';
 import Layer from '../components/layer.js';
-import Gallery from '../components/gallery.js';
 import { Element, Node } from '../utils/dom.js';
 import { MultitouchListener, MovementListener, TouchEvents } from '../utils/touchHandler.js';
 import Dropzone from 'react-dropzone';
@@ -112,7 +111,6 @@ class Show extends React.Component {
           </Dropzone>
         </form>
 
-        <Gallery />
         <div
           className={'panels'}
           style={{
