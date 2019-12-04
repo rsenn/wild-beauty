@@ -2,14 +2,26 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Nav from '../components/nav.js';
 import Layer from '../components/layer.js';
-import { Element, Node, HSLA } from '../utils/dom.js';
+import { Element, Node, HSLA   } from '../utils/dom.js';
 import { MultitouchListener, MovementListener, TouchEvents } from '../utils/touchHandler.js';
 import Dropzone from 'react-dropzone';
 import { SvgOverlay } from '../utils/svg-overlay.js';
+import { GraphQLClient } from 'graphql-request';
+
+const client = new GraphQLClient('http://localhost:4000/api');
+
 
 const RandomColor = () => {
   const c = HSLA.random();
   return c.toString();
+};
+
+const maxZIndex = () => {
+  let arr = [...document.querySelectorAll('*')]
+    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
+    .filter(e => !isNaN(e));
+  arr.sort((a, b) => a < b);
+  return arr[0];
 };
 
 class Show extends React.Component {
