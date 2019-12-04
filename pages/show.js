@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Nav from '../components/nav.js';
 import Layer from '../components/layer.js';
-import { Element, Node } from '../utils/dom.js';
+import { Element, Node, HSLA } from '../utils/dom.js';
 import { MultitouchListener, MovementListener, TouchEvents } from '../utils/touchHandler.js';
 import Dropzone from 'react-dropzone';
 import { SvgOverlay } from '../utils/svg-overlay.js';
+
+const RandomColor = () => {
+  const c = HSLA.random();
+  return c.toString();
+};
 
 class Show extends React.Component {
   render() {
@@ -76,20 +81,14 @@ class Show extends React.Component {
       document.forms[0].submit();
       console.log('onChange: ', value);
     };
+    const   list = [
+      'static/img/86463ed8ed391bf6b0a2907df74adb37.jpg',
+      'static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg',
+      'static/img/cdb466a69cc7944809b20e7f34840486.jpg',
+      'static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg',
+      'static/img/fdcce856cf66f33789dc3934418113a2.jpg'
+    ];
 
-    const state = {
-      image: useState(''),
-      error: useState(0)
-    };
-    let list = imagePaths();
-    /*if(list === null || (list && list.length == undefined))
-      list = [
-        'static/img/86463ed8ed391bf6b0a2907df74adb37.jpg',
-        'static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg',
-        'static/img/cdb466a69cc7944809b20e7f34840486.jpg',
-        'static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg',
-        'static/img/fdcce856cf66f33789dc3934418113a2.jpg'
-      ];*/
 
     return (
       <div className={'main-layout'} {...TouchEvents(touchListener)}>
