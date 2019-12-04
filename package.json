@@ -19,6 +19,7 @@
     "dotenv": "^8.2.0",
     "dotenv-webpack": "^1.7.0",
     "express": "^4.17.1",
+    "express-fileupload": "^1.1.6",
     "graphql": "^14.5.8",
     "graphql-request": "^1.8.2",
     "graphql-tag": "^2.10.1",
@@ -39,6 +40,7 @@
     "react-file-drop": "^0.2.8",
     "react-flip-toolkit": "^7.0.7",
     "react-image-dropzone": "^1.11.0",
-    "react-sizeme": "^2.6.10"
+    "react-sizeme": "^2.6.10",
+    "react-upload-gallery": "^0.0.4"
   }
 }
