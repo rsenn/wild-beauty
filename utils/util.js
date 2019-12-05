@@ -697,8 +697,7 @@ Util.findVal = (object, propName) => {
     } else {
       let value = Util.findVal(object[key], propName);
 
-      if(value !== undefined)
-        return value;
+      if(value !== undefined) return value;
     }
   }
 };

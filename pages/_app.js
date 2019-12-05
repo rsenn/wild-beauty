@@ -90,6 +90,72 @@ class MyApp extends App {
           html {
             font-size: 20px;
           }
+
+          .page-layout {
+            position: absolute;
+            top: 250px;
+            width: 100vw;
+            min-height: 100vh;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+          }
+          li.menu-active {
+            border-radius: 8px;
+            border: 3px solid black;
+          }
+
+          li.menu-inactive {
+            border-radius: 8px;
+            border: 3px solid #00000000;
+          }
+          li.menu-inactive {
+            /*    background-color: #bcbcbcc0;*/
+          }
+
+          li.menu-disabled {
+            display: none;
+          }
+          li > a > span {
+            font-family: "Jewel Hill";
+            font-size: 62px;
+          }
+          li {
+            background-color: #dfdfdf80;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 8px 18px 0 18px;
+            margin: 2px;
+          }
+          a {
+            color: black;
+            text-decoration: none;
+            font-size: 24px;
+            padding: 0 0 -8px 0;
+          }
+          a:hover {
+            filter: drop-shadow(4px 4px 2px #00000080);
+          }
+          ul.menu {
+            font-family: "Jewel Hill";
+          }
+          .menu {
+            position: fixed;
+            top: 0;
+            z-index: 10;
+            text-align: center;
+            display: inline-block;
+          }
+          ul {
+            display: flex;
+            justify-content: space-around;
+          }
+          .menu > ul {
+            padding: 4px 16px;
+          }
         `}</style>
       </Container>
     );

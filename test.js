@@ -11,9 +11,7 @@ console.log(fileBuffer.length);*/
 const insertItem = ({ id, image, author }) => {
   return `mutation InsertItem {
     __typename
-    insert_items(objects: {id: ${id}, author: "${author}", image: "${fileBuffer.toString(
-    "base64"
-  )}"}) {
+    insert_items(objects: {id: ${id}, author: "${author}", image: "${fileBuffer.toString("base64")}"}) {
       affected_rows
       returning {
         author

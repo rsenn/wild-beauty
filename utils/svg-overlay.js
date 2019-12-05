@@ -74,7 +74,7 @@ export class SvgOverlay extends React.Component {
         ref
       );
       SVG.create("defs", {}, svg);
-      SVG.create(
+      /* SVG.create(
         "rect",
         {
           x: 100,
@@ -87,7 +87,7 @@ export class SvgOverlay extends React.Component {
           "fill-opacity": 0.5
         },
         svg
-      );
+      );*/
 
       console.log("SvgOverlay: ", { svg, rect });
 

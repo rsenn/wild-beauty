@@ -20,7 +20,8 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
         h4.article-title {
           margin: 0px;
           position: relative;
-          top: 0px;          background: black;
+          top: 0px;
+          background: black;
           color: white;
           font-family: "Candara Bold", Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif;
           font-size: 20px;
@@ -32,15 +33,15 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
         }
         div.article-box-size {
           margin: 4px;
+          border: 1px inset rgba(192, 192, 192, 0.3);
         }
         .aspect-ratio-box-inside {
           position: relative;
-          
-         /*   border: 1px inset rgba(192, 192, 192, 0.3);
-*/
         }
         div.article-box-size {
-          background-color: rgba(192, 192, 192, 0.2);
+          border: 2px solid rgba(0, 0, 0, 0.4);
+
+          background-color: rgba(160, 160, 160, 0.2);
         }
         .article-box .aspect-ratio-box-inside {
           display: inline-block;
@@ -48,9 +49,8 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
         .article-box-size {
         }
         .article-box-size:hover {
-                    background-color: rgba(192, 192, 192, 0.3);
-box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.6);
-
+          background-color: rgba(120, 120, 120, 0.3);
+          box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.6);
         }
       `}</style>
     </SizedAspectRatioBox>

@@ -83,64 +83,72 @@ const Panes = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Nav />
-      <RUG
-        action="/api/upload" // upload route
-        source={response => response.source} // response image source
-      />
-      <div className={"panes-list"}>
-        <div className={"panes-item layer"}>
-          <img src="static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
+      <div className={"page-layout"}>
+        <div
+          style={{ position: "absolute", top: "15vh", left: "5vw", width: "80vw", height: "20vh" }}
+        >
+          <RUG
+            action="/api/upload" // upload route
+            source={response => response.source} // response image source
+          />
         </div>
-        <div className={"panes-item layer"}>
-          <img src="static/img/76619287_430389744517453_4826291339341594624_n.jpg" />
+        <div className={"panes-list"}>
+          <div className={"panes-item layer"}>
+            <img src="static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
+          </div>
+          <div className={"panes-item layer"}>
+            <img src="static/img/76619287_430389744517453_4826291339341594624_n.jpg" />
+          </div>
+          <div className={"panes-item layer"}>
+            <img src="static/img/69688821_689014168592533_7393339862767632384_n.jpg" />
+          </div>
+          <div className={"panes-item layer"}>
+            <img src="static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg" />
+          </div>
+          <div className={"panes-item layer"}>
+            <img src="static/img/d415b80a6007124c4e3948b21a7f0ed1.jpg" />
+          </div>
+          <div className={"panes-item layer"}>
+            <img src="static/img/69536222_653691828474365_6429980850053447680_n.jpg" />
+          </div>
+          <div className={"panes-item layer"}>
+            <img src="static/img/76771501_2539648529692993_599570957710917632_n.jpg" />
+          </div>
+          <div className={"panes-item layer"}>
+            <img src="static/img/0c71247f63ff20833347da1484d3caa4.jpg" />
+          </div>
         </div>
-        <div className={"panes-item layer"}>
-          <img src="static/img/69688821_689014168592533_7393339862767632384_n.jpg" />
-        </div>
-        <div className={"panes-item layer"}>
-          <img src="static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg" />
-        </div>
-        <div className={"panes-item layer"}>
-          <img src="static/img/d415b80a6007124c4e3948b21a7f0ed1.jpg" />
-        </div>
-        <div className={"panes-item layer"}>
-          <img src="static/img/69536222_653691828474365_6429980850053447680_n.jpg" />
-        </div>
-        <div className={"panes-item layer"}>
-          <img src="static/img/76771501_2539648529692993_599570957710917632_n.jpg" />
-        </div>
-        <div className={"panes-item layer"}>
-          <img src="static/img/0c71247f63ff20833347da1484d3caa4.jpg" />
-        </div>
-      </div>
 
-      {/*  <Layer w={300} h={'300px'} margin={10} padding={2} border={'2px dashed red'}>
+        {/*  <Layer w={300} h={'300px'} margin={10} padding={2} border={'2px dashed red'}>
         Layer
       </Layer>
       <SvgOverlay />*/}
-      <style jsx global>{`
-        .panes-list {
-          display: flex;
-          border: 1px solid black;
-        }
-        .panes-item {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          border: 1px dashed red;
+        <style jsx global>{`
+          .panes-list {
+            display: flex;
+            border: 1px solid black;
+            position: relative;
+            top: 90vh;
+          }
+          .panes-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px dashed red;
 
-          position: relative;
-          flex: 0 0 auto;
-          width: 20vw;
-          height: 20vw;
-          align-items: center;
-          justify-content: center;
-          overflow: auto;
-        }
-        .panes-item > img {
-          width: 20vw;
-        }
-      `}</style>
+            position: relative;
+            flex: 0 0 auto;
+            width: 20vw;
+            height: 20vw;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+          }
+          .panes-item > img {
+            width: 20vw;
+          }
+        `}</style>
+      </div>
     </div>
   );
 };

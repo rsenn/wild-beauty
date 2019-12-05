@@ -5,6 +5,7 @@ import Alea from "../utils/alea.js";
 import anime from "animejs";
 import { RandomColor } from "../utils/dom.js";
 import Layer from "../components/layer.js";
+import { WrapInAspectBox, SizedAspectRatioBox } from "./simple/aspectBox.js";
 
 const imageNames = [
   "04b79de115044501f1358f829130438d",
@@ -84,13 +85,21 @@ export const ImageList = ({ images }) => images.map(img => <ImageLayer src={img}
  */
 export const ImageLayer = ({ path, bgcolor = RandomColor() }) => {
   return (
-    <Layer inline style={{ flex: "1 0 auto", backgroundColor: bgcolor }}>
-      <img
-        src={path}
-        style={{ maxWidth: "20vmin", maxHeight: "50vmin", width: "100%" }}
-        className="gallery-image"
-      />
-    </Layer>
+    <SizedAspectRatioBox width={"20vw"} height={"20vw"} className={"gallery-aspect-box"}>
+      {/*    <Layer inline style={{ flex: "1 0 auto", backgroundColor: bgcolor }}>
+       */}{" "}
+      <img src={path} className="gallery-image" />
+      <style jsx global>{`
+        .gallery-list > div {
+          display: inline-block;
+          font-size: 1.5rem;
+        }
+
+        .gallery-aspect-box-size {
+          border: 2px solid green;
+        }
+      `}</style>{" "}
+    </SizedAspectRatioBox>
   );
 };
 
@@ -247,7 +256,7 @@ export class Gallery extends Component {
             width: 100%;
           }
 
-          .gallery-list li {
+          .gallery-list > div {
             display: inline-block;
             font-size: 1.5rem;
           }
@@ -259,6 +268,9 @@ export class Gallery extends Component {
 
           .gallery-label > input {
             margin-right: 0.5rem;
+          }
+          .gallery-aspect-box-size {
+            border: 2px solid green;
           }
         `}</style>
       </div>

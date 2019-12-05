@@ -65,16 +65,15 @@ const NavLink = ({ href, label, path, key, disabled }) => (
       }
       li > a > span {
         font-family: "Jewel Hill";
-        font-size: 42px;
+        font-size: 62px;
       }
       li {
         background-color: #dfdfdf80;
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        padding: 8px 8px 0 8px;
+        padding: 8px 18px 0 18px;
         margin: 2px;
-        height: 58px;
       }
       a {
         color: black;

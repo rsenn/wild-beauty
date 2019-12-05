@@ -133,17 +133,6 @@ class Home extends React.Component {
       </Layer>
       <SvgOverlay />*/}
         <style jsx global>{`
-          .page-layout {
-            position: absolute;
-            top: 0px;
-            width: 100vw;
-            min-height: 100vh;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1;
-          }
           .article-list {
             margin: auto;
             display: flex;
