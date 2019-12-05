@@ -1,6 +1,5 @@
 import React from "react";
-import { action, observable } from "mobx";
-import { inject, observer } from "mobx-react";
+import { observable } from "mobx";
 export class RootStore {
   entries = observable.array([]);
 }

@@ -1,9 +1,7 @@
 import React, { useRef } from "react";
-import Link from "next/link";
-import Util from "../utils/util.js";
-import { devtools, assign_to } from "../utils/devtools.js";
+import { assign_to } from "../utils/devtools.js";
 import { trkl } from "../utils/trkl.js";
-import { Point, Size, Rect, Element, SVG } from "../utils/dom.js";
+import { Size, Rect, Element } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 

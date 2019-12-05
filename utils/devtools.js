@@ -8,7 +8,7 @@ import { trkl } from "./trkl.js";
 import HashList from "./hashList.js";
 import { Polygon } from "./polygon.js";
 import { TouchListener } from "./touchHandler.js";
-import { makeAutoStoreHandler, makeLocalStorage } from "./autoStore.js";
+import { makeLocalStorage } from "./autoStore.js";
 var root = global.window ? window : global;
 
 //uire('./svg-path.js');

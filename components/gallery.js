@@ -1,10 +1,9 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
 import { Flipper, Flipped } from "react-flip-toolkit";
 import Util from "../utils/util.js";
 import Alea from "../utils/alea.js";
 import anime from "animejs";
-import { Element, HSLA, RandomColor } from "../utils/dom.js";
+import { RandomColor } from "../utils/dom.js";
 import Layer from "../components/layer.js";
 
 const imageNames = [

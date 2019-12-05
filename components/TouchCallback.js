@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Element, Node, HSLA } from "../utils/dom.js";
+import { Element } from "../utils/dom.js";
 export const maxZIndex = () => {
   let arr = [...document.querySelectorAll("*")]
     .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
