@@ -29,7 +29,7 @@ export const AspectRatioBox = ({
   return (
     <div
       className={classNames("aspect-ratio-box", outsideClassName)}
-      style={{ height: 0, paddingTop: (1.0 / aspect) * 100 + "%", ...style }}
+      style={{ height: 0, paddingBottom: (1.0 / aspect) * 100 + "%", ...style }}
     >
       <div className={classNames("aspect-ratio-box-inside", insideClassName)} {...props}>
         {" "}

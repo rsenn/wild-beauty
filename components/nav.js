@@ -110,6 +110,9 @@ const Nav = withRouter(props => (
         font-family: "Jewel Hill";
       }
       .menu {
+        position: fixed;
+        top: 0;
+        z-index: 10;
         text-align: center;
         display: inline-block;
       }

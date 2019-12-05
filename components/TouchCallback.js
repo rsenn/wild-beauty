@@ -48,7 +48,7 @@ export const TouchCallback = event => {
     );
   }
 
-  console.log(event.type + " event: ", { event, e });
+  // console.log(event.type + " event: ", { event, e });
 };
 
 export default TouchCallback;

@@ -51,7 +51,6 @@ const Test = () => {
       noscroll: true
     });
     window.dragged = e;
-    console.log("Play.componentDidMount touchListener=", touchListener);
     MultitouchListener(
       event => {
         console.log("multitouch", event);
