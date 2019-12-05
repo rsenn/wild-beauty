@@ -81,7 +81,7 @@ const insertItem = ({ id, image, author }) => {
   }
 }`;
 };
-var ret = API.insert("users", {  name: "test2" });
+var ret = API.insert("users", { name: "test2" });
 ret.then(ret => {
   console.log(ret);
 });
