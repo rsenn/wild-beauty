@@ -97,8 +97,7 @@ const Home = () => {
       }`);
 
   result.then(result => {
-
-    result = Util.findVal(result, 'items');
+    result = Util.findVal(result, "items");
     console.log("Result: ", result);
   });
 
