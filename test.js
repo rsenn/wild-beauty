@@ -1,6 +1,5 @@
 const prettyoutput = require("prettyoutput");
 var Blob = require("blob");
-
 const API = require("./utils/api.js");
 const Util = require("./utils/util.js");
 const fs = require("fs");
@@ -9,7 +8,6 @@ var fileBuffer = fs.readFileSync("static/img/63a5110bf12b0acef2f68e0e1a023502.jp
 /*
 console.log(fileBuffer);
 console.log(fileBuffer.length);*/
-
 const insertItem = ({ id, image, author }) => {
   return `mutation InsertItem {
     __typename
@@ -46,7 +44,6 @@ res.then(res => {
   for(let item of items) {
     console.log("Inserted photo: ", item);
   }
-
   console.log("res: ", res.insert_photos.returning);
 });
 res = api.list("photos", "width height data filesize");
@@ -55,14 +52,11 @@ res.then(res => {
   process.exit(0);
 });
 //
-
 function addPhoto(path) {
   var buf = fs.readFileSync(path);
-
   if(jpeg.isJpeg(buf)) {
     const arr = Uint8Array.from(buf);
     var props = jpeg.jpegProps(arr);
-
     return api.insert("photos", {
       data: buf.toString("base64"),
       filesize: buf.length,
@@ -96,7 +90,6 @@ let prom = Promise.all(
   ].map(path => addPhoto(path))
 );
 prom.then(res => console.log("res: ", res));
-
 const convertImage = item => {
   var ret = null;
   var buf = Buffer.from(item.data, "base64");
@@ -135,7 +128,6 @@ res = api.list(
 res.then(res => {
   //console.log("res: ", prettyoutput(res, { maxDepth: 10 }));
   //
-
   const items = findObjects(res, "photo").map(item => convertImage(item));
   if(items)
     for(let item of items) {

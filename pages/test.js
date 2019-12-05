@@ -11,10 +11,9 @@ import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touc
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import Dropzone from "react-dropzone";
 import { SvgOverlay } from "../utils/svg-overlay.js";
-
+import { TouchCallback } from "../components/TouchCallback.js";
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
-
 const maxZIndex = () => {
   let arr = [...document.querySelectorAll("*")]
     .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
@@ -97,14 +96,13 @@ const Test = () => {
       { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
     );
   }
-  const onError = event => {};
 
+  const onError = event => {};
   const onImage = event => {
     const { value } = event.nativeEvent.target;
     document.forms[0].submit();
     console.log("onChange: ", value);
   };
-
   const state = {
     image: useState(""),
     error: useState(0)
@@ -118,7 +116,6 @@ const Test = () => {
       "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
       "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
     ];
-
   return (
     <div className={"main-layout"} {...TouchEvents(touchListener)}>
       <Head>
@@ -126,7 +123,7 @@ const Test = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Nav />
-      <form action="upload" method="POST" onSubmit={e => e.preventDefault()}>
+      {/*    <form action="upload" method="POST" onSubmit={e => e.preventDefault()}>
         <Dropzone onDrop={acceptedFiles => console.log(acceptedFiles)}>
           {({ getRootProps, getInputProps }) => (
             <section>
@@ -137,8 +134,7 @@ const Test = () => {
             </section>
           )}
         </Dropzone>
-      </form>
-
+      </form>*/}
       <Gallery />
       <div
         className={"panels"}
@@ -163,7 +159,14 @@ const Test = () => {
           </Layer>
         ))}{" "}
       </div>
-      <Layer w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
+      <Layer
+        className={"layer"}
+        w={300}
+        h={"300px"}
+        margin={10}
+        padding={2}
+        border={"2px dashed red"}
+      >
         Layer
       </Layer>
       <SvgOverlay />
@@ -171,23 +174,28 @@ const Test = () => {
         .main-layout {
           overflow: hidden;
         }
+
         .gallery-image {
           height: auto;
         }
+
         .panels {
           margin: 100px;
           overflow: visible;
         }
+
         img {
           border: 0px;
           outline: 0px;
           padding: 0px;
           margin: 0px;
         }
+
         .panels .layer {
           margin: 0px;
           padding: 0px;
         }
+
         .layout {
           margin: 0px;
           padding: 0px;
@@ -197,14 +205,17 @@ const Test = () => {
         .panels > div {
           flex: 1 1 auto;
         }
+
         .layer > div {
           width: 100%;
           height: 100%;
         }
+
         .layer > div {
           width: 100%;
           height: 100%;
         }
+
         .layer.dragging {
           opacity: 50%;
         }
@@ -216,10 +227,12 @@ const Test = () => {
           line-height: 1.15;
           font-size: 48px;
         }
+
         .title,
         .description {
           text-align: center;
         }
+
         .row {
           max-width: 880px;
           margin: 80px auto 40px;

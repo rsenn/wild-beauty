@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import Head from "next/head";
+import { withRouter } from "next/router";
 import Nav from "../components/nav.js";
 import Layer from "../components/layer.js";
+import { TouchCallback } from "../components/TouchCallback.js";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import { ScrollController } from "../utils/scrollController.js";
 import Alea from "../utils/alea.js";

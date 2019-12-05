@@ -61,9 +61,7 @@ class Show extends React.Component {
   render() {
     let swipeEvents = {};
     var e = null;
-
     if(global.window !== undefined) window.page = this;
-
     if(global.window) {
       var touchListener = TouchListener(
         event => {
@@ -133,7 +131,6 @@ class Show extends React.Component {
       "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
       "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
     ];
-
     return (
       <div className={"main-layout"} {...TouchEvents(touchListener)}>
         <Head>
@@ -153,7 +150,6 @@ class Show extends React.Component {
             )}
           </Dropzone>
         </form>
-
         <div
           className={"panels"}
           style={{
@@ -185,23 +181,28 @@ class Show extends React.Component {
           .main-layout {
             overflow: hidden;
           }
+
           .gallery-image {
             height: auto;
           }
+
           .panels {
             margin: 100px;
             overflow: visible;
           }
+
           img {
             border: 0px;
             outline: 0px;
             padding: 0px;
             margin: 0px;
           }
+
           .panels .layer {
             margin: 0px;
             padding: 0px;
           }
+
           .layout {
             margin: 0px;
             padding: 0px;
@@ -211,14 +212,17 @@ class Show extends React.Component {
           .panels > div {
             flex: 1 1 auto;
           }
+
           .layer > div {
             width: 100%;
             height: 100%;
           }
+
           .layer > div {
             width: 100%;
             height: 100%;
           }
+
           .layer.dragging {
             opacity: 50%;
           }
@@ -230,10 +234,12 @@ class Show extends React.Component {
             line-height: 1.15;
             font-size: 48px;
           }
+
           .title,
           .description {
             text-align: center;
           }
+
           .row {
             max-width: 880px;
             margin: 80px auto 40px;

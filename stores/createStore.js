@@ -25,7 +25,6 @@ export function getOrCreateStore(isServer = false, preFetchObj = {}, pageProps =
     stores = createStore(isServer, preFetchObj, pageProps);
     //CommonStoreFunctions.getStore = name => appStores[name].singleton;
   }
-
   // Always make a new store if server, otherwise state is shared between requests
   if(!Util.isBrowser()) {
     return stores;

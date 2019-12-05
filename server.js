@@ -10,7 +10,9 @@ const graphqlHTTP = require("express-graphql");
 const graphql = require("graphql");
 const API = require("./utils/api.js")();
 const jpeg = require("./utils/jpeg.js");
-
+var multer = require("multer");
+var cloudinary = require("cloudinary");
+var cloudinaryStorage = require("multer-storage-cloudinary");
 const userType = new graphql.GraphQLObjectType({
   name: "users",
   fields: {
@@ -20,7 +22,6 @@ const userType = new graphql.GraphQLObjectType({
     last_seen: { type: graphql.GraphQLString }
   }
 });
-
 const itemType = new graphql.GraphQLObjectType({
   name: "items",
   fields: {
@@ -38,7 +39,6 @@ const photoType = new graphql.GraphQLObjectType({
     height: { type: graphql.GraphQLInt }
   }
 });
-
 var schema = new graphql.GraphQLSchema({
   query: itemType,
   mutation: new graphql.GraphQLObjectType({
@@ -52,7 +52,6 @@ var schema = new graphql.GraphQLSchema({
     })
   })
 });
-
 // The root provides a resolver function for each API endpoint
 var rootValue = {
   items: ({ id, author, image }) => {
@@ -104,10 +103,8 @@ if (!dev && cluster.isMaster) {
 } else {
   const nextApp = next({ dir: ".", dev });
   const nextHandler = nextApp.getRequestHandler();
-
   nextApp.prepare().then(() => {
     const server = express();
-
     if(!dev) {
       // Enforce SSL & HSTS in production
       server.use(function(req, res, next) {
@@ -121,7 +118,6 @@ if (!dev && cluster.isMaster) {
         res.redirect("https://" + req.headers.host + req.url);
       });
     }
-
     // Static files
     // https://github.com/zeit/next.js/tree/4.2.3#user-content-static-file-serving-eg-images
     server.use(
@@ -130,7 +126,6 @@ if (!dev && cluster.isMaster) {
         maxAge: dev ? "0" : "365d"
       })
     );
-
     server.use(
       "https://wild-beauty.herokuapp.com/v1/graphql",
       graphqlHTTP({
@@ -139,7 +134,6 @@ if (!dev && cluster.isMaster) {
         rootValue
       })
     );
-
     server.use(
       "https://wild-beauty.herokuapp.com/v1/graphql",
       graphqlHTTP(request => {
@@ -156,7 +150,6 @@ if (!dev && cluster.isMaster) {
         limits: { fileSize: 50 * 1024 * 1024 }
       })
     );
-
     server.post("/api/upload", function(req, res) {
       /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
@@ -164,12 +157,10 @@ if (!dev && cluster.isMaster) {
 */
       const file = req.files.file;
       const data = file.data.toString("base64");
-
       const props = jpeg.jpegProps(Uint8Array.from(file.data));
       const { width, height } = props;
-
       API.insert("photos", { data, filesize: file.data.length, width, height });
-            console.log("API upload photo: ", props);
+      console.log("API upload photo: ", props);
       //
       //      const q = "{ images {id image author } }";
       //      graphql.graphql(schema, "{ id image author }").then(result => {
@@ -183,17 +174,14 @@ if (!dev && cluster.isMaster) {
       //        console.log(result);
       //      });*/
     });
-
     // Example server-side routing
     server.post("/a", (req, res) => {
       return nextApp.render(req, res, "/b", req.query);
     });
-
     // Example server-side routing
     server.get("/b", (req, res) => {
       return nextApp.render(req, res, "/a", req.query);
     });
-
     // Default catch-all renders Next app
     server.get("*", (req, res) => {
       // res.set({
@@ -202,7 +190,6 @@ if (!dev && cluster.isMaster) {
       const parsedUrl = url.parse(req.url, true);
       nextHandler(req, res, parsedUrl);
     });
-
     server.listen(port, err => {
       if(err) throw err;
       console.log(`Listening on http://localhost:${port}`);
