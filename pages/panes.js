@@ -10,11 +10,6 @@ import { Element, Node, HSLA } from "../utils/dom.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
-
-import gql from "graphql-tag";
-import { Query } from "react-apollo";
-import withData from "../config";
-
 import RUG from "react-upload-gallery";
 import "react-upload-gallery/dist/style.css";
 

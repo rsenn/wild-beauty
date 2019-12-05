@@ -11,7 +11,6 @@ import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touc
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import Dropzone from "react-dropzone";
 import { SvgOverlay } from "../utils/svg-overlay.js";
-import { TouchCallback } from "../components/TouchCallback.js";
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 const maxZIndex = () => {

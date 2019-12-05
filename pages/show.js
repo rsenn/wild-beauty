@@ -1,18 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import Head from "next/head";
 import Nav from "../components/nav.js";
-import prettyoutput from "prettyoutput";
 import Layer from "../components/layer.js";
 import { Element, Node, HSLA } from "../utils/dom.js";
 import API from "../utils/api.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import Dropzone from "react-dropzone";
 import { SvgOverlay } from "../utils/svg-overlay.js";
-import { GraphQLClient } from "graphql-request";
 import { inject, observer } from "mobx-react";
-
 import ApolloClient from "apollo-boost";
-import { ApolloProvider } from "@apollo/react-hooks";
 
 const client = new ApolloClient({
   uri: "http://wild-beauty.herokuapp.com/v1/graphql"
