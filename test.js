@@ -9,9 +9,7 @@ console.log(fileBuffer.length);*/
 const insertItem = ({ id, image, author }) => {
   return `mutation InsertItem {
     __typename
-    insert_items(objects: {id: ${id}, author: "${author}", image: "${fileBuffer.toString(
-    "base64"
-  )}"}) {
+    insert_items(objects: {id: ${id}, author: "${author}", image: "${fileBuffer.toString("base64")}"}) {
       affected_rows
       returning {
         author
@@ -33,24 +31,79 @@ const queryItems = () => {
 
 const api = API();
 let res;
-res = api.insert("items", { id: 44, image: "x.jpg", author: "mister x" });
+res = api.insert("items", { id: 46, image: "x.jpg", author: "mister x" });
 res.then(res => {
-  if(res.data.data !== undefined) res.data = res.data.data;
-
   const items = res.data && res.data.insert_items ? res.data.insert_items.returning : [];
   for(let item of items) {
-    console.log(/*JSON.stringify*/ item);
+    console.log("Inserted item: ", item);
   }
 
-  console.log("res: ", res.data);
+  //console.log("res: ", res.data);
 });
 
-res = api(queryItems());
-res.then(res => {
-  const items = res.data.data.items.map(item => Util.filterKeys(item, key => key != "image"));
-  console.log("res.data: ");
+const isJpeg = buf => (typeof(buf) == 'object' && buf !== null && buf.length >= 10) ? buf.readUInt32LE(6) == 0x4649464a : false;
 
-  for(let item of items) {
-    console.log(/*JSON.stringify*/ item);
+
+function jpegProps(data) {
+  var ret = {};
+  // data is an array of bytes
+  var off = 0;
+  while(off < data.length) {
+    while(data[off] == 0xff) off++;
+    var mrkr = data[off];
+    off++;
+    if(!((mrkr & 0xf0) == 0xc0)) {
+      if(mrkr == 0xd8) continue; // SOI
+      if(mrkr == 0xd9) break; // EOI
+      if(0xd0 <= mrkr && mrkr <= 0xd7) continue;
+      if(mrkr == 0x01) continue; // TEM
+    }
+    var len = (data[off] << 8) | data[off + 1];
+    off += 2;
+    if((mrkr & 0xf0) == 0xc0) {
+      ret = {
+        depth: data[off]* data[off + 5], // precission (bits per channel)
+        width: (data[off + 1] << 8) | data[off + 2],
+        height: (data[off + 3] << 8) | data[off + 4],
+        channels: data[off + 5] // number of color components
+      };
+      break;
+    }
+
+    off += len - 2;
   }
+  if(ret.depth === undefined) return null;
+  return ret;
+}
+
+const convertImage = item => {
+  var ret = null;
+  var buf = Buffer.from(item.image, "base64");
+
+  if(/\.jpe?g$/.test(item.image)) {
+    try {
+      buf = fs.readFileSync(item.image);
+    } catch(err) {
+      return item.image;
+    }
+  }
+  if(isJpeg(buf)) {
+    const arr = Uint8Array.from(buf);
+    return jpegProps(arr);
+  }
+  return null;
+};
+
+res = api.list("items", "author,image");
+res.then(res => {
+  const items = res.map(item => ({
+    ...item,
+    image: convertImage(item)
+  }));
+  /*  console.log("res: ", items);
+   */
+  for(let item of items) {
+    console.log("Item: ", item);
+  }
+  // items.forEach(console.log);
 });

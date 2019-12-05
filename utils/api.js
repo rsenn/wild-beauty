@@ -4,7 +4,7 @@ const Util = require("./util.js");
 function API() {
   const url = "http://wild-beauty.herokuapp.com/v1/graphql";
   var api = async function(query) {
-    const res = await axios({
+    let res = await axios({
       url,
       method: "POST",
       headers: {
@@ -14,7 +14,30 @@ function API() {
       responseType: "blob"
     });
     //console.log("res: ", res);
+
+    while((await res.data) !== undefined) res = await res.data;
     return res;
+  };
+
+  api.list = async function(name, fields = []) {
+    const camelCase = Util.ucfirst(name);
+    if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
+    const queryStr = `query List${camelCase} {${name} { ${fields.join(" ")} } }`;
+    console.log(queryStr);
+
+    let ret = await this(queryStr);
+    if(typeof ret == "object" && ret[name] !== undefined) ret = ret[name];
+    return ret;
+  };
+
+  api.select = function(name, obj, fields = "") {
+    const camelCase = Util.ucfirst(name);
+    const objStr = Util.map(obj, (key, value) => `${key}: "${value}"`).join(", ");
+    if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
+    const queryStr = `query Select${camelCase} { ${name}(${objStr}) { ${fields.join(" ")} } }`;
+    console.log(queryStr);
+
+    return this(queryStr);
   };
 
   api.insert = function(name, obj) {
@@ -30,7 +53,6 @@ function API() {
       returning { ${fieldStr} }
     }
   }`;
-    console.log(queryStr);
     return this(queryStr);
   };
 
