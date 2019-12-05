@@ -11,61 +11,60 @@ const graphql = require("graphql");
 const API = require("./utils/api.js")();
 const jpeg = require("./utils/jpeg.js");
 
-//
-//const userType = new graphql.GraphQLObjectType({
-//  name: "users",
-//  fields: {
-//    id: { type: graphql.GraphQLInt },
-//    name: { type: graphql.GraphQLString },
-//    password: { type: graphql.GraphQLString },
-//    last_seen: { type: graphql.GraphQLString }
-//  }
-//});
-//
-//const itemType = new graphql.GraphQLObjectType({
-//  name: "items",
-//  fields: {
-//    id: { type: graphql.GraphQLInt },
-//    author: { type: userType },
-//    image: { type: graphql.GraphQLString }
-//  }
-//});
-//const photoType = new graphql.GraphQLObjectType({
-//  name: "photos",
-//  fields: {
-//    id: { type: graphql.GraphQLInt },
-//    src: { type: graphql.GraphQLString },
-//    width: { type: graphql.GraphQLInt },
-//    height: { type: graphql.GraphQLInt }
-//  }
-//});
-//
-//var schema = new graphql.GraphQLSchema({
-//  query: itemType,
-//  mutation: new graphql.GraphQLObjectType({
-//    //⚠️ NOT mutiation
-//    name: "Mutation",
-//    fields: () => ({
-//      incrementCounter: {
-//        type: graphql.GraphQLInt,
-//        resolve: () => ++counter
-//      }
-//    })
-//  })
-//});
+const userType = new graphql.GraphQLObjectType({
+  name: "users",
+  fields: {
+    id: { type: graphql.GraphQLInt },
+    name: { type: graphql.GraphQLString },
+    password: { type: graphql.GraphQLString },
+    last_seen: { type: graphql.GraphQLString }
+  }
+});
+
+const itemType = new graphql.GraphQLObjectType({
+  name: "items",
+  fields: {
+    id: { type: graphql.GraphQLInt },
+    author: { type: userType },
+    image: { type: graphql.GraphQLString }
+  }
+});
+const photoType = new graphql.GraphQLObjectType({
+  name: "photos",
+  fields: {
+    id: { type: graphql.GraphQLInt },
+    src: { type: graphql.GraphQLString },
+    width: { type: graphql.GraphQLInt },
+    height: { type: graphql.GraphQLInt }
+  }
+});
+
+var schema = new graphql.GraphQLSchema({
+  query: itemType,
+  mutation: new graphql.GraphQLObjectType({
+    //⚠️ NOT mutiation
+    name: "Mutation",
+    fields: () => ({
+      incrementCounter: {
+        type: graphql.GraphQLInt,
+        resolve: () => ++counter
+      }
+    })
+  })
+});
 
 // The root provides a resolver function for each API endpoint
-//var rootValue = {
-//  items: ({ id, author, image }) => {
-//    console.log("item: ", { id, author, image });
-//  },
-//  users: ({ id, name, email, password, last_seen }) => {
-//    console.log("user: ", { id, name, email, password, last_seen });
-//  },
-//  photos: ({ id, src, width, height }) => {
-//    console.log("photo: ", { id, author, image });
-//  }
-//};
+var rootValue = {
+  items: ({ id, author, image }) => {
+    console.log("item: ", { id, author, image });
+  },
+  users: ({ id, name, email, password, last_seen }) => {
+    console.log("user: ", { id, name, email, password, last_seen });
+  },
+  photos: ({ id, src, width, height }) => {
+    console.log("photo: ", { id, author, image });
+  }
+};
 
 const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5555;
@@ -170,7 +169,7 @@ if (!dev && cluster.isMaster) {
       const { width, height } = props;
 
       API.insert("photos", { data, filesize: file.data.length, width, height });
-      //      console.log("API upload: ", data.slice(0, 32)); // the uploaded file object
+            console.log("API upload photo: ", props);
       //
       //      const q = "{ images {id image author } }";
       //      graphql.graphql(schema, "{ id image author }").then(result => {
