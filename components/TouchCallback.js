@@ -8,75 +8,6 @@ export const maxZIndex = () => {
   return arr[0];
 };
 
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-
-export const containsClass = className => {
-  return e =>
-    [...Node.parents(e)].some(
-      item => item && item.classList && item.classList.contains(className || "layer")
-    );
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-
 export const TouchCallback = event => {
   const { cancel } = event;
   let zIndex = maxZIndex();
@@ -95,7 +26,6 @@ export const TouchCallback = event => {
       if(e.classList.contains("layer")) break;
       e = e.parentElement;
     }
-
   }
 
   if((e.tagName && e.tagName.toLowerCase() == "html") || !hasLayerClass) {
@@ -112,36 +42,5 @@ export const TouchCallback = event => {
 
   console.log(event.type + " event: ", { event, e });
 };
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
-};
-
 
 export default TouchCallback;
