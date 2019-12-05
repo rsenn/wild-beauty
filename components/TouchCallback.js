@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Element } from "../utils/dom.js";
+
 export const maxZIndex = () => {
   let arr = [...document.querySelectorAll("*")]
     .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
@@ -7,13 +8,20 @@ export const maxZIndex = () => {
   arr.sort((a, b) => a < b);
   return arr[0];
 };
+export const containsClass = className => {
+  return e =>
+    [...Node.parents(e)].some(
+      item => item && item.classList && item.classList.contains(className || "layer")
+    );
+};
 
 export const TouchCallback = event => {
   const { cancel } = event;
-  let zIndex = maxZIndex();
+  let e,
+    zIndex = maxZIndex();
   if(event.type == "touchstart") {
     zIndex++;
-    e = event.start.target;
+    e = event.target;
   } else if(event.start) {
     e = event.start.target;
   }
@@ -28,12 +36,12 @@ export const TouchCallback = event => {
     }
   }
 
-  if((e.tagName && e.tagName.toLowerCase() == "html") || !hasLayerClass) {
+  if((e && e.tagName && e.tagName.toLowerCase() == "html") || !hasLayerClass) {
     return cancel();
   }
 
   if(e) Element.setCSS(e, { zIndex });
-  if(e.style) {
+  if(e && e.style) {
     e.style.setProperty(
       "transform",
       event.type.endsWith("move") ? `translate(${event.x}px, ${event.y}px)` : ""

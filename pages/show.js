@@ -9,11 +9,13 @@ import Dropzone from "react-dropzone";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { inject, observer } from "mobx-react";
 import ApolloClient from "apollo-boost";
+import { TouchCallback } from "../components/TouchCallback.js";
 
+/*
 const client = new ApolloClient({
   uri: "http://wild-beauty.herokuapp.com/v1/graphql"
 });
-
+*/
 const RandomColor = () => {
   const c = HSLA.random();
   return c.toString();
@@ -59,51 +61,13 @@ class Show extends React.Component {
     var e = null;
     if(global.window !== undefined) window.page = this;
     if(global.window) {
-      var touchListener = TouchListener(
-        event => {
-          const { cancel } = event;
-          let zIndex = maxZIndex();
-          if(event.type == "touchstart") {
-            zIndex++;
-            e = event.start.target;
-          } else if(event.start) {
-            e = event.start.target;
-          }
-          const containsClass = className => {
-            return e =>
-              [...Node.parents(e)].some(
-                item => item && item.classList && item.classList.contains(className || "layer")
-              );
-          };
-          const hasLayerClass = containsClass("layer");
-          if(hasLayerClass) {
-            while(e && e.parentElement && e.classList) {
-              if(event.type.endsWith("start")) if (e && e.classList) e.classList.add("dragging");
-              if(event.type.endsWith("end")) if (e && e.classList) e.classList.remove("dragging");
-              if(e.classList.contains("layer")) break;
-              e = e.parentElement;
-            }
-          }
-          if(e.tagName.toLowerCase() == "html" || !hasLayerClass) {
-            return cancel();
-          }
-          if(e) Element.setCSS(e, { zIndex });
-          if(e.style) {
-            e.style.setProperty(
-              "transform",
-              event.type.endsWith("move") ? `translate(${event.x}px, ${event.y}px)` : ""
-            );
-          }
-          console.log(event.type + " event: ", { event, e });
-        },
-        {
-          element: global.window,
-          step: 1,
-          round: true,
-          listener: MovementListener,
-          noscroll: true
-        }
-      );
+      var touchListener = TouchListener(TouchCallback, {
+        element: global.window,
+        step: 1,
+        round: true,
+        listener: MovementListener,
+        noscroll: true
+      });
       window.dragged = e;
       console.log("Play.componentDidMount touchListener=", touchListener);
       MultitouchListener(
