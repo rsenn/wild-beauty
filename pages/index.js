@@ -85,7 +85,7 @@ const Home = () => {
     ];
 
   let result = getAPI()(`
-        query MyQuery {
+    query MyQuery {
       pages(where: {name: {_eq: "home"}}) {
         items {
           id
