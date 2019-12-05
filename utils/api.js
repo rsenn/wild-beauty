@@ -1,8 +1,9 @@
+const Blob = require("blob");
+
 const axios = require("axios");
 const Util = require("./util.js");
 
-function API() {
-  const url = "http://wild-beauty.herokuapp.com/v1/graphql";
+function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
   var api = async function(query) {
     let res = await axios({
       url,
@@ -14,15 +15,21 @@ function API() {
       responseType: "blob"
     });
     //console.log("res: ", res);
+    while((await res.data) !== undefined) res = await res.data;
+
+    if(res && res.text !== undefined) res = await res.text();
+
+    if(typeof res == "string") res = JSON.parse(res);
 
     while((await res.data) !== undefined) res = await res.data;
+
     return res;
   };
 
   api.list = async function(name, fields = []) {
     const camelCase = Util.ucfirst(name);
-    if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
-    const queryStr = `query List${camelCase} {${name} { ${fields.join(" ")} } }`;
+    //if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
+    const queryStr = `query List${camelCase} {${name} { ${fields} } }`;
     console.log(queryStr);
 
     let ret = await this(queryStr);
@@ -42,9 +49,7 @@ function API() {
 
   api.insert = function(name, obj) {
     const camelCase = Util.ucfirst(name);
-    const objStr = Util.map(obj, (key, value) =>
-      typeof value == "string" ? `${key}: "${value}"` : `${key}: ${value}`
-    ).join(", ");
+    const objStr = Util.map(obj, (key, value) => (typeof value == "string" ? `${key}: "${value}"` : `${key}: ${value}`)).join(", ");
     const fieldStr = Object.keys(obj).join(" ");
     const queryStr = `mutation Insert${camelCase} {
     __typename

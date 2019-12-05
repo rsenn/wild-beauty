@@ -1,25 +1,5 @@
 import React from "react";
-import dom, {
-  TRBL,
-  CSS,
-  CSSTransformSetters,
-  Element,
-  ElementRectProxy,
-  ElementSizeProps,
-  ElementTransformation,
-  ElementXYProps,
-  Line,
-  Matrix,
-  Point,
-  PointList,
-  Rect,
-  RGBA,
-  Size,
-  SVG,
-  Timer,
-  ReactComponent,
-  Node
-} from "../utils/dom.js";
+import dom, { TRBL, CSS, CSSTransformSetters, Element, ElementRectProxy, ElementSizeProps, ElementTransformation, ElementXYProps, Line, Matrix, Point, PointList, Rect, RGBA, Size, SVG, Timer, ReactComponent, Node } from "../utils/dom.js";
 import { SvgOverlay, SvgPathTracer } from "./svg-overlay.js";
 import { SvgPath } from "./svg-path.js";
 import Util from "./util.js";
@@ -558,26 +538,22 @@ export async function img(name, arg = {}) {
 
   let list = root.images
     ? root.images
-    : (root.images = new HashList(
-        obj =>
-          (obj.firstElementChild.id || obj.xpath).replace(/(^|[^A-Za-z0-9])[FfEe][NnAa]([^A-Za-z0-9]|$)/, "$1XX$2"),
-        function(arg) {
-          let e = Element.find(arg);
-          let svg = Element.find("svg", e);
-          /*let xpath = arg.xpath || Element.xpath(svg);
+    : (root.images = new HashList(obj => (obj.firstElementChild.id || obj.xpath).replace(/(^|[^A-Za-z0-9])[FfEe][NnAa]([^A-Za-z0-9]|$)/, "$1XX$2"), function(arg) {
+        let e = Element.find(arg);
+        let svg = Element.find("svg", e);
+        /*let xpath = arg.xpath || Element.xpath(svg);
       if(xpath && xpath.replace) xpath = xpath.replace(/.*\//, '');*/
-          Element.attr(svg, { "data-name": svg.id });
-          let r = new Rect(0, 0, svg.getAttribute("width"), svg.getAttribute("height"));
-          r = Rect.round(r);
-          let width = this.width + r.width;
-          /*  r.x += width;
+        Element.attr(svg, { "data-name": svg.id });
+        let r = new Rect(0, 0, svg.getAttribute("width"), svg.getAttribute("height"));
+        r = Rect.round(r);
+        let width = this.width + r.width;
+        /*  r.x += width;
         this.width = width;*/
-          Element.setRect(e, r);
-          //console.log("HashList ctor ", { width, r, id });
-          return e;
-          //return { e, r, id, xpath, svg };
-        }
-      ));
+        Element.setRect(e, r);
+        //console.log("HashList ctor ", { width, r, id });
+        return e;
+        //return { e, r, id, xpath, svg };
+      }));
 
   return new Promise(async (resolve, reject) => {
     let path = name.indexOf(".") == -1 ? name + ".svg" : name;

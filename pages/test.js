@@ -16,7 +16,9 @@ const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")]
+    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
+    .filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -52,7 +54,10 @@ const Test = () => {
           e = event.start && event.start.target;
         }
         const containsClass = className => {
-          return e => [...Node.parents(e)].some(item => item && item.classList && item.classList.contains(className || "layer"));
+          return e =>
+            [...Node.parents(e)].some(
+              item => item && item.classList && item.classList.contains(className || "layer")
+            );
         };
         const hasLayerClass = containsClass("layer");
         if(hasLayerClass) {
@@ -68,7 +73,10 @@ const Test = () => {
         }
         if(e) Element.setCSS(e, { zIndex });
         if(e.style) {
-          e.style.setProperty("transform", event.type.endsWith("move") ? `translate(${event.x}px, ${event.y}px)` : "");
+          e.style.setProperty(
+            "transform",
+            event.type.endsWith("move") ? `translate(${event.x}px, ${event.y}px)` : ""
+          );
         }
         console.log(event.type + " event: ", { event, e });
       },
@@ -103,7 +111,13 @@ const Test = () => {
   };
   let list = imagePaths();
   if(list === null || (list && list.length == undefined))
-    list = ["static/img/86463ed8ed391bf6b0a2907df74adb37.jpg", "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg", "static/img/cdb466a69cc7944809b20e7f34840486.jpg", "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg", "static/img/fdcce856cf66f33789dc3934418113a2.jpg"];
+    list = [
+      "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
+      "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
+      "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
+      "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
+      "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
+    ];
 
   return (
     <div className={"main-layout"} {...TouchEvents(touchListener)}>
@@ -141,7 +155,11 @@ const Test = () => {
       >
         {list.map(path => (
           <Layer inline style={{ flex: "1 0 auto", backgroundColor: RandomColor() }}>
-            <img src={path} style={{ maxWidth: "50vmin", width: "100%", height: "auto" }} className="gallery-image" />
+            <img
+              src={path}
+              style={{ maxWidth: "50vmin", width: "100%", height: "auto" }}
+              className="gallery-image"
+            />
           </Layer>
         ))}{" "}
       </div>

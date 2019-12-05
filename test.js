@@ -1,3 +1,6 @@
+const prettyoutput = require("prettyoutput");
+var Blob = require("blob");
+
 const API = require("./utils/api.js");
 const Util = require("./utils/util.js");
 const fs = require("fs");
@@ -10,7 +13,9 @@ console.log(fileBuffer.length);*/
 const insertItem = ({ id, image, author }) => {
   return `mutation InsertItem {
     __typename
-    insert_items(objects: {id: ${id}, author: "${author}", image: "${fileBuffer.toString("base64")}"}) {
+    insert_items(objects: {id: ${id}, author: "${author}", image: "${fileBuffer.toString(
+    "base64"
+  )}"}) {
       affected_rows
       returning {
         author
@@ -21,26 +26,35 @@ const insertItem = ({ id, image, author }) => {
   }`;
 };
 const queryItems = () => {
-  return `query ListItems {
- items {
-   id
-  image
-  author
- }
-}`;
+  return `query MyQuery { items { photos { photo { id data width height filesize } } users { user { id email last_seen name } } } }`;
 };
 
 const api = API();
 let res;
-res = api.insert("items", { id: 46, image: "x.jpg", author: "mister x" });
+//res = api.insert("items", { id: 46, image: "x.jpg", author: "mister x" });
+//res.then(res => {
+//  const items = res.data && res.data.insert_items ? res.data.insert_items.returning : [];
+//  for(let item of items) {
+//    console.log("Inserted item: ", item);
+//  }
+//
+//  //console.log("res: ", res.data);
+//});
+res = api.insert("photos", { data: "XXXX" });
 res.then(res => {
-  const items = res.data && res.data.insert_items ? res.data.insert_items.returning : [];
+  const items = res.data && res.data.insert_photos ? res.data.insert_photos.returning : [];
   for(let item of items) {
-    console.log("Inserted item: ", item);
+    console.log("Inserted photo: ", item);
   }
 
-  //console.log("res: ", res.data);
+  console.log("res: ", res.insert_photos.returning);
 });
+res = api.list("photos", "width height data filesize");
+res.then(res => {
+  console.log("res: ", prettyoutput(res));
+  process.exit(0);
+});
+//
 
 function addPhoto(path) {
   var buf = fs.readFileSync(path);
@@ -49,7 +63,12 @@ function addPhoto(path) {
     const arr = Uint8Array.from(buf);
     var props = jpeg.jpegProps(arr);
 
-    return api.insert("photos", { data: buf.toString("base64"), filesize: buf.length, width: props.width, height: props.height });
+    return api.insert("photos", {
+      data: buf.toString("base64"),
+      filesize: buf.length,
+      width: props.width,
+      height: props.height
+    });
   }
 }
 let prom = Promise.all(
@@ -80,31 +99,52 @@ prom.then(res => console.log("res: ", res));
 
 const convertImage = item => {
   var ret = null;
-  var buf = Buffer.from(item.image, "base64");
-  if(/\.jpe?g$/.test(item.image)) {
+  var buf = Buffer.from(item.data, "base64");
+  if(/\.jpe?g$/.test(item.data)) {
     try {
-      buf = fs.readFileSync(item.image);
+      buf = fs.readFileSync(item.data);
     } catch(err) {
-      return item.image;
+      return null;
     }
   }
+  console.log("image: ", buf.toString("hex").substring(0, 20));
   if(jpeg.isJpeg(buf)) {
     const arr = Uint8Array.from(buf);
-    return jpeg.jpegProps(arr);
+    return { ...item, ...jpeg.jpegProps(arr) };
   }
   return null;
 };
 
-res = api.list("items", "author,image");
-res.then(res => {
-  const items = res.map(item => ({
-    ...item,
-    image: convertImage(item)
-  }));
-  /*  console.log("res: ", items);
-   */
-  for(let item of items) {
-    console.log("Item: ", item);
+const findObjects = (obj, name) => {
+  var ret = [];
+
+  for(let key in obj) {
+    if(key === name) {
+      ret.push(obj[key]);
+      continue;
+    }
+    if(typeof obj[key] == "object") ret = ret.concat(findObjects(obj[key], name));
   }
+  return ret;
+};
+
+res = api.list(
+  "items",
+  "type data photos { photo { width height data filesize } } users { user { id name last_seen } }"
+);
+res.then(res => {
+  //console.log("res: ", prettyoutput(res, { maxDepth: 10 }));
+  //
+
+  const items = findObjects(res, "photo").map(item => convertImage(item));
+  if(items)
+    for(let item of items) {
+      console.log("Item: ", item);
+    }
+  // items.forEach(console.log);
+});
+res = api({ query: queryItems() });
+res.then(res => {
+  console.log("res: ", Util.inspect(res));
   // items.forEach(console.log);
 });

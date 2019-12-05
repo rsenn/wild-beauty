@@ -12,13 +12,10 @@ let root = null;
 export function createStore(isServer = false, preFetchObj = {}, pageProps = {}) {
   root = null;
   return Object.keys(appStores).reduce((acc, storeName) => {
-    CommonStoreFunctions.decorate(appStores[storeName]);
-    let instance =
-      !isServer && store !== null
-        ? store
-        : new appStores[storeName](isServer, preFetchObj, pageProps);
+    //CommonStoreFunctions.decorate(appStores[storeName]);
+    let instance = !isServer && store !== null ? store : new appStores[storeName](isServer, preFetchObj, pageProps);
     appStores[storeName].singleton = instance;
-    CommonStoreFunctions.mixin(instance);
+    //CommonStoreFunctions.mixin(instance);
     return { ...acc, [storeName]: instance };
   }, {});
 }
@@ -26,7 +23,7 @@ export function createStore(isServer = false, preFetchObj = {}, pageProps = {}) 
 export function getOrCreateStore(isServer = false, preFetchObj = {}, pageProps = {}) {
   if(stores == null) {
     stores = createStore(isServer, preFetchObj, pageProps);
-    CommonStoreFunctions.getStore = name => appStores[name].singleton;
+    //CommonStoreFunctions.getStore = name => appStores[name].singleton;
   }
 
   // Always make a new store if server, otherwise state is shared between requests

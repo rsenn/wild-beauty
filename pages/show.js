@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import Nav from "../components/nav.js";
+import prettyoutput from "prettyoutput";
 import Layer from "../components/layer.js";
 import { Element, Node, HSLA } from "../utils/dom.js";
+import API from "../utils/api.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import Dropzone from "react-dropzone";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { GraphQLClient } from "graphql-request";
+import { inject, observer } from "mobx-react";
 
 import ApolloClient from "apollo-boost";
 import { ApolloProvider } from "@apollo/react-hooks";
@@ -21,12 +24,40 @@ const RandomColor = () => {
 };
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")]
+    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
+    .filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
 
 class Show extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.api = API(
+      global.window && /192\.168/.test(window.location.href)
+        ? "http://wild-beauty.herokuapp.com/v1/graphql"
+        : "/v1/graphql"
+    );
+
+    if(global.window) {
+      window.api = this.api;
+      window.page = this;
+    }
+  }
+
+  componentDidMount() {
+    this.api
+      .list(
+        "items",
+        "type data photos { photo { width height data filesize } } users { user { id name last_seen } }"
+      )
+      .then(res => {
+        console.log("items: ", res);
+      });
+  }
+
   render() {
     let swipeEvents = {};
     var e = null;
@@ -45,7 +76,10 @@ class Show extends React.Component {
             e = event.start.target;
           }
           const containsClass = className => {
-            return e => [...Node.parents(e)].some(item => item && item.classList && item.classList.contains(className || "layer"));
+            return e =>
+              [...Node.parents(e)].some(
+                item => item && item.classList && item.classList.contains(className || "layer")
+              );
           };
           const hasLayerClass = containsClass("layer");
           if(hasLayerClass) {
@@ -61,7 +95,10 @@ class Show extends React.Component {
           }
           if(e) Element.setCSS(e, { zIndex });
           if(e.style) {
-            e.style.setProperty("transform", event.type.endsWith("move") ? `translate(${event.x}px, ${event.y}px)` : "");
+            e.style.setProperty(
+              "transform",
+              event.type.endsWith("move") ? `translate(${event.x}px, ${event.y}px)` : ""
+            );
           }
           console.log(event.type + " event: ", { event, e });
         },
@@ -89,7 +126,13 @@ class Show extends React.Component {
       document.forms[0].submit();
       console.log("onChange: ", value);
     };
-    const list = ["static/img/86463ed8ed391bf6b0a2907df74adb37.jpg", "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg", "static/img/cdb466a69cc7944809b20e7f34840486.jpg", "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg", "static/img/fdcce856cf66f33789dc3934418113a2.jpg"];
+    const list = [
+      "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
+      "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
+      "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
+      "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
+      "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
+    ];
 
     return (
       <div className={"main-layout"} {...TouchEvents(touchListener)}>
@@ -126,7 +169,11 @@ class Show extends React.Component {
         >
           {list.map(path => (
             <Layer inline style={{ flex: "1 0 auto", backgroundColor: RandomColor() }}>
-              <img src={path} style={{ maxWidth: "50vmin", width: "100%", height: "auto" }} className="gallery-image" />
+              <img
+                src={path}
+                style={{ maxWidth: "50vmin", width: "100%", height: "auto" }}
+                className="gallery-image"
+              />
             </Layer>
           ))}{" "}
         </div>
@@ -200,4 +247,4 @@ class Show extends React.Component {
   }
 }
 
-export default Show;
+export default inject("rootStore")(observer(Show));
