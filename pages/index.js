@@ -11,6 +11,7 @@ import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touc
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
+import getAPI from "../utils/api.js";
 
 import "../static/style.css";
 
@@ -82,6 +83,24 @@ const Home = () => {
       "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
       "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
     ];
+
+  let result = getAPI()(`
+        query MyQuery {
+      pages(where: {name: {_eq: "home"}}) {
+        items {
+          id
+          type
+          data
+          page_id
+        }
+      }
+      }`);
+
+  result.then(result => {
+
+    result = Util.findVal(result, 'items');
+    console.log("Result: ", result);
+  });
 
   return (
     <div className={"main-layout"} {...TouchEvents(touchListener)}>

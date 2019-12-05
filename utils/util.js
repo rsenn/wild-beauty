@@ -687,6 +687,18 @@ Util.deepClone = function(data) {
   return JSON.parse(JSON.stringify(data));
 };
 
+// Function
+Util.findVal = (object, propName) => {
+  for (let key in object) {
+    if (key === propName) {
+      console.log(propName)
+      console.log(object[key])
+      return object[key]
+    } else {
+      Util.findVal(object[key], propName)
+    }
+  }
+}
 //Deep copy for ObservableArray/Object == There is a problem
 Util.deepCloneObservable = function(data) {
   let o;

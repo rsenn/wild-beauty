@@ -64,4 +64,13 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
   return api;
 }
 
+let apiInstance = null;
+
+export default function getAPI() {
+  if(apiInstance == null) {
+    apiInstance = API.apply(API, arguments);
+  }
+  return apiInstance;
+}
+
 module.exports = API;
