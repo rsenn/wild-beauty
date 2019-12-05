@@ -73,10 +73,7 @@ export class CurrencyList {
       format: function(am) {
         if(am == NaN || am == "NaN") return "...";
         am = Math.round(am * 100) / 100;
-        var value =
-          this.symbol +
-          "" +
-          am.toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        var value = this.symbol + "" + am.toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         return value;
       },
       round: v => Math.round(v * 100) / 100,

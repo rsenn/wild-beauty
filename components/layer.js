@@ -12,22 +12,7 @@ if ("window" in global) {
   window.layers = [];
 }
 
-export function Layer({
-  style,
-  inline,
-  flex,
-  children,
-  border,
-  margin,
-  padding,
-  background,
-  overflow = "visible",
-  opacity,
-  x,
-  y,
-  w,
-  h
-}) {
+export function Layer({ style, inline, flex, children, border, margin, padding, background, overflow = "visible", opacity, x, y, w, h }) {
   var rect = w && h ? new Rect({ x: 0, y: 0, width: w, height: h }) : new Rect();
   var refContainer = useRef(null);
   var handler = trkl();
@@ -52,9 +37,7 @@ export function Layer({
   };
   var box = lazyInitializer(() => Element.rect(ref.current));
   var client = lazyInitializer(() => {
-    return "window" in global
-      ? new Size(window.innerWidth, window.innerHeight)
-      : new Size({ width: 0, height: 0 });
+    return "window" in global ? new Size(window.innerWidth, window.innerHeight) : new Size({ width: 0, height: 0 });
   });
   box.subscribe(rect => {
     console.log("New element rect: ", rect);
