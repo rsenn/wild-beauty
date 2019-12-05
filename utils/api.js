@@ -42,7 +42,9 @@ function API() {
 
   api.insert = function(name, obj) {
     const camelCase = Util.ucfirst(name);
-    const objStr = Util.map(obj, (key, value) => (typeof value == "string" ? `${key}: "${value}"` : `${key}: ${value}`)).join(", ");
+    const objStr = Util.map(obj, (key, value) =>
+      typeof value == "string" ? `${key}: "${value}"` : `${key}: ${value}`
+    ).join(", ");
     const fieldStr = Object.keys(obj).join(" ");
     const queryStr = `mutation Insert${camelCase} {
     __typename

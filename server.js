@@ -8,16 +8,38 @@ const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
 const graphqlHTTP = require("express-graphql");
 const graphql = require("graphql");
+const API = require("./utils/api.js")();
+
+const userType = new graphql.GraphQLObjectType({
+  name: "users",
+  fields: {
+    id: { type: graphql.GraphQLInt },
+    name: { type: graphql.GraphQLString },
+    password: { type: graphql.GraphQLString },
+    last_seen: { type: graphql.GraphQLString }
+  }
+});
+
+const itemType = new graphql.GraphQLObjectType({
+  name: "items",
+  fields: {
+    id: { type: graphql.GraphQLInt },
+    author: { type: userType },
+    image: { type: graphql.GraphQLString }
+  }
+});
+const photoType = new graphql.GraphQLObjectType({
+  name: "photos",
+  fields: {
+    id: { type: graphql.GraphQLInt },
+    src: { type: graphql.GraphQLString },
+    width: { type: graphql.GraphQLInt },
+    height: { type: graphql.GraphQLInt }
+  }
+});
 
 var schema = new graphql.GraphQLSchema({
-  query: new graphql.GraphQLObjectType({
-    name: "items",
-    fields: {
-      id: { type: graphql.GraphQLInt },
-      author: { type: graphql.GraphQLString },
-      image: { type: graphql.GraphQLString }
-    }
-  }),
+  query: itemType,
   mutation: new graphql.GraphQLObjectType({
     //⚠️ NOT mutiation
     name: "Mutation",
@@ -29,6 +51,19 @@ var schema = new graphql.GraphQLSchema({
     })
   })
 });
+
+// The root provides a resolver function for each API endpoint
+var rootValue = {
+  items: ({ id, author, image }) => {
+    console.log("item: ", { id, author, image });
+  },
+  users: ({ id, name, email, password, last_seen }) => {
+    console.log("user: ", { id, name, email, password, last_seen });
+  },
+  photos: ({ id, src, width, height }) => {
+    console.log("photo: ", { id, author, image });
+  }
+};
 
 const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5555;
@@ -46,6 +81,11 @@ const insertItem = ({ id, image, author }) => {
   }
 }`;
 };
+var ret = API.insert("users", { name: "test2" });
+ret.then(ret => {
+  console.log(ret);
+});
+
 // Multi-process to utilize all CPU cores.
 if (!dev && cluster.isMaster) {
   console.log(`Node cluster master ${process.pid} is running`);
@@ -92,7 +132,8 @@ if (!dev && cluster.isMaster) {
       "https://wild-beauty.herokuapp.com/v1/graphql",
       graphqlHTTP({
         schema: schema,
-        graphiql: true
+        graphiql: true,
+        rootValue
       })
     );
 
@@ -103,7 +144,7 @@ if (!dev && cluster.isMaster) {
           schema: schema,
           context: { startTime: Date.now() },
           graphiql: true,
-          extensions
+          rootValue
         };
       })
     );
@@ -123,16 +164,16 @@ if (!dev && cluster.isMaster) {
       console.log("API upload: ", data.slice(0, 32)); // the uploaded file object
 
       const q = "{ images {id image author } }";
-      graphql.graphql(schema, "{ id name }").then(result => {
+      graphql.graphql(schema, "{ id image author }").then(result => {
         // Prints
         // {
         //   data: { hello: "world" }
         // }
         console.log(result);
       });
-      graphql.graphql(schema, insertItem({ id: 30, author: "x", image: "x.jpg" })).then(result => {
+      /*      graphql.graphql(schema, insertItem({ id: 30, author: "x", image: "x.jpg" })).then(result => {
         console.log(result);
-      });
+      });*/
     });
 
     // Example server-side routing

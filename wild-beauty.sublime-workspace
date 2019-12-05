@@ -36,10 +36,10 @@
 	"buffers":
 	[
 		{
-			"contents": "getPrng\n() =>\nmaxZIndex\ne =>\ne =>\n(a, b) =>\nRandomColor\nPanes\nevent =>\ncontainsClass\ne =>\nitem =>\nevent =>\nonError\nonImage\nresponse =>",
+			"contents": "fields: ()\nresolve: ()\ninsertItem\nret =>\n(worker, code, signal) =>\n() =>\nrequest =>\nresult =>\n(req, res) =>\n(req, res) =>\n(req, res) =>\nerr =>",
 			"settings":
 			{
-				"buffer_size": 134,
+				"buffer_size": 142,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
@@ -67,6 +67,48 @@
 			"settings":
 			{
 				"buffer_size": 6204,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utils/api.js",
+			"settings":
+			{
+				"buffer_size": 1849,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test.js",
+			"settings":
+			{
+				"buffer_size": 1661,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server.js",
+			"settings":
+			{
+				"buffer_size": 4963,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utils/jpeg.js",
+			"settings":
+			{
+				"buffer_size": 1064,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utils/util.js",
+			"settings":
+			{
+				"buffer_size": 41939,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -125,13 +167,11 @@
 	},
 	"expanded_folders":
 	[
-		"/home/roman/wild-beauty",
-		"/home/roman/wild-beauty/components",
-		"/home/roman/wild-beauty/pages",
-		"/home/roman/wild-beauty/static"
+		"/home/roman/the-wild-beauty-company"
 	],
 	"file_history":
 	[
+		"/home/roman/wild-beauty/test.js",
 		"/home/roman/wild-beauty/config.js",
 		"/home/roman/wild-beauty/pages/panes.js",
 		"/home/roman/wild-beauty/utils/dom.js",
@@ -186,7 +226,7 @@
 	],
 	"find":
 	{
-		"height": 38.0
+		"height": 39.0
 	},
 	"find_in_files":
 	{
@@ -212,6 +252,18 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"isJp",
+			"data\\[([^\\]]*)\\]",
+			"data\\[\\([^]]*\\)\\]",
+			"map =",
+			"ucfirst",
+			"map =",
+			"remov.*\\(",
+			"remov",
+			"removeItem",
+			"removeItem =",
+			"removeItem",
+			"remove",
 			"'panes-item'",
 			"'hinted",
 			"'hinted-JewelHill",
@@ -327,19 +379,7 @@
 			"3, 3",
 			"3,",
 			"dim",
-			"setRow",
-			"other\\[0",
-			"row\\(",
-			"t \\* r",
-			"r \\* s",
-			"r * s",
-			"Row row",
-			"T\\(angle\\)",
-			"T\\(-",
-			"(-",
-			"rotation",
-			"multiplicate",
-			"matrix1"
+			"setRow"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -347,6 +387,7 @@
 		"regex": true,
 		"replace_history":
 		[
+			"data.readUInt8(\\1)",
 			"'panes-item layer'",
 			"'/static/fonts/hinted",
 			"'/static/fonts/hinted-JewelHill",
@@ -420,7 +461,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 134,
+						"buffer_size": 142,
 						"regions":
 						{
 						},
@@ -446,95 +487,79 @@
 								{
 									"characters": ".#",
 									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
 								}
 							],
-							"current_file": "/home/roman/wild-beauty/pages/panes.js",
+							"current_file": "/home/roman/the-wild-beauty-company/server.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									879,
-									894
+									776,
+									789
 								],
 								[
-									936,
-									941
+									861,
+									875
 								],
 								[
-									970,
-									987
+									1008,
+									1047
 								],
 								[
-									1042,
-									1046
+									1328,
+									1334
 								],
 								[
-									1125,
-									1129
+									1604,
+									1629
 								],
 								[
-									1153,
-									1162
+									1870,
+									1875
 								],
 								[
-									1198,
-									1217
+									2812,
+									2822
 								],
 								[
-									1280,
-									1293
+									3555,
+									3564
 								],
 								[
-									1654,
-									1662
+									3903,
+									3916
 								],
 								[
-									1919,
-									1947
+									4040,
+									4053
 								],
 								[
-									1967,
-									1971
+									4183,
+									4196
 								],
 								[
-									1998,
-									2005
-								],
-								[
-									3192,
-									3200
-								],
-								[
-									3372,
-									3390
-								],
-								[
-									3404,
-									3422
-								],
-								[
-									4244,
-									4255
+									4405,
+									4411
 								]
 							],
 							"symlist":
 							[
-								"getPrng",
+								"fields: ()",
+								"resolve: ()",
+								"insertItem",
+								"ret =>",
+								"(worker, code, signal) =>",
 								"() =>",
-								"maxZIndex",
-								"e =>",
-								"e =>",
-								"(a, b) =>",
-								"RandomColor",
-								"Panes",
-								"event =>",
-								"containsClass",
-								"e =>",
-								"item =>",
-								"event =>",
-								"onError",
-								"onImage",
-								"response =>"
+								"request =>",
+								"result =>",
+								"(req, res) =>",
+								"(req, res) =>",
+								"(req, res) =>",
+								"err =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -542,13 +567,13 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 9,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 2,
+			"selected": 5,
 			"sheets":
 			[
 				{
@@ -587,6 +612,10 @@
 								{
 									"characters": ".#",
 									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
 								}
 							],
 							"syntax": "Packages/CSS3/CSS3.sublime-syntax",
@@ -603,7 +632,7 @@
 						"translation.y": 276.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
@@ -642,6 +671,10 @@
 								{
 									"characters": ".#",
 									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
 								}
 							],
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
@@ -659,7 +692,7 @@
 						"translation.y": 2484.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
@@ -675,8 +708,8 @@
 						"selection":
 						[
 							[
-								10,
-								10
+								40,
+								40
 							]
 						],
 						"settings":
@@ -685,6 +718,10 @@
 							[
 								{
 									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
 									"selector": "text.html"
 								},
 								{
@@ -715,11 +752,253 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
 					"buffer": 4,
+					"file": "utils/api.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1849,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								519,
+								519
+							],
+							[
+								524,
+								524
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 828.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "test.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1661,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1257,
+								1257
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 897.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "server.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4963,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3681,
+								3681
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2208.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "utils/jpeg.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1064,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								184,
+								184
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "utils/util.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 41939,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								30590,
+								30590
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 25690.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
 					"file": "wild-beauty.sublime-project",
 					"semi_transient": false,
 					"settings":
@@ -746,15 +1025,21 @@
 								{
 									"characters": ".#",
 									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
 								}
 							],
-							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JSON (JavaScriptNext).tmLanguage"
+							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JSON (JavaScriptNext).tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 6,
 					"type": "text"
 				}
 			]
@@ -824,7 +1109,7 @@
 	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
-		"height": 84.0
+		"height": 74.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -833,6 +1118,26 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"server",
+				"server.js"
+			],
+			[
+				"test",
+				"test.js"
+			],
+			[
+				"util",
+				"utils/util.js"
+			],
+			[
+				"api.js",
+				"utils/api.js"
+			],
+			[
+				"test.js",
+				"test.js"
+			],
 			[
 				"line",
 				"src/line.h"
