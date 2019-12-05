@@ -40,28 +40,78 @@
 	"buffers":
 	[
 		{
-			"contents": "WrapInAspectBox",
+			"contents": "LoginIcon\nNavLink\nprops =>\nlink =>\nitem =>",
 			"settings":
 			{
-				"buffer_size": 15,
+				"buffer_size": 42,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "components/views/article.js",
+			"file": "components/nav.js",
 			"settings":
 			{
-				"buffer_size": 1832,
+				"buffer_size": 11570,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "components/simple/aspectBox.js",
+			"file": "/home/roman/the-wild-beauty-company/components/nav.js",
 			"settings":
 			{
-				"buffer_size": 1484,
+				"buffer_size": 11570,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/index.js",
+			"settings":
+			{
+				"buffer_size": 4249,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "Searching 26 files for \"family\" (regex, case sensitive)\n\n/home/roman/my-app/components/nav.js:\n   29          margin: 0;\n   30          box-sizing: content-box;\n   31:         font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir, Helvetica, sans-serif;\n   32        }\n   33        .menu {\n\n1 match in 1 file\n\n\nSearching 26 files for \"family.*manjar\" (regex)\n\n0 matches\n\nSearching 34 files for \"family.*manjar\" (regex)\n\n/home/roman/wild-beauty/components/login.js:\n   22      <style jsx global>{`\n   23        .login-view {\n   24:         font-family: \"Manjari Regular\";\n   25          font-size: 1rem;\n   26        }\n\n/home/roman/wild-beauty/pages/_app.js:\n   71            }\n   72            @font-face {\n   73:             font-family: \"Manjari Regular\";\n   74              src: url(\"/static/fonts/hinted-Manjari-Regular.eot\");\n   75              src: local(\"Manjari Regular\"), local(\"Manjari-Regular\"), url(\"/static/fonts/hinted-Manjari-Regular.eot?#iefix\") format(\"embedded-opentype\"), url(\"/static/fonts/hinted-Manjari-Regular.woff2\") format(\"woff2\"), url(\"/static/fonts/hinted-Manjari-Regular.woff\") format(\"woff\"),\n   ..\n   80            * {\n   81              box-sizing: content-box;\n   82:             font-family: \"Manjari Regular\", Tahoma, Arial, sans-serif;\n   83            }\n   84            body,\n\n3 matches across 2 files\n",
+			"settings":
+			{
+				"buffer_size": 1354,
+				"line_ending": "Unix",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "components/login.js",
+			"settings":
+			{
+				"buffer_size": 2033,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/the-wild-beauty-company/components/TouchCallback.js",
+			"settings":
+			{
+				"buffer_size": 1526,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/_app.js",
+			"settings":
+			{
+				"buffer_size": 3524,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "static/style.css",
+			"settings":
+			{
+				"buffer_size": 1161,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -74,14 +124,10 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 126.0,
-		"last_filter": "install pac",
+		"height": 250.0,
+		"last_filter": "outline",
 		"selected_items":
 		[
-			[
-				"install pac",
-				"Package Control: Install Package"
-			],
 			[
 				"outline",
 				"Browse Mode: Outline (Right)"
@@ -117,48 +163,36 @@
 	[
 		"/home/roman/wild-beauty",
 		"/home/roman/wild-beauty/components",
-		"/home/roman/wild-beauty/components/simple",
-		"/home/roman/wild-beauty/components/views",
 		"/home/roman/wild-beauty/nextjs-postgres-graphql",
 		"/home/roman/wild-beauty/pages",
 		"/home/roman/wild-beauty/static",
-		"/home/roman/wild-beauty/stores",
 		"/home/roman/wild-beauty/utils"
 	],
 	"file_history":
 	[
-		"/home/roman/wild-beauty/components/gallery.js",
-		"/home/roman/wild-beauty/pages/panes.js",
-		"/home/roman/wild-beauty/pages/show.js",
-		"/home/roman/wild-beauty/components/nav.js",
-		"/home/roman/wild-beauty/pages/_app.js",
 		"/home/roman/wild-beauty/static/style.css",
-		"/home/roman/wild-beauty/utils/svg-overlay.js",
+		"/home/roman/wild-beauty/pages/panes.js",
+		"/home/roman/wild-beauty/pages/_app.js",
 		"/home/roman/wild-beauty/pages/index.js",
-		"/home/roman/wild-beauty/components/views/article.js",
-		"/home/roman/the-wild-beauty-company/components/views/article.js",
-		"/home/roman/wild-beauty/components/simple/aspectBox.js",
-		"/home/roman/wild-beauty/utils/util.js",
-		"/home/roman/the-wild-beauty-company/pages/index.js",
-		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
+		"/home/roman/wild-beauty/pages/show.js",
 		"/home/roman/wild-beauty/pages/test.js",
-		"/home/roman/wild-beauty/components/TouchCallback.js",
-		"/home/roman/wild-beauty/stores/RootStore.js",
-		"/home/roman/wild-beauty/components/simple/logo.js",
-		"/home/roman/wild-beauty/utils/api.js",
-		"/home/roman/the-wild-beauty-company/utils/util.js",
-		"/home/roman/the-wild-beauty-company/components/TouchCallback.js",
-		"/home/roman/wild-beauty/components/login.js",
-		"/home/roman/the-wild-beauty-company/components/nav.js",
 		"/home/roman/the-wild-beauty-company/pages/show.js",
 		"/home/roman/my-app/pages/index.js",
+		"/home/roman/wild-beauty/utils/api.js",
+		"/home/roman/the-wild-beauty-company/components/nav.js",
+		"/home/roman/wild-beauty/components/login.js",
 		"/home/roman/wild-beauty/components/layer.js",
+		"/home/roman/wild-beauty/components/TouchCallback.js",
 		"/home/roman/wild-beauty/server.js",
+		"/home/roman/wild-beauty/components/nav.js",
 		"/home/roman/wild-beauty/test.js",
 		"/home/roman/wild-beauty/utils/jpeg.js",
+		"/home/roman/wild-beauty/utils/util.js",
 		"/home/roman/wild-beauty/wild-beauty.sublime-project",
 		"/home/roman/wild-beauty/config.js",
 		"/home/roman/wild-beauty/utils/dom.js",
+		"/home/roman/wild-beauty/components/gallery.js",
+		"/home/roman/wild-beauty/utils/svg-overlay.js",
 		"/home/roman/my-app/utils/touchHandler.js",
 		"/home/roman/my-app/components/layer.js",
 		"/home/roman/my-app/utils/devtools.js",
@@ -229,39 +263,6 @@
 		"case_sensitive": false,
 		"find_history":
 		[
-			"page-lay",
-			"gallery",
-			"Gallery",
-			"fill",
-			"fill:",
-			"fill",
-			"rect",
-			"svg.*rect",
-			"rect",
-			"<rect",
-			"backgr",
-			"background",
-			"Layer",
-			"SizedA",
-			"<Layer",
-			"layer",
-			"layer\"",
-			"style jsx",
-			"ImageLayer",
-			"gallery-as",
-			"devpan",
-			"Article",
-			"border-ra",
-			"findVal =",
-			"projects",
-			"Projects",
-			"Play\\.",
-			"^\\s*console.log",
-			"console.log",
-			"console.lo",
-			"getArticles",
-			"findOb",
-			"api",
 			"SiteMap",
 			"family.*manjar",
 			"family",
@@ -356,7 +357,40 @@
 			"opacity",
 			"}\n",
 			"assign_to",
-			"makeLocalStorage"
+			"makeLocalStorage",
+			"axios",
+			"i18n",
+			"ampli",
+			"Lotto",
+			"unsub",
+			"this\\.",
+			".resize",
+			"\\.resize",
+			"function Rect",
+			"style\\.",
+			"function Point",
+			"function Size",
+			"\\.area",
+			"size\\.",
+			"area",
+			"add_props",
+			"strel",
+			"morphologyEx",
+			"dim",
+			"dim;",
+			"dim",
+			"imgInput",
+			"imgOr",
+			"imgOri",
+			"imgOr",
+			"imgRaw",
+			"VideoCa",
+			"100",
+			"%% 100",
+			"100",
+			"write_im",
+			"imwrite",
+			"main\\("
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -364,10 +398,6 @@
 		"regex": true,
 		"replace_history":
 		[
-			"articles",
-			"",
-			"Articles",
-			"fetchArticles",
 			"",
 			"\\1",
 			"data.readUInt8(\\1)",
@@ -444,7 +474,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 15,
+						"buffer_size": 42,
 						"regions":
 						{
 						},
@@ -474,28 +504,40 @@
 								{
 									"characters": ".#",
 									"selector": "text.html"
-								},
-								{
-									"characters": ".#",
-									"selector": "text.html"
-								},
-								{
-									"characters": ".#",
-									"selector": "text.html"
 								}
 							],
-							"current_file": "/home/roman/wild-beauty/components/simple/aspectBox.js",
+							"current_file": "/home/roman/the-wild-beauty-company/components/nav.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									78,
-									165
+									192,
+									218
+								],
+								[
+									9462,
+									9513
+								],
+								[
+									10769,
+									10777
+								],
+								[
+									10833,
+									10840
+								],
+								[
+									10935,
+									10942
 								]
 							],
 							"symlist":
 							[
-								"WrapInAspectBox"
+								"LoginIcon",
+								"NavLink",
+								"props =>",
+								"link =>",
+								"item =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -503,7 +545,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 8,
 					"type": "text"
 				}
 			]
@@ -514,19 +556,258 @@
 			[
 				{
 					"buffer": 1,
-					"file": "components/views/article.js",
+					"file": "components/nav.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1832,
+						"buffer_size": 11570,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								300,
-								300
+								518,
+								518
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1035.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/home/roman/the-wild-beauty-company/components/nav.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11570,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								10139,
+								10139
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1104.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "pages/index.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4249,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								71,
+								71
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1354,
+						"regions":
+						{
+							"match":
+							{
+								"flags": 112,
+								"regions":
+								[
+									[
+										181,
+										187
+									],
+									[
+										558,
+										573
+									],
+									[
+										745,
+										760
+									],
+									[
+										1232,
+										1247
+									]
+								],
+								"scope": ""
+							}
+						},
+						"selection":
+						[
+							[
+								1239,
+								1239
+							]
+						],
+						"settings":
+						{
+							"detect_indentation": false,
+							"line_numbers": false,
+							"output_tag": 3,
+							"result_base_dir": "",
+							"result_file_regex": "^([^ \t].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 345.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "components/login.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2033,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								818,
+								818
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 90.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/home/roman/the-wild-beauty-company/components/TouchCallback.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1526,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1264,
+								1264
 							]
 						],
 						"settings":
@@ -557,24 +838,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "components/simple/aspectBox.js",
+					"buffer": 7,
+					"file": "pages/_app.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1484,
+						"buffer_size": 3524,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								166,
-								166
+								3254,
+								3254
 							]
 						],
 						"settings":
@@ -593,13 +874,60 @@
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
 							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1429.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "static/style.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1161,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								42,
+								42
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html"
+								},
+								{
+									"characters": ".#",
+									"selector": "text.html"
+								}
+							],
+							"syntax": "Packages/CSS3/CSS3.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
@@ -679,40 +1007,16 @@
 		"selected_items":
 		[
 			[
-				"style",
-				"static/style.css"
-			],
-			[
-				"art",
-				"components/views/article.js"
-			],
-			[
-				"aspe",
-				"components/simple/aspectBox.js"
-			],
-			[
-				"util",
-				"utils/util.js"
-			],
-			[
-				"index",
-				"pages/index.js"
-			],
-			[
-				"arti",
-				"components/views/article.js"
-			],
-			[
-				"api",
-				"utils/api.js"
-			],
-			[
 				"server",
 				"server.js"
 			],
 			[
 				"test",
 				"test.js"
+			],
+			[
+				"util",
+				"utils/util.js"
 			],
 			[
 				"api.js",
@@ -807,7 +1111,7 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 442.0,
+	"side_bar_width": 150.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{
