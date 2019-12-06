@@ -68,7 +68,7 @@ const NavLink = ({ href, label, path, key, disabled }) => (
         font-size: 62px;
       }
       li {
-        background-color: #dfdfdf80;
+        background-color: rgb(219, 219, 219);
         display: flex;
         justify-content: flex-start;
         align-items: center;

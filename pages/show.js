@@ -137,7 +137,7 @@ class Show extends React.Component {
                   maxHeight: "20vw",
                   overflow: "hidden"
                 }}
-                className={"gallery-aspect-box"}
+                className={"layer gallery-aspect-box"}
               >
                 <img
                   src={path}
