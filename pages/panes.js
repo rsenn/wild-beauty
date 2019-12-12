@@ -13,6 +13,7 @@ import { TouchCallback } from "../components/TouchCallback.js";
 import { toJS, autorun } from "mobx";
 import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
+import { createStore, getOrCreateStore } from "../stores/createStore.js";
 
 import RUG from "react-upload-gallery";
 import "react-upload-gallery/dist/style.css";
@@ -37,7 +38,7 @@ class Panes extends React.Component {
       window.api = this.api;
       window.page = this;
       window.rs = rootStore;
-      window.stores = getOrCreateStore();
+  //    window.stores = getOrCreateStore();
     }
 
     autorun(() => console.log("loading: ", rootStore.state.loading));
