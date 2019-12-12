@@ -6742,6 +6742,11 @@ through2@^2.0.0:
     readable-stream "~2.3.6"
     xtend "~4.0.1"
 
+time-span-format@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/time-span-format/-/time-span-format-1.0.1.tgz#b8202eb1dab194c6066429e0620729dec2cb7943"
+  integrity sha512-OdYtymGtNJtXj6VHWPu9wGzzRIRVqSLM5W71dqHVco9yPdmzmuzlY/yBY182NP+QL4Joklauo5TeJV8j+4bP2Q==
+
 timers-browserify@^2.0.4:
   version "2.0.11"
   resolved "https://registry.yarnpkg.com/timers-browserify/-/timers-browserify-2.0.11.tgz#800b1f3eee272e5bc53ee465a04d0e804c31211f"

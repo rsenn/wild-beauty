@@ -75,6 +75,20 @@ const Panes = () => {
       "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
       "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
     ];
+       
+    let articles = toJS(rootStore.state.articles);
+
+    if(articles.length === undefined) articles = [];
+    console.log("Home.render ", { articles });
+    articles = articles.map(art => {
+      const { type, id, page_id, data } = art;
+      const json = JSON.parse(data);
+      console.log("json: ", json);
+      json.type = art.type;
+      json.id = art.id;
+      json.page_id = art.page_id;
+      return json;
+    });
 
   return (
     <div className={"panes-layout"} {...TouchEvents(touchListener)}>

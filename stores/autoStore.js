@@ -57,19 +57,13 @@ export const makeAutoStoreHandler = (name, _class) => {
       if(firstRun) {
         const existingStore = store.get(name);
         if(existingStore) {
-          /*          if(_class)
-            _class.setState({ [name]: existingStore });
-          else*/
           _this[_member] = existingStore;
           _class.setSource('local', _member);
-          //console.log("AUTO RUN localStore '" + name + "' READ " + Object.keys(existingStore).length + ' keys');
         }
       }
       const updatedStore = _this[_member];
 
       if(updatedStore) {
-        //console.log("AUTO store '" + name + "' WRITE " + Object.keys(updatedStore).length + ' keys');
-        // from then on serialize and save to localStorage
         store.set(name, updatedStore);
       } else {
         store.remove(name);

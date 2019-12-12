@@ -16,6 +16,7 @@ import { action, toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Article } from "../components/views/article.js";
 import LoginForm from "../components/login.js";
+import timeSpanFormat from 'time-span-format';
 
 import tims from "tims";
 
@@ -96,54 +97,20 @@ class Home extends React.Component {
         { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
       );
     }
-    /*   const onError = event => {};
 
-    const onImage = event => {
-      const { value } = event.nativeEvent.target;
-      document.forms[0].submit();
-      console.log("onChange: ", value);
-    };
-
-    const state = {
-      image: useState(""),
-      error: useState(0)
-    };
-    let list = imagePaths();
-    if(list === null || (list && list.length == undefined))
-      list = [
-        "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
-        "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
-        "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
-        "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
-        "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
-      ];*/
     const { rootStore } = this.props;
-    /*
-    let articles = toJS(rootStore.state.articles);
-
-    if(articles.length === undefined) articles = [];
-    console.log("Home.render ", { articles });
-    articles = articles.map(art => {
-      const { type, id, page_id, data } = art;
-      const json = JSON.parse(data);
-      console.log("json: ", json);
-      json.type = art.type;
-      json.id = art.id;
-      json.page_id = art.page_id;
-      return json;
-    });*/
-
-    // const t = ` perspective(100vw) rotateY(${rootStore.state.mirrored ? 180 : 0}deg)`; // `rotateZ(${rootStore.state.angle}deg) ` + (rootStore.state.mirrored ? " rotateY(-180deg) " : "");
+ 
     const t = ` perspective(100vw) scaleX(${rootStore.state.mirrored ? -1 : 1})`; // `rotateZ(${rootStore.state.angle}deg) ` + (rootStore.state.mirrored ? " rotateY(-180deg) " : "");
 
-    const endDate = new Date("2035");
+    const endDate = new Date("01.01.2035");
 
     const now = new Date();
 
-    const timespan = tims.text(endDate.getTime() - now.getTime(), {
-      lang: "fr"
-    }); /*.split(/,/g).slice(0, 2).join(', ')*/
-    console.log("Home.render", { t, timespan });
+const seconds = (endDate.getTime() - now.getTime()) / 1000;
+    //const timespan = tims.text(, {    lang: "fr"   }); /*.split(/,/g).slice(0, 2).join(', ')*/
+    const timespan = timeSpanFormat(Math.floor(seconds));
+
+   // console.log("Home.render", { t, timespan });
 
     return (
       <div className={"main-layout"} {...TouchEvents(touchListener)}>
@@ -171,6 +138,8 @@ class Home extends React.Component {
           />
         </div>
         <div className={"time-counter"}>{timespan}</div>
+         {/*  <img src={"static/img/arrow-next.svg"} style={{ transform: 'scaleX(-1)' }} />*/}
+          <a className={'button-next'}><img src={"static/img/arrow-next.svg"} /></a>
 
         {/*        {rootStore.state.updated}
         <div className={"page-layout"}>
@@ -190,6 +159,11 @@ class Home extends React.Component {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
+          }
+          .button-next {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
           }
           .main-layout {
             width: 100%;

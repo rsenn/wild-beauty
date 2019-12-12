@@ -51,6 +51,7 @@
     "react-image-dropzone": "^1.11.0",
     "react-sizeme": "^2.6.10",
     "react-upload-gallery": "^0.0.4",
+    "time-span-format": "^1.0.1",
     "tims": "^1.0.4"
   },
   "devDependencies": {
