@@ -3,6 +3,6 @@ const plugins = [
   ["@babel/plugin-proposal-class-properties", { loose: true }]
 ];
 
-const presets = [["@babel/env"], ["@babel/preset-react"]];
+const presets = [["next/babel"]];
 
 module.exports = { presets, plugins };
