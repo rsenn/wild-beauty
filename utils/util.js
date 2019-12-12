@@ -638,9 +638,9 @@ Util.lcfirst = function(str) {
  * @param {text} string Text to camelize
  * @return string Camelized text
  */
-Util.camelize = function(text) {
+Util.camelize = function(text, sep = '') {
   return text.replace(/^([A-Z])|[\s-_]+(\w)/g, function(match, p1, p2, offset) {
-    if(p2) return p2.toUpperCase();
+    if(p2) return sep+p2.toUpperCase();
     return p1.toLowerCase();
   });
 };

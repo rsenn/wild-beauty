@@ -257,7 +257,11 @@ if (!dev && cluster.isMaster) {
 
       let props = jpeg.jpegProps(data);
 
-      props.aspect = (props.width / props.height).toFixed(3);
+      if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
+
+      for(let key of ["original_name", "uploaded", "filesize", "owner"])
+       if(photo[key]) props[Util.camelize(key, '-')] = photo[key];
+
       for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
 
       res.send(data);
@@ -282,11 +286,12 @@ if (!dev && cluster.isMaster) {
           //const data = ;
           let props = jpeg.jpegProps(file.data);
           let { width, height } = props;
-          let aspect = width / height;
+          let aspect = props.aspect || width / height;
           console.log(`Image width: ${width} height: ${height}`);
           console.log(`Image aspect: ${aspect}`);
 
-          const calcDimensions = (max, { width, height }) => {
+          const calcDimensions = (max, props) => {
+            let { width, height, ...restOfProps } = props;
             if(width > max || height > max) {
               if(width > height) {
                 height = Math.floor((max * height) / width);
@@ -296,15 +301,15 @@ if (!dev && cluster.isMaster) {
                 height = max;
               }
             }
-            return { width, height };
+            return { ...restOfProps, width, height };
           };
 
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
 
-          let newDimensions = calcDimensions(maxWidthOrHeight, { width, height });
-          aspect = newDimensions.width / newDimensions.height;
+          let newDimensions = calcDimensions(maxWidthOrHeight, props);
+          aspect = newDimensions.aspect || newDimensions.width / newDimensions.height;
 
-          if(!compareDimensions({ width, height }, newDimensions)) {
+          if(!compareDimensions(props, newDimensions)) {
             console.log(`new Image aspect: ${aspect}`);
             console.log(`newnewDimensions `, newDimensions);
 
