@@ -9,7 +9,6 @@ import { SwipeTracker } from "../utils/swipeTracker.js";
 import { Element, Node, HSLA } from "../utils/dom.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
-import Dropzone from "react-dropzone";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
 

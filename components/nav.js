@@ -105,31 +105,33 @@ const NavLink = ({ href, label, path, key, disabled, onClick }) => (
       li.menu-disabled {
         display: none;
       }
-      li {
+      li.menu-item {
         position: relative;
         transition: width 1s;
         text-align: center;
 
         width: 12.5vw;
         height: 12.5vw;
+        max-width: 80px;
+        max-height: 80px;
       }
       li:hover {
         transition: width 1s;
         width: 100px;
-        minwidth: 12.5vw;
+        min-width: 12.5vw;
       }
       li > a > span {
         font-family: Fixed;
         font-size: 40px;
         vertical-align: center;
       }
-      li {
+      li.menu-item {
         background-color: rgba(138, 0, 16, 0.8);
         display: flex;
         justify-content: flex-start;
         align-items: center;
         padding: 4px 0 0 1px;
-        margin: 2px;
+        margin: 2px 4px 2px 4px;
         overflow: hidden;
       }
       a {
@@ -380,6 +382,10 @@ const Nav = inject(
             .ReactModal__Overlay--before-close {
               transform: perspective(300px) translate3d(50vw, -50vh, 0) rotateX(-45deg)
                 rotateY(-45deg) rotateZ(90deg) scale3d(0.02, 0.02, 1);
+            }
+            li.menu-item {
+                      max-width: 80px;
+        max-height: 80px;
             }
           `}</style>
         </div>

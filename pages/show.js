@@ -4,7 +4,6 @@ import Layer from "../components/layer.js";
 import { Element, Node, HSLA } from "../utils/dom.js";
 import API from "../utils/api.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
-import Dropzone from "react-dropzone";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { inject, observer } from "mobx-react";
 import ApolloClient from "apollo-boost";

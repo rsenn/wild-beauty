@@ -15,11 +15,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 var cookieParser = require("cookie-parser");
-
+/*
 var multer = require("multer");
 var cloudinary = require("cloudinary");
 var cloudinaryStorage = require("multer-storage-cloudinary");
-
+*/
 var secret = fs.readFileSync("secret.key");
 
 const userType = new graphql.GraphQLObjectType({
