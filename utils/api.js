@@ -26,11 +26,14 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     return res;
   };
 
-  api.list = async function(name, fields = []) {
+  api.list = async function(name, fields = [], options = {}) {
     const camelCase = Util.ucfirst(name);
     //if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
-    const queryStr = `query List${camelCase} {${name} { ${fields} } }`;
-    console.log(queryStr);
+
+    const optKeys = Object.keys(options);
+    const optStr = optKeys.length > 0 ? "(" + optKeys.map(key => `${key}: ${options[key]}`).join(", ") + ")" : "";
+    const queryStr = `query List${camelCase} {${name}${optStr} { ${fields} } }`;
+    console.log("query: ", queryStr, { optStr });
 
     let ret = await this(queryStr);
     if(typeof ret == "object" && ret[name] !== undefined) ret = ret[name];

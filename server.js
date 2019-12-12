@@ -18,6 +18,8 @@ const fs = require("fs");
 var cookieParser = require("cookie-parser");
 const sharp = require("sharp");
 const util = require("util");
+var session = require("express-session");
+var cookieSession = require("cookie-session");
 
 const maxWidthOrHeight = 1024;
 
@@ -31,12 +33,14 @@ function bufferToStream(buffer) {
   stream.push(null);
   return stream;
 }
+
 /*
 var multer = require("multer");
 var cloudinary = require("cloudinary");
 var cloudinaryStorage = require("multer-storage-cloudinary");
 */
 var secret = fs.readFileSync("secret.key");
+
 /*
 const userType = new graphql.GraphQLObjectType({
   name: "users",
@@ -141,6 +145,21 @@ if (!dev && cluster.isMaster) {
         res.redirect("https://" + req.headers.host + req.url);
       });
     }
+
+    let sess = {
+      secret: typeof secret == "string" ? secret : "the-wild-beauty-1234",
+      saveUninitialized: true,
+      resave: true,
+      cookie: {
+        secure: false,
+        maxAge: 2160000000,
+        httpOnly: false
+      },
+      expires: new Date(Date.now() + 30 * 24 * 3600 * 1000)
+    };
+
+    server.use(session(sess));
+
     server.use(cors());
     server.use(cookieParser());
 
@@ -198,6 +217,8 @@ if (!dev && cluster.isMaster) {
           maxAge: 1000 * 60, // 1 min
           httpOnly: true // http only, prevents JavaScript cookie access
         });
+        req.session.token = token;
+
         console.error("Login user: ", user);
 
         res.json({ success, token, user_id: user.id });
@@ -228,6 +249,9 @@ if (!dev && cluster.isMaster) {
           //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
           if(req.cookies.token == user.token) {
             response = await API.update("users", { id: user.id }, { token: "NULL" });
+            req.session.token = null;
+            req.session.destroy();
+
             //console.log("response: ", response.affected_rows);
             if(response.affected_rows == 1) {
               res.json({ success: true });
@@ -241,7 +265,24 @@ if (!dev && cluster.isMaster) {
       res.json({ success: false });
     });
 
-    server.get("/api/image/:id", async function(req, res) {
+    //   server.use(bodyParser.json());
+    //  curl   --header 'Content-Type: application/json' --data '{"fields":"original_name","offset":"10","limit":"10","order_by":"{id: desc}"}' -v http://localhost:5555/api/image/list|json_pp
+
+    server.post("/api/image/list", async function(req, res) {
+      let { fields, format, ...params } = req.body;
+
+      if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
+      else fields = [];
+
+      console.log("params: ", params);
+      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "owner", "user { id }", ...fields], params);
+
+      if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
+
+      res.json({ success: true, count: images.length, images });
+    });
+
+    server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
       console.log(`id: `, id);
 
@@ -269,12 +310,14 @@ if (!dev && cluster.isMaster) {
     });
 
     server.post(
-      "/api/upload",
+      "/api/image/upload",
       needAuth(async function(req, res) {
         /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
-      }
-*/
+      }*/
+        let user_id;
+        if(req.cookies && req.cookies.user_id) user_id = parseInt(req.cookies.user_id);
+
         console.log(`Files: `, Object.entries(req.files));
 
         let response = [];
@@ -359,7 +402,7 @@ if (!dev && cluster.isMaster) {
 
           const { depth, channels } = props;
 
-          let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height }, ["id"]);
+          let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height, user_id }, ["id"]);
 
           const { affected_rows, returning } = reply.insert_photos;
           console.log("API upload photo: ", word.toString(16), { affected_rows, props });
