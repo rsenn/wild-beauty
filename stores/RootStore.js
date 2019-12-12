@@ -5,16 +5,17 @@ import getAPI from "../utils/api.js";
 export class RootStore {
   entries = observable.array([]);
 
-  state = observable({
+  @observable
+  state = {
     articles: [],
     updated: false,
     mirrored: false,
-    angle: 0
-  });
+    angle: 0,
+    subpage: 0
+  };
 
-  constructor() {}
-
-
+  constructor() {
+  }
 
   updateState = action(function(obj) {
     set(this.state, obj);
@@ -30,8 +31,8 @@ export class RootStore {
   setState = action(function(obj) {
     set(this.state, obj);
 
-    console.log("RootStore.setState ", obj);
-  });
+/*    console.log("RootStore.setState ", obj);
+*/  });
 
   fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {
     // <- note the star, this a generator function!

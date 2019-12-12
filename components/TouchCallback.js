@@ -2,17 +2,12 @@ import React, { Component } from "react";
 import { Element } from "../utils/dom.js";
 
 export const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
 export const containsClass = className => {
-  return e =>
-    [...Node.parents(e)].some(
-      item => item && item.classList && item.classList.contains(className || "layer")
-    );
+  return e => [...Node.parents(e)].some(item => item && item.classList && item.classList.contains(className || "layer"));
 };
 
 export const TouchCallback = event => {
@@ -42,10 +37,7 @@ export const TouchCallback = event => {
 
   if(e) Element.setCSS(e, { zIndex });
   if(e && e.style) {
-    e.style.setProperty(
-      "transform",
-      event.type.endsWith("move") ? `translate(${event.x}px, ${event.y}px)` : ""
-    );
+    e.style.setProperty("transform", event.type.endsWith("move") ? `translate(${event.x}px, ${event.y}px)` : "");
   }
 
   // console.log(event.type + " event: ", { event, e });

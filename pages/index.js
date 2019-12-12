@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Head from "next/head";
+import { withRouter } from "next/router";
 import Nav from "../components/nav.js";
 import Layer from "../components/layer.js";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
@@ -12,11 +13,11 @@ import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
 import getAPI from "../utils/api.js";
-import { action, toJS } from "mobx";
+import { action, toJS, autorun } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Article } from "../components/views/article.js";
 import LoginForm from "../components/login.js";
-import timeSpanFormat from 'time-span-format';
+import timeSpanFormat from "time-span-format";
 
 import tims from "tims";
 
@@ -26,9 +27,7 @@ const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -40,6 +39,7 @@ const RandomColor = () => {
 
 @inject("rootStore")
 @observer
+@withRouter
 class Home extends React.Component {
   state = {
     mirrored: false,
@@ -48,10 +48,42 @@ class Home extends React.Component {
 
   constructor(props) {
     super(props);
+
+    const { rootStore } = this.props;
+    rootStore.setState({ subpage: 1 });
+
+    if(global.window) {
+      global.window.page = this;
+      global.window.rs = rootStore;
+    }
+
+    this.getHash();
+
+    autorun(() => {
+      console.log("rootStore.state = ", toJS(rootStore.state));
+    });
   }
 
+  getHash() {
+    const { rootStore, router } = this.props;
+
+    if(global.window) {
+      const hash = /#/.test(window.location.href) ? window.location.href.replace(/.*#/, "") : "1";
+      //  console.log("hash: ", hash);
+      const subpage = parseInt(hash);
+      if(!isNaN(subpage)) {
+        if(subpage != rootStore.state.subpage) {
+         rootStore.setState({ subpage });
+              this.forceUpdate();
+        }
+      }
+    }
+  }
+  /**
+   * { function_description }
+   */
   componentDidMount() {
-    const { rootStore } = this.props;
+    const { rootStore, router } = this.props;
     console.log("Home.componentDidMount ");
     rootStore.loadArticles("home").then(result => {
       let articles = Util.findVal(result, "items");
@@ -62,20 +94,38 @@ class Home extends React.Component {
       }
     });
 
+this.getHash();
+
     var counter = 0;
 
     Timer.interval(1000, () => {
-      rootStore.setState({
-        mirrored: counter % 3 == 0 ? !rootStore.state.mirrored : rootStore.state.mirrored,
-        angle: (counter / 3) % 360
-      });
       counter++;
-      /*  this.setState({ mirrored: !this.state.mirrored });*/
+      if(counter % 3 == 0) {
+        rootStore.setState({
+          mirrored: !rootStore.state.mirrored
+        });
+      }
       this.forceUpdate();
     });
   }
 
+  handleNext = () => {
+    const { rootStore } = this.props;
+
+    rootStore.setState({ subpage: rootStore.state.subpage + 1 });
+    this.forceUpdate();
+  };
+
+  handlePrev = () => {
+    const { rootStore } = this.props;
+
+    rootStore.setState({ subpage: rootStore.state.subpage - 1 });
+    this.forceUpdate();
+  };
+
   render() {
+    const { rootStore, router } = this.props;
+
     let swipeEvents = {};
     var e = null;
 
@@ -98,62 +148,56 @@ class Home extends React.Component {
       );
     }
 
-    const { rootStore } = this.props;
- 
+    this.getHash();
+
     const t = ` perspective(100vw) scaleX(${rootStore.state.mirrored ? -1 : 1})`; // `rotateZ(${rootStore.state.angle}deg) ` + (rootStore.state.mirrored ? " rotateY(-180deg) " : "");
-
     const endDate = new Date("01.01.2035");
-
     const now = new Date();
-
-const seconds = (endDate.getTime() - now.getTime()) / 1000;
+    const seconds = (endDate.getTime() - now.getTime()) / 1000;
     //const timespan = tims.text(, {    lang: "fr"   }); /*.split(/,/g).slice(0, 2).join(', ')*/
     const timespan = timeSpanFormat(Math.floor(seconds));
-
-   // console.log("Home.render", { t, timespan });
-
+    const subpage =   toJS(rootStore.state.subpage);
+    console.log("Home.render", { t, timespan, subpage });
     return (
       <div className={"main-layout"} {...TouchEvents(touchListener)}>
         <Head>
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        {/*        <Nav />
-         */}
-        <div
-          style={{
-            //   transition: "transform 1s ease-in",
-            transformStyle: "preserve-3d",
-            transform: t
-          }}
-        >
-          <img
-            src={"static/img/logo-transparent.png"}
-            style={{
-              width: "100%",
-              maxWidth: "1280px"
-              /*            height: "auto",
-               */
-            }}
-          />
-        </div>
-        <div className={"time-counter"}>{timespan}</div>
-         {/*  <img src={"static/img/arrow-next.svg"} style={{ transform: 'scaleX(-1)' }} />*/}
-          <a className={'button-next'}><img src={"static/img/arrow-next.svg"} /></a>
 
-        {/*        {rootStore.state.updated}
-        <div className={"page-layout"}>
-          <div className={"article-list"}>
-            {articles.map(article => (
-              <Article {...article} />
-            ))}
+        <div className={"subpage"} style={{ opacity: subpage == 1 ? 1 : 0, display: subpage == 1 ? "flex" : "flex" }}>
+          <div
+            style={{
+              //   transition: "transform 1s ease-in",
+              transformStyle: "preserve-3d",
+              transform: t
+            }}
+          >
+            <img
+              src={"static/img/logo-transparent.png"}
+              style={{
+                width: "100%",
+                maxWidth: "1280px"
+                /*            height: "auto",
+                 */
+              }}
+            />
           </div>
+          <div className={"time-counter"}>{timespan}</div>
+          {/*  <img src={"static/img/arrow-next.svg"} style={{ transform: 'scaleX(-1)' }} />*/}
         </div>
-*/}
-        {/*  <Layer w={300} h={'300px'} margin={10} padding={2} border={'2px dashed red'}>
-        Layer
-      </Layer>
-      <SvgOverlay />*/}
+        <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "flex" : "flex" }}></div>
+        <div className={"subpage"} style={{ opacity: subpage == 3 ? 1 : 0, display: subpage == 3 ? "flex" : "flex" }}></div>
+        {subpage > 1 ? (
+          <a className={"button-prev"} href={"#" + (subpage - 1)} onClick={this.handlePrev}>
+            <img src={"static/img/arrow-next.svg"} style={{ transform: "scaleX(-1)" }} />
+          </a>
+        ) : (
+          undefined
+        )}
+        <a className={"button-next"} href={"#" + (subpage + 1)} onClick={this.handleNext}>
+          <img src={"static/img/arrow-next.svg"} />
+        </a>
         <style jsx global>{`
           .article-list {
             display: flex;
@@ -165,13 +209,34 @@ const seconds = (endDate.getTime() - now.getTime()) / 1000;
             right: 10px;
             bottom: 10px;
           }
-          .main-layout {
-            width: 100%;
+          .button-prev {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+          }
+          .button-next,
+          .button-prev {
+            filter: drop-shadow(-2px 2px 4px #00000080);
+          }
+          .button-next:active,
+          .button-prev:active {
+            transform: translate(2px, 2px);
+          }
+          .subpage {
+            position: absolute;
+            width: 100vw;
             height: 100vh;
             display: flex;
             flex-flow: column nowrap;
             justify-content: center;
             align-items: center;
+            transition: opacity 0.5s;
+          }
+
+          .main-layout {
+            width: 100%;
+            height: 100vh;
+
             padding: 0;
             margin: 0;
           }

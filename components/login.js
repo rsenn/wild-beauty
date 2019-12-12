@@ -5,13 +5,7 @@ const LoginForm = ({ show = true, className, style, ...props }) => (
   <React.Fragment>
     <span>Login</span>
     <div className={classNames("login-view", className)} style={style}>
-      <form
-        className={"login"}
-        style={{ display: show ? "block" : "none" }}
-        method={"none"}
-        action={""}
-        onSubmit={e => e.preventDefault()}
-      >
+      <form className={"login"} style={{ display: show ? "block" : "none" }} method={"none"} action={""} onSubmit={e => e.preventDefault()}>
         <div className={"form-field"}>
           <label className={"form-label"}>Benutzername:</label>
           <div className={"form-value"}>

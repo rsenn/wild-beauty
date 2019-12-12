@@ -23,9 +23,7 @@ const RandomColor = () => {
 };
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -34,11 +32,7 @@ class Show extends React.Component {
   constructor(props) {
     super(props);
 
-    this.api = API(
-      global.window && /192\.168/.test(window.location.href)
-        ? "http://wild-beauty.herokuapp.com/v1/graphql"
-        : "/v1/graphql"
-    );
+    this.api = API(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
 
     if(global.window) {
       window.api = this.api;
@@ -47,14 +41,9 @@ class Show extends React.Component {
   }
 
   componentDidMount() {
-    this.api
-      .list(
-        "items",
-        "type data photos { photo { width height data filesize } } users { user { id name last_seen } }"
-      )
-      .then(res => {
-        console.log("items: ", res);
-      });
+    this.api.list("items", "type data photos { photo { width height data filesize } } users { user { id name last_seen } }").then(res => {
+      console.log("items: ", res);
+    });
   }
 
   render() {
@@ -84,13 +73,7 @@ class Show extends React.Component {
       document.forms[0].submit();
       console.log("onChange: ", value);
     };
-    const list = [
-      "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
-      "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
-      "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
-      "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
-      "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
-    ];
+    const list = ["static/img/86463ed8ed391bf6b0a2907df74adb37.jpg", "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg", "static/img/cdb466a69cc7944809b20e7f34840486.jpg", "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg", "static/img/fdcce856cf66f33789dc3934418113a2.jpg"];
     return (
       <div className={"main-layout"} {...TouchEvents(touchListener)}>
         <Head>
@@ -139,11 +122,7 @@ class Show extends React.Component {
                 }}
                 className={"layer gallery-aspect-box"}
               >
-                <img
-                  src={path}
-                  style={{ maxWidth: "28vw", width: "100%", height: "auto" }}
-                  className="gallery-image"
-                />
+                <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto" }} className="gallery-image" />
               </SizedAspectRatioBox>
             ))}{" "}
           </div>
