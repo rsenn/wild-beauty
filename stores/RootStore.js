@@ -3,7 +3,7 @@ import { action, observable, flow, set, get, values, computed } from "mobx";
 import getAPI from "../utils/api.js";
 import { Timer } from "../utils/dom.js";
 import axios from "axios";
-import { makeAutoStoreHandler, getLocalStorage } from "./autoStore.js";
+import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoStore.js";
 
 export class RootStore {
   entries = observable.array([]);
@@ -29,13 +29,17 @@ export class RootStore {
     for(let k in initialData) this[k] = observable(initialData[k]);
 
     this.enableAutoRun();
+
+
+const { auth, state } = this;
+console.log("RootStore.constructor ", { auth, state });
   }
 
-  enableAutoRun() {
-    this.autorunners = [makeAutoStoreHandler("auth")(this, "auth")];
+  enableAutoRun = () => {
+    this.autorunners = [logStoreAdapter(makeAutoStoreHandler("auth", logStoreAdapter(getLocalStorage))(this, "auth"))];
   }
 
-  disableAutoRun() {
+  disableAutoRun = () => {
     this.autorunners.forEach(disposer => disposer());
     this.autorunners = [];
   }
@@ -136,6 +140,7 @@ export class RootStore {
         this.setState({ loading: false, authenticated: success, error: success ? undefined : "Login failed" });
         /*   this.auth.token = token;
         this.auth.user_id = user_id;*/
+        this.enableAutoRun();
         set(this.auth, { token, user_id });
         console.log("API login result: ", { success, token });
 

@@ -79,13 +79,13 @@ var schema = new graphql.GraphQLSchema({
 // The root provides a resolver function for each API endpoint
 /*var rootValue = {
   items: ({ id, author, image }) => {
-    console.log("item: ", { id, author, image });
+    //console.log("item: ", { id, author, image });
   },
   users: ({ id, name, email, password, last_seen }) => {
-    console.log("user: ", { id, name, email, password, last_seen });
+    //console.log("user: ", { id, name, email, password, last_seen });
   },
   photos: ({ id, src, width, height }) => {
-    console.log("photo: ", { id, author, image });
+    //console.log("photo: ", { id, author, image });
   }
 };*/
 const dev = process.env.NODE_ENV !== "production";
@@ -106,12 +106,12 @@ const insertItem = ({ id, image, author }) => {
 };
 var ret = API.insert("users", { name: "test2" });
 ret.then(ret => {
-  console.log(ret);
+  //console.log(ret);
 });
 */
 // Multi-process to utilize all CPU cores.
 if (!dev && cluster.isMaster) {
-  console.log(`Node cluster master ${process.pid} is running`);
+  //console.log(`Node cluster master ${process.pid} is running`);
   // Fork workers.
   for(let i = 0; i < numCPUs; i++) {
     cluster.fork();
@@ -187,7 +187,7 @@ if (!dev && cluster.isMaster) {
 
     server.post("/api/login", async function(req, res) {
       const { username, password } = req.body;
-      //console.log("req: ", { username, password });
+      ////console.log("req: ", { username, password });
       try {
         let response = await API.select("users", { username }, ["id", "username", "password"]);
         const user = response.users[0];
@@ -221,7 +221,7 @@ if (!dev && cluster.isMaster) {
         if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
-          //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
+          ////console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
           if(token == user.token) return fn(req, res);
         }
         //    res.json({ success: false, message: 'Need authentification' });
@@ -234,13 +234,13 @@ if (!dev && cluster.isMaster) {
         if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
-          //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
+          ////console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
           if(user && token == user.token) {
             response = await API.update("users", { id: user.id }, { token: "NULL" });
             req.session.token = null;
             req.session.user_id = -1;
             req.session.destroy();
-            //console.log("response: ", response.affected_rows);
+            ////console.log("response: ", response.affected_rows);
             return res.json({ success: response && response.affected_rows });
           }
         }
@@ -256,7 +256,7 @@ if (!dev && cluster.isMaster) {
       let { fields, format, ...params } = req.body;
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
-      console.log("params: ", params);
+      //console.log("params: ", params);
       let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "owner", "user { id }", ...fields], params);
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
       res.json({ success: true, count: images.length, images });
@@ -264,13 +264,13 @@ if (!dev && cluster.isMaster) {
 
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
-      console.log(`id: `, id);
+      //console.log(`id: `, id);
       let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "owner", "user { id }"]);
       const photo = response.photos[0];
       photo.uploaded = new Date(photo.uploaded).toString();
       let data = Buffer.from(photo.data, "base64");
       delete photo.data;
-      console.log(`photo: `, photo);
+      //console.log(`photo: `, photo);
       res.set("Content-Type", "image/jpeg");
       let props = jpeg.jpegProps(data);
       if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
@@ -285,18 +285,18 @@ if (!dev && cluster.isMaster) {
       }*/
       let user_id = getVar(req, "user_id");
 
-      //  console.log(`Files: `, Object.entries(req.files));
+      //  //console.log(`Files: `, Object.entries(req.files));
       let response = [];
       for(let item of Object.entries(req.files)) {
         const file = item[1];
-        console.log(`item: `, item);
-        console.log(`file: `, file);
+        //console.log(`item: `, item);
+        //console.log(`file: `, file);
         //const data = ;
         let props = jpeg.jpegProps(file.data);
         let { width, height } = props;
         let aspect = props.aspect || width / height;
-        console.log(`Image width: ${width} height: ${height}`);
-        console.log(`Image aspect: ${aspect}`);
+        //console.log(`Image width: ${width} height: ${height}`);
+        //console.log(`Image aspect: ${aspect}`);
 
         const calcDimensions = (max, props) => {
           let { width, height, ...restOfProps } = props;
@@ -317,8 +317,8 @@ if (!dev && cluster.isMaster) {
         let newDimensions = calcDimensions(maxWidthOrHeight, props);
         aspect = newDimensions.aspect || newDimensions.width / newDimensions.height;
         if(!compareDimensions(props, newDimensions)) {
-          console.log(`new Image aspect: ${aspect}`);
-          console.log(`newnewDimensions `, newDimensions);
+          //console.log(`new Image aspect: ${aspect}`);
+          //console.log(`newnewDimensions `, newDimensions);
           const transformer = sharp()
             .jpeg({
               quality: 95 /*,
@@ -326,26 +326,26 @@ if (!dev && cluster.isMaster) {
             })
             .resize(newDimensions)
             .on("info", function(info) {
-              console.log("Image height is " + info.height);
+              //console.log("Image height is " + info.height);
             });
           var inputStream = bufferToStream(file.data);
           var outputStream = new MemoryStream();
           const finished = util.promisify(stream.finished);
           outputStream.on("finish", () => {
-            console.log("outputStream: ", outputStream.buffer);
+            //console.log("outputStream: ", outputStream.buffer);
           });
-          console.log("inputStream: ", inputStream);
+          //console.log("inputStream: ", inputStream);
 
           inputStream.pipe(transformer).pipe(outputStream);
           await finished(outputStream);
           let newData = outputStream.buffer[0];
           //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
-          console.log("newData.length: ", newData.length);
+          //console.log("newData.length: ", newData.length);
           file.data = newData;
           props = jpeg.jpegProps(file.data);
           width = props ? props.width : null;
           height = props ? props.height : null;
-          console.log(`new Image props: `, props);
+          //console.log(`new Image props: `, props);
         }
         /*.resize*/
 
@@ -354,10 +354,10 @@ if (!dev && cluster.isMaster) {
         const { depth, channels } = props;
         let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height, user_id }, ["id"]);
         const { affected_rows, returning } = typeof reply == "object" ? reply.insert_photos : {};
-        console.log("API upload photo: ", word.toString(16), { affected_rows, props });
+        //console.log("API upload photo: ", word.toString(16), { affected_rows, props });
         returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
       }
-      console.log("Send response: ", response);
+      //console.log("Send response: ", response);
       res.json(response);
     });
     server.post("/api/image/upload", imageUpload);
@@ -381,7 +381,7 @@ if (!dev && cluster.isMaster) {
     });
     server.listen(port, err => {
       if(err) throw err;
-      console.log(`Listening on http://localhost:${port}`);
+      //console.log(`Listening on http://localhost:${port}`);
     });
   });
 }

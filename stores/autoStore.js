@@ -14,6 +14,15 @@ export const makeLocalStorage = () => {
   };
 };
 
+export const logStoreAdapter = store => {
+  return {
+    store,
+    get: function(name) { console.log(`logStoreAdapter.get(${name}`); return this.store.get(name); },
+    set: function(name,data)  { console.log(`logStoreAdapter.set(${name},`,data,')'); return this.store.set(name,data); },
+   remove: function(name) { console.log(`logStoreAdapter.remove(${name}`); return this.store.remove(name); },
+ }
+}
+
 export const makeLocalStore = name => ({
   name,
   storage: makeLocalStorage(),
@@ -46,8 +55,9 @@ export function getLocalStorage() {
   return getLocalStorage.store;
 }
 
-export const makeAutoStoreHandler = (name, _class) => {
-  const store = getLocalStorage();
+export const makeAutoStoreHandler = (name, store) => {
+  if(!store)
+  store = getLocalStorage();
   return (_this, _member) => {
     let firstRun = false; //true;
     // will run on change
@@ -57,7 +67,6 @@ export const makeAutoStoreHandler = (name, _class) => {
         const existingStore = store.get(name);
         if(existingStore) {
           _this[_member] = existingStore;
-          _class.setSource("local", _member);
         }
       }
       const updatedStore = _this[_member];

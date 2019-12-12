@@ -40,12 +40,12 @@ class Panes extends React.Component {
       window.rs = rootStore;
   //    window.stores = getOrCreateStore();
     }
-
+/*
     autorun(() => console.log("loading: ", rootStore.state.loading));
     autorun(() => {
       console.log("re: ", rootStore.state.loading);
       this.forceUpdate();
-    });
+    });*/
     let swipeEvents = {};
     var e = null;
     const { rootStore } = props;
