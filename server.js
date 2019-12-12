@@ -249,6 +249,8 @@ if (!dev && cluster.isMaster) {
 
       const photo = response.photos[0];
 
+      photo.uploaded = new Date(photo.uploaded).toString();
+   
       console.log(`response: `, { ...photo, data: undefined });
 
       let data = Buffer.from(photo.data, "base64");
@@ -259,8 +261,7 @@ if (!dev && cluster.isMaster) {
 
       if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
 
-      for(let key of ["original_name", "uploaded", "filesize", "owner"])
-       if(photo[key]) props[Util.camelize(key, '-')] = photo[key];
+      for(let key of ["original_name", "uploaded", "owner"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
 
       for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
 
