@@ -160,7 +160,7 @@ const randomColor = () =>
 const randomGradient = () => {
   let hue = 0 - Math.abs(prng.double()) * 200;
   if(hue < 0) hue += 360;
-  let baseColor = new HSLA(hue, prng.double() * 50 + 50, prng.double() * 25 + 60, 0.8);
+  let baseColor = new HSLA(Math.floor(hue), Math.floor(prng.double() * 50 + 50), Math.floor(prng.double() * 25 + 60), 0.8);
 
   console.log("baseColor ", baseColor.toString());
   let colors = [
