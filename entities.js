@@ -1,4 +1,3 @@
-const he = require('he');
+const he = require("he");
 
-he.encode('براى خرید بلیط کافى نیست.');
-
+he.encode("براى خرید بلیط کافى نیست.");

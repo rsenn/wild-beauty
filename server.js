@@ -105,9 +105,7 @@ if (!dev && cluster.isMaster) {
   }
 
   cluster.on("exit", (worker, code, signal) => {
-    console.error(
-      `Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`
-    );
+    console.error(`Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`);
   });
 } else {
   const nextApp = next({ dir: ".", dev });
@@ -171,9 +169,10 @@ if (!dev && cluster.isMaster) {
         let response = await API.select("users", { username }, ["id", "username", "password"]);
         const user = response.users[0];
         let success = bcrypt.compareSync(password, user.password);
-        let token, user_id = -1;
+        let token,
+          user_id = -1;
         if(success) {
-                   user_id = user.id;
+          user_id = user.id;
 
           token = jwt.sign(password, secret);
           last_seen = new Date().toISOString();

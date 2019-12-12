@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6",
     "@render-props/image-props": "^0.1.18",
     "@zeit/next-css": "^1.0.1",
     "abs-svg-path": "^0.1.1",

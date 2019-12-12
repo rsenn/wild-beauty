@@ -50,7 +50,6 @@ res.then(res => {
   process.exit(0);
 });*/
 
-
 function addPhoto(path) {
   var buf = fs.readFileSync(path);
   if(jpeg.isJpeg(buf)) {
@@ -137,16 +136,15 @@ res.then(res => {
 
 */
 
-var bcrypt = require('bcryptjs');
+var bcrypt = require("bcryptjs");
 var pass = "r4eHuJ";
 
-
-res = api.select('users', { username: "roman" }, ['id','username','password']);
+res = api.select("users", { username: "roman" }, ["id", "username", "password"]);
 res.then(res => {
   const user = res.users[0];
   console.log("res: ", Util.inspect(user));
 
   let result = bcrypt.compareSync(pass, user.password);
-   console.log("result: ", result);
- // items.forEach(console.log);
+  console.log("result: ", result);
+  // items.forEach(console.log);
 });
