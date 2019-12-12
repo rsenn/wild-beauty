@@ -250,10 +250,10 @@ if (!dev && cluster.isMaster) {
       const photo = response.photos[0];
 
       photo.uploaded = new Date(photo.uploaded).toString();
-   
-      console.log(`response: `, { ...photo, data: undefined });
 
       let data = Buffer.from(photo.data, "base64");
+      delete photo.data;
+      console.log(`photo: `, photo);
 
       res.set("Content-Type", "image/jpeg");
 
