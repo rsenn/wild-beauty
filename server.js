@@ -279,93 +279,90 @@ if (!dev && cluster.isMaster) {
       res.send(data);
     });
 
-const imageUpload = 
-      needAuth(async function(req, res) {
-        /*   if(!req.files || Object.keys(req.files).length === 0) {
+    const imageUpload = needAuth(async function(req, res) {
+      /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
       }*/
-        let user_id = getVar(req, "user_id");
+      let user_id = getVar(req, "user_id");
 
-        //  console.log(`Files: `, Object.entries(req.files));
-        let response = [];
-        for(let item of Object.entries(req.files)) {
-          const file = item[1];
-          console.log(`item: `, item);
-          console.log(`file: `, file);
-          //const data = ;
-          let props = jpeg.jpegProps(file.data);
-          let { width, height } = props;
-          let aspect = props.aspect || width / height;
-          console.log(`Image width: ${width} height: ${height}`);
-          console.log(`Image aspect: ${aspect}`);
+      //  console.log(`Files: `, Object.entries(req.files));
+      let response = [];
+      for(let item of Object.entries(req.files)) {
+        const file = item[1];
+        console.log(`item: `, item);
+        console.log(`file: `, file);
+        //const data = ;
+        let props = jpeg.jpegProps(file.data);
+        let { width, height } = props;
+        let aspect = props.aspect || width / height;
+        console.log(`Image width: ${width} height: ${height}`);
+        console.log(`Image aspect: ${aspect}`);
 
-          const calcDimensions = (max, props) => {
-            let { width, height, ...restOfProps } = props;
-            if(width > max || height > max) {
-              if(width > height) {
-                height = Math.floor((max * height) / width);
-                width = max;
-              } else {
-                width = Math.floor((max * width) / height);
-                height = max;
-              }
+        const calcDimensions = (max, props) => {
+          let { width, height, ...restOfProps } = props;
+          if(width > max || height > max) {
+            if(width > height) {
+              height = Math.floor((max * height) / width);
+              width = max;
+            } else {
+              width = Math.floor((max * width) / height);
+              height = max;
             }
-            return { ...restOfProps, width, height };
-          };
-
-          const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
-
-          let newDimensions = calcDimensions(maxWidthOrHeight, props);
-          aspect = newDimensions.aspect || newDimensions.width / newDimensions.height;
-          if(!compareDimensions(props, newDimensions)) {
-            console.log(`new Image aspect: ${aspect}`);
-            console.log(`newnewDimensions `, newDimensions);
-            const transformer = sharp()
-              .jpeg({
-                quality: 95 /*,
-              chromaSubsampling: "4:4:4"*/
-              })
-              .resize(newDimensions)
-              .on("info", function(info) {
-                console.log("Image height is " + info.height);
-              });
-            var inputStream = bufferToStream(file.data);
-            var outputStream = new MemoryStream();
-            const finished = util.promisify(stream.finished);
-            outputStream.on("finish", () => {
-              console.log("outputStream: ", outputStream.buffer);
-            });
-            console.log("inputStream: ", inputStream);
-
-            inputStream.pipe(transformer).pipe(outputStream);
-            await finished(outputStream);
-            let newData = outputStream.buffer[0];
-            //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
-            console.log("newData.length: ", newData.length);
-            file.data = newData;
-            props = jpeg.jpegProps(file.data);
-            width = props ? props.width : null;
-            height = props ? props.height : null;
-            console.log(`new Image props: `, props);
           }
-          /*.resize*/
+          return { ...restOfProps, width, height };
+        };
 
-          let data = file.data.toString("base64");
-          let word = file.data[0] << (8 + file.data[1]);
-          const { depth, channels } = props;
-          let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height, user_id }, ["id"]);
-          const { affected_rows, returning } = reply.insert_photos;
-          console.log("API upload photo: ", word.toString(16), { affected_rows, props });
-          returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
+        const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
+
+        let newDimensions = calcDimensions(maxWidthOrHeight, props);
+        aspect = newDimensions.aspect || newDimensions.width / newDimensions.height;
+        if(!compareDimensions(props, newDimensions)) {
+          console.log(`new Image aspect: ${aspect}`);
+          console.log(`newnewDimensions `, newDimensions);
+          const transformer = sharp()
+            .jpeg({
+              quality: 95 /*,
+              chromaSubsampling: "4:4:4"*/
+            })
+            .resize(newDimensions)
+            .on("info", function(info) {
+              console.log("Image height is " + info.height);
+            });
+          var inputStream = bufferToStream(file.data);
+          var outputStream = new MemoryStream();
+          const finished = util.promisify(stream.finished);
+          outputStream.on("finish", () => {
+            console.log("outputStream: ", outputStream.buffer);
+          });
+          console.log("inputStream: ", inputStream);
+
+          inputStream.pipe(transformer).pipe(outputStream);
+          await finished(outputStream);
+          let newData = outputStream.buffer[0];
+          //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
+          console.log("newData.length: ", newData.length);
+          file.data = newData;
+          props = jpeg.jpegProps(file.data);
+          width = props ? props.width : null;
+          height = props ? props.height : null;
+          console.log(`new Image props: `, props);
         }
-        console.log("Send response: ", response);
-        res.json(response);
-      })
-      ;
-    server.post("/api/image/upload", imageUpload );
-    server.post("/api/upload", imageUpload );
+        /*.resize*/
 
-    
+        let data = file.data.toString("base64");
+        let word = file.data[0] << (8 + file.data[1]);
+        const { depth, channels } = props;
+        let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height, user_id }, ["id"]);
+        const { affected_rows, returning } = typeof reply == "object" ? reply.insert_photos : {};
+        console.log("API upload photo: ", word.toString(16), { affected_rows, props });
+        returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
+      }
+      console.log("Send response: ", response);
+      res.json(response);
+    });
+    server.post("/api/image/upload", imageUpload);
+    server.post("/api/upload", imageUpload);
+
     // Example server-side routing
     server.post("/a", (req, res) => {
       return nextApp.render(req, res, "/b", req.query);

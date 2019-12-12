@@ -7,11 +7,12 @@ import { ScrollController } from "../utils/scrollController.js";
 import Alea from "../utils/alea.js";
 import { SwipeTracker } from "../utils/swipeTracker.js";
 import { Element, Node, HSLA } from "../utils/dom.js";
-import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
-import { toJS } from "mobx";
+import { toJS, autorun } from "mobx";
+import { inject, observer } from "mobx-react";
+import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 
 import RUG from "react-upload-gallery";
 import "react-upload-gallery/dist/style.css";
@@ -77,6 +78,22 @@ class Panes extends React.Component {
   }
 
   render() {
+    if(global.window !== undefined) window.page = this;
+    if(global.window) {
+      var touchListener = TouchListener(TouchCallback, {
+        element: global.window,
+        step: 1,
+        round: true,
+        listener: MovementListener,
+        noscroll: true
+      });
+      MultitouchListener(
+        event => {
+          console.log("multitouch", event);
+        },
+        { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
+      );
+    }
     const onError = event => {};
 
     const onImage = event => {

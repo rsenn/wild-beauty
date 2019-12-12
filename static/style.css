@@ -29,5 +29,5 @@ li.menu-item {
   transition: width 1s;
 }
 li.menu-item > a {
-    font-size: 2em;
+  font-size: 2em;
 }
