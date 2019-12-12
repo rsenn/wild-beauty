@@ -21,7 +21,7 @@ const LoginForm = inject("rootStore")(
           <form
             className={"login"}
             method={"none"}
-            action={""}
+            action={"/api/login"}
             onKeyPress={e => {
               if(e.keyCode == 13) {
                 e.target.submit();

@@ -101,8 +101,9 @@ const Panes = props => {
       </Head>
       <Nav />
       <div className={"page-layout"}>
-        <div
-          style={{ position: "absolute", top: "15vh", left: "5vw", width: "80vw", height: "20vh" }}
+        <div className={'upload-area'}
+          style={{ position: "relative", top: "20px", left: "80vw", minWidth: '80vmin', minHeight: '80vmin' }}
+          
         >
           <RUG
             action="/api/upload" // upload route
@@ -163,6 +164,13 @@ const Panes = props => {
           }
           .panes-item > img {
             width: 20vw;
+          }
+          div.upload-area > div, div.upload-area > div > div, div.upload-area > div > div > div {
+            position: relative;
+            display: block;
+            width: 100%;
+            height: 100%;
+            min-height: 80vmin;
           }
         `}</style>
       </div>
