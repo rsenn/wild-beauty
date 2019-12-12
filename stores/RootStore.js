@@ -119,7 +119,8 @@ export class RootStore {
 
     if(!data) res = await axios.get(endpoint);
     else res = await axios.post(endpoint, data);
-    console.log("RootStore.apiRequest " + endpoint, " = ", res.data);
+
+    console.log("RootStore.apiRequest " + endpoint, " = ", await res.data);
 
     return await res;
   }

@@ -191,7 +191,7 @@ if (!dev && cluster.isMaster) {
       try {
         let response = await API.select("users", { username }, ["id", "username", "password"]);
         const user = response.users[0];
-        let success = bcrypt.compareSync(password, user.password);
+        let success = user ? bcrypt.compareSync(password, user.password) : false;
         let token,
           user_id = -1;
         if(success) {
@@ -207,7 +207,7 @@ if (!dev && cluster.isMaster) {
         req.session.token = token;
         req.session.user_id = user_id;
         console.error("Login user: ", user);
-        res.json({ success, token, user_id: user.id });
+        res.json({ success, token, user_id: user ? user.id  : -1 });
       } catch(err) {
         console.error("Login error: ", err);
       }
@@ -235,16 +235,14 @@ if (!dev && cluster.isMaster) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
           //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
-          if(token == user.token) {
+          if(user && token == user.token) {
             response = await API.update("users", { id: user.id }, { token: "NULL" });
             req.session.token = null;
             req.session.user_id = -1;
             req.session.destroy();
             //console.log("response: ", response.affected_rows);
-            if(response.affected_rows == 1) {
-              res.json({ success: true });
-              return;
-            }
+            return  res.json({ success: response && response.affected_rows});
+
           }
         }
       } catch(err) {
@@ -352,7 +350,7 @@ if (!dev && cluster.isMaster) {
             console.log(`new Image props: `, props);
           }
           /*.resize*/
-          
+
           let data = file.data.toString("base64");
           let word = file.data[0] << (8 + file.data[1]);
           const { depth, channels } = props;
