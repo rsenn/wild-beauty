@@ -113,7 +113,9 @@ const Panes = props => {
         >
           <RUG
             action="/api/upload" // upload route
-            source={response => response.source} // response image source
+            source={response => {
+              console.log("RUG response:", response);
+            }}
           />
         </div>
         <div className={"panes-list"}>

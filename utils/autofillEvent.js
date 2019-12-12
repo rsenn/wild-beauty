@@ -1,7 +1,7 @@
 export function autofillEvent(window, changeHandler) {
   var rootElement = window.document.documentElement;
 
-  console.log("autofillEvent ", { window, rootElement });
+  //console.log("autofillEvent ", { window, rootElement });
 
   window.handleAutoFillEvent = changeHandler;
   window.checkAndTriggerAutoFillEvent = function(els) {

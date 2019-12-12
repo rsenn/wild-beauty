@@ -137,6 +137,11 @@ export class RootStore {
         set(this.auth, { token, user_id });
         console.log("API login result: ", { success, token });
 
+        if(success && window.global) {
+          for(let name of ["token"]) document.cookie += `${name}=${res.data[name]}; Path=/; `;
+          console.log("Cookies: ", document.cookie);
+        }
+
         completed();
       });
     });

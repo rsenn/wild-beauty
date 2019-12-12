@@ -61,10 +61,10 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     return response[queryName];
   };
 
-  api.insert = function(name, obj) {
+  api.insert = function(name, obj, fields = []) {
     const camelCase = Util.ucfirst(name);
     const objStr = Util.map(obj, (key, value) => (typeof value == "string" ? `${key}: "${value}"` : `${key}: ${value}`)).join(", ");
-    const fieldStr = Object.keys(obj).join(" ");
+    const fieldStr = [...Object.keys(obj), ...fields].join(" ");
     const queryStr = `mutation Insert${camelCase} {
     __typename
     insert_${name}(objects: { ${objStr} }) {
