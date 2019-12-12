@@ -112,15 +112,16 @@ const NavLink = ({ href, label, path, key, disabled, onClick }) => (
 
         width: 12.5vw;
         height: 12.5vw;
-        max-width: 80px;
-        max-height: 80px;
+        max-width: 48px;
+        max-height: 48px;
       }
       li:hover {
-        transition: width 1s;
+        transition: width 1s, max-width 1s;
         width: 100px;
-        min-width: 12.5vw;
+        max-width: 100px;
       }
-      li > a > span {
+      limargin: 2px;
+      > a > span {
         font-family: Fixed;
         font-size: 40px;
         vertical-align: center;
@@ -133,6 +134,12 @@ const NavLink = ({ href, label, path, key, disabled, onClick }) => (
         padding: 4px 0 0 1px;
         margin: 2px 4px 2px 4px;
         overflow: hidden;
+      }
+      li.menu-item > a {
+    font-size: 3em;
+}
+      li {
+        transition: width 1s;
       }
       a {
         color: white;
@@ -383,10 +390,7 @@ const Nav = inject(
               transform: perspective(300px) translate3d(50vw, -50vh, 0) rotateX(-45deg)
                 rotateY(-45deg) rotateZ(90deg) scale3d(0.02, 0.02, 1);
             }
-            li.menu-item {
-                      max-width: 80px;
-        max-height: 80px;
-            }
+
           `}</style>
         </div>
       );

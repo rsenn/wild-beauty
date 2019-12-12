@@ -23,8 +23,11 @@ html {
 }
 
 li.menu-item {
-          max-width: 80px;
-        max-height: 80px;
-          margin: 2px 4px 2px 4px;
-
+  max-width: 80px;
+  max-height: 80px;
+  margin: 2px 4px 2px 4px;
+  transition: width 1s;
+}
+li.menu-item > a {
+    font-size: 2em;
 }

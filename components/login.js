@@ -92,8 +92,7 @@ const LoginForm = inject("rootStore")(
               position: relative;
 
               font-family: Fixed;
-                            font-size: 15px;
-
+              font-size: 15px;
             }
             form.login {
               position: absolute;

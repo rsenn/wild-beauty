@@ -96,10 +96,6 @@ class MyApp extends App {
             align-items: center;
             z-index: 1;
           }
-          li.menu-item {
-                  max-width: 80px;
-        max-height: 80px;
-      }
         `}</style>
       </Container>
     );
