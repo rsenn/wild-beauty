@@ -133,7 +133,7 @@ export class RootStore {
       this.apiRequest("/api/login", { username, password }).then(res => {
         const { success, token, user_id } = res.data;
 
-        this.setState({ loading: false, authenticated: success, error: success ? undefined : 'Login failed' });
+        this.setState({ loading: false, authenticated: success, error: success ? undefined : "Login failed" });
         /*   this.auth.token = token;
         this.auth.user_id = user_id;*/
         set(this.auth, { token, user_id });
@@ -143,8 +143,6 @@ export class RootStore {
           for(let name of ["token"]) document.cookie += `${name}=${res.data[name]}; Path=/; `;
           console.log("Cookies: ", document.cookie);
         }
-
-
 
         completed(res.data);
       });

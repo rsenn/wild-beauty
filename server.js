@@ -207,17 +207,17 @@ if (!dev && cluster.isMaster) {
         req.session.token = token;
         req.session.user_id = user_id;
         console.error("Login user: ", user);
-        res.json({ success, token, user_id: user ? user.id  : -1 });
+        res.json({ success, token, user_id: user ? user.id : -1 });
       } catch(err) {
         console.error("Login error: ", err);
       }
     });
 
-    const getVar = (req, name) =>  (req.cookies && req.cookies[name]) || (req.session && req.session[name]);
+    const getVar = (req, name) => (req.cookies && req.cookies[name]) || (req.session && req.session[name]);
 
     const needAuth = fn =>
       async function(req, res) {
-        let token = getVar(req, 'token')
+        let token = getVar(req, "token");
         if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
@@ -229,7 +229,7 @@ if (!dev && cluster.isMaster) {
       };
 
     server.get("/api/logout", async function(req, res) {
-      let token = getVar(req, 'token')
+      let token = getVar(req, "token");
       try {
         if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
@@ -241,8 +241,7 @@ if (!dev && cluster.isMaster) {
             req.session.user_id = -1;
             req.session.destroy();
             //console.log("response: ", response.affected_rows);
-            return  res.json({ success: response && response.affected_rows});
-
+            return res.json({ success: response && response.affected_rows });
           }
         }
       } catch(err) {
@@ -280,14 +279,14 @@ if (!dev && cluster.isMaster) {
       res.send(data);
     });
 
-    server.post("/api/image/upload", needAuth(async function(req, res) {
+const imageUpload = 
+      needAuth(async function(req, res) {
         /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
       }*/
-        let user_id  = getVar(req, 'user_id')
+        let user_id = getVar(req, "user_id");
 
-
-      //  console.log(`Files: `, Object.entries(req.files));
+        //  console.log(`Files: `, Object.entries(req.files));
         let response = [];
         for(let item of Object.entries(req.files)) {
           const file = item[1];
@@ -313,7 +312,7 @@ if (!dev && cluster.isMaster) {
             }
             return { ...restOfProps, width, height };
           };
-          
+
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
 
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
@@ -333,7 +332,7 @@ if (!dev && cluster.isMaster) {
             var inputStream = bufferToStream(file.data);
             var outputStream = new MemoryStream();
             const finished = util.promisify(stream.finished);
-            outputStream.on("finish", () =>  {
+            outputStream.on("finish", () => {
               console.log("outputStream: ", outputStream.buffer);
             });
             console.log("inputStream: ", inputStream);
@@ -362,7 +361,11 @@ if (!dev && cluster.isMaster) {
         console.log("Send response: ", response);
         res.json(response);
       })
-    );
+      ;
+    server.post("/api/image/upload", imageUpload );
+    server.post("/api/upload", imageUpload );
+
+    
     // Example server-side routing
     server.post("/a", (req, res) => {
       return nextApp.render(req, res, "/b", req.query);

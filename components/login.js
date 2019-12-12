@@ -79,9 +79,9 @@ const LoginForm = inject("rootStore")(
                   <div className="sk-cube sk-cube9"></div>
                 </div>
               </div>
-            ) : (rootStore.authenticated || rootStore.state.error) ? (
+            ) : rootStore.authenticated || rootStore.state.error ? (
               <div className={"form-status"}>
-{rootStore.state.error ||                 <Translate value="login.logged" /> }
+                {rootStore.state.error || <Translate value="login.logged" />}
               </div>
             ) : (
               undefined

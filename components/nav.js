@@ -234,9 +234,9 @@ const Nav = inject(
               onLogin={(user, pass) => {
                 rootStore.doLogin(user, pass, res => {
                   if(res.success)
-                  Timer.once(1333, () => {
-                    setLoginOpen(false);
-                  });
+                    Timer.once(1333, () => {
+                      setLoginOpen(false);
+                    });
                 });
               }}
             />
