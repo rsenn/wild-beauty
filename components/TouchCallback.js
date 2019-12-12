@@ -20,11 +20,16 @@ export const TouchCallback = event => {
   let e,
     zIndex = maxZIndex();
   if(event.type == "touchstart") {
+
+    if(event.button != 0 && typeof cancel == "function") return cancel();
+    
     zIndex++;
     e = event.target;
   } else if(event.start) {
     e = event.start.target;
   }
+
+console.log("TouchCallback event: ", event);
 
   const hasLayerClass = containsClass("layer");
   if(hasLayerClass) {

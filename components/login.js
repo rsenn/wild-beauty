@@ -93,6 +93,7 @@ const LoginForm = inject("rootStore")(
 
               font-family: Fixed;
               font-size: 15px;
+              overflow: hidden;
             }
             form.login {
               position: absolute;
@@ -145,14 +146,14 @@ const LoginForm = inject("rootStore")(
               text-align: center;
             }
             .form-label {
-              font-size: 1em;
+              font-size: 1.5em;
 
               padding: 0 8px 0 2px;
             }
             .form-label,
             .form-value {
               vertical-align: bottom;
-              margin: auto 0 auto 0;
+              margin: 4px 0 4px 0;
             }
             .login-view {
               position: relative;
@@ -184,10 +185,9 @@ const LoginForm = inject("rootStore")(
             }
             div.form-value > input {
               font-family: Fixed;
-              font-size: 14px;
+              font-size: 1.5em;
 
               padding: 2px 2px;
-              font-size: 1em;
               width: 100%;
               border: 1px #c0c0c0 inset;
             }

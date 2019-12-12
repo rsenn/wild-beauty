@@ -114,16 +114,17 @@ class Show extends React.Component {
           <div
             className={"panels"}
             style={{
-              position: "absolute",
-              top: "250px",
-              overflow: "visible",
-              display: "flex",
+              position: "relative",
+              top: "0",
+              overflow: "hidden",
+              display: "inline-flex",
               flexFlow: "row wrap",
               justifyContent: "flex-start",
-              alignItems: "stretch",
-              position: "absolute",
-              maxWidth: "100%",
-              maxHeight: "100%"
+              alignItems: "flex-start",
+             /* maxWidth: "100vw",
+              maxHeight: "100vh",*/
+              padding: '0 0 0 40px',
+              margin: '0 auto 0 auto'
             }}
           >
             {list.map(path => (
@@ -132,7 +133,9 @@ class Show extends React.Component {
                 height={"28vw"}
                 style={{
                   margin: "16px",
-                  border: "1px dashed black",
+                  border: "1px solid black",
+                                boxShadow: '0px 0px 4px 0px rgba(0, 0, 0, 0.75)',
+
                   maxWidth: "20vw",
                   maxHeight: "20vw",
                   overflow: "hidden"
@@ -147,19 +150,21 @@ class Show extends React.Component {
               </SizedAspectRatioBox>
             ))}{" "}
           </div>
-          <Layer w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
+{/*          <Layer w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
             Layer
-          </Layer>
+          </Layer>*/}
           <SvgOverlay />
           <style jsx global>{`
             .main-layout {
+              width: 100vw;
+              height: 100vh;
               overflow: hidden;
             }
             .gallery-image {
               height: auto;
             }
             .panels {
-              margin: 100px;
+              margin: 40pxf auto 0 auto;
               overflow: visible;
             }
             img {
@@ -210,12 +215,13 @@ class Show extends React.Component {
               justify-content: space-around;
             }
             .page-layout {
-              position: absolute;
-              top: 250px;
+              position: relative;
+              top: 0px;
               width: 100vw;
+              overflow: hidden;
               min-height: 100vh;
               text-align: center;
-              display: flex;
+              display: inline-flex;
               justify-content: center;
               align-items: center;
               z-index: 1;

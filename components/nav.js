@@ -70,7 +70,7 @@ let customStyles = {
     transform: "translate(-50%, -50%)",
     background: "url(static/img/tile-background.jpg) repeat",
     backgroundSize: "auto 50vmin",
-    zIndex: 12
+    zIndex: 10
   }
 };
 Modal.setAppElement("#__next");
@@ -363,7 +363,7 @@ const Nav = inject(
             .menu {
               position: relative;
               top: 0;
-              z-index: 10;
+              z-index: 12;
               text-align: center;
               display: înline-block;
               color: white;
