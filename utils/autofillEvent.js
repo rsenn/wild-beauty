@@ -54,10 +54,10 @@ export function autofillEvent(window, changeHandler) {
 
   initAutoFillListeners();
   //IE8 compatibility issue
-    if(!window.document.addEventListener) {
-    window.document.attachEvent('DOMContentLoaded', initAutoFillListeners);
+  if(!window.document.addEventListener) {
+    window.document.attachEvent("DOMContentLoaded", initAutoFillListeners);
   } else {
-    window.document.addEventListener('DOMContentLoaded', initAutoFillListeners, false);
+    window.document.addEventListener("DOMContentLoaded", initAutoFillListeners, false);
   }
 
   //----------
@@ -79,7 +79,7 @@ export function autofillEvent(window, changeHandler) {
   }
 
   function markValue(el) {
-//    console.log("markValue ", { el });
+    //    console.log("markValue ", { el });
     el.$$currentValue = el.value;
   }
   /*

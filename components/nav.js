@@ -29,10 +29,10 @@ const LoginIcon = ({ style }) => (
 );
 
 const SiteMap = [
-  { href: "/",  name: 'home',label: <span>Home</span> },
-  { href: "/test",  name: 'text',label: <span>Gallery</span>, disabled: true },
-  { href: "/panes",  name: 'panes',label: <span>Panes</span> },
-  { href: "/show", name: 'show', label: <span>Show</span> },
+  { href: "/", name: "home", label: <span>Home</span> },
+  { href: "/test", name: "text", label: <span>Gallery</span>, disabled: true },
+  { href: "/panes", name: "panes", label: <span>Panes</span> },
+  { href: "/show", name: "show", label: <span>Show</span> },
   {
     href: "#",
     name: "login",
@@ -265,7 +265,9 @@ const Nav = inject(
           </Modal>
           <ul>
             {SiteMap.map(link => {
-              link.key = `nav-link-${typeof(link.href) == 'string' ? link.href : ''}-${typeof(link.name) == 'string' ? link.name : ''}`;
+              link.key = `nav-link-${typeof link.href == "string" ? link.href : ""}-${
+                typeof link.name == "string" ? link.name : ""
+              }`;
               return link;
             }).map(item => {
               console.log("item.name: ", item.name);
@@ -275,7 +277,7 @@ const Nav = inject(
               }
               return (
                 <NavLink
-                key={item.key}
+                  key={item.key}
                   {...{ ...props, ...item, path: props.router.asPath }}
                   onClick={
                     item.name == "login"
