@@ -1,11 +1,12 @@
 import { RootStore } from "./RootStore.js";
+import i18nStore from "./i18nStore.js";
 import Util from "../utils/util.js";
 
-export let appStores = {
+let appStores = {
   RootStore
 };
 
-export let stores = null;
+let stores = null;
 let store = null;
 let root = null;
 
@@ -13,7 +14,7 @@ export function createStore(isServer = false, preFetchObj = {}, pageProps = {}) 
   root = null;
   return Object.keys(appStores).reduce((acc, storeName) => {
     //CommonStoreFunctions.decorate(appStores[storeName]);
-    let instance = !isServer && store !== null ? store : new appStores[storeName](isServer, preFetchObj, pageProps);
+    let instance = !isServer && store !== null ? store : new appStores[storeName](preFetchObj, pageProps);
     appStores[storeName].singleton = instance;
     //CommonStoreFunctions.mixin(instance);
     return { ...acc, [storeName]: instance };
@@ -41,9 +42,9 @@ export function getOrCreateStore(isServer = false, preFetchObj = {}, pageProps =
 
 export function getStore(name) {
   const stores = getOrCreateStore();
-  const store = stores ? stores[name] : null;
-  return store;
+  return stores ? stores[name] : null;
 }
+
 export function getStores() {
   return getOrCreateStore();
 }

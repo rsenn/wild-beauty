@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import { withRouter } from "next/router";
-import Nav from "../components/nav.js";
 import Layer from "../components/layer.js";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import { ScrollController } from "../utils/scrollController.js";
@@ -27,7 +26,9 @@ const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")]
+    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
+    .filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -73,8 +74,8 @@ class Home extends React.Component {
       const subpage = parseInt(hash);
       if(!isNaN(subpage)) {
         if(subpage != rootStore.state.subpage) {
-         rootStore.setState({ subpage });
-              this.forceUpdate();
+          rootStore.setState({ subpage });
+          this.forceUpdate();
         }
       }
     }
@@ -94,7 +95,7 @@ class Home extends React.Component {
       }
     });
 
-this.getHash();
+    this.getHash();
 
     var counter = 0;
 
@@ -156,7 +157,7 @@ this.getHash();
     const seconds = (endDate.getTime() - now.getTime()) / 1000;
     //const timespan = tims.text(, {    lang: "fr"   }); /*.split(/,/g).slice(0, 2).join(', ')*/
     const timespan = timeSpanFormat(Math.floor(seconds));
-    const subpage =   toJS(rootStore.state.subpage);
+    const subpage = toJS(rootStore.state.subpage);
     console.log("Home.render", { t, timespan, subpage });
     return (
       <div className={"main-layout"} {...TouchEvents(touchListener)}>
@@ -164,30 +165,55 @@ this.getHash();
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-
-        <div className={"subpage"} style={{ opacity: subpage == 1 ? 1 : 0, display: subpage == 1 ? "flex" : "flex" }}>
-          <div
-            style={{
-              //   transition: "transform 1s ease-in",
-              transformStyle: "preserve-3d",
-              transform: t
-            }}
-          >
+        <div
+          className={"subpage flex-vertical"}
+          style={{ opacity: subpage == 1 ? 1 : 0, display: subpage == 1 ? "flex" : "flex" }}
+        >
+          <div style={{ transformStyle: "preserve-3d", transform: t }}>
             <img
               src={"static/img/logo-transparent.png"}
-              style={{
-                width: "100%",
-                maxWidth: "1280px"
-                /*            height: "auto",
-                 */
-              }}
+              style={{ width: "100%", maxWidth: "1280px" }}
             />
           </div>
-          <div className={"time-counter"}>{timespan}</div>
           {/*  <img src={"static/img/arrow-next.svg"} style={{ transform: 'scaleX(-1)' }} />*/}
         </div>
-        <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "flex" : "flex" }}></div>
-        <div className={"subpage"} style={{ opacity: subpage == 3 ? 1 : 0, display: subpage == 3 ? "flex" : "flex" }}></div>
+        <div
+          className={"subpage"}
+          style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "block" : "block" }}
+        >
+          <h1>Title</h1>
+          <span className={"paragraph"}>
+            The earliest known appearance of the phrase is from The Boston Journal. In an article
+            titled "Current Notes" in the February 9, 1885, edition, the phrase is mentioned as a
+            good practice sentence for writing students: "A favorite copy set by writing teachers
+            for their pupils is the following, because it contains every letter of the alphabet: 'A
+            quick brown fox jumps over the lazy dog.'" Dozens of other newspapers published the
+            phrase over the next few months, all using the version of the sentence starting with "A"
+            rather than "The". The earliest known use of the phrase in its modern form (starting
+            with "The") is from the 1888 book Illustrative Shorthand by Linda Bronson. The modern
+            form (starting with "The") became more common despite the fact that it is slightly
+            longer than the original (starting with "A"). As the use of typewriters grew in the late
+            19th century, the phrase began appearing in typing lesson books as a practice sentence.
+            Early examples include How to Become Expert in Typewriting: A Complete Instructor
+            Designed Especially for the Remington Typewriter (1890), and Typewriting Instructor and
+            Stenographer's Hand-book (1892). By the turn of the 20th century, the phrase had become
+            widely known. In the January 10, 1903, issue of Pitman's Phonetic Journal, it is
+            referred to as "the well known memorized typing line embracing all the letters of the
+            alphabet". Robert Baden-Powell's book Scouting for Boys (1908) uses the phrase as a
+            practice sentence for signaling. The first message sent on the Moscow–Washington hotline
+            on August 30, 1963, was the test phrase "THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG'S
+            BACK 1234567890". Later, during testing, the Russian translators sent a message asking
+            their American counterparts, "What does it mean when your people say 'The quick brown
+            fox jumped over the lazy dog'?" During the 20th century, technicians tested typewriters
+            and teleprinters by typing the sentence.
+          </span>
+        </div>
+        <div
+          className={"subpage flex-vertical"}
+          style={{ opacity: subpage == 3 ? 1 : 0, display: subpage == 3 ? "flex" : "flex" }}
+        >
+          <div className={"time-counter"}>{timespan}</div>
+        </div>
         {subpage > 1 ? (
           <a className={"button-prev"} href={"#" + (subpage - 1)} onClick={this.handlePrev}>
             <img src={"static/img/arrow-next.svg"} style={{ transform: "scaleX(-1)" }} />
@@ -195,10 +221,21 @@ this.getHash();
         ) : (
           undefined
         )}
-        <a className={"button-next"} href={"#" + (subpage + 1)} onClick={this.handleNext}>
+        <a
+          className={"button-next"}
+          href={subpage < 3 ? "#" + (subpage + 1) : "/show"}
+          onClick={subpage >= 3 ? undefined : this.handleNext}
+        >
           <img src={"static/img/arrow-next.svg"} />
         </a>
         <style jsx global>{`
+          h1 {
+            width: 100%;
+            text-align: left;
+          }
+          span.paragraph {
+            font-size: 2em;
+          }
           .article-list {
             display: flex;
             flex-direction: row;
@@ -222,23 +259,27 @@ this.getHash();
           .button-prev:active {
             transform: translate(2px, 2px);
           }
-          .subpage {
-            position: absolute;
-            width: 100vw;
-            height: 100vh;
+          .flex-vertical {
             display: flex;
             flex-flow: column nowrap;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+          }
+          .subpage {
+            position: absolute;
+            width: 100vw;
+
             transition: opacity 0.5s;
+            margin: 0 10px 0 10px;
+            overflow: auto;
           }
 
           .main-layout {
-            width: 100%;
-            height: 100vh;
-
+            display: block;
             padding: 0;
             margin: 0;
+            overflow: visible;
           }
           .time-counter {
             margin: 10px;
@@ -256,49 +297,6 @@ this.getHash();
             outline: 0px;
             padding: 0px;
             margin: 0px;
-          }
-          .panels .layer {
-            margin: 0px;
-            padding: 0px;
-          }
-          .layout {
-            margin: 0px;
-            padding: 0px;
-            overflow: visible;
-          }
-
-          .panels > div {
-            flex: 1 1 auto;
-          }
-          .layer > div {
-            width: 100%;
-            height: 100%;
-          }
-          .layer > div {
-            width: 100%;
-            height: 100%;
-          }
-          .layer.dragging {
-            opacity: 50%;
-          }
-
-          .title {
-            margin: 0;
-            width: 100%;
-            padding-top: 80px;
-            line-height: 1.15;
-            font-size: 48px;
-          }
-          .title,
-          .description {
-            text-align: center;
-          }
-          .row {
-            max-width: 880px;
-            margin: 80px auto 40px;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-around;
           }
         `}</style>
       </div>

@@ -405,7 +405,14 @@ Util.adapter = function(obj, getLength = obj => obj.length, getKey = (obj, index
   return adapter;
 };
 
-Util.adapter.localStorage = (s = localStorage) => Util.adapter(s, l => l.length, (l, i) => l.key(i), (l, key) => JSON.parse(l.getItem(key)), (l, key, v) => l.setItem(key, JSON.stringify(v)));
+Util.adapter.localStorage = (s = localStorage) =>
+  Util.adapter(
+    s,
+    l => l.length,
+    (l, i) => l.key(i),
+    (l, key) => JSON.parse(l.getItem(key)),
+    (l, key, v) => l.setItem(key, JSON.stringify(v))
+  );
 
 Util.array = function(enumerable = []) {
   let a = enumerable instanceof Array ? enumerable : [...enumerable];

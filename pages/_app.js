@@ -5,7 +5,11 @@ import { Provider } from "mobx-react";
 import Util from "../utils/util.js";
 import { Router } from "next/router";
 import { createStore, getOrCreateStore } from "../stores/createStore.js";
+import { singleton } from "../stores/RootStore.js";
 import { withRouter } from "next/router";
+import i18nStore from "../stores/i18nStore.js";
+
+const mobxStore = getOrCreateStore();
 
 class MyApp extends App {
   static async getInitialProps({ Component, router, ctx }) {
@@ -36,36 +40,40 @@ class MyApp extends App {
     } else {
       //console.log(`App.getInitialProps ${componentName} has no getInitialProps!`);
     }
-    //console.log(componentName + ' pageProps=', pageProps);
+    console.log("App pageProps=", pageProps);
 
     return { pageProps };
   }
 
   constructor(props) {
     super(props);
+    this.mobxStore = getOrCreateStore(!global.window, props.pageProps.initialMobxState);
+    console.log("App.constructor", this.mobxStore);
   }
 
   render() {
     const { Component, pageProps, router } = this.props;
 
-    const mobxStore = getOrCreateStore();
-
     if(Util.isBrowser()) window.component = Component;
 
-    //console.log('App.render\n', process.env.BUILD_ID);
+    console.log("App.render", mobxStore);
     return (
       <Container>
         <Head>
           <title>StarLottery</title>
         </Head>
-        <Provider rootStore={mobxStore.RootStore} store={mobxStore}>
+        <Provider rootStore={this.mobxStore.RootStore} i18nStore={i18nStore} store={this.mobxStore}>
           <Component {...pageProps} router={router} key={Router.route} />
         </Provider>
         <style jsx global>{`
           @font-face {
             font-family: "Fixed";
             src: url("static/fonts/Fixed-Medium.eot");
-            src: url("static/fonts/Fixed-Medium.eot?#iefix") format("embedded-opentype"), url("static/fonts/Fixed-Medium.woff2") format("woff2"), url("static/fonts/Fixed-Medium.woff") format("woff"), url("static/fonts/Fixed-Medium.ttf") format("truetype"), url("static/fonts/Fixed-Medium.svg#Fixed-Medium") format("svg");
+            src: url("static/fonts/Fixed-Medium.eot?#iefix") format("embedded-opentype"),
+              url("static/fonts/Fixed-Medium.woff2") format("woff2"),
+              url("static/fonts/Fixed-Medium.woff") format("woff"),
+              url("static/fonts/Fixed-Medium.ttf") format("truetype"),
+              url("static/fonts/Fixed-Medium.svg#Fixed-Medium") format("svg");
             font-weight: 500;
             font-style: normal;
           }
@@ -75,7 +83,7 @@ class MyApp extends App {
             font-family: Fixed;
             font-size: 13px;
             background: url(static/img/tile-background.jpg) repeat;
-            background-size: 100vmin auto;
+            background-size: auto 50vmin;
             margin: 0;
           }
 

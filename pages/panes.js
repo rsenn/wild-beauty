@@ -11,6 +11,8 @@ import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touc
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
+import { toJS } from "mobx";
+
 import RUG from "react-upload-gallery";
 import "react-upload-gallery/dist/style.css";
 
@@ -24,9 +26,10 @@ const RandomColor = () => {
   return c.toString();
 };
 
-const Panes = () => {
+const Panes = props => {
   let swipeEvents = {};
   var e = null;
+  const { rootStore } = props;
 
   if(global.window !== undefined) window.page = this;
   /*
@@ -67,9 +70,16 @@ const Panes = () => {
     error: useState(0)
   };
   let list = imagePaths();
-  if(list === null || (list && list.length == undefined)) list = ["static/img/86463ed8ed391bf6b0a2907df74adb37.jpg", "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg", "static/img/cdb466a69cc7944809b20e7f34840486.jpg", "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg", "static/img/fdcce856cf66f33789dc3934418113a2.jpg"];
+  if(list === null || (list && list.length == undefined))
+    list = [
+      "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
+      "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
+      "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
+      "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
+      "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
+    ];
 
-  let articles = toJS(rootStore.state.articles);
+  /*  let articles = toJS(rootStore.state.articles);
 
   if(articles.length === undefined) articles = [];
   console.log("Home.render ", { articles });
@@ -81,7 +91,7 @@ const Panes = () => {
     json.id = art.id;
     json.page_id = art.page_id;
     return json;
-  });
+  });*/
 
   return (
     <div className={"panes-layout"} {...TouchEvents(touchListener)}>
@@ -91,7 +101,9 @@ const Panes = () => {
       </Head>
       <Nav />
       <div className={"page-layout"}>
-        <div style={{ position: "absolute", top: "15vh", left: "5vw", width: "80vw", height: "20vh" }}>
+        <div
+          style={{ position: "absolute", top: "15vh", left: "5vw", width: "80vw", height: "20vh" }}
+        >
           <RUG
             action="/api/upload" // upload route
             source={response => response.source} // response image source

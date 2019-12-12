@@ -36,7 +36,7 @@ let res;
 //
 //  //console.log("res: ", res.data);
 //});
-res = api.insert("photos", { data: "XXXX" });
+/*res = api.insert("photos", { data: "XXXX" });
 res.then(res => {
   const items = res.data && res.data.insert_photos ? res.data.insert_photos.returning : [];
   for(let item of items) {
@@ -48,8 +48,9 @@ res = api.list("photos", "width height data filesize");
 res.then(res => {
   console.log("res: ", prettyoutput(res));
   process.exit(0);
-});
-//
+});*/
+
+
 function addPhoto(path) {
   var buf = fs.readFileSync(path);
   if(jpeg.isJpeg(buf)) {
@@ -63,7 +64,7 @@ function addPhoto(path) {
     });
   }
 }
-let prom = Promise.all(
+/*let prom = Promise.all(
   [
     "static/img/04b79de115044501f1358f829130438d.jpg",
     "static/img/0c71247f63ff20833347da1484d3caa4.jpg",
@@ -105,7 +106,7 @@ const convertImage = item => {
   }
   return null;
 };
-
+*/
 const findObjects = (obj, name) => {
   var ret = [];
 
@@ -118,7 +119,7 @@ const findObjects = (obj, name) => {
   }
   return ret;
 };
-
+/*
 res = api.list(
   "items",
   "type data photos { photo { width height data filesize } } users { user { id name last_seen } }"
@@ -133,8 +134,19 @@ res.then(res => {
     }
   // items.forEach(console.log);
 });
-res = api({ query: queryItems() });
+
+*/
+
+var bcrypt = require('bcryptjs');
+var pass = "r4eHuJ";
+
+
+res = api.select('users', { username: "roman" }, ['id','username','password']);
 res.then(res => {
-  console.log("res: ", Util.inspect(res));
-  // items.forEach(console.log);
+  const user = res.users[0];
+  console.log("res: ", Util.inspect(user));
+
+  let result = bcrypt.compareSync(pass, user.password);
+   console.log("result: ", result);
+ // items.forEach(console.log);
 });

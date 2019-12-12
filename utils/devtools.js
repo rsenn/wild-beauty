@@ -270,7 +270,10 @@ Element.setCSS(c.root, { width: '100%', height: '100%' });
   let g = SVG.gradient(f, {
     type: "radial",
     id: "page1-halo",
-    stops: [[0, "#d8d8f4"], [1, "#edd455"]]
+    stops: [
+      [0, "#d8d8f4"],
+      [1, "#edd455"]
+    ]
   });
   console.log("PointList: ", { d, g });
 
@@ -538,22 +541,25 @@ export async function img(name, arg = {}) {
 
   let list = root.images
     ? root.images
-    : (root.images = new HashList(obj => (obj.firstElementChild.id || obj.xpath).replace(/(^|[^A-Za-z0-9])[FfEe][NnAa]([^A-Za-z0-9]|$)/, "$1XX$2"), function(arg) {
-        let e = Element.find(arg);
-        let svg = Element.find("svg", e);
-        /*let xpath = arg.xpath || Element.xpath(svg);
+    : (root.images = new HashList(
+        obj => (obj.firstElementChild.id || obj.xpath).replace(/(^|[^A-Za-z0-9])[FfEe][NnAa]([^A-Za-z0-9]|$)/, "$1XX$2"),
+        function(arg) {
+          let e = Element.find(arg);
+          let svg = Element.find("svg", e);
+          /*let xpath = arg.xpath || Element.xpath(svg);
       if(xpath && xpath.replace) xpath = xpath.replace(/.*\//, '');*/
-        Element.attr(svg, { "data-name": svg.id });
-        let r = new Rect(0, 0, svg.getAttribute("width"), svg.getAttribute("height"));
-        r = Rect.round(r);
-        let width = this.width + r.width;
-        /*  r.x += width;
+          Element.attr(svg, { "data-name": svg.id });
+          let r = new Rect(0, 0, svg.getAttribute("width"), svg.getAttribute("height"));
+          r = Rect.round(r);
+          let width = this.width + r.width;
+          /*  r.x += width;
         this.width = width;*/
-        Element.setRect(e, r);
-        //console.log("HashList ctor ", { width, r, id });
-        return e;
-        //return { e, r, id, xpath, svg };
-      }));
+          Element.setRect(e, r);
+          //console.log("HashList ctor ", { width, r, id });
+          return e;
+          //return { e, r, id, xpath, svg };
+        }
+      ));
 
   return new Promise(async (resolve, reject) => {
     let path = name.indexOf(".") == -1 ? name + ".svg" : name;
@@ -603,7 +609,7 @@ export async function img(name, arg = {}) {
       e.svg = svg;
       const arr = list.add(e);
       if(arr.length == 2) {
-        Timer.once(2000, () => {
+        Timer.once(1333, () => {
           console.log("walk(", arr[0].e, ", ", arr[1].e, ")");
           walk(arr[0].e, arr[1].e);
         });
@@ -915,7 +921,12 @@ export function storage(name) {
   });
 
   Util.defineGetterSetter(self, "name", () => name);
-  Util.defineGetterSetter(self, "value", () => self(), value => self(value));
+  Util.defineGetterSetter(
+    self,
+    "value",
+    () => self(),
+    value => self(value)
+  );
   self.get = function(key) {
     return key ? this.value[key] : this.value;
   };

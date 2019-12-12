@@ -5,10 +5,10 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
   return (
     <SizedAspectRatioBox width={"20vw"} className={"article-box"}>
       {title ? <h4 className={"article-title"}>{title}</h4> : undefined}
-      <div className={'article-content'}>
-      {text ? <p className={"article-text"}>{text} </p> : undefined}
-      {children}
-      &nbsp;
+      <div className={"article-content"}>
+        {text ? <p className={"article-text"}>{text} </p> : undefined}
+        {children}
+        &nbsp;
       </div>
 
       <style jsx global>{`
@@ -32,11 +32,12 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
           font-weight: 100;
           padding: 2px 0px 4px 10px;
           text-align: left;
-        } 
+        }
         div.article-box-size {
           margin: 4px;
-/*          border: 1px inset rgba(192, 192, 192, 0.3);
-*/        }
+          /*          border: 1px inset rgba(192, 192, 192, 0.3);
+*/
+        }
         div.article-box {
           position: relative;
           height: 20vw;
@@ -44,8 +45,7 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
           flex-flow: column nowrap;
           justify-content: stretch;
           align-items: stretch;
-                    border-top: 2px solid rgba(0, 0, 0, 0.4);
-
+          border-top: 2px solid rgba(0, 0, 0, 0.4);
         }
         div.article-content {
           height: 100%;

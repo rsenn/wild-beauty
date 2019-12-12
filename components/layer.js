@@ -4,13 +4,29 @@ import { trkl } from "../utils/trkl.js";
 import { Size, Rect, Element } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
+import { toJS } from "mobx";
 
 if ("window" in global) {
   assign_to(window);
   window.layers = [];
 }
 
-export function Layer({ style, inline, flex, children, border, margin, padding, background, overflow = "visible", opacity, x, y, w, h }) {
+export function Layer({
+  style,
+  inline,
+  flex,
+  children,
+  border,
+  margin,
+  padding,
+  background,
+  overflow = "visible",
+  opacity,
+  x,
+  y,
+  w,
+  h
+}) {
   var rect = w && h ? new Rect({ x: 0, y: 0, width: w, height: h }) : new Rect();
   var refContainer = useRef(null);
   var handler = trkl();
@@ -35,7 +51,9 @@ export function Layer({ style, inline, flex, children, border, margin, padding, 
   };
   var box = lazyInitializer(() => Element.rect(ref.current));
   var client = lazyInitializer(() => {
-    return "window" in global ? new Size(window.innerWidth, window.innerHeight) : new Size({ width: 0, height: 0 });
+    return "window" in global
+      ? new Size(window.innerWidth, window.innerHeight)
+      : new Size({ width: 0, height: 0 });
   });
   box.subscribe(rect => {
     console.log("New element rect: ", rect);

@@ -10,9 +10,18 @@ const graphqlHTTP = require("express-graphql");
 const graphql = require("graphql");
 const API = require("./utils/api.js")();
 const jpeg = require("./utils/jpeg.js");
+const cors = require("cors");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const fs = require("fs");
+var cookieParser = require("cookie-parser");
+
 var multer = require("multer");
 var cloudinary = require("cloudinary");
 var cloudinaryStorage = require("multer-storage-cloudinary");
+
+var secret = fs.readFileSync("secret.key");
+
 const userType = new graphql.GraphQLObjectType({
   name: "users",
   fields: {
@@ -96,7 +105,9 @@ if (!dev && cluster.isMaster) {
   }
 
   cluster.on("exit", (worker, code, signal) => {
-    console.error(`Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`);
+    console.error(
+      `Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`
+    );
   });
 } else {
   const nextApp = next({ dir: ".", dev });
@@ -116,6 +127,9 @@ if (!dev && cluster.isMaster) {
         res.redirect("https://" + req.headers.host + req.url);
       });
     }
+    server.use(cors());
+    server.use(cookieParser());
+
     // Static files
     // https://github.com/zeit/next.js/tree/4.2.3#user-content-static-file-serving-eg-images
     server.use(
@@ -148,6 +162,57 @@ if (!dev && cluster.isMaster) {
         limits: { fileSize: 50 * 1024 * 1024 }
       })
     );
+    server.use(bodyParser.json());
+
+    server.post("/api/login", async function(req, res) {
+      const { username, password } = req.body;
+      //console.log("req: ", { username, password });
+      try {
+        let response = await API.select("users", { username }, ["id", "username", "password"]);
+        const user = response.users[0];
+        let success = bcrypt.compareSync(password, user.password);
+        let token, user_id = -1;
+        if(success) {
+                   user_id = user.id;
+
+          token = jwt.sign(password, secret);
+          last_seen = new Date().toISOString();
+          response = await API.update("users", { username }, { token, last_seen });
+        }
+        res.cookie("token", token, {
+          maxAge: 1000 * 60, // 1 min
+          httpOnly: true // http only, prevents JavaScript cookie access
+        });
+        console.error("Login user: ", user);
+
+        res.json({ success, token, user_id: user.id });
+      } catch(err) {
+        console.error("Login error: ", err);
+      }
+    });
+
+    server.get("/api/logout", async function(req, res) {
+      try {
+        if(req.cookies && req.cookies.token) {
+          const { token } = req.cookies;
+          let response = await API.select("users", { token }, ["id", "username", "token"]);
+          const user = response.users[0];
+          //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
+          if(req.cookies.token == user.token) {
+            response = await API.update("users", { id: user.id }, { token: "NULL" });
+            //console.log("response: ", response.affected_rows);
+            if(response.affected_rows == 1) {
+              res.json({ success: true });
+              return;
+            }
+          }
+        }
+      } catch(err) {
+        console.error("Logout error: ", err);
+      }
+      res.json({ success: false });
+    });
+
     server.post("/api/upload", function(req, res) {
       /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");

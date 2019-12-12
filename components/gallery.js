@@ -68,7 +68,9 @@ export const RandomImages = (arg => {
     if(!style) style = {};
     style = { ...style, width, height: height ? height : "auto" };
     props = { ...rest, style };
-    return randomImagePaths().map(path => <img src={path} border={0} alt={path.replace(/.*\//g, "")} {...props} />);
+    return randomImagePaths().map(path => (
+      <img src={path} border={0} alt={path.replace(/.*\//g, "")} {...props} />
+    ));
   };
 })(defaultImageProps);
 
@@ -105,7 +107,12 @@ export const ImageLayer = ({ path, bgcolor = RandomColor() }) => {
 // handlegallery- prop of the Flipper component
 
 // all animations happen at the same time
-const simultaneousAnimations = ({ hideEnteringElements, animateEnteringElements, animateExitingElements, animateFlippedElements }) => {
+const simultaneousAnimations = ({
+  hideEnteringElements,
+  animateEnteringElements,
+  animateExitingElements,
+  animateFlippedElements
+}) => {
   hideEnteringElements();
   animateExitingElements();
   animateFlippedElements();
@@ -116,7 +123,12 @@ const simultaneousAnimations = ({ hideEnteringElements, animateEnteringElements,
 // next, animate updating elements
 // finally, after updates are complete,
 // animate entering elements
-const exitThenFlipThenEnter = ({ hideEnteringElements, animateEnteringElements, animateExitingElements, animateFlippedElements }) => {
+const exitThenFlipThenEnter = ({
+  hideEnteringElements,
+  animateEnteringElements,
+  animateExitingElements,
+  animateFlippedElements
+}) => {
   hideEnteringElements();
   animateExitingElements()
     .then(animateFlippedElements)
@@ -125,7 +137,12 @@ const exitThenFlipThenEnter = ({ hideEnteringElements, animateEnteringElements, 
 
 // animate exiting and updating elements simultaneously
 // then, when both are complete, animate in new elements
-const exitAndFlipThenEnter = ({ hideEnteringElements, animateEnteringElements, animateExitingElements, animateFlippedElements }) => {
+const exitAndFlipThenEnter = ({
+  hideEnteringElements,
+  animateEnteringElements,
+  animateExitingElements,
+  animateFlippedElements
+}) => {
   hideEnteringElements();
   Promise.all([animateExitingElements(), animateFlippedElements()]).then(animateEnteringElements);
 };
@@ -193,9 +210,19 @@ export class Gallery extends Component {
             );
           })}
         </div>
-        <Flipper flipKey={this.state.list.join(", ")} element="ul" className="gallery-list" handleEnterUpdateDelete={transitions[this.state.transitionType]}>
+        <Flipper
+          flipKey={this.state.list.join(", ")}
+          element="ul"
+          className="gallery-list"
+          handleEnterUpdateDelete={transitions[this.state.transitionType]}
+        >
           {this.state.list.map(d => (
-            <Flipped key={d} flipId={d.toString()} onAppear={animateElementIn} onExit={animateElementOut}>
+            <Flipped
+              key={d}
+              flipId={d.toString()}
+              onAppear={animateElementIn}
+              onExit={animateElementOut}
+            >
               <div className={"centered"}>
                 <img src={d} {...defaultImageProps} />
                 {/*d.replace(/.*\//g, '').replace(/\.[a-z]*$/g, '')*/}

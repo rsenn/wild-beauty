@@ -267,7 +267,7 @@ Point.prototype.toCSS = Point.toCSS;
 
 Point.match = new RegExp("/([0-9.]+,[0-9.]+)/");
 
-Point.inside = (p, rect) => p.x >= rect.x && p.x < rect.x + rect.width && (p.y >= rect.y && p.y < rect.y + rect.height);
+Point.inside = (p, rect) => p.x >= rect.x && p.x < rect.x + rect.width && p.y >= rect.y && p.y < rect.y + rect.height;
 
 Point.transform = (p, m) => ({
   x: m.xx * p.x + m.yx * p.y + m.tx,
@@ -2055,7 +2055,7 @@ export function HSLA(h = 0, s = 0, l = 0, a = 1.0) {
     ret.a = c[3] !== undefined ? c[3] : 1.0;
 
     ["h", "s", "l", "a"].forEach(channel => {
-      if(ret[channel].endsWith("%")) ret[channel] = parseFloat(ret[channel].slice(0, ret[channel].length - 1));
+      if(String(ret[channel]).endsWith("%")) ret[channel] = parseFloat(ret[channel].slice(0, ret[channel].length - 1));
       else ret[channel] = parseFloat(ret[channel]);
     });
   }
@@ -2150,6 +2150,10 @@ export let Timer = function(timeout, fn, props = {}, { create = setInterval, des
     },
     ...props
   };
+};
+HSLA.prototype.toString = function() {
+  if(this.a == 1) return `hsl(${this.h},${this.s}%,${this.l}%)`;
+  return `hsla(${this.h},${this.s}%,${this.l}%,${this.a})`;
 };
 
 Timer.interval = (timeout, fn, props) => Timer(timeout, fn, props, {});
@@ -2490,12 +2494,30 @@ export class Element extends Node {
 
   static edges = arg => Element.getEdgesXYWH(Element.rect(arg));
 
-  static getEdgesXYWH = ({ x, y, w, h }) => [{ x, y }, { x: x + w, y }, { x: x + w, y: y + h }, { x, y: y + h }];
-  static getEdge = ({ x, y, w, h }, which) => [{ x, y }, { x: x + w / 2, y }, { x: x + w, y }, { x: x + w, y: y + h / 2 }, { x: x + w, y: y + h }, { x: x + w / 2, y: y + h }, { x, y: y + h }, { x, y: y + h / 2 }][Math.floor(which * 2)];
+  static getEdgesXYWH = ({ x, y, w, h }) => [
+    { x, y },
+    { x: x + w, y },
+    { x: x + w, y: y + h },
+    { x, y: y + h }
+  ];
+  static getEdge = ({ x, y, w, h }, which) =>
+    [
+      { x, y },
+      { x: x + w / 2, y },
+      { x: x + w, y },
+      { x: x + w, y: y + h / 2 },
+      { x: x + w, y: y + h },
+      { x: x + w / 2, y: y + h },
+      { x, y: y + h },
+      { x, y: y + h / 2 }
+    ][Math.floor(which * 2)];
 
   static Axis = { H: 0, V: 2 };
 
-  static getPointsXYWH = ({ x, y, w, h }) => [{ x, y }, { x: x + w, y: y + h }];
+  static getPointsXYWH = ({ x, y, w, h }) => [
+    { x, y },
+    { x: x + w, y: y + h }
+  ];
 
   static cumulativeOffset = (element, relative_to = null) => {
     if(typeof element == "string") element = Element.find(element);
@@ -2812,9 +2834,19 @@ export class CSS {
     const getStyleSheet = (obj, key) => {
       let sheet = Util.find(obj, entry => entry.href == key || entry.ownerNode.id == key) || obj[key];
 
-      return Util.adapter(sheet.rules, obj => (obj && obj.length !== undefined ? obj.length : 0), (obj, i) => obj[i].selectorText, getStyleMap);
+      return Util.adapter(
+        sheet.rules,
+        obj => (obj && obj.length !== undefined ? obj.length : 0),
+        (obj, i) => obj[i].selectorText,
+        getStyleMap
+      );
     };
-    return Util.adapter([...doc.styleSheets], obj => obj.length, (obj, i) => obj[i].href || obj[i].ownerNode.id || i, getStyleSheet);
+    return Util.adapter(
+      [...doc.styleSheets],
+      obj => obj.length,
+      (obj, i) => obj[i].href || obj[i].ownerNode.id || i,
+      getStyleSheet
+    );
   }
   static styles(stylesheet) {
     const list = stylesheet && stylesheet.cssRules ? [stylesheet] : CSS.list(stylesheet);
@@ -3200,7 +3232,12 @@ export const ElementWHProps = element => {
 
 export const ElementPosProps = (element, proxy) => {
   proxy = proxy || new ElementRectProxy(element);
-  Util.defineGetterSetter(element, "x", () => proxy.getPos().x, x => proxy.setPos({ x }));
+  Util.defineGetterSetter(
+    element,
+    "x",
+    () => proxy.getPos().x,
+    x => proxy.setPos({ x })
+  );
   Util.defineGetterSetter(
     element,
     "x1",
@@ -3223,7 +3260,12 @@ export const ElementPosProps = (element, proxy) => {
         return rect;
       })
   );
-  Util.defineGetterSetter(element, "y", () => proxy.getPos().y, y => proxy.setPos({ y }));
+  Util.defineGetterSetter(
+    element,
+    "y",
+    () => proxy.getPos().y,
+    y => proxy.setPos({ y })
+  );
   Util.defineGetterSetter(
     element,
     "y1",
@@ -3250,10 +3292,30 @@ export const ElementPosProps = (element, proxy) => {
 
 export const ElementSizeProps = (element, proxy) => {
   proxy = proxy || new ElementRectProxy(element);
-  Util.defineGetterSetter(element, "w", () => proxy.getRect().width, width => proxy.setSize({ width }));
-  Util.defineGetterSetter(element, "width", () => proxy.getRect().width, width => proxy.setSize({ width }));
-  Util.defineGetterSetter(element, "h", () => proxy.getRect().height, width => proxy.setSize({ height }));
-  Util.defineGetterSetter(element, "height", () => proxy.getRect().height, width => proxy.setSize({ height }));
+  Util.defineGetterSetter(
+    element,
+    "w",
+    () => proxy.getRect().width,
+    width => proxy.setSize({ width })
+  );
+  Util.defineGetterSetter(
+    element,
+    "width",
+    () => proxy.getRect().width,
+    width => proxy.setSize({ width })
+  );
+  Util.defineGetterSetter(
+    element,
+    "h",
+    () => proxy.getRect().height,
+    width => proxy.setSize({ height })
+  );
+  Util.defineGetterSetter(
+    element,
+    "height",
+    () => proxy.getRect().height,
+    width => proxy.setSize({ height })
+  );
 };
 
 export const ElementRectProps = (element, proxy) => {

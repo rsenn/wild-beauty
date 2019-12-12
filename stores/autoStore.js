@@ -1,4 +1,4 @@
-import { autorun } from 'mobx';
+import { autorun, toJS } from "mobx";
 
 export const makeLocalStorage = () => {
   if(global.window && window.localStorage)
@@ -41,8 +41,7 @@ export const makeDummyStorage = () => ({
 
 export function getLocalStorage() {
   if(getLocalStorage.store === undefined) {
-    getLocalStorage.store =
-      global.window && window.localStorage ? makeLocalStorage() : makeDummyStorage();
+    getLocalStorage.store = global.window && window.localStorage ? makeLocalStorage() : makeDummyStorage();
   }
   return getLocalStorage.store;
 }
@@ -58,13 +57,20 @@ export const makeAutoStoreHandler = (name, _class) => {
         const existingStore = store.get(name);
         if(existingStore) {
           _this[_member] = existingStore;
-          _class.setSource('local', _member);
+          _class.setSource("local", _member);
         }
       }
       const updatedStore = _this[_member];
 
+      console.log("AutoStoreHandler: ", {
+        name,
+        obj: toJS(_this),
+        key: _member,
+        value: toJS(updatedStore)
+      });
+
       if(updatedStore) {
-        store.set(name, updatedStore);
+        store.set(name, toJS(updatedStore));
       } else {
         store.remove(name);
       }
