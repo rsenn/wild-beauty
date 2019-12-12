@@ -232,7 +232,8 @@ const Nav = inject(
               }}
               loading={loading}
               onLogin={(user, pass) => {
-                rootStore.doLogin(user, pass, () => {
+                rootStore.doLogin(user, pass, res => {
+                  if(res.success)
                   Timer.once(1333, () => {
                     setLoginOpen(false);
                   });
