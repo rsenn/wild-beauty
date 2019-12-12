@@ -688,14 +688,15 @@ Util.deepClone = function(data) {
 };
 
 // Function
-Util.findVal = (object, propName) => {
+Util.findVal = (object, propName, maxDepth = 10) => {
+  if(maxDepth <= 0) return null;
   for(let key in object) {
     if(key === propName) {
       console.log(propName);
       console.log(object[key]);
       return object[key];
     } else {
-      let value = Util.findVal(object[key], propName);
+      let value = Util.findVal(object[key], propName, maxDepth - 1);
 
       if(value !== undefined) return value;
     }

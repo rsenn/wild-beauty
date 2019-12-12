@@ -1,8 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import LoginForm from "../components/login.js";
 import { withRouter } from "next/router";
 import classNames from "classnames";
+import LoginForm from "./login.js";
 
 const LoginIcon = ({ style }) => (
   <svg
@@ -26,7 +26,7 @@ const SiteMap = [
   { href: "/test", label: <span>Gallery</span>, disabled: true },
   { href: "/panes", label: <span>Panes</span> },
   { href: "/show", label: <span>Show</span> },
-  { label: <LoginIcon style={{ position: "relative", width: "auto", height: "60px" }} /> }
+  { href: "#", label: <LoginForm show={true} style={{ position: 'absolute', width: '100%', height: '100%' }} /> }
 ];
 
 const NavLink = ({ href, label, path, key, disabled }) => (
@@ -48,38 +48,47 @@ const NavLink = ({ href, label, path, key, disabled }) => (
     </a>{" "}
     <style jsx global>{`
       li.menu-active {
-        border-radius: 8px;
-        border: 3px solid black;
+        border: 1px solid #00000040;
       }
 
       li.menu-inactive {
-        border-radius: 8px;
-        border: 3px solid #00000000;
+        border: 1px solid #00000000;
       }
       li.menu-inactive {
-        /*    background-color: #bcbcbcc0;*/
       }
 
       li.menu-disabled {
         display: none;
       }
+      li {
+        position: relative;
+        transition: width 1s;
+        text-align: center;
+
+        width: 12.5vw;
+        height: 12.5vw;
+      }
+      li:hover {
+        transition: width 1s;
+        width: 100px;
+      }
       li > a > span {
-        font-family: "Jewel Hill";
-        font-size: 62px;
+        font-family: Fixed;
+        font-size: 40px;
+        vertical-align: center;
       }
       li {
-        background-color: rgb(219, 219, 219);
+        background-color: rgba(138, 0, 16, 0.5);
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        padding: 8px 18px 0 18px;
+        padding: 4px 0 0 1px;
         margin: 2px;
+        overflow: hidden;
       }
       a {
-        color: black;
+        color: white;
         text-decoration: none;
-        font-size: 24px;
-        padding: 0 0 -8px 0;
       }
       a:hover {
         filter: drop-shadow(4px 4px 2px #00000080);
@@ -106,21 +115,25 @@ const Nav = withRouter(props => (
         font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir, Helvetica, sans-serif;
       }
       ul.menu {
-        font-family: "Jewel Hill";
+        font-family: Fixed;
       }
       .menu {
-        position: fixed;
+        position: relative;
         top: 0;
         z-index: 10;
         text-align: center;
-        display: inline-block;
+        display: înline-block;
+        color: white;
+        float: right;
       }
       ul {
         display: flex;
-        justify-content: space-around;
+        justify-content: flex-end;
+        margin-block-start: 0;
+        margin-block-end: 0;
       }
       .menu > ul {
-        padding: 4px 16px;
+        padding: 4px 4px;
       }
     `}</style>
   </div>

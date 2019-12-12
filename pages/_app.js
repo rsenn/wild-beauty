@@ -62,104 +62,32 @@ class MyApp extends App {
         </Provider>
         <style jsx global>{`
           @font-face {
-            font-family: "Jewel Hill";
-            src: url("/static/fonts/hinted-JewelHill.eot");
-            src: local("Jewel Hill"), local("JewelHill"),
-              url("/static/fonts/hinted-JewelHill.eot?#iefix") format("embedded-opentype"),
-              url("/static/fonts/hinted-JewelHill.woff2") format("woff2"),
-              url("/static/fonts/hinted-JewelHill.woff") format("woff"),
-              url("/static/fonts/hinted-JewelHill.ttf") format("truetype"),
-              url("/static/fonts/hinted-JewelHill.svg#JewelHill") format("svg");
-            font-weight: normal;
-            font-style: normal;
-          }
-          @font-face {
-            font-family: "Manjari Regular";
-            src: url("/static/fonts/hinted-Manjari-Regular.eot");
-            src: local("Manjari Regular"), local("Manjari-Regular"),
-              url("/static/fonts/hinted-Manjari-Regular.eot?#iefix") format("embedded-opentype"),
-              url("/static/fonts/hinted-Manjari-Regular.woff2") format("woff2"),
-              url("/static/fonts/hinted-Manjari-Regular.woff") format("woff"),
-              url("/static/fonts/hinted-Manjari-Regular.ttf") format("truetype"),
-              url("/static/fonts/hinted-Manjari-Regular.svg#Manjari-Regular") format("svg");
-            font-weight: normal;
+            font-family: "Fixed";
+            src: url("static/fonts/Fixed-Medium.eot");
+            src: url("static/fonts/Fixed-Medium.eot?#iefix") format("embedded-opentype"),
+              url("static/fonts/Fixed-Medium.woff2") format("woff2"),
+              url("static/fonts/Fixed-Medium.woff") format("woff"),
+              url("static/fonts/Fixed-Medium.ttf") format("truetype"),
+              url("static/fonts/Fixed-Medium.svg#Fixed-Medium") format("svg");
+            font-weight: 500;
             font-style: normal;
           }
 
           body,
           html {
-            font-size: 20px;
-             background: url(static/img/tile-background.jpg) repeat;
-               background-size: 100vmin auto;
-
+            font-size: 13px;
+            background: url(static/img/tile-background.jpg) repeat;
+            background-size: 100vmin auto;
           }
 
           .page-layout {
-            position: absolute;
-            top: 250px;
+            margin: 50px 0 0 0;
             width: 100vw;
-            min-height: 100vh;
             text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1;
-
-
-          }
-          li.menu-active {
-            border-radius: 8px;
-            border: 3px solid black;
-          }
-
-          li.menu-inactive {
-            border-radius: 8px;
-            border: 3px solid #00000000;
-          }
-          li.menu-inactive {
-            /*    background-color: #bcbcbcc0;*/
-          }
-
-          li.menu-disabled {
-            display: none;
-          }
-          li > a > span {
-            font-family: "Jewel Hill";
-            font-size: 62px;
-          }
-          li {
-            background-color: rgb(219, 219, 219);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            padding: 8px 18px 0 18px;
-            margin: 2px;
-          }
-          a {
-            color: black;
-            text-decoration: none;
-            font-size: 24px;
-            padding: 0 0 -8px 0;
-          }
-          a:hover {
-            filter: drop-shadow(4px 4px 2px #00000080);
-          }
-          ul.menu {
-            font-family: "Jewel Hill";
-          }
-          .menu {
-            position: fixed;
-            top: 0;
-            z-index: 10;
-            text-align: center;
-            display: inline-block;
-          }
-          ul {
-            display: flex;
-            justify-content: space-around;
-          }
-          .menu > ul {
-            padding: 4px 16px;
           }
         `}</style>
       </Container>

@@ -15,9 +15,9 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
         p.article-text {
           margin: 0px;
           position: relative;
-          font-size: 0.8em;
+          font-size: 15px;
           padding: 8px 2px 2px 8px;
-          font-family: "Century Gothic", Arial, sans;
+          font-family: Fixed;
         }
         h4.article-title {
           margin: 0px;
@@ -25,14 +25,14 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
           top: 0px;
           background: black;
           color: white;
-          font-family: "Candara Bold", Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif;
-          font-size: 20px;
+          font-family: Fixed;
+          font-size: 15px;
           font-style: normal;
           font-variant: normal;
-          font-weight: 900;
+          font-weight: 100;
           padding: 2px 0px 4px 10px;
           text-align: left;
-        }
+        } 
         div.article-box-size {
           margin: 4px;
 /*          border: 1px inset rgba(192, 192, 192, 0.3);

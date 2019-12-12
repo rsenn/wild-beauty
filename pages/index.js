@@ -15,6 +15,7 @@ import getAPI from "../utils/api.js";
 import { action, toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Article } from "../components/views/article.js";
+import LoginForm from "../components/login.js";
 
 import "../static/style.css";
 
@@ -41,9 +42,7 @@ class Home extends React.Component {
 
   componentDidMount() {
     const { rootStore } = this.props;
-
     console.log("Home.componentDidMount ");
-
     rootStore.loadArticles("home").then(result => {
       let articles = Util.findVal(result, "items");
       console.log("Home fetched", { result, articles });
@@ -98,7 +97,7 @@ class Home extends React.Component {
         "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
       ];*/
     const { rootStore } = this.props;
-
+/*
     let articles = toJS(rootStore.state.articles);
 
     if(articles.length === undefined) articles = [];
@@ -111,17 +110,25 @@ class Home extends React.Component {
       json.id = art.id;
       json.page_id = art.page_id;
       return json;
-    });
+    });*/
     return (
       <div className={"main-layout"} {...TouchEvents(touchListener)}>
         <Head>
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Nav />
-                  <img src={'static/img/logo-transparent.png'} style={{ marginLeft: '20px', marginTop: '150px', width: '100vw', maxWidth: '480px', height: 'auto' }} />
+{/*        <Nav />
+*/}
+        <img
+          src={"static/img/logo-transparent.png"}
+          style={{
+            width: "100vw",
+            maxWidth: "480px",
+            height: "auto"
+          }}
+        />
 
-        {rootStore.state.updated}
+{/*        {rootStore.state.updated}
         <div className={"page-layout"}>
           <div className={"article-list"}>
             {articles.map(article => (
@@ -129,14 +136,13 @@ class Home extends React.Component {
             ))}
           </div>
         </div>
-
+*/}
         {/*  <Layer w={300} h={'300px'} margin={10} padding={2} border={'2px dashed red'}>
         Layer
       </Layer>
       <SvgOverlay />*/}
         <style jsx global>{`
           .article-list {
-            margin: auto;
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;

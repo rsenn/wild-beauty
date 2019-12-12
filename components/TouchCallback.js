@@ -37,7 +37,7 @@ export const TouchCallback = event => {
   }
 
   if((e && e.tagName && e.tagName.toLowerCase() == "html") || !hasLayerClass) {
-    if(typeof(cancel) == 'function') return cancel();
+    if(typeof cancel == "function") return cancel();
   }
 
   if(e) Element.setCSS(e, { zIndex });
