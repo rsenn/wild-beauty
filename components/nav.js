@@ -393,8 +393,8 @@ const Nav = inject(
               transform: perspective(300px) rotate3d(0, 0, 1, 0deg) scale3d(1, 1, 1);
             }
             .ReactModal__Overlay--before-close {
-              transform: perspective(300px) translate3d(50vw, -50vh, 0) rotateX(-45deg)
-                rotateY(-45deg) rotateZ(90deg) scale3d(0.02, 0.02, 1);
+              transform: perspective(300px) translate3d(-50vw, 50vh, 0) rotateX(45deg)
+                rotateY(45deg) rotateZ(-90deg) scale3d(0.02, 0.02, 1);
             }
           `}</style>
         </div>
