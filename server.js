@@ -20,11 +20,8 @@ const sharp = require("sharp");
 const util = require("util");
 var session = require("express-session");
 var cookieSession = require("cookie-session");
-
 const maxWidthOrHeight = 1024;
-
 var MemoryStream = require("memory-stream");
-
 let stream = require("stream");
 let Readable = stream.Readable;
 function bufferToStream(buffer) {
@@ -33,14 +30,12 @@ function bufferToStream(buffer) {
   stream.push(null);
   return stream;
 }
-
 /*
 var multer = require("multer");
 var cloudinary = require("cloudinary");
 var cloudinaryStorage = require("multer-storage-cloudinary");
 */
 var secret = fs.readFileSync("secret.key");
-
 /*
 const userType = new graphql.GraphQLObjectType({
   name: "users",
@@ -93,7 +88,6 @@ var schema = new graphql.GraphQLSchema({
     console.log("photo: ", { id, author, image });
   }
 };*/
-
 const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5555;
 /*
@@ -118,12 +112,10 @@ ret.then(ret => {
 // Multi-process to utilize all CPU cores.
 if (!dev && cluster.isMaster) {
   console.log(`Node cluster master ${process.pid} is running`);
-
   // Fork workers.
   for(let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
-
   cluster.on("exit", (worker, code, signal) => {
     console.error(`Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`);
   });
@@ -145,7 +137,6 @@ if (!dev && cluster.isMaster) {
         res.redirect("https://" + req.headers.host + req.url);
       });
     }
-
     let sess = {
       secret: typeof secret == "string" ? secret : "the-wild-beauty-1234",
       saveUninitialized: true,
@@ -157,12 +148,9 @@ if (!dev && cluster.isMaster) {
       },
       expires: new Date(Date.now() + 30 * 24 * 3600 * 1000)
     };
-
     server.use(session(sess));
-
     server.use(cors());
     server.use(cookieParser());
-
     // Static files
     // https://github.com/zeit/next.js/tree/4.2.3#user-content-static-file-serving-eg-images
     server.use(
@@ -208,7 +196,6 @@ if (!dev && cluster.isMaster) {
           user_id = -1;
         if(success) {
           user_id = user.id;
-
           token = jwt.sign(password, secret);
           last_seen = new Date().toISOString();
           response = await API.update("users", { username }, { token, last_seen });
@@ -218,40 +205,41 @@ if (!dev && cluster.isMaster) {
           httpOnly: true // http only, prevents JavaScript cookie access
         });
         req.session.token = token;
-
+        req.session.user_id = user_id;
         console.error("Login user: ", user);
-
         res.json({ success, token, user_id: user.id });
       } catch(err) {
         console.error("Login error: ", err);
       }
     });
 
+    const getVar = (req, name) =>  (req.cookies && req.cookies[name]) || (req.session && req.session[name]);
+
     const needAuth = fn =>
       async function(req, res) {
-        if(req.cookies && req.cookies.token) {
-          const { token } = req.cookies;
+        let token = getVar(req, 'token')
+        if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
           //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
-          if(req.cookies.token == user.token) return fn(req, res);
+          if(token == user.token) return fn(req, res);
         }
         //    res.json({ success: false, message: 'Need authentification' });
         return res.status(401).send("Need authentification");
       };
 
     server.get("/api/logout", async function(req, res) {
+      let token = getVar(req, 'token')
       try {
-        if(req.cookies && req.cookies.token) {
-          const { token } = req.cookies;
+        if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
           //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
-          if(req.cookies.token == user.token) {
+          if(token == user.token) {
             response = await API.update("users", { id: user.id }, { token: "NULL" });
             req.session.token = null;
+            req.session.user_id = -1;
             req.session.destroy();
-
             //console.log("response: ", response.affected_rows);
             if(response.affected_rows == 1) {
               res.json({ success: true });
@@ -267,66 +255,46 @@ if (!dev && cluster.isMaster) {
 
     //   server.use(bodyParser.json());
     //  curl   --header 'Content-Type: application/json' --data '{"fields":"original_name","offset":"10","limit":"10","order_by":"{id: desc}"}' -v http://localhost:5555/api/image/list|json_pp
-
     server.post("/api/image/list", async function(req, res) {
       let { fields, format, ...params } = req.body;
-
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
-
       console.log("params: ", params);
       let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "owner", "user { id }", ...fields], params);
-
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
-
       res.json({ success: true, count: images.length, images });
     });
 
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
       console.log(`id: `, id);
-
       let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "owner", "user { id }"]);
-
       const photo = response.photos[0];
-
       photo.uploaded = new Date(photo.uploaded).toString();
-
       let data = Buffer.from(photo.data, "base64");
       delete photo.data;
       console.log(`photo: `, photo);
-
       res.set("Content-Type", "image/jpeg");
-
       let props = jpeg.jpegProps(data);
-
       if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
-
       for(let key of ["original_name", "uploaded", "owner"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
-
       for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
-
       res.send(data);
     });
 
-    server.post(
-      "/api/image/upload",
-      needAuth(async function(req, res) {
+    server.post("/api/image/upload", needAuth(async function(req, res) {
         /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
       }*/
-        let user_id;
-        if(req.cookies && req.cookies.user_id) user_id = parseInt(req.cookies.user_id);
+        let user_id  = getVar(req, 'user_id')
 
-        console.log(`Files: `, Object.entries(req.files));
 
+      //  console.log(`Files: `, Object.entries(req.files));
         let response = [];
-
         for(let item of Object.entries(req.files)) {
           const file = item[1];
           console.log(`item: `, item);
           console.log(`file: `, file);
-
           //const data = ;
           let props = jpeg.jpegProps(file.data);
           let { width, height } = props;
@@ -347,16 +315,14 @@ if (!dev && cluster.isMaster) {
             }
             return { ...restOfProps, width, height };
           };
-
+          
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
 
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
           aspect = newDimensions.aspect || newDimensions.width / newDimensions.height;
-
           if(!compareDimensions(props, newDimensions)) {
             console.log(`new Image aspect: ${aspect}`);
             console.log(`newnewDimensions `, newDimensions);
-
             const transformer = sharp()
               .jpeg({
                 quality: 95 /*,
@@ -366,54 +332,39 @@ if (!dev && cluster.isMaster) {
               .on("info", function(info) {
                 console.log("Image height is " + info.height);
               });
-
             var inputStream = bufferToStream(file.data);
-
             var outputStream = new MemoryStream();
             const finished = util.promisify(stream.finished);
-
-            outputStream.on("finish", function() {
+            outputStream.on("finish", () =>  {
               console.log("outputStream: ", outputStream.buffer);
             });
             console.log("inputStream: ", inputStream);
 
             inputStream.pipe(transformer).pipe(outputStream);
-
             await finished(outputStream);
-
             let newData = outputStream.buffer[0];
             //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
-
             console.log("newData.length: ", newData.length);
-
             file.data = newData;
-
             props = jpeg.jpegProps(file.data);
             width = props ? props.width : null;
             height = props ? props.height : null;
             console.log(`new Image props: `, props);
           }
-
-          /*
-
-.resize*/
+          /*.resize*/
+          
           let data = file.data.toString("base64");
           let word = file.data[0] << (8 + file.data[1]);
-
           const { depth, channels } = props;
-
           let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height, user_id }, ["id"]);
-
           const { affected_rows, returning } = reply.insert_photos;
           console.log("API upload photo: ", word.toString(16), { affected_rows, props });
-
           returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
         }
         console.log("Send response: ", response);
         res.json(response);
       })
     );
-
     // Example server-side routing
     server.post("/a", (req, res) => {
       return nextApp.render(req, res, "/b", req.query);

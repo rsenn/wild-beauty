@@ -141,7 +141,7 @@ export function autofillEvent(window, changeHandler) {
 
     event.initEvent("change", true, true);
 
-    console.log("triggerChangeEvent ", { element, doc, event });
+    //    console.log("triggerChangeEvent ", { element, doc, event });
 
     if(handler) {
       handler(event);
