@@ -119,6 +119,8 @@ class Home extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav />
+                  <img src={'static/img/logo-transparent.png'} style={{ marginLeft: '20px', marginTop: '150px', width: '100vw', maxWidth: '480px', height: 'auto' }} />
+
         {rootStore.state.updated}
         <div className={"page-layout"}>
           <div className={"article-list"}>

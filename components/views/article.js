@@ -5,9 +5,11 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
   return (
     <SizedAspectRatioBox width={"20vw"} className={"article-box"}>
       {title ? <h4 className={"article-title"}>{title}</h4> : undefined}
-
+      <div className={'article-content'}>
       {text ? <p className={"article-text"}>{text} </p> : undefined}
       {children}
+      &nbsp;
+      </div>
 
       <style jsx global>{`
         p.article-text {
@@ -33,13 +35,23 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
         }
         div.article-box-size {
           margin: 4px;
-          border: 1px inset rgba(192, 192, 192, 0.3);
-        }
-        .aspect-ratio-box-inside {
+/*          border: 1px inset rgba(192, 192, 192, 0.3);
+*/        }
+        div.article-box {
           position: relative;
+          height: 20vw;
+          display: flex;
+          flex-flow: column nowrap;
+          justify-content: stretch;
+          align-items: stretch;
+                    border-top: 2px solid rgba(0, 0, 0, 0.4);
+
         }
-        div.article-box-size {
-          border: 2px solid rgba(0, 0, 0, 0.4);
+        div.article-content {
+          height: 100%;
+          border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+          border-left: 2px solid rgba(0, 0, 0, 0.4);
+          border-right: 2px solid rgba(0, 0, 0, 0.4);
 
           background-color: rgba(160, 160, 160, 0.2);
         }

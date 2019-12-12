@@ -1,13 +1,12 @@
 @font-face {
-    font-family: 'Manjari';
-    src: url('hinted-Manjari-Regular.eot');
-    src: local('Manjari Regular'), local('Manjari-Regular'),
-        url('hinted-Manjari-Regular.eot?#iefix') format('embedded-opentype'),
-        url('hinted-Manjari-Regular.woff2') format('woff2'),
-        url('hinted-Manjari-Regular.woff') format('woff'),
-        url('hinted-Manjari-Regular.ttf') format('truetype'),
-        url('hinted-Manjari-Regular.svg#Manjari-Regular') format('svg');
-    font-weight: normal;
+    font-family: 'Fixed';
+    src: url('Fixed-Medium.eot');
+    src: url('Fixed-Medium.eot?#iefix') format('embedded-opentype'),
+        url('Fixed-Medium.woff2') format('woff2'),
+        url('Fixed-Medium.woff') format('woff'),
+        url('Fixed-Medium.ttf') format('truetype'),
+        url('Fixed-Medium.svg#Fixed-Medium') format('svg');
+    font-weight: 500;
     font-style: normal;
 }
 

@@ -89,6 +89,9 @@ class MyApp extends App {
           body,
           html {
             font-size: 20px;
+             background: url(static/img/tile-background.jpg) repeat;
+               background-size: 100vmin auto;
+
           }
 
           .page-layout {
@@ -101,6 +104,8 @@ class MyApp extends App {
             justify-content: center;
             align-items: center;
             z-index: 1;
+
+
           }
           li.menu-active {
             border-radius: 8px;
