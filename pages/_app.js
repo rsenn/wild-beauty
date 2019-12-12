@@ -23,6 +23,7 @@ class MyApp extends App {
       (() => {
         return {};
       });
+
     if(typeof getInit == "function") {
       let pageCtx = { ...ctx, ...basePageProps };
 
@@ -75,9 +76,11 @@ class MyApp extends App {
 
           body,
           html {
+            font-family: Fixed;
             font-size: 13px;
             background: url(static/img/tile-background.jpg) repeat;
             background-size: 100vmin auto;
+            margin: 0;
           }
 
           .page-layout {

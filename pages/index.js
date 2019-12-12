@@ -6,7 +6,7 @@ import Gallery, { randomImagePaths } from "../components/gallery.js";
 import { ScrollController } from "../utils/scrollController.js";
 import Alea from "../utils/alea.js";
 import { SwipeTracker } from "../utils/swipeTracker.js";
-import { Element, Node, HSLA } from "../utils/dom.js";
+import { Element, Node, HSLA, Timer } from "../utils/dom.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
@@ -16,6 +16,8 @@ import { action, toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Article } from "../components/views/article.js";
 import LoginForm from "../components/login.js";
+
+import tims from "tims";
 
 import "../static/style.css";
 
@@ -35,7 +37,14 @@ const RandomColor = () => {
   return c.toString();
 };
 
+@inject("rootStore")
+@observer
 class Home extends React.Component {
+  state = {
+    mirrored: false,
+    angle: 0
+  };
+
   constructor(props) {
     super(props);
   }
@@ -50,6 +59,18 @@ class Home extends React.Component {
         //        rootStore.setState({ articles: toJS(res) });
         rootStore.updateState({ articles });
       }
+    });
+
+    var counter = 0;
+
+    Timer.interval(1000, () => {
+      rootStore.setState({
+        mirrored: counter % 3 == 0 ? !rootStore.state.mirrored : rootStore.state.mirrored,
+        angle: (counter / 3) % 360
+      });
+      counter++;
+      /*  this.setState({ mirrored: !this.state.mirrored });*/
+      this.forceUpdate();
     });
   }
 
@@ -97,7 +118,7 @@ class Home extends React.Component {
         "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
       ];*/
     const { rootStore } = this.props;
-/*
+    /*
     let articles = toJS(rootStore.state.articles);
 
     if(articles.length === undefined) articles = [];
@@ -111,24 +132,47 @@ class Home extends React.Component {
       json.page_id = art.page_id;
       return json;
     });*/
+
+    // const t = ` perspective(100vw) rotateY(${rootStore.state.mirrored ? 180 : 0}deg)`; // `rotateZ(${rootStore.state.angle}deg) ` + (rootStore.state.mirrored ? " rotateY(-180deg) " : "");
+    const t = ` perspective(100vw) scaleX(${rootStore.state.mirrored ? -1 : 1})`; // `rotateZ(${rootStore.state.angle}deg) ` + (rootStore.state.mirrored ? " rotateY(-180deg) " : "");
+
+    const endDate = new Date("2035");
+
+    const now = new Date();
+
+    const timespan = tims.text(endDate.getTime() - now.getTime(), {
+      lang: "fr"
+    }); /*.split(/,/g).slice(0, 2).join(', ')*/
+    console.log("Home.render", { t, timespan });
+
     return (
       <div className={"main-layout"} {...TouchEvents(touchListener)}>
         <Head>
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-{/*        <Nav />
-*/}
-        <img
-          src={"static/img/logo-transparent.png"}
+        {/*        <Nav />
+         */}
+        <div
           style={{
-            width: "100vw",
-            maxWidth: "480px",
-            height: "auto"
+            //   transition: "transform 1s ease-in",
+            transformStyle: "preserve-3d",
+            transform: t
           }}
-        />
+        >
+          <img
+            src={"static/img/logo-transparent.png"}
+            style={{
+              width: "100%",
+              maxWidth: "1280px"
+              /*            height: "auto",
+               */
+            }}
+          />
+        </div>
+        <div className={"time-counter"}>{timespan}</div>
 
-{/*        {rootStore.state.updated}
+        {/*        {rootStore.state.updated}
         <div className={"page-layout"}>
           <div className={"article-list"}>
             {articles.map(article => (
@@ -148,7 +192,18 @@ class Home extends React.Component {
             flex-wrap: wrap;
           }
           .main-layout {
-            overflow: hidden;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+          }
+          .time-counter {
+            margin: 10px;
+            font-size: 2em;
           }
           .gallery-image {
             height: auto;
@@ -212,4 +267,4 @@ class Home extends React.Component {
   }
 }
 
-export default inject("rootStore")(observer(Home));
+export default Home;

@@ -8,6 +8,7 @@
     "start": "node_modules/.bin/next start -p ${PORT:-5555}"
   },
   "dependencies": {
+    "@babel/core": "^7.7.5",
     "@render-props/image-props": "^0.1.18",
     "@zeit/next-css": "^1.0.1",
     "abs-svg-path": "^0.1.1",
@@ -49,6 +50,16 @@
     "react-flip-toolkit": "^7.0.7",
     "react-image-dropzone": "^1.11.0",
     "react-sizeme": "^2.6.10",
-    "react-upload-gallery": "^0.0.4"
+    "react-upload-gallery": "^0.0.4",
+    "tims": "^1.0.4"
+  },
+  "devDependencies": {
+    "@babel/node": "^7.7.4",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-decorators": "^7.7.4",
+    "@babel/plugin-proposal-export-default-from": "^7.7.4",
+    "babel-eslint": "^10.0.3",
+    "babel-plugin-transform-imports": "^2.0.0",
+    "eslint-plugin-legacy-decorators": "^1.0.0"
   }
 }

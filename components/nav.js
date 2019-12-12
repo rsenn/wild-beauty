@@ -26,7 +26,10 @@ const SiteMap = [
   { href: "/test", label: <span>Gallery</span>, disabled: true },
   { href: "/panes", label: <span>Panes</span> },
   { href: "/show", label: <span>Show</span> },
-  { href: "#", label: <LoginForm show={true} style={{ position: 'absolute', width: '100%', height: '100%' }} /> }
+  {
+    href: "#",
+    label: <LoginForm show={true} style={{ position: "absolute", width: "100%", height: "100%" }} />
+  }
 ];
 
 const NavLink = ({ href, label, path, key, disabled }) => (

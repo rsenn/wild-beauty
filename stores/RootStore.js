@@ -7,10 +7,14 @@ export class RootStore {
 
   state = observable({
     articles: [],
-    updated: false
+    updated: false,
+    mirrored: false,
+    angle: 0
   });
 
   constructor() {}
+
+
 
   updateState = action(function(obj) {
     set(this.state, obj);
