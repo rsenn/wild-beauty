@@ -24,6 +24,10 @@ module.exports = {
           height: (data[off + 3] << 8) | data[off + 4],
           channels: data[off + 5] // number of color components
         };
+        if(ret.width > 0 && ret.height > 0) {
+          ret.aspect = (ret.width / ret.height).toFixed(3);
+          ret.orientation = ret.aspect > 1 ? "landscape" : ret.aspect < 1 ? "portrait" : "square";
+        }
         break;
       }
 

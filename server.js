@@ -10,6 +10,7 @@ const graphqlHTTP = require("express-graphql");
 const graphql = require("graphql");
 const API = require("./utils/api.js")();
 const jpeg = require("./utils/jpeg.js");
+const Util = require("./utils/util.js");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -241,7 +242,25 @@ if (!dev && cluster.isMaster) {
     });
 
     server.get("/api/image/:id", async function(req, res) {
-      console.log(`req: `, req);
+      const id = req.params.id.replace(/[^0-9].*/, "");
+      console.log(`id: `, id);
+
+      let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "owner", "user { id }"]);
+
+      const photo = response.photos[0];
+
+      console.log(`response: `, { ...photo, data: undefined });
+
+      let data = Buffer.from(photo.data, "base64");
+
+      res.set("Content-Type", "image/jpeg");
+
+      let props = jpeg.jpegProps(data);
+
+      props.aspect = (props.width / props.height).toFixed(3);
+      for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
+
+      res.send(data);
     });
 
     server.post(
@@ -261,7 +280,7 @@ if (!dev && cluster.isMaster) {
           console.log(`file: `, file);
 
           //const data = ;
-          let props = jpeg.jpegProps(Uint8Array.from(file.data));
+          let props = jpeg.jpegProps(file.data);
           let { width, height } = props;
           let aspect = width / height;
           console.log(`Image width: ${width} height: ${height}`);
@@ -320,10 +339,10 @@ if (!dev && cluster.isMaster) {
 
             file.data = newData;
 
-            props = jpeg.jpegProps(Uint8Array.from(file.data));
+            props = jpeg.jpegProps(file.data);
             width = props ? props.width : null;
             height = props ? props.height : null;
-            console.log(`new Image props: `, { width, height });
+            console.log(`new Image props: `, props);
           }
 
           /*
@@ -331,6 +350,8 @@ if (!dev && cluster.isMaster) {
 .resize*/
           let data = file.data.toString("base64");
           let word = file.data[0] << (8 + file.data[1]);
+
+          const { depth, channels } = props;
 
           let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height }, ["id"]);
 
