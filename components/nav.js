@@ -136,8 +136,8 @@ const NavLink = ({ href, label, path, key, disabled, onClick }) => (
         overflow: hidden;
       }
       li.menu-item > a {
-    font-size: 3em;
-}
+        font-size: 3em;
+      }
       li {
         transition: width 1s;
       }
@@ -390,7 +390,6 @@ const Nav = inject(
               transform: perspective(300px) translate3d(50vw, -50vh, 0) rotateX(-45deg)
                 rotateY(-45deg) rotateZ(90deg) scale3d(0.02, 0.02, 1);
             }
-
           `}</style>
         </div>
       );

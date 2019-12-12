@@ -15,6 +15,21 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 var cookieParser = require("cookie-parser");
+const sharp = require("sharp");
+const util = require("util");
+
+const maxWidthOrHeight = 1024;
+
+var MemoryStream = require("memory-stream");
+
+let stream = require("stream");
+let Readable = stream.Readable;
+function bufferToStream(buffer) {
+  let stream = new Readable();
+  stream.push(buffer);
+  stream.push(null);
+  return stream;
+}
 /*
 var multer = require("multer");
 var cloudinary = require("cloudinary");
@@ -212,17 +227,85 @@ if (!dev && cluster.isMaster) {
       res.json({ success: false });
     });
 
-    server.post("/api/upload", function(req, res) {
+    server.post("/api/upload", async function(req, res) {
       /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
       }
 */
       const file = req.files.file;
-      const data = file.data.toString("base64");
-      const props = jpeg.jpegProps(Uint8Array.from(file.data));
-      const { width, height } = props;
+
+      //const data = ;
+      let props = jpeg.jpegProps(Uint8Array.from(file.data));
+      let { width, height } = props;
+      let aspect = width / height;
+      console.log(`Image width: ${width} height: ${height}`);
+      console.log(`Image aspect: ${aspect}`);
+
+      const calcDimensions = (max, { width, height }) => {
+        if(width > max || height > max) {
+          if(width > height) {
+            height = Math.floor((max * height) / width);
+            width = max;
+          } else {
+            width = Math.floor((max * width) / height);
+            height = max;
+          }
+        }
+        return { width, height };
+      };
+
+      const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
+
+      let newDimensions = calcDimensions(maxWidthOrHeight, { width, height });
+      aspect = newDimensions.width / newDimensions.height;
+
+      if(!compareDimensions({ width, height }, newDimensions)) {
+        console.log(`new Image aspect: ${aspect}`);
+
+     /*   if(newDimensions.width != maxWidthOrHeight) newDimensions.width = null;
+        if(newDimensions.height != maxWidthOrHeight) newDimensions.height = null;
+     */   console.log(`new Image `, newDimensions, file.data);
+
+        const transformer = sharp()
+          .resize(newDimensions)
+          .on("info", function(info) {
+            console.log("Image height is " + info.height);
+          });
+
+        var inputStream = bufferToStream(file.data);
+
+        var outputStream = new MemoryStream();         const finished = util.promisify(stream.finished);
+
+        outputStream.on("finish", function() {
+          console.log("outputStream: ", outputStream.buffer);
+        });
+        console.log("file.data: ", file.data);
+        console.log("inputStream: ", inputStream);
+
+        inputStream.pipe(transformer).pipe(outputStream);
+
+        await finished(outputStream);
+
+        let newData = outputStream.buffer;
+        //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
+
+        file.data = newData[0];
+        console.log("new Data: ", file.data);
+
+        props = jpeg.jpegProps(Uint8Array.from(file.data));
+        width = props ? props.width : null;
+        height = props ? props.height : null;
+        console.log(`new Image img: `, { width, height });
+      }
+
+      /*
+
+.resize*/
+let data = file.data.toString("base64");
+let word = file.data[0]<<8+file.data[1];
+
       API.insert("photos", { data, filesize: file.data.length, width, height });
-      console.log("API upload photo: ", props);
+      console.log("API upload photo: ", word.toString(16),  props);
       //
       //      const q = "{ images {id image author } }";
       //      graphql.graphql(schema, "{ id image author }").then(result => {
