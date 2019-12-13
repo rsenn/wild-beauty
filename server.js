@@ -330,7 +330,9 @@ if (!dev && cluster.isMaster) {
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
           if(!compareDimensions(props, newDimensions)) {
             //console.log(`new Image aspect: ${aspect}`);
-            //console.log(`newnewDimensions `, newDimensions);
+            if(!newDimensions.width) delete newDimensions.width;
+            if(!newDimensions.height) delete newDimensions.height;
+            console.log(`newDimensions `, newDimensions);
             const transformer = sharp()
               .jpeg({
                 quality: 95 /*,
