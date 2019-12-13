@@ -222,7 +222,10 @@ if (!dev && cluster.isMaster) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
           ////console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
-          if(token == user.token) return fn(req, res);
+
+          if(user) {
+            if(token == user.token) return fn(req, res);
+          }
         }
         //    res.json({ success: false, message: 'Need authentification' });
         return res.status(401).send("Need authentification");
@@ -279,13 +282,13 @@ if (!dev && cluster.isMaster) {
       res.send(data);
     });
 
-    server.post("/api/image/upload",
+    server.post(
+      "/api/image/upload",
       needAuth(async function(req, res) {
         /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
       }*/
         let user_id = getVar(req, "user_id");
-
         //  //console.log(`Files: `, Object.entries(req.files));
         let response = [];
         for(let item of Object.entries(req.files)) {
@@ -295,12 +298,11 @@ if (!dev && cluster.isMaster) {
           //const data = ;
           let props = jpeg.jpegProps(file.data);
           let { width, height, aspect } = props || {};
-          if(!aspect && width > 0 && height > 0) aspect =  width / height;
+          if(!aspect && width > 0 && height > 0) aspect = width / height;
           //console.log(`Image width: ${width} height: ${height}`);
           //console.log(`Image aspect: ${aspect}`);
-
           const calcDimensions = (max, props) => {
-            if(typeof(props) != 'object' || props === null) props = {};
+            if(typeof props != "object" || props === null) props = {};
             let { width, height, ...restOfProps } = props;
             if(width > max || height > max) {
               if(width > height) {
@@ -313,14 +315,9 @@ if (!dev && cluster.isMaster) {
             }
             return { ...restOfProps, width, height };
           };
-
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
-
-                      if(typeof(props) != 'object' || props === null) props = {};
-
-
+          if(typeof props != "object" || props === null) props = {};
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
-
           if(!compareDimensions(props, newDimensions)) {
             //console.log(`new Image aspect: ${aspect}`);
             //console.log(`newnewDimensions `, newDimensions);
@@ -340,7 +337,6 @@ if (!dev && cluster.isMaster) {
               //console.log("outputStream: ", outputStream.buffer);
             });
             //console.log("inputStream: ", inputStream);
-
             inputStream.pipe(transformer).pipe(outputStream);
             await finished(outputStream);
             let newData = outputStream.buffer[0];
@@ -353,14 +349,11 @@ if (!dev && cluster.isMaster) {
             //console.log(`new Image props: `, props);
           }
           /*.resize*/
-
           let data = file.data.toString("base64");
           let word = file.data[0] << (8 + file.data[1]);
           const { depth, channels } = props;
-          let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height,/*  */ }, ["id"]);
-      
-
-          console.log("API upload photo: ", (reply && reply.returning) ? reply.returning : reply );
+          let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height /*  */ }, ["id"]);
+          console.log("API upload photo: ", reply && reply.returning ? reply.returning : reply);
           const { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
           console.log("API upload photo: ", word.toString(16), { affected_rows, props });
           if(returning && returning.forEach) returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
@@ -369,6 +362,7 @@ if (!dev && cluster.isMaster) {
         res.json(response);
       })
     );
+
     // Example server-side routing
     server.post("/a", (req, res) => {
       return nextApp.render(req, res, "/b", req.query);

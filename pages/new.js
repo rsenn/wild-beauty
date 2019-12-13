@@ -145,9 +145,9 @@ class New extends React.Component {
           <div
             className={"upload-area"}
             style={{
-              position: "relative",
+              /*    position: "relative",
               top: "20px",
-              left: "80vw",
+              left: "80vw",*/
               minWidth: "80vmin",
               minHeight: "80vmin"
             }}
@@ -155,13 +155,12 @@ class New extends React.Component {
             <RUG
               action="/api/image/upload" // upload route
               source={response => {
-              return  response.map(item => {
-                const { id } = item;
-                const url = `/api/image/get/${id}.jpg`;
-                console.log("RUG response:",  { item, url });
-                return url;
-              })[0];
-
+                return response.map(item => {
+                  const { id } = item;
+                  const url = `/api/image/get/${id}.jpg`;
+                  console.log("RUG response:", { item, url });
+                  return url;
+                })[0];
               }}
             />
           </div>

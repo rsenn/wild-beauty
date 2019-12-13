@@ -34,7 +34,7 @@ export class RootStore {
 
     const { auth, state } = this;
 
-//    console.log("RootStore.constructor ", { auth, state });
+    //    console.log("RootStore.constructor ", { auth, state });
   }
 
   enableAutoRun = () => {

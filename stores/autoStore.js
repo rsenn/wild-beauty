@@ -79,7 +79,7 @@ export const makeAutoStoreHandler = (name, store) => {
       }
       const updatedStore = _this[_member];
 
-/*      console.log("AutoStoreHandler: ", {
+      /*      console.log("AutoStoreHandler: ", {
         name,
         obj: toJS(_this),
         key: _member,
