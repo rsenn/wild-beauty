@@ -316,8 +316,11 @@ if (!dev && cluster.isMaster) {
 
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
 
+                      if(typeof(props) != 'object' || props === null) props = {};
+
+
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
-          aspect = newDimensions.aspect || newDimensions.width / newDimensions.height;
+
           if(!compareDimensions(props, newDimensions)) {
             //console.log(`new Image aspect: ${aspect}`);
             //console.log(`newnewDimensions `, newDimensions);
