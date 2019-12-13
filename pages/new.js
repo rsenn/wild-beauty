@@ -30,7 +30,7 @@ const RandomColor = () => {
 
 @inject("rootStore")
 @observer
-class Panes extends React.Component {
+class New extends React.Component {
   constructor(props) {
     super(props);
 
@@ -165,7 +165,7 @@ class Panes extends React.Component {
               }}
             />
           </div>
-          <div className={"panes-list"}>
+          {/*<div className={"panes-list"}>
             <div className={"panes-item layer"}>
               <img src="static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
             </div>
@@ -190,7 +190,7 @@ class Panes extends React.Component {
             <div className={"panes-item layer"}>
               <img src="static/img/0c71247f63ff20833347da1484d3caa4.jpg" />
             </div>
-          </div>
+          </div>*/}
 
           {/*  <Layer w={300} h={'300px'} margin={10} padding={2} border={'2px dashed red'}>
         Layer
@@ -236,4 +236,4 @@ class Panes extends React.Component {
   }
 }
 
-export default Panes;
+export default New;
