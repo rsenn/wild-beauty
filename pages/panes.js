@@ -38,9 +38,9 @@ class Panes extends React.Component {
       window.api = this.api;
       window.page = this;
       window.rs = rootStore;
-  //    window.stores = getOrCreateStore();
+      //    window.stores = getOrCreateStore();
     }
-/*
+    /*
     autorun(() => console.log("loading: ", rootStore.state.loading));
     autorun(() => {
       console.log("re: ", rootStore.state.loading);

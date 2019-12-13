@@ -30,19 +30,21 @@ export class RootStore {
 
     this.enableAutoRun();
 
-
-const { auth, state } = this;
-console.log("RootStore.constructor ", { auth, state });
+    const { auth, state } = this;
+    console.log("RootStore.constructor ", { auth, state });
   }
 
   enableAutoRun = () => {
-    this.autorunners = [logStoreAdapter(makeAutoStoreHandler("auth", logStoreAdapter(getLocalStorage))(this, "auth"))];
-  }
+    this.stores = {
+      auth: makeAutoStoreHandler("auth", logStoreAdapter(getLocalStorage))(this, "auth")
+    };
+    this.autorunners = [this.stores.auth];
+  };
 
   disableAutoRun = () => {
-    this.autorunners.forEach(disposer => disposer());
+    this.autorunners.forEach(disposer => (typeof disposer == "function" ? disposer() : undefined));
     this.autorunners = [];
-  }
+  };
 
   @computed
   get authenticated() {
@@ -140,8 +142,15 @@ console.log("RootStore.constructor ", { auth, state });
         this.setState({ loading: false, authenticated: success, error: success ? undefined : "Login failed" });
         /*   this.auth.token = token;
         this.auth.user_id = user_id;*/
+        this.disableAutoRun();
+        let newAuth = { token, user_id };
+        set(this.auth, newAuth);
+
+        if(global.window)
+        localStorage.setItem('auth', JSON.stringify(newAuth));
+      
         this.enableAutoRun();
-        set(this.auth, { token, user_id });
+
         console.log("API login result: ", { success, token });
 
         if(success && window.global) {
@@ -160,7 +169,10 @@ console.log("RootStore.constructor ", { auth, state });
     this.apiRequest("/api/logout").then(res => {
       const { success, token, user_id } = res.data;
       this.setState({ loading: false, authenticated: false });
+      this.disableAutoRun();
       set(this.auth, { token: "", user_id: -1 });
+      this.stores.auth.set({ token, user_id });
+      this.enableAutoRun();
       completed();
     });
   }

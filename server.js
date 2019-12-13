@@ -353,8 +353,9 @@ if (!dev && cluster.isMaster) {
         let word = file.data[0] << (8 + file.data[1]);
         const { depth, channels } = props;
         let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height, user_id }, ["id"]);
-        const { affected_rows, returning } = typeof reply == "object" ? reply.insert_photos : {};
+        const { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
         //console.log("API upload photo: ", word.toString(16), { affected_rows, props });
+        if(returning && returning.forEach)
         returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
       }
       //console.log("Send response: ", response);

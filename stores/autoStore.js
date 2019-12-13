@@ -17,11 +17,20 @@ export const makeLocalStorage = () => {
 export const logStoreAdapter = store => {
   return {
     store,
-    get: function(name) { console.log(`logStoreAdapter.get(${name}`); return this.store.get(name); },
-    set: function(name,data)  { console.log(`logStoreAdapter.set(${name},`,data,')'); return this.store.set(name,data); },
-   remove: function(name) { console.log(`logStoreAdapter.remove(${name}`); return this.store.remove(name); },
- }
-}
+    get: function(name) {
+      console.log(`logStoreAdapter.get(${name}`);
+      return this.store.get(name);
+    },
+    set: function(name, data) {
+      console.log(`logStoreAdapter.set(${name},`, data, ")");
+      return (this.store && this.store.set) ? this.store.set(name, data) : null;
+    },
+    remove: function(name) {
+      console.log(`logStoreAdapter.remove(${name}`);
+      return (this.store && this.store.remove) ? this.store.remove(name) : null;
+    }
+  };
+};
 
 export const makeLocalStore = name => ({
   name,
@@ -56,9 +65,8 @@ export function getLocalStorage() {
 }
 
 export const makeAutoStoreHandler = (name, store) => {
-  if(!store)
-  store = getLocalStorage();
-  return (_this, _member) => {
+  if(!store) store = getLocalStorage();
+  var fn = function(_this, _member) {
     let firstRun = false; //true;
     // will run on change
     const disposer = autorun(() => {
@@ -79,7 +87,7 @@ export const makeAutoStoreHandler = (name, store) => {
       });
 
       if(updatedStore) {
-        store.set(name, toJS(updatedStore));
+       fn.update ? fn.update(updatedStore) : store.set(name, updatedStore);  
       } else {
         store.remove(name);
       }
@@ -87,4 +95,17 @@ export const makeAutoStoreHandler = (name, store) => {
     firstRun = false;
     return disposer;
   };
+  fn.update = function(updatedStore) {
+    try {
+      store.set(name, updatedStore);
+    } catch(err) {
+      console.log("ERROR: ", err);
+    }
+  };
+
+  fn.set = store.set;
+  fn.get = store.get;
+  fn.remove = store.remove;
+
+  return fn;
 };
