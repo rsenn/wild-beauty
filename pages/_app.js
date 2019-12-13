@@ -40,7 +40,7 @@ class MyApp extends App {
     } else {
       //console.log(`App.getInitialProps ${componentName} has no getInitialProps!`);
     }
-    console.log("App pageProps=", pageProps);
+    //console.log("App pageProps=", pageProps);
 
     return { pageProps };
   }
@@ -48,7 +48,7 @@ class MyApp extends App {
   constructor(props) {
     super(props);
     this.mobxStore = getOrCreateStore(!global.window, props.pageProps.initialMobxState);
-    console.log("App.constructor", this.mobxStore);
+    //console.log("App.constructor", this.mobxStore);
   }
 
   render() {
@@ -56,7 +56,7 @@ class MyApp extends App {
 
     if(Util.isBrowser()) window.component = Component;
 
-    console.log("App.render", mobxStore);
+    //console.log("App.render", mobxStore);
     return (
       <Container>
         <Head>

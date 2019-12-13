@@ -23,11 +23,11 @@ export const logStoreAdapter = store => {
     },
     set: function(name, data) {
       console.log(`logStoreAdapter.set(${name},`, data, ")");
-      return (this.store && this.store.set) ? this.store.set(name, data) : null;
+      return this.store && this.store.set ? this.store.set(name, data) : null;
     },
     remove: function(name) {
       console.log(`logStoreAdapter.remove(${name}`);
-      return (this.store && this.store.remove) ? this.store.remove(name) : null;
+      return this.store && this.store.remove ? this.store.remove(name) : null;
     }
   };
 };
@@ -79,15 +79,15 @@ export const makeAutoStoreHandler = (name, store) => {
       }
       const updatedStore = _this[_member];
 
-      console.log("AutoStoreHandler: ", {
+/*      console.log("AutoStoreHandler: ", {
         name,
         obj: toJS(_this),
         key: _member,
         value: toJS(updatedStore)
-      });
+      });*/
 
       if(updatedStore) {
-       fn.update ? fn.update(updatedStore) : store.set(name, updatedStore);  
+        fn.update ? fn.update(updatedStore) : store.set(name, updatedStore);
       } else {
         store.remove(name);
       }

@@ -50,7 +50,10 @@ class Panes extends React.Component {
     var e = null;
     const { rootStore } = props;
 
-    if(global.window !== undefined) window.page = this;
+    if(global.window !== undefined) {
+      window.page = this;
+      window.rs = rootStore;
+    }
     /*
   var scrolling = new ScrollController();
 
