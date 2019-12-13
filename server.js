@@ -185,17 +185,13 @@ if (!dev && cluster.isMaster) {
     );
     server.use(bodyParser.json());
 
-
-
-    server.use(function(req, res) {
-   
-   const token = getVar(req, 'token');
-   const user_id = getVar(req, 'user_id');
-console.log("Cookie: ", { token, user_id });
+    server.use(function(req, res, next) {
+      const token = getVar(req, "token");
+      const user_id = getVar(req, "user_id");
+      console.log("Cookie: ", { token, user_id });
 
       return next();
-       });
-
+    });
 
     server.post("/api/login", async function(req, res) {
       const { username, password } = req.body;
@@ -230,10 +226,12 @@ console.log("Cookie: ", { token, user_id });
     const needAuth = fn =>
       async function(req, res) {
         let token = getVar(req, "token");
+        console.log("needAuth: ", { token });
+
         if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
-          ////console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
+          console.log("needAuth: response =", response);
 
           if(user) {
             if(token == user.token) return fn(req, res);
@@ -249,7 +247,7 @@ console.log("Cookie: ", { token, user_id });
         if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
-          ////console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
+          //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
           if(user && token == user.token) {
             response = await API.update("users", { id: user.id }, { token: "NULL" });
             req.session.token = null;
