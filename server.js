@@ -300,7 +300,7 @@ if (!dev && cluster.isMaster) {
           //console.log(`Image aspect: ${aspect}`);
 
           const calcDimensions = (max, props) => {
-            if(typeof(props) != 'object') props = {};
+            if(typeof(props) != 'object' || props === null) props = {};
             let { width, height, ...restOfProps } = props;
             if(width > max || height > max) {
               if(width > height) {
