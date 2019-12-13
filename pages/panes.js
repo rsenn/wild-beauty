@@ -155,7 +155,13 @@ class Panes extends React.Component {
             <RUG
               action="/api/image/upload" // upload route
               source={response => {
-                console.log("RUG response:", response);
+              return  response.map(item => {
+                const { id } = item;
+                const url = `/api/image/get/${id}.jpg`;
+                console.log("RUG response:",  { item, url });
+                return url;
+              })[0];
+
               }}
             />
           </div>
