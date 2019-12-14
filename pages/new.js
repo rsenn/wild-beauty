@@ -171,7 +171,7 @@ class New extends React.Component {
               return (
                 <SizedAspectRatioBox className={"item-entry"}>
                   <img
-                  className={'layer'}
+                    className={"layer"}
                     src={`/api/image/get/${entry.image.id}.jpg`}
                     width={entry.image.width}
                     height={entry.image.height}

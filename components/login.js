@@ -43,6 +43,9 @@ const LoginForm = inject("rootStore")(
                   onChange={e => setUsername(e.target.value)}
                   size={20}
                   autoComplete={"username"}
+                  ref={input => {
+                   // if(input) input.focus();
+                  }}
                 />
               </div>
             </div>

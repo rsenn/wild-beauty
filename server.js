@@ -190,7 +190,7 @@ if (!dev && cluster.isMaster) {
     server.use(function(req, res, next) {
       const token = getVar(req, "token");
       const user_id = getVar(req, "user_id");
-      console.log("Cookie: ", { token, user_id });
+      //console.log("Cookie: ", { token, user_id });
 
       return next();
     });
@@ -293,10 +293,25 @@ if (!dev && cluster.isMaster) {
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
       //console.log("params: ", params);
-      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", ...fields], params);
+      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { id }", ...fields], params);
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
+
+      images = images.filter(im => im.items.length == 0);
+
       res.json({ success: true, count: images.length, images });
     });
+
+    server.post(
+      "/api/image/delete",
+      needAuth(async function(req, res) {
+        let { id } = req.body;
+        let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
+
+        let result = await API.delete("photos", { user_id, id });
+
+        res.json({ success: true, result });
+      })
+    );
 
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
@@ -310,7 +325,7 @@ if (!dev && cluster.isMaster) {
       res.set("Content-Type", "image/jpeg");
       const { width, height, aspect } = photo;
       let props = { ...(jpeg.jpegProps(data) || {}), width, height, aspect };
-      
+
       if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
       for(let key of ["original_name", "uploaded", "user_id"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
       for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
@@ -357,7 +372,7 @@ if (!dev && cluster.isMaster) {
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
           if(typeof props != "object" || props === null) props = {};
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
-                    console.log(`New Image width: ${newDimensions.width} height: ${newDimensions.height}`);
+          console.log(`New Image width: ${newDimensions.width} height: ${newDimensions.height}`);
 
           if(!compareDimensions(props, newDimensions)) {
             //console.log(`new Image aspect: ${aspect}`);
