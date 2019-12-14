@@ -148,9 +148,10 @@ if (!dev && cluster.isMaster) {
       },
       expires: new Date(Date.now() + 30 * 24 * 3600 * 1000)
     };
-    server.use(session(sess));
-    server.use(cors());
+    //server.use(session(sess));
+    server.use(cors({ credentials: true }));
     server.use(cookieParser());
+
     // Static files
     // https://github.com/zeit/next.js/tree/4.2.3#user-content-static-file-serving-eg-images
     server.use(
@@ -203,17 +204,23 @@ if (!dev && cluster.isMaster) {
         let token,
           user_id = -1;
         if(success) {
+          var signature = jwt.sign(password, secret);
           user_id = user.id;
-          token = jwt.sign(password, secret);
+          token = signature.replace(/.*\./g, "");
           last_seen = new Date().toISOString();
           response = await API.update("users", { username }, { token, last_seen });
         }
-        res.cookie("token", token, {
-          maxAge: 1000 * 60, // 1 min
-          httpOnly: true // http only, prevents JavaScript cookie access
-        });
-        req.session.token = token;
-        req.session.user_id = user_id;
+        const cookieOptions = {
+          maxAge: 1000 * 60 * 60 * 24, // 1 day
+          httpOnly: false // http only, prevents JavaScript cookie access
+        };
+        res.cookie("token", token, cookieOptions);
+        res.cookie("user_id", user_id, cookieOptions);
+
+        if(req.session) {
+          req.session.token = token;
+          req.session.user_id = user_id;
+        }
         console.error("Login user: ", user);
         res.json({ success, token, user_id: user ? user.id : -1 });
       } catch(err) {
@@ -223,6 +230,18 @@ if (!dev && cluster.isMaster) {
 
     const getVar = (req, name) => (req.cookies && req.cookies[name]) || (req.session && req.session[name]);
 
+    const getUser = async function(token, prop) {
+      let response = await API.select("users", { token }, ["id", "username", "token"]);
+      const user = await response.users[0];
+      console.log("getUser: response =", response);
+
+      if(user) {
+        if(prop) return await user[prop];
+        return await user;
+      }
+
+      return null;
+    };
     const needAuth = fn =>
       async function(req, res) {
         let token = getVar(req, "token");
@@ -250,9 +269,12 @@ if (!dev && cluster.isMaster) {
           //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
           if(user && token == user.token) {
             response = await API.update("users", { id: user.id }, { token: "NULL" });
-            req.session.token = null;
-            req.session.user_id = -1;
-            req.session.destroy();
+
+            if(req.session) {
+              req.session.token = null;
+              req.session.user_id = -1;
+              req.session.destroy();
+            }
             ////console.log("response: ", response.affected_rows);
             return res.json({ success: response && response.affected_rows });
           }
@@ -298,7 +320,9 @@ if (!dev && cluster.isMaster) {
         /*   if(!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
       }*/
-        let user_id = getVar(req, "user_id");
+
+        let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
+
         //  //console.log(`Files: `, Object.entries(req.files));
         let response = [];
         for(let item of Object.entries(req.files)) {

@@ -41,7 +41,6 @@ let customStyles = {
   },
   content: {
     width: "75vmin",
-
     height: "75vmin",
     top: "50%",
     left: "50%",

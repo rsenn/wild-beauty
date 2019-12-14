@@ -14,11 +14,9 @@ import { toJS, autorun } from "mobx";
 import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { createStore, getOrCreateStore } from "../stores/createStore.js";
-import NeedAuth from "../components/simple/needAuth.js";
-import { Translate, Localize } from "react-i18nify-mobx";
 
 import RUG from "react-upload-gallery";
-import "../static/css/react-upload-gallery.css";
+import "react-upload-gallery/dist/style.css";
 
 import "../static/style.css";
 
@@ -32,7 +30,7 @@ const RandomColor = () => {
 
 @inject("rootStore")
 @observer
-class New extends React.Component {
+class Panes extends React.Component {
   constructor(props) {
     super(props);
 
@@ -42,7 +40,12 @@ class New extends React.Component {
       window.rs = rootStore;
       //    window.stores = getOrCreateStore();
     }
-
+    /*
+    autorun(() => console.log("loading: ", rootStore.state.loading));
+    autorun(() => {
+      console.log("re: ", rootStore.state.loading);
+      this.forceUpdate();
+    });*/
     let swipeEvents = {};
     var e = null;
     const { rootStore } = props;
@@ -51,9 +54,17 @@ class New extends React.Component {
       window.page = this;
       window.rs = rootStore;
     }
+    /*
+  var scrolling = new ScrollController();
+
+  var swipeTracker = new SwipeTracker(10, function(event) {
+    console.log(event.type+': ', event);
+  });
+  swipeEvents = swipeTracker.events;
+*/
 
     if(global.window) {
-      this.touchListener = TouchListener(TouchCallback, {
+      var touchListener = TouchListener(TouchCallback, {
         element: global.window,
         step: 1,
         round: true,
@@ -71,7 +82,7 @@ class New extends React.Component {
   }
 
   render() {
-    /*   if(global.window !== undefined) window.page = this;
+    if(global.window !== undefined) window.page = this;
     if(global.window) {
       var touchListener = TouchListener(TouchCallback, {
         element: global.window,
@@ -86,7 +97,7 @@ class New extends React.Component {
         },
         { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
       );
-    }*/
+    }
     const onError = event => {};
 
     const onImage = event => {
@@ -124,37 +135,36 @@ class New extends React.Component {
   });*/
 
     return (
-      <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
+      <div className={"panes-layout"} {...TouchEvents(touchListener)}>
         <Head>
           <title>Panes</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav />
         <div className={"page-layout"}>
-          <NeedAuth>
-            <div
-              className={"upload-area"}
-              style={{
-                /*    position: "relative",
+          <div
+            className={"upload-area"}
+            style={{
+              position: "relative",
               top: "20px",
-              left: "80vw",*/
-                minWidth: "80vmin",
-                minHeight: "80vmin"
+              left: "80vw",
+              minWidth: "80vmin",
+              minHeight: "80vmin"
+            }}
+          >
+            <RUG
+              action="/api/image/upload" // upload route
+              source={response => {
+                return response.map(item => {
+                  const { id } = item;
+                  const url = `/api/image/get/${id}.jpg`;
+                  console.log("RUG response:", { item, url });
+                  return url;
+                })[0];
               }}
-            >
-              <RUG
-                action="/api/image/upload" // upload route
-                source={response => {
-                  return response.map(item => {
-                    const { id } = item;
-                    const url = `/api/image/get/${id}.jpg`;
-                    console.log("RUG response:", { item, url });
-                    return url;
-                  })[0];
-                }}
-              ></RUG>
-            </div>
-            {/*<div className={"panes-list"}>
+            />
+          </div>
+          {/*<div className={"panes-list"}>
             <div className={"panes-item layer"}>
               <img src="static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
             </div>
@@ -181,19 +191,10 @@ class New extends React.Component {
             </div>
           </div>*/}
 
-            <Layer
-              w={300}
-              h={"300px"}
-              margin={10}
-              padding={20}
-              border={"2px dashed red"}
-              style={{ cursor: "move" }}
-            >
-              Layer
-            </Layer>
-            <SvgOverlay />
-          </NeedAuth>
-
+          {/*  <Layer w={300} h={'300px'} margin={10} padding={2} border={'2px dashed red'}>
+        Layer
+      </Layer>
+      <SvgOverlay />*/}
           <style jsx global>{`
             .panes-list {
               display: flex;
@@ -225,6 +226,7 @@ class New extends React.Component {
               display: block;
               width: 100%;
               height: 100%;
+              min-height: 80vmin;
             }
           `}</style>
         </div>
@@ -233,4 +235,4 @@ class New extends React.Component {
   }
 }
 
-export default New;
+export default Panes;

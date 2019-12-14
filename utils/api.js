@@ -64,7 +64,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     return response[queryName];
   };
 
-  api.insert = function(name, obj, fields = []) {
+  api.insert = async function(name, obj, fields = []) {
     const camelCase = Util.ucfirst(name);
     const objStr = Util.map(obj, (key, value) => (typeof value == "string" ? `${key}: "${value}"` : `${key}: ${value}`)).join(", ");
     const fieldStr = [...Object.keys(obj), ...fields].join(" ");
@@ -75,9 +75,10 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
       returning { ${fieldStr} }
     }
   }`;
-    // console.log("query: ", queryStr);
 
-    return this(queryStr);
+    let response = await this(queryStr);
+    console.log("response: ", response, "query: ", queryStr);
+    return response;
   };
 
   return api;

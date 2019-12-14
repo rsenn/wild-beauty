@@ -1,9 +1,12 @@
 import { i18nStore } from "react-i18nify-mobx";
 import { makeAutoStoreHandler, getLocalStorage } from "./autoStore.js";
-import { observable, autorun } from "mobx";
+import { observable, autorun, toJS } from "mobx";
 
 i18nStore.setTranslations({
   en: {
+    common: {
+      loading: "Loading, please wait..."
+    },
     nav: {
       home_name: "Home",
       home_description: "start page",
@@ -23,10 +26,14 @@ i18nStore.setTranslations({
       password: "Password",
       submit: "Login",
       title: "authentication",
-      logged: "You're in!"
+      logged: "You're in!",
+      unauthorized: "Unauthorized - Please login"
     }
   },
   de: {
+    common: {
+      loading: "Laden, bitte warten..."
+    },
     nav: {
       home_name: "Home",
       home_description: "Startseite",
@@ -46,10 +53,14 @@ i18nStore.setTranslations({
       password: "Passwort",
       submit: "Einloggen",
       title: "Authentifizierung",
-      logged: "Willkommen!"
+      logged: "Willkommen!",
+      unauthorized: "Nicht autorisiert - Bitte einloggen"
     }
   },
   fr: {
+    common: {
+      loading: "Chargement, veuillez patienter..."
+    },
     nav: {
       home_name: "Home",
       home_description: "Page d'accueil",
@@ -69,7 +80,8 @@ i18nStore.setTranslations({
       password: "Mot de passe",
       submit: "S'identifier",
       title: "authentification",
-      logged: "Connecté!"
+      logged: "Connecté!",
+      unauthorized: "Non autorisé - Veuillez vous connecter"
     }
   }
 });
@@ -84,6 +96,7 @@ if (global.navigator) {
   });
   if(!i18nStore.user.lang || i18nStore.user.lang.length != 2) i18nStore.user.lang = (navigator.language || navigator.userLanguage).substring(0, 2);
   window.i18n = i18nStore;
+  window.toJS = toJS;
 }
 
 export default i18nStore;

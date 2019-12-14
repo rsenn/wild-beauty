@@ -2,7 +2,7 @@ import React from "react";
 import { action, observable, flow, set, get, values, computed } from "mobx";
 import getAPI from "../utils/api.js";
 import { Timer } from "../utils/dom.js";
-import axios from "axios";
+import axios from "../utils/axios.js";
 import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoStore.js";
 
 export class RootStore {
