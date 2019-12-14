@@ -10,6 +10,7 @@ import { HSLA, Timer } from "../utils/dom.js";
 import Util from "../utils/util.js";
 import Alea from "../utils/alea.js";
 import ReactCountryFlag from "react-country-flag";
+import { Translate, Localize } from "react-i18nify-mobx";
 
 const LoginIcon = ({ style }) => (
   <svg
@@ -27,23 +28,6 @@ const LoginIcon = ({ style }) => (
     </g>
   </svg>
 );
-
-const SiteMap = [
-  { href: "/", name: "home", label: <span>Home</span> },
-  { href: "/test", name: "text", label: <span>Gallery</span>, disabled: true },
-  { href: "/new", name: "new", label: <span>New</span> },
-  { href: "/show", name: "show", label: <span>Show</span> },
-  {
-    href: "#",
-    name: "login",
-    label: <span>Login</span>
-  },
-  {
-    href: "#",
-    name: "lang",
-    label: <span>Language</span>
-  }
-];
 
 let customStyles = {
   overlay: {
@@ -75,10 +59,10 @@ let customStyles = {
 };
 Modal.setAppElement("#__next");
 
-const NavLink = ({ href, label, path, key, disabled, onClick }) => (
+const NavLink = ({ href, label, description, path, key, disabled, onClick, active, ...props }) => (
   <li
     className={classNames(
-      path == href ? "menu-active" : "menu-inactive",
+      /*path == href ||*/ active ? "menu-active" : "menu-inactive",
       "menu-item",
       disabled && "menu-disabled"
     )}
@@ -89,7 +73,8 @@ const NavLink = ({ href, label, path, key, disabled, onClick }) => (
       href={href}
       onClick={onClick}
     >
-      {label}
+      {typeof label == "function" ? label(props) : label}
+      <div className={"desc"}>{description}</div>
     </a>
     <style jsx global>{`
       li.menu-active {
@@ -108,45 +93,69 @@ const NavLink = ({ href, label, path, key, disabled, onClick }) => (
       li.menu-item {
         position: relative;
         transition: width 1s;
-        text-align: center;
+        text-align: left;
 
-        width: 12.5vw;
-        height: 12.5vw;
+        width: 48px;
+        height: 48px;
         max-width: 48px;
-        max-height: 48px;
+        max-height: 51px;
+
+        display: flex;
+        flex-flow: column nowrap;
+        transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1),
+          max-width 1s cubic-bezier(0.165, 0.84, 0.44, 1),
+          height 1s cubic-bezier(0.165, 0.84, 0.44, 1),
+          max-height 1s cubic-bezier(0.165, 0.84, 0.44, 1);
       }
-      li:hover {
-        transition: width 1s, max-width 1s;
+      li:hover,
+      li.menu-active {
         width: 100px;
+        height: 100px;
         max-width: 100px;
+        max-height: 100px;
       }
-      limargin: 2px;
-      > a > span {
+      li > a > span {
         font-family: Fixed;
         font-size: 40px;
-        vertical-align: center;
+        vertical-align: top;
+      }
+      li > a {
+        position: absolute;
+        margin: 8px 0px 1px 2px;
+      }
+      li:hover > a,
+      li.menu-active > a {
+        width: 100px;
+      }
+      li:hover > a > span,
+      li.menu-active > a > span {
+        width: 100px;
+      }
+      li > a > div.desc {
+        position: absolute;
+        top: 48px;
+        font-size: 15px;
       }
       li.menu-item {
         background-color: rgba(138, 0, 16, 0.8);
         display: flex;
         justify-content: flex-start;
-        align-items: center;
-        padding: 4px 0 0 1px;
+        align-items: flex-start;
+        padding: 0 0 0 0;
         margin: 2px 4px 2px 4px;
         overflow: hidden;
       }
       li.menu-item > a {
         font-size: 3em;
+        color: white;
+        text-decoration: none;
       }
       li {
         transition: width 1s;
       }
-      a {
-        color: white;
-        text-decoration: none;
-      }
-      a:hover {
-        filter: drop-shadow(4px 4px 2px #00000080);
+
+      a:hover > span {
+        filter: drop-shadow(0px 0px 4px #ffffffff);
       }
     `}</style>
   </li>
@@ -208,6 +217,83 @@ const Nav = inject(
 
       const language = i18nStore.user.lang;
       console.log("i18nStore: ", i18nStore);
+
+      var SiteMap = [
+        {
+          href: "/",
+          name: "home",
+          label: (
+            <span>
+              <Translate value="nav.home_name" />
+            </span>
+          ),
+          description: <Translate value="nav.home_description" />
+        },
+        {
+          href: "/test",
+          name: "text",
+          label: (
+            <span>
+              <Translate value="nav.gallery_name" />
+            </span>
+          ),
+          description: <Translate value="nav.gallery_description" />
+        },
+        {
+          href: "/show",
+          name: "show",
+          label: (
+            <span>
+              <Translate value="nav.show_name" />
+            </span>
+          ),
+          description: <Translate value="nav.show_description" />
+        },
+        {
+          href: "/new",
+          name: "new",
+          label: (
+            <span>
+              <Translate value="nav.new_name" />
+            </span>
+          ),
+          description: <Translate value="nav.new_description" />
+        },
+        {
+          href: "#",
+          name: "login",
+          label: () => (
+            <span>
+              <Translate value="nav.login_name" />
+            </span>
+          ),
+          description: <Translate value="nav.login_description" />
+        },
+        {
+          href: "#",
+          name: "lang",
+          label: () => (
+            <span>
+              <Translate value="nav.lang_name" />
+            </span>
+          ),
+          description:  <Translate value="nav.lang_description" />
+        }
+      ];
+      if(global.window) {
+        window.SiteMap = SiteMap;
+      }
+
+      let entry = Util.find(SiteMap, "lang", "name");
+      //     console.log("SiteMap: ", SiteMap);
+      entry.active = languageIsOpen;
+
+      entry = Util.find(SiteMap, "login", "name");
+      entry.active = loginIsOpen;
+
+
+      entry = Util.find(SiteMap, "new", "name");
+      entry.disabled = !rootStore.authenticated;
 
       return (
         <div className="menu">
@@ -290,6 +376,9 @@ const Nav = inject(
               if(item.name == "login") {
                 if(rootStore.authenticated) item.label = <span>Logout</span>;
               }
+
+              if(item.disabled) 
+                return undefined;
               return (
                 <NavLink
                   key={item.key}
@@ -367,8 +456,9 @@ const Nav = inject(
               font-family: Fixed;
             }
             .menu {
-              position: relative;
+              position: absolute;
               top: 0;
+              right: 0;
               z-index: 12;
               text-align: center;
               display: înline-block;

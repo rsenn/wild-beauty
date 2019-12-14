@@ -162,7 +162,7 @@ class New extends React.Component {
                   return url;
                 })[0];
               }}
-            />
+            ></RUG>
           </div>
           {/*<div className={"panes-list"}>
             <div className={"panes-item layer"}>
@@ -191,10 +191,17 @@ class New extends React.Component {
             </div>
           </div>*/}
 
-          {/*  <Layer w={300} h={'300px'} margin={10} padding={2} border={'2px dashed red'}>
-        Layer
-      </Layer>
-      <SvgOverlay />*/}
+          <Layer
+            w={300}
+            h={"300px"}
+            margin={10}
+            padding={20}
+            border={"2px dashed red"}
+            style={{ cursor: "move" }}
+          >
+            Layer
+          </Layer>
+          <SvgOverlay />
           <style jsx global>{`
             .panes-list {
               display: flex;

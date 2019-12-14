@@ -57,11 +57,13 @@
     "react-i18nify-mobx": "1.0.0-1",
     "react-mobx-i18n": "^1.2.0",
     "react-modal": "^3.11.1",
+    "react-rpg": "^2.0.0",
     "react-sizeme": "^2.6.10",
-    "react-upload-gallery": "^0.0.4",
+    "react-upload-gallery": "https://github.com/m-inan/react-upload-gallery",
     "sharp": "^0.23.4",
     "time-span-format": "^1.0.1",
     "tims": "^1.0.4",
+    "watchpack": "2.0.0-beta.10",
     "webpack": "^4"
   },
   "devDependencies": {

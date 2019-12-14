@@ -535,13 +535,14 @@ Util.find = (arr, value, prop = "id", acc = Util.array()) => {
   if(typeof value == "function") pred = value;
   else if(prop && prop.length !== undefined) {
     pred = obj => {
-      for(let j = 0; j < prop.length; j++) if(obj[prop[j]] == value) return true;
+      if(obj[prop] == value) return true;
       return false;
     };
   } else pred = obj => obj[prop] == value;
 
   for(let k = 0; k < arr.length; k++) {
     let v = arr[k];
+    // console.log("v: ", v, "k:", k);
     /*if(Util.isArray(v)) {
       for(let i = 0; i < v.length; i++)
         if(pred(v[i]))

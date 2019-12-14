@@ -75,7 +75,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
       returning { ${fieldStr} }
     }
   }`;
-   // console.log("query: ", queryStr);
+    // console.log("query: ", queryStr);
 
     return this(queryStr);
   };

@@ -59,7 +59,6 @@
         "tmp",
         "tzdata2019a",
         "websocket",
-        "node_modules",
         "lapis",
         "compiled",
         "models-seq",

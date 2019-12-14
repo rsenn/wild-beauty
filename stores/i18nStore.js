@@ -4,6 +4,20 @@ import { observable, autorun } from "mobx";
 
 i18nStore.setTranslations({
   en: {
+    nav: {
+      home_name: "Home",
+      home_description: "start page",
+      gallery_name: "Gallery",
+      gallery_description: "View newest creations",
+      new_name: "New",
+      new_description: "Create a new tile",
+      show_name: "Show",
+      show_description: "View artists work",
+      login_name: "Login",
+      login_description: "Login as member",
+      lang_name: "Language",
+      lang_description: "choose the language"
+    },
     login: {
       username: "Username",
       password: "Password",
@@ -13,6 +27,20 @@ i18nStore.setTranslations({
     }
   },
   de: {
+    nav: {
+      home_name: "Home",
+      home_description: "Startseite",
+      gallery_name: "Galerie",
+      gallery_description: "Neueste Kreationen ansehen",
+      new_name: "Neu",
+      new_description: "Neue Kachel erstellen",
+      show_name: "Show",
+      show_description: "Siehe die Arbeit der Künstler",
+      login_name: "Login",
+      login_description: "Einloggen als Mitglied",
+      lang_name: "Sprache",
+      lang_description: "Sprache auswählen"
+    },
     login: {
       username: "Benutzer",
       password: "Passwort",
@@ -22,6 +50,20 @@ i18nStore.setTranslations({
     }
   },
   fr: {
+    nav: {
+      home_name: "Home",
+      home_description: "Page d'accueil",
+      gallery_name: "Galerie",
+      gallery_description: "Voir les dernières créations",
+      new_name: "New",
+      new_description: "Créer une nouvelle tuile",
+      show_name: "Show",
+      show_description: "Voir le travail des artistes",
+      login_name: "Login",
+      login_description: "se connecter en tant que membre",
+      lang_name: "Langue",
+      lang_description: "Choisir la langue"
+    },
     login: {
       username: "Nom d'utilisateur",
       password: "Mot de passe",

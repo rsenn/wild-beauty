@@ -28,13 +28,14 @@ export class RootStore {
   constructor(initialData) {
     for(let k in initialData) this[k] = observable(initialData[k]);
 
-    if(global.window) set(this.auth, JSON.parse(localStorage.getItem("auth")));
-
+    if(global.window) {
+      set(this.auth, JSON.parse(localStorage.getItem("auth")));
+   }
     this.enableAutoRun();
 
     const { auth, state } = this;
 
-    //    console.log("RootStore.constructor ", { auth, state });
+       console.log("RootStore.constructor ", { auth, state });
   }
 
   enableAutoRun = () => {
@@ -49,9 +50,8 @@ export class RootStore {
     this.autorunners = [];
   };
 
-  @computed
   get authenticated() {
-    return this.auth.token && this.auth.token.length > 0;
+    return !!(this.auth.token && this.auth.token.length > 0);
   }
 
   @action.bound
@@ -173,6 +173,9 @@ export class RootStore {
       this.setState({ loading: false, authenticated: false });
       //      this.disableAutoRun();
       set(this.auth, { token: "", user_id: -1 });
+      this.auth.token = '';
+      this.auth.user_id = -1;
+      localStorage.removeItem('auth');
       //    this.enableAutoRun();
       completed();
     });

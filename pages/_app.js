@@ -48,6 +48,10 @@ class MyApp extends App {
   constructor(props) {
     super(props);
     this.mobxStore = getOrCreateStore(!global.window, props.pageProps.initialMobxState);
+
+    if(global.window) {
+      window.Util = Util;
+    }
     //console.log("App.constructor", this.mobxStore);
   }
 
@@ -88,7 +92,7 @@ class MyApp extends App {
           }
 
           .page-layout {
-            margin: 50px 0 0 0;
+            margin: 80px 0 0 0;
             width: 100vw;
             text-align: center;
             display: flex;
