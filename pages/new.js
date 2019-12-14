@@ -16,6 +16,7 @@ import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touc
 import { createStore, getOrCreateStore } from "../stores/createStore.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import { Translate, Localize } from "react-i18nify-mobx";
+import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 
 import RUG from "react-upload-gallery";
 import "../static/css/react-upload-gallery.css";
@@ -71,6 +72,7 @@ class New extends React.Component {
   }
 
   render() {
+    const { rootStore } = this.props;
     /*   if(global.window !== undefined) window.page = this;
     if(global.window) {
       var touchListener = TouchListener(TouchCallback, {
@@ -149,11 +151,34 @@ class New extends React.Component {
                     const { id } = item;
                     const url = `/api/image/get/${id}.jpg`;
                     console.log("RUG response:", { item, url });
+                    rootStore.newImage(item);
                     return url;
                   })[0];
                 }}
+                onSuccess={arg => {
+                  const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
+
+                  let entry = rootStore.newEntry(id);
+                  arg.remove();
+                  //                  const image = toJS(rootStore.images.get(id));
+
+                  console.log("RUG success:", entry);
+                }}
               ></RUG>
             </div>
+
+            {rootStore.entries.map(entry => {
+              return (
+                <SizedAspectRatioBox className={"item-entry"}>
+                  <img
+                  className={'layer'}
+                    src={`/api/image/get/${entry.image.id}.jpg`}
+                    width={entry.image.width}
+                    height={entry.image.height}
+                  />
+                </SizedAspectRatioBox>
+              );
+            })}
             {/*<div className={"panes-list"}>
             <div className={"panes-item layer"}>
               <img src="static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
@@ -225,6 +250,12 @@ class New extends React.Component {
               display: block;
               width: 100%;
               height: 100%;
+            }
+            .aspect-ratio-box {
+              border: 2px dashed black;
+            }
+            .aspect-ratio-box {
+              overflow: hidden;
             }
           `}</style>
         </div>

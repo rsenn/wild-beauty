@@ -24,6 +24,7 @@ const maxWidthOrHeight = 1024;
 var MemoryStream = require("memory-stream");
 let stream = require("stream");
 let Readable = stream.Readable;
+
 function bufferToStream(buffer) {
   let stream = new Readable();
   stream.push(buffer);
@@ -307,7 +308,9 @@ if (!dev && cluster.isMaster) {
       delete photo.data;
       //console.log(`photo: `, photo);
       res.set("Content-Type", "image/jpeg");
-      let props = jpeg.jpegProps(data);
+      const { width, height, aspect } = photo;
+      let props = { ...(jpeg.jpegProps(data) || {}), width, height, aspect };
+      
       if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
       for(let key of ["original_name", "uploaded", "user_id"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
       for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
@@ -328,12 +331,13 @@ if (!dev && cluster.isMaster) {
         for(let item of Object.entries(req.files)) {
           const file = item[1];
           //console.log(`item: `, item);
-          //console.log(`file: `, file);
           //const data = ;
-          let props = jpeg.jpegProps(file.data);
+          let props = await sharp(file.data).metadata(); // jpeg.jpegProps(file.data);
+          console.log(`props: `, props);
+
           let { width, height, aspect } = props || {};
           if(!aspect && width > 0 && height > 0) aspect = width / height;
-          //console.log(`Image width: ${width} height: ${height}`);
+          console.log(`Image width: ${width} height: ${height}`);
           //console.log(`Image aspect: ${aspect}`);
           const calcDimensions = (max, props) => {
             if(typeof props != "object" || props === null) props = {};
@@ -349,9 +353,12 @@ if (!dev && cluster.isMaster) {
             }
             return { ...restOfProps, width, height };
           };
+
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
           if(typeof props != "object" || props === null) props = {};
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
+                    console.log(`New Image width: ${newDimensions.width} height: ${newDimensions.height}`);
+
           if(!compareDimensions(props, newDimensions)) {
             //console.log(`new Image aspect: ${aspect}`);
             if(!newDimensions.width) delete newDimensions.width;
@@ -380,13 +387,13 @@ if (!dev && cluster.isMaster) {
             //console.log("newData.length: ", newData.length);
             file.data = newData;
             props = jpeg.jpegProps(file.data);
-            width = props ? props.width : null;
-            height = props ? props.height : null;
+            width = newDimensions.width ? newDimensions.width : props.width;
+            height = newDimensions.height ? newDimensions.height : props.height;
             //console.log(`new Image props: `, props);
           }
           /*.resize*/
           let data = file.data.toString("base64");
-          let word = file.data[0] << (8 + file.data[1]);
+          let word = (file.data[0] << 8) + file.data[1];
           const { depth, channels } = props;
           let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height, user_id }, ["id"]);
           console.log("API upload photo: ", reply && reply.returning ? reply.returning : reply);

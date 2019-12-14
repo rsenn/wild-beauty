@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 
-export const WrapInAspectBox = (enable, { width = "84%", aspect = "0.718", className }, children) =>
+export const WrapInAspectBox = (enable, { width = "100%", aspect = 1, className }, children) =>
   enable ? (
     <SizedAspectRatioBox
       className={className}

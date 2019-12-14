@@ -25,6 +25,9 @@ export class RootStore {
     token: ""
   });
 
+  images = observable.map();
+  entries = observable.array([]);
+
   constructor(initialData) {
     for(let k in initialData) this[k] = observable(initialData[k]);
 
@@ -72,6 +75,22 @@ export class RootStore {
 
     /*    console.log("RootStore.setState ", obj);
      */
+  }
+
+  @action.bound
+  newImage(imageObj) {
+    const { id, original_name, filesize, width, height } = imageObj;
+
+    return this.images.set(id, { original_name, filesize, width, height });
+  }
+
+  @action.bound
+  newEntry(imageId) {
+    let image = this.images.get(imageId);
+    console.log("newEntry: ", { image });
+    let entry = { image: { ...image, id: imageId } };
+    this.entries.push(entry);
+    return entry;
   }
 
   fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {
