@@ -276,7 +276,7 @@ const Nav = inject(
               <Translate value="nav.lang_name" />
             </span>
           ),
-          description:  <Translate value="nav.lang_description" />
+          description: <Translate value="nav.lang_description" />
         }
       ];
       if(global.window) {
@@ -289,7 +289,6 @@ const Nav = inject(
 
       entry = Util.find(SiteMap, "login", "name");
       entry.active = loginIsOpen;
-
 
       entry = Util.find(SiteMap, "new", "name");
       entry.disabled = !rootStore.authenticated;
@@ -376,8 +375,7 @@ const Nav = inject(
                 if(rootStore.authenticated) item.label = <span>Logout</span>;
               }
 
-              if(item.disabled) 
-                return undefined;
+              if(item.disabled) return undefined;
               return (
                 <NavLink
                   key={item.key}

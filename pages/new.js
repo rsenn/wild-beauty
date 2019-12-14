@@ -130,29 +130,30 @@ class New extends React.Component {
         </Head>
         <Nav />
         <div className={"page-layout"}>
-          <div
-            className={"upload-area"}
-            style={{
-              /*    position: "relative",
+          <NeedAuth>
+            <div
+              className={"upload-area"}
+              style={{
+                /*    position: "relative",
               top: "20px",
               left: "80vw",*/
-              minWidth: "80vmin",
-              minHeight: "80vmin"
-            }}
-          >
-            <RUG
-              action="/api/image/upload" // upload route
-              source={response => {
-                return response.map(item => {
-                  const { id } = item;
-                  const url = `/api/image/get/${id}.jpg`;
-                  console.log("RUG response:", { item, url });
-                  return url;
-                })[0];
+                minWidth: "80vmin",
+                minHeight: "80vmin"
               }}
-            ></RUG>
-          </div>
-          {/*<div className={"panes-list"}>
+            >
+              <RUG
+                action="/api/image/upload" // upload route
+                source={response => {
+                  return response.map(item => {
+                    const { id } = item;
+                    const url = `/api/image/get/${id}.jpg`;
+                    console.log("RUG response:", { item, url });
+                    return url;
+                  })[0];
+                }}
+              ></RUG>
+            </div>
+            {/*<div className={"panes-list"}>
             <div className={"panes-item layer"}>
               <img src="static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
             </div>
@@ -179,17 +180,19 @@ class New extends React.Component {
             </div>
           </div>*/}
 
-          <Layer
-            w={300}
-            h={"300px"}
-            margin={10}
-            padding={20}
-            border={"2px dashed red"}
-            style={{ cursor: "move" }}
-          >
-            Layer
-          </Layer>
-          <SvgOverlay />
+            <Layer
+              w={300}
+              h={"300px"}
+              margin={10}
+              padding={20}
+              border={"2px dashed red"}
+              style={{ cursor: "move" }}
+            >
+              Layer
+            </Layer>
+            <SvgOverlay />
+          </NeedAuth>
+
           <style jsx global>{`
             .panes-list {
               display: flex;
