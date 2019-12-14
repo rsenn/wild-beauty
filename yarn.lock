@@ -7916,9 +7916,10 @@ react-sortable-hoc@^1.8.3:
     invariant "^2.2.4"
     prop-types "^15.5.7"
 
-"react-upload-gallery@https://github.com/m-inan/react-upload-gallery":
-  version "0.0.3"
-  resolved "https://github.com/m-inan/react-upload-gallery#da567e0b95ac62ee5136e6c803901ab9d2760941"
+react-upload-gallery@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/react-upload-gallery/-/react-upload-gallery-0.0.4.tgz#37a96ee8a6e1db21645a0d9cbd9aee8d13fb2dcf"
+  integrity sha512-dNHLSNN5v51vN8gBa5qJK4u/gxCztNCwrWRgF9IUqfOPK0T+oZesnzZ4M5gJUW0GEVWgC/tqKWDhgQeuaGYhrw==
   dependencies:
     prop-types "^15.7.2"
     react-sortable-hoc "^1.8.3"
