@@ -153,7 +153,6 @@ const NavLink = ({ href, label, description, path, key, disabled, onClick, activ
       li {
         transition: width 1s;
       }
-
       a:hover > span {
         filter: drop-shadow(0px 0px 4px #ffffffff);
       }

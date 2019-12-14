@@ -14,9 +14,10 @@ import { toJS, autorun } from "mobx";
 import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { createStore, getOrCreateStore } from "../stores/createStore.js";
+import NeedAuth from "../components/simple/needAuth.js";
 
 import RUG from "react-upload-gallery";
-import "react-upload-gallery/dist/style.css";
+import "../static/css/react-upload-gallery.css";
 
 import "../static/style.css";
 
@@ -40,12 +41,7 @@ class New extends React.Component {
       window.rs = rootStore;
       //    window.stores = getOrCreateStore();
     }
-    /*
-    autorun(() => console.log("loading: ", rootStore.state.loading));
-    autorun(() => {
-      console.log("re: ", rootStore.state.loading);
-      this.forceUpdate();
-    });*/
+
     let swipeEvents = {};
     var e = null;
     const { rootStore } = props;
@@ -54,17 +50,9 @@ class New extends React.Component {
       window.page = this;
       window.rs = rootStore;
     }
-    /*
-  var scrolling = new ScrollController();
-
-  var swipeTracker = new SwipeTracker(10, function(event) {
-    console.log(event.type+': ', event);
-  });
-  swipeEvents = swipeTracker.events;
-*/
 
     if(global.window) {
-      var touchListener = TouchListener(TouchCallback, {
+      this.touchListener = TouchListener(TouchCallback, {
         element: global.window,
         step: 1,
         round: true,
@@ -82,7 +70,7 @@ class New extends React.Component {
   }
 
   render() {
-    if(global.window !== undefined) window.page = this;
+    /*   if(global.window !== undefined) window.page = this;
     if(global.window) {
       var touchListener = TouchListener(TouchCallback, {
         element: global.window,
@@ -97,7 +85,7 @@ class New extends React.Component {
         },
         { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
       );
-    }
+    }*/
     const onError = event => {};
 
     const onImage = event => {
@@ -135,7 +123,7 @@ class New extends React.Component {
   });*/
 
     return (
-      <div className={"panes-layout"} {...TouchEvents(touchListener)}>
+      <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
         <Head>
           <title>Panes</title>
           <link rel="icon" href="/favicon.ico" />
@@ -233,7 +221,6 @@ class New extends React.Component {
               display: block;
               width: 100%;
               height: 100%;
-              min-height: 80vmin;
             }
           `}</style>
         </div>

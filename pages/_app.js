@@ -9,12 +9,10 @@ import { singleton } from "../stores/RootStore.js";
 import { withRouter } from "next/router";
 import i18nStore from "../stores/i18nStore.js";
 
-const mobxStore = getOrCreateStore();
-
 class MyApp extends App {
   static async getInitialProps({ Component, router, ctx }) {
     // create a store with the initial state
-    const mobxStore = createStore(!Util.isBrowser());
+    const mobxStore = getOrCreateStore(!Util.isBrowser());
     ctx.mobxStore = mobxStore;
 
     const basePageProps = {
@@ -51,6 +49,7 @@ class MyApp extends App {
 
     if(global.window) {
       window.Util = Util;
+      window.stores = this.mobxStore;
     }
     //console.log("App.constructor", this.mobxStore);
   }
@@ -82,8 +81,7 @@ class MyApp extends App {
             font-style: normal;
           }
 
-          body,
-          html {
+          body {
             font-family: Fixed;
             font-size: 13px;
             background: url(static/img/tile-background.jpg) repeat;
@@ -96,6 +94,7 @@ class MyApp extends App {
             width: 100vw;
             text-align: center;
             display: flex;
+            flex-flow: column nowrap;
             justify-content: center;
             align-items: center;
             z-index: 1;
