@@ -288,8 +288,8 @@ class New extends React.Component {
               margin: 10px;
             }
             .item-box-size {
-                                border: 1px solid black;
-                  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+              border: 1px solid black;
+              box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
               box-sizing: border-box;
             }
 
