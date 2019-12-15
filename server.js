@@ -297,7 +297,7 @@ if (!dev && cluster.isMaster) {
       let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { id }", ...fields], params);
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
 
-      images = images.filter(im => im.items.length == 0);
+      if(images.length !== undefined) images = images.filter(im => im.items.length == 0);
 
       res.json({ success: true, count: images.length, images });
     });

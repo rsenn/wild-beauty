@@ -9,7 +9,7 @@ import { SwipeTracker } from "../utils/swipeTracker.js";
 import { Element, Node, HSLA } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
-import { TouchCallback } from "../components/TouchCallback.js";
+import { TouchCallback, makeTouchCallback, maxZIndex } from "../components/TouchCallback.js";
 import { toJS, autorun } from "mobx";
 import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
@@ -34,7 +34,20 @@ const RandomColor = () => {
 @inject("rootStore")
 @observer
 class New extends React.Component {
+  static async getInitialProps(ctx) {
+    const { RootStore } = ctx.mobxStore;
+
+    let photos = await RootStore.fetchPhotos();
+    console.log("photos:", photos);
+
+    photos.forEach(item => RootStore.newImage(item));
+  }
+
   constructor(props) {
+    let args = [...arguments];
+    const { rootStore } = props;
+    //    console.log("constructor args: ", props.initialMobxState.RootStore.images);
+    console.log("rootStore: ", toJS(rootStore.images));
     super(props);
 
     if(global.window) {
@@ -46,7 +59,6 @@ class New extends React.Component {
 
     let swipeEvents = {};
     var e = null;
-    const { rootStore } = props;
 
     if(global.window !== undefined) {
       window.page = this;
@@ -54,13 +66,33 @@ class New extends React.Component {
     }
 
     if(global.window) {
-      this.touchListener = TouchListener(TouchCallback, {
-        element: global.window,
-        step: 1,
-        round: true,
-        listener: MovementListener,
-        noscroll: true
+      this.touchCallback = makeTouchCallback("inner-image", (event, e) => {
+        const zIndex = maxZIndex() + 1;
+        if(e) Element.setCSS(e, { zIndex });
+        if(e && e.style) {
+          const orientation = e.getAttribute("orientation");
+          console.log("img ", { orientation });
+
+          let transformation = orientation == "landscape" ? `translateX(${event.x}px)` : `translateY(${event.y}px)`;
+
+          e.style.setProperty("transform", event.type.endsWith("move") ? transformation : "");
+        }
       });
+
+      this.touchListener = TouchListener(
+        e => {
+          if(e.nativeEvent) e.nativeEvent.preventDefault();
+
+          this.touchCallback(e);
+        },
+        {
+          element: global.window,
+          step: 1,
+          round: true,
+          listener: MovementListener,
+          noscroll: true
+        }
+      );
       window.dragged = e;
       MultitouchListener(
         event => {
@@ -128,7 +160,7 @@ class New extends React.Component {
     return (
       <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
         <Head>
-          <title>Panes</title>
+          <title>New</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav />
@@ -137,9 +169,6 @@ class New extends React.Component {
             <div
               className={"upload-area"}
               style={{
-                /*    position: "relative",
-              top: "20px",
-              left: "80vw",*/
                 minWidth: "80vmin",
                 minHeight: "80vmin"
               }}
@@ -157,35 +186,39 @@ class New extends React.Component {
                 }}
                 onSuccess={arg => {
                   const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
+                  console.log("UploadImages success:", arg);
 
                   let entry = rootStore.newEntry(id);
                   arg.remove();
-                  //                  const image = toJS(rootStore.images.get(id));
 
                   console.log("UploadImages success:", entry);
                 }}
               ></UploadImages>
             </div>
+            <div className={"image-list"}>
+              {[...rootStore.images.entries()].map(([id, image]) => {
+                const { width, height } = image;
+                const landscape = width > height;
 
-            {rootStore.entries.map(entry => {
-              const { width, height, id } = entry.image;
-              const landscape = width > height;
-
-              return (
-                <SizedAspectRatioBox className={"item-entry"}>
-                  <img
-                    className={"layer"}
-                    src={`/api/image/get/${id}.jpg`}
-                    width={width}
-                    height={height}
-                    style={{
-                      width: landscape ? `${(width * 100) / height}%` : "100%",
-                      height: landscape ? "100%" : "auto"
-                    }}
-                  />
-                </SizedAspectRatioBox>
-              );
-            })}
+                return (
+                  <div className={"item-entry"}>
+                    <SizedAspectRatioBox className={"item-box"}>
+                      <img
+                        className={"inner-image"}
+                        src={`/api/image/get/${id}.jpg`}
+                        width={width}
+                        height={height}
+                        orientation={landscape ? "landscape" : "portrait"}
+                        style={{
+                          width: landscape ? `${(width * 100) / height}%` : "100%",
+                          height: landscape ? "100%" : "auto"
+                        }}
+                      />
+                    </SizedAspectRatioBox>
+                  </div>
+                );
+              })}
+            </div>
             {/*<div className={"panes-list"}>
             <div className={"panes-item layer"}>
               <img src="static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
@@ -213,14 +246,7 @@ class New extends React.Component {
             </div>
           </div>*/}
 
-            <Layer
-              w={300}
-              h={"300px"}
-              margin={10}
-              padding={20}
-              border={"2px dashed red"}
-              style={{ cursor: "move" }}
-            >
+            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} style={{ cursor: "move" }}>
               Layer
             </Layer>
             <SvgOverlay />
@@ -258,11 +284,27 @@ class New extends React.Component {
               width: 100%;
               height: 100%;
             }
-            .aspect-ratio-box {
-              border: 2px dashed black;
+            .item-entry {
+              margin: 10px;
             }
+            .item-box-size {
+                                border: 1px solid black;
+                  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+              box-sizing: border-box;
+            }
+
             .aspect-ratio-box {
               overflow: hidden;
+            }
+            .image-list {
+              display: inline-flex;
+              flex-flow: row wrap;
+              flex-basis: 30%;
+              justify-content: center;
+            }
+            .image-list > div {
+              flex: 0 1 auto;
+              width: 30vw;
             }
           `}</style>
         </div>

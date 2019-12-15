@@ -7810,6 +7810,11 @@ react-dom@^16.12.0:
     prop-types "^15.6.2"
     scheduler "^0.18.0"
 
+react-editable-hooks@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-editable-hooks/-/react-editable-hooks-1.0.0.tgz#848354418e2a0b7302a63482a8d0a460a212ef41"
+  integrity sha512-u9H8M7zVJvwqvH2lQsSLSdiOeq2FM3HgZf5VaM+2C3vTA/GzIwaT00vLxEKobHFM4uiWK9cVQQTtsY+zbmf9DA==
+
 react-editext@^3.11.1:
   version "3.11.1"
   resolved "https://registry.yarnpkg.com/react-editext/-/react-editext-3.11.1.tgz#9d2100adde6ef66103b98b8292fdba0348b95c50"

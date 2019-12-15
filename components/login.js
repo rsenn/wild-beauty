@@ -77,8 +77,7 @@ const LoginForm = inject("rootStore")(
                   autoComplete={"current-password"}
                   onKeyDown={e => {
                     if(e.keyCode == 13) {
-                      if(document && document.querySelector)
-                        document.querySelector("button.form-button").focus();
+                      if(document && document.querySelector) document.querySelector("button.form-button").focus();
                     }
                   }}
                 />
@@ -104,9 +103,7 @@ const LoginForm = inject("rootStore")(
                 </div>
               </div>
             ) : rootStore.authenticated || rootStore.state.error ? (
-              <div className={"form-status"}>
-                {rootStore.state.error || <Translate value="login.logged" />}
-              </div>
+              <div className={"form-status"}>{rootStore.state.error || <Translate value="login.logged" />}</div>
             ) : (
               undefined
             )}
@@ -192,11 +189,7 @@ const LoginForm = inject("rootStore")(
               justify-content: center;
               vertical-align: baseline;
               background: rgba(138, 0, 16, 0.5);
-              background: linear-gradient(
-                0deg,
-                rgba(91, 0, 10, 0.75) 0%,
-                rgba(138, 0, 16, 0.5) 100%
-              );
+              background: linear-gradient(0deg, rgba(91, 0, 10, 0.75) 0%, rgba(138, 0, 16, 0.5) 100%);
               color: white;
               padding: 4px 4px 2px 4px;
               outline: none;

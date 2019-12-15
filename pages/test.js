@@ -15,9 +15,7 @@ import { TouchCallback } from "../components/TouchCallback.js";
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -113,22 +111,11 @@ const Test = () => {
         >
           {list.map(path => (
             <Layer inline style={{ flex: "1 0 auto", backgroundColor: RandomColor() }}>
-              <img
-                src={path}
-                style={{ maxWidth: "50vmin", width: "100%", height: "auto" }}
-                className="gallery-image"
-              />
+              <img src={path} style={{ maxWidth: "50vmin", width: "100%", height: "auto" }} className="gallery-image" />
             </Layer>
           ))}{" "}
         </div>
-        <Layer
-          className={"layer"}
-          w={300}
-          h={"300px"}
-          margin={10}
-          padding={2}
-          border={"2px dashed red"}
-        >
+        <Layer className={"layer"} w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
           Layer
         </Layer>
         <SvgOverlay />

@@ -4,6 +4,22 @@ import getAPI from "../utils/api.js";
 import { Timer } from "../utils/dom.js";
 import axios from "../utils/axios.js";
 import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoStore.js";
+import Util from "../utils/util.js";
+import { assign_to } from "../utils/devtools.js";
+import devpane from "../utils/devpane.js";
+
+const isServer = !Util.isBrowser();
+
+if (!isServer) {
+  window.devp = new devpane();
+  window.dev = {};
+  window.fns = {};
+
+  assign_to(window);
+  //  assign_to(window.dev);
+  // Object.assign(window, { REST_API, API_URL });
+  //Object.assign(window.fns, { Container, Element, HSLA, Matrix, Point, PointList, ReactComponent, Rect, RGBA, Size, SVG, Timer, TRBL, Tree });
+}
 
 export class RootStore {
   entries = observable.array([]);
@@ -29,17 +45,31 @@ export class RootStore {
   entries = observable.array([]);
   users = observable.map();
 
-  constructor(initialData) {
-    for(let k in initialData) this[k] = observable(initialData[k]);
+  api = getAPI();
+
+  constructor(initialData, pageProps) {
+    console.log("RootStore.constructor ", { initialData, pageProps });
+
+    if(initialData && initialData.RootStore) {
+      const init = initialData.RootStore;
+      for(let k in init) {
+        switch (k) {
+          case "images": {
+            this.images = observable.map(init[k]);
+            break;
+          }
+        }
+      }
+    }
 
     if(global.window) {
+      window.rs = this;
+
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
     }
     this.enableAutoRun();
 
     const { auth, state } = this;
-
-    console.log("RootStore.constructor ", { auth, state });
   }
 
   enableAutoRun = () => {
@@ -80,9 +110,9 @@ export class RootStore {
 
   @action.bound
   newImage(imageObj) {
-    const { id, original_name, filesize, width, height } = imageObj;
+    const { id, ...photo } = imageObj;
 
-    return this.images.set(id, { original_name, filesize, width, height });
+    return this.images.set(id, photo);
   }
 
   @action.bound
@@ -94,13 +124,21 @@ export class RootStore {
     return entry;
   }
 
+  async fetchPhotos(where = {}) {
+    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { id }"], where);
+
+    console.log("fetchPhotos =", response);
+
+    return response;
+  }
+
   fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {
     // <- note the star, this a generator function!
     this.result = "pending";
     let articles;
     //   let promise = new Promise(async function(resolve, reject) {
     try {
-      articles = yield getAPI()(`
+      articles = yield this.api(`
       query MyQuery {
         pages(where: {name: {_eq: "${page}"}}) {
           items {
@@ -125,7 +163,7 @@ export class RootStore {
 
   async loadArticles(page = "") {
     if(page == "") page = "home";
-    let result = await getAPI()(`
+    let result = await this.api(`
       query MyQuery {
         pages(where: {name: {_eq: "${page}"}}) {
           items {

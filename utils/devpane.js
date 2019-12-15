@@ -6,6 +6,7 @@ import { Polygon } from "./polygon.js";
 import { storage } from "./devtools.js";
 import { TouchListener } from "./touchHandler.js";
 import { lazyInitializer } from "./lazyInitializer.js";
+
 var SvgPath = require("./svg-path.js");
 /*
 if (global.window) {
@@ -203,14 +204,19 @@ export default class devpane {
   }
 
   logEntry(str) {
-    let log = this.log();
-    /*  let pane = this.pane();
-     */
-    if(log.parentNode !== this.pane()) this.pane().insertBefore(log, this.pane().firstElementChild);
+    if(this.log) {
+      let log = this.log();
+      /*  let pane = this.pane();
+       */
 
-    log.insertAdjacentText("beforeend", str.trim() + "\n");
-    log.scrollTop = log.scrollHeight;
-    log.style.height = "4em";
+      if(log) {
+        if(log.parentNode !== this.pane()) this.pane().insertBefore(log, this.pane().firstElementChild);
+
+        log.insertAdjacentText("beforeend", str.trim() + "\n");
+        log.scrollTop = log.scrollHeight;
+        log.style.height = "4em";
+      }
+    }
   }
 
   handleTouch(event) {

@@ -31,8 +31,7 @@ export const StyledCheckbox = props => (
       width: "24px",
       height: "24px",
       backgroundSize: "100% 100%",
-      backgroundImage:
-        `url(/static/img/checkbox-` + (props.checked ? "enabled" : "disabled") + `.svg)`,
+      backgroundImage: `url(/static/img/checkbox-` + (props.checked ? "enabled" : "disabled") + `.svg)`,
       borderRadius: "3px",
       transition: "all 150ms"
       /*   ${HiddenCheckbox}:focus + & {

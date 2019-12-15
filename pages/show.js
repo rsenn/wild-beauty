@@ -20,9 +20,7 @@ const RandomColor = () => {
 };
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -33,11 +31,7 @@ class Show extends React.Component {
   constructor(props) {
     super(props);
 
-    this.api = API(
-      global.window && /192\.168/.test(window.location.href)
-        ? "http://wild-beauty.herokuapp.com/v1/graphql"
-        : "/v1/graphql"
-    );
+    this.api = API(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
 
     const { rootStore } = this.props;
 
@@ -56,14 +50,9 @@ class Show extends React.Component {
   }
 
   componentDidMount() {
-    this.api
-      .list(
-        "items",
-        "type data photos { photo { width height data filesize } } users { user { id name last_seen } }"
-      )
-      .then(res => {
-        console.log("items: ", res);
-      });
+    this.api.list("items", "type data photos { photo { width height data filesize } } users { user { id name last_seen } }").then(res => {
+      console.log("items: ", res);
+    });
   }
 
   render() {
@@ -142,11 +131,7 @@ class Show extends React.Component {
                 }}
                 className={"layer gallery-aspect-box"}
               >
-                <img
-                  src={path}
-                  style={{ maxWidth: "28vw", width: "100%", height: "auto" }}
-                  className="gallery-image"
-                />
+                <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto" }} className="gallery-image" />
               </SizedAspectRatioBox>
             ))}{" "}
           </div>
