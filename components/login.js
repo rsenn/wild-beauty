@@ -9,6 +9,7 @@ const LoginForm = inject("rootStore")(
   observer(({ show = true, className, style, onLogin, loading, rootStore, ...props }) => {
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [focus, setFocus] = React.useState(false);
 
     if(global.window) autofillEvent(global.window);
 
@@ -24,7 +25,8 @@ const LoginForm = inject("rootStore")(
             action={"/api/login"}
             onKeyPress={e => {
               if(e.keyCode == 13) {
-                e.target.submit();
+                console.log("currentTarget: ", e.currentTarget);
+                if(e.currentTarget.tagName.toLowerCase() == "button") e.target.submit();
               }
             }}
             onSubmit={e => {
@@ -38,13 +40,25 @@ const LoginForm = inject("rootStore")(
               </div>
               <div className={"form-value"}>
                 <input
+                  name={"username"}
                   type={"text"}
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   size={20}
                   autoComplete={"username"}
+                  onKeyDown={e => {
+                    if(e.keyCode == 13) {
+                      if(document && document.querySelector) {
+                        e.preventDefault();
+                        document.querySelector("input[name=password]").focus();
+                      }
+                    }
+                  }}
                   ref={input => {
-                   // if(input) input.focus();
+                    if(!focus) {
+                      if(input) input.focus();
+                      setFocus(true);
+                    }
                   }}
                 />
               </div>
@@ -55,11 +69,18 @@ const LoginForm = inject("rootStore")(
               </div>
               <div className={"form-value"}>
                 <input
+                  name={"password"}
                   type={"password"}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   size={20}
                   autoComplete={"current-password"}
+                  onKeyDown={e => {
+                    if(e.keyCode == 13) {
+                      if(document && document.querySelector)
+                        document.querySelector("button.form-button").focus();
+                    }
+                  }}
                 />
               </div>
             </div>

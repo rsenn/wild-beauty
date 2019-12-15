@@ -99,6 +99,22 @@ class MyApp extends App {
             align-items: center;
             z-index: 1;
           }
+          button,
+          textarea,
+          input,
+          select,
+          a {
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+          }
+          :focus {
+            outline: none !important;
+          }
         `}</style>
       </Container>
     );

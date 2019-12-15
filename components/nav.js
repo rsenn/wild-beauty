@@ -73,7 +73,10 @@ const NavLink = ({ href, label, description, path, key, disabled, onClick, activ
       onClick={onClick}
     >
       {typeof label == "function" ? label(props) : label}
-      <div className={"desc"}>{description}</div>
+      <div className={"desc"}>
+        {" "}
+        {typeof description == "function" ? description(props) : description}
+      </div>
     </a>
     <style jsx global>{`
       li.menu-active {
@@ -174,17 +177,17 @@ const randomGradient = () => {
     0.8
   );
 
-  console.log("baseColor ", baseColor.toString());
+  //console.log("baseColor ", baseColor.toString());
   let colors = [
     new HSLA(baseColor.h, baseColor.s, baseColor.l, baseColor.a),
     new HSLA(baseColor.h, baseColor.s, baseColor.l, baseColor.a)
   ];
   colors[0].l = colors[0].l / 2;
   colors[1].l = 100 - (100 - colors[1].l) / 2;
-  console.log(
+  /*  console.log(
     "colors ",
     colors.map(c => c.toString())
-  );
+  );*/
 
   return colors;
 };
@@ -259,6 +262,21 @@ const Nav = inject(
         },
         {
           href: "#",
+          name: "logout",
+          disabled: true,
+          label: () => (
+            <span>
+              <Translate value="nav.logout_name" />
+            </span>
+          ),
+          description: () => (
+            <React.Fragment>
+              <Translate value="nav.logout_description" />: {rootStore.state.username}
+            </React.Fragment>
+          )
+        },
+        {
+          href: "#",
           name: "login",
           label: () => (
             <span>
@@ -291,6 +309,12 @@ const Nav = inject(
 
       entry = Util.find(SiteMap, "new", "name");
       entry.disabled = !rootStore.authenticated;
+
+      entry = Util.find(SiteMap, "logout", "name");
+      entry.disabled = !rootStore.authenticated;
+
+      entry = Util.find(SiteMap, "login", "name");
+      entry.disabled = rootStore.authenticated;
 
       return (
         <div className="menu">
@@ -368,7 +392,7 @@ const Nav = inject(
               }`;
               return link;
             }).map(item => {
-              console.log("item.name: ", item.name);
+              //     console.log("item.name: ", item.name);
 
               if(item.name == "login") {
                 if(rootStore.authenticated) item.label = <span>Logout</span>;
@@ -380,15 +404,15 @@ const Nav = inject(
                   key={item.key}
                   {...{ ...props, ...item, path: props.router.asPath }}
                   onClick={
-                    item.name == "login"
+                    item.name.startsWith("log")
                       ? () => {
                           console.log("click login");
-                          if(!rootStore.authenticated) {
+                          if(item.name == "login") {
                             if(!loginIsOpen) {
                               setColor(randomGradient());
                               setLoginOpen(!loginIsOpen);
                             }
-                          } else {
+                          } else if(item.name == "logout") {
                             rootStore.doLogout();
                           }
                         }

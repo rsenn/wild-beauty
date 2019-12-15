@@ -200,7 +200,7 @@ if (!dev && cluster.isMaster) {
       ////console.log("req: ", { username, password });
       try {
         let response = await API.select("users", { username }, ["id", "username", "password"]);
-        const user = response.users[0];
+        let user = response.users[0];
         let success = user ? bcrypt.compareSync(password, user.password) : false;
         let token,
           user_id = -1;
@@ -222,8 +222,9 @@ if (!dev && cluster.isMaster) {
           req.session.token = token;
           req.session.user_id = user_id;
         }
+        user = Util.filterKeys(user, key => key != "password");
         console.error("Login user: ", user);
-        res.json({ success, token, user_id: user ? user.id : -1 });
+        res.json({ success, token, user, user_id: user ? user.id : -1 });
       } catch(err) {
         console.error("Login error: ", err);
       }
@@ -277,7 +278,7 @@ if (!dev && cluster.isMaster) {
               req.session.destroy();
             }
             ////console.log("response: ", response.affected_rows);
-            return res.json({ success: response && response.affected_rows });
+            return res.json({ success: !!(response && response.affected_rows) });
           }
         }
       } catch(err) {

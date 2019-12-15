@@ -27,6 +27,7 @@ export class RootStore {
 
   images = observable.map();
   entries = observable.array([]);
+  users = observable.map();
 
   constructor(initialData) {
     for(let k in initialData) this[k] = observable(initialData[k]);
@@ -159,13 +160,17 @@ export class RootStore {
 
     Timer.once(100, () => {
       this.apiRequest("/api/login", { username, password }).then(res => {
-        const { success, token, user_id } = res.data;
+        const { success, token, user_id, user } = res.data;
+        const { username } = user;
 
         this.setState({ loading: false, authenticated: success, error: success ? undefined : "Login failed" });
+
+        this.users.set(user_id, user);
+
         /*   this.auth.token = token;
         this.auth.user_id = user_id;*/
         this.disableAutoRun();
-        let newAuth = { token, user_id };
+        let newAuth = { token, user_id, user };
         set(this.auth, newAuth);
 
         if(global.window) localStorage.setItem("auth", JSON.stringify(newAuth));

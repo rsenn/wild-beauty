@@ -48,11 +48,11 @@ class Show extends React.Component {
       window.stores = getOrCreateStore();
     }
 
-    autorun(() => console.log("loading: ", rootStore.state.loading));
-    autorun(() => {
+    //    autorun(() => console.log("loading: ", rootStore.state.loading));
+    /*  autorun(() => {
       console.log("re: ", rootStore.state.loading);
       this.forceUpdate();
-    });
+    });*/
   }
 
   componentDidMount() {

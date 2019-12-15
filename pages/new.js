@@ -18,7 +18,7 @@ import NeedAuth from "../components/simple/needAuth.js";
 import { Translate, Localize } from "react-i18nify-mobx";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 
-import RUG from "react-upload-gallery";
+import UploadImages from "react-upload-gallery";
 import "../static/css/react-upload-gallery.css";
 
 import "../static/style.css";
@@ -144,13 +144,13 @@ class New extends React.Component {
                 minHeight: "80vmin"
               }}
             >
-              <RUG
+              <UploadImages
                 action="/api/image/upload" // upload route
                 source={response => {
                   return response.map(item => {
                     const { id } = item;
                     const url = `/api/image/get/${id}.jpg`;
-                    console.log("RUG response:", { item, url });
+                    console.log("UploadImages response:", { item, url });
                     rootStore.newImage(item);
                     return url;
                   })[0];
@@ -162,19 +162,26 @@ class New extends React.Component {
                   arg.remove();
                   //                  const image = toJS(rootStore.images.get(id));
 
-                  console.log("RUG success:", entry);
+                  console.log("UploadImages success:", entry);
                 }}
-              ></RUG>
+              ></UploadImages>
             </div>
 
             {rootStore.entries.map(entry => {
+              const { width, height, id } = entry.image;
+              const landscape = width > height;
+
               return (
                 <SizedAspectRatioBox className={"item-entry"}>
                   <img
                     className={"layer"}
-                    src={`/api/image/get/${entry.image.id}.jpg`}
-                    width={entry.image.width}
-                    height={entry.image.height}
+                    src={`/api/image/get/${id}.jpg`}
+                    width={width}
+                    height={height}
+                    style={{
+                      width: landscape ? `${(width * 100) / height}%` : "100%",
+                      height: landscape ? "100%" : "auto"
+                    }}
                   />
                 </SizedAspectRatioBox>
               );

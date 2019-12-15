@@ -86,19 +86,18 @@ i18nStore.setTranslations({
   }
 });
 
-i18nStore.user = observable.object({ lang: '' });
+i18nStore.user = observable.object({ lang: "" });
 
 if (global.navigator) {
   makeAutoStoreHandler("language")(i18nStore.user, "lang");
 
   autorun(() => {
     i18nStore.setLocale(i18nStore.user.lang);
-      console.log("Language: ", i18nStore.user.lang);
-
+    console.log("Language: ", i18nStore.user.lang);
   });
-  
-  if(typeof(i18nStore.user.lang) != 'string' || i18nStore.user.lang.length != 2) {
-    i18nStore.user.lang = navigator.language.substring(0,2);
+
+  if(typeof i18nStore.user.lang != "string" || i18nStore.user.lang.length != 2) {
+    i18nStore.user.lang = navigator.language.substring(0, 2);
   }
 
   if(!i18nStore.user.lang || i18nStore.user.lang.length != 2) i18nStore.user.lang = (navigator.language || navigator.userLanguage).substring(0, 2);

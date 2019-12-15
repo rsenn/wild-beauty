@@ -28,7 +28,7 @@ export const TouchCallback = event => {
     e = event.start.target;
   }
 
-  console.log("TouchCallback event: ", event);
+  //console.log("TouchCallback event: ", event);
 
   const hasLayerClass = containsClass("layer");
   if(hasLayerClass) {
