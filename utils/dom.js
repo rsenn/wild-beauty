@@ -247,8 +247,8 @@ Point.dimension = p => [p.width, p.height];
 
 Point.toString = point => {
   if(point instanceof Array) return `[${point[0].toFixed(3)},${point[1].toFixed(3)}]`;
-  return `[${point.x},${point.y}]`
-//  return Point.prototype.toString.call(point);
+  return `[${point.x},${point.y}]`;
+  //  return Point.prototype.toString.call(point);
 };
 Point.prototype.toString = function(brackets = true) {
   return (brackets ? "{" : "") + "x:" + this.x.toFixed(3) + ",y:" + this.y.toFixed(3) + (brackets ? "}" : "");
@@ -600,8 +600,7 @@ PointList.prototype.toString = function() {
 };
 
 PointList.toString = pointList => {
-
-  return '['+[...pointList].map(({x,y }) => `[${x},${y}]`).join(",")+']';
+  return "[" + [...pointList].map(p => `[${p.x || p[0]},${p.y || p[1]}]`).join(",") + "]";
 };
 
 PointList.prototype.rotateRight = function(n) {

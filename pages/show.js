@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Layer from "../components/layer.js";
-import { Element, Node, HSLA, PointList, Point, Rect } from "../utils/dom.js";
+import { Element, Node, HSLA, PointList, Point, Rect, Matrix } from "../utils/dom.js";
 import getAPI from "../utils/api.js";
 import Util from "../utils/util.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
@@ -14,7 +14,8 @@ import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspec
 import { action, toJS, autorun } from "mobx";
 import Nav from "../components/nav.js";
 import { createStore, getOrCreateStore } from "../stores/createStore.js";
-import  affineFit from 'affinefit';
+import affineFit from "affinefit";
+import { fromTriangles, applyToPoint } from "transformation-matrix";
 
 import "../static/css/grid.css";
 
@@ -79,20 +80,35 @@ class Show extends React.Component {
   }
 
   handleClick = event => {
+    let e = event.currentTarget;
+    while(e.parentElement  && !e.classList.contains('tile')) {
+      e = e.parentElement;
+    } 
+    let rect = Element.rect(e);
+    let points = rect.toPoints().map(p => [p.x, p.y]);
+    let rect2 = Element.rect("#item-grid");
+    let points2 = rect2.toPoints().map(p => [p.x, p.y]);
+    console.log("handleClick:\nrect: ", rect.toString(), "\npoints: ", PointList.toString(points), "\nrect2: ", rect2.toString(), "\npoints2: ", PointList.toString(points2));
+    var trn = affineFit(points, points2);
+    console.log("trn: ", trn.M);
+    var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
+    var m = Matrix.init_scale(3,3);
 
-    let rect =Element.rect( event.target);
-    let points = rect.toPoints().map(p => ([p.x, p.y]));
+    m = Matrix.translate(m, -100, 10);
 
-    let rect2 = Element.rect('#item-grid');
-    let points2 = rect2.toPoints().map(p => ([p.x, p.y]));
 
-        console.log("handleClick:\nrect: ", rect.toString(), "\npoints: ", PointList.toString(points), 
-         "\nrect2: ",  rect2.toString(), "\npoints2: ", PointList.toString(points2) );
+    var dm = m.toDOMMatrix();
+    var dms = dm.toString();
 
-var trn = affineFit(points, points2);
-        console.log("trn: ", trn.M);
+    console.log("event.target: ", e);
 
-  }
+  e.style.setProperty('transform', dms);
+
+    if(global.window) {
+      window.t = e;
+     window.m = m; }
+    console.log("matrix: ", m, dms);
+  };
 
   render() {
     const { rootStore } = this.props;
@@ -169,7 +185,7 @@ var trn = affineFit(points, points2);
             }}
           >*/}
           <div
-          id={'item-grid'}
+            id={"item-grid"}
             style={{
               marginLeft: "-8px",
               padding: "4px",
@@ -191,7 +207,7 @@ var trn = affineFit(points, points2);
                 console.log("data: ", data);
 
                 return (
-                  <div className={'tile'} id={`item-${item.id}`} onClick={this.handleClick}>
+                  <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                     <SizedAspectRatioBox
                       style={{
                         position: "relative",
@@ -309,9 +325,7 @@ var trn = affineFit(points, points2);
             .tile {
               transition: transform 1s ease-in-out;
             }
-            .tile:hover {
-              transform: scale3d(2, 2, 2);
-            }
+         
           `}</style>
         </div>
       </div>
