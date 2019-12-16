@@ -349,8 +349,12 @@ if (!dev && cluster.isMaster) {
       //console.log(`id: `, id);
       let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "user_id"]);
       const photo = response.photos[0];
-      if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
+
+      if(typeof(photo) == 'object') {
+
+        if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
       let data = Buffer.from(photo.data, "base64");
+    
       delete photo.data;
       //console.log(`photo: `, photo);
       res.set("Content-Type", "image/jpeg");
@@ -361,6 +365,7 @@ if (!dev && cluster.isMaster) {
       for(let key of ["original_name", "uploaded", "user_id"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
       for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
       res.send(data);
+}    
     });
 
     server.post(

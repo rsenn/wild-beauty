@@ -229,9 +229,9 @@ export class RootStore {
 
         let { parent_id } = item;
 
-        if(item.children && item.children.length) item.children = item.children.map(i => this.getItem(parseInt(i.id), tr, idMap));
+        if(item.children && item.children.length) item.children = item.children.map(i => i != null ? this.getItem(parseInt(i.id), tr, idMap) : null).filter(c => c !== null);
         else item.children = [];
-        // item.children = item.children.map(it => this.items.get(it.id, tr, idMap)).filter(c => c !== null);
+        // item.children = item.children.map(it => this.items.get(it.id, tr, idMap))
         /*.filter(it => it !== undefined)*/
         //
       }
