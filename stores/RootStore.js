@@ -138,12 +138,12 @@ export class RootStore {
     return image;
   }
 
- /**
-  * Gets an image.
-  *
-  * @param      {<type>}  id      The identifier
-  * @return     {<type>}  The image.
-  */
+  /**
+   * Gets an image.
+   *
+   * @param      {<type>}  id      The identifier
+   * @return     {<type>}  The image.
+   */
   getImage(id) {
     id = parseInt(id);
     return this.images.has(id) ? this.images.get(id) : null;
@@ -175,14 +175,12 @@ export class RootStore {
     });
   }
 
-  
   /**
-   * Get field names 
+   * Get field names
    *
    * @return     {<type>}  { description_of_the_return_value }
    */
-  get
-  fieldNames() {
+  get fieldNames() {
     return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
   }
 

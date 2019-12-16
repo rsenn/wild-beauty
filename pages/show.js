@@ -165,16 +165,15 @@ class Show extends React.Component {
                 const haveImage = photo_id >= 0;
                 const path = haveImage ? `/api/image/get/${photo_id}` : "static/img/no-image.svg";
                 const opacity = photo_id >= 0 ? 1 : 0.3;
-console.log("item: ", item);
-let { data, parent, type, children , users } = item;
+                console.log("item: ", item);
+                let { data, parent, type, children, users } = item;
 
- data = item.data && item.data.length && JSON.parse(item.data);
- if(typeof(data) != 'object' || data === null)
-   data = {};
- console.log("data: ", data);
+                data = item.data && item.data.length && JSON.parse(item.data);
+                if(typeof data != "object" || data === null) data = {};
+                console.log("data: ", data);
 
                 return (
-                  <div>
+                  <div className={'tile'} id={`item-${item.id}`}>
                     <SizedAspectRatioBox
                       style={{
                         position: "relative",
@@ -185,33 +184,31 @@ let { data, parent, type, children , users } = item;
                       }}
                       className={"layer gallery-aspect-box"}
                     >
-                      {haveImage ? (
-                        <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto", opacity }} className="gallery-image" />
-                      ) : undefined }
+                      {haveImage ? <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto", opacity }} className="gallery-image" /> : undefined}
 
-
-                        <div
-                          style={{
-                            position: "absolute",
-                            padding: "2px",
-                            background: "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
-                            textAlign: "left",
-                            top: "0px",
-                            left: "0px",
-                            fontSize: "15px"
-                          }}
-                        >
-                          Id: {item.id}
-                          <br />
-                          Number of children: {children.length}
-                          <br />
-                          Parent Id: {parent ? parent.id : -1}  <br />
-                          {  !!type ? `Type: ${type}` : undefined }
-                          <br />
-                          <br />
-                          <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>{[...Object.entries(data)].map(([ key, value ]) => `${Util.ucfirst(key)}: ${value}`).join("\n") }</pre>
-                        </div>
-                     
+                      <div
+                        style={{
+                          position: "absolute",
+                          padding: "2px",
+                          background: "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                          textAlign: "left",
+                          top: "0px",
+                          left: "0px",
+                          fontSize: "15px"
+                        }}
+                      >
+                        Id: {item.id}
+                        <br />
+                        Number of children: {children.length}
+                        <br />
+                        Parent Id: {parent ? parent.id : -1} <br />
+                        {!!type ? `Type: ${type}` : undefined}
+                        <br />
+                        <br />
+                        <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>
+                          {[...Object.entries(data)].map(([key, value]) => `${Util.ucfirst(key)}: ${value}`).join("\n")}
+                        </pre>
+                      </div>
                     </SizedAspectRatioBox>
                   </div>
                 );
@@ -290,6 +287,12 @@ let { data, parent, type, children , users } = item;
               justify-content: center;
               align-items: center;
               z-index: 1;
+            }
+            .tile {
+              transition: transform 1s ease-in-out;
+            }
+            .tile:hover {
+              transform: scale3d(2, 2, 2);
             }
           `}</style>
         </div>
