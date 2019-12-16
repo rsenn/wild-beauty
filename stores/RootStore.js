@@ -53,7 +53,6 @@ export class RootStore {
 
   constructor(initialData, pageProps) {
     console.log("RootStore.constructor ", { initialData, pageProps });
-
     if(initialData && initialData.RootStore) {
       const init = initialData.RootStore;
       for(let k in init) {
@@ -65,14 +64,11 @@ export class RootStore {
         }
       }
     }
-
     if(global.window) {
       window.rs = this;
-
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
     }
     this.enableAutoRun();
-
     const { auth, state } = this;
   }
 
@@ -152,10 +148,17 @@ export class RootStore {
     return item === null ? -1 : item.id;
   }
 
-  getItem(id, tr = it => it) {
+  @action
+  getItem(id, tr = it => it, idMap = null) {
+    if(idMap === null) idMap = [];
+
     let item = this.items.get(!id ? this.rootItemId : id);
 
-    if(typeof item == "object") item.children = item.children ? item.children.map(({ id }) => this.getItem(id, tr)) : [];
+    if(item && idMap.indexOf(item.id) == -1) {
+      idMap.push(item.id);
+
+      if(typeof item == "object") item.children = item.children ? item.children.map(({ id }) => this.getItem(id, tr, idMap)) : [];
+    }
 
     return item === undefined ? item : tr(item);
   }
@@ -253,7 +256,11 @@ export class RootStore {
         const { success, token, user_id, user } = res.data;
         const { username } = user;
 
-        this.setState({ loading: false, authenticated: success, error: success ? undefined : "Login failed" });
+        this.setState({
+          loading: false,
+          authenticated: success,
+          error: success ? undefined : "Login failed"
+        });
 
         this.users.set(user_id, user);
 

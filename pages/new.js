@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Router, withRouter } from "next/router";
 import Head from "next/head";
 import Nav from "../components/nav.js";
 import Layer from "../components/layer.js";
@@ -48,8 +49,20 @@ const makeItemToOption = selected => item => {
   return obj;
 };
 
+const findInTree = (tree, value) => {
+  if(tree.value === value) return tree;
+  if(tree.children) {
+    for(let child of tree.children) {
+      let ret = findInTree(child, value);
+      if(ret !== null) return ret;
+    }
+  }
+  return null;
+};
+
 @inject("rootStore")
 @observer
+@withRouter
 class New extends React.Component {
   currentImage = null;
   clonedImage = null;
@@ -170,30 +183,47 @@ class New extends React.Component {
       );
     }
     rootStore.state.step = 1;
+    //    this.checkQuery();
   }
 
-  addContent = () => {
+  addContent = event => {
     const { rootStore } = this.props;
-
+    console.log("addContent: ", event);
     rootStore.fields.push({ type: null, value: "" });
   };
 
+  checkQuery() {
+    const { rootStore, router } = this.props;
+
+    console.log("router.query", router.query);
+
+    const obj = ["step", "image", "selected"].reduce((acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc), {});
+    console.log("newState: ", obj);
+
+    rootStore.setState(obj);
+  }
+
   componentDidMount() {
-    const { rootStore } = this.props;
+    const { rootStore, router } = this.props;
+    this.checkQuery();
 
     rootStore.fetchItems().then(response => {
       console.log("Items: ", response.items);
 
+      this.tree = rootStore.getItem(0, makeItemToOption());
     });
   }
 
   treeSelEvent = (type, arg) => {
-        const { rootStore } = this.props;
+    const { rootStore } = this.props;
 
-    switch(type) {
-      case 'change': {
-        rootStore.setState({ selected: arg.value });
-    console.log("treeSelEvent: ", type, arg);
+    switch (type) {
+      case "change": {
+        console.log("treeSelEvent: ", this.tree, arg.value);
+        const item = findInTree(this.tree, arg.value);
+        item.checked = true;
+        //rootStore.setState({ selected: arg.value });
+        console.log("treeSelEvent: ", type, item);
         break;
       }
       default: {
@@ -204,7 +234,7 @@ class New extends React.Component {
   };
 
   render() {
-    const { rootStore } = this.props;
+    const { rootStore, router } = this.props;
     const onError = event => {};
     const onImage = event => {
       const { value } = event.nativeEvent.target;
@@ -212,7 +242,7 @@ class New extends React.Component {
       console.log("onChange: ", value);
     };
 
-    const makeTreeSelEvent = name => event => this.treeSelEvent(name, event)
+    const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
 
     return (
       <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
@@ -272,7 +302,12 @@ class New extends React.Component {
                               height: landscape ? "100%" : "auto"
                             }}
                             onClick={() => {
-                              rootStore.setState({ selected: index, image: id, step: 2 });
+                              router.push({
+                                pathname: "/new",
+                                query: { step: 2, image: id, selected: index },
+                                shallow: true
+                              });
+                              //                         rootStore.setState({ selected: index, image: id, step: 2 });
                             }}
                           />
                         </SizedAspectRatioBox>
@@ -308,7 +343,7 @@ class New extends React.Component {
                 </div>
                 <div></div>
                 <DropdownTreeSelect
-                  data={rootStore.getItem(0, makeItemToOption(this.selectedParent))}
+                  data={this.tree}
                   onChange={makeTreeSelEvent("change")}
                   onNodeToggle={makeTreeSelEvent("node-toggle")}
                   onFocus={makeTreeSelEvent("focus")}
@@ -327,7 +362,7 @@ class New extends React.Component {
                     }}
                   />
                 ))}
-                <AddItemBar onAdd={this.addContent} />
+                <AddItemBar onAdd={() => rootStore.fields.push({ type: null, value: "" })} />
               </div>
             )}
 

@@ -43,6 +43,7 @@ const hashPath = path => {
   const INT32_MAX = 2147483647;
   return () => Util.hashString(path, 32, INT32_MAX) / INT32_MAX;
 };
+
 const defaultImageProps = { style: { width: "100%", maxWidth: "100px", maxHeight: "150px" } };
 
 /**

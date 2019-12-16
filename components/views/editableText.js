@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useEditableState } from "react-editable-hooks";
 import classNames from "classnames";
-
+import { useRef } from 'react';
+import { trkl } from "../../utils/trkl.js";
+ 
 export const EditableText = ({ className, style, multiline = false, value, onValueChanged }) => {
   const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
     value,
@@ -11,7 +13,17 @@ export const EditableText = ({ className, style, multiline = false, value, onVal
 
   const lines = value.split(/\n/g).length;
   const lineStyle = multiline ? { height: `${lines}em`, whiteSpace: "pre" } : {};
-
+  const ref = trkl();
+/*
+ useDoubleClick({
+    onSingleClick: e => {
+      console.log(e, 'single click');
+    },
+    onDoubleClick: onEditBegin,
+    ref,
+    latency: 250
+  });
+*/
   return (
     <div className={classNames(className, "editable-text")} style={style}>
       {isEditing ? (
@@ -26,7 +38,7 @@ export const EditableText = ({ className, style, multiline = false, value, onVal
         </React.Fragment>
       ) : (
         <React.Fragment>
-          <div className="content" style={lineStyle}>
+          <div className="content" ref={ref} style={lineStyle}>
             {value}
           </div>
           <button onClick={onEditBegin}>Edit</button>
