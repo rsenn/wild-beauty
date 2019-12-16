@@ -37,7 +37,11 @@ export const ItemEditor = inject("rootStore")(
       </div>
       <DropdownTreeSelect
         data={tree}
-        onChange={obj => { console.log("Tree value: ", obj); rootStore.state.parent_id = obj.value; makeTreeSelEvent("change")(obj);  }}
+        onChange={obj => {
+          console.log("Tree value: ", obj);
+          rootStore.state.parent_id = obj.value;
+          makeTreeSelEvent("change")(obj);
+        }}
         onNodeToggle={makeTreeSelEvent("node-toggle")}
         onFocus={makeTreeSelEvent("focus")}
         onBlur={makeTreeSelEvent("blur")}
@@ -53,21 +57,20 @@ export const ItemEditor = inject("rootStore")(
           className={"editable-field"}
           name={field.type}
           value={field.value}
-          onNameChanged={ newName => {
+          onNameChanged={newName => {
             field.type = newName;
           }}
           onValueChanged={newVal => {
             field.value = newVal;
-
           }}
           onCreateName={name => {
             console.log("onCreateName: ", name);
-            if(typeof(name) == 'string' && name.length > 0) {
+            if(typeof name == "string" && name.length > 0) {
               name = name.toLowerCase();
-            rootStore.fields.push(name);
-field.type = name;
-}
-          } }
+              rootStore.fields.push(name);
+              field.type = name;
+            }
+          }}
         />
       ))}
       <AddItemBar

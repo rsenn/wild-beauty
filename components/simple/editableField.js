@@ -5,8 +5,6 @@ import { trkl } from "../../utils/trkl.js";
 import Util from "../../utils/util.js";
 
 export const EditableField = ({ options, key, className, style, multiline = false, wrapFlex = true, mame, onCreateName, onNameChanged, value, onValueChanged }) => {
- 
-
   const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
     value,
     onValueChanged,
@@ -22,12 +20,11 @@ export const EditableField = ({ options, key, className, style, multiline = fals
   const changeName = name => {
     setName(name);
     onNameChanged(name.label);
-  }
+  };
 
   const changeValue = value => {
     setEditValue(value);
   };
-
 
   let content = isEditing ? (
     <React.Fragment>
@@ -99,14 +96,14 @@ export const EditableField = ({ options, key, className, style, multiline = fals
     <div className={classNames(className, "editable-field")} style={style}>
       {isEditing ? (
         <CreatableSelect
-        createOptionPosition={'first'}
-        allowCreateWhileLoading={true}
-        isValidNewOption={value => true}
-        onCreateOption={onCreateName}
-        formatCreateLabel={value => {
-//console.log("formatCreateLabel", value);
-          return typeof(value) == 'string' ? Util.ucfirst( value) : '';
-        }}
+          createOptionPosition={"first"}
+          allowCreateWhileLoading={true}
+          isValidNewOption={value => true}
+          onCreateOption={onCreateName}
+          formatCreateLabel={value => {
+            //console.log("formatCreateLabel", value);
+            return typeof value == "string" ? Util.ucfirst(value) : "";
+          }}
           className={classNames("editable-field-name", className + "-name")}
           value={name}
           onChange={choice => {

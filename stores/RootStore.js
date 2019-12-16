@@ -47,7 +47,7 @@ export class RootStore {
   });
 
   images = observable.map();
-  entries = observable.array([], { deep:true});
+  entries = observable.array([], { deep: true });
   users = observable.map();
   fields = observable.array(["name", "title"]);
   items = observable.map();
@@ -215,8 +215,6 @@ export class RootStore {
   @action.bound
   saveItem(event) {
     console.log("saveItem");
-
-    
   }
   /*
   fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {

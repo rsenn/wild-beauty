@@ -296,13 +296,14 @@ if (!dev && cluster.isMaster) {
       console.log("params: ", params);
       let itemList = await API.list("items", fields, params);
       itemList = itemList.map(item => {
-let newData;
-try {
-  newData = JSON.parse(item.data);
-} catch(err) {
-  newData = item.data;
-} return    ({ ...item, data: newData })
-});
+        let newData;
+        try {
+          newData = JSON.parse(item.data);
+        } catch(err) {
+          newData = item.data;
+        }
+        return { ...item, data: newData };
+      });
       console.log("itemList: ", itemList);
       /*    let items = {};
       itemList.forEach(item => {
@@ -315,12 +316,10 @@ try {
     server.post("/api/item/new", async function(req, res) {
       let { data, parent_id, ...params } = req.body;
       console.log("params: ", params);
-      let result = await API.insert("items", { parent_id, data: typeof(data) == 'string' ? data : JSON.stringify(data) }, ['id']);
+      let result = await API.insert("items", { parent_id, data: typeof data == "string" ? data : JSON.stringify(data) }, ["id"]);
       console.log("result: ", result);
-      if(result && result.insert_items)
-        result = await result.insert_items;
-              if(result && result.returning)
-        result = await result.returning;
+      if(result && result.insert_items) result = await result.insert_items;
+      if(result && result.returning) result = await result.returning;
       res.json({ success: true, result });
     });
     //   server.use(bodyParser.json());
