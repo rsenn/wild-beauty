@@ -9,7 +9,7 @@ import { Element, HSLA } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { makeTouchCallback, maxZIndex } from "../components/TouchCallback.js";
-import { toJS } from "mobx";
+import { toJS, action } from "mobx";
 import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { getOrCreateStore } from "../stores/createStore.js";
@@ -72,11 +72,11 @@ class New extends React.Component {
    */
   static async getInitialProps(ctx) {
     const { RootStore } = ctx.mobxStore;
-    let photos = await RootStore.fetchPhotos(/*{ where: { user_id:   }}*/);
-    //console.log("photos:", photos);
-    photos = photos.filter(ph => ph.items.length == 0);
-    photos.forEach(item => RootStore.newImage(item));
-    return { photos };
+    let images = await RootStore.fetchImages(/*{ where: { user_id:   }}*/);
+    images = images.filter(ph => ph.items.length == 0);
+    images.forEach(item => RootStore.newImage(item));
+    console.log("images:", images);
+    return { images };
   }
 
   /**
@@ -192,12 +192,14 @@ class New extends React.Component {
    *
    * @param      {<type>}  event   The event
    */
-  addContent = event => {
+  @action.bound
+  addContent(event) {
     const { rootStore } = this.props;
     console.log("addContent: ", event);
     rootStore.fields.push({ type: null, value: "" });
-  };
+  }
 
+  @action.bound
   checkQuery() {
     const { rootStore, router } = this.props;
     console.log("router.query", router.query);
@@ -216,7 +218,8 @@ class New extends React.Component {
     });
   }
 
-  treeSelEvent = (type, arg) => {
+  @action.bound
+  treeSelEvent(type, arg) {
     const { rootStore } = this.props;
     switch (type) {
       case "change": {
@@ -232,9 +235,15 @@ class New extends React.Component {
         break;
       }
     }
-  };
+  }
 
-  chooseImage = event => {
+  /**
+   * Choose image for new item }
+   *
+   * @param      {<type>}  event   The event
+   */
+  @action.bound
+  chooseImage(event) {
     const { rootStore } = this.props;
     const { target, currentTarget } = event;
     let id = parseInt(target.getAttribute("id").replace(/.*-/g, ""));
@@ -242,8 +251,16 @@ class New extends React.Component {
 
     rootStore.state.step = 2;
     rootStore.state.image = id;
-  };
+  }
 
+  /*  @action.bound
+  deleteImage(id) {
+    const { rootStore } = this.props;
+
+    rootStore.deleteImage()
+
+  }
+*/
   render() {
     const { rootStore } = this.props;
     const onError = event => {};
@@ -252,9 +269,7 @@ class New extends React.Component {
       document.forms[0].submit();
       console.log("onChange: ", value);
     };
-
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
-
     return (
       <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
         <Head>
@@ -263,23 +278,20 @@ class New extends React.Component {
         </Head>
         <Nav />
         <div className={"page-layout"}>
+                  <div className={'title-bar'}>{global.window ? window.site.label(this.props): undefined} - {global.window ? window.site.description(this.props) : undefined}</div>
           <NeedAuth>
-            {rootStore.state.step == 1 ? <ImageUpload onChoose={this.chooseImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
-
+            {rootStore.state.step == 1 ? <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
             {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
               Layer
             </Layer>
             <SvgOverlay />*/}
           </NeedAuth>
-
           <style jsx global>{`
             button.tag-remove {
               border: 1px outset #55555580;
             }
-
             .dropdown-tree {
             }
-
             .panes-list {
               display: flex;
               border: 1px solid black;
@@ -291,7 +303,6 @@ class New extends React.Component {
               justify-content: center;
               align-items: center;
               border: 1px dashed red;
-
               position: relative;
               flex: 0 0 auto;
               width: 20vw;

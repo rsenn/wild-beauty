@@ -12,7 +12,7 @@ import "../../static/css/react-upload-gallery.css";
 
 export const ImageUpload = inject("rootStore")(
   observer(
-    /*withRouter*/ ({ rootStore, onChoose }) => (
+    /*withRouter*/ ({ rootStore, onChoose, onDelete }) => (
       <div
         className={"upload-area"}
         style={{
@@ -48,7 +48,7 @@ export const ImageUpload = inject("rootStore")(
             let entry = rootStore.newImage({ id });
 
             console.log("UploadImages success:", toJS(entry));
-            //     arg.remove();
+            arg.remove();
           }}
         ></UploadImages>
         <div className={"image-list"}>
@@ -59,7 +59,7 @@ export const ImageUpload = inject("rootStore")(
             const landscape = width > height;
 
             return (
-              <div className={"item-entry"}>
+              <div className={"image-entry"}>
                 <SizedAspectRatioBox className={"item-box"}>
                   <img
                     id={`image-${id}`}
@@ -75,6 +75,14 @@ export const ImageUpload = inject("rootStore")(
                     onClick={onChoose}
                   />
                 </SizedAspectRatioBox>
+                <button
+                  className={"image-delete"}
+                  onClick={() => {
+                    onDelete(id);
+                  }}
+                >
+                  <img src={"static/img/icon-cancel.svg"} />
+                </button>
               </div>
             );
           })}
@@ -96,17 +104,49 @@ export const ImageUpload = inject("rootStore")(
           .aspect-ratio-box {
             overflow: hidden;
           }
+          .image-entry {
+            position: relative;
+          }
+          .image-delete {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            padding: 0;
+            border: 1px outset #cdcdcd;
+            border-radius: 99999px;
+            background: #ffffff60;
+            filter: drop-shadow(1px 1px 10px #ffffffff);
+          }
+          .image-delete:active > img {
+            transform: translate(1px, 1px);
+          }
+          .image-delete:active {
+            border: 1px inset #cdcdcd;
+          }
+          .image-delete:hover {
+            background: #ffdc20c0;
+          }
+          .auth-fail {
+            position: relative;
+          }
+          .image-list {
+            width: 100%;
+            margin: 20px -20px 0 0;
+          }
           .image-list {
             display: inline-flex;
             flex-flow: row wrap;
-            flex-basis: 30%;
-            justify-content: center;
-            max-width: 80vw;
-            margin: 20px 0;
+            flex-basis: 33%;
+            justify-content: flex-start;
+            max-width: 100%;
           }
           .image-list > div {
-            flex: 0 1 auto;
-            width: 30vw;
+            flex: 1 1 auto;
+          }
+          .image-entry {
+            max-width: 24vw;
+            margin: 0 20px 0 0;
+            flex: 1 1 auto;
           }
         `}</style>
       </div>

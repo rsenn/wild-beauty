@@ -109,7 +109,8 @@ export class RootStore {
 
   @action.bound
   newImage(imageObj) {
-    const { id, ...photo } = imageObj;
+    let { id, ...photo } = imageObj;
+    id = parseInt(id);
 
     if(imageObj.src === undefined) imageObj.src = `/api/image/get/${id}.jpg`;
 
@@ -131,6 +132,31 @@ export class RootStore {
     return image;
   }
 
+  getImage(id) {
+    id = parseInt(id);
+    return this.images.has(id) ? this.images.get(id) : null;
+  }
+
+  imageExists(id) {
+    id = parseInt(id);
+    return this.images.has(id);
+  }
+
+  @action.bound
+  deleteImage(id) {
+    let image = this.getImage(id);
+    console.log("deleteImage :", image);
+    this.apiRequest("/api/image/delete", { id }).then(response => {
+      let data, result;
+      if(response && response.data) data = response.data;
+      if(data && data.result) result = data.result;
+      if(result.affected_rows) {
+        this.images.delete(id);
+      }
+      console.log("deleteImage API response:", result);
+    });
+  }
+
   get fieldNames() {
     return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
   }
@@ -138,7 +164,7 @@ export class RootStore {
   get currentImage() {
     const id = this.state.image;
     let image = toJS(this.images.get(id) || {});
-    image.id = id;
+    image.id = parseInt(id);
     image.landscape = image.width > image.height;
     return image;
   }
@@ -182,10 +208,10 @@ export class RootStore {
     return item ? tr(item) : item;
   }
 
-  async fetchPhotos(where = {}) {
-    // console.log("fetchPhotos ", { where });
+  async fetchImages(where = {}) {
+    // console.log("fetchImages ", { where });
     let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], where);
-    //  console.log("fetchPhotos =", response);
+    //  console.log("fetchImages =", response);
     return response;
   }
 
@@ -295,8 +321,12 @@ export class RootStore {
     //console.log("RootStore.apiRequest " + endpoint, data);
     if(!data) res = await axios.get(endpoint);
     else res = await axios.post(endpoint, data);
-    //  console.log("RootStore.apiRequest " + endpoint, " = ", await res.data);
-    return await res;
+
+    if((await res.status) != 200 || !(await res.data) || !(await res.data.success)) {
+      console.log("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
+    }
+
+    return res;
   }
 
   /**

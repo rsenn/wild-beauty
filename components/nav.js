@@ -3,6 +3,7 @@ import Link from "next/link";
 import { withRouter } from "next/router";
 import classNames from "classnames";
 import LoginForm from "./login.js";
+import SiteMap from "./siteMap.js";
 import Modal from "react-modal";
 import { inject, observer } from "mobx-react";
 import { set } from "mobx";
@@ -52,7 +53,9 @@ let customStyles = {
 };
 Modal.setAppElement("#__next");
 
-const NavLink = ({ href, label, description, path, key, disabled, onClick, active, ...props }) => (
+const NavLink = inject("rootStore")(
+  observer(
+   ({ href, label, description, path, key, disabled, onClick, active, ...props }) => (
   <li className={classNames(/*path == href ||*/ active ? "menu-active" : "menu-inactive", "menu-item", disabled && "menu-disabled")} key={key}>
     <a className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")} href={href} onClick={onClick}>
       {typeof label == "function" ? label(props) : label}
@@ -84,8 +87,7 @@ const NavLink = ({ href, label, description, path, key, disabled, onClick, activ
 
         display: flex;
         flex-flow: column nowrap;
-        transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-width 1s cubic-bezier(0.165, 0.84, 0.44, 1), height 1s cubic-bezier(0.165, 0.84, 0.44, 1),
-          max-height 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+        transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-width 1s cubic-bezier(0.165, 0.84, 0.44, 1), height 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-height 1s cubic-bezier(0.165, 0.84, 0.44, 1);
       }
       li.menu-item:hover,
       li.menu-active {
@@ -138,7 +140,7 @@ const NavLink = ({ href, label, description, path, key, disabled, onClick, activ
       }
     `}</style>
   </li>
-);
+)));
 
 const prng = Alea.singleton(Date.now());
 
@@ -186,84 +188,7 @@ const Nav = inject(
       const language = i18nStore.user.lang;
       //      console.log("i18nStore: ", i18nStore);
 
-      var SiteMap = [
-        {
-          href: "/",
-          name: "home",
-          label: (
-            <span>
-              <Translate value="nav.home_name" />
-            </span>
-          ),
-          description: <Translate value="nav.home_description" />
-        },
-        {
-          href: "/test",
-          name: "text",
-          label: (
-            <span>
-              <Translate value="nav.gallery_name" />
-            </span>
-          ),
-          description: <Translate value="nav.gallery_description" />
-        },
-        {
-          href: "/show",
-          name: "show",
-          label: (
-            <span>
-              <Translate value="nav.show_name" />
-            </span>
-          ),
-          description: <Translate value="nav.show_description" />
-        },
-        {
-          href: "/new",
-          name: "new",
-          label: (
-            <span>
-              <Translate value="nav.new_name" />
-            </span>
-          ),
-          description: <Translate value="nav.new_description" />
-        },
-        {
-          href: "#",
-          name: "logout",
-          disabled: true,
-          label: () => (
-            <span>
-              <Translate value="nav.logout_name" />
-            </span>
-          ),
-          description: () => (
-            <React.Fragment>
-              <Translate value="nav.logout_description" />: {rootStore.state.username}
-            </React.Fragment>
-          )
-        },
-        {
-          href: "#",
-          name: "login",
-          label: () => (
-            <span>
-              {" "}
-              <Translate value="nav.login_name" />{" "}
-            </span>
-          ),
-          description: <Translate value="nav.login_description" />
-        },
-        {
-          href: "#",
-          name: "lang",
-          label: () => (
-            <span>
-              <Translate value="nav.lang_name" />
-            </span>
-          ),
-          description: <Translate value="nav.lang_description" />
-        }
-      ];
+
       if(global.window) {
         window.SiteMap = SiteMap;
       }
@@ -381,6 +306,7 @@ const Nav = inject(
               box-sizing: content-box;
               font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir, Helvetica, sans-serif;
             }
+          
             .flagbox {
               width: 100%;
               height: 100%;
