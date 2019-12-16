@@ -18,6 +18,7 @@ import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
 import classNames from "classnames";
+import "../static/css/react-upload-gallery.css";
 
 import "../static/style.css";
 
