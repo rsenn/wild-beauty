@@ -84,14 +84,14 @@ class Home extends React.Component {
   componentDidMount() {
     const { rootStore, router } = this.props;
     console.log("Home.componentDidMount ");
-    rootStore.loadArticles("home").then(result => {
+/*    rootStore.loadArticles("home").then(result => {
       let articles = Util.findVal(result, "items");
       console.log("Home fetched", { result, articles });
       {
         //        rootStore.setState({ articles: toJS(res) });
         rootStore.updateState({ articles });
       }
-    });
+    });*/
 
     this.getHash();
 
