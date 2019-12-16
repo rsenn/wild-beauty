@@ -273,6 +273,7 @@ class Show extends React.Component {
           ) : (
             undefined
           )}
+      <img src={'static/img/test.svg'} />
           <div
             id={"item-grid"}
             style={{
@@ -281,6 +282,7 @@ class Show extends React.Component {
               width: "90vw"
             }}
           >
+
             <div className={"grid-4col grid-gap-1em"}>
               {this.props.items.map(item => {
                 // console.log("item: ", item);
