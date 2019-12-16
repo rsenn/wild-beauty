@@ -37,12 +37,12 @@ const RandomColor = () => {
   return c.toString();
 };
 
-const ItemToOption = item => {
+const makeItemToOption = selected => item => {
   let data = (item && item.data) || {};
   let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
   let value = item.id;
   let children = toJS(item.children);
-  let obj = { label, value, expanded: true };
+  let obj = { label, value, expanded: true, checked: selected === value };
 
   if(children && children.length) obj.children = children;
   return obj;
@@ -184,15 +184,24 @@ class New extends React.Component {
     rootStore.fetchItems().then(response => {
       console.log("Items: ", response.items);
 
-      const options = rootStore.getItem(0, ItemToOption);
-      console.log("Options: ", options);
-      this.state.options = options;
     });
   }
 
-  treeSelEvent = (name, arg) => {
-    console.log("treeSelEvent: ", arg);
-  }
+  treeSelEvent = (type, arg) => {
+        const { rootStore } = this.props;
+
+    switch(type) {
+      case 'change': {
+        rootStore.setState({ selected: arg.value });
+    console.log("treeSelEvent: ", type, arg);
+        break;
+      }
+      default: {
+        console.log("treeSelEvent: ", type, arg);
+        break;
+      }
+    }
+  };
 
   render() {
     const { rootStore } = this.props;
@@ -203,9 +212,7 @@ class New extends React.Component {
       console.log("onChange: ", value);
     };
 
-    const makeTreeSelEvent = (name) => function(event) {
-      return this.treeSelEvent(name, event);
-    };
+    const makeTreeSelEvent = name => event => this.treeSelEvent(name, event)
 
     return (
       <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
@@ -300,7 +307,16 @@ class New extends React.Component {
                   </div>
                 </div>
                 <div></div>
-                                <DropdownTreeSelect data={this.state.options} onChange={makeTreeSelEvent('change')} onNodeToggle={makeTreeSelEvent('node-toggle')} onFocus={makeTreeSelEvent('focus')} onBlur={makeTreeSelEvent('blur')} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} />
+                <DropdownTreeSelect
+                  data={rootStore.getItem(0, makeItemToOption(this.selectedParent))}
+                  onChange={makeTreeSelEvent("change")}
+                  onNodeToggle={makeTreeSelEvent("node-toggle")}
+                  onFocus={makeTreeSelEvent("focus")}
+                  onBlur={makeTreeSelEvent("blur")}
+                  className={"dropdown-tree"}
+                  mode={"radioSelect"}
+                  texts={{ placeholder: "parent item" }}
+                />
                 {rootStore.fields.map(field => (
                   <EditableText
                     multiline={true}

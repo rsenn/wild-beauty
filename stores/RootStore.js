@@ -154,7 +154,9 @@ export class RootStore {
 
   getItem(id, tr = it => it) {
     let item = this.items.get(!id ? this.rootItemId : id);
+
     if(typeof item == "object") item.children = item.children ? item.children.map(({ id }) => this.getItem(id, tr)) : [];
+
     return item === undefined ? item : tr(item);
   }
 
