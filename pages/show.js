@@ -79,15 +79,7 @@ class Show extends React.Component {
     //console.log("Show.getInitialProps ");
     const { RootStore } = ctx.mobxStore;
     //console.log("RootStore.fetchItems");
-    let items = await getAPI().list("items", [
-      "id",
-      "type",
-      "parent { id type data }",
-      "children { id type data }",
-      "data",
-      "photos { photo { id width height filesize original_name } }",
-      "users { user { id username last_seen } }"
-    ]);
+    let items = await getAPI().list("items", ["id", "type", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize original_name } }", "users { user { id username last_seen } }"]);
     //await RootStore.fetchItems();
     //console.log("Show.getInitialProps  items:", items);
     items.forEach(item => RootStore.newItem(item));
@@ -223,13 +215,7 @@ class Show extends React.Component {
       document.forms[0].submit();
       //console.log("onChange: ", value);
     };
-    const list = [
-      "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
-      "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
-      "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
-      "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
-      "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
-    ];
+    const list = ["static/img/86463ed8ed391bf6b0a2907df74adb37.jpg", "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg", "static/img/cdb466a69cc7944809b20e7f34840486.jpg", "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg", "static/img/fdcce856cf66f33789dc3934418113a2.jpg"];
 
     if(global.window) {
       /*Element.findAll('*').forEach(e => {
@@ -273,7 +259,7 @@ class Show extends React.Component {
           ) : (
             undefined
           )}
-      <img src={'static/img/test.svg'} />
+          <img src={"static/img/test.svg"} />
           <div
             id={"item-grid"}
             style={{
@@ -282,7 +268,6 @@ class Show extends React.Component {
               width: "90vw"
             }}
           >
-
             <div className={"grid-4col grid-gap-1em"}>
               {this.props.items.map(item => {
                 // console.log("item: ", item);
@@ -340,9 +325,7 @@ class Show extends React.Component {
                         {!!type ? `Type: ${type}` : undefined}
                         <br />
                         <br />
-                        <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>
-                          {[...Object.entries(data)].map(([key, value]) => `${Util.ucfirst(key)}: ${value}`).join("\n")}
-                        </pre>
+                        <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>{[...Object.entries(data)].map(([key, value]) => `${Util.ucfirst(key)}: ${value}`).join("\n")}</pre>
                       </div>
                     </SizedAspectRatioBox>
                   </div>
