@@ -30,12 +30,12 @@ export const ImageUpload = inject("rootStore")(
               let entry = rootStore.newImage(photo);
 
               axios.head(url).then(res => {
-                if(res.status == 200 ) {
-                const { width, height, aspect, channels, depth } = res.headers;
-                console.log("HEAD: ", res);
+                if(res.status == 200) {
+                  const { width, height, aspect, channels, depth } = res.headers;
+                  console.log("HEAD: ", res);
 
-                Object.assign(entry, { width, height, aspect, channels, depth, ...entry });
-              }
+                  Object.assign(entry, { width, height, aspect, channels, depth, ...entry });
+                }
               });
 
               return url;
@@ -53,7 +53,7 @@ export const ImageUpload = inject("rootStore")(
         ></UploadImages>
         <div className={"image-list"}>
           {[...rootStore.images.entries()].map(([id, image], index) => {
-image = toJS(image);
+            image = toJS(image);
             //console.log("image-list entry", {id,image});
             const { width, height } = image;
             const landscape = width > height;

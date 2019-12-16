@@ -304,12 +304,7 @@ if (!dev && cluster.isMaster) {
         }
         return { ...item, data: newData };
       });
-      console.log("itemList: ", itemList);
-      /*    let items = {};
-      itemList.forEach(item => {
-        item.data = JSON.parse(item.data);
-        items[parseInt(item.id)] = item;
-      });*/
+      //console.log("itemList: ", itemList);
       res.json({ success: true, count: itemList.length, items: itemList });
     });
 
