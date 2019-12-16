@@ -8,10 +8,9 @@ import Util from "../utils/util.js";
 import { assign_to } from "../utils/devtools.js";
 import devpane from "../utils/devpane.js";
 
-const isServer = !Util.isBrowser();
+const isServer = !global.window;
 
-if (!isServer) {
-  window.devp = new devpane();
+if (global.window) {
   window.dev = {};
   window.fns = {};
 
@@ -21,6 +20,11 @@ if (!isServer) {
   //Object.assign(window.fns, { Container, Element, HSLA, Matrix, Point, PointList, ReactComponent, Rect, RGBA, Size, SVG, Timer, TRBL, Tree });
 }
 
+/**
+ * This class describes the root store.
+ *
+ * @class      RootStore (name)
+ */
 export class RootStore {
   @observable
   state = {
@@ -49,6 +53,12 @@ export class RootStore {
 
   api = getAPI();
 
+  /**
+   * Constructs the RootStore
+   *
+   * @param      {<type>}  initialData  The initial data
+   * @param      {<type>}  pageProps    The page properties
+   */
   constructor(initialData, pageProps) {
     console.log("RootStore.constructor ", { initialData, pageProps });
     if(initialData && initialData.RootStore) {
@@ -63,6 +73,8 @@ export class RootStore {
       }
     }
     if(global.window) {
+        if(!window.devp) window.devp = new devpane();
+
       window.rs = this;
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
     }
@@ -112,7 +124,6 @@ export class RootStore {
 
     return this.images.set(id, photo);
   }
-  /*F*/
 
   get fieldNames() {
     return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
@@ -142,6 +153,14 @@ export class RootStore {
     return item === null ? -1 : item.id;
   }
 
+  /**
+   * Gets an item.
+   *
+   * @param      {<type>}          id            The identifier
+   * @param      {Function}        [tr=it=>it]   { parameter_description }
+   * @param      {(Array|string)}  [idMap=null]  The identifier map
+   * @return     {<type>}          The item.
+   */
   getItem(id, tr = it => it, idMap = null) {
     if(idMap === null) idMap = [];
     let item = this.items.get(!id ? this.rootItemId : id);
@@ -165,6 +184,12 @@ export class RootStore {
     return response;
   }
 
+  /**
+   * Fetches items.
+   *
+   * @param      {<type>}   [where={}]  The where
+   * @return     {Promise}  The items.
+   */
   async fetchItems(where = {}) {
     let response = await this.apiRequest("/api/item/tree", { where });
     let data = response ? await response.data : null;
@@ -181,6 +206,16 @@ export class RootStore {
     return await data;
   }
 
+  /**
+   * Saves an item.
+   *
+   * @param      {<type>}  event   The event
+   */
+  @action.bound
+  saveItem(event) {
+    console.log("saveItem", event);
+  }
+  /*
   fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {
     // <- note the star, this a generator function!
     this.result = "pending";
@@ -227,20 +262,35 @@ export class RootStore {
 
     return result;
   }
+*/
 
+  /**
+   * Perform async API request
+   *
+   * @param      {string}   endpoint  The endpoint
+   * @param      {<type>}   data      The data
+   * @return     {Promise}  { description_of_the_return_value }
+   */
   async apiRequest(endpoint, data) {
     let res;
 
-    console.log("RootStore.apiRequest " + endpoint, data);
+    //console.log("RootStore.apiRequest " + endpoint, data);
 
     if(!data) res = await axios.get(endpoint);
     else res = await axios.post(endpoint, data);
 
-    console.log("RootStore.apiRequest " + endpoint, " = ", await res.data);
+    //  console.log("RootStore.apiRequest " + endpoint, " = ", await res.data);
 
     return await res;
   }
 
+  /**
+   * Does a login.
+   *
+   * @param      {<type>}    username            The username
+   * @param      {<type>}    password            The password
+   * @param      {Function}  [completed=()=>{}]  The completed
+   */
   @action.bound
   doLogin(username, password, completed = () => {}) {
     this.setState({ loading: true });
@@ -280,6 +330,11 @@ export class RootStore {
     });
   }
 
+  /**
+   * Does a logout.
+   *
+   * @param      {Function}  [completed=()=>{}]  The completed
+   */
   @action.bound
   doLogout(completed = () => {}) {
     this.setState({ loading: true });

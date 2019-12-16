@@ -134,6 +134,15 @@ class MyApp extends App {
           :focus {
             outline: none !important;
           }
+          button.icon {
+            padding: 0px;
+          }
+          body {
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+  }
         `}</style>
       </Container>
     );

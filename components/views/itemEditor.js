@@ -56,10 +56,18 @@ export const ItemEditor = inject("rootStore")(
         />
       ))}
       <AddItemBar onAdd={() => rootStore.entries.push({ type: null, value: "" })} />
+
+      <button onClick={rootStore.saveItem} className={"save"}>
+        {" "}
+        <img src={"static/img/icon-save.svg"} />{" "}
+      </button>
+
       <style jsx global>{`
         .content-edit {
+          position: relative;
           width: 80vw;
-          padding: 0px 20px;
+          min-height: 80vh;
+          padding: 0px;
           display: flex;
           flex-flow: column nowrap;
           justify-content: flex-start;
@@ -73,6 +81,11 @@ export const ItemEditor = inject("rootStore")(
           justify-content: center;
           width: 100%;
         }
+                  .item-box-size {
+            border: 1px solid black;
+            box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+            box-sizing: border-box;
+          }
         .aspect-ratio-box {
           overflow: hidden;
         }
@@ -83,37 +96,15 @@ export const ItemEditor = inject("rootStore")(
         .button-add:active > svg {
           transform: translate(1px, 2px);
         }
-        .editable-field {
-          width: 100%;
-          margin: 2px 0;
-        }
-        .editable-field > button {
-          width: 32px;
-          height: 32px;
-          flex: 0 0 auto;
-        }
-        .editable-field-name,
-        .editable-field-value-content {
-          flex: 1 0 auto;
-          min-height: 34px;
-          font-size: 20px;
-          background-color: rgba(255, 255, 255, 0.6);
-        }
-        div.editable-field-value-content {
-          text-align: left;
-          border: 1px dashed black;
-          display: flex;
-          justify-content: center;
-          align-content: center;
-          flex-direction: column;
-        }
-        input.editable-field-value-content {
-          font-family: Fixed;
-          border: 1px inset rgba(160, 160, 160, 1);
-        }
+
         ul > li > input,
         .dropdown-tree.react-dropdown-tree-select {
           font-size: 20px;
+        }
+        button.save {
+          position: absolute;
+          right: 0px;
+          bottom: 0px;
         }
       `}</style>
     </div>

@@ -24,17 +24,19 @@ function TrackedInstance(initVal = null) {
 }
 
 export function lazyInitializer(fn, opts = {}) {
-  let inst = trkl(null);
-  var handler = function(value) {
-    if(inst() === null) {
-      const initVal = fn(inst);
-      console.log("initialized to: ", initVal);
-      inst(initVal);
-      inst.unsubscribe(handler);
+  var instance = trkl();
+  var ret = (value = null) => {
+    if(value === null) {
+      if(!instance()) {
+        const initVal = fn(instance);
+        instance(initVal);
+       // console.log("initialized to: ", initVal);
+      }
+      return instance();
     }
+    return instance(value);
   };
-  inst.subscribe(handler);
-  return inst;
+  return ret;
 }
 
 export function valueInitializer(createFunction, onInit) {}

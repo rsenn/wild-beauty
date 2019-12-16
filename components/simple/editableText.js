@@ -14,19 +14,8 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
   const lines = value.split(/\n/g).length;
   const lineStyle = multiline ? { height: `${lines}em`, whiteSpace: "pre" } : {};
   const ref = trkl();
-
   const [focus, setFocus] = React.useState(false);
 
-  /*
- useDoubleClick({
-    onSingleClick: e => {
-      console.log(e, 'single click');
-    },
-    onDoubleClick: onEditBegin,
-    ref,
-    latency: 250
-  });
-*/
   let content = isEditing ? (
     <React.Fragment>
       {multiline ? (
@@ -42,7 +31,7 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
               setFocus(true);
             }
           }}
-        ></textarea>
+        />
       ) : (
         <input
           className={classNames("content", className + "-content")}
@@ -62,7 +51,7 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
           onEditConfirm(e);
         }}
       >
-        <img src={"static/img/icon-apply.svg"} />{" "}
+        <img src={"static/img/icon-apply.svg"} />
       </button>
       <button
         onClick={e => {
@@ -70,7 +59,7 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
           onEditCancel(e);
         }}
       >
-        <img src={"static/img/icon-cancel.svg"} />{" "}
+        <img src={"static/img/icon-cancel.svg"} />
       </button>
     </React.Fragment>
   ) : (
@@ -81,8 +70,6 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
       <button onClick={onEditBegin}>
         <img src={"static/img/icon-edit.svg"} />
       </button>
-      {/*      {hasDraft ? <button onClick={useDraft}>Load draft</button> : null}
-       */}{" "}
     </React.Fragment>
   );
 
@@ -132,7 +119,6 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
         span.content {
           border: 1px dashed black;
         }
-
         div.editable-text > .content {
           text-align: left;
           vertical-align: middle;
