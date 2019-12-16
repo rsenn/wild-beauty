@@ -3,6 +3,7 @@ import Head from "next/head";
 import Layer from "../components/layer.js";
 import { Element, Node, HSLA } from "../utils/dom.js";
 import getAPI from "../utils/api.js";
+import Util from "../utils/util.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { inject, observer } from "mobx-react";
@@ -13,6 +14,8 @@ import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspec
 import { action, toJS, autorun } from "mobx";
 import Nav from "../components/nav.js";
 import { createStore, getOrCreateStore } from "../stores/createStore.js";
+
+import "../static/css/grid.css";
 
 const RandomColor = () => {
   const c = HSLA.random();
@@ -110,7 +113,22 @@ class Show extends React.Component {
       "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
       "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
     ];
+
+    if(global.window) {
+      /*Element.findAll('*').forEach(e => {
+
+  e.addEventListener('resize', event => {
+    console.log("Resized: ", event.target);
+  })
+});
+*/
+      window.addEventListener("resize", event => {
+        const { currentTarget, target } = event;
+        console.log("Resized: ", { currentTarget, target });
+      });
+    }
     console.log("Show.render");
+
     return (
       <div className={"main-layout"} {...TouchEvents(touchListener)}>
         <Head>
@@ -119,7 +137,7 @@ class Show extends React.Component {
         </Head>
         <Nav loading={rootStore.state.loading} />
         <div className={"page-layout"}>
-          <div
+          {/*       <div
             className={"panels"}
             style={{
               position: "relative",
@@ -129,65 +147,81 @@ class Show extends React.Component {
               flexFlow: "row wrap",
               justifyContent: "flex-start",
               alignItems: "flex-start",
-              /* maxWidth: "100vw",
-              maxHeight: "100vh",*/
               padding: "0 0 0 0",
               margin: "0 auto 0 auto"
             }}
+          >*/}
+          <div
+            style={{
+              marginLeft: "-8px",
+              padding: "4px",
+              width: "90vw"
+            }}
           >
-            {this.props.items.map(item => {
-              console.log("item: ", item);
-              const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
-              const haveImage = photo_id >= 0;
-              const path = haveImage ? `/api/image/get/${photo_id}` : "static/img/no-image.svg";
-              const opacity = photo_id >= 0 ? 1 : 0.3;
-              return (
-                <SizedAspectRatioBox
-                  width={"28vw"}
-                  height={"28vw"}
-                  style={{
-                    position: "relative",
-                    margin: "16px",
-                    border: "1px solid black",
-                    boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
-                    maxWidth: "20vw",
-                    maxHeight: "20vw",
-                    overflow: "hidden"
-                  }}
-                  className={"layer gallery-aspect-box"}
-                >
-                  {haveImage ? (
-                    <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto", opacity }} className="gallery-image" />
-                  ) : (
-                    <div
+            <div className={"grid-4col grid-gap-1em"}>
+              {this.props.items.map(item => {
+                console.log("item: ", item);
+                const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
+                const haveImage = photo_id >= 0;
+                const path = haveImage ? `/api/image/get/${photo_id}` : "static/img/no-image.svg";
+                const opacity = photo_id >= 0 ? 1 : 0.3;
+console.log("item: ", item);
+let { data, parent, type, children , users } = item;
+
+ data = item.data && item.data.length && JSON.parse(item.data);
+ if(typeof(data) != 'object' || data === null)
+   data = {};
+ console.log("data: ", data);
+
+                return (
+                  <div>
+                    <SizedAspectRatioBox
                       style={{
-                        position: "absolute",
-                        padding: "2px",
-                        background: "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
-                        textAlign: "left",
-                        top: "0px",
-                        left: "0px",
-                        fontSize: "15px"
+                        position: "relative",
+                        border: "1px solid black",
+                        boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
+
+                        overflow: "hidden"
                       }}
+                      className={"layer gallery-aspect-box"}
                     >
-                      Id: {item.id}
-                      <br />
-                      Number of children: {item.children.length}
-                      <br />
-                      Parent Id: {item.parent ? item.parent.id : -1}
-                      <br />
-                      <br />
-                      <span style={{ fontSize: "12px" }}>{item.data.replace(/","/g, '",\n"')}</span>
-                    </div>
-                  )}
-                </SizedAspectRatioBox>
-              );
-            })}
-          </div>
-          {/*          <Layer w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
+                      {haveImage ? (
+                        <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto", opacity }} className="gallery-image" />
+                      ) : undefined }
+
+
+                        <div
+                          style={{
+                            position: "absolute",
+                            padding: "2px",
+                            background: "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                            textAlign: "left",
+                            top: "0px",
+                            left: "0px",
+                            fontSize: "15px"
+                          }}
+                        >
+                          Id: {item.id}
+                          <br />
+                          Number of children: {children.length}
+                          <br />
+                          Parent Id: {parent ? parent.id : -1}  <br />
+                          {  !!type ? `Type: ${type}` : undefined }
+                          <br />
+                          <br />
+                          <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>{[...Object.entries(data)].map(([ key, value ]) => `${Util.ucfirst(key)}: ${value}`).join("\n") }</pre>
+                        </div>
+                     
+                    </SizedAspectRatioBox>
+                  </div>
+                );
+              })}
+            </div>
+            {/*          <Layer w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
             Layer
           </Layer>*/}
-          <SvgOverlay />
+            <SvgOverlay />
+          </div>
           <style jsx global>{`
             .main-layout {
               width: 100vw;

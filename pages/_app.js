@@ -42,15 +42,15 @@ class MyApp extends App {
   constructor(props) {
     super(props);
 
-        const { router } = props;
+    const { router } = props;
     this.mobxStore = getOrCreateStore(!global.window, props.pageProps.initialMobxState);
 
-    const pageName = router.pathname.replace(/^\//, '');
+    const pageName = router.pathname.replace(/^\//, "");
 
     if(global.window) {
       window.Util = Util;
       window.stores = this.mobxStore;
-      window.site = Util.find(SiteMap, pageName, 'name');
+      window.site = Util.find(SiteMap, pageName, "name");
     }
     console.log("App.constructor", pageName);
   }
@@ -144,16 +144,16 @@ class MyApp extends App {
             width: 100vw;
             height: 100vh;
           }
-            .title-bar {
-              position: absolute;
-              left: 0.5em;  
-              top: 0.5em;  
-              text-align: left;
-              color: black;
-              padding-left: 10px;
-              font-size: 2em;
-              font-family: Fixed;
-            }
+          .title-bar {
+            position: absolute;
+            left: 0.5em;
+            top: 0.5em;
+            text-align: left;
+            color: black;
+            padding-left: 10px;
+            font-size: 2em;
+            font-family: Fixed;
+          }
         `}</style>
       </Container>
     );

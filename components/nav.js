@@ -54,93 +54,94 @@ let customStyles = {
 Modal.setAppElement("#__next");
 
 const NavLink = inject("rootStore")(
-  observer(
-   ({ href, label, description, path, key, disabled, onClick, active, ...props }) => (
-  <li className={classNames(/*path == href ||*/ active ? "menu-active" : "menu-inactive", "menu-item", disabled && "menu-disabled")} key={key}>
-    <a className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")} href={href} onClick={onClick}>
-      {typeof label == "function" ? label(props) : label}
-      <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
-    </a>
-    <style jsx global>{`
-      li.menu-active {
-        border: 1px solid #00000040;
-      }
+  observer(({ href, label, description, path, key, disabled, onClick, active, ...props }) => (
+    <li className={classNames(/*path == href ||*/ active ? "menu-active" : "menu-inactive", "menu-item", disabled && "menu-disabled")} key={key}>
+      <a href={href} className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")} onClick={onClick}>
+        {typeof label == "function" ? label(props) : label}
+        <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
+      </a>
+      <style jsx global>{`
+        li.menu-active {
+          border: 1px solid #00000040;
+        }
 
-      li.menu-inactive {
-        border: 1px solid #00000000;
-      }
-      li.menu-inactive {
-      }
+        li.menu-inactive {
+          border: 1px solid #00000000;
+        }
+        li.menu-inactive {
+        }
 
-      li.menu-disabled {
-        display: none;
-      }
-      li.menu-item {
-        position: relative;
-        transition: width 1s;
-        text-align: left;
+        li.menu-disabled {
+          display: none;
+        }
+        li.menu-item {
+          position: relative;
+          transition: width 1s;
+          text-align: left;
 
-        width: 48px;
-        height: 48px;
-        max-width: 48px;
-        max-height: 51px;
+          width: 48px;
+          height: 48px;
+          max-width: 48px;
+          max-height: 51px;
 
-        display: flex;
-        flex-flow: column nowrap;
-        transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-width 1s cubic-bezier(0.165, 0.84, 0.44, 1), height 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-height 1s cubic-bezier(0.165, 0.84, 0.44, 1);
-      }
-      li.menu-item:hover,
-      li.menu-active {
-        width: 100px;
-        height: 100px;
-        max-width: 100px;
-        max-height: 100px;
-      }
-      li.menu-item > a > span {
-        font-family: Fixed;
-        font-size: 40px;
-        vertical-align: top;
-      }
-      li.menu-item > a {
-        position: absolute;
-        margin: 8px 0px 1px 2px;
-      }
-      li.menu-item:hover > a,
-      li.menu-active > a {
-        width: 100px;
-      }
-      li.menu-item:hover > a > span,
-      li.menu-active > a > span {
-        width: 100px;
-      }
-      li.menu-item > a > div.desc {
-        position: absolute;
-        top: 48px;
-        font-size: 15px;
-      }
-      li.menu-item {
-        background-color: rgba(138, 0, 16, 0.8);
-        display: flex;
-        justify-content: flex-start;
-        align-items: flex-start;
-        padding: 0 0 0 0;
-        margin: 2px 4px 2px 4px;
-        overflow: hidden;
-      }
-      li.menu-item > a {
-        font-size: 3em;
-        color: white;
-        text-decoration: none;
-      }
-      li.menu-item {
-        transition: width 1s;
-      }
-      a:hover > span {
-        filter: drop-shadow(0px 0px 4px #ffffffff);
-      }
-    `}</style>
-  </li>
-)));
+          display: flex;
+          flex-flow: column nowrap;
+          transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-width 1s cubic-bezier(0.165, 0.84, 0.44, 1), height 1s cubic-bezier(0.165, 0.84, 0.44, 1),
+            max-height 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        li.menu-item:hover,
+        li.menu-active {
+          width: 100px;
+          height: 100px;
+          max-width: 100px;
+          max-height: 100px;
+        }
+        li.menu-item > a > span {
+          font-family: Fixed;
+          font-size: 40px;
+          vertical-align: top;
+        }
+        li.menu-item > a {
+          position: absolute;
+          margin: 8px 0px 1px 2px;
+        }
+        li.menu-item:hover > a,
+        li.menu-active > a {
+          width: 100px;
+        }
+        li.menu-item:hover > a > span,
+        li.menu-active > a > span {
+          width: 100px;
+        }
+        li.menu-item > a > div.desc {
+          position: absolute;
+          top: 48px;
+          font-size: 15px;
+        }
+        li.menu-item {
+          background-color: rgba(138, 0, 16, 0.8);
+          display: flex;
+          justify-content: flex-start;
+          align-items: flex-start;
+          padding: 0 0 0 0;
+          margin: 2px 4px 2px 4px;
+          overflow: hidden;
+        }
+        li.menu-item > a {
+          font-size: 3em;
+          color: white;
+          text-decoration: none;
+        }
+        li.menu-item {
+          transition: width 1s;
+        }
+        a:hover > span {
+          filter: drop-shadow(0px 0px 4px #ffffffff);
+        }
+      `}</style>
+    </li>
+  ))
+);
 
 const prng = Alea.singleton(Date.now());
 
@@ -176,7 +177,7 @@ const Nav = inject(
   "i18nStore"
 )(
   observer(
-    withRouter(({ rootStore, i18nStore, loading, ...props }) => {
+    withRouter(({ rootStore, i18nStore, loading, router, ...props }) => {
       const [loginIsOpen, setLoginOpen] = React.useState(false);
       const [languageIsOpen, setLanguageOpen] = React.useState(false);
 
@@ -187,7 +188,6 @@ const Nav = inject(
 
       const language = i18nStore.user.lang;
       //      console.log("i18nStore: ", i18nStore);
-
 
       if(global.window) {
         window.SiteMap = SiteMap;
@@ -271,7 +271,7 @@ const Nav = inject(
               return (
                 <NavLink
                   key={item.key}
-                  {...{ ...props, ...item, path: props.router.asPath }}
+                  {...{ ...props, ...item, path: router.asPath }}
                   onClick={
                     item.name.startsWith("log")
                       ? () => {
@@ -293,24 +293,24 @@ const Nav = inject(
                             setLanguageOpen(!languageIsOpen);
                           }
                         }
-                      : undefined
+                      : () => {
+                          console.log("click " + item.name);
+                          router.push(`/${item.name}`);
+                        }
                   }
                 />
               );
             })}
           </ul>
-
           <style jsx global>{`
             :global(body) {
               margin: 0;
               box-sizing: content-box;
               font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir, Helvetica, sans-serif;
             }
-          
             .flagbox {
               width: 100%;
               height: 100%;
-
               box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 1);
               overflow: hidden;
             }
@@ -318,19 +318,16 @@ const Nav = inject(
               opacity: 1;
               border: 2px solid rgba(0, 0, 0, 0);
               transition: transform 800ms, opacity 800ms;
-
               transform: scale3d(0.5, 0.5, 1) rotateY(-180deg);
             }
             .country-flag:hover {
               opacity: 1;
-
               border: 2px solid rgba(0, 0, 0, 0);
               transform: scale3d(1, 1, 1) rotateY(0);
             }
             div < .country-flag:hover {
               transform: rotateZ(360deg);
             }
-
             .flaglist {
               position: relative;
               top: 50%;

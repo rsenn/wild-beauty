@@ -108,6 +108,12 @@ export class RootStore {
   }
 
   @action.bound
+  /**
+   * Add new image record
+   *
+   * @param      {<type>}  imageObj  The image object
+   * @return     {number}  { description_of_the_return_value }
+   */
   newImage(imageObj) {
     let { id, ...photo } = imageObj;
     id = parseInt(id);
@@ -132,11 +138,23 @@ export class RootStore {
     return image;
   }
 
+ /**
+  * Gets an image.
+  *
+  * @param      {<type>}  id      The identifier
+  * @return     {<type>}  The image.
+  */
   getImage(id) {
     id = parseInt(id);
     return this.images.has(id) ? this.images.get(id) : null;
   }
 
+  /**
+   * Determines if image exists.
+   *
+   * @param      {<type>}  id      The identifier
+   * @return     {<type>}  True if image exists, False otherwise.
+   */
   imageExists(id) {
     id = parseInt(id);
     return this.images.has(id);
@@ -157,7 +175,14 @@ export class RootStore {
     });
   }
 
-  get fieldNames() {
+  
+  /**
+   * Get field names 
+   *
+   * @return     {<type>}  { description_of_the_return_value }
+   */
+  get
+  fieldNames() {
     return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
   }
 

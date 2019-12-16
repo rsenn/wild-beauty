@@ -278,7 +278,9 @@ class New extends React.Component {
         </Head>
         <Nav />
         <div className={"page-layout"}>
-                  <div className={'title-bar'}>{global.window ? window.site.label(this.props): undefined} - {global.window ? window.site.description(this.props) : undefined}</div>
+          <div className={"title-bar"}>
+            {global.window ? window.site.label(this.props) : undefined} - {global.window ? window.site.description(this.props) : undefined}
+          </div>
           <NeedAuth>
             {rootStore.state.step == 1 ? <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
             {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
