@@ -25,6 +25,9 @@ var MemoryStream = require("memory-stream");
 let stream = require("stream");
 let Readable = stream.Readable;
 
+util.inspect.defaultOptions.colors = true;
+util.inspect.defaultOptions.depth = 10;
+
 function bufferToStream(buffer) {
   let stream = new Readable();
   stream.push(buffer);
@@ -288,16 +291,22 @@ if (!dev && cluster.isMaster) {
     });
 
     server.post("/api/item/tree", async function(req, res) {
-      let { ...params } = req.body;
+      let { fields, ...params } = req.body;
+
+      if(!fields) fields = ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
 
       console.log("params: ", params);
-      let itemList = await API.list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"], params);
-      let items = {};
+      let itemList = await API.list("items", fields, params);
+
+      itemList = itemList.map(item => ({ ...item, data: JSON.parse(item.data) }));
+
+      console.log("itemList: ", itemList);
+      /*    let items = {};
       itemList.forEach(item => {
         item.data = JSON.parse(item.data);
         items[parseInt(item.id)] = item;
-      });
-      res.json({ success: true, count: itemList.length, items });
+      });*/
+      res.json({ success: true, count: itemList.length, items: itemList });
     });
 
     //   server.use(bodyParser.json());

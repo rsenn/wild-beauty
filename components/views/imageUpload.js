@@ -4,8 +4,7 @@ import { inject, observer } from "mobx-react";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../simple/aspectBox.js";
 import classNames from "classnames";
 
-import DropdownTreeSelect from 'react-dropdown-tree-select'
-
+import DropdownTreeSelect from "react-dropdown-tree-select";
 
 import UploadImages from "react-upload-gallery";
 import "../../static/css/react-upload-gallery.css";
@@ -74,6 +73,34 @@ export const ImageUpload = inject("rootStore")(
             );
           })}
         </div>
+        <style jsx global>{`
+          div.upload-area > div,
+          div.upload-area > div > div,
+          div.upload-area > div > div > div {
+            position: relative;
+            display: block;
+            width: 100%;
+            height: 100%;
+          }
+          .item-box-size {
+            border: 1px solid black;
+            box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+            box-sizing: border-box;
+          }
+          .aspect-ratio-box {
+            overflow: hidden;
+          }
+          .image-list {
+            display: inline-flex;
+            flex-flow: row wrap;
+            flex-basis: 30%;
+            justify-content: center;
+          }
+          .image-list > div {
+            flex: 0 1 auto;
+            width: 30vw;
+          }
+        `}</style>
       </div>
     ))
   )

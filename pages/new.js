@@ -19,9 +19,6 @@ import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
 import classNames from "classnames";
 
-import "../static/css/react-dropdown-tree-select.css";
-
-
 import "../static/style.css";
 
 const getPrng = () => Alea;
@@ -122,7 +119,6 @@ const NewItemImageUpload = inject("rootStore")(
     ))
   )
 );
-
 
 @inject("rootStore")
 @observer
@@ -274,7 +270,9 @@ class New extends React.Component {
     rootStore.fetchItems().then(response => {
       console.log("Items: ", response.items);
 
-      this.tree = rootStore.getItem(0, makeItemToOption());
+      this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
+
+      console.log("this.tree", toJS(this.tree));
     });
   }
 
@@ -326,27 +324,13 @@ class New extends React.Component {
           </NeedAuth>
 
           <style jsx global>{`
-            .content-edit {
-              width: 80vw;
-              padding: 0px 20px;
-              display: flex;
-              flex-flow: column nowrap;
-              justify-content: flex-start;
-              align-items: flex-start;
-            }
-
             button.tag-remove {
               border: 1px outset #55555580;
             }
-            .editable-text {
-              width: 100%;
-              margin: 4px 0px;
-            }
+
             .dropdown-tree {
             }
-            .button-add:active > svg {
-              transform: translate(1px, 2px);
-            }
+
             .panes-list {
               display: flex;
               border: 1px solid black;
@@ -369,41 +353,6 @@ class New extends React.Component {
             }
             .panes-item > img {
               width: 20vw;
-            }
-            div.upload-area > div,
-            div.upload-area > div > div,
-            div.upload-area > div > div > div {
-              position: relative;
-              display: block;
-              width: 100%;
-              height: 100%;
-            }
-            .item-entry {
-              margin: 10px;
-            }
-            .item-photo {
-              display: flex;
-              justify-content: center;
-              width: 100%;
-            }
-            .item-box-size {
-              border: 1px solid black;
-              box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
-              box-sizing: border-box;
-            }
-
-            .aspect-ratio-box {
-              overflow: hidden;
-            }
-            .image-list {
-              display: inline-flex;
-              flex-flow: row wrap;
-              flex-basis: 30%;
-              justify-content: center;
-            }
-            .image-list > div {
-              flex: 0 1 auto;
-              width: 30vw;
             }
           `}</style>
         </div>

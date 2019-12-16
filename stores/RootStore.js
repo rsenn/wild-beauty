@@ -22,8 +22,6 @@ if (!isServer) {
 }
 
 export class RootStore {
-  entries = observable.array([]);
-
   @observable
   state = {
     articles: [],
@@ -46,7 +44,7 @@ export class RootStore {
   images = observable.map();
   entries = observable.array([]);
   users = observable.map();
-  fields = observable.array([]);
+  fields = observable.array(["name", "title"]);
   items = observable.map();
 
   api = getAPI();
@@ -114,14 +112,10 @@ export class RootStore {
 
     return this.images.set(id, photo);
   }
+  /*F*/
 
-  @action.bound
-  newEntry(imageId) {
-    let image = this.images.get(imageId);
-    console.log("newEntry: ", { image });
-    let entry = { image: { ...image, id: imageId } };
-    this.entries.push(entry);
-    return entry;
+  get fieldNames() {
+    return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
   }
 
   get currentImage() {
@@ -148,19 +142,19 @@ export class RootStore {
     return item === null ? -1 : item.id;
   }
 
-  @action
   getItem(id, tr = it => it, idMap = null) {
     if(idMap === null) idMap = [];
-
     let item = this.items.get(!id ? this.rootItemId : id);
 
     if(item && idMap.indexOf(item.id) == -1) {
       idMap.push(item.id);
-
-      if(typeof item == "object") item.children = item.children ? item.children.map(({ id }) => this.getItem(id, tr, idMap)) : [];
+      if(typeof item == "object") {
+        // console.log("item.children", toJS(item.children));
+        if(item.children && item.children.length) item.children = item.children.map(it => this.getItem(it.id, tr, idMap)) /*.filter(it => it !== undefined)*/;
+        else item.children = [];
+      }
     }
-
-    return item === undefined ? item : tr(item);
+    return item ? tr(item) : item;
   }
 
   async fetchPhotos(where = {}) {
@@ -179,7 +173,7 @@ export class RootStore {
       const items = await data.items;
 
       for(let key in items) {
-        const id = parseInt(key);
+        const id = parseInt(items[key].id || key);
         this.items.delete(id);
         this.items.set(id, items[key]);
       }

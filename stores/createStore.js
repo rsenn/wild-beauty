@@ -1,6 +1,11 @@
 import { RootStore } from "./RootStore.js";
 import i18nStore from "./i18nStore.js";
 import Util from "../utils/util.js";
+import { useStaticRendering } from "mobx-react";
+
+const isServer = typeof global.window === "undefined";
+
+useStaticRendering(isServer);
 
 let appStores = {
   RootStore

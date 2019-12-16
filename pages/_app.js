@@ -1,9 +1,9 @@
 import React from "react";
 import Head from "next/head";
 import App, { Container } from "next/app";
+import { Router } from "next/router";
 import { Provider } from "mobx-react";
 import Util from "../utils/util.js";
-import { Router } from "next/router";
 import { createStore, getOrCreateStore } from "../stores/createStore.js";
 import { singleton } from "../stores/RootStore.js";
 import { withRouter } from "next/router";
@@ -52,6 +52,28 @@ class MyApp extends App {
       window.stores = this.mobxStore;
     }
     //console.log("App.constructor", this.mobxStore);
+  }
+
+  componentDidMount(props) {
+    const { router } = this.props;
+
+    const rootStore = this.mobxStore.RootStore;
+
+    Router.events.on("routeChangeStart", () => {
+      console.log("routeChangeStart ", router.query);
+      rootStore.setState({ loading: true });
+    });
+
+    Router.events.on("routeChangeComplete", () => {
+      console.log("routeChangeComplete ", router.query);
+      rootStore.setState({ loading: false });
+    });
+
+    console.log("App.componentDidMount ", router.query);
+    const obj = ["step", "image", "selected"].reduce((acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc), {});
+    console.log("newState: ", obj);
+
+    rootStore.setState(obj);
   }
 
   render() {
