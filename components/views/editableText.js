@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useEditableState } from "react-editable-hooks";
 import classNames from "classnames";
-import { useRef } from 'react';
+import { useRef } from "react";
 import { trkl } from "../../utils/trkl.js";
- 
+
 export const EditableText = ({ className, style, multiline = false, value, onValueChanged }) => {
   const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
     value,
@@ -14,7 +14,7 @@ export const EditableText = ({ className, style, multiline = false, value, onVal
   const lines = value.split(/\n/g).length;
   const lineStyle = multiline ? { height: `${lines}em`, whiteSpace: "pre" } : {};
   const ref = trkl();
-/*
+  /*
  useDoubleClick({
     onSingleClick: e => {
       console.log(e, 'single click');
