@@ -1,5 +1,5 @@
 import React from "react";
-import { action, observable, flow, set, get, values, computed } from "mobx";
+import { action, observable, flow, set, get, values, toJS, computed } from "mobx";
 import getAPI from "../utils/api.js";
 import { Element, Timer } from "../utils/dom.js";
 import axios from "../utils/axios.js";
@@ -225,9 +225,15 @@ export class RootStore {
     if(item && idMap.indexOf(item.id) == -1) {
       idMap.push(item.id);
       if(typeof item == "object") {
-        // console.log("item.children", toJS(item.children));
-        if(item.children && item.children.length) item.children = item.children.map(it => this.getItem(it.id, tr, idMap)).filter(c => c !== null);
-        /*.filter(it => it !== undefined)*/ else item.children = [];
+        console.log("item", toJS(item));
+
+        let { parent_id } = item;
+
+        if(item.children && item.children.length) item.children = item.children.map(i => this.getItem(parseInt(i.id), tr, idMap));
+        else item.children = [];
+        // item.children = item.children.map(it => this.items.get(it.id, tr, idMap)).filter(c => c !== null);
+        /*.filter(it => it !== undefined)*/
+        //
       }
     }
     return item ? tr(item) : null;

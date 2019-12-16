@@ -48,19 +48,23 @@ const makeItemToOption = selected => arg => {
   let { data, ...item } = arg;
   data = data || {};
 
-  if(typeof data == "string") data = JSON.parse(data);
 
+try {
+  if(typeof arg.data == "string") data = JSON.parse(arg.data);
+} catch(err) {
+  data = {};
+}
   let label = data.title || data.name || data.text  ||  null; //`${item.type}(${item.id})`;
   let value = item.id;
   let children = toJS(item.children);
-  let obj = { label, value, expanded: true, checked: selected === value };
+  let obj = { label, value, data, expanded: true, checked: selected === value };
 
   if(label == "null" || label == null) return null;
 
   if((!item.type || item.type.indexOf('categ') == -1)  && !children)
     return null;
 
-  if(children && children.length) obj.children = children;
+  //if(children && children.length) obj.children = children;
   // else return null;
   return obj;
 };
