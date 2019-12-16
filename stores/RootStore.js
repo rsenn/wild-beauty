@@ -113,7 +113,6 @@ export class RootStore {
 
     if(imageObj.src === undefined)
       imageObj.src = `/api/image/get/${id}.jpg`;
-    
 
     this.images.set(id, observable.object(imageObj));
     let image = this.images.get(id);
@@ -121,7 +120,7 @@ export class RootStore {
     if(image.width === undefined || image.height === undefined) {
       var tm = Timer.interval(500,  () => {
         let e = Element.find(`#image-${id}`);
-        if(e) {
+        if(e && e.naturalWidth > 0 && e.naturalHeight > 0) {
           const { naturalWidth, naturalHeight, width, height } = e;
    image.width = naturalWidth;
    image.height = naturalHeight;

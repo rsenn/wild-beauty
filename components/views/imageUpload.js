@@ -3,6 +3,7 @@ import { Router, withRouter } from "next/router";
 import { inject, observer } from "mobx-react";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../simple/aspectBox.js";
 import classNames from "classnames";
+import axios from "../../utils/axios.js";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
 
@@ -26,7 +27,17 @@ export const ImageUpload = inject("rootStore")(
               console.log("UploadImages response:", { photo, url });
               const { id } = photo;
               const url = `/api/image/get/${id}.jpg`;
-              rootStore.newImage(photo);
+              let entry = rootStore.newImage(photo);
+
+              axios.head(url).then(res => {
+                if(res.status == 200 ) {
+                const { width, height, aspect, channels, depth } = res.headers;
+                console.log("HEAD: ", res);
+
+                Object.assign(entry, { width, height, aspect, channels, depth, ...entry });
+              }
+              });
+
               return url;
             })[0];
           }}
@@ -43,7 +54,7 @@ export const ImageUpload = inject("rootStore")(
         <div className={"image-list"}>
           {[...rootStore.images.entries()].map(([id, image], index) => {
 image = toJS(image);
-            console.log("image-list entry", {id,image});
+            //console.log("image-list entry", {id,image});
             const { width, height } = image;
             const landscape = width > height;
 
