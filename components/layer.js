@@ -39,7 +39,7 @@ export function Layer({ style, inline, flex, children, border, margin, padding, 
     return "window" in global ? new Size(window.innerWidth, window.innerHeight) : new Size({ width: 0, height: 0 });
   });
   box.subscribe(rect => {
-   /// console.log("New element rect: ", rect);
+    /// console.log("New element rect: ", rect);
   });
   handler.subscribe(e => {
     // console.log('Element: ', e);

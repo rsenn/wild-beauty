@@ -184,7 +184,7 @@ const Nav = inject(
       //console.log("Nav.render", { angle });
 
       const language = i18nStore.user.lang;
-//      console.log("i18nStore: ", i18nStore);
+      //      console.log("i18nStore: ", i18nStore);
 
       var SiteMap = [
         {

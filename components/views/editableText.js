@@ -17,8 +17,7 @@ export const EditableText = ({ className, style, multiline = false, value, onVal
       {isEditing ? (
         <React.Fragment>
           {multiline ? (
-            <textarea className="content" rows={lines} style={lineStyle} value={editValue} onChange={e => setEditValue(e.target.value)}>
-            </textarea>
+            <textarea className="content" rows={lines} style={lineStyle} value={editValue} onChange={e => setEditValue(e.target.value)}></textarea>
           ) : (
             <input className="content" value={editValue} onChange={e => setEditValue(e.target.value)} />
           )}

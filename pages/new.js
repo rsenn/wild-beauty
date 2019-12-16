@@ -38,14 +38,14 @@ const RandomColor = () => {
 };
 
 const ItemToOption = item => {
-  let data = item && item.data || {};
-    let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
- let value = item.id; let children = toJS(item.children);  
-let obj = { label, value, expanded: true };
+  let data = (item && item.data) || {};
+  let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
+  let value = item.id;
+  let children = toJS(item.children);
+  let obj = { label, value, expanded: true };
 
-if(children && children.length)
-obj.children = children;
-  return  obj;
+  if(children && children.length) obj.children = children;
+  return obj;
 };
 
 @inject("rootStore")
@@ -58,7 +58,7 @@ class New extends React.Component {
   step = 1;
   state = {
     options: {}
-  }
+  };
 
   static async getInitialProps(ctx) {
     const { RootStore } = ctx.mobxStore;
@@ -182,12 +182,16 @@ class New extends React.Component {
     const { rootStore } = this.props;
 
     rootStore.fetchItems().then(response => {
-console.log("Items: ", response.items);
+      console.log("Items: ", response.items);
 
-const options =  rootStore.getItem(0, ItemToOption);
-console.log("Options: ", options);
-this.state.options = options;
+      const options = rootStore.getItem(0, ItemToOption);
+      console.log("Options: ", options);
+      this.state.options = options;
     });
+  }
+
+  treeSelEvent = (name, arg) => {
+    console.log("treeSelEvent: ", arg);
   }
 
   render() {
@@ -197,6 +201,10 @@ this.state.options = options;
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
       console.log("onChange: ", value);
+    };
+
+    const makeTreeSelEvent = (name) => function(event) {
+      return this.treeSelEvent(name, event);
     };
 
     return (
@@ -291,8 +299,8 @@ this.state.options = options;
                     </SizedAspectRatioBox>
                   </div>
                 </div>
-                <div>
-                </div>
+                <div></div>
+                                <DropdownTreeSelect data={this.state.options} onChange={makeTreeSelEvent('change')} onNodeToggle={makeTreeSelEvent('node-toggle')} onFocus={makeTreeSelEvent('focus')} onBlur={makeTreeSelEvent('blur')} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} />
                 {rootStore.fields.map(field => (
                   <EditableText
                     multiline={true}
@@ -304,11 +312,10 @@ this.state.options = options;
                   />
                 ))}
                 <AddItemBar onAdd={this.addContent} />
-                <DropdownTreeSelect data={this.state.options} className={'dropdown-tree'} mode={'radioSelect'} texts={{ placeholder: 'parent item' }}  />
-             </div>
+              </div>
             )}
 
-{/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
+            {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
               Layer
             </Layer>
             <SvgOverlay />*/}
@@ -324,15 +331,15 @@ this.state.options = options;
               align-items: flex-start;
             }
 
-button.tag-remove {
-  border: 1px outset #55555580;
-} 
-           .editable-text {
+            button.tag-remove {
+              border: 1px outset #55555580;
+            }
+            .editable-text {
               width: 100%;
               margin: 4px 0px;
             }
-.dropdown-tree {
-}
+            .dropdown-tree {
+            }
             .button-add:active > svg {
               transform: translate(1px, 2px);
             }
