@@ -37,6 +37,7 @@ const makeItemToOption = selected => item => {
   let obj = { label, value, expanded: true, checked: selected === value };
 
   if(children && children.length) obj.children = children;
+  if(label.startsWith('null(')) return null;
   return obj;
 };
 
