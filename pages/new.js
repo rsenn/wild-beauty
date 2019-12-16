@@ -64,23 +64,30 @@ class New extends React.Component {
     options: {}
   };
 
+  /**
+   * Gets the initial properties.
+   *
+   * @param      {<type>}   ctx     The context
+   * @return     {Promise}  The initial properties.
+   */
   static async getInitialProps(ctx) {
     const { RootStore } = ctx.mobxStore;
-
     let photos = await RootStore.fetchPhotos(/*{ where: { user_id:   }}*/);
-    console.log("photos:", photos);
-
+    //console.log("photos:", photos);
     photos = photos.filter(ph => ph.items.length == 0);
     photos.forEach(item => RootStore.newImage(item));
-
     return { photos };
   }
 
+  /**
+   * Constructs a new instance.
+   *
+   * @param      {<type>}  props   The properties
+   */
   constructor(props) {
     let args = [...arguments];
     const { rootStore } = props;
     //    console.log("constructor args: ", props.initialMobxState.RootStore.images);
-    console.log("rootStore: ", toJS(rootStore.images));
     super(props);
 
     if(global.window) {
@@ -180,6 +187,11 @@ class New extends React.Component {
     //    this.checkQuery();
   }
 
+  /**
+   * Adds content.
+   *
+   * @param      {<type>}  event   The event
+   */
   addContent = event => {
     const { rootStore } = this.props;
     console.log("addContent: ", event);

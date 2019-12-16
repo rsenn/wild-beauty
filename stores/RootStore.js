@@ -190,9 +190,9 @@ export class RootStore {
   }
 
   async fetchItems(where = {}) {
-    console.log("RootStore.fetchItems:", where);
+    //console.log("RootStore.fetchItems:", where);
     let response = await this.api.list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"]);
-    console.log("fetchItems =", response);
+    //console.log("fetchItems =", response);
     return response;
   }
 
@@ -207,7 +207,7 @@ export class RootStore {
     let data = response ? await response.data : null;
     if(await data) {
       const items = await data.items;
-      console.log("RootStore.loadItems", data);
+      //console.log("RootStore.loadItems", data);
       for(let key in items) {
         const id = parseInt(items[key].id || key);
         this.items.delete(id);
