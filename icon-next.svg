@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48" viewBox="0 0 12.7 12.7">
+  <defs/>
+  <defs>
+    <linearGradient id="icon-next_svg__b" x1="-929.15" x2="-690.85" y1="178.52" y2="178.52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffff04" stop-opacity=".678"/>
+    </linearGradient>
+    <symbol id="icon-next_svg__a">
+      <path fill="none" stroke-width="1.058" d="M14.552 7.408c-.265 0-.53 0-.794.265l-6.614 6.614c-.53.53-1.059.794-1.588.794H3.175a1.587 1.587 0 110-3.175h1.323c.264 0 .529 0 .794-.264l6.614-6.615c.53-.53 1.059-.794 1.588-.794h2.38a1.587 1.587 0 110 3.175z"/>
+      <path d="M7.144 9.26l2.381-2.38v-.795a1.19 1.19 0 00-2.381 0z"/>
+      <circle cx="8.334" cy="3.572" r="1.191"/>
+      <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.058" d="M11.112 15.081l3.175-3.175m-3.175.794v2.38h2.381"/>
+    </symbol>
+    <filter id="icon-next_svg__d" width="1.095" height="1.097" x="-.048" y="-.048" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.304"/>
+    </filter>
+  </defs>
+  <g transform="translate(45.233 -2.18) scale(.18136)">
+    <path fill="#0ff" d="M-247.24 14.646h65.768v65.768h-65.768z" opacity=".879"/>
+    <path fill="#03f611" fill-opacity=".439" stroke="#f20b00" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".984" stroke-width="1.567" d="M-246.9 47.472V14.681h65.204v65.581H-246.9z" opacity=".879" paint-order="markers fill stroke"/>
+    <path fill="#03f611" fill-opacity=".439" stroke="#f20b00" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".984" stroke-width="1.567" d="M-245.77 47.472V15.435h62.943v64.074h-62.943z" opacity=".879" paint-order="markers fill stroke"/>
+    <use width="100%" height="100%" stroke="#000" transform="matrix(2.1572 0 0 2.3184 -234.48 27.051)" href="#icon-next_svg__a"/>
+    <path fill="#bb1d1b" fill-rule="evenodd" stroke="#001000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".889" stroke-width="2.57145302" d="M-244.549 47.233V16.24h60.475v61.988h-60.475zm28.387 12.055l4.118-4.066v3.862c0 4.083.605 4.78 4.157 4.78 3.87 0 5.528-1.81 2.638-2.88-1.455-.537-1.424-.672.726-3.188 3.978-4.654 2.37-6.34-2.005-2.1-1.84 1.784-2.493 2.09-2.493 1.172 0-.685-.595-1.583-1.323-1.996-1.166-.662-.834-1.248 2.81-4.95 3.349-3.406 4.601-4.201 6.614-4.201 5.155 0 7.46-5.913 3.515-9.016-1.398-1.1-3.094-1.567-5.687-1.567-3.25 0-4.083.358-6.926 2.978-3.152 2.906-3.255 2.94-4.203 1.423-.696-1.116-.74-1.787-.153-2.374a2.676 2.676 0 00-.64-4.266c-2.824-1.512-5.316.98-3.804 3.805.536 1.002.535 1.914-.003 2.92-.43.804-.783 3.084-.783 5.066 0 3.03-.385 4.002-2.416 6.098-1.886 1.946-3.037 2.492-5.249 2.492-5.109 0-7.13 5.915-3.107 9.091 1.705 1.346 2.801 1.582 6.088 1.312 3.653-.3 4.375-.69 8.126-4.395z" paint-order="stroke markers fill"/>
+    <path fill="#0ac0d3" fill-rule="evenodd" stroke="url(#icon-next_svg__b)" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".889" stroke-width="30.883" d="M-924.29 178.52V61.38h228.57v234.29h-228.57zm104.77 48.61l16.66-14.247 1.429 13.533 1.428 13.533 12.531.898c14.965 1.071 21.581-3.587 13.532-9.53-5.175-3.82-5.099-4.277 2.143-12.884 13.494-16.036 8.506-22.466-7.788-10.038l-9.2 7.018-3.716-5.951c-3.368-5.392-2.452-7.235 9.753-19.627 9.377-9.52 17.24-14.625 25.874-16.799 6.953-1.75 13.7-5.544 15.352-8.631 9.032-16.875-2.9-31.598-25.607-31.598-11.066 0-15.733 1.768-25.9 9.815-6.822 5.398-13.446 9.17-14.72 8.383-1.273-.787-1.98-6.632-1.57-12.989.87-13.51-5.625-20.328-14.21-14.913-3.935 2.483-5.098 7.945-5.661 26.586-.415 13.747-2.523 27.287-5.093 32.701-4.87 10.262-17.445 18.988-27.365 18.988-15.93 0-22.589 20.748-10.715 33.387 4.963 5.282 9.228 6.613 21.197 6.613 13.844 0 16.253-1.084 31.645-14.247z" paint-order="stroke markers fill" transform="scale(.26458)"/>
+    <use width="100%" height="100%" stroke="#000" transform="translate(-234.43 28.2) scale(2.1514)" href="#icon-next_svg__a"/>
+    <path fill="#ec8608" fill-opacity=".961" fill-rule="evenodd" stroke="url(#icon-next_svg__c)" stroke-linecap="round" stroke-linejoin="round" stroke-width="13.508" d="M-861.61 222.25c-1.026-1.566-1.376-3.082-.825-3.571.528-.468 4.248-1.636 8.269-2.597 13.92-3.326 26.726-13.24 33.46-25.906 3.58-6.732 20.785-25.999 23.217-25.999.765 0 5.83-3.186 11.253-7.08 5.752-4.131 11.668-7.487 14.197-8.056 7.398-1.662 17.753 1.186 17.753 4.882 0 .832-3.906 2.827-9.34 4.77-5.136 1.838-11.897 5.064-15.023 7.169-8 5.387-20.92 17.921-26.419 25.626-2.712 3.801-10.11 11.163-17.732 17.647-20.013 17.024-17.902 15.836-28.129 15.836-8.361 0-9.004-.164-10.68-2.721z" paint-order="stroke markers fill" transform="scale(.26458)"/>
+    <path fill="#03f611" fill-opacity=".439" stroke="#f20b00" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".984" stroke-width="1.567" d="M-247.19 47.06V14.646h65.581v64.827h-65.581zm61.812 0V18.038h-58.42v58.043h58.42z" filter="url(#icon-next_svg__d)" opacity=".879" paint-order="markers fill stroke"/>
+  </g>
+</svg>
