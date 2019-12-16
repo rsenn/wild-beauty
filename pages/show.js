@@ -32,7 +32,7 @@ class Show extends React.Component {
     console.log("Show.getInitialProps ");
     const { RootStore } = ctx.mobxStore;
     console.log("RootStore.fetchItems");
-    let items = await getAPI().list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"]);
+    let items = await getAPI().list("items", ["id", "type", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize original_name } }", "users { user { id username last_seen } }"]);
     //await RootStore.fetchItems();
     console.log("Show.getInitialProps  items:", items);
     items.forEach(item => RootStore.newItem(item));
@@ -123,28 +123,36 @@ class Show extends React.Component {
               alignItems: "flex-start",
               /* maxWidth: "100vw",
               maxHeight: "100vh",*/
-              padding: "0 0 0 40px",
+              padding: "0 0 0 0",
               margin: "0 auto 0 auto"
             }}
           >
-            {list.map(path => (
+            {this.props.items.map(item => {
+
+              console.log("item: ", item);
+              const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
+              const path = photo_id >= 0 ? `/api/image/get/${photo_id}` : 'static/img/no-image.svg';
+              const opacity = photo_id >= 0 ? 1 : 0.3;
+              return (
               <SizedAspectRatioBox
                 width={"28vw"}
                 height={"28vw"}
                 style={{
+                  position: 'relative',
                   margin: "16px",
                   border: "1px solid black",
                   boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
-
                   maxWidth: "20vw",
                   maxHeight: "20vw",
                   overflow: "hidden"
-                }}
+                                  }}
                 className={"layer gallery-aspect-box"}
               >
-                <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto" }} className="gallery-image" />
+                <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto",                   opacity
+ }} className="gallery-image" />
+{ opacity == 1 ? undefined :  <div style={{ position: 'absolute', top: '0px', left: '0px', fontSize: '30px' }}>No Image</div> }
               </SizedAspectRatioBox>
-            ))}{" "}
+            ); })}
           </div>
           {/*          <Layer w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
             Layer
@@ -153,8 +161,7 @@ class Show extends React.Component {
           <style jsx global>{`
             .main-layout {
               width: 100vw;
-              height: 100vh;
-              overflow: hidden;
+              overflow: auto;
             }
             .gallery-image {
               height: auto;
@@ -214,8 +221,6 @@ class Show extends React.Component {
               position: relative;
               top: 0px;
               width: 100vw;
-              overflow: hidden;
-              min-height: 100vh;
               text-align: center;
               display: inline-flex;
               justify-content: center;

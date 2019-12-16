@@ -113,7 +113,7 @@ const Test = () => {
             <Layer inline style={{ flex: "1 0 auto", backgroundColor: RandomColor() }}>
               <img src={path} style={{ maxWidth: "50vmin", width: "100%", height: "auto" }} className="gallery-image" />
             </Layer>
-          ))}{" "}
+          ))}
         </div>
         <Layer className={"layer"} w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
           Layer
