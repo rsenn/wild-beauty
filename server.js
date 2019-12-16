@@ -350,22 +350,21 @@ if (!dev && cluster.isMaster) {
       let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "user_id"]);
       const photo = response.photos[0];
 
-      if(typeof(photo) == 'object') {
-
+      if(typeof photo == "object") {
         if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
-      let data = Buffer.from(photo.data, "base64");
-    
-      delete photo.data;
-      //console.log(`photo: `, photo);
-      res.set("Content-Type", "image/jpeg");
-      const { width, height, aspect } = photo;
-      let props = { ...(jpeg.jpegProps(data) || {}), width, height, aspect };
+        let data = Buffer.from(photo.data, "base64");
 
-      if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
-      for(let key of ["original_name", "uploaded", "user_id"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
-      for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
-      res.send(data);
-}    
+        delete photo.data;
+        //console.log(`photo: `, photo);
+        res.set("Content-Type", "image/jpeg");
+        const { width, height, aspect } = photo;
+        let props = { ...(jpeg.jpegProps(data) || {}), width, height, aspect };
+
+        if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
+        for(let key of ["original_name", "uploaded", "user_id"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
+        for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
+        res.send(data);
+      }
     });
 
     server.post(

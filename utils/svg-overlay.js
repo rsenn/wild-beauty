@@ -93,7 +93,9 @@ export class SvgOverlay extends React.Component {
 
       //   this.createPaths();
     });
-    if(global.window) window.svgOverlay = this;
+    if(global.window) {
+      window.svgOverlay = this;
+    }
   }
 
   createPaths = () => {

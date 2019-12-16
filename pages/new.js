@@ -37,8 +37,8 @@ const makeItemToOption = selected => item => {
   let obj = { label, value, expanded: true, checked: selected === value };
 
   if(children && children.length) obj.children = children;
-  if(label.startsWith('null(')) return null;
-  
+  if(label.startsWith("null(")) return null;
+
   return obj;
 };
 
@@ -287,9 +287,9 @@ class New extends React.Component {
             {rootStore.state.step == 1 ? <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
             {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
               Layer
-            </Layer>
-            <SvgOverlay />*/}
+            </Layer>*/}
           </NeedAuth>
+          <SvgOverlay />
           <style jsx global>{`
             button.tag-remove {
               border: 1px outset #55555580;
