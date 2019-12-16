@@ -4,4 +4,5 @@
 
  curl  -v --cookie cookies.txt http://localhost:5555/api/logout
  curl  -v --cookie cookies.txt http://localhost:5555/api/image/upload --upload-file "test.jpg"
+ curl  -v --cookie cookies.txt --data '' http://localhost:5555/api/item/tree
 
