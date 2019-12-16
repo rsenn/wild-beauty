@@ -34,7 +34,7 @@ export const ImageUpload = inject("rootStore")(
             const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
             console.log("UploadImages success:", { id, arg });
 
-            let entry = rootStore.newImage(id);
+            let entry = rootStore.newImage({ id });
 
             console.log("UploadImages success:", toJS(entry));
             //     arg.remove();
@@ -42,6 +42,8 @@ export const ImageUpload = inject("rootStore")(
         ></UploadImages>
         <div className={"image-list"}>
           {[...rootStore.images.entries()].map(([id, image], index) => {
+image = toJS(image);
+            console.log("image-list entry", {id,image});
             const { width, height } = image;
             const landscape = width > height;
 

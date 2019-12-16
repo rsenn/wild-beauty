@@ -188,31 +188,24 @@ class New extends React.Component {
 
   checkQuery() {
     const { rootStore, router } = this.props;
-
     console.log("router.query", router.query);
-
     const obj = ["step", "image", "selected"].reduce((acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc), {});
     console.log("newState: ", obj);
-
     rootStore.setState(obj);
   }
 
   componentDidMount() {
     const { rootStore, router } = this.props;
     //this.checkQuery();
-
     rootStore.loadItems().then(response => {
       console.log("Items: ", response.items);
-
       this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
-
       console.log("this.tree", toJS(this.tree));
     });
   }
 
   treeSelEvent = (type, arg) => {
     const { rootStore } = this.props;
-
     switch (type) {
       case "change": {
         console.log("treeSelEvent: ", this.tree, arg.value);

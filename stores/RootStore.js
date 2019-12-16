@@ -1,7 +1,7 @@
 import React from "react";
 import { action, observable, flow, set, get, values, computed } from "mobx";
 import getAPI from "../utils/api.js";
-import { Timer } from "../utils/dom.js";
+import { Element,Timer } from "../utils/dom.js";
 import axios from "../utils/axios.js";
 import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoStore.js";
 import Util from "../utils/util.js";
@@ -111,9 +111,26 @@ export class RootStore {
   newImage(imageObj) {
     const { id, ...photo } = imageObj;
 
-    this.images.set(id, imageObj);
+    if(imageObj.src === undefined)
+      imageObj.src = `/api/image/get/${id}.jpg`;
+    
 
-    return this.images.get(id);
+    this.images.set(id, observable.object(imageObj));
+    let image = this.images.get(id);
+
+    if(image.width === undefined || image.height === undefined) {
+      var tm = Timer.interval(500,  () => {
+        let e = Element.find(`#image-${id}`);
+        if(e) {
+          const { naturalWidth, naturalHeight, width, height } = e;
+   image.width = naturalWidth;
+   image.height = naturalHeight;
+          console.log({naturalWidth, naturalHeight, width, height  });
+          tm.stop();
+        }
+      });
+    }
+    return image;
   }
 
   get fieldNames() {
