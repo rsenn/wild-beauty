@@ -17,6 +17,8 @@ import { createStore, getOrCreateStore } from "../stores/createStore.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import { Translate, Localize } from "react-i18nify-mobx";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspectBox.js";
+import { EditableText } from "../components/views/editableText.js";
+import { AddItemBar } from "../components/views/addItemBar.js";
 
 import UploadImages from "react-upload-gallery";
 import "../static/css/react-upload-gallery.css";
@@ -71,19 +73,62 @@ class New extends React.Component {
         if(e) Element.setCSS(e, { zIndex });
         if(e && e.style) {
           const orientation = e.getAttribute("orientation");
-          console.log("img ", { orientation });
-
-          let transformation = orientation == "landscape" ? `translateX(${event.x}px)` : `translateY(${event.y}px)`;
-
-          e.style.setProperty("transform", event.type.endsWith("move") ? transformation : "");
+          //   console.log("img ", { orientation });
+          let offset = orientation == "landscape" ? event.x : event.y;
+          if(offset > 0) offset = 0;
+          if(offset < -this.offsetRange) offset = -this.offsetRange;
+          if(event.type.endsWith("move")) this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
+          let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
+          //   console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
+          //e.style.setProperty("transform", event.type.endsWith("move") ? transformation : "");
+          if(event.type.endsWith("move")) e.style.setProperty("transform", transformation);
         }
       });
 
       this.touchListener = TouchListener(
-        e => {
-          if(e.nativeEvent) e.nativeEvent.preventDefault();
+        event => {
+          //     if(event.nativeEvent) event.nativeEvent.preventDefault();
+          if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img") {
+            this.currentImage = event.target;
+            let obj = Element.toObject(this.currentImage);
+            const orientation = this.currentImage.getAttribute("orientation");
+            let rect = Element.rect(this.currentImage);
+            let prect = Element.rect(this.currentImage.parentElement);
+            let range = orientation == "landscape" ? rect.width - prect.width : rect.height - prect.height;
+            this.offsetRange = range;
+            //console.log("rect: ", { range, rect, prect });
+            obj.style = `position: absolute; width: ${rect.width}px; height: ${rect.height}px`;
+            if(this.clonedImage) Element.remove(this.clonedImage);
+            this.clonedImage = Element.create(obj);
+            document.body.appendChild(this.clonedImage);
+            //console.log("clonedImage obj:", this.clonedImage);
+          }
 
-          this.touchCallback(e);
+          if(event.type.endsWith("move")) {
+            if(this.clonedImage && this.currentImage) {
+              let zIndex = parseInt(Element.getCSS(this.currentImage, "z-index")) - 1;
+              let irect = Element.rect(this.currentImage);
+              //console.log("irect: ", { irect });
+              if(irect.x >= 1 && irect.y >= 1) Element.move(this.clonedImage, irect);
+              this.clonedImage.style.zIndex = -1;
+              this.clonedImage.style.opacity = 0.5;
+            }
+          }
+
+          this.touchCallback(event);
+
+          if(event.type.endsWith("end")) {
+            if(this.clonedImage && this.currentImage) {
+              this.currentImage.style.position = "relative";
+              /*           this.currentImage.style.left = `${this.currentOffset.x}px`;
+           this.currentImage.style.top = `${this.currentOffset.y}px`;*/
+
+              console.log("currentOffset: ", this.currentOffset);
+              console.log("currentImage: ", this.currentImage);
+              Element.remove(this.clonedImage);
+              this.clonedImage = null;
+            }
+          }
         },
         {
           element: global.window,
@@ -103,59 +148,20 @@ class New extends React.Component {
     }
   }
 
+  addContent = () => {
+    const { rootStore } = this.props;
+
+    rootStore.fields.push({ type: null, value: "" });
+  };
+
   render() {
     const { rootStore } = this.props;
-    /*   if(global.window !== undefined) window.page = this;
-    if(global.window) {
-      var touchListener = TouchListener(TouchCallback, {
-        element: global.window,
-        step: 1,
-        round: true,
-        listener: MovementListener,
-        noscroll: true
-      });
-      MultitouchListener(
-        event => {
-          console.log("multitouch", event);
-        },
-        { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
-      );
-    }*/
     const onError = event => {};
-
     const onImage = event => {
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
       console.log("onChange: ", value);
-    }; /*
-
-  const state = {
-    image: useState(""),
-    error: useState(0)
-  };*/
-    let list = imagePaths();
-    if(list === null || (list && list.length == undefined))
-      list = [
-        "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
-        "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
-        "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
-        "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
-        "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
-      ];
-
-    /*  let articles = toJS(rootStore.state.articles);
-
-  if(articles.length === undefined) articles = [];
-  console.log("Home.render ", { articles });
-  articles = articles.map(art => {
-    const { type, id, page_id, data } = art;
-    const json = JSON.parse(data);
-    console.log("json: ", json);
-    json.type = art.type;
-    json.id = art.id;
-    json.page_id = art.page_id;
-    return json;
-  });*/
+    };
 
     return (
       <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
@@ -169,8 +175,8 @@ class New extends React.Component {
             <div
               className={"upload-area"}
               style={{
-                minWidth: "80vmin",
-                minHeight: "80vmin"
+                minWidth: "80vmin"
+                // minHeight: "80vmin"
               }}
             >
               <UploadImages
@@ -204,6 +210,7 @@ class New extends React.Component {
                   <div className={"item-entry"}>
                     <SizedAspectRatioBox className={"item-box"}>
                       <img
+                        id={`image-${id}`}
                         className={"inner-image"}
                         src={`/api/image/get/${id}.jpg`}
                         width={width}
@@ -219,32 +226,19 @@ class New extends React.Component {
                 );
               })}
             </div>
-            {/*<div className={"panes-list"}>
-            <div className={"panes-item layer"}>
-              <img src="static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
+            <div className={"content-edit"}>
+              {rootStore.fields.map(field => (
+                <EditableText
+                multiline={true}
+                  className={"editable-text"}
+                  value={field.value}
+                  onValueChanged={newVal => {
+                    field.value = newVal;
+                  }}
+                />
+              ))}
+              <AddItemBar onAdd={this.addContent} />
             </div>
-            <div className={"panes-item layer"}>
-              <img src="static/img/76619287_430389744517453_4826291339341594624_n.jpg" />
-            </div>
-            <div className={"panes-item layer"}>
-              <img src="static/img/69688821_689014168592533_7393339862767632384_n.jpg" />
-            </div>
-            <div className={"panes-item layer"}>
-              <img src="static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg" />
-            </div>
-            <div className={"panes-item layer"}>
-              <img src="static/img/d415b80a6007124c4e3948b21a7f0ed1.jpg" />
-            </div>
-            <div className={"panes-item layer"}>
-              <img src="static/img/69536222_653691828474365_6429980850053447680_n.jpg" />
-            </div>
-            <div className={"panes-item layer"}>
-              <img src="static/img/76771501_2539648529692993_599570957710917632_n.jpg" />
-            </div>
-            <div className={"panes-item layer"}>
-              <img src="static/img/0c71247f63ff20833347da1484d3caa4.jpg" />
-            </div>
-          </div>*/}
 
             <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} style={{ cursor: "move" }}>
               Layer
@@ -253,6 +247,22 @@ class New extends React.Component {
           </NeedAuth>
 
           <style jsx global>{`
+            .content-edit {
+              width: 80vw;
+              padding: 0px 20px;
+              display: flex;
+              flex-flow: column nowrap;
+              justify-content: flex-start;
+              align-items: flex-start;
+            }
+            .editable-text {
+              width: 100%;
+              margin: 4px 0px;
+            }
+
+            .button-add:active > svg {
+              transform: translate(1px, 2px);
+            }
             .panes-list {
               display: flex;
               border: 1px solid black;

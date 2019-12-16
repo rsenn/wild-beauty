@@ -2276,10 +2276,11 @@ export class Element extends Node {
     let children = e.children && e.children.length ? { children: Util.array(e.children).map(child => Element.toObject(child, e)) } : {};
 
     let ns = (arguments[1] ? arguments[1].namespaceURI : document.body.namespaceURI) != e.namespaceURI ? { ns: e.namespaceURI } : {};
+    let { /*style,*/ ...attributes } = Element.attr(e);
 
     return {
       tagName: e.tagName,
-      ...Element.attr(e),
+      ...attributes,
       ...children,
       ...ns
     };
@@ -2465,7 +2466,7 @@ export class Element extends Node {
       to.y -= off.y;
     }*/
     let css = Point.toCSS(current);
-    console.log("Element.move: ", { position, to, css, off, current });
+    //console.log("Element.move: ", { position, to, css, off, current });
     //console.log('move newpos: ', Point.toCSS(pt));
     Element.setCSS(element, { ...css, position });
     return element;

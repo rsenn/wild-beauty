@@ -44,6 +44,7 @@ export class RootStore {
   images = observable.map();
   entries = observable.array([]);
   users = observable.map();
+  fields = observable.array([]);
 
   api = getAPI();
 
