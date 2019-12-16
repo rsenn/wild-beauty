@@ -12,7 +12,7 @@ export const SiteMap = [
     ),
     description: () => <Translate value="nav.home_description" />
   },
-  {
+  /*{
     href: "/test",
     name: "text",
     label: () => (
@@ -21,7 +21,7 @@ export const SiteMap = [
       </span>
     ),
     description: () => <Translate value="nav.gallery_description" />
-  },
+  },*/
   {
     href: "/show",
     name: "show",
