@@ -32,7 +32,15 @@ class Show extends React.Component {
     console.log("Show.getInitialProps ");
     const { RootStore } = ctx.mobxStore;
     console.log("RootStore.fetchItems");
-    let items = await getAPI().list("items", ["id", "type", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize original_name } }", "users { user { id username last_seen } }"]);
+    let items = await getAPI().list("items", [
+      "id",
+      "type",
+      "parent { id type data }",
+      "children { id type data }",
+      "data",
+      "photos { photo { id width height filesize original_name } }",
+      "users { user { id username last_seen } }"
+    ]);
     //await RootStore.fetchItems();
     console.log("Show.getInitialProps  items:", items);
     items.forEach(item => RootStore.newItem(item));
@@ -61,7 +69,7 @@ class Show extends React.Component {
   }
 
   componentDidMount() {
-/*    this.api.list("items", "type data photos { photo { width height data filesize } } users { user { id username last_seen } }").then(res => {
+    /*    this.api.list("items", "type data photos { photo { width height data filesize } } users { user { id username last_seen } }").then(res => {
       console.log("items: ", res);
     });*/
   }
@@ -128,31 +136,30 @@ class Show extends React.Component {
             }}
           >
             {this.props.items.map(item => {
-
               console.log("item: ", item);
               const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
-              const path = photo_id >= 0 ? `/api/image/get/${photo_id}` : 'static/img/no-image.svg';
+              const path = photo_id >= 0 ? `/api/image/get/${photo_id}` : "static/img/no-image.svg";
               const opacity = photo_id >= 0 ? 1 : 0.3;
               return (
-              <SizedAspectRatioBox
-                width={"28vw"}
-                height={"28vw"}
-                style={{
-                  position: 'relative',
-                  margin: "16px",
-                  border: "1px solid black",
-                  boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
-                  maxWidth: "20vw",
-                  maxHeight: "20vw",
-                  overflow: "hidden"
-                                  }}
-                className={"layer gallery-aspect-box"}
-              >
-                <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto",                   opacity
- }} className="gallery-image" />
-{ opacity == 1 ? undefined :  <div style={{ position: 'absolute', top: '0px', left: '0px', fontSize: '30px' }}>No Image</div> }
-              </SizedAspectRatioBox>
-            ); })}
+                <SizedAspectRatioBox
+                  width={"28vw"}
+                  height={"28vw"}
+                  style={{
+                    position: "relative",
+                    margin: "16px",
+                    border: "1px solid black",
+                    boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
+                    maxWidth: "20vw",
+                    maxHeight: "20vw",
+                    overflow: "hidden"
+                  }}
+                  className={"layer gallery-aspect-box"}
+                >
+                  <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto", opacity }} className="gallery-image" />
+                  {opacity == 1 ? undefined : <div style={{ position: "absolute", top: "0px", left: "0px", fontSize: "30px" }}>No Image</div>}
+                </SizedAspectRatioBox>
+              );
+            })}
           </div>
           {/*          <Layer w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
             Layer
