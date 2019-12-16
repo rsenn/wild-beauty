@@ -247,7 +247,8 @@ Point.dimension = p => [p.width, p.height];
 
 Point.toString = point => {
   if(point instanceof Array) return `[${point[0].toFixed(3)},${point[1].toFixed(3)}]`;
-  return Point.prototype.toString.call(point);
+  return `[${point.x},${point.y}]`
+//  return Point.prototype.toString.call(point);
 };
 Point.prototype.toString = function(brackets = true) {
   return (brackets ? "{" : "") + "x:" + this.x.toFixed(3) + ",y:" + this.y.toFixed(3) + (brackets ? "}" : "");
@@ -595,10 +596,13 @@ PointList.prototype.lines = function(closed = false) {
 };
 
 PointList.prototype.toString = function() {
-  return "[" + this.map(point => (point.toString && !(point instanceof DOMPoint) ? point.toString() : Point.toString(point))).join(",\n  ") + "]";
+  return "[" + this.map(point => Point.toString(point) /*.toString && !(point instanceof DOMPoint) ? point.toString() : Point.toString(point))*/).join(",\n  ") + "]";
 };
 
-PointList.toString = plist => PointList.prototype.toString.call(plist);
+PointList.toString = pointList => {
+
+  return '['+[...pointList].map(({x,y }) => `[${x},${y}]`).join(",")+']';
+};
 
 PointList.prototype.rotateRight = function(n) {
   return Util.rotateRight(this, n);
@@ -1099,9 +1103,9 @@ Rect.toTRBL = rect => ({
 Rect.prototype.toPoints = function() {
   var list = new PointList();
   list.push(new Point(this.x, this.y));
-  list.push(new Point(this.x2, this.y));
-  list.push(new Point(this.x2, this.y2));
   list.push(new Point(this.x, this.y2));
+  list.push(new Point(this.x2, this.y2));
+  list.push(new Point(this.x2, this.y));
   return list;
 };
 

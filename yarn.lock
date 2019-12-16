@@ -1460,6 +1460,11 @@ acorn@^7.1.0:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.1.0.tgz#949d36f2c292535da602283586c2477c57eb2d6c"
   integrity sha512-kL5CuoXA/dgxlBbVrflsflzQ3PAas7RYZB52NOm/6839iVYJgKMJ3cQJD+t2i5+qFa8h3MDpEOJiS64E8JLnSQ==
 
+affinefit@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/affinefit/-/affinefit-1.0.5.tgz#5f6d2762bca5535951e3b37157aece520a91ef50"
+  integrity sha512-WbhePNorrWi083HVtUUcZBKflfvZ0YodH/EdVbgtb5DFi2fFrlDwd83eDzbDR+8fEjMZU5zcgUK94dJSM2c7zw==
+
 ajv-errors@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/ajv-errors/-/ajv-errors-1.0.1.tgz#f35986aceb91afadec4102fbd85014950cefa64d"

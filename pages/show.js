@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Layer from "../components/layer.js";
-import { Element, Node, HSLA } from "../utils/dom.js";
+import { Element, Node, HSLA, PointList, Point, Rect } from "../utils/dom.js";
 import getAPI from "../utils/api.js";
 import Util from "../utils/util.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
@@ -14,6 +14,7 @@ import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspec
 import { action, toJS, autorun } from "mobx";
 import Nav from "../components/nav.js";
 import { createStore, getOrCreateStore } from "../stores/createStore.js";
+import  affineFit from 'affinefit';
 
 import "../static/css/grid.css";
 
@@ -75,6 +76,22 @@ class Show extends React.Component {
     /*    this.api.list("items", "type data photos { photo { width height data filesize } } users { user { id username last_seen } }").then(res => {
       console.log("items: ", res);
     });*/
+  }
+
+  handleClick = event => {
+
+    let rect =Element.rect( event.target);
+    let points = rect.toPoints().map(p => ([p.x, p.y]));
+
+    let rect2 = Element.rect('#item-grid');
+    let points2 = rect2.toPoints().map(p => ([p.x, p.y]));
+
+        console.log("handleClick:\nrect: ", rect.toString(), "\npoints: ", PointList.toString(points), 
+         "\nrect2: ",  rect2.toString(), "\npoints2: ", PointList.toString(points2) );
+
+var trn = affineFit(points, points2);
+        console.log("trn: ", trn.M);
+
   }
 
   render() {
@@ -152,6 +169,7 @@ class Show extends React.Component {
             }}
           >*/}
           <div
+          id={'item-grid'}
             style={{
               marginLeft: "-8px",
               padding: "4px",
@@ -173,7 +191,7 @@ class Show extends React.Component {
                 console.log("data: ", data);
 
                 return (
-                  <div className={'tile'} id={`item-${item.id}`}>
+                  <div className={'tile'} id={`item-${item.id}`} onClick={this.handleClick}>
                     <SizedAspectRatioBox
                       style={{
                         position: "relative",
