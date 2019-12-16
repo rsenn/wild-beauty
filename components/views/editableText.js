@@ -33,15 +33,15 @@ export const EditableText = ({ className, style, multiline = false, value, onVal
           ) : (
             <input className="content" value={editValue} onChange={e => setEditValue(e.target.value)} />
           )}
-          <button onClick={onEditConfirm}>Confirm</button>
-          <button onClick={onEditCancel}>Cancel</button>
+          <button onClick={onEditConfirm}><img src={'static/img/icon-apply.svg'} /> </button>
+          <button onClick={onEditCancel}><img src={'static/img/icon-cancel.svg'} /> </button>
         </React.Fragment>
       ) : (
         <React.Fragment>
           <div className="content" ref={ref} style={lineStyle}>
             {value}
           </div>
-          <button onClick={onEditBegin}>Edit</button>
+          <button onClick={onEditBegin}><img src={'static/img/icon-edit.svg'} /></button>
           {hasDraft ? <button onClick={useDraft}>Load draft</button> : null}
         </React.Fragment>
       )}

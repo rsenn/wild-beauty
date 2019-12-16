@@ -48,6 +48,7 @@ export const ItemEditor = inject("rootStore")(
       {rootStore.fields.map(field => (
         <EditableText
           multiline={false}
+          hasDraft={false}
           className={"editable-text"}
           value={field.value}
           onValueChanged={newVal => {
