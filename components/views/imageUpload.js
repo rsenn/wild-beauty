@@ -11,7 +11,7 @@ import "../../static/css/react-upload-gallery.css";
 
 export const ImageUpload = inject("rootStore")(
   observer(
-    withRouter(({ rootStore, router }) => (
+    /*withRouter*/ ({ rootStore, router }) => (
       <div
         className={"upload-area"}
         style={{
@@ -34,7 +34,7 @@ export const ImageUpload = inject("rootStore")(
             const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
             console.log("UploadImages success:", arg);
 
-            let entry = rootStore.newEntry(id);
+            let entry = rootStore.newImage(id);
             arg.remove();
 
             console.log("UploadImages success:", entry);
@@ -60,12 +60,13 @@ export const ImageUpload = inject("rootStore")(
                       height: landscape ? "100%" : "auto"
                     }}
                     onClick={() => {
-                      router.push({
+                      rootStore.setState({ selected: index, image: id, step: 2 });
+                      console.log("state: ", toJS(rootStore.state));
+                      /* router.push({
                         pathname: "/new",
                         query: { step: 2, image: id, selected: index },
                         shallow: true
-                      });
-                      //                         rootStore.setState({ selected: index, image: id, step: 2 });
+                      });*/
                     }}
                   />
                 </SizedAspectRatioBox>
@@ -104,7 +105,7 @@ export const ImageUpload = inject("rootStore")(
           }
         `}</style>
       </div>
-    ))
+    )
   )
 );
 

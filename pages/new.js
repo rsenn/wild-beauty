@@ -51,78 +51,9 @@ const findInTree = (tree, value) => {
   return null;
 };
 
-const NewItemImageUpload = inject("rootStore")(
-  observer(
-    withRouter(({ rootStore, router }) => (
-      <div
-        className={"upload-area"}
-        style={{
-          minWidth: "80vmin"
-          // minHeight: "80vmin"
-        }}
-      >
-        <UploadImages
-          action="/api/image/upload" // upload route
-          source={response => {
-            return response.map(item => {
-              const { id } = item;
-              const url = `/api/image/get/${id}.jpg`;
-              console.log("UploadImages response:", { item, url });
-              rootStore.newImage(item);
-              return url;
-            })[0];
-          }}
-          onSuccess={arg => {
-            const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
-            console.log("UploadImages success:", arg);
-
-            let entry = rootStore.newEntry(id);
-            arg.remove();
-
-            console.log("UploadImages success:", entry);
-          }}
-        ></UploadImages>
-        <div className={"image-list"}>
-          {[...rootStore.images.entries()].map(([id, image], index) => {
-            const { width, height } = image;
-            const landscape = width > height;
-
-            return (
-              <div className={"item-entry"}>
-                <SizedAspectRatioBox className={"item-box"}>
-                  <img
-                    id={`image-${id}`}
-                    className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
-                    src={`/api/image/get/${id}.jpg`}
-                    width={width}
-                    height={height}
-                    orientation={landscape ? "landscape" : "portrait"}
-                    style={{
-                      width: landscape ? `${(width * 100) / height}%` : "100%",
-                      height: landscape ? "100%" : "auto"
-                    }}
-                    onClick={() => {
-                      router.push({
-                        pathname: "/new",
-                        query: { step: 2, image: id, selected: index },
-                        shallow: true
-                      });
-                      //                         rootStore.setState({ selected: index, image: id, step: 2 });
-                    }}
-                  />
-                </SizedAspectRatioBox>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    ))
-  )
-);
-
 @inject("rootStore")
 @observer
-@withRouter
+//@withRouter
 class New extends React.Component {
   currentImage = null;
   clonedImage = null;
@@ -261,6 +192,8 @@ class New extends React.Component {
     console.log("newState: ", obj);
 
     rootStore.setState(obj);
+
+    // rootStore.state.step = 2;
   }
 
   componentDidMount() {
@@ -305,7 +238,7 @@ class New extends React.Component {
     };
 
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
-
+    console.log("New.render");
     return (
       <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
         <Head>
@@ -315,6 +248,7 @@ class New extends React.Component {
         <Nav />
         <div className={"page-layout"}>
           <NeedAuth>
+            {rootStore.state.step}
             {rootStore.state.step == 1 ? <ImageUpload /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
 
             {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
