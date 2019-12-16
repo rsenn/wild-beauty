@@ -214,7 +214,19 @@ export class RootStore {
    */
   @action.bound
   saveItem(event) {
-    console.log("saveItem");
+const photo_id = rs.state.image;
+const parent_id = rs.state.parent_id;
+
+
+const dataObj = this.entries.reduce((acc,entry) => ({ ...acc,  [Util.decamelize(entry.type)]: entry.value  }), {});
+    console.log("saveItem", { photo_id, parent_id, dataObj });
+
+
+this.apiRequest('/api/item/new',  { photos: { data: { photo_id }}, parent_id, data: dataObj }).then(response => {
+
+  console.log("saveitem API response:", response);
+})
+
   }
   /*
   fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {

@@ -316,7 +316,7 @@ if (!dev && cluster.isMaster) {
     server.post("/api/item/new", async function(req, res) {
       let { data, parent_id, ...params } = req.body;
       console.log("params: ", params);
-      let result = await API.insert("items", { parent_id, data: typeof data == "string" ? data : JSON.stringify(data) }, ["id"]);
+      let result = await API.insert("items", { parent_id, data: (typeof data == "string" ? data : JSON.stringify(data)).replace(/"/g, '\\"') }, ["id"]);
       console.log("result: ", result);
       if(result && result.insert_items) result = await result.insert_items;
       if(result && result.returning) result = await result.returning;
