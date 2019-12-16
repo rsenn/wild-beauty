@@ -2216,6 +2216,15 @@ export class Node {
       } while((n = n.parentNode));
     })();
   }
+
+  static depth(node) {
+    let r = 0;
+    while(node && node.parentNode) {
+      r++;
+      node = node.parentNode;
+    }
+    return r;
+  }
 }
 
 /**
@@ -2635,7 +2644,19 @@ export class Element extends Node {
     return path;
   }
 
-  static depth(elem, relative_to = null) {
+  static selector(elt, opts = {}) {
+    const { relative_to = null, use_id = false } = opts;
+    let sel = "";
+    for(; elt && elt.nodeType == 1; elt = elt.parentNode) {
+      if(sel != "") sel = " > " + sel;
+      let xname = Element.unique(elt, { idx: false, use_id });
+      if(use_id === false) xname = xname.replace(/#.*/g, "");
+      sel = xname + sel;
+      if(elt == relative_to) break;
+    }
+    return sel;
+  }
+  static depth(elem, relative_to = document.body) {
     let count = 0;
     while(elem != relative_to && (elem = elem.parentNode)) count++;
     return count;
@@ -2693,16 +2714,19 @@ export class Element extends Node {
     return name;
   }
 
-  static unique(elem) {
+  static unique(elem, opts = {}) {
+    const { idx = true, use_id = true } = opts;
     let name = elem.tagName.toLowerCase();
-    if(elem.id && elem.id.length) return name + "#" + elem.id;
-    const classNames = String(elem.className).split(new RegExp("/[ \t]/"));
+    if(use_id && elem.id && elem.id.length) return name + "#" + elem.id;
+    const classNames = [...elem.classList]; //String(elem.className).split(new RegExp("/[ \t]/"));
     for(let i = 0; i < classNames.length; i++) {
       let res = document.getElementsByClassName(classNames[i]);
       if(res && res.length === 1) return name + "." + classNames[i];
     }
-    if(elem.nextElementSibling || elem.previousElementSibling) {
-      return name + "[" + Element.idx(elem) + "]";
+    if(idx) {
+      if(elem.nextElementSibling || elem.previousElementSibling) {
+        return name + "[" + Element.idx(elem) + "]";
+      }
     }
     return name;
   }

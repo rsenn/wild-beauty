@@ -105,7 +105,7 @@ const insertItem = ({ id, image, author }) => {
   }
 }`;
 };
-var ret = API.insert("users", { name: "test2" });
+var ret = API.insert('users', { name: 'test2' });
 ret.then(ret => {
   //console.log(ret);
 });
@@ -287,20 +287,18 @@ if (!dev && cluster.isMaster) {
       res.json({ success: false });
     });
 
-     server.post("/api/item/tree", async function(req, res) {
-      let {  ...params } = req.body;
+    server.post("/api/item/tree", async function(req, res) {
+      let { ...params } = req.body;
 
-      let itemList = await API.list("items", ["id", "parent_id", "data", "photos { photo { id } }", "users { user { id } }" ], params);
-
-let items = {};
-
-      itemList.forEach(item => {  
+      console.log("params: ", params);
+      let itemList = await API.list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"], params);
+      let items = {};
+      itemList.forEach(item => {
         item.data = JSON.parse(item.data);
-        items[parseInt(item.id)] = item; 
+        items[parseInt(item.id)] = item;
       });
       res.json({ success: true, count: itemList.length, items });
     });
-
 
     //   server.use(bodyParser.json());
     //  curl   --header 'Content-Type: application/json' --data '{"fields":"original_name","offset":"10","limit":"10","order_by":"{id: desc}"}' -v http://localhost:5555/api/image/list|json_pp

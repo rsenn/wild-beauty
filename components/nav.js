@@ -87,31 +87,31 @@ const NavLink = ({ href, label, description, path, key, disabled, onClick, activ
         transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-width 1s cubic-bezier(0.165, 0.84, 0.44, 1), height 1s cubic-bezier(0.165, 0.84, 0.44, 1),
           max-height 1s cubic-bezier(0.165, 0.84, 0.44, 1);
       }
-      li:hover,
+      li.menu-item:hover,
       li.menu-active {
         width: 100px;
         height: 100px;
         max-width: 100px;
         max-height: 100px;
       }
-      li > a > span {
+      li.menu-item > a > span {
         font-family: Fixed;
         font-size: 40px;
         vertical-align: top;
       }
-      li > a {
+      li.menu-item > a {
         position: absolute;
         margin: 8px 0px 1px 2px;
       }
-      li:hover > a,
+      li.menu-item:hover > a,
       li.menu-active > a {
         width: 100px;
       }
-      li:hover > a > span,
+      li.menu-item:hover > a > span,
       li.menu-active > a > span {
         width: 100px;
       }
-      li > a > div.desc {
+      li.menu-item > a > div.desc {
         position: absolute;
         top: 48px;
         font-size: 15px;
@@ -130,7 +130,7 @@ const NavLink = ({ href, label, description, path, key, disabled, onClick, activ
         color: white;
         text-decoration: none;
       }
-      li {
+      li.menu-item {
         transition: width 1s;
       }
       a:hover > span {
@@ -181,10 +181,10 @@ const Nav = inject(
       const [color, setColor] = React.useState(randomGradient());
       const angle = ((color[0].h + color[0].s + color[0].l) % 360) - 180;
       customStyles.overlay.background = `linear-gradient(${Math.floor(angle)}deg, ${color[0].toString()} 0%, ${color[1].toString()} 100%)`;
-      console.log("Nav.render", { angle });
+      //console.log("Nav.render", { angle });
 
       const language = i18nStore.user.lang;
-      console.log("i18nStore: ", i18nStore);
+//      console.log("i18nStore: ", i18nStore);
 
       var SiteMap = [
         {

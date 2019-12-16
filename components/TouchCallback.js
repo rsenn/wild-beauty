@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Element } from "../utils/dom.js";
+import { Node, Element } from "../utils/dom.js";
 
 export const maxZIndex = () => {
   let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
@@ -32,15 +32,23 @@ export const makeTouchCallback = (className = "layer", action = null) => {
       e = event.start.target;
     }
 
-    //console.log("TouchCallback event: ", event);
+
+const depth =  Node.depth(e);
+
+if(depth <= 5)
+  return cancel();
+
+
+    console.log("TouchCallback event: ", { depth, event });
 
     const hasLayerClass = containsClass(className);
     if(hasLayerClass) {
-      while(e && e.parentElement && e.classList) {
-        if(event.type.endsWith("start")) if (e && e.classList) e.classList.add("dragging");
-        if(event.type.endsWith("end")) if (e && e.classList) e.classList.remove("dragging");
-        if(e.classList.contains(className)) break;
-        e = e.parentElement;
+      let element = e;
+      while(element && element.parentElement && element.classList) {
+        if(event.type.endsWith("start")) if (element && element.classList) element.classList.add("dragging");
+        if(event.type.endsWith("end")) if (element && element.classList) element.classList.remove("dragging");
+        if(true /*element.classList.contains(className)*/) break;
+        element = element.parentElement;
       }
     }
 

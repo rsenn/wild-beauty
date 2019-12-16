@@ -93,7 +93,7 @@ if (global.navigator) {
 
   autorun(() => {
     i18nStore.setLocale(i18nStore.user.lang);
-    console.log("Language: ", i18nStore.user.lang);
+    //console.log("Language: ", i18nStore.user.lang);
   });
 
   if(typeof i18nStore.user.lang != "string" || i18nStore.user.lang.length != 2) {

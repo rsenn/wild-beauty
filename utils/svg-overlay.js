@@ -34,7 +34,7 @@ export class SvgOverlay extends React.Component {
   //layer = lazyInitializer(() => Element.create('div', { id: 'svg-overlay', parent: document.body }));
 
   svg = lazyInitializer((rect, root) => {
-    console.log("lazyInitializer: ", { rect, root });
+    //console.log("lazyInitializer: ", { rect, root });
     var svg = SVG.create(
       "svg",
       {
@@ -61,7 +61,7 @@ export class SvgOverlay extends React.Component {
     this.layerRef = {};
 
     trkl.property(this.layerRef, "current").subscribe(ref => {
-      console.log("layerRef: ", ref);
+      //console.log("layerRef: ", ref);
       var rect = Element.rect(ref);
       var svg = SVG.create(
         "svg",
@@ -89,7 +89,7 @@ export class SvgOverlay extends React.Component {
         svg
       );*/
 
-      console.log("SvgOverlay: ", { svg, rect });
+      //console.log("SvgOverlay: ", { svg, rect });
 
       //   this.createPaths();
     });

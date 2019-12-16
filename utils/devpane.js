@@ -146,7 +146,7 @@ export default class devpane {
     this.touch = TouchListener(this.handleTouch.bind(this));
     this.svg.factory = lazyInitializer(() => SVG.factory(this.svg()));
     var cfg = this.config();
-    console.log("devpane cfg=", cfg);
+    //    console.log("devpane cfg=", cfg);
     this.open = !cfg.open;
 
     /* if(this.open === true) */ this.toggleOpenClose();
@@ -154,7 +154,7 @@ export default class devpane {
 
   toggleOpenClose() {
     this.open = !this.open;
-    console.log("devpane.toggleOpenClose open=" + this.open);
+    // console.log("devpane.toggleOpenClose open=" + this.open);
     this.config.assign({ open: this.open });
 
     if(this.pane()) {

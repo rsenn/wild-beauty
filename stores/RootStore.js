@@ -33,7 +33,9 @@ export class RootStore {
     subpage: 0,
     loading: false,
     authenticated: false,
-    error: undefined
+    error: undefined,
+    selected: -1,
+    image: null
   };
 
   auth = observable.object({
@@ -45,6 +47,7 @@ export class RootStore {
   entries = observable.array([]);
   users = observable.map();
   fields = observable.array([]);
+  items = observable.map();
 
   api = getAPI();
 
@@ -125,12 +128,58 @@ export class RootStore {
     return entry;
   }
 
+  get currentImage() {
+    const id = this.state.image;
+    let image = toJS(this.images.get(id) || {});
+    image.id = id;
+    image.landscape = image.width > image.height;
+    return image;
+  }
+
+  get rootItem() {
+    if(this.items.size == 0) {
+      this.fetchItems({ parent_id: null });
+    }
+
+    for(let [id, item] of this.items.entries()) {
+      if(item.parent == null) return item;
+    }
+    return null;
+  }
+
+  get rootItemId() {
+    const item = this.rootItem;
+    return item === null ? -1 : item.id;
+  }
+
+  getItem(id, tr = it => it) {
+    let item = this.items.get(!id ? this.rootItemId : id);
+    if(typeof item == "object") item.children = item.children ? item.children.map(({ id }) => this.getItem(id, tr)) : [];
+    return item === undefined ? item : tr(item);
+  }
+
   async fetchPhotos(where = {}) {
     let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { id }"], where);
 
     console.log("fetchPhotos =", response);
 
     return response;
+  }
+
+  async fetchItems(where = {}) {
+    let response = await this.apiRequest("/api/item/tree", { where });
+    let data = response ? await response.data : null;
+
+    if(await data) {
+      const items = await data.items;
+
+      for(let key in items) {
+        const id = parseInt(key);
+        this.items.delete(id);
+        this.items.set(id, items[key]);
+      }
+    }
+    return await data;
   }
 
   fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {

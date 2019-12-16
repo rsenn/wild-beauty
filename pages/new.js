@@ -19,6 +19,10 @@ import { Translate, Localize } from "react-i18nify-mobx";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { EditableText } from "../components/views/editableText.js";
 import { AddItemBar } from "../components/views/addItemBar.js";
+import classNames from "classnames";
+
+import DropdownTreeSelect from "react-dropdown-tree-select";
+import "../static/css/react-dropdown-tree-select.css";
 
 import UploadImages from "react-upload-gallery";
 import "../static/css/react-upload-gallery.css";
@@ -33,9 +37,29 @@ const RandomColor = () => {
   return c.toString();
 };
 
+const ItemToOption = item => {
+  let data = item && item.data || {};
+    let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
+ let value = item.id; let children = toJS(item.children);  
+let obj = { label, value, expanded: true };
+
+if(children && children.length)
+obj.children = children;
+  return  obj;
+};
+
 @inject("rootStore")
 @observer
 class New extends React.Component {
+  currentImage = null;
+  clonedImage = null;
+  currentOffset = { x: 0, y: 0 };
+  offsetRange = 0;
+  step = 1;
+  state = {
+    options: {}
+  }
+
   static async getInitialProps(ctx) {
     const { RootStore } = ctx.mobxStore;
 
@@ -53,7 +77,6 @@ class New extends React.Component {
     super(props);
 
     if(global.window) {
-      window.api = this.api;
       window.page = this;
       window.rs = rootStore;
       //    window.stores = getOrCreateStore();
@@ -146,6 +169,7 @@ class New extends React.Component {
         { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
       );
     }
+    rootStore.state.step = 1;
   }
 
   addContent = () => {
@@ -153,6 +177,18 @@ class New extends React.Component {
 
     rootStore.fields.push({ type: null, value: "" });
   };
+
+  componentDidMount() {
+    const { rootStore } = this.props;
+
+    rootStore.fetchItems().then(response => {
+console.log("Items: ", response.items);
+
+const options =  rootStore.getItem(0, ItemToOption);
+console.log("Options: ", options);
+this.state.options = options;
+    });
+  }
 
   render() {
     const { rootStore } = this.props;
@@ -172,78 +208,110 @@ class New extends React.Component {
         <Nav />
         <div className={"page-layout"}>
           <NeedAuth>
-            <div
-              className={"upload-area"}
-              style={{
-                minWidth: "80vmin"
-                // minHeight: "80vmin"
-              }}
-            >
-              <UploadImages
-                action="/api/image/upload" // upload route
-                source={response => {
-                  return response.map(item => {
-                    const { id } = item;
-                    const url = `/api/image/get/${id}.jpg`;
-                    console.log("UploadImages response:", { item, url });
-                    rootStore.newImage(item);
-                    return url;
-                  })[0];
+            {rootStore.state.step == 1 ? (
+              <div
+                className={"upload-area"}
+                style={{
+                  minWidth: "80vmin"
+                  // minHeight: "80vmin"
                 }}
-                onSuccess={arg => {
-                  const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
-                  console.log("UploadImages success:", arg);
+              >
+                <UploadImages
+                  action="/api/image/upload" // upload route
+                  source={response => {
+                    return response.map(item => {
+                      const { id } = item;
+                      const url = `/api/image/get/${id}.jpg`;
+                      console.log("UploadImages response:", { item, url });
+                      rootStore.newImage(item);
+                      return url;
+                    })[0];
+                  }}
+                  onSuccess={arg => {
+                    const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
+                    console.log("UploadImages success:", arg);
 
-                  let entry = rootStore.newEntry(id);
-                  arg.remove();
+                    let entry = rootStore.newEntry(id);
+                    arg.remove();
 
-                  console.log("UploadImages success:", entry);
-                }}
-              ></UploadImages>
-            </div>
-            <div className={"image-list"}>
-              {[...rootStore.images.entries()].map(([id, image]) => {
-                const { width, height } = image;
-                const landscape = width > height;
+                    console.log("UploadImages success:", entry);
+                  }}
+                ></UploadImages>
+                <div className={"image-list"}>
+                  {[...rootStore.images.entries()].map(([id, image], index) => {
+                    const { width, height } = image;
+                    const landscape = width > height;
 
-                return (
-                  <div className={"item-entry"}>
+                    return (
+                      <div className={"item-entry"}>
+                        <SizedAspectRatioBox className={"item-box"}>
+                          <img
+                            id={`image-${id}`}
+                            className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
+                            src={`/api/image/get/${id}.jpg`}
+                            width={width}
+                            height={height}
+                            orientation={landscape ? "landscape" : "portrait"}
+                            style={{
+                              width: landscape ? `${(width * 100) / height}%` : "100%",
+                              height: landscape ? "100%" : "auto"
+                            }}
+                            onClick={() => {
+                              rootStore.setState({ selected: index, image: id, step: 2 });
+                            }}
+                          />
+                        </SizedAspectRatioBox>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className={"content-edit"}>
+                <div className={"item-photo"}>
+                  <div
+                    className={"item-entry"}
+                    style={{
+                      width: rootStore.currentImage.landscape ? `${(rootStore.currentImage.height * 100) / rootStore.currentImage.width}%` : "100%"
+                    }}
+                  >
                     <SizedAspectRatioBox className={"item-box"}>
                       <img
-                        id={`image-${id}`}
+                        id={`image-${rootStore.currentImage.id}`}
                         className={"inner-image"}
-                        src={`/api/image/get/${id}.jpg`}
-                        width={width}
-                        height={height}
-                        orientation={landscape ? "landscape" : "portrait"}
+                        src={`/api/image/get/${rootStore.currentImage.id}.jpg`}
+                        width={rootStore.currentImage.width}
+                        height={rootStore.currentImage.height}
+                        orientation={rootStore.currentImage.landscape ? "landscape" : "portrait"}
                         style={{
-                          width: landscape ? `${(width * 100) / height}%` : "100%",
-                          height: landscape ? "100%" : "auto"
+                          width: rootStore.currentImage.landscape ? `${(rootStore.currentImage.width * 100) / rootStore.currentImage.height}%` : "100%",
+                          height: rootStore.currentImage.landscape ? "100%" : "auto"
                         }}
                       />
                     </SizedAspectRatioBox>
                   </div>
-                );
-              })}
-            </div>
-            <div className={"content-edit"}>
-              {rootStore.fields.map(field => (
-                <EditableText
-                multiline={true}
-                  className={"editable-text"}
-                  value={field.value}
-                  onValueChanged={newVal => {
-                    field.value = newVal;
-                  }}
-                />
-              ))}
-              <AddItemBar onAdd={this.addContent} />
-            </div>
+                </div>
+                <div>
+                </div>
+                {rootStore.fields.map(field => (
+                  <EditableText
+                    multiline={true}
+                    className={"editable-text"}
+                    value={field.value}
+                    onValueChanged={newVal => {
+                      field.value = newVal;
+                    }}
+                  />
+                ))}
+                <AddItemBar onAdd={this.addContent} />
+                <DropdownTreeSelect data={this.state.options} className={'dropdown-tree'} mode={'radioSelect'} texts={{ placeholder: 'parent item' }}  />
+             </div>
+            )}
 
-            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} style={{ cursor: "move" }}>
+{/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
               Layer
             </Layer>
-            <SvgOverlay />
+            <SvgOverlay />*/}
           </NeedAuth>
 
           <style jsx global>{`
@@ -255,11 +323,16 @@ class New extends React.Component {
               justify-content: flex-start;
               align-items: flex-start;
             }
-            .editable-text {
+
+button.tag-remove {
+  border: 1px outset #55555580;
+} 
+           .editable-text {
               width: 100%;
               margin: 4px 0px;
             }
-
+.dropdown-tree {
+}
             .button-add:active > svg {
               transform: translate(1px, 2px);
             }
@@ -296,6 +369,11 @@ class New extends React.Component {
             }
             .item-entry {
               margin: 10px;
+            }
+            .item-photo {
+              display: flex;
+              justify-content: center;
+              width: 100%;
             }
             .item-box-size {
               border: 1px solid black;

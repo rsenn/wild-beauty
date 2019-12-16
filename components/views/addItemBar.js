@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import classNames from "classnames";
 
 export const IconAdd = props => (
-  <img src={'static/img/icon-add.svg'} />
+  <img src={"static/img/icon-add.svg"} />
   /*<svg height="32" width="32" viewBox="0 0 45.336 45.336" xmlns="http://www.w3.org/2000/svg">
     <defs />
     <defs />

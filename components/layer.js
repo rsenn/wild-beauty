@@ -39,14 +39,14 @@ export function Layer({ style, inline, flex, children, border, margin, padding, 
     return "window" in global ? new Size(window.innerWidth, window.innerHeight) : new Size({ width: 0, height: 0 });
   });
   box.subscribe(rect => {
-    console.log("New element rect: ", rect);
+   /// console.log("New element rect: ", rect);
   });
   handler.subscribe(e => {
     // console.log('Element: ', e);
     do {
       box(Element.rect(e));
     } while(0); //(e = e.parentNode));
-    console.log("layer element: ", { box, client });
+    //console.log("layer element: ", { box, client });
   });
 
   if(!st.position) st.position = "relative";
