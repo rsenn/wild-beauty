@@ -11,7 +11,7 @@ import "../../static/css/react-upload-gallery.css";
 
 export const ImageUpload = inject("rootStore")(
   observer(
-    /*withRouter*/ ({ rootStore, router }) => (
+    /*withRouter*/ ({ rootStore, onChoose }) => (
       <div
         className={"upload-area"}
         style={{
@@ -59,15 +59,7 @@ export const ImageUpload = inject("rootStore")(
                       width: landscape ? `${(width * 100) / height}%` : "100%",
                       height: landscape ? "100%" : "auto"
                     }}
-                    onClick={() => {
-                      rootStore.setState({ selected: index, image: id, step: 2 });
-                      console.log("state: ", toJS(rootStore.state));
-                      /* router.push({
-                        pathname: "/new",
-                        query: { step: 2, image: id, selected: index },
-                        shallow: true
-                      });*/
-                    }}
+                    onClick={onChoose}
                   />
                 </SizedAspectRatioBox>
               </div>

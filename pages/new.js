@@ -192,15 +192,13 @@ class New extends React.Component {
     console.log("newState: ", obj);
 
     rootStore.setState(obj);
-
-    // rootStore.state.step = 2;
   }
 
   componentDidMount() {
     const { rootStore, router } = this.props;
-    this.checkQuery();
+    //this.checkQuery();
 
-    rootStore.fetchItems().then(response => {
+    rootStore.loadItems().then(response => {
       console.log("Items: ", response.items);
 
       this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
@@ -228,8 +226,19 @@ class New extends React.Component {
     }
   };
 
+  chooseImage = (event) => {
+        const { rootStore } = this.props;
+const { target , currentTarget } = event;
+let id = parseInt(target.getAttribute('id').replace(/.*-/g, ''));
+console.log("New.chooseImage ", {id, target,currentTarget}); 
+
+
+rootStore.state.step = 2;
+rootStore.state.image = id;
+  }
+
   render() {
-    const { rootStore, router } = this.props;
+    const { rootStore } = this.props;
     const onError = event => {};
     const onImage = event => {
       const { value } = event.nativeEvent.target;
@@ -238,7 +247,7 @@ class New extends React.Component {
     };
 
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
-    console.log("New.render");
+
     return (
       <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
         <Head>
@@ -248,8 +257,7 @@ class New extends React.Component {
         <Nav />
         <div className={"page-layout"}>
           <NeedAuth>
-            {rootStore.state.step}
-            {rootStore.state.step == 1 ? <ImageUpload /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
+            {rootStore.state.step == 1 ? <ImageUpload onChoose={this.chooseImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
 
             {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
               Layer

@@ -205,12 +205,14 @@ export class RootStore {
    * @param      {<type>}   [where={}]  The where
    * @return     {Promise}  The items.
    */
-  async fetchItems(where = {}) {
+  async loadItems(where = {}) {
+
     let response = await this.apiRequest("/api/item/tree", { where });
     let data = response ? await response.data : null;
 
     if(await data) {
       const items = await data.items;
+    console.log("RootStore.loadItems" , data);
 
       for(let key in items) {
         const id = parseInt(items[key].id || key);

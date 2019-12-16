@@ -10,11 +10,7 @@ import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../../static/css/react-dropdown-tree-select.css";
 
 export const ItemEditor = inject("rootStore")(
-  observer(({ rootStore, tree, makeTreeSelEvent }) => {
-    console.log("ItemEditor.render");
-    //    const changeEvent =   makeTreeSelEvent("change");
-
-    return (
+  observer(({ rootStore, tree, makeTreeSelEvent }) => (
       <div className={"content-edit"}>
         <div className={"item-photo"}>
           <div
@@ -39,20 +35,20 @@ export const ItemEditor = inject("rootStore")(
             </SizedAspectRatioBox>
           </div>
         </div>
-        <DropdownTreeSelect
-          data={tree}
-          onChange={obj => {
-            console.log("Tree value: ", obj);
-            //rootStore.state.parent_id = obj.value;
-            //   changeEvent(obj);
-          }}
-          /* onNodeToggle={makeTreeSelEvent("node-toggle")}
-          onFocus={makeTreeSelEvent("focus")}
-          onBlur={makeTreeSelEvent("blur")}*/
+       <DropdownTreeSelect
+        data={tree}
+        onChange={obj => {
+          console.log("Tree value: ", obj);
+          rootStore.state.parent_id = obj.value;
+          makeTreeSelEvent("change")(obj);
+        }}
+        onNodeToggle={makeTreeSelEvent("node-toggle")}
+        onFocus={makeTreeSelEvent("focus")}
+        onBlur={makeTreeSelEvent("blur")}
           className={"dropdown-tree"}
           mode={"radioSelect"}
           texts={{ placeholder: "parent item" }}
-        />
+          />
         {rootStore.entries.map(field => (
           <EditableField
             options={rootStore.fieldNames}
@@ -101,8 +97,9 @@ export const ItemEditor = inject("rootStore")(
           .content-edit {
             position: relative;
             width: 80vw;
-            min-height: 80vh;
-            padding: 0px;
+            max-height: 60vh;
+/*            min-height: 80vh;
+*/            padding: 0px;
             display: flex;
             flex-flow: column nowrap;
             justify-content: flex-start;
@@ -110,6 +107,7 @@ export const ItemEditor = inject("rootStore")(
           }
           .item-entry {
             margin: 10px;
+            max-width: 50vw;
           }
           .item-photo {
             display: flex;
@@ -143,8 +141,8 @@ export const ItemEditor = inject("rootStore")(
           }
         `}</style>
       </div>
-    );
-  })
-);
+    )
+  ));
+
 
 export default ItemEditor;

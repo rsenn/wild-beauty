@@ -316,12 +316,13 @@ if (!dev && cluster.isMaster) {
     server.post("/api/item/new", async function(req, res) {
       let { data, parent_id, ...params } = req.body;
       console.log("params: ", params);
-      let result = await API.insert("items", { parent_id, data: (typeof data == "string" ? data : JSON.stringify(data)).replace(/"/g, '\\"') }, ["id"]);
+      let result = await API.insert("items", { parent_id, ...params, data: (typeof data == "string" ? data : JSON.stringify(data)).replace(/"/g, '\\"') }, ["id"]);
       console.log("result: ", result);
       if(result && result.insert_items) result = await result.insert_items;
       if(result && result.returning) result = await result.returning;
       res.json({ success: true, result });
     });
+
     //   server.use(bodyParser.json());
     //  curl   --header 'Content-Type: application/json' --data '{"fields":"original_name","offset":"10","limit":"10","order_by":"{id: desc}"}' -v http://localhost:5555/api/image/list|json_pp
     server.post("/api/image/list", async function(req, res) {
