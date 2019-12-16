@@ -95,6 +95,8 @@ export const ImageUpload = inject("rootStore")(
             flex-flow: row wrap;
             flex-basis: 30%;
             justify-content: center;
+            max-width: 80vw;
+            margin: 20px 0;
           }
           .image-list > div {
             flex: 0 1 auto;
