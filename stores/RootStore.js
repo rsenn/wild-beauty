@@ -37,7 +37,8 @@ export class RootStore {
     authenticated: false,
     error: undefined,
     selected: -1,
-    image: null
+    image: null,
+    parent_id: -1
   };
 
   auth = observable.object({
@@ -46,7 +47,7 @@ export class RootStore {
   });
 
   images = observable.map();
-  entries = observable.array([]);
+  entries = observable.array([], { deep:true});
   users = observable.map();
   fields = observable.array(["name", "title"]);
   items = observable.map();
@@ -73,7 +74,7 @@ export class RootStore {
       }
     }
     if(global.window) {
-        if(!window.devp) window.devp = new devpane();
+      if(!window.devp) window.devp = new devpane();
 
       window.rs = this;
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
@@ -213,7 +214,9 @@ export class RootStore {
    */
   @action.bound
   saveItem(event) {
-    console.log("saveItem", event);
+    console.log("saveItem");
+
+    
   }
   /*
   fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {

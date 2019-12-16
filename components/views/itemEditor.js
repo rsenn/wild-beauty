@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../simple/aspectBox.js";
+import { observable, toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { AddItemBar } from "../views/addItemBar.js";
 import { EditableField } from "../simple/editableField.js";
+import { Element, Timer } from "../../utils/dom.js";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../../static/css/react-dropdown-tree-select.css";
@@ -35,7 +37,7 @@ export const ItemEditor = inject("rootStore")(
       </div>
       <DropdownTreeSelect
         data={tree}
-        onChange={makeTreeSelEvent("change")}
+        onChange={obj => { console.log("Tree value: ", obj); rootStore.state.parent_id = obj.value; makeTreeSelEvent("change")(obj);  }}
         onNodeToggle={makeTreeSelEvent("node-toggle")}
         onFocus={makeTreeSelEvent("focus")}
         onBlur={makeTreeSelEvent("blur")}
@@ -49,13 +51,46 @@ export const ItemEditor = inject("rootStore")(
           multiline={false}
           hasDraft={false}
           className={"editable-field"}
+          name={field.type}
           value={field.value}
+          onNameChanged={ newName => {
+            field.type = newName;
+          }}
           onValueChanged={newVal => {
             field.value = newVal;
+
           }}
+          onCreateName={name => {
+            console.log("onCreateName: ", name);
+            if(typeof(name) == 'string' && name.length > 0) {
+              name = name.toLowerCase();
+            rootStore.fields.push(name);
+field.type = name;
+}
+          } }
         />
       ))}
-      <AddItemBar onAdd={() => rootStore.entries.push({ type: null, value: "" })} />
+      <AddItemBar
+        onAdd={() => {
+          let obj = observable({ type: null, value: "" });
+
+          rootStore.entries.push(obj);
+
+          Timer.once(100, () => {
+            let a = [...dom.Element.findAll("img").filter(i => /edit/.test(i.src))];
+
+            let button = a[a.length - 1].parentElement;
+            console.log("Button: ", button);
+
+            if(button && button.click) button.click();
+
+            let inputs = Util.array([...dom.Element.findAll("input", button.parentElement)]);
+
+            console.log("inputs:", inputs);
+            inputs[0].focus();
+          });
+        }}
+      />
 
       <button onClick={rootStore.saveItem} className={"save"}>
         {" "}
@@ -81,11 +116,11 @@ export const ItemEditor = inject("rootStore")(
           justify-content: center;
           width: 100%;
         }
-                  .item-box-size {
-            border: 1px solid black;
-            box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
-            box-sizing: border-box;
-          }
+        .item-box-size {
+          border: 1px solid black;
+          box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+          box-sizing: border-box;
+        }
         .aspect-ratio-box {
           overflow: hidden;
         }

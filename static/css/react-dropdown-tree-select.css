@@ -36,8 +36,10 @@
 }
 .tag-item {
   display: inline-block;
-  margin: 4px;
+  /*   margin: 4px;
+ */
   border: 1px outset #55555580;
+  min-height: 40px;
 }
 .tag-item .search {
   border: none;
@@ -153,6 +155,7 @@ li.tag-item > input.search {
 }
 .dropdown .radio-select {
   background-color: gray;
+  height: 38px;
 }
 
 .react-dropdown-tree-select {
@@ -162,8 +165,24 @@ li.tag-item > input.search {
   border: 1px outset rgb(221, 221, 221);
   color: black;
   direction: ltr;
+  box-sizing: border-box;
+}
+div.react-dropdown-tree-select > div.dropdown.radio-select {
+  height: 38px;
+  box-sizing: border-box;
+}
+
+.react-dropdown-tree-select .dropdown .dropdown-trigger.arrow {
+  box-sizing: border-box;
+}
+input.search {
+  box-sizing: border-box;
+
+  height: 100%;
 }
 
 ul.tag-list > li > input.search {
-  height: 23px;
+  box-sizing: border-box;
+
+  height: 38px;
 }

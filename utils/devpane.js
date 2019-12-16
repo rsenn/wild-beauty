@@ -41,7 +41,7 @@ export default class devpane {
         top: `${p.y}px`
       };
     }
-    let layer =  this.createLayer(
+    let layer = this.createLayer(
       { id: "devpane-pane" },
       {
         zIndex: 18,
@@ -49,7 +49,7 @@ export default class devpane {
         maxWidth: "80vw",
         width: "200px  ",
 
-        minHeight: '30vh',
+        minHeight: "30vh",
         maxHeight: "60vh",
         overflowY: "auto",
         /*   overflowX: 'auto',*/
@@ -69,13 +69,13 @@ export default class devpane {
       }
     );
     let p = this.renderPaneLayer(layer);
-//    layer.appendChild(p);
+    //    layer.appendChild(p);
     return layer;
   });
 
   root = lazyInitializer(
     () => {
-      let e = this.createRectLayer(this.bbrect(), { width: '', height: '', top: '', bottom: '10px', right: '10px', left: '' });
+      let e = this.createRectLayer(this.bbrect(), { width: "", height: "", top: "", bottom: "10px", right: "10px", left: "" });
       e.id = "devpane-root";
       return e;
     } /*,
@@ -436,7 +436,7 @@ export default class devpane {
         border: '1px solid black',
         borderRadius: '0.5em',*/
         opacity: 1.0,
-     //   pointerEvents: "none",
+        //   pointerEvents: "none",
         ...css
       }
     });
@@ -472,8 +472,7 @@ export default class devpane {
     const { currentTarget } = event;
     const { checked } = currentTarget;
     const what = checked ? "add" : "remove";
-    const mouseEvents = elem => ["mouseenter", "mouseleave"].forEach(listener => 
-      elem[what + "EventListener"](listener, this.mouseEvent));
+    const mouseEvents = elem => ["mouseenter", "mouseleave"].forEach(listener => elem[what + "EventListener"](listener, this.mouseEvent));
     window[what + "EventListener"]("mousemove", this.mouseMove);
     this.active = checked;
     if(this.active) {
@@ -694,9 +693,9 @@ export default class devpane {
   }
 
   renderPaneLayer(parent) {
-   /* const pane = this.pane();
+    /* const pane = this.pane();
     const { factory } = this;*/
-     let elm = ReactDOM.render(this.render(), parent);
+    let elm = ReactDOM.render(this.render(), parent);
     if(true) {
       Element.create("input", {
         type: "button",
@@ -770,7 +769,7 @@ export default class devpane {
       });
     }
 
- //   this.writeLayer(`date: ${new Date().toJSON()}<br />cookie: ${document.cookie}`);
+    //   this.writeLayer(`date: ${new Date().toJSON()}<br />cookie: ${document.cookie}`);
 
     return elm;
   }
@@ -844,7 +843,7 @@ export default class devpane {
   }
 
   mouseMove(event) {
-    const {rectList } = this;
+    const { rectList } = this;
     const { target, clientX, clientY } = event;
 
     //console.log('this.rectList.length: ', this.rectList.length);
@@ -870,47 +869,44 @@ export default class devpane {
         rect.boxes = null;
         rect.serial = serial;
       }
-      if(inside)
-        accu.push(rect);
+      if(inside) accu.push(rect);
       return accu;
     }, []);
 
+    // rects = rects.filter(item => rect.boxes != null && rect.serial == serial);
 
-   // rects = rects.filter(item => rect.boxes != null && rect.serial == serial);
-     
     rects.sort((a, b) => Rect.area(b) - Rect.area(a));
 
     rects = rects.filter(item => Rect.area(item) > 0);
-       console.log("devp.mouseMove", { target, clientX, clientY , rects});
+    console.log("devp.mouseMove", { target, clientX, clientY, rects });
 
     if(rects.length) console.log("rects: ", rects);
     let svg = this.svg();
 
-    [...svg.querySelectorAll('rect')].forEach(e => e.parentElement.removeChild(e));
+    [...svg.querySelectorAll("rect")].forEach(e => e.parentElement.removeChild(e));
 
-    let  f = SVG.factory(svg);
+    let f = SVG.factory(svg);
     /*
     const g = f('g');
     f = SVG.factory(g);
     */
-           console.log("devp.mouseMove", f);
-         //  f('rect', { x: 10, y: 10, width:  100, height: 100 });
+    console.log("devp.mouseMove", f);
+    //  f('rect', { x: 10, y: 10, width:  100, height: 100 });
 
-
-//rects = rects.reverse();
+    //rects = rects.reverse();
 
     this.svgRects = rects;
 
     let svgRects = rects.map(({ x, y, width, height }, index) => {
-      const color = new HSLA((60 + (index * 360 / (rects.length - 1)))%360 , 100, 50, 1);  
-      return f('rect', { x, y, width, height, stroke: color.toString(), strokeWidth: 3, fill: 'none' });
+      const color = new HSLA((60 + (index * 360) / (rects.length - 1)) % 360, 100, 50, 1);
+      return f("rect", { x, y, width, height, stroke: color.toString(), strokeWidth: 3, fill: "none" });
     });
 
-           console.log("devp.mouseMove",  svgRects);
+    console.log("devp.mouseMove", svgRects);
 
-        if(rects[0]) {
+    if(rects[0]) {
       this.rect = rects[0];
-    //  this.renderPaneLayer();
+      //  this.renderPaneLayer();
     }
   }
 

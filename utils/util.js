@@ -627,10 +627,10 @@ Util.dump = function(name, props) {
 };
 Util.ucfirst = function(str) {
   if(typeof str != "string") str = String(str);
-  return str[0].toUpperCase() + str.substring(1);
+  return str.substring(0, 1).toUpperCase() + str.substring(1);
 };
 Util.lcfirst = function(str) {
-  return str[0].toLowerCase() + str.substring(1);
+  return str.substring(0,1).toLowerCase() + str.substring(1);
 };
 /**
  * Camelize a string, cutting the string by multiple separators like

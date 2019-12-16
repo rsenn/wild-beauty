@@ -138,11 +138,11 @@ class MyApp extends App {
             padding: 0px;
           }
           body {
-    position: absolute;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-  }
+            position: absolute;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+          }
         `}</style>
       </Container>
     );

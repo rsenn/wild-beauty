@@ -2,8 +2,11 @@ import CreatableSelect, { makeCreatableSelect } from "react-select/creatable";
 import classNames from "classnames";
 import { useEditableState } from "react-editable-hooks";
 import { trkl } from "../../utils/trkl.js";
+import Util from "../../utils/util.js";
 
-export const EditableField = ({ options, key, className, style, multiline = false, wrapFlex = true, value, onValueChanged }) => {
+export const EditableField = ({ options, key, className, style, multiline = false, wrapFlex = true, mame, onCreateName, onNameChanged, value, onValueChanged }) => {
+ 
+
   const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
     value,
     onValueChanged,
@@ -16,6 +19,16 @@ export const EditableField = ({ options, key, className, style, multiline = fals
   const [focus, setFocus] = React.useState(false);
   const [name, setName] = React.useState("");
 
+  const changeName = name => {
+    setName(name);
+    onNameChanged(name.label);
+  }
+
+  const changeValue = value => {
+    setEditValue(value);
+  };
+
+
   let content = isEditing ? (
     <React.Fragment>
       {multiline ? (
@@ -24,7 +37,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
           rows={lines}
           style={lineStyle}
           value={editValue}
-          onChange={e => setEditValue(e.target.value)}
+          onChange={e => changeValue(e.target.value)}
           ref={input => {
             if(!focus) {
               if(input) input.focus();
@@ -36,7 +49,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         <input
           className={classNames("content", className + "-content")}
           value={editValue}
-          onChange={e => setEditValue(e.target.value)}
+          onChange={e => changeValue(e.target.value)}
           ref={input => {
             if(!focus) {
               if(input) input.focus();
@@ -86,11 +99,19 @@ export const EditableField = ({ options, key, className, style, multiline = fals
     <div className={classNames(className, "editable-field")} style={style}>
       {isEditing ? (
         <CreatableSelect
+        createOptionPosition={'first'}
+        allowCreateWhileLoading={true}
+        isValidNewOption={value => true}
+        onCreateOption={onCreateName}
+        formatCreateLabel={value => {
+//console.log("formatCreateLabel", value);
+          return typeof(value) == 'string' ? Util.ucfirst( value) : '';
+        }}
           className={classNames("editable-field-name", className + "-name")}
           value={name}
           onChange={choice => {
-            console.log("name change: ", choice.label);
-            setName(choice);
+            console.log("name change: ", choice);
+            changeName(choice);
           }}
           options={options}
         />
@@ -117,8 +138,13 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         }
         input.content,
         textarea.content {
-          border: 1px inset rgba(160, 160, 160, 1);
-          background-color: rgba(255, 255, 255, 0.6);
+          border: 1px solid rgba(204, 204, 204, 1);
+          border-radius: 4px;
+          background-color: rgba(255, 255, 255, 1);
+        }
+        input.content:focus,
+        textarea.content:focus {
+          border: 2px solid #2684ff;
         }
         div.content,
         span.content,
@@ -188,17 +214,19 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         input.editable-field-content {
           font-family: Fixed;
           font-size: 20px;
-          border: 1px inset rgba(160, 160, 160, 1);
         }
         .editable-field {
           width: 100%;
           margin: 2px 0;
         }
-        .editable-field > button {
+        button.icon {
           box-sizing: border-box;
           width: 38px;
           height: 38px;
           flex: 0 0 38px;
+        }
+        button.icon:hover {
+          box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.6);
         }
       `}</style>
     </div>
