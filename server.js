@@ -339,9 +339,7 @@ if (!dev && cluster.isMaster) {
       needAuth(async function(req, res) {
         let { id } = req.body;
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
-
         let result = await API.delete("photos", { user_id, id });
-
         res.json({ success: true, result });
       })
     );

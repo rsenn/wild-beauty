@@ -48,21 +48,19 @@ const makeItemToOption = selected => arg => {
   let { data, ...item } = arg;
   data = data || {};
 
-
-try {
-  if(typeof arg.data == "string") data = JSON.parse(arg.data);
-} catch(err) {
-  data = {};
-}
-  let label = data.title || data.name || data.text  ||  null; //`${item.type}(${item.id})`;
+  try {
+    if(typeof arg.data == "string") data = JSON.parse(arg.data);
+  } catch(err) {
+    data = {};
+  }
+  let label = data.title || data.name || data.text || null; //`${item.type}(${item.id})`;
   let value = item.id;
   let children = toJS(item.children);
   let obj = { label, value, data, expanded: true, checked: selected === value };
 
   if(label == "null" || label == null) return null;
 
-  if((!item.type || item.type.indexOf('categ') == -1)  && !children)
-    return null;
+  if((!item.type || item.type.indexOf("categ") == -1) && !children) return null;
 
   //if(children && children.length) obj.children = children;
   // else return null;
@@ -128,16 +126,13 @@ class Show extends React.Component {
         //console.log("treeSelEvent: ", this.state.tree, arg.value);
         const item = findInTree(this.tree, arg.value);
 
-        if(item)  {
+        if(item) {
+          item.checked = true;
 
-            item.checked = true;
+          this.state.node = item.value;
+          this.tree = rootStore.getItem(this.state.node, makeItemToOption());
 
-            this.state.node = item.value;
-    this.tree = rootStore.getItem(this.state.node, makeItemToOption());
-
-
-           console.log("treeSelEvent: ", item );
-
+          console.log("treeSelEvent: ", item);
         }
         //rootStore.setState({ selected: arg.value });
         break;
