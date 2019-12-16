@@ -15,9 +15,6 @@ if (global.window) {
   window.fns = {};
 
   assign_to(window);
-  //  assign_to(window.dev);
-  // Object.assign(window, { REST_API, API_URL });
-  //Object.assign(window.fns, { Container, Element, HSLA, Matrix, Point, PointList, ReactComponent, Rect, RGBA, Size, SVG, Timer, TRBL, Tree });
 }
 
 /**
@@ -75,7 +72,6 @@ export class RootStore {
     }
     if(global.window) {
       if(!window.devp) window.devp = new devpane();
-
       window.rs = this;
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
     }
@@ -102,21 +98,13 @@ export class RootStore {
   @action.bound
   updateState(obj) {
     set(this.state, obj);
-    /*    for(let key in obj) {
-
-      extendObservable(this.state, { key: obj[key] });
-      //      this.state[key] = obj[key];
-    }
-*/ this.state.updated = true;
+    this.state.updated = true;
     console.log("RootStore.updateState ", obj);
   }
 
   @action.bound
   setState(obj) {
     set(this.state, obj);
-
-    /*    console.log("RootStore.setState ", obj);
-     */
   }
 
   @action.bound
@@ -141,13 +129,8 @@ export class RootStore {
   }
 
   get rootItem() {
-    if(this.items.size == 0) {
-      this.fetchItems({ parent_id: null });
-    }
-
-    for(let [id, item] of this.items.entries()) {
-      if(item.parent == null) return item;
-    }
+    if(this.items.size == 0) this.loadItems(/*{ parent_id: null }*/);
+    for(let [id, item] of this.items.entries()) if(item.parent == null) return item;
     return null;
   }
 
@@ -187,18 +170,14 @@ export class RootStore {
   async fetchPhotos(where = {}) {
     // console.log("fetchPhotos ", { where });
     let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], where);
-
     //  console.log("fetchPhotos =", response);
-
     return response;
   }
 
   async fetchItems(where = {}) {
     console.log("RootStore.fetchItems:", where);
     let response = await this.api.list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"]);
-
     console.log("fetchItems =", response);
-
     return response;
   }
 
@@ -211,11 +190,9 @@ export class RootStore {
   async loadItems(where = {}) {
     let response = await this.apiRequest("/api/item/tree", { where });
     let data = response ? await response.data : null;
-
     if(await data) {
       const items = await data.items;
       console.log("RootStore.loadItems", data);
-
       for(let key in items) {
         const id = parseInt(items[key].id || key);
         this.items.delete(id);
@@ -300,14 +277,10 @@ export class RootStore {
    */
   async apiRequest(endpoint, data) {
     let res;
-
     //console.log("RootStore.apiRequest " + endpoint, data);
-
     if(!data) res = await axios.get(endpoint);
     else res = await axios.post(endpoint, data);
-
     //  console.log("RootStore.apiRequest " + endpoint, " = ", await res.data);
-
     return await res;
   }
 
@@ -321,37 +294,28 @@ export class RootStore {
   @action.bound
   doLogin(username, password, completed = () => {}) {
     this.setState({ loading: true });
-
     Timer.once(100, () => {
       this.apiRequest("/api/login", { username, password }).then(res => {
         const { success, token, user_id, user } = res.data;
         const { username } = user;
-
         this.setState({
           loading: false,
           authenticated: success,
           error: success ? undefined : "Login failed"
         });
-
         this.users.set(user_id, user);
-
         /*   this.auth.token = token;
         this.auth.user_id = user_id;*/
         this.disableAutoRun();
         let newAuth = { token, user_id, user };
         set(this.auth, newAuth);
-
         if(global.window) localStorage.setItem("auth", JSON.stringify(newAuth));
-
         this.enableAutoRun();
-
         console.log("API login result: ", { success, token });
-
         if(success && window.global) {
           for(let name of ["token"]) document.cookie += `${name}=${res.data[name]}; Path=/; `;
           console.log("Cookies: ", document.cookie);
         }
-
         completed(res.data);
       });
     });
