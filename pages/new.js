@@ -38,6 +38,7 @@ const makeItemToOption = selected => item => {
 
   if(children && children.length) obj.children = children;
   if(label.startsWith('null(')) return null;
+  
   return obj;
 };
 
