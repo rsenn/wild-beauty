@@ -236,7 +236,7 @@ export class RootStore {
     const dataObj = this.entries.reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
     console.log("saveItem", { photo_id, parent_id, dataObj });
 
-    this.apiRequest("/api/item/new", { photos: { data: { photo_id } }, parent_id, data: dataObj }).then(response => {
+    this.apiRequest("/api/item/new", { photos: `{ data: { photo_id: ${photo_id} } }`, parent_id, data: dataObj }).then(response => {
       console.log("saveitem API response:", response);
     });
   }
