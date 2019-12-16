@@ -8,7 +8,6 @@ import axios from "../../utils/axios.js";
 import DropdownTreeSelect from "react-dropdown-tree-select";
 
 import UploadImages from "react-upload-gallery";
-import "../../static/css/react-upload-gallery.css";
 
 export const ImageUpload = inject("rootStore")(
   observer(

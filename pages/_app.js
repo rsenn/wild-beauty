@@ -10,7 +10,6 @@ import { withRouter } from "next/router";
 import i18nStore from "../stores/i18nStore.js";
 import SiteMap from "../components/siteMap.js";
 
-import "../static/css/react-upload-gallery.css";
 
 class MyApp extends App {
   static async getInitialProps({ Component, router, ctx }) {

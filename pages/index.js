@@ -17,6 +17,7 @@ import { inject, observer } from "mobx-react";
 import { Article } from "../components/views/article.js";
 import LoginForm from "../components/login.js";
 import timeSpanFormat from "time-span-format";
+import { trkl } from "../utils/trkl.js";
 
 import tims from "tims";
 
@@ -44,6 +45,7 @@ class Home extends React.Component {
     mirrored: false,
     angle: 0
   };
+    svgLayer = trkl();
 
   constructor(props) {
     super(props);
@@ -61,6 +63,9 @@ class Home extends React.Component {
     autorun(() => {
       console.log("rootStore.state = ", toJS(rootStore.state));
     });
+    this.svgLayer.subscribe(newLayer => {
+      console.log("svgLayer: ", newLayer);
+    })
   }
 
   getHash() {
@@ -194,6 +199,8 @@ class Home extends React.Component {
         <a className={"button-next"} href={subpage < 3 ? "#" + (subpage + 1) : "/show"} onClick={subpage >= 3 ? undefined : this.handleNext}>
           <img src={"static/img/arrow-next.svg"} />
         </a>
+                  <SvgOverlay  svgRef={this.svgLayer} />
+
         <style jsx global>{`
           h1 {
             width: 100%;

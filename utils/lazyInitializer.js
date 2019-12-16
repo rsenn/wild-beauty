@@ -36,6 +36,7 @@ export function lazyInitializer(fn, opts = {}) {
     }
     return instance(value);
   };
+  ret.subscribe = instance.subscribe.bind(instance);
   return ret;
 }
 
