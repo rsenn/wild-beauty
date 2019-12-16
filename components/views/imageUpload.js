@@ -22,22 +22,22 @@ export const ImageUpload = inject("rootStore")(
         <UploadImages
           action="/api/image/upload" // upload route
           source={response => {
-            return response.map(item => {
-              const { id } = item;
+            return response.map(photo => {
+              console.log("UploadImages response:", { photo, url });
+              const { id } = photo;
               const url = `/api/image/get/${id}.jpg`;
-              console.log("UploadImages response:", { item, url });
-              rootStore.newImage(item);
+              rootStore.newImage(photo);
               return url;
             })[0];
           }}
           onSuccess={arg => {
             const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
-            console.log("UploadImages success:", arg);
+              console.log("UploadImages success:", { id ,arg });
 
             let entry = rootStore.newImage(id);
-            arg.remove();
 
-            console.log("UploadImages success:", entry);
+            console.log("UploadImages success:", toJS(entry));
+       //     arg.remove();
           }}
         ></UploadImages>
         <div className={"image-list"}>

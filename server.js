@@ -314,9 +314,9 @@ if (!dev && cluster.isMaster) {
     });
 
     server.post("/api/item/new", async function(req, res) {
-      let { data, parent_id, ...params } = req.body;
+      let { data, photo_id, parent_id, ...params } = req.body;
       console.log("params: ", params);
-      let result = await API.insert("items", { parent_id, ...params, data: (typeof data == "string" ? data : JSON.stringify(data)).replace(/"/g, '\\"') }, ["id"]);
+      let result = await API.insert("items", { parent_id, photos: `{data: {photo_id: ${photo_id}}}`, ...params, data: '"'+(JSON.stringify(data)).replace(/"/g, '\\"')+'"' }, ["id"]);
       console.log("result: ", result);
       if(result && result.insert_items) result = await result.insert_items;
       if(result && result.returning) result = await result.returning;
@@ -330,7 +330,7 @@ if (!dev && cluster.isMaster) {
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
       //console.log("params: ", params);
-      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { id }", ...fields], params);
+      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }", ...fields], params);
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
 
       if(images.length !== undefined) images = images.filter(im => im.items.length == 0);
@@ -355,6 +355,7 @@ if (!dev && cluster.isMaster) {
       //console.log(`id: `, id);
       let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "user_id"]);
       const photo = response.photos[0];
+      if(photo.uploaded !== undefined)
       photo.uploaded = new Date(photo.uploaded).toString();
       let data = Buffer.from(photo.data, "base64");
       delete photo.data;
@@ -447,7 +448,7 @@ if (!dev && cluster.isMaster) {
           let data = file.data.toString("base64");
           let word = (file.data[0] << 8) + file.data[1];
           const { depth, channels } = props;
-          let reply = await API.insert("photos", { data, original_name: file.name, filesize: file.data.length, width, height, user_id }, ["id"]);
+          let reply = await API.insert("photos", { original_name: `"${file.name}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
           console.log("API upload photo: ", reply && reply.returning ? reply.returning : reply);
           const { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
           console.log("API upload photo: ", word.toString(16), { affected_rows, props });

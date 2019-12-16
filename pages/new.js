@@ -67,10 +67,13 @@ class New extends React.Component {
   static async getInitialProps(ctx) {
     const { RootStore } = ctx.mobxStore;
 
-    let photos = await RootStore.fetchPhotos();
+    let photos = await RootStore.fetchPhotos(/*{ where: { user_id:   }}*/);
     console.log("photos:", photos);
 
+    photos = photos.filter(ph => ph.items.length == 0);
     photos.forEach(item => RootStore.newImage(item));
+
+    return { photos };
   }
 
   constructor(props) {

@@ -123,7 +123,9 @@ export class RootStore {
   newImage(imageObj) {
     const { id, ...photo } = imageObj;
 
-    return this.images.set(id, photo);
+    this.images.set(id, imageObj);
+
+    return this.images.get(id);
   }
 
   get fieldNames() {
@@ -183,9 +185,10 @@ export class RootStore {
   }
 
   async fetchPhotos(where = {}) {
-    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { id }"], where);
+   // console.log("fetchPhotos ", { where });
+    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], where);
 
-    console.log("fetchPhotos =", response);
+  //  console.log("fetchPhotos =", response);
 
     return response;
   }
@@ -236,7 +239,7 @@ export class RootStore {
     const dataObj = this.entries.reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
     console.log("saveItem", { photo_id, parent_id, dataObj });
 
-    this.apiRequest("/api/item/new", { photos: `{ data: { photo_id: ${photo_id} } }`, parent_id, data: dataObj }).then(response => {
+    this.apiRequest("/api/item/new", { photo_id, parent_id, data: dataObj }).then(response => {
       console.log("saveitem API response:", response);
     });
   }
