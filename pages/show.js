@@ -2,7 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Layer from "../components/layer.js";
 import { Element, Node, HSLA } from "../utils/dom.js";
-import API from "../utils/api.js";
+import getAPI from "../utils/api.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { inject, observer } from "mobx-react";
@@ -28,10 +28,21 @@ const maxZIndex = () => {
 @inject("rootStore")
 @observer
 class Show extends React.Component {
+  static async getInitialProps(ctx) {
+    console.log("Show.getInitialProps ");
+    const { RootStore } = ctx.mobxStore;
+    console.log("RootStore.fetchItems");
+    let items = await getAPI().list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"]);
+    //await RootStore.fetchItems();
+    console.log("Show.getInitialProps  items:", items);
+    items.forEach(item => RootStore.newItem(item));
+    return { items };
+  }
+
   constructor(props) {
     super(props);
 
-    this.api = API(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
+    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
 
     const { rootStore } = this.props;
 
@@ -50,9 +61,9 @@ class Show extends React.Component {
   }
 
   componentDidMount() {
-    this.api.list("items", "type data photos { photo { width height data filesize } } users { user { id name last_seen } }").then(res => {
+/*    this.api.list("items", "type data photos { photo { width height data filesize } } users { user { id username last_seen } }").then(res => {
       console.log("items: ", res);
-    });
+    });*/
   }
 
   render() {

@@ -154,6 +154,11 @@ export class RootStore {
     return item === null ? -1 : item.id;
   }
 
+  @action.bound
+  newItem(item) {
+    console.log("New item: ", item);
+  }
+
   /**
    * Gets an item.
    *
@@ -181,6 +186,15 @@ export class RootStore {
     let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { id }"], where);
 
     console.log("fetchPhotos =", response);
+
+    return response;
+  }
+
+  async fetchItems(where = {}) {
+    console.log("RootStore.fetchItems:", where);
+    let response = await this.api.list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"]);
+
+    console.log("fetchItems =", response);
 
     return response;
   }
@@ -214,19 +228,15 @@ export class RootStore {
    */
   @action.bound
   saveItem(event) {
-const photo_id = rs.state.image;
-const parent_id = rs.state.parent_id;
+    const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
+    const parent_id = rs.state.parent_id;
 
-
-const dataObj = this.entries.reduce((acc,entry) => ({ ...acc,  [Util.decamelize(entry.type)]: entry.value  }), {});
+    const dataObj = this.entries.reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
     console.log("saveItem", { photo_id, parent_id, dataObj });
 
-
-this.apiRequest('/api/item/new',  { photos: { data: { photo_id }}, parent_id, data: dataObj }).then(response => {
-
-  console.log("saveitem API response:", response);
-})
-
+    this.apiRequest("/api/item/new", { photos: { data: { photo_id } }, parent_id, data: dataObj }).then(response => {
+      console.log("saveitem API response:", response);
+    });
   }
   /*
   fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {

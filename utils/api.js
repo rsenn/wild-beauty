@@ -28,12 +28,16 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
 
     const { where, ...options } = opts;
     console.log("api.list ", { where, options });
-    let objStr = where
-      ? "where: {" +
-        Object.entries(where)
-          .map(([key, value]) => `${key}: {` + (value === null ? `_is_null: true` : `_eq:"${value}"`) + `}`)
-          .join(", ") +
-        "}"
+    let objStr;
+
+    objStr = where
+      ? typeof where == "string"
+        ? "where: " + where
+        : "where: {" +
+          Object.entries(where)
+            .map(([key, value]) => `${key}: {` + (value === null ? `_is_null: true` : `_eq:"${value}"`) + `}`)
+            .join(", ") +
+          "}"
       : "";
     objStr += Object.keys(options)
       .map(key => `${key}: ${options[key]}`)
@@ -97,7 +101,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
   }`;
 
     let response = await this(queryStr);
-      console.log("response: ", response, "query: ", queryStr);
+    console.log("response: ", response, "query: ", queryStr);
     return response;
   };
 
