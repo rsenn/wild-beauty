@@ -35,7 +35,8 @@ export class RootStore {
     error: undefined,
     selected: -1,
     image: null,
-    parent_id: -1
+    parent_id: -1,
+    tree: {}
   };
 
   auth = observable.object({
@@ -194,7 +195,7 @@ export class RootStore {
 
   get rootItem() {
     if(this.items.size == 0) this.loadItems(/*{ parent_id: null }*/);
-    for(let [id, item] of this.items.entries()) if(item.parent == null) return item;
+    if(this.items && this.items.entries) for(let [id, item] of this.items.entries()) if (item && item.parent == null) return item;
     return null;
   }
 
@@ -216,6 +217,7 @@ export class RootStore {
    * @param      {(Array|string)}  [idMap=null]  The identifier map
    * @return     {<type>}          The item.
    */
+  /*  @action*/
   getItem(id, tr = it => it, idMap = null) {
     if(idMap === null) idMap = [];
     let item = this.items.get(!id ? this.rootItemId : id);
@@ -224,11 +226,11 @@ export class RootStore {
       idMap.push(item.id);
       if(typeof item == "object") {
         // console.log("item.children", toJS(item.children));
-        if(item.children && item.children.length) item.children = item.children.map(it => this.getItem(it.id, tr, idMap)) /*.filter(it => it !== undefined)*/;
-        else item.children = [];
+        if(item.children && item.children.length) item.children = item.children.map(it => this.getItem(it.id, tr, idMap)).filter(c => c !== null);
+        /*.filter(it => it !== undefined)*/ else item.children = [];
       }
     }
-    return item ? tr(item) : item;
+    return item ? tr(item) : null;
   }
 
   async fetchImages(where = {}) {

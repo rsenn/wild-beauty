@@ -297,8 +297,9 @@ if (!dev && cluster.isMaster) {
       let itemList = await API.list("items", fields, params);
       itemList = itemList.map(item => {
         let newData;
+
         try {
-          newData = JSON.parse(item.data);
+          newData = item && item.data ? JSON.parse(item.data) : {};
         } catch(err) {
           newData = item.data;
         }

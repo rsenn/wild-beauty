@@ -1475,18 +1475,23 @@ Matrix.identity = function() {
   return new Matrix([1, 0, 0, 1, 0, 0]);
 };
 
-Matrix.translate = function(tx, ty) {
+Matrix.translate = function(m, tx, ty) {
   let args = [...arguments];
-  if(!isMatrix(args[0])) return Matrix.init_translate.call(new Matrix(), tx, ty);
-  let m = args.shift();
-  return Matrix.multiply(m, Matrix.init_translate.apply(Matrix, args));
+
+  if(!isMatrix(args[0])) return Matrix.init_translate(tx, ty);
+
+  m = args.shift();
+  return Matrix.multiply(m, Matrix.init_translate(tx, ty));
 };
 
-Matrix.scale = function(sx, sy) {
+Matrix.scale = function(m, sx, sy) {
   let args = [...arguments];
-  if(typeof args[0] == "number") return Matrix.init_scale.call(new Matrix(), sx, sy);
-  let m = args.shift();
-  return Matrix.prototype.multiply.call(m, Matrix.init_scale.apply(Matrix, args));
+  //  if(typeof args[0] == "number") return Matrix.init_scale.call(new Matrix(), sx, sy);
+  //  let m = args.shift();
+  //let s = new Matrix(Matrix.init_scale(sx, sy));
+  //return s.multiply(m);
+
+  return Matrix.multiply(m, Matrix.init_scale(sx, sy));
 };
 
 Matrix.rotate = function(rad) {
@@ -1544,19 +1549,19 @@ Matrix.init_identity = () => [1, 0, 0, 1, 0, 0];
 Matrix.prototype.init_translate = function(tx, ty) {
   return Matrix.init(this, 1, 0, 0, 1, tx, ty);
 };
-Matrix.init_translate = (tx, ty) => [1, 0, 0, 1, tx, ty];
+Matrix.init_translate = (tx, ty) => new Matrix([1, 0, 0, 1, tx, ty]);
 
 Matrix.prototype.init_scale = function(sx, sy) {
   return Matrix.init(this, sx, 0, 0, sy, 0, 0);
 };
-Matrix.init_scale = (sx, sy) => [sx, 0, 0, sy, 0, 0];
+Matrix.init_scale = (sx, sy) => new Matrix([sx, 0, 0, sy, 0, 0]);
 
 Matrix.prototype.init_rotate = function(rad) {
   const s = Math.sin(rad);
   const c = Math.cos(rad);
   return Matrix.init(this, c, s, -s, c, 0, 0);
 };
-Matrix.init_rotate = rad => [Math.cos(rad), Math.sin(rad), -Math.sin(rad), Math.cos(rad), 0, 0];
+Matrix.init_rotate = rad => new Matrix([Math.cos(rad), Math.sin(rad), -Math.sin(rad), Math.cos(rad), 0, 0]);
 
 Matrix.prototype.transform_distance = function(p) {
   const x = this.xx * p.x + this.xy * p.y;
