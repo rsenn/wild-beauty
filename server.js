@@ -316,7 +316,7 @@ if (!dev && cluster.isMaster) {
     server.post("/api/item/new", async function(req, res) {
       let { data, photo_id, parent_id, ...params } = req.body;
       console.log("params: ", params);
-      let result = await API.insert("items", { parent_id, photos: `{data: {photo_id: ${photo_id}}}`, ...params, data: '"'+(JSON.stringify(data)).replace(/"/g, '\\"')+'"' }, ["id"]);
+      let result = await API.insert("items", { parent_id, photos: `{data: {photo_id: ${photo_id}}}`, ...params, data: '"' + JSON.stringify(data).replace(/"/g, '\\"') + '"' }, ["id"]);
       console.log("result: ", result);
       if(result && result.insert_items) result = await result.insert_items;
       if(result && result.returning) result = await result.returning;
@@ -355,8 +355,7 @@ if (!dev && cluster.isMaster) {
       //console.log(`id: `, id);
       let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "user_id"]);
       const photo = response.photos[0];
-      if(photo.uploaded !== undefined)
-      photo.uploaded = new Date(photo.uploaded).toString();
+      if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
       let data = Buffer.from(photo.data, "base64");
       delete photo.data;
       //console.log(`photo: `, photo);

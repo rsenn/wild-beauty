@@ -229,16 +229,15 @@ class New extends React.Component {
     }
   };
 
-  chooseImage = (event) => {
-        const { rootStore } = this.props;
-const { target , currentTarget } = event;
-let id = parseInt(target.getAttribute('id').replace(/.*-/g, ''));
-console.log("New.chooseImage ", {id, target,currentTarget}); 
+  chooseImage = event => {
+    const { rootStore } = this.props;
+    const { target, currentTarget } = event;
+    let id = parseInt(target.getAttribute("id").replace(/.*-/g, ""));
+    console.log("New.chooseImage ", { id, target, currentTarget });
 
-
-rootStore.state.step = 2;
-rootStore.state.image = id;
-  }
+    rootStore.state.step = 2;
+    rootStore.state.image = id;
+  };
 
   render() {
     const { rootStore } = this.props;

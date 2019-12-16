@@ -32,12 +32,12 @@ export const ImageUpload = inject("rootStore")(
           }}
           onSuccess={arg => {
             const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
-              console.log("UploadImages success:", { id ,arg });
+            console.log("UploadImages success:", { id, arg });
 
             let entry = rootStore.newImage(id);
 
             console.log("UploadImages success:", toJS(entry));
-       //     arg.remove();
+            //     arg.remove();
           }}
         ></UploadImages>
         <div className={"image-list"}>

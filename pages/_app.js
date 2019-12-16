@@ -103,7 +103,7 @@ class MyApp extends App {
           body {
             font-family: Fixed;
             font-size: 13px;
-            background: url(static/img/tile-background.jpg) repeat;
+            background: url(static/img/tile-background.png) repeat;
             background-size: auto 50vmin;
             margin: 0;
           }

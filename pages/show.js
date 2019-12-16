@@ -138,7 +138,7 @@ class Show extends React.Component {
             {this.props.items.map(item => {
               console.log("item: ", item);
               const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
-              const haveImage = photo_id >= 0 ;
+              const haveImage = photo_id >= 0;
               const path = haveImage ? `/api/image/get/${photo_id}` : "static/img/no-image.svg";
               const opacity = photo_id >= 0 ? 1 : 0.3;
               return (
@@ -156,18 +156,30 @@ class Show extends React.Component {
                   }}
                   className={"layer gallery-aspect-box"}
                 >
-                 
-                  {haveImage ?   <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto", opacity }} className="gallery-image" /> :  <div 
-                  style={{ position: "absolute", padding: '2px', background: 'linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)', textAlign: 'left', top: "0px", left: "0px", fontSize: "15px" }}>
-Id: {item.id}<br />
-Number of children: {item.children.length}<br />
-Parent Id: {item.parent ? item.parent.id : -1}<br />
-<br />
-
-<span style={{ fontSize: "12px" }}>{item.data.replace(/","/g, '",\n"')}</span>
-
-                  </div>
-                }
+                  {haveImage ? (
+                    <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto", opacity }} className="gallery-image" />
+                  ) : (
+                    <div
+                      style={{
+                        position: "absolute",
+                        padding: "2px",
+                        background: "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                        textAlign: "left",
+                        top: "0px",
+                        left: "0px",
+                        fontSize: "15px"
+                      }}
+                    >
+                      Id: {item.id}
+                      <br />
+                      Number of children: {item.children.length}
+                      <br />
+                      Parent Id: {item.parent ? item.parent.id : -1}
+                      <br />
+                      <br />
+                      <span style={{ fontSize: "12px" }}>{item.data.replace(/","/g, '",\n"')}</span>
+                    </div>
+                  )}
                 </SizedAspectRatioBox>
               );
             })}

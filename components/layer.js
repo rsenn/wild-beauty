@@ -38,9 +38,9 @@ export function Layer({ style, inline, flex, children, border, margin, padding, 
   var client = lazyInitializer(() => {
     return "window" in global ? new Size(window.innerWidth, window.innerHeight) : new Size({ width: 0, height: 0 });
   });
-/*  box.subscribe(rect => {
+  /*  box.subscribe(rect => {
   });
-*/  handler.subscribe(e => {
+*/ handler.subscribe(e => {
     // console.log('Element: ', e);
     do {
       box(Element.rect(e));

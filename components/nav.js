@@ -45,9 +45,9 @@ let customStyles = {
     borderRadius: "0",
     border: "none",
     transform: "translate(-50%, -50%)",
-/*    background: "url(static/img/tile-background.jpg) repeat",
+    /*    background: "url(static/img/tile-background.jpg) repeat",
     backgroundSize: "auto 50vmin",
-*/    zIndex: 10
+*/ zIndex: 10
   }
 };
 Modal.setAppElement("#__next");

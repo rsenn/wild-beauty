@@ -185,10 +185,10 @@ export class RootStore {
   }
 
   async fetchPhotos(where = {}) {
-   // console.log("fetchPhotos ", { where });
+    // console.log("fetchPhotos ", { where });
     let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], where);
 
-  //  console.log("fetchPhotos =", response);
+    //  console.log("fetchPhotos =", response);
 
     return response;
   }
@@ -209,13 +209,12 @@ export class RootStore {
    * @return     {Promise}  The items.
    */
   async loadItems(where = {}) {
-
     let response = await this.apiRequest("/api/item/tree", { where });
     let data = response ? await response.data : null;
 
     if(await data) {
       const items = await data.items;
-    console.log("RootStore.loadItems" , data);
+      console.log("RootStore.loadItems", data);
 
       for(let key in items) {
         const id = parseInt(items[key].id || key);
