@@ -293,7 +293,7 @@ class New extends React.Component {
               Layer
             </Layer>*/}
           </NeedAuth>
-          <SvgOverlay  svgRef={this.svgLayer} />
+          <SvgOverlay svgRef={this.svgLayer} />
           <style jsx global>{`
             button.tag-remove {
               border: 1px outset #55555580;

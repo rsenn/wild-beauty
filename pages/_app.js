@@ -10,7 +10,6 @@ import { withRouter } from "next/router";
 import i18nStore from "../stores/i18nStore.js";
 import SiteMap from "../components/siteMap.js";
 
-
 class MyApp extends App {
   static async getInitialProps({ Component, router, ctx }) {
     // create a store with the initial state
@@ -96,8 +95,8 @@ class MyApp extends App {
           @font-face {
             font-family: "Fixed";
             src: url("static/fonts/Fixed-Medium.eot");
-            src: url("static/fonts/Fixed-Medium.eot?#iefix") format("embedded-opentype"), url("static/fonts/Fixed-Medium.woff2") format("woff2"), url("static/fonts/Fixed-Medium.woff") format("woff"), url("static/fonts/Fixed-Medium.ttf") format("truetype"),
-              url("static/fonts/Fixed-Medium.svg#Fixed-Medium") format("svg");
+            src: url("static/fonts/Fixed-Medium.eot?#iefix") format("embedded-opentype"), url("static/fonts/Fixed-Medium.woff2") format("woff2"), url("static/fonts/Fixed-Medium.woff") format("woff"),
+              url("static/fonts/Fixed-Medium.ttf") format("truetype"), url("static/fonts/Fixed-Medium.svg#Fixed-Medium") format("svg");
             font-weight: 500;
             font-style: normal;
           }

@@ -35,7 +35,7 @@ export const makeTouchCallback = (className = "layer", action = null) => {
 
     const depth = Node.depth(e);
 
-    if(depth <= 5) return cancel();
+    //    if(depth <= 5) return  typeof cancel == "function" ? cancel() : null;
 
     //    console.log("TouchCallback event: ", { depth, event, cancel });
 

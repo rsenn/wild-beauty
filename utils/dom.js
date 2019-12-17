@@ -2220,8 +2220,8 @@ export class Node {
     return (function*() {
       var n = node;
       do {
-        yield n;
-      } while((n = n.parentNode));
+        if(n) yield n;
+      } while(n && (n = n.parentNode));
     })();
   }
 

@@ -7,7 +7,7 @@ import { ScrollController } from "../utils/scrollController.js";
 import Alea from "../utils/alea.js";
 import { SwipeTracker } from "../utils/swipeTracker.js";
 import { Element, Node, HSLA, Timer } from "../utils/dom.js";
-import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
+import { MultitouchListener, MovementListener, TouchEvents, MouseEvents, TouchListener, TouchHandler } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
@@ -45,32 +45,69 @@ class Home extends React.Component {
     mirrored: false,
     angle: 0
   };
-    svgLayer = trkl();
+  svgLayer = trkl();
 
   constructor(props) {
     super(props);
-
     const { rootStore } = this.props;
     rootStore.setState({ subpage: 1 });
-
     if(global.window) {
       global.window.page = this;
       global.window.rs = rootStore;
     }
-
     this.getHash();
-
     autorun(() => {
       console.log("rootStore.state = ", toJS(rootStore.state));
     });
-    this.svgLayer.subscribe(newLayer => {
+        this.svgLayer.subscribe(newLayer => {
       console.log("svgLayer: ", newLayer);
-    })
+    });
+        const svgRef = this.svgLayer;
+        const page = this;
+    this.touchHandler = TouchHandler({
+      start(event) {
+        const { x, y } = event;
+        console.log("touch start: ", event, { x, y });
+
+        const f = svgRef().factory;
+        if(f) {
+          this.g = f('g', { stroke: '#ff0', fill: 'none', strokeWidth: 8 }, svgRef().svg);
+          this.path = f('path', { d: '', style: "paint-order:markers stroke fill" }, this.g);
+          this.pathData =  `M${x},${y}`;
+          page.path = this.path;
+          console.log("new Path: ", this.path);
+        }
+      },
+      end(event) {
+        const { x, y } = event;
+        console.log("touch end: ", { x, y });
+      },
+      move(event) {
+        const { x, y, distance } = event;
+
+this.pathData += ` L${x},${y}`;
+this.path.setAttribute('d', this.pathData);
+       console.log("touch move: ", this.path);
+      },
+      cancel(event) {}
+    });
+    this.touchListener = TouchListener(
+      event => {
+        this.touchHandler(event);
+      },
+      {
+        element: global.window,
+        step: 10,
+        round: false,
+        listener: MovementListener,
+        noscroll: true
+      }
+    );
+
   }
 
   getHash() {
     const { rootStore, router } = this.props;
-
     if(global.window) {
       const hash = /#/.test(window.location.href) ? window.location.href.replace(/.*#/, "") : "1";
       //  console.log("hash: ", hash);
@@ -89,19 +126,8 @@ class Home extends React.Component {
   componentDidMount() {
     const { rootStore, router } = this.props;
     console.log("Home.componentDidMount ");
-    /*    rootStore.loadArticles("home").then(result => {
-      let articles = Util.findVal(result, "items");
-      console.log("Home fetched", { result, articles });
-      {
-        //        rootStore.setState({ articles: toJS(res) });
-        rootStore.updateState({ articles });
-      }
-    });*/
-
     this.getHash();
-
     var counter = 0;
-
     Timer.interval(1000, () => {
       counter++;
       if(counter % 3 == 0) {
@@ -115,31 +141,26 @@ class Home extends React.Component {
 
   handleNext = () => {
     const { rootStore } = this.props;
-
     rootStore.setState({ subpage: rootStore.state.subpage + 1 });
     this.forceUpdate();
   };
 
   handlePrev = () => {
     const { rootStore } = this.props;
-
     rootStore.setState({ subpage: rootStore.state.subpage - 1 });
     this.forceUpdate();
   };
 
   render() {
     const { rootStore, router } = this.props;
-
     let swipeEvents = {};
     var e = null;
-
     if(global.window !== undefined) window.page = this;
-
     if(global.window) {
       var touchListener = TouchListener(TouchCallback, {
         element: global.window,
-        step: 1,
-        round: true,
+        step: 10,
+        round: false,
         listener: MovementListener,
         noscroll: true
       });
@@ -161,9 +182,9 @@ class Home extends React.Component {
     //const timespan = tims.text(, {    lang: "fr"   }); /*.split(/,/g).slice(0, 2).join(', ')*/
     const timespan = timeSpanFormat(Math.floor(seconds));
     const subpage = toJS(rootStore.state.subpage);
-    console.log("Home.render", { t, timespan, subpage });
+    //  console.log("Home.render", { t, timespan, subpage });
     return (
-      <div className={"main-layout"} {...TouchEvents(touchListener)}>
+      <div className={"main-layout"} {...TouchEvents(this.touchListener)} {...MouseEvents(this.touchListener)}>
         <Head>
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
@@ -177,13 +198,17 @@ class Home extends React.Component {
         <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "block" : "block" }}>
           <h1>Title</h1>
           <span className={"paragraph"}>
-            The earliest known appearance of the phrase is from The Boston Journal. In an article titled "Current Notes" in the February 9, 1885, edition, the phrase is mentioned as a good practice sentence for writing students: "A favorite copy set by writing teachers for their pupils is the
-            following, because it contains every letter of the alphabet: 'A quick brown fox jumps over the lazy dog.'" Dozens of other newspapers published the phrase over the next few months, all using the version of the sentence starting with "A" rather than "The". The earliest known use of the
-            phrase in its modern form (starting with "The") is from the 1888 book Illustrative Shorthand by Linda Bronson. The modern form (starting with "The") became more common despite the fact that it is slightly longer than the original (starting with "A"). As the use of typewriters grew in the
-            late 19th century, the phrase began appearing in typing lesson books as a practice sentence. Early examples include How to Become Expert in Typewriting: A Complete Instructor Designed Especially for the Remington Typewriter (1890), and Typewriting Instructor and Stenographer's Hand-book
-            (1892). By the turn of the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic Journal, it is referred to as "the well known memorized typing line embracing all the letters of the alphabet". Robert Baden-Powell's book Scouting for Boys
-            (1908) uses the phrase as a practice sentence for signaling. The first message sent on the Moscow–Washington hotline on August 30, 1963, was the test phrase "THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG'S BACK 1234567890". Later, during testing, the Russian translators sent a message
-            asking their American counterparts, "What does it mean when your people say 'The quick brown fox jumped over the lazy dog'?" During the 20th century, technicians tested typewriters and teleprinters by typing the sentence.
+            The earliest known appearance of the phrase is from The Boston Journal. In an article titled "Current Notes" in the February 9, 1885, edition, the phrase is mentioned as a good practice
+            sentence for writing students: "A favorite copy set by writing teachers for their pupils is the following, because it contains every letter of the alphabet: 'A quick brown fox jumps over
+            the lazy dog.'" Dozens of other newspapers published the phrase over the next few months, all using the version of the sentence starting with "A" rather than "The". The earliest known use
+            of the phrase in its modern form (starting with "The") is from the 1888 book Illustrative Shorthand by Linda Bronson. The modern form (starting with "The") became more common despite the
+            fact that it is slightly longer than the original (starting with "A"). As the use of typewriters grew in the late 19th century, the phrase began appearing in typing lesson books as a
+            practice sentence. Early examples include How to Become Expert in Typewriting: A Complete Instructor Designed Especially for the Remington Typewriter (1890), and Typewriting Instructor and
+            Stenographer's Hand-book (1892). By the turn of the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic Journal, it is referred to as "the
+            well known memorized typing line embracing all the letters of the alphabet". Robert Baden-Powell's book Scouting for Boys (1908) uses the phrase as a practice sentence for signaling. The
+            first message sent on the Moscow–Washington hotline on August 30, 1963, was the test phrase "THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG'S BACK 1234567890". Later, during testing, the
+            Russian translators sent a message asking their American counterparts, "What does it mean when your people say 'The quick brown fox jumped over the lazy dog'?" During the 20th century,
+            technicians tested typewriters and teleprinters by typing the sentence.
           </span>
         </div>
         <div className={"subpage flex-vertical"} style={{ opacity: subpage == 3 ? 1 : 0, display: subpage == 3 ? "flex" : "flex" }}>
@@ -199,7 +224,7 @@ class Home extends React.Component {
         <a className={"button-next"} href={subpage < 3 ? "#" + (subpage + 1) : "/show"} onClick={subpage >= 3 ? undefined : this.handleNext}>
           <img src={"static/img/arrow-next.svg"} />
         </a>
-                  <SvgOverlay  svgRef={this.svgLayer} />
+        <SvgOverlay svgRef={this.svgLayer} />
 
         <style jsx global>{`
           h1 {

@@ -354,4 +354,26 @@ export function TouchListener(handler, options) {
   return listen.handler;
 }
 
+export const TouchHandler = (handle, options) => {
+  var running = false;
+  var fn = function(event) {
+    const { nativeEvent } = event;
+    const e = nativeEvent || event;
+    const { type } = e;
+    // console.log("TouchHandler ", {event,nativeEvent, type});
+    //console.log("TouchHandler ", e.x, e.y);
+    if(type.endsWith("start") || type.endsWith("down")) {
+      running = true;
+      handle.start(e);
+    } else if(type.endsWith("move")) {
+      if(running) handle.move(e);
+    } else if(type.endsWith("end") || type.endsWith("up")) {
+      running = false;
+      handle.end(e);
+      //  event.cancel();
+    } else if(type.endsWith("cancel")) handle.cancel(e);
+  };
+  return fn;
+};
+
 export default TouchListener;
