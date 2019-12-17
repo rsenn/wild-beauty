@@ -6,7 +6,7 @@ import Gallery, { randomImagePaths } from "../components/gallery.js";
 import { ScrollController } from "../utils/scrollController.js";
 import Alea from "../utils/alea.js";
 import { SwipeTracker } from "../utils/swipeTracker.js";
-import { Element, Node, HSLA, Timer } from "../utils/dom.js";
+import { Element, Point, Node, HSLA, Timer } from "../utils/dom.js";
 import { MultitouchListener, MovementListener, TouchEvents, MouseEvents, TouchListener, TouchHandler } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
@@ -59,11 +59,11 @@ class Home extends React.Component {
     autorun(() => {
       console.log("rootStore.state = ", toJS(rootStore.state));
     });
-        this.svgLayer.subscribe(newLayer => {
+    this.svgLayer.subscribe(newLayer => {
       console.log("svgLayer: ", newLayer);
     });
-        const svgRef = this.svgLayer;
-        const page = this;
+    const svgRef = this.svgLayer;
+    const page = this;
     this.touchHandler = TouchHandler({
       start(event) {
         const { x, y } = event;
@@ -71,12 +71,14 @@ class Home extends React.Component {
 
         const f = svgRef().factory;
         if(f) {
-          this.g = f('g', { stroke: '#ff0', fill: 'none', strokeWidth: 8 }, svgRef().svg);
-          this.path = f('path', { d: '', style: "paint-order:markers stroke fill" }, this.g);
-          this.pathData =  `M${x},${y}`;
+          this.g = f("g", { stroke: "#ff0", fill: "none", strokeWidth: 8 }, svgRef().svg);
+          this.path = f("path", { d: "", style: "paint-order:markers stroke fill" }, this.g);
+          this.pathData = `M${x},${y}`;
           page.path = this.path;
           console.log("new Path: ", this.path);
         }
+        this.x = x;
+        this.y = y;
       },
       end(event) {
         const { x, y } = event;
@@ -85,11 +87,23 @@ class Home extends React.Component {
       move(event) {
         const { x, y, distance } = event;
 
-this.pathData += ` L${x},${y}`;
-this.path.setAttribute('d', this.pathData);
-       console.log("touch move: ", this.path);
+        const rel = this.relxy(x, y);
+
+        if(Math.abs(rel.x) + Math.abs(rel.y) > 3) {
+          this.pathData += ` l${rel.x},${rel.y}`;
+          this.path.setAttribute("d", this.pathData);
+          //   console.log("touch move: ", this.path);
+          this.setxy(x, y);
+        }
       },
-      cancel(event) {}
+      cancel(event) {},
+      setxy(x, y) {
+        this.x = x;
+        this.y = y;
+      },
+      relxy(x, y) {
+        return { x: x - this.x, y: y - this.y };
+      }
     });
     this.touchListener = TouchListener(
       event => {
@@ -103,7 +117,6 @@ this.path.setAttribute('d', this.pathData);
         noscroll: true
       }
     );
-
   }
 
   getHash() {

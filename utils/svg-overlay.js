@@ -91,9 +91,9 @@ export class SvgOverlay extends React.Component {
         svg
       );*/
       this.svg(svg);
-      const f =  this.factory();
-      f.root=svg;
-      svgRef({ svg, factory: f /*(name,props) => f(name,props, svg) */});
+      const f = this.factory();
+      f.root = svg;
+      svgRef({ svg, factory: f /*(name,props) => f(name,props, svg) */ });
       console.log("SvgOverlay: ", { svg, rect });
 
       //   this.createPaths();
