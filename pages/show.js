@@ -35,7 +35,7 @@ const maxZIndex = () => {
 };
 
 const findInTree = (tree, value) => {
-  if(tree.value === value) return tree;
+  if(tree.value === value  || tree.label === value) return tree;
   if(tree.children) {
     for(let child of tree.children) {
       let ret = findInTree(child, value);
@@ -107,11 +107,30 @@ class Show extends React.Component {
     });
     //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
+
+    var item = findInTree(this.tree, 'Objects');
+
+    item.checked = true;
+
+    Util.traverseTree(item, i => this.state.parentIds.push(i.id));
+
+    //this.selectNode(item);
+
     console.log("this.tree: ", this.tree);
+    console.log("item: ", item);
+    console.log("parentIds: ", this.state.parentIds);
   }
 
   componentDidMount() {
     const { rootStore, router } = this.props;
+  }
+
+  @action.bound
+  selectNode(item) {
+              var children = Util.flatTree(item);
+          var ids = children.map(child => child.id);
+          console.log("treeSelEvent: ", ids, item.title);
+          this.setState({ parentIds: ids });
   }
 
   @action.bound
@@ -128,11 +147,8 @@ class Show extends React.Component {
           item.checked = true;
           this.state.node = item.value;
           //  this.tree = rootStore.getItem(this.state.node, makeItemToOption());
-          var children = Util.flatTree(item);
-          var ids = children.map(child => child.id);
-          console.log("treeSelEvent: ", ids, item.title);
-          this.setState({ parentIds: ids });
-        }
+this.selectNode(item);
+       }
         //rootStore.setState({ selected: arg.value });
         break;
       }

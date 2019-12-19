@@ -462,6 +462,10 @@ if (!dev && cluster.isMaster) {
       })
     );
 
+    server.get('/show/:slug', (req, res) => {
+      return app.render(req, res, '/show', { slug: req.params.slug })
+    });
+
     // Example server-side routing
     server.post("/a", (req, res) => {
       return nextApp.render(req, res, "/b", req.query);

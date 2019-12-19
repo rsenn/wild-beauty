@@ -36,7 +36,7 @@ const LoginForm = inject("rootStore")(
               onLogin(username, password);
             }}
           >
-            <div className={"form-field form-row"}>
+            <div className={"form-field"}>
               <div className={"form-label"}>
                 <Translate value="login.username" />
               </div>
@@ -69,7 +69,7 @@ const LoginForm = inject("rootStore")(
                 />
               </div>
             </div>
-            <div className={"form-field form-row"}>
+            <div className={"form-field"}>
               <div className={"form-label"}>
                 <Translate value="login.password" />
               </div>
@@ -135,12 +135,12 @@ const LoginForm = inject("rootStore")(
               padding: 10px;
               display: flex;
               flex-flow: column nowrap;
-              min-height: 50vmin;
               -webkit-user-select: text;
               user-select: text;
             }
             .form-row {
               flex: 1 1 auto;
+              min-height: 38px;
               max-height: 50px;
             }
             .form-buttonfield {
@@ -208,7 +208,7 @@ const LoginForm = inject("rootStore")(
               outline: none;
               border: 1px solid rgba(91, 0, 10, 1);
               box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.6);
-              margin: 12px auto 8px auto;
+              margin: 0px auto 8px auto;
             }
             .form-button:active {
               transform: translate(1px, 1px);
