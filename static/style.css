@@ -32,3 +32,8 @@ li.menu-item {
 li.menu-item > a {
   font-size: 2em;
 }
+@media (max-width: 414px) {
+  .title-bar {
+    font-size: 18px;
+  }
+}

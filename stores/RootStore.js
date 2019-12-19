@@ -125,6 +125,7 @@ export class RootStore {
     let { id, ...photo } = imageObj;
     id = parseInt(id);
 
+    console.log("rootStore.newImage ", imageObj);
     if(imageObj.src === undefined) imageObj.src = `/api/image/get/${id}.jpg`;
 
     this.images.set(id, observable.object(imageObj));
@@ -152,7 +153,7 @@ export class RootStore {
    * @return     {<type>}  The image.
    */
   getImage(id) {
-    id = parseInt(id);
+    id = "" + id;
     return this.images.has(id) ? this.images.get(id) : null;
   }
 
@@ -198,7 +199,7 @@ export class RootStore {
    */
   get currentImage() {
     const id = this.state.image;
-    let image = toJS(this.images.get(id) || {});
+    let image = this.getImage(id);
     image.id = parseInt(id);
     image.landscape = image.width > image.height;
     return image;

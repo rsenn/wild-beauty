@@ -79,11 +79,13 @@ class New extends React.Component {
   static async getInitialProps(ctx) {
     const { RootStore } = ctx.mobxStore;
     let images = await RootStore.fetchImages(/*{ where: { user_id:   }}*/);
+
     images = images.filter(ph => ph.items.length == 0);
     images.forEach(item => RootStore.newImage(item));
+
     console.log("images:", images);
 
-    if(ctx.req.cookies) {
+    if(ctx && ctx.req && ctx.req.cookies) {
       const { token, user_id } = ctx.req.cookies;
       //set(RootStore.auth, { token, user_id });
       RootStore.auth.token = token;
@@ -119,29 +121,36 @@ class New extends React.Component {
     }
 
     if(global.window) {
+      const moveImage = (event, e) => {
+        const orientation = e.getAttribute("orientation");
+        //   console.log("img ", { orientation });
+        let offset = orientation == "landscape" ? event.x : event.y;
+        if(offset > 0) offset = 0;
+        if(offset < -this.offsetRange) offset = -this.offsetRange;
+        if(event.type.endsWith("move")) this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
+        let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
+        console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
+
+        //e.style.setProperty("transform", event.type.endsWith("move") ? transformation : "");
+
+        if(event.type.endsWith("move")) {
+          e.style.setProperty("transform", transformation);
+          this.clonedImage.style.setProperty("transform", transformation);
+        }
+      };
       this.touchCallback = makeTouchCallback("inner-image", (event, e) => {
+        console.log("touchCallback ", { event, e });
+
         const zIndex = maxZIndex() + 1;
         if(e) Element.setCSS(e, { zIndex });
         if(e && e.style) {
-          const orientation = e.getAttribute("orientation");
-          //   console.log("img ", { orientation });
-          let offset = orientation == "landscape" ? event.x : event.y;
-          if(offset > 0) offset = 0;
-          if(offset < -this.offsetRange) offset = -this.offsetRange;
-          if(event.type.endsWith("move")) this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
-          let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
-          //console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
-          //e.style.setProperty("transform", event.type.endsWith("move") ? transformation : "");
-          if(event.type.endsWith("move")) {
-            e.style.setProperty("transform", transformation);
-            this.clonedImage.style.setProperty("transform", transformation);
-          }
+          moveImage(event, e);
         }
       });
 
       this.touchListener = TouchListener(
         event => {
-          // console.log("Touch ", event);
+          console.log("Touch ", event);
           const elem = event.target;
 
           //     if(event.nativeEvent) event.nativeEvent.preventDefault();
@@ -158,6 +167,9 @@ class New extends React.Component {
             if(this.clonedImage) Element.remove(this.clonedImage);
             this.clonedImage = Element.create(obj);
             document.body.appendChild(this.clonedImage);
+
+            this.clonedImage.style.zIndex = -1;
+            this.clonedImage.style.opacity = 0.3;
             //   Element.move(this.clonedImage, rect);
             //console.log("clonedImage obj:", this.clonedImage);
           }
@@ -171,13 +183,13 @@ class New extends React.Component {
               //  if(irect.x >= 1 && irect.y >= 1) Element.move(this.clonedImage, irect);
               //
 
-              this.clonedImage.style.zIndex = -1;
-              this.clonedImage.style.opacity = 0.5;
+              moveImage(event, this.currentImage);
             }
           }
+          /* console.log("Touch obj:", this.touchCallback);
 
-          this.touchCallback(event);
-
+          this.touchCallback(event, this.currentImage);
+*/
           if(event.type.endsWith("end")) {
             if(this.clonedImage && this.currentImage) {
               this.currentImage.style.position = "relative";
@@ -321,28 +333,6 @@ class New extends React.Component {
             .content-layout {
               width: 100vw;
               text-align: left;
-            }
-            .panes-list {
-              display: flex;
-              border: 1px solid black;
-              position: relative;
-              top: 90vh;
-            }
-            .panes-item {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              border: 1px dashed red;
-              position: relative;
-              flex: 0 0 auto;
-              width: 20vw;
-              height: 20vw;
-              align-items: center;
-              justify-content: center;
-              overflow: auto;
-            }
-            .panes-item > img {
-              width: 20vw;
             }
           `}</style>
         </div>

@@ -9,6 +9,7 @@ import axios from "../../utils/axios.js";
 import DropdownTreeSelect from "react-dropdown-tree-select";
 
 import UploadImages from "react-upload-gallery";
+import "../../static/css/grid.css";
 
 export const ImageUpload = inject("rootStore")(
   observer(
@@ -51,7 +52,7 @@ export const ImageUpload = inject("rootStore")(
             arg.remove();
           }}
         ></UploadImages>
-        <div className={"image-list"}>
+        <div className={"image-list grid-col grid-gap-20"}>
           {[...rootStore.images.entries()].map(([id, image], index) => {
             image = toJS(image);
             //console.log("image-list entry", {id,image});
@@ -92,7 +93,6 @@ export const ImageUpload = inject("rootStore")(
             position: relative;
             padding: 0px 10px;
           }
-          div.upload-area > div,
           div.upload-area > div > div,
           div.upload-area > div > div > div {
             position: relative;
@@ -138,18 +138,14 @@ export const ImageUpload = inject("rootStore")(
             margin: 20px -20px 0 0;
           }
           .image-list {
-            display: inline-flex;
-            flex-flow: row wrap;
-            flex-basis: 33%;
-            justify-content: flex-start;
-            max-width: 100%;
+            display: grid;
+            margin: 10px 0 0 0;
           }
           .image-list > div {
             flex: 1 1 auto;
           }
           .image-entry {
-            max-width: 24vw;
-            margin: 0 20px 0 0;
+            margin: 0 10px 0 0;
             flex: 1 1 auto;
           }
         `}</style>

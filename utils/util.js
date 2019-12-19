@@ -1522,9 +1522,9 @@ Util.flatTree = function(tree, addOutput) {
   if(typeof tree.children == "object" && tree.children.length) for(let child of tree.children) Util.flatTree(child, addOutput);
   return ret;
 };
-Util.traverseTree = function(tree, fn) {
-  fn(tree);
-  if(typeof tree.children == "object" && tree.children.length) for(let child of tree.children) Util.traverseTree(child, fn);
+Util.traverseTree = function(tree, fn, depth = 0) {
+  fn(tree, depth);
+  if(typeof tree.children == "object" && tree.children.length) for(let child of tree.children) Util.traverseTree(child, fn, depth + 1);
 };
 
 module.exports = Util;

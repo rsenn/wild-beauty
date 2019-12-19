@@ -58,8 +58,10 @@ const LoginForm = inject("rootStore")(
                   }}
                   ref={input => {
                     if(!focus) {
-                      if(input) input.focus();
-                      setFocus(true);
+                      if(input && document.activeElement !== input) {
+                        input.focus();
+                        setFocus(true);
+                      }
                     }
                   }}
                 />
@@ -115,8 +117,12 @@ const LoginForm = inject("rootStore")(
               position: relative;
 
               font-family: Fixed;
-              font-size: 15px;
+              font-size: 13px;
               overflow: hidden;
+
+              -webkit-user-select: text;
+              user-select: text;
+              min-height: 300px;
             }
             form.login {
               position: absolute;
@@ -125,8 +131,9 @@ const LoginForm = inject("rootStore")(
               padding: 10px;
               display: flex;
               flex-flow: column nowrap;
-              justify-content: ;
               minheight: 50vmin;
+              -webkit-user-select: text;
+              user-select: text;
             }
             .form-row {
               flex: 1 1 auto;
@@ -176,7 +183,7 @@ const LoginForm = inject("rootStore")(
             .form-label,
             .form-value {
               vertical-align: bottom;
-              margin: 4px 0 4px 0;
+              margin: 0 0 0 0;
             }
             .login-view {
               position: relative;
@@ -209,6 +216,12 @@ const LoginForm = inject("rootStore")(
               padding: 2px 2px;
               width: 100%;
               border: 1px #c0c0c0 inset;
+              border-bottom: 1px #808080 solid;
+              border-right: 1px #808080 solid;
+
+              -webkit-user-select: text;
+              user-select: text;
+              color: black;
             }
 
             .sk-cube-grid {

@@ -11,6 +11,7 @@ import ApolloClient from "apollo-boost";
 import { TouchCallback } from "../components/TouchCallback.js";
 import LoginForm from "../components/login.js";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspectBox.js";
+import { Tree } from "../components/tree.js";
 import { action, toJS, autorun, observable } from "mobx";
 import Nav from "../components/nav.js";
 import { createStore, getOrCreateStore } from "../stores/createStore.js";
@@ -154,6 +155,7 @@ class Show extends React.Component {
     let rect = Element.rect(e);
     let points = rect.toPoints().map(p => [p.x, p.y]);
     let rect2 = Element.rect("#item-grid");
+    let lrect = Element.rect(".show-layout2");
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
     //console.log("handleClick:\nrect: ", rect.toString(), "\npoints: ", PointList.toString(points), "\nrect2: ", rect2.toString(), "\npoints2: ", PointList.toString(points2));
     var trn = affineFit(points, points2);
@@ -165,7 +167,7 @@ class Show extends React.Component {
 
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
     m = Matrix.translate(m, rect2.center.x, rect2.center.x);
-    m = Matrix.translate(m, 0, window.scrollY);
+    m = Matrix.translate(m, 0, window.scrollY + lrect.y);
 
     m.xx *= scale[0];
     m.yy *= scale[1];
@@ -241,7 +243,8 @@ class Show extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <div className={"show-layout"}>
+        <div className={"show-layout2"}>
+          <Tree tree={tree} />
           {tree ? (
             <DropdownTreeSelect
               data={tree}
@@ -338,8 +341,11 @@ class Show extends React.Component {
             width: 100vw;
             padding: 0px 20px;
             box-sizing: border-box;
-            overflow: auto;
+            overflow: visible;
             min-height: 60vh;
+          }
+          .show-layout2 {
+            padding: 0px 20px;
           }
           .gallery-image {
             height: auto;

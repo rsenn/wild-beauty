@@ -219,7 +219,7 @@ const Nav = inject(
             onRequestClose={() => setLoginOpen(false)}
             style={{
               overlay: customStyles.overlay,
-              content: { ...customStyles.content, maxWidth: "320px", maxHeight: "320px" }
+              content: { ...customStyles.content, maxWidth: "320px", minHeight: "300px", maxHeight: "75vh" }
             }}
             contentLabel="Login Modal"
             closeTimeoutMS={1000}
@@ -350,7 +350,7 @@ const Nav = inject(
               min-height: 112px;
               padding: 0 0 0 0;
               position: relative;
-              left: -14px;
+              left: 0px;
             }
             ul {
               direction: ltr;
