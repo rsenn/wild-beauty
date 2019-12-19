@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Layer from "../components/layer.js";
-import { Element, Node, HSLA, PointList, Point, Rect, Matrix } from "../utils/dom.js";
+import { Element, Node, HSLA, PointList, Point, Rect, Matrix , Timer } from "../utils/dom.js";
 import getAPI from "../utils/api.js";
 import Util from "../utils/util.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
@@ -131,16 +131,38 @@ class Show extends React.Component {
 
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
     }
-
-    //this.selectNode(item);
-
-    /* console.log("this.tree: ", this.tree);
-    console.log("item: ", item);
-    console.log("parentIds: ", this.state.parentIds);*/
   }
+
+checkTagRemove() {
+      if(global.window) {
+      let tagRemove = Element.find('button.tag-remove');
+
+if(tagRemove) {
+      tagRemove.addEventListener('click', e => {
+        e.preventDefault();
+         Timer.once(100, () => {
+                    console.log("tagRemove: ", tagRemove);
+
+        Util.traverseTree(this.tree, node => {
+          node.checked = false;
+        });
+        this.forceUpdate();
+      });
+      });
+    }
+    return tagRemove;
+  }
+}
 
   componentDidMount() {
     const { rootStore, router } = this.props;
+
+this.checkTagRemove();
+  }
+
+  componentDidUpdate() {
+    this.checkTagRemove();
+
   }
 
   @action.bound
@@ -151,10 +173,10 @@ class Show extends React.Component {
     this.setState({ parentIds: ids });
   }
 
-  @action.bound
   treeSelEvent(type, arg) {
     const { rootStore } = this.props;
-    switch (type) {
+         console.log("treeSelEvent: ", type, arg);
+   switch (type) {
       case "change": {
         console.log("treeSelEvent: ", arg.value);
         Util.traverseTree(this.tree, item => {
@@ -171,7 +193,6 @@ class Show extends React.Component {
         break;
       }
       default: {
-        //console.log("treeSelEvent: ", type, arg);
         break;
       }
     }
@@ -358,11 +379,7 @@ class Show extends React.Component {
             {tree ? (
               <DropdownTreeSelect
                 data={tree}
-                onChange={obj => {
-                  //console.log("Tree value: ", obj);
-                  rootStore.state.parent_id = obj.value;
-                  makeTreeSelEvent("change")(obj);
-                }}
+                onChange={ makeTreeSelEvent("change")}
                 onNodeToggle={makeTreeSelEvent("node-toggle")}
                 onFocus={makeTreeSelEvent("focus")}
                 onBlur={makeTreeSelEvent("blur")}
@@ -386,7 +403,7 @@ class Show extends React.Component {
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
                   //    console.log("photo: ", photo);
-                  let { data, parent, type, children, users } = item;
+                  let { data, name,  parent, type, children, users } = item;
                   try {
                     data = item.data && item.data.length && JSON.parse(item.data);
                   } catch(err) {
@@ -439,6 +456,7 @@ class Show extends React.Component {
                           )}
                           Parent Id: {parent ? parent.id : -1} <br />
                           {!!type ? `Type: ${type}` : undefined}
+                          {!!name ? `Name: ${name}` : undefined}
                           <br />
                           <br />
                           <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>
@@ -528,6 +546,18 @@ class Show extends React.Component {
           }
           .dropdown-content {
             z-index: 12;
+          }
+          button.tag-remove {
+            transform: translateY(-3px);
+            min-height: 21.5px;
+            min-width: 21.5px;
+            padding: 2px;
+            margin: 0 3px;
+            border-width: 1px;
+            color: red;
+          }
+          span.tag, span.node-label {
+              font-size: 15px;
           }
         `}</style>
       </div>

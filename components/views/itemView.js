@@ -39,10 +39,10 @@ export const ItemView = inject("rootStore")(
           </div>
         </div>
         <a className={"button-prev"} href={"#"} onClick={e => { e.preventDefault(); if(typeof(onPrev) == 'function') onPrev(e); }}>
-          <ArrowNext innerFill={'hsla(160,100%,50%,1)'} style={{ transform: "scaleX(-1)" }} />
+          <ArrowNext innerFill={'hsla(300,80%,40%,1)'} style={{ transform: "scaleX(-1)" }} />
         </a>
         <a className={"button-next"} href={"#"} onClick={e => { e.preventDefault(); if(typeof(onNext) == 'function') onNext(e); }}>
-          <ArrowNext innerFill={'hsla(220,100%,50%,1)'} />
+          <ArrowNext innerFill={'hsla(250,100%,60%,1)'} />
         </a>
        
         <style jsx global>{`
