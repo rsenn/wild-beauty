@@ -35,7 +35,7 @@ const maxZIndex = () => {
 };
 
 const findInTree = (tree, value) => {
-  if(tree.value === value  || tree.label === value) return tree;
+  if(tree.value === value || tree.label === value) return tree;
   if(tree.children) {
     for(let child of tree.children) {
       let ret = findInTree(child, value);
@@ -83,7 +83,7 @@ class Show extends React.Component {
       "users { user { id username last_seen } }"
     ]);
     //await RootStore.fetchItems();
-   // console.log("Show.getInitialProps  items:", items);
+    // console.log("Show.getInitialProps  items:", items);
     items = items.sort((a, b) => a.id - b.id);
     RootStore.items.clear();
     //  items.forEach(item => RootStore.newItem(item));
@@ -109,7 +109,7 @@ class Show extends React.Component {
     //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
 
-    var item = findInTree(this.tree, 'Objects');
+    var item = findInTree(this.tree, "Objects");
 
     item.checked = true;
 
@@ -117,7 +117,7 @@ class Show extends React.Component {
 
     //this.selectNode(item);
 
-   /* console.log("this.tree: ", this.tree);
+    /* console.log("this.tree: ", this.tree);
     console.log("item: ", item);
     console.log("parentIds: ", this.state.parentIds);*/
   }
@@ -128,10 +128,10 @@ class Show extends React.Component {
 
   @action.bound
   selectNode(item) {
-              var children = Util.flatTree(item);
-          var ids = children.map(child => child.id);
-          console.log("treeSelEvent: ", ids, item.title);
-          this.setState({ parentIds: ids });
+    var children = Util.flatTree(item);
+    var ids = children.map(child => child.id);
+    console.log("treeSelEvent: ", ids, item.title);
+    this.setState({ parentIds: ids });
   }
 
   @action.bound
@@ -148,8 +148,8 @@ class Show extends React.Component {
           item.checked = true;
           this.state.node = item.value;
           //  this.tree = rootStore.getItem(this.state.node, makeItemToOption());
-this.selectNode(item);
-       }
+          this.selectNode(item);
+        }
         //rootStore.setState({ selected: arg.value });
         break;
       }
@@ -166,7 +166,8 @@ this.selectNode(item);
     let e = event.currentTarget;
 
     if(this.element === e) {
-      this.grid.style.transform = '';
+      this.grid.style.transition = `transform ${this.speed}s ease-in-out`;
+      this.grid.style.transform = "";
 
       this.element = null;
 
@@ -185,7 +186,7 @@ this.selectNode(item);
     while(e.parentElement && !e.classList.contains("tile")) {
       e = e.parentElement;
     }
-    let grid =Element.find("#item-grid");
+    let grid = Element.find("#item-grid");
     let b = Element.find(".page-layout");
     let brect = Element.rect("body");
 
@@ -199,24 +200,25 @@ this.selectNode(item);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
     console.log("matrix fromTriangles: ", matrix);
 
-var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
+    var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
     var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
 
-var pt = new Point(srect.center);
-pt.y += window.scrollY;
-     var t = Point.diff(pt, rect.center);
-     var distance = Math.sqrt(t.x*t.x + t.y*t.y);
-     this.speed = distance / 100;
+    var pt = new Point(srect.center);
+   pt.y += window.scrollY;
+    var t = Point.diff(pt, rect.center);
 
-     var gm = Matrix.init_translate(t.x, t.y);
-          console.log("translation:  ", t);
 
+    var distance = Math.sqrt(t.x * t.x + t.y * t.y);
+    this.speed = distance * 0.002;
+
+    var gm = Matrix.init_translate(t.x, t.y);
+    console.log("translation:  ", t);
 
     var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
     m = Matrix.translate(m, rect2.center.x, rect2.center.x);
-    m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2 );
+    m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2);
     m.xx *= scale[0];
     m.yy *= scale[1];
     //m = Matrix.scale.apply(Matrix, scale);
@@ -231,27 +233,27 @@ pt.y += window.scrollY;
     //    Element.setCSS(back, { left: 0, top: 0, width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
     this.element = e;
 
-this.grid = b;
-e = this.grid;
-         Element.setCSS(this.grid, { transition: `transform ${ 0.0001 /*this.speed*/ }s ease-in-out`, transform: "", zIndex: 8 });
+    this.grid = grid;
+    e = this.grid;
+    Element.setCSS(this.grid, { transition: `transform ${this.speed}s ease-in`, transform: "", zIndex: 8 });
 
     var tend = e => {
-          console.log("transition end: ", e.target);
-  /* gm.xx *= scale[0];
+      console.log("transition end: ", e.target);
+      /* gm.xx *= scale[0];
     gm.yy *= scale[1];*/
-  
-  dm = new DOMMatrix();
-         var t2 = Point.diff(srect.center, rect.center);
-    dm.translateSelf( 0, rect.height  + rect2.y );
 
-    dm.scaleSelf(scale[0], scale[1]);
-    dm.translateSelf( t2.x, t2.y );
-    console.log("dm: ", dm);
-     // var gm2 = Matrix.scale(gm, scale[0], scale[1]);
-          e.target.style.transition = `transform ${this.speed}s ease-out`;
+      dm = new DOMMatrix();
+      var t2 = Point.diff(srect.center, rect.center);
+      dm.translateSelf(0, rect.height + rect2.y + window.scrollY);
 
-    e.target.style.transform = /*Matrix.toDOMMatrix(gm)*/dm.toString();
-     /* let back = Element.create("div", {
+      dm.scaleSelf(scale[0], scale[1]);
+      dm.translateSelf(t2.x, t2.y);
+      console.log("dm: ", dm);
+      // var gm2 = Matrix.scale(gm, scale[0], scale[1]);
+      e.target.style.transition = `transform 0.5s ease-out`;
+
+      e.target.style.transform = /*Matrix.toDOMMatrix(gm)*/ dm.toString();
+      /* let back = Element.create("div", {
         parent: document.body,
         style: {
          background: "url(/static/img/tile-background.png) repeat",
@@ -276,9 +278,8 @@ e = this.grid;
 */
     e.style.setProperty("transition", `transform ${this.speed} ease-out`);
     e.style.setProperty("transform", dms);
-   // e.style.setProperty("background-color", "white");
+    // e.style.setProperty("background-color", "white");
     e.style.setProperty("z-index", 9);
-
 
     if(global.window) {
       window.t = e;
@@ -322,7 +323,7 @@ e = this.grid;
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
     const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
-    console.log("Show.render"/*, { tree, items }*/);
+    console.log("Show.render" /*, { tree, items }*/);
     return (
       <div className={"page-layout"} {...TouchEvents(touchListener)}>
         <Head>
@@ -363,7 +364,7 @@ e = this.grid;
                 const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
                 const opacity = photo_id >= 0 ? 1 : 0.3;
                 if(photo !== null) photo.landscape = photo.width > photo.height;
-            //    console.log("photo: ", photo);
+                //    console.log("photo: ", photo);
                 let { data, parent, type, children, users } = item;
                 try {
                   data = item.data && item.data.length && JSON.parse(item.data);

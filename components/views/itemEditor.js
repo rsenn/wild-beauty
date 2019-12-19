@@ -67,7 +67,7 @@ export const ItemEditor = inject("rootStore")(
               name={field.type}
               value={field.value}
               onNameChanged={newName => {
-                field.multiline = String(newName).toLowerCase() == 'text';
+                field.multiline = String(newName).toLowerCase() == "text";
                 field.type = newName;
               }}
               onValueChanged={newVal => {

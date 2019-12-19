@@ -13,7 +13,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
 
   const changeName = name => {
     setName(name);
-    multiline = (String(name).toLowerCase() == 'text');
+    multiline = String(name).toLowerCase() == "text";
     onNameChanged(name.label);
   };
 
@@ -29,7 +29,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
 
   let content = isEditing ? (
     <React.Fragment>
-      {(multiline  || String(name).toLowerCase() == 'text') ? (
+      {multiline || String(name).toLowerCase() == "text" ? (
         <textarea
           className={classNames("content", className + "-content")}
           rows={lines}
