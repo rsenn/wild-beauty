@@ -3,13 +3,22 @@ import { inject, observer } from "mobx-react";
 import { toJS } from "mobx";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../simple/aspectBox.js";
 
-const ArrowNext = ({ innerFill = "#ffffff", ... props }) => 
-<svg height="48" id="svg8" width="48" {...props} preserveAspectRatio="xMidYMid meet" version="1.0" viewBox="0 0 47.487945 47.487945" xmlns="http://www.w3.org/2000/svg">
-  <defs />
-    <path id="path5290-5-6-6-3" style={{"opacity":"1","fill":innerFill,"fillOpacity":"1","stroke":"none","strokeWidth":"2.061728","strokeMiterlimit":"4","paintOrder":"markers stroke fill" }} d="M 31.052734 13.316406 L 31.052734 25.316406 L 12.400391 25.316406 L 12.400391 40.316406 L 31.052734 40.318359 L 31.052734 50.316406 L 51.828125 32.316406 L 31.052734 13.316406 z " transform="scale(0.74999999)"/>
-  <path style={{ "opacity":"1","fill":"#000000","fillOpacity":"1","stroke":"none","strokeWidth":"2.061728","strokeMiterlimit":"4","paintOrder":"markers stroke fill"}} d="M 0.0546875,0.0546875 V 63.263672 H 63.263672 V 0.0546875 Z m 30.9980465,13.2625735 20.775391,19 -20.775391,18 V 40.318212 L 12.4,40.31631 V 25.317261 h 18.652734 z" transform="scale(0.74999999)" />
-</svg>
-
+const ArrowNext = ({ innerFill = "#ffffff", ...props }) => (
+  <svg height="48" id="svg8" width="48" {...props} preserveAspectRatio="xMidYMid meet" version="1.0" viewBox="0 0 47.487945 47.487945" xmlns="http://www.w3.org/2000/svg">
+    <defs />
+    <path
+      id="path5290-5-6-6-3"
+      style={{ opacity: "1", fill: innerFill, fillOpacity: "1", stroke: "none", strokeWidth: "2.061728", strokeMiterlimit: "4", paintOrder: "markers stroke fill" }}
+      d="M 31.052734 13.316406 L 31.052734 25.316406 L 12.400391 25.316406 L 12.400391 40.316406 L 31.052734 40.318359 L 31.052734 50.316406 L 51.828125 32.316406 L 31.052734 13.316406 z "
+      transform="scale(0.74999999)"
+    />
+    <path
+      style={{ opacity: "1", fill: "#000000", fillOpacity: "1", stroke: "none", strokeWidth: "2.061728", strokeMiterlimit: "4", paintOrder: "markers stroke fill" }}
+      d="M 0.0546875,0.0546875 V 63.263672 H 63.263672 V 0.0546875 Z m 30.9980465,13.2625735 20.775391,19 -20.775391,18 V 40.318212 L 12.4,40.31631 V 25.317261 h 18.652734 z"
+      transform="scale(0.74999999)"
+    />
+  </svg>
+);
 
 export const ItemView = inject("rootStore")(
   observer(({ rootStore, id, onPrev, onNext }) => {
@@ -38,13 +47,27 @@ export const ItemView = inject("rootStore")(
             <p>{item.data.text}</p>
           </div>
         </div>
-        <a className={"button-prev"} href={"#"} onClick={e => { e.preventDefault(); if(typeof(onPrev) == 'function') onPrev(e); }}>
-          <ArrowNext innerFill={'hsla(300,80%,40%,1)'} style={{ transform: "scaleX(-1)" }} />
+        <a
+          className={"button-prev"}
+          href={"#"}
+          onClick={e => {
+            e.preventDefault();
+            if(typeof onPrev == "function") onPrev(e);
+          }}
+        >
+          <ArrowNext innerFill={"hsla(300,80%,40%,1)"} style={{ transform: "scaleX(-1)" }} />
         </a>
-        <a className={"button-next"} href={"#"} onClick={e => { e.preventDefault(); if(typeof(onNext) == 'function') onNext(e); }}>
-          <ArrowNext innerFill={'hsla(250,100%,60%,1)'} />
+        <a
+          className={"button-next"}
+          href={"#"}
+          onClick={e => {
+            e.preventDefault();
+            if(typeof onNext == "function") onNext(e);
+          }}
+        >
+          <ArrowNext innerFill={"hsla(250,100%,60%,1)"} />
         </a>
-       
+
         <style jsx global>{`
           .item-view {
             position: relative;
@@ -70,7 +93,7 @@ export const ItemView = inject("rootStore")(
           .item-box-size {
             flex: 1 1 auto;
             min-width: 79.9vmin;
-          min-height: 79.9vmin;
+            min-height: 79.9vmin;
             max-width: 80vmin;
             max-height: 80vmin;
             box-shadow: 1px 1px 4px 0px rgba(0, 0, 0, 0.6);

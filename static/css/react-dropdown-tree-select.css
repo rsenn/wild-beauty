@@ -33,7 +33,7 @@
   display: inline;
   padding: 0;
   margin: 0;
-  height:  36px;
+  height: 36px;
 }
 .tag-item {
   display: inline-block;
@@ -150,7 +150,7 @@ ul.tag-list {
   height: 36px;
 }
 li.tag-item {
-  transform:  translateY(-2px);
+  transform: translateY(-2px);
 }
 li.tag-item > input.search {
   width: 100%;
@@ -193,6 +193,5 @@ ul.tag-list > li > input.search {
   transform: translateY(2px);
 }
 span.tag {
-    height: 28px;
-
+  height: 28px;
 }

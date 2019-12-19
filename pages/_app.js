@@ -165,7 +165,7 @@ class MyApp extends App {
             white-space: pre;
           }
 
-                    button {
+          button {
             -webkit-appearance: none;
             border: 1px outset #555555;
             border-radius: 5px;

@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Layer from "../components/layer.js";
-import { Element, Node, HSLA, PointList, Point, Rect, Matrix , Timer } from "../utils/dom.js";
+import { Element, Node, HSLA, PointList, Point, Rect, Matrix, Timer } from "../utils/dom.js";
 import getAPI from "../utils/api.js";
 import Util from "../utils/util.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
@@ -133,36 +133,35 @@ class Show extends React.Component {
     }
   }
 
-checkTagRemove() {
-      if(global.window) {
-      let tagRemove = Element.find('button.tag-remove');
+  checkTagRemove() {
+    if(global.window) {
+      let tagRemove = Element.find("button.tag-remove");
 
-if(tagRemove) {
-      tagRemove.addEventListener('click', e => {
-        e.preventDefault();
-         Timer.once(100, () => {
-                    console.log("tagRemove: ", tagRemove);
+      if(tagRemove) {
+        tagRemove.addEventListener("click", e => {
+          e.preventDefault();
+          Timer.once(100, () => {
+            console.log("tagRemove: ", tagRemove);
 
-        Util.traverseTree(this.tree, node => {
-          node.checked = false;
+            Util.traverseTree(this.tree, node => {
+              node.checked = false;
+            });
+            this.forceUpdate();
+          });
         });
-        this.forceUpdate();
-      });
-      });
+      }
+      return tagRemove;
     }
-    return tagRemove;
   }
-}
 
   componentDidMount() {
     const { rootStore, router } = this.props;
 
-this.checkTagRemove();
+    this.checkTagRemove();
   }
 
   componentDidUpdate() {
     this.checkTagRemove();
-
   }
 
   @action.bound
@@ -175,8 +174,8 @@ this.checkTagRemove();
 
   treeSelEvent(type, arg) {
     const { rootStore } = this.props;
-         console.log("treeSelEvent: ", type, arg);
-   switch (type) {
+    console.log("treeSelEvent: ", type, arg);
+    switch (type) {
       case "change": {
         console.log("treeSelEvent: ", arg.value);
         Util.traverseTree(this.tree, item => {
@@ -379,7 +378,7 @@ this.checkTagRemove();
             {tree ? (
               <DropdownTreeSelect
                 data={tree}
-                onChange={ makeTreeSelEvent("change")}
+                onChange={makeTreeSelEvent("change")}
                 onNodeToggle={makeTreeSelEvent("node-toggle")}
                 onFocus={makeTreeSelEvent("focus")}
                 onBlur={makeTreeSelEvent("blur")}
@@ -403,7 +402,7 @@ this.checkTagRemove();
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
                   //    console.log("photo: ", photo);
-                  let { data, name,  parent, type, children, users } = item;
+                  let { data, name, parent, type, children, users } = item;
                   try {
                     data = item.data && item.data.length && JSON.parse(item.data);
                   } catch(err) {
@@ -556,8 +555,9 @@ this.checkTagRemove();
             border-width: 1px;
             color: red;
           }
-          span.tag, span.node-label {
-              font-size: 15px;
+          span.tag,
+          span.node-label {
+            font-size: 15px;
           }
         `}</style>
       </div>
