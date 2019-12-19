@@ -22,9 +22,17 @@ const ArrowNext = ({ innerFill = "#ffffff", ...props }) => (
 
 export const ItemView = inject("rootStore")(
   observer(({ rootStore, id, onPrev, onNext }) => {
-    const item = rootStore.getItem(id);
+    let item = rootStore.getItem(id);
     console.log("Item ID: ", id);
     console.log("Item: ", toJS(item));
+
+    if(!item.photos || !item.photos.length )
+      item.photos = [{
+href: '/static/img/no-image.svg',
+width: 512,
+height: 512,
+id: -1
+      }];
 
     return (
       <React.Fragment>
@@ -32,7 +40,7 @@ export const ItemView = inject("rootStore")(
           {(item && item.photos && item.photos.map) ? item.photos.map(photo => (
             <SizedAspectRatioBox className={"item-box"}>
               <img
-                src={`/api/image/get/${photo.id}`}
+                src={photo.href || `/api/image/get/${photo.id}`}
                 width={photo.width}
                 height={photo.height}
                 style={{

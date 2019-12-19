@@ -23,6 +23,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     //console.log("res: ", res);
 
     if(res.errors !== undefined) {
+    console.error("res.errors: ", res.errors);
       throw Error(res.errors[0].message);
     }
 

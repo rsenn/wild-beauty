@@ -87,7 +87,12 @@ class Show extends React.Component {
     let items;
 
     if(params && params.id !== undefined) {
-      let response = await Show.API.select("items", { id: params.id }, Show.fields);
+      let id = parseInt(params.id);
+      const name = params.id;
+      if(isNaN(id) || typeof(id) != 'number') id = -1;
+      const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
+      console.log("query: ", q);
+      let response = await Show.API(q);
       items = response.items || [];
       console.log("item: ", items[0]);
     } else {

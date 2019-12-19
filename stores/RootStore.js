@@ -226,7 +226,7 @@ export class RootStore {
    */
   @action
   newItem(item) {
-    var childIds = item.children.map(child => child.id).sort();
+    var childIds = (item.children && item.children.map) ? item.children.map(child => child.id).sort() : [];
     var id = parseInt(item.id);
     item = { ...item, id, childIds };
     //delete item.children;
