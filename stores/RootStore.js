@@ -200,8 +200,10 @@ export class RootStore {
   get currentImage() {
     const id = this.state.image;
     let image = this.getImage(id);
-    image.id = parseInt(id);
-    image.landscape = image.width > image.height;
+    if(image !== null) {
+      image.id = parseInt(id);
+      image.landscape = image.width > image.height;
+    }
     return image;
   }
 
@@ -448,6 +450,8 @@ export class RootStore {
       this.auth.token = "";
       this.auth.user_id = -1;
       localStorage.removeItem("auth");
+      Util.deleteCookie("token");
+      Util.deleteCookie("user_id");
       //    this.enableAutoRun();
       completed();
     });

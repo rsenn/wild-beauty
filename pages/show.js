@@ -53,6 +53,8 @@ const makeItemToOption = selected => item => {
   let obj = { label, title: label, id: value, parent_id: item.parent_id, value, expanded: true, checked: selected === value };
   if(children && children.length) obj.children = children;
   if(label.startsWith("null(")) return null;
+  if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
+  //if(item.parent_id != -1 && item.parent_id != 1 && item.type !== null && !item.type.endsWith('category')) return null;
   return obj;
 };
 
@@ -142,13 +144,29 @@ class Show extends React.Component {
   }
 
   handleClick = event => {
+    const { nativeEvent } = event;
+    console.log("handleClick", event.buttons, nativeEvent.buttons, nativeEvent);
     let e = event.currentTarget;
+      
+
+
+    if(this.element === e) {
+      e.style.setProperty("transform", "none");
+
+      this.element = null;
+
+if(this.back) {
+      this.back.parentElement.removeChild(this.back);
+      this.back = null;
+    }
+      return;
+    }
 
     Element.findAll(".tile").forEach(e => {
-      e.style.setProperty("transition", "transform 0.3s linear");
+      if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
+      /*    e.style.setProperty("transition", "transform 0.2s ease-in");*/
       e.style.setProperty("transform", "none");
     });
-
     while(e.parentElement && !e.classList.contains("tile")) {
       e = e.parentElement;
     }
@@ -159,39 +177,66 @@ class Show extends React.Component {
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
     //console.log("handleClick:\nrect: ", rect.toString(), "\npoints: ", PointList.toString(points), "\nrect2: ", rect2.toString(), "\npoints2: ", PointList.toString(points2));
     var trn = affineFit(points, points2);
-    //console.log("trn: ", trn.M);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
+    console.log("matrix fromTriangles: ", matrix);
+ 
+ var size = Math.min(rect2.width, window.innerHeight );
 
-    var scale = [(rect2.width / rect.width) * 1, (rect2.width / rect.height) * 1];
+    var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
-
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
     m = Matrix.translate(m, rect2.center.x, rect2.center.x);
-    m = Matrix.translate(m, 0, window.scrollY + lrect.y);
-
+    m = Matrix.translate(m, 0, window.scrollY +  rect2.y / 2/*- rect.height / 2 + rect2.width / 2*/);
     m.xx *= scale[0];
     m.yy *= scale[1];
-
     //m = Matrix.scale.apply(Matrix, scale);
-
     var dm = Matrix.toDOMMatrix(m);
     //console.log("matrix: ", m);
-
     var dms = dm.toString();
 
     //console.log("event.target: ", e);
-    e.style.setProperty("transition", "transform 1s ease-out");
+    let brect = Element.rect("body");
+    
 
+  //  Element.setCSS(back, { opacity: 1 });
+  //  Element.setCSS(back, Rect.toCSS(brect));
+//    Element.setCSS(back, { left: 0, top: 0, width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
+
+var tend = e => {
+     let back = Element.create("div", {
+      parent: document.body,
+      style: {
+        background: "url(static/img/tile-background.png) repeat",
+        backgroundSize: "auto 50vmin",
+        zIndex: 8,
+        position: "fixed",
+        ...Rect.toCSS(Element.rect(e.target)),
+      //  transition: 'opacity 1s ease-in-out'
+       transition: "left 0.2s ease-out, top 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out"
+      }});
+      this.back = back;
+     Element.setCSS(back, Rect.toCSS(brect));
+e.target.removeEventListener('transitionend', tend);
+    };
+
+   e.addEventListener('transitionend', tend);
+    console.log("rect: ", rect);
+    
+  /*  back.style.setProperty("opacity", 1);
+   });
+*/
+    e.style.setProperty("transition", "transform 0.2s ease-out");
     e.style.setProperty("transform", dms);
     e.style.setProperty("background-color", "white");
-    e.style.setProperty("z-index", this.state.zIndex++);
+    e.style.setProperty("z-index", 9);
+
+    this.element = e;
 
     if(global.window) {
       window.t = e;
       window.m = m;
     }
   };
-
   render() {
     const { rootStore } = this.props;
     let swipeEvents = {};
@@ -219,13 +264,7 @@ class Show extends React.Component {
       document.forms[0].submit();
       //console.log("onChange: ", value);
     };
-    const list = [
-      "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
-      "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
-      "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
-      "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
-      "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
-    ];
+
     if(global.window) {
       window.addEventListener("resize", event => {
         const { currentTarget, target } = event;
@@ -245,7 +284,7 @@ class Show extends React.Component {
         <Nav loading={rootStore.state.loading} />
         <div className={"show-layout2"}>
           {/*          <Tree tree={tree} />
-           */}{" "}
+           */}
           {tree ? (
             <DropdownTreeSelect
               data={tree}
@@ -265,18 +304,19 @@ class Show extends React.Component {
             undefined
           )}
           {/*          <img src={"static/img/test.svg"} />
-           */}{" "}
+           */}
           <div id={"item-grid"} style={{ margin: "0 0" }}>
             <div className={"grid-col grid-gap-20"}>
               {items.map(item => {
                 // console.log("item: ", item);
                 const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                 const haveImage = photo_id >= 0;
+                let photo = haveImage ? item.photos[0].photo : null;
                 const path = haveImage ? `/api/image/get/${photo_id}` : "static/img/no-image.svg";
                 const opacity = photo_id >= 0 ? 1 : 0.3;
-                //    console.log("item: ", item);
+                if(photo !== null) photo.landscape = photo.width > photo.height;
+                console.log("photo: ", photo);
                 let { data, parent, type, children, users } = item;
-
                 try {
                   data = item.data && item.data.length && JSON.parse(item.data);
                 } catch(err) {
@@ -284,21 +324,28 @@ class Show extends React.Component {
                 }
                 if(typeof data != "object" || data === null) data = {};
                 //        console.log("data: ", data);
-
                 return (
                   <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                     <SizedAspectRatioBox
                       style={{
                         position: "relative",
-                        border: "1px solid black",
+                       // border: "1px solid black",
                         boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
-
                         overflow: "hidden"
                       }}
                       className={"layer gallery-aspect-box"}
                     >
-                      {haveImage ? <img src={path} style={{ maxWidth: "28vw", width: "100%", height: "auto", opacity }} className="gallery-image" /> : undefined}
-
+                      {haveImage ? (
+                        <img
+                          src={path}
+                          width={photo.width}
+                          height={photo.height}
+                          style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }}
+                          className="gallery-image"
+                        />
+                      ) : (
+                        undefined
+                      )}
                       <div
                         style={{
                           position: "absolute",
@@ -402,9 +449,11 @@ class Show extends React.Component {
             flex-direction: row;
             justify-content: space-around;
           }
-
           .tile {
             transition: transform 1s ease-in-out;
+          }
+          .dropdown-content {
+            z-index: 12;
           }
         `}</style>
       </div>

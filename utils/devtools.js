@@ -837,7 +837,7 @@ export function rect() {
   let parent = null;
 
   let rect = args.shift();
-  if(rect.tagName !== undefined) {
+  if(typeof rect == "string" || rect.tagName !== undefined) {
     parent = rect;
     rect = Element.rect(rect);
   }

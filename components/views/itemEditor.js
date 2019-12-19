@@ -98,10 +98,10 @@ export const ItemEditor = inject("rootStore")(
             }}
           >
             <button onClick={rootStore.saveItem} className={"save"}>
-              <img src={"static/img/icon-save.svg"} />{" "}
+              <img src={"static/img/icon-save.svg"} />
             </button>
           </AddItemBar>
-        </div>{" "}
+        </div>
         <style jsx global>{`
           .content-edit {
             position: relative;
@@ -112,7 +112,6 @@ export const ItemEditor = inject("rootStore")(
             max-width: 50vw;
           }
           .item-fields {
-            padding: 0 30px 0 30px;
           }
           .item-photo {
             display: flex;
@@ -154,8 +153,14 @@ export const ItemEditor = inject("rootStore")(
           }
           button.save,
           button.button-add {
-            width: 64px;
-            height: 32px;
+            margin: 1px;
+            width: 77px;
+            height: 38px;
+          }
+          button.icon {
+            margin: 1px;
+            width: 38px;
+            height: 38px;
           }
           button.save {
             position: absolute;

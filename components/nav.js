@@ -32,7 +32,7 @@ let customStyles = {
     right: 0,
     bottom: 0,
     backgroundColor: "rgba(78, 34, 255, 1)",
-    zIndex: 10
+    zIndex: 12
   },
   content: {
     width: "75vmin",
@@ -47,7 +47,8 @@ let customStyles = {
     transform: "translate(-50%, -50%)",
     /*    background: "url(static/img/tile-background.jpg) repeat",
     backgroundSize: "auto 50vmin",
-*/ zIndex: 10
+*/ zIndex: 13,
+    overflow: "hidden"
   }
 };
 Modal.setAppElement("#__next");
@@ -246,13 +247,13 @@ const Nav = inject(
             <div className={"flagbox"}>
               <div className={"flaglist"}>
                 <div onClick={() => setLanguage(i18nStore, "de", setLanguageOpen)}>
-                  <ReactCountryFlag code={"de"} svg className={"country-flag"} styleProps={{ width: "24vmin", height: "18.12vmin", margin: "10px 10px" }} />
+                  <img src={"static/img/flag-de.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
                 </div>
                 <div onClick={() => setLanguage(i18nStore, "fr", setLanguageOpen)}>
-                  <ReactCountryFlag code={"fr"} svg className={"country-flag"} styleProps={{ width: "24vmin", height: "18.12vmin", margin: "10px 10px" }} />
+                  <img src={"static/img/flag-fr.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
                 </div>
                 <div onClick={() => setLanguage(i18nStore, "en", setLanguageOpen)}>
-                  <ReactCountryFlag code={"gb"} svg className={"country-flag"} styleProps={{ width: "24vmin", height: "18.12vmin", margin: "10px 10px" }} />
+                  <img src={"static/img/flag-gb.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
                 </div>
               </div>
             </div>
@@ -305,9 +306,10 @@ const Nav = inject(
           <style jsx global>{`
             .flagbox {
               width: 100%;
-              height: 100%;
               box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 1);
               overflow: hidden;
+              background: url(static/img/tile-background.png) repeat;
+              background-size: 33% auto;
             }
             .country-flag {
               opacity: 1;
@@ -323,22 +325,27 @@ const Nav = inject(
             div < .country-flag:hover {
               transform: rotateZ(360deg);
             }
+
+            .flaglist > div > img {
+            }
+
             .flaglist {
               position: relative;
               top: 50%;
-              transform: translateY(-50%);
+
               display: flex;
               flex-flow: row wrap;
-              justify-content: space-around;
+              justify-content: center;
               align-items: center;
               padding: auto 0;
+              border: 1px solid black;
             }
             ul.menu {
               font-family: Fixed;
               float: right;
             }
             div.menu {
-              z-index: 12;
+              z-index: 9;
               text-align: center;
               display: flex;
               color: white;
@@ -371,13 +378,13 @@ const Nav = inject(
             }
             .ReactModal__Overlay {
               transition: transform 1000ms linear;
-              transform: perspective(300px) translate3d(50vw, -50vh, 0) rotateX(-45deg) rotateY(-45deg) rotateZ(90deg) scale3d(0.02, 0.02, 1);
+              transform: perspective(1000px) translate3d(50vw, -50vh, 50px) rotateX(-45deg) rotateY(-45deg) rotateZ(90deg) scale3d(0.02, 0.02, 1);
             }
             .ReactModal__Overlay--after-open {
-              transform: perspective(300px) rotate3d(0, 0, 1, 0deg) scale3d(1, 1, 1);
+              transform: perspective(1000px) translate3d(0, 0, 50px) rotate3d(0, 0, 1, 0deg) scale3d(1, 1, 1);
             }
             .ReactModal__Overlay--before-close {
-              transform: perspective(300px) translate3d(-50vw, 50vh, 0) rotateX(45deg) rotateY(45deg) rotateZ(-90deg) scale3d(0.02, 0.02, 1);
+              transform: perspective(1000px) translate3d(-50vw, 50vh, 50px) rotateX(45deg) rotateY(45deg) rotateZ(-90deg) scale3d(0.02, 0.02, 1);
             }
           `}</style>
         </div>

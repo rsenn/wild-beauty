@@ -87,7 +87,7 @@
 .react-dropdown-tree-select .dropdown .dropdown-content {
   position: absolute;
   padding: 4px;
-  z-index: 1;
+  z-index: 12;
   background: #fff;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   -webkit-box-shadow: 0 5px 8px rgba(0, 0, 0, 0.15);

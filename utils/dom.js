@@ -1115,6 +1115,17 @@ Rect.prototype.pointFromCenter = function(point) {
   return point;
 };
 
+Rect.transform = function(rect1, rect2) {
+  let translate = Point.diff(rect1, rect2);
+  let scale = { x: rect1.width / rect2.width, y: rect1.height / rect2.height };
+  let matrix = Matrix.identity();
+  // matrix = Matrix.scale(matrix, scale.x, scale.y);
+
+  matrix.translate_self(translate.x, translate.y);
+  matrix.scale_self(scale.x, scale.y);
+  return matrix;
+};
+
 /**
  * Type for TopRightBottomLeft (paddings and margins)
  *
@@ -1356,12 +1367,12 @@ Matrix.multiply = function(a, b, fn = o => new Matrix(o)) {
   a = fn(a);
   b = fn(b);
   return fn({
-    xx: a.xx * b.xx + a.yx * b.xy,
-    xy: a.xy * b.xx + a.yy * b.xy,
-    x0: a.xx * b.x0 + a.yx * b.y0 + a.x0,
-    yx: a.xx * b.yx + a.yx * b.yy,
-    yy: a.xy * b.yx + a.yy * b.yy,
-    y0: a.xy * b.x0 + a.yy * b.y0 + a.y0
+    xx: a.xx * b.xx + a.xy * b.yx,
+    xy: a.xx * b.xy + a.xy * b.yy,
+    x0: a.xx * b.x0 + a.xy * b.y0 + a.x0,
+    yx: a.yx * b.xx + a.yy * b.yx,
+    yy: a.yx * b.xy + a.yy * b.yy,
+    y0: a.yx * b.x0 + a.yy * b.y0 + a.y0
   });
 };
 
@@ -1369,24 +1380,24 @@ Matrix.prototype.multiply = function(m) {
   if(!(m instanceof Matrix)) m = new Matrix(m);
 
   return Object.assign(this, {
-    xx: this.xx * m.xx + this.yx * m.xy,
-    xy: this.xy * m.xx + this.yy * m.xy,
-    x0: this.xx * m.x0 + this.yx * m.y0 + this.x0,
-    yx: this.xx * m.yx + this.yx * m.yy,
-    yy: this.xy * m.yx + this.yy * m.yy,
-    y0: this.xy * m.x0 + this.yy * m.y0 + this.y0
+    xx: this.xx * m.xx + this.xy * m.yx,
+    xy: this.xx * m.xy + this.xy * m.yy,
+    x0: this.xx * m.x0 + this.xy * m.y0 + this.x0,
+    yx: this.yx * m.xx + this.yy * m.yx,
+    yy: this.yx * m.xy + this.yy * m.yy,
+    y0: this.yx * m.x0 + this.yy * m.y0 + this.y0
   });
 };
 
 Matrix.prototype.product = function(m) {
   if(!(m instanceof Matrix)) m = new Matrix(m);
   return new Matrix({
-    xx: this.xx * m.xx + this.yx * m.xy,
-    xy: this.xy * m.xx + this.yy * m.xy,
-    x0: this.xx * m.x0 + this.yx * m.y0 + this.x0,
-    yx: this.xx * m.yx + this.yx * m.yy,
-    yy: this.xy * m.yx + this.yy * m.yy,
-    y0: this.xy * m.x0 + this.yy * m.y0 + this.y0
+    xx: this.xx * m.xx + this.xy * m.yx,
+    xy: this.xx * m.xy + this.xy * m.yy,
+    x0: this.xx * m.x0 + this.xy * m.y0 + this.x0,
+    yx: this.yx * m.xx + this.yy * m.yx,
+    yy: this.yx * m.xy + this.yy * m.yy,
+    y0: this.yx * m.x0 + this.yy * m.y0 + this.y0
   });
 };
 
@@ -1481,7 +1492,7 @@ Matrix.translate = function(m, tx, ty) {
   if(!isMatrix(args[0])) return Matrix.init_translate(tx, ty);
 
   m = args.shift();
-  return Matrix.multiply(m, Matrix.init_translate(tx, ty));
+  return Matrix.multiply(Matrix.init_translate(tx, ty), m);
 };
 
 Matrix.scale = function(m, sx, sy) {
@@ -1491,7 +1502,7 @@ Matrix.scale = function(m, sx, sy) {
   //let s = new Matrix(Matrix.init_scale(sx, sy));
   //return s.multiply(m);
 
-  return Matrix.multiply(m, Matrix.init_scale(sx, sy));
+  return Matrix.multiply(Matrix.init_scale(sx, sy), m);
 };
 
 Matrix.rotate = function(rad) {

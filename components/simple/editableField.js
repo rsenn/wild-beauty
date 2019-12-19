@@ -80,7 +80,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         {value}
       </div>
       <button onClick={onEditBegin} className={"icon"}>
-        <img src={"static/img/icon-edit.svg"} />{" "}
+        <img src={"static/img/icon-edit.svg"} />
       </button>
     </React.Fragment>
   );
@@ -168,7 +168,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
           align-items: stretch;
         }
         .editable-field-name {
-          width: 200px;
+          width: 100px;
           flex: 0 0 auto;
         }
         .content.editable-field-content {

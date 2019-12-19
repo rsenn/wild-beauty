@@ -140,6 +140,15 @@ class MyApp extends App {
             -ms-user-select: none;
             user-select: none;
           }
+          textarea,
+          input,
+          select {
+            -webkit-user-select: text;
+            -khtml-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+          }
           :focus {
             outline: none !important;
           }

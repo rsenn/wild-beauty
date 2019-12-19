@@ -114,6 +114,9 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
           flex: 1 1 auto;
           padding: 2px;
           min-height: 15px;
+
+          -webkit-user-select: text;
+          user-select: text;
         }
         div.content,
         span.content {
@@ -123,6 +126,9 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
           text-align: left;
           vertical-align: middle;
           margin: auto;
+
+          -webkit-user-select: text;
+          user-select: text;
         }
       `}</style>
     </React.Fragment>

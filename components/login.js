@@ -40,6 +40,8 @@ const LoginForm = inject("rootStore")(
               <div className={"form-label"}>
                 <Translate value="login.username" />
               </div>
+            </div>
+            <div className={"form-field form-row"}>
               <div className={"form-value"}>
                 <input
                   name={"username"}
@@ -71,6 +73,8 @@ const LoginForm = inject("rootStore")(
               <div className={"form-label"}>
                 <Translate value="login.password" />
               </div>
+            </div>
+            <div className={"form-field form-row"}>
               <div className={"form-value"}>
                 <input
                   name={"password"}
@@ -93,7 +97,7 @@ const LoginForm = inject("rootStore")(
               </button>
             </div>
             {loading ? (
-              <div className={"form-field form-buttonfield form-row"}>
+              <div className={"form-field form-buttonfield form-row form-spinner"}>
                 <div className="sk-cube-grid" style={{ opacity: loading ? 1 : 0 }}>
                   <div className="sk-cube sk-cube1"></div>
                   <div className="sk-cube sk-cube2"></div>
@@ -131,13 +135,13 @@ const LoginForm = inject("rootStore")(
               padding: 10px;
               display: flex;
               flex-flow: column nowrap;
-              minheight: 50vmin;
+              min-height: 50vmin;
               -webkit-user-select: text;
               user-select: text;
             }
             .form-row {
               flex: 1 1 auto;
-              maxheight: 50px;
+              max-height: 50px;
             }
             .form-buttonfield {
               text-align: center;
@@ -146,9 +150,9 @@ const LoginForm = inject("rootStore")(
               display: inline-block;
               font-size: 2em;
               font-weight: normal;
-              margin: 20px auto;
+              margin: 10px auto 20px auto;
               color: rgb(123, 255, 15);
-              padding: 4px 2px 0 4px;
+              padding: 0 4px 0 4px;
               border-radius: 2px;
               background-color: black;
             }
@@ -222,6 +226,9 @@ const LoginForm = inject("rootStore")(
               -webkit-user-select: text;
               user-select: text;
               color: black;
+            }
+            .form-spinner {
+              top: -4px;
             }
 
             .sk-cube-grid {

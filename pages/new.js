@@ -41,6 +41,7 @@ const makeItemToOption = selected => item => {
 
   if(children && children.length) obj.children = children;
   if(label.startsWith("null(")) return null;
+  if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
 
   return obj;
 };

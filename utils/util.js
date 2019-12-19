@@ -874,8 +874,10 @@ Util.setCookies = c =>
 
 Util.clearCookies = c => Util.setCookies(Object.keys(Util.parseCookie(c)).reduce((acc, name) => ({ ...acc, [name]: "; max-age=0; expires=" + new Date().toUTCString() }), {}));
 
-//js addition calculation
-//
+Util.deleteCookie = name => {
+  if(global.window) document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+};
+
 Util.accAdd = function(arg1, arg2) {
   var r1, r2, m;
   try {
