@@ -147,18 +147,16 @@ class Show extends React.Component {
     const { nativeEvent } = event;
     console.log("handleClick", event.buttons, nativeEvent.buttons, nativeEvent);
     let e = event.currentTarget;
-      
-
 
     if(this.element === e) {
       e.style.setProperty("transform", "none");
 
       this.element = null;
 
-if(this.back) {
-      this.back.parentElement.removeChild(this.back);
-      this.back = null;
-    }
+      if(this.back) {
+        this.back.parentElement.removeChild(this.back);
+        this.back = null;
+      }
       return;
     }
 
@@ -179,14 +177,14 @@ if(this.back) {
     var trn = affineFit(points, points2);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
     console.log("matrix fromTriangles: ", matrix);
- 
- var size = Math.min(rect2.width, window.innerHeight );
+
+    var size = Math.min(rect2.width, window.innerHeight);
 
     var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
     m = Matrix.translate(m, rect2.center.x, rect2.center.x);
-    m = Matrix.translate(m, 0, window.scrollY +  rect2.y / 2/*- rect.height / 2 + rect2.width / 2*/);
+    m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2 /*- rect.height / 2 + rect2.width / 2*/);
     m.xx *= scale[0];
     m.yy *= scale[1];
     //m = Matrix.scale.apply(Matrix, scale);
@@ -196,33 +194,33 @@ if(this.back) {
 
     //console.log("event.target: ", e);
     let brect = Element.rect("body");
-    
 
-  //  Element.setCSS(back, { opacity: 1 });
-  //  Element.setCSS(back, Rect.toCSS(brect));
-//    Element.setCSS(back, { left: 0, top: 0, width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
+    //  Element.setCSS(back, { opacity: 1 });
+    //  Element.setCSS(back, Rect.toCSS(brect));
+    //    Element.setCSS(back, { left: 0, top: 0, width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
 
-var tend = e => {
-     let back = Element.create("div", {
-      parent: document.body,
-      style: {
-        background: "url(static/img/tile-background.png) repeat",
-        backgroundSize: "auto 50vmin",
-        zIndex: 8,
-        position: "fixed",
-        ...Rect.toCSS(Element.rect(e.target)),
-      //  transition: 'opacity 1s ease-in-out'
-       transition: "left 0.2s ease-out, top 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out"
-      }});
+    var tend = e => {
+      let back = Element.create("div", {
+        parent: document.body,
+        style: {
+          background: "url(static/img/tile-background.png) repeat",
+          backgroundSize: "auto 50vmin",
+          zIndex: 8,
+          position: "fixed",
+          ...Rect.toCSS(Element.rect(e.target)),
+          //  transition: 'opacity 1s ease-in-out'
+          transition: "left 0.2s ease-out, top 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out"
+        }
+      });
       this.back = back;
-     Element.setCSS(back, Rect.toCSS(brect));
-e.target.removeEventListener('transitionend', tend);
+      Element.setCSS(back, Rect.toCSS(brect));
+      e.target.removeEventListener("transitionend", tend);
     };
 
-   e.addEventListener('transitionend', tend);
+    e.addEventListener("transitionend", tend);
     console.log("rect: ", rect);
-    
-  /*  back.style.setProperty("opacity", 1);
+
+    /*  back.style.setProperty("opacity", 1);
    });
 */
     e.style.setProperty("transition", "transform 0.2s ease-out");
@@ -329,7 +327,7 @@ e.target.removeEventListener('transitionend', tend);
                     <SizedAspectRatioBox
                       style={{
                         position: "relative",
-                       // border: "1px solid black",
+                        // border: "1px solid black",
                         boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
                         overflow: "hidden"
                       }}
