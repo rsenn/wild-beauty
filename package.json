@@ -71,6 +71,7 @@
     "react-select": "^3.0.8",
     "react-sizeme": "^2.6.10",
     "react-sortable-tree": "2.0.0",
+    "react-swipeable": "^5.5.0",
     "react-upload-gallery": "^0.0.4",
     "sharp": "^0.23.4",
     "time-span-format": "^1.0.1",
