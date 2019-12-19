@@ -117,11 +117,11 @@ export class SvgOverlay extends React.Component {
         className={"svg-overlay"}
         ref={this.layerRef}
         style={{
-          position: "fixed",
+          position: "absolute",
           left: 0,
           top: 0,
           width: "100vw",
-          height: "100vh",
+          height: "100%",
           pointerEvents: "none"
         }}
       ></div>

@@ -235,9 +235,9 @@ export class RootStore {
     if(typeof item.data == "string" && item.data.length > 0) {
       var data = {};
 
-      try { 
+      try {
         data = JSON.parse(item.data.replace(/\n/g, "\\n"));
-      }catch(err) {
+      } catch(err) {
         console.error("newItem JSON.parse error", item.data);
       }
       item.data = data;

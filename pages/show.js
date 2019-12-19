@@ -166,7 +166,7 @@ this.selectNode(item);
     let e = event.currentTarget;
 
     if(this.element === e) {
-      e.style.setProperty("transform", "none");
+      this.grid.style.transform = '';
 
       this.element = null;
 
@@ -185,6 +185,10 @@ this.selectNode(item);
     while(e.parentElement && !e.classList.contains("tile")) {
       e = e.parentElement;
     }
+    let grid =Element.find("#item-grid");
+    let b = Element.find(".page-layout");
+    let brect = Element.rect("body");
+
     let rect = Element.rect(e);
     let points = rect.toPoints().map(p => [p.x, p.y]);
     let rect2 = Element.rect("#item-grid");
@@ -195,32 +199,62 @@ this.selectNode(item);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
     console.log("matrix fromTriangles: ", matrix);
 
-    var size = Math.min(rect2.width, window.innerHeight);
+var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
+    var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
+
+var pt = new Point(srect.center);
+pt.y += window.scrollY;
+     var t = Point.diff(pt, rect.center);
+     var distance = Math.sqrt(t.x*t.x + t.y*t.y);
+     this.speed = distance / 100;
+
+     var gm = Matrix.init_translate(t.x, t.y);
+          console.log("translation:  ", t);
+
 
     var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
     m = Matrix.translate(m, rect2.center.x, rect2.center.x);
-    m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2 /*- rect.height / 2 + rect2.width / 2*/);
+    m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2 );
     m.xx *= scale[0];
     m.yy *= scale[1];
     //m = Matrix.scale.apply(Matrix, scale);
-    var dm = Matrix.toDOMMatrix(m);
+    var dm = Matrix.toDOMMatrix(gm);
     //console.log("matrix: ", m);
     var dms = dm.toString();
 
-    //console.log("event.target: ", e);
-    let brect = Element.rect("body");
+    console.log("b: ", b);
 
     //  Element.setCSS(back, { opacity: 1 });
     //  Element.setCSS(back, Rect.toCSS(brect));
     //    Element.setCSS(back, { left: 0, top: 0, width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
+    this.element = e;
+
+this.grid = b;
+e = this.grid;
+         Element.setCSS(this.grid, { transition: `transform ${ 0.0001 /*this.speed*/ }s ease-in-out`, transform: "", zIndex: 8 });
 
     var tend = e => {
-      let back = Element.create("div", {
+          console.log("transition end: ", e.target);
+  /* gm.xx *= scale[0];
+    gm.yy *= scale[1];*/
+  
+  dm = new DOMMatrix();
+         var t2 = Point.diff(srect.center, rect.center);
+    dm.translateSelf( 0, rect.height  + rect2.y );
+
+    dm.scaleSelf(scale[0], scale[1]);
+    dm.translateSelf( t2.x, t2.y );
+    console.log("dm: ", dm);
+     // var gm2 = Matrix.scale(gm, scale[0], scale[1]);
+          e.target.style.transition = `transform ${this.speed}s ease-out`;
+
+    e.target.style.transform = /*Matrix.toDOMMatrix(gm)*/dm.toString();
+     /* let back = Element.create("div", {
         parent: document.body,
         style: {
-          background: "url(/static/img/tile-background.png) repeat",
+         background: "url(/static/img/tile-background.png) repeat",
           backgroundSize: "auto 50vmin",
           zIndex: 8,
           position: "fixed",
@@ -230,7 +264,7 @@ this.selectNode(item);
         }
       });
       this.back = back;
-      Element.setCSS(back, Rect.toCSS(brect));
+      Element.setCSS(back, Rect.toCSS(brect));*/
       e.target.removeEventListener("transitionend", tend);
     };
 
@@ -240,12 +274,11 @@ this.selectNode(item);
     /*  back.style.setProperty("opacity", 1);
    });
 */
-    e.style.setProperty("transition", "transform 0.2s ease-out");
+    e.style.setProperty("transition", `transform ${this.speed} ease-out`);
     e.style.setProperty("transform", dms);
-    e.style.setProperty("background-color", "white");
+   // e.style.setProperty("background-color", "white");
     e.style.setProperty("z-index", 9);
 
-    this.element = e;
 
     if(global.window) {
       window.t = e;

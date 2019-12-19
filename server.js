@@ -462,14 +462,13 @@ if (!dev && cluster.isMaster) {
       })
     );
 
-    server.get('/show/category/:category', (req, res) => {
-      return nextApp.render(req, res, '/show', { category: req.params.category })
+    server.get("/show/category/:category", (req, res) => {
+      return nextApp.render(req, res, "/show", { category: req.params.category });
     });
 
-    server.get('/show/:id', (req, res) => {
-      return nextApp.render(req, res, '/show', { id: parseInt(req.params.id) })
+    server.get("/show/:id", (req, res) => {
+      return nextApp.render(req, res, "/show", { id: parseInt(req.params.id) });
     });
-
 
     // Example server-side routing
     server.post("/a", (req, res) => {

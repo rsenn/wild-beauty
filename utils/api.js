@@ -9,7 +9,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
       url,
       method: "POST",
       headers: {
-      //  "Accept-Encoding": "deflate, br;q=1.0, gzip;q=0.9, *;q=0.5",
+        //  "Accept-Encoding": "deflate, br;q=1.0, gzip;q=0.9, *;q=0.5",
         "X-Hasura-Access-Key": "RUCXOZZjwWXeNxOOzNZBptPxCNl18H"
       },
       data: JSON.stringify({ query }),
