@@ -80,7 +80,7 @@ class Show extends React.Component {
   ];
 
   static async getInitialProps(ctx) {
-    const { query, params } = ctx.req;
+    const { query, params } = ctx && ctx.req || {};
     console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
     //console.log("RootStore.fetchItems");
