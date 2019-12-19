@@ -11,6 +11,7 @@ import ApolloClient from "apollo-boost";
 import { TouchCallback } from "../components/TouchCallback.js";
 import LoginForm from "../components/login.js";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspectBox.js";
+import { ItemView } from "../components/views/itemView.js";
 import { Tree } from "../components/tree.js";
 import { action, toJS, autorun, observable } from "mobx";
 import Nav from "../components/nav.js";
@@ -64,30 +65,32 @@ class Show extends React.Component {
   state = {
     zIndex: 99999,
     tree: {},
-    parentIds: []
+    parentIds: [],
+    view: 'list'
   };
+  static API = getAPI();
+  static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize original_name } }", "users { user { id username last_seen } }"];
 
   static async getInitialProps(ctx) {
     const { query, params } = ctx.req;
     console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
     //console.log("RootStore.fetchItems");
-    let items = await getAPI().list("items", [
-      "id",
-      "type",
-      "parent_id",
-      "parent { id type data }",
-      "children { id type data }",
-      "data",
-      "photos { photo { id width height filesize original_name } }",
-      "users { user { id username last_seen } }"
-    ]);
+    let items;
+
+    if(params.id !== undefined) {
+      let response = await Show.API.select("items", { id: params.id }, Show.fields);
+      items = response.items || [];
+      console.log("item: ", items[0]);
+    } else {
+      items = await Show.API.list("items", Show.fields);
+    }
     //await RootStore.fetchItems();
     // console.log("Show.getInitialProps  items:", items);
     items = items.sort((a, b) => a.id - b.id);
     RootStore.items.clear();
     //  items.forEach(item => RootStore.newItem(item));
-    return { items };
+    return { items, params };
   }
 
   constructor(props) {
@@ -109,11 +112,18 @@ class Show extends React.Component {
     //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
 
-    var item = findInTree(this.tree, "Objects");
+    if(this.tree) {
+      var item = findInTree(this.tree, "Objects");
 
-    item.checked = true;
+      item.checked = true;
 
-    Util.traverseTree(item, i => this.state.parentIds.push(i.id));
+      Util.traverseTree(item, i => this.state.parentIds.push(i.id));
+    }
+
+    if(this.props.params.id !== undefined) {
+      this.state.view = 'item';
+      this.state.itemId = parseInt(this.props.params.id);
+    }
 
     //this.selectNode(item);
 
@@ -204,9 +214,8 @@ class Show extends React.Component {
     var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
 
     var pt = new Point(srect.center);
-   pt.y += window.scrollY;
+    pt.y += window.scrollY;
     var t = Point.diff(pt, rect.center);
-
 
     var distance = Math.sqrt(t.x * t.x + t.y * t.y);
     this.speed = distance * 0.002;
@@ -286,6 +295,7 @@ class Show extends React.Component {
       window.m = m;
     }
   };
+
   render() {
     const { rootStore } = this.props;
     let swipeEvents = {};
@@ -331,7 +341,8 @@ class Show extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <div className={"show-layout2"}>
+
+{this.state.view == 'item' ? <ItemView id={this.state.itemId} /> :       <div className={"show-layout2"}>
           {/*          <Tree tree={tree} />
            */}
           {tree ? (
@@ -384,17 +395,7 @@ class Show extends React.Component {
                       }}
                       className={"layer gallery-aspect-box"}
                     >
-                      {haveImage ? (
-                        <img
-                          src={path}
-                          width={photo.width}
-                          height={photo.height}
-                          style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }}
-                          className="gallery-image"
-                        />
-                      ) : (
-                        undefined
-                      )}
+                      {haveImage ? <img src={path} width={photo.width} height={photo.height} style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }} className="gallery-image" /> : undefined}
                       <div
                         style={{
                           position: "absolute",
@@ -420,9 +421,7 @@ class Show extends React.Component {
                         {!!type ? `Type: ${type}` : undefined}
                         <br />
                         <br />
-                        <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>
-                          {[...Object.entries(data)].map(([key, value]) => `${Util.ucfirst(key)}: ${value}`).join("\n")}
-                        </pre>
+                        <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>{[...Object.entries(data)].map(([key, value]) => `${Util.ucfirst(key)}: ${value}`).join("\n")}</pre>
                       </div>
                     </SizedAspectRatioBox>
                   </div>
@@ -430,7 +429,7 @@ class Show extends React.Component {
               })}
             </div>
           </div>
-        </div>
+        </div> }
         <SvgOverlay />
         <style jsx global>{`
           .show-layout {
