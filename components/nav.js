@@ -163,6 +163,7 @@ const randomGradient = () => {
 
   return colors;
 };
+
 const setLanguage = (store, lang, setOpen) => {
   if(store && store.user && store.user.lang) {
     set(store.user, "lang", lang);
@@ -177,17 +178,16 @@ const Nav = inject(
   "i18nStore"
 )(
   observer(
-    withRouter(({ rootStore, i18nStore, loading, router, ...props }) => {
+    withRouter(({ rootStore, i18nStore, loading, router, children, ...props }) => {
       const [loginIsOpen, setLoginOpen] = React.useState(false);
       const [languageIsOpen, setLanguageOpen] = React.useState(false);
 
       const [color, setColor] = React.useState(randomGradient());
       const angle = ((color[0].h + color[0].s + color[0].l) % 360) - 180;
       customStyles.overlay.background = `linear-gradient(${Math.floor(angle)}deg, ${color[0].toString()} 0%, ${color[1].toString()} 100%)`;
-      //console.log("Nav.render", { angle });
 
       const language = i18nStore.user.lang;
-      //      console.log("i18nStore: ", i18nStore);
+      const authenticated = loginIsOpen ? false : rootStore.authenticated; //      console.log("i18nStore: ", i18nStore);
 
       if(global.window) {
         window.SiteMap = SiteMap;
@@ -201,13 +201,15 @@ const Nav = inject(
       entry.active = loginIsOpen;
 
       entry = Util.find(SiteMap, "new", "name");
-      entry.disabled = !rootStore.authenticated;
+      entry.disabled = !authenticated;
 
       entry = Util.find(SiteMap, "logout", "name");
-      entry.disabled = !rootStore.authenticated;
+      entry.disabled = !authenticated;
 
       entry = Util.find(SiteMap, "login", "name");
-      entry.disabled = rootStore.authenticated;
+      entry.disabled = authenticated;
+
+      console.log("Nav.render", { angle, authenticated });
 
       return (
         <div className="menu">
@@ -255,18 +257,16 @@ const Nav = inject(
                 </div>
               </div>
             </div>
-          </Modal>
+          </Modal>{" "}
           <ul>
             {SiteMap.map(link => {
               link.key = `nav-link-${typeof link.href == "string" ? link.href : ""}-${typeof link.name == "string" ? link.name : ""}`;
               return link;
             }).map(item => {
               //     console.log("item.name: ", item.name);
-
               if(item.name == "login") {
-                if(rootStore.authenticated) item.label = <span>Logout</span>;
+                if(authenticated) item.label = <span>Logout</span>;
               }
-
               if(item.disabled) return undefined;
               return (
                 <NavLink
@@ -295,19 +295,15 @@ const Nav = inject(
                         }
                       : () => {
                           console.log("click " + item.name);
-                          router.push(`/${item.name}`);
+                          router.push(item.href || `/${item.name}`);
                         }
                   }
                 />
               );
             })}
           </ul>
+          {children ? <span className={"title-bar"}>{children}</span> : undefined}
           <style jsx global>{`
-            :global(body) {
-              margin: 0;
-              box-sizing: content-box;
-              font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir, Helvetica, sans-serif;
-            }
             .flagbox {
               width: 100%;
               height: 100%;
@@ -340,18 +336,21 @@ const Nav = inject(
             }
             ul.menu {
               font-family: Fixed;
-            }
-            .menu {
-              position: absolute;
-              top: 0;
-              right: 0;
-              z-index: 12;
-              text-align: center;
-              display: înline-block;
-              color: white;
               float: right;
             }
+            .menu {
+              z-index: 12;
+              text-align: center;
+              display: flex;
+              color: white;
+              flex-flow: row wrap;
+              justify-content: space-between;
+              width: 100vw;
+              direction: rtl;
+              min-height: 112px;
+            }
             ul {
+              direction: ltr;
               display: flex;
               justify-content: flex-end;
               margin-block-start: 0;
@@ -359,6 +358,14 @@ const Nav = inject(
             }
             .menu > ul {
               padding: 4px 4px;
+            }
+            .title-bar {
+              float: left;
+              text-align: left;
+              color: black;
+              padding: 10px 10px 0 10px;
+              font-size: 2em;
+              font-family: Fixed;
             }
             .ReactModal__Overlay {
               transition: transform 1000ms linear;

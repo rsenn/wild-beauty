@@ -53,7 +53,7 @@ export const SiteMap = [
     ),
     description: props => (
       <React.Fragment>
-        <Translate value="nav.logout_description" />: {props.rootStore.state.username}
+        <Translate value="nav.logout_description" />: {props.rootStore.auth.user && props.rootStore.auth.user.username}
       </React.Fragment>
     )
   },

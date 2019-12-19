@@ -10,6 +10,7 @@ import { Element, Point, Node, HSLA, Timer } from "../utils/dom.js";
 import { MultitouchListener, MovementListener, TouchEvents, MouseEvents, TouchListener, TouchHandler } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
+import Util from "../utils/util.js";
 import { TouchCallback } from "../components/TouchCallback.js";
 import getAPI from "../utils/api.js";
 import { action, toJS, autorun } from "mobx";
@@ -39,7 +40,7 @@ const RandomColor = () => {
 
 @inject("rootStore")
 @observer
-@withRouter
+//@withRouter
 class Home extends React.Component {
   state = {
     mirrored: false,
@@ -56,58 +57,57 @@ class Home extends React.Component {
       global.window.rs = rootStore;
     }
     this.getHash();
-    autorun(() => {
+    /*   autorun(() => {
       console.log("rootStore.state = ", toJS(rootStore.state));
-    });
+    });*/
     this.svgLayer.subscribe(newLayer => {
       console.log("svgLayer: ", newLayer);
     });
     const svgRef = this.svgLayer;
     const page = this;
-    this.touchHandler = TouchHandler({
-      start(event) {
-        const { x, y } = event;
-        console.log("touch start: ", event, { x, y });
+    this.touchListener = TouchHandler(
+      {
+        start(event) {
+          const { x, y, client, page } = event;
+          console.log("touch start: ", event, { x, y });
 
-        const f = svgRef().factory;
-        if(f) {
-          this.g = f("g", { stroke: "#ff0", fill: "none", strokeWidth: 8 }, svgRef().svg);
-          this.path = f("path", { d: "", style: "paint-order:markers stroke fill" }, this.g);
-          this.pathData = `M${x},${y}`;
-          page.path = this.path;
-          console.log("new Path: ", this.path);
+          const f = svgRef().factory;
+          if(f) {
+            this.g = f("g", { stroke: "#ff0", fill: "none", strokeWidth: 8, transform: `translate(${client.x}, ${client.y})` }, svgRef().svg);
+            this.path = f("path", { d: "", style: "paint-order:markers stroke fill" }, this.g);
+            this.pathData = `M${x},${y}`;
+            page.path = this.path;
+            console.log("new Path: ", this.path);
+          }
+          this.x = x;
+          this.y = y;
+          this.origin = client;
+        },
+        end(event) {
+          const { x, y } = event;
+          console.log("touch end: ", { x, y });
+        },
+        move(event) {
+          const { x, y, distance } = event;
+          const callers = Util.getCallerFunctionNames(1, 50);
+          console.log("touch move: ", { x, y, callers });
+
+          const rel = this.relxy(x, y);
+
+          if(Math.abs(rel.x) + Math.abs(rel.y) > 3) {
+            this.pathData += ` l${rel.x.toFixed(3)},${rel.y.toFixed(3)}`;
+            this.path.setAttribute("d", this.pathData);
+            this.setxy(x, y);
+          }
+        },
+        cancel(event) {},
+        setxy(x, y) {
+          this.x = x;
+          this.y = y;
+        },
+        relxy(x, y) {
+          return { x: x - this.x, y: y - this.y };
         }
-        this.x = x;
-        this.y = y;
-      },
-      end(event) {
-        const { x, y } = event;
-        console.log("touch end: ", { x, y });
-      },
-      move(event) {
-        const { x, y, distance } = event;
-
-        const rel = this.relxy(x, y);
-
-        if(Math.abs(rel.x) + Math.abs(rel.y) > 3) {
-          this.pathData += ` l${rel.x},${rel.y}`;
-          this.path.setAttribute("d", this.pathData);
-          //   console.log("touch move: ", this.path);
-          this.setxy(x, y);
-        }
-      },
-      cancel(event) {},
-      setxy(x, y) {
-        this.x = x;
-        this.y = y;
-      },
-      relxy(x, y) {
-        return { x: x - this.x, y: y - this.y };
-      }
-    });
-    this.touchListener = TouchListener(
-      event => {
-        this.touchHandler(event);
       },
       {
         element: global.window,
@@ -119,18 +119,27 @@ class Home extends React.Component {
     );
   }
 
+  readHash() {
+    if(global.window) {
+      const hash = /#/.test(window.location.href) ? window.location.href.replace(/.*#/, "") : "1";
+      const subpage = parseInt(hash);
+      return subpage;
+    }
+    return 1;
+  }
+
   getHash() {
     const { rootStore, router } = this.props;
     if(global.window) {
-      const hash = /#/.test(window.location.href) ? window.location.href.replace(/.*#/, "") : "1";
-      //  console.log("hash: ", hash);
-      const subpage = parseInt(hash);
+      const subpage = this.readHash();
       if(!isNaN(subpage)) {
         if(subpage != rootStore.state.subpage) {
           rootStore.setState({ subpage });
           this.forceUpdate();
         }
       }
+    } else {
+      console.log("query: ", router.query);
     }
   }
   /**
@@ -152,16 +161,27 @@ class Home extends React.Component {
     });
   }
 
+  componentDidUpdate(prevProps) {
+    const { pathname, query } = this.props.router;
+    /*  if(query !== prevProps.router.query) {
+      this.getHash();
+    }*/
+  }
+
   handleNext = () => {
     const { rootStore } = this.props;
-    rootStore.setState({ subpage: rootStore.state.subpage + 1 });
-    this.forceUpdate();
+    const subpage = rootStore.state.subpage;
+    rootStore.setState({ subpage: subpage + 1 });
+    if(global.window) window.location.hash = `#${subpage + 1}`;
+    //this.forceUpdate();
   };
 
   handlePrev = () => {
     const { rootStore } = this.props;
-    rootStore.setState({ subpage: rootStore.state.subpage - 1 });
-    this.forceUpdate();
+    const subpage = rootStore.state.subpage;
+    rootStore.setState({ subpage: subpage - 1 });
+    if(global.window) window.location.hash = `#${subpage - 1}`;
+    //this.forceUpdate();
   };
 
   render() {
@@ -169,7 +189,7 @@ class Home extends React.Component {
     let swipeEvents = {};
     var e = null;
     if(global.window !== undefined) window.page = this;
-    if(global.window) {
+    /*    if(global.window) {
       var touchListener = TouchListener(TouchCallback, {
         element: global.window,
         step: 10,
@@ -185,19 +205,22 @@ class Home extends React.Component {
         { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
       );
     }
-
-    this.getHash();
+*/
+    // this.getHash();
 
     const t = ` perspective(100vw) scaleX(${rootStore.state.mirrored ? -1 : 1})`; // `rotateZ(${rootStore.state.angle}deg) ` + (rootStore.state.mirrored ? " rotateY(-180deg) " : "");
     const endDate = new Date("01.01.2035");
     const now = new Date();
+
     const seconds = (endDate.getTime() - now.getTime()) / 1000;
+
     //const timespan = tims.text(, {    lang: "fr"   }); /*.split(/,/g).slice(0, 2).join(', ')*/
-    const timespan = timeSpanFormat(Math.floor(seconds));
-    const subpage = toJS(rootStore.state.subpage);
-    //  console.log("Home.render", { t, timespan, subpage });
+    const timespan = Util.timeSpan(Math.floor(seconds));
+
+    const subpage = this.readHash(); //rootStore.state.subpage;
+    console.log("Home.render", { subpage });
     return (
-      <div className={"main-layout"} {...TouchEvents(this.touchListener)} {...MouseEvents(this.touchListener)}>
+      <div className={"main-layout"}>
         <Head>
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
@@ -218,10 +241,11 @@ class Home extends React.Component {
             fact that it is slightly longer than the original (starting with "A"). As the use of typewriters grew in the late 19th century, the phrase began appearing in typing lesson books as a
             practice sentence. Early examples include How to Become Expert in Typewriting: A Complete Instructor Designed Especially for the Remington Typewriter (1890), and Typewriting Instructor and
             Stenographer's Hand-book (1892). By the turn of the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic Journal, it is referred to as "the
-            well known memorized typing line embracing all the letters of the alphabet". Robert Baden-Powell's book Scouting for Boys (1908) uses the phrase as a practice sentence for signaling. The
+            well known memorized typing line embracing all the letters of the alphabet".{" "}
+            {/*Robert Baden-Powell's book Scouting for Boys (1908) uses the phrase as a practice sentence for signaling. The
             first message sent on the Moscow–Washington hotline on August 30, 1963, was the test phrase "THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG'S BACK 1234567890". Later, during testing, the
             Russian translators sent a message asking their American counterparts, "What does it mean when your people say 'The quick brown fox jumped over the lazy dog'?" During the 20th century,
-            technicians tested typewriters and teleprinters by typing the sentence.
+            technicians tested typewriters and teleprinters by typing the sentence.*/}
           </span>
         </div>
         <div className={"subpage flex-vertical"} style={{ opacity: subpage == 3 ? 1 : 0, display: subpage == 3 ? "flex" : "flex" }}>
@@ -241,7 +265,6 @@ class Home extends React.Component {
 
         <style jsx global>{`
           h1 {
-            width: 100%;
             text-align: left;
           }
           span.paragraph {
@@ -253,12 +276,12 @@ class Home extends React.Component {
             flex-wrap: wrap;
           }
           .button-next {
-            position: absolute;
+            position: fixed;
             right: 10px;
             bottom: 10px;
           }
           .button-prev {
-            position: absolute;
+            position: fixed;
             left: 10px;
             bottom: 10px;
           }
@@ -279,10 +302,13 @@ class Home extends React.Component {
           }
           .subpage {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100vw;
+            font-size: 2vw;
 
             transition: opacity 0.5s;
-            margin: 0 10px 0 10px;
+            padding: 0 10px 0 10px;
             overflow: auto;
           }
 
@@ -290,7 +316,7 @@ class Home extends React.Component {
             display: block;
             padding: 0;
             margin: 0;
-            overflow: visible;
+            overflow: ĥidden;
           }
           .time-counter {
             margin: 10px;

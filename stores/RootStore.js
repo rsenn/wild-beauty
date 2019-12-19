@@ -1,5 +1,5 @@
 import React from "react";
-import { action, observable, flow, set, get, values, toJS, computed } from "mobx";
+import { action, autorun, observable, flow, set, get, values, toJS, computed } from "mobx";
 import getAPI from "../utils/api.js";
 import { Element, Timer } from "../utils/dom.js";
 import axios from "../utils/axios.js";
@@ -59,7 +59,7 @@ export class RootStore {
    * @param      {<type>}  pageProps    The page properties
    */
   constructor(initialData, pageProps) {
-    console.log("RootStore.constructor ", { initialData, pageProps });
+    //console.log("RootStore.constructor ", { initialData, pageProps });
     if(initialData && initialData.RootStore) {
       const init = initialData.RootStore;
       for(let k in init) {
@@ -76,6 +76,12 @@ export class RootStore {
       window.rs = this;
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
     }
+
+    autorun(() => console.log("rootStore.authenticated: ", this.authenticated));
+    autorun(() => console.log("rootStore.loading: ", this.state.loading));
+    autorun(() => console.log("rootStore.auth: ", toJS(this.auth)));
+    autorun(() => console.log("rootStore.auth.token: ", this.auth.token));
+
     this.enableAutoRun();
     const { auth, state } = this;
   }
@@ -100,7 +106,7 @@ export class RootStore {
   updateState(obj) {
     set(this.state, obj);
     this.state.updated = true;
-    console.log("RootStore.updateState ", obj);
+    //console.log("RootStore.updateState ", obj);
   }
 
   @action.bound
@@ -131,7 +137,7 @@ export class RootStore {
           const { naturalWidth, naturalHeight, width, height } = e;
           image.width = naturalWidth;
           image.height = naturalHeight;
-          console.log({ naturalWidth, naturalHeight, width, height });
+          //console.log({ naturalWidth, naturalHeight, width, height });
           tm.stop();
         }
       });
@@ -164,7 +170,7 @@ export class RootStore {
   @action.bound
   deleteImage(id) {
     let image = this.getImage(id);
-    console.log("deleteImage :", image);
+    //console.log("deleteImage :", image);
     this.apiRequest("/api/image/delete", { id }).then(response => {
       let data, result;
       if(response && response.data) data = response.data;
@@ -172,7 +178,7 @@ export class RootStore {
       if(result.affected_rows) {
         this.images.delete(id);
       }
-      console.log("deleteImage API response:", result);
+      //console.log("deleteImage API response:", result);
     });
   }
 
@@ -185,7 +191,14 @@ export class RootStore {
     return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
   }
 
-  get currentImage() {
+
+  /**
+   * Gets the current image
+   *
+   * @return     {Object}  {Uploaded image}
+   */
+  get
+  currentImage() {
     const id = this.state.image;
     let image = toJS(this.images.get(id) || {});
     image.id = parseInt(id);
@@ -206,7 +219,7 @@ export class RootStore {
 
   @action.bound
   newItem(item) {
-    console.log("New item: ", item);
+    //console.log("New item: ", item);
   }
 
   /**
@@ -225,7 +238,7 @@ export class RootStore {
     if(item && idMap.indexOf(item.id) == -1) {
       idMap.push(item.id);
       if(typeof item == "object") {
-        console.log("item", toJS(item));
+        //console.log("item", toJS(item));
 
         let { parent_id } = item;
 
@@ -354,7 +367,7 @@ export class RootStore {
     else res = await axios.post(endpoint, data);
 
     if((await res.status) != 200 || !(await res.data) || !(await res.data.success)) {
-      console.log("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
+      //console.log("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
     }
 
     return res;
@@ -387,10 +400,10 @@ export class RootStore {
         set(this.auth, newAuth);
         if(global.window) localStorage.setItem("auth", JSON.stringify(newAuth));
         this.enableAutoRun();
-        console.log("API login result: ", { success, token });
+        //console.log("API login result: ", { success, token });
         if(success && window.global) {
           for(let name of ["token"]) document.cookie += `${name}=${res.data[name]}; Path=/; `;
-          console.log("Cookies: ", document.cookie);
+          //console.log("Cookies: ", document.cookie);
         }
         completed(res.data);
       });
@@ -404,6 +417,7 @@ export class RootStore {
    */
   @action.bound
   doLogout(completed = () => {}) {
+    console.log("rootStore.doLogout ");
     this.setState({ loading: true });
     this.apiRequest("/api/logout").then(res => {
       const { success, token, user_id } = res.data;

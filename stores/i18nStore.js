@@ -18,6 +18,8 @@ i18nStore.setTranslations({
       show_description: "View artists work",
       login_name: "Login",
       login_description: "Login as member",
+      logout_name: "Logout",
+      logout_description: "Logged in as",
       lang_name: "Language",
       lang_description: "choose the language"
     },
@@ -45,6 +47,8 @@ i18nStore.setTranslations({
       show_description: "Siehe die Arbeit der Künstler",
       login_name: "Login",
       login_description: "Einloggen als Mitglied",
+      logout_name: "Logout",
+      logout_description: "Eingeloggt als",
       lang_name: "Sprache",
       lang_description: "Sprache auswählen"
     },
@@ -72,6 +76,8 @@ i18nStore.setTranslations({
       show_description: "Voir le travail des artistes",
       login_name: "Login",
       login_description: "se connecter en tant que membre",
+      logout_name: "Logout",
+      logout_description: "Connecté en tant que",
       lang_name: "Langue",
       lang_description: "Choisir la langue"
     },

@@ -140,7 +140,7 @@ class Panes extends React.Component {
           <title>Panes</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Nav />
+        <Nav loading={rootStore.state.loading} />
         <div className={"page-layout"}>
           <div
             className={"upload-area"}

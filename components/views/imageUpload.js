@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Router, withRouter } from "next/router";
+import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { WrapInAspectBox, SizedAspectRatioBox } from "../simple/aspectBox.js";
 import classNames from "classnames";
@@ -87,6 +88,10 @@ export const ImageUpload = inject("rootStore")(
           })}
         </div>
         <style jsx global>{`
+          .upload-area {
+            position: relative;
+            padding: 0px 10px;
+          }
           div.upload-area > div,
           div.upload-area > div > div,
           div.upload-area > div > div > div {

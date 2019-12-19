@@ -14,9 +14,9 @@
   font-size: 75%;
   line-height: 100%;
   cursor: pointer;
-  background-color: transparent;
-  border: none;
+  background-color: rgba(192, 192, 192, 0.8);
   outline: none;
+  border: 2px outset rgba(85, 85, 85, 0.5);
 }
 .tag-remove.disabled,
 .tag-remove.readOnly {
@@ -36,9 +36,8 @@
 }
 .tag-item {
   display: inline-block;
-  /*   margin: 4px;
- */
-  border: 1px outset #55555580;
+
+  /*   border: 1px outset #55555580; */
   min-height: 40px;
 }
 .tag-item .search {
@@ -166,14 +165,16 @@ li.tag-item > input.search {
   color: black;
   direction: ltr;
   box-sizing: border-box;
+  display: inline-block;
 }
 div.react-dropdown-tree-select > div.dropdown.radio-select {
-  height: 38px;
   box-sizing: border-box;
 }
 
 .react-dropdown-tree-select .dropdown .dropdown-trigger.arrow {
   box-sizing: border-box;
+  max-height: 32px;
+  overflow: hidden;
 }
 input.search {
   box-sizing: border-box;

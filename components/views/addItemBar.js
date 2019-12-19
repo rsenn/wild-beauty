@@ -8,8 +8,10 @@ export const AddItemBar = ({ onAdd, ...props }) => {
       <button className={"button-add"} onClick={onAdd}>
         <img src={"static/img/icon-plus.svg"} />
       </button>
+      {props.children}
       <style jsx>{`
         .add-item-bar {
+          position: relative;
           display: flex;
           flex-flow: row wrap;
           justify-content: flex-start;

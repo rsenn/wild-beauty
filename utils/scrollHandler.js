@@ -78,10 +78,10 @@ export function ScrollDisabler(disabledfn = () => true, element = global.window)
       if(event.keyCode !== undefined && keys.indexOf(event.keyCode) != -1) {
         event.preventDefault();
       } else if(event.type == "wheel" || event.type == "scroll" || event.type == "touchmove" || event.type == "DOMMouseScroll") {
-        event.preventDefault();
+        if(event.cancelable) event.preventDefault();
       }
 
-      //console.log('ScrollDisabler.event ', { disabled, event });
+      //  console.log('ScrollDisabler.event ', { disabled, event });
     }
     return true;
   });

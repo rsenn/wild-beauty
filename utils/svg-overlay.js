@@ -10,7 +10,7 @@ export function SvgPathTracer(path) {
   var steps = 100;
   var center = bbox.center;
 
-  console.log("SvgPathTracer ", { center, bbox, rect, length });
+  //console.log("SvgPathTracer ", { center, bbox, rect, length });
 
   var self = {
     length,
@@ -63,7 +63,7 @@ export class SvgOverlay extends React.Component {
     const { svgRef } = this.props;
 
     trkl.property(this.layerRef, "current").subscribe(ref => {
-      console.log("layerRef: ", ref);
+      //console.log("layerRef: ", ref);
       var rect = Element.rect(ref);
       var svg = SVG.create(
         "svg",
@@ -93,8 +93,8 @@ export class SvgOverlay extends React.Component {
       this.svg(svg);
       const f = this.factory();
       f.root = svg;
-      svgRef({ svg, factory: f /*(name,props) => f(name,props, svg) */ });
-      console.log("SvgOverlay: ", { svg, rect });
+      if(typeof svgRef == "function") svgRef({ svg, factory: f /*(name,props) => f(name,props, svg) */ });
+      //console.log("SvgOverlay: ", { svg, rect });
 
       //   this.createPaths();
     });

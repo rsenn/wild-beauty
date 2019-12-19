@@ -25,7 +25,7 @@ export const makeTouchCallback = (className = "layer", action = null) => {
     const { cancel } = event;
 
     let e;
-    if(event.type == "touchstart") {
+    if(event.type.endsWith("start")) {
       if(event.button != 0 && typeof cancel == "function") return cancel();
 
       e = event.target;

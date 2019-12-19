@@ -25,9 +25,10 @@ export function MovementListener(handler, options) {
   }
 
   options = { step: 1, round: false, angle: false, noscroll: true, ...options };
+  //console.log("new MovementListener(", handler, ",", options, ")");
 
   var self = function(event) {
-    //console.log('MovementListener(', event, ')');
+    //console.log("MovementListener(", { event }, ")");
     const { nativeEvent, button, buttons } = event;
     let currentTarget = nativeEvent ? nativeEvent.currentTarget : event.currentTarget;
 
@@ -121,7 +122,7 @@ export function MovementListener(handler, options) {
   };
 
   self.handler = handler; /*event => {
-    console.debug('MovementListener handler(', event, ')');
+    //console.debug('MovementListener handler(', event, ')');
 
     return handler(event);
   };*/
@@ -331,6 +332,7 @@ export const addMouseListeners = (listener, element, passive = true) => {
 
 export function TouchListener(handler, options) {
   options = { listener: MovementListener, noscroll: true, lastTouch: true, ...options };
+  //console.log("new TouchListener ", { handler, options });
 
   var listen = options.listener(handler, options);
   listen.handler.listener = listen;
@@ -350,30 +352,36 @@ export function TouchListener(handler, options) {
     TouchListener.list.push(listen);
   }
 
-  //console.log('TouchListener.new ', { handler, options });
   return listen.handler;
 }
 
 export const TouchHandler = (handle, options) => {
   var running = false;
+  //console.log("new TouchHandler ", { handle, options });
+
   var fn = function(event) {
     const { nativeEvent } = event;
-    const e = nativeEvent || event;
-    const { type } = e;
-    // console.log("TouchHandler ", {event,nativeEvent, type});
-    //console.log("TouchHandler ", e.x, e.y);
+    event = typeof event.type == "string" && event.type.length >= 1 ? event : nativeEvent;
+    const { type } = event;
+
+    //console.log("TouchHandler ", { type, event });
     if(type.endsWith("start") || type.endsWith("down")) {
       running = true;
-      handle.start(e);
+      handle.start(event);
     } else if(type.endsWith("move")) {
-      if(running) handle.move(e);
+      if(global.window) {
+        window.touchEvent = event;
+        window.touchNativeEvent = nativeEvent;
+      }
+
+      if(running) handle.move(event);
     } else if(type.endsWith("end") || type.endsWith("up")) {
       running = false;
-      handle.end(e);
+      handle.end(event);
       //  event.cancel();
-    } else if(type.endsWith("cancel")) handle.cancel(e);
+    } else if(type.endsWith("cancel")) handle.cancel(event);
   };
-  return fn;
+  return TouchListener(fn, options);
 };
 
 export default TouchListener;

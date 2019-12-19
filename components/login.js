@@ -6,10 +6,12 @@ import { inject, observer } from "mobx-react";
 import { Translate, Localize } from "react-i18nify-mobx";
 
 const LoginForm = inject("rootStore")(
-  observer(({ show = true, className, style, onLogin, loading, rootStore, ...props }) => {
+  observer(({ show = true, className, style, onLogin, rootStore, ...props }) => {
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [focus, setFocus] = React.useState(false);
+
+    const loading = rootStore.state.loading;
 
     if(global.window) autofillEvent(global.window);
 

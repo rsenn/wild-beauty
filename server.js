@@ -220,6 +220,7 @@ if (!dev && cluster.isMaster) {
         };
         res.cookie("token", token, cookieOptions);
         res.cookie("user_id", user_id, cookieOptions);
+        res.cookie("username", user.username, cookieOptions);
 
         if(req.session) {
           req.session.token = token;
@@ -346,11 +347,12 @@ if (!dev && cluster.isMaster) {
 
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
-      //console.log(`id: `, id);
       let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "user_id"]);
       const photo = response.photos[0];
 
       if(typeof photo == "object") {
+        console.log(`Image get id: `, id, "photo.data:", typeof photo.data);
+
         if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
         let data = Buffer.from(photo.data, "base64");
 

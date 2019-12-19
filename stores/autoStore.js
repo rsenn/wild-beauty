@@ -18,15 +18,15 @@ export const logStoreAdapter = store => {
   return {
     store,
     get: function(name) {
-      console.log(`logStoreAdapter.get(${name}`);
+      //console.log(`logStoreAdapter.get(${name}`);
       return this.store.get(name);
     },
     set: function(name, data) {
-      console.log(`logStoreAdapter.set(${name},`, data, ")");
+      //console.log(`logStoreAdapter.set(${name},`, data, ")");
       return this.store && this.store.set ? this.store.set(name, data) : null;
     },
     remove: function(name) {
-      console.log(`logStoreAdapter.remove(${name}`);
+      //console.log(`logStoreAdapter.remove(${name}`);
       return this.store && this.store.remove ? this.store.remove(name) : null;
     }
   };
@@ -36,16 +36,16 @@ export const makeLocalStore = name => ({
   name,
   storage: makeLocalStorage(),
   get() {
-    console.log(`localStore[${this.name}].get()`);
+    //console.log(`localStore[${this.name}].get()`);
     return this.storage.get(this.name);
   },
   set(data) {
-    console.log(`localStore[${this.name}].set(data)`);
+    //console.log(`localStore[${this.name}].set(data)`);
 
     return this.storage.set(this.name, data);
   },
   remove() {
-    console.log(`localStore[${this.name}].remove()`);
+    //console.log(`localStore[${this.name}].remove()`);
 
     return this.storage.remove(this.name);
   }
@@ -99,7 +99,7 @@ export const makeAutoStoreHandler = (name, store) => {
     try {
       store.set(name, updatedStore);
     } catch(err) {
-      console.log("ERROR: ", err);
+      //console.log("ERROR: ", err);
     }
   };
 

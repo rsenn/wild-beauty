@@ -9,7 +9,7 @@ import { Element, HSLA } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { makeTouchCallback, maxZIndex } from "../components/TouchCallback.js";
-import { toJS, action } from "mobx";
+import { toJS, action, set } from "mobx";
 import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { getOrCreateStore } from "../stores/createStore.js";
@@ -37,7 +37,7 @@ const makeItemToOption = selected => item => {
   let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
   let value = item.id;
   let children = toJS(item.children);
-  let obj = { label, value, expanded: true, checked: selected === value };
+  let obj = { label, title: label, value, expanded: true, checked: selected === value };
 
   if(children && children.length) obj.children = children;
   if(label.startsWith("null(")) return null;
@@ -82,6 +82,14 @@ class New extends React.Component {
     images = images.filter(ph => ph.items.length == 0);
     images.forEach(item => RootStore.newImage(item));
     console.log("images:", images);
+
+    if(ctx.req.cookies) {
+      const { token, user_id } = ctx.req.cookies;
+      //set(RootStore.auth, { token, user_id });
+      RootStore.auth.token = token;
+      RootStore.auth.user_id = user_id;
+    }
+
     return { images };
   }
 
@@ -122,28 +130,35 @@ class New extends React.Component {
           if(offset < -this.offsetRange) offset = -this.offsetRange;
           if(event.type.endsWith("move")) this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
           let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
-          //   console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
+          //console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
           //e.style.setProperty("transform", event.type.endsWith("move") ? transformation : "");
-          if(event.type.endsWith("move")) e.style.setProperty("transform", transformation);
+          if(event.type.endsWith("move")) {
+            e.style.setProperty("transform", transformation);
+            this.clonedImage.style.setProperty("transform", transformation);
+          }
         }
       });
 
       this.touchListener = TouchListener(
         event => {
+          // console.log("Touch ", event);
+          const elem = event.target;
+
           //     if(event.nativeEvent) event.nativeEvent.preventDefault();
-          if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img") {
+          if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
             this.currentImage = event.target;
             let obj = Element.toObject(this.currentImage);
             const orientation = this.currentImage.getAttribute("orientation");
             let rect = Element.rect(this.currentImage);
-            let prect = Element.rect(this.currentImage.parentElement);
+            let prect = Element.rect(this.currentImage.parentElement.parentElement);
             let range = orientation == "landscape" ? rect.width - prect.width : rect.height - prect.height;
             this.offsetRange = range;
-            //console.log("rect: ", { range, rect, prect });
-            obj.style = `position: absolute; width: ${rect.width}px; height: ${rect.height}px`;
+            console.log("rect: ", { orientation, range, rect, prect });
+            obj.style = `position: fixed; top: ${rect.y - window.scrollY}px; left: ${rect.x}px; width: ${rect.width}px; height: ${rect.height}px`;
             if(this.clonedImage) Element.remove(this.clonedImage);
             this.clonedImage = Element.create(obj);
             document.body.appendChild(this.clonedImage);
+            //   Element.move(this.clonedImage, rect);
             //console.log("clonedImage obj:", this.clonedImage);
           }
 
@@ -151,8 +166,11 @@ class New extends React.Component {
             if(this.clonedImage && this.currentImage) {
               let zIndex = parseInt(Element.getCSS(this.currentImage, "z-index")) - 1;
               let irect = Element.rect(this.currentImage);
-              //console.log("irect: ", { irect });
-              if(irect.x >= 1 && irect.y >= 1) Element.move(this.clonedImage, irect);
+
+              //   console.log("irect: ", { irect });
+              //  if(irect.x >= 1 && irect.y >= 1) Element.move(this.clonedImage, irect);
+              //
+
               this.clonedImage.style.zIndex = -1;
               this.clonedImage.style.opacity = 0.5;
             }
@@ -182,12 +200,12 @@ class New extends React.Component {
         }
       );
       window.dragged = e;
-      MultitouchListener(
+      /*   MultitouchListener(
         event => {
           console.log("multitouch", event);
         },
         { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
-      );
+      );*/
     }
     rootStore.state.step = 1;
     //    this.checkQuery();
@@ -218,9 +236,9 @@ class New extends React.Component {
     const { rootStore, router } = this.props;
     //this.checkQuery();
     rootStore.loadItems().then(response => {
-      console.log("Items: ", response.items);
+      //console.log("Items: ", response.items);
       this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
-      console.log("this.tree", toJS(this.tree));
+      // console.log("this.tree", toJS(this.tree));
     });
   }
 
@@ -276,17 +294,17 @@ class New extends React.Component {
       console.log("onChange: ", value);
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
+    console.log("New.render");
     return (
-      <div className={"panes-layout"} {...TouchEvents(this.touchListener)}>
+      <div className={"page-layout"}>
         <Head>
           <title>New</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Nav />
-        <div className={"page-layout"}>
-          <div className={"title-bar"}>
-            {global.window ? window.site.label(this.props) : undefined} - {global.window ? window.site.description(this.props) : undefined}
-          </div>
+        <Nav>
+          {global.window ? window.site.label(this.props) : undefined} - {global.window ? window.site.description(this.props) : undefined}
+        </Nav>
+        <div className={"content-layout"}>
           <NeedAuth>
             {rootStore.state.step == 1 ? <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
             {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
@@ -299,6 +317,10 @@ class New extends React.Component {
               border: 1px outset #55555580;
             }
             .dropdown-tree {
+            }
+            .content-layout {
+              width: 100vw;
+              text-align: left;
             }
             .panes-list {
               display: flex;

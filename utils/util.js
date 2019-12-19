@@ -1219,6 +1219,28 @@ Util.formatTime = function(date = new Date(), format = "HH:MM:SS") {
   }
   return out;
 };
+Util.leapYear = function(year) {
+  if(year % 400 == 0) return true;
+  if(year % 100 == 0) return false;
+  if(year % 4 == 0) return true;
+  return false;
+};
+Util.timeSpan = function(s) {
+  var seconds = s % 60;
+  s = Math.floor(s / 60);
+  var minutes = s % 60;
+  s = Math.floor(s / 60);
+  var hours = s % 24;
+  s = Math.floor(s / 24);
+  var days = s % 7;
+  s = Math.floor(s / 7);
+  var weeks = s;
+  var ret = "";
+  ret = ("0" + hours).substring(0, 2) + ":" + ("0" + minutes).substring(0, 2) + ":" + ("0" + seconds).substring(0, 2);
+  if(days) ret = days + " days " + ret;
+  if(weeks) ret = weeks + " weeks " + ret;
+  return ret;
+};
 Util.randFloat = function(min, max) {
   return Math.random() * (max - min) + min;
 };

@@ -2594,7 +2594,7 @@ export class Element extends Node {
     let parent = element.parentElement ? element.parentElement : element.parentNode;
 
     const estyle = Util.toHash(w && w.getComputedStyle ? w.getComputedStyle(element) : d.getComputedStyle(element));
-    const pstyle = Util.toHash(w && w.getComputedStyle ? w.getComputedStyle(parent) : d.getComputedStyle(parent));
+    const pstyle = parent && parent.tagName ? Util.toHash(w && w.getComputedStyle ? w.getComputedStyle(parent) : d.getComputedStyle(parent)) : {};
     //console.log('Element.getCSS ', { estyle, pstyle });
 
     let style = Util.removeEqual(estyle, pstyle);

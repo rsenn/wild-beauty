@@ -248,13 +248,14 @@ class Show extends React.Component {
     let tree = this.tree;
     //console.log("Show.render", { tree });
     return (
-      <div className={"main-layout"} {...TouchEvents(touchListener)}>
+      <div className={"page-layout"} {...TouchEvents(touchListener)}>
         <Head>
-          <title>Home</title>
+          <title>Show</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <div className={"page-layout"}>
+
+        <div className={"show-layout"}>
           {tree ? (
             <DropdownTreeSelect
               data={tree}
@@ -274,15 +275,8 @@ class Show extends React.Component {
             undefined
           )}
           <img src={"static/img/test.svg"} />
-          <div
-            id={"item-grid"}
-            style={{
-              marginLeft: "-8px",
-              padding: "4px",
-              width: "90vw"
-            }}
-          >
-            <div className={"grid-4col grid-gap-1em"}>
+          <div id={"item-grid"} style={{}}>
+            <div className={"grid-col grid-gap-1em"}>
               {this.props.items.map(item => {
                 // console.log("item: ", item);
                 const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
@@ -351,82 +345,76 @@ class Show extends React.Component {
             {/*          <Layer w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
             Layer
           </Layer>*/}
-            <SvgOverlay />
           </div>
-          <style jsx global>{`
-            .main-layout {
-              width: 100vw;
-              overflow: auto;
-            }
-            .gallery-image {
-              height: auto;
-            }
-            .panels {
-              margin: 40pxf auto 0 auto;
-              overflow: visible;
-            }
-            img {
-              border: 0px;
-              outline: 0px;
-              padding: 0px;
-              margin: 0px;
-            }
-            .panels .layer {
-              margin: 0px;
-              padding: 0px;
-            }
-            .layout {
-              margin: 0px;
-              padding: 0px;
-              overflow: visible;
-            }
-            .panels > div {
-              flex: 1 1 auto;
-            }
-            .layer > div {
-              width: 100%;
-              height: 100%;
-            }
-            .layer > div {
-              width: 100%;
-              height: 100%;
-            }
-            .layer.dragging {
-              opacity: 50%;
-            }
-            .title {
-              margin: 0;
-              width: 100%;
-              padding-top: 80px;
-              line-height: 1.15;
-              font-size: 48px;
-            }
-            .title,
-            .description {
-              text-align: center;
-            }
-            .row {
-              max-width: 880px;
-              margin: 80px auto 40px;
-              display: flex;
-              flex-direction: row;
-              justify-content: space-around;
-            }
-            .page-layout {
-              position: relative;
-              top: 0px;
-              width: 100vw;
-              text-align: center;
-              display: inline-flex;
-              justify-content: center;
-              align-items: center;
-              z-index: 1;
-            }
-            .tile {
-              transition: transform 1s ease-in-out;
-            }
-          `}</style>
         </div>
+        <SvgOverlay />
+        <style jsx global>{`
+          .show-layout {
+            overflow-x: hidden;
+            overflow-y: scroll;
+            text-align: left;
+            width: 100vw;
+            padding: 0 10px;
+          }
+          .gallery-image {
+            height: auto;
+          }
+          .panels {
+            margin: 40pxf auto 0 auto;
+            overflow: visible;
+          }
+          img {
+            border: 0px;
+            outline: 0px;
+            padding: 0px;
+            margin: 0px;
+          }
+          .panels .layer {
+            margin: 0px;
+            padding: 0px;
+          }
+          .layout {
+            margin: 0px;
+            padding: 0px;
+            overflow: visible;
+          }
+          .panels > div {
+            flex: 1 1 auto;
+          }
+          .layer > div {
+            width: 100%;
+            height: 100%;
+          }
+          .layer > div {
+            width: 100%;
+            height: 100%;
+          }
+          .layer.dragging {
+            opacity: 50%;
+          }
+          .title {
+            margin: 0;
+            width: 100%;
+            padding-top: 80px;
+            line-height: 1.15;
+            font-size: 48px;
+          }
+          .title,
+          .description {
+            text-align: center;
+          }
+          .row {
+            max-width: 880px;
+            margin: 80px auto 40px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+          }
+
+          .tile {
+            transition: transform 1s ease-in-out;
+          }
+        `}</style>
       </div>
     );
   }

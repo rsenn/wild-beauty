@@ -3,7 +3,7 @@ import { Element, HSLA, Point, Rect, Renderer, Select, SVG } from "../utils/dom.
 import axios from "../utils/axios.js";
 import Util from "./util.js";
 import { Polygon } from "./polygon.js";
-import { storage } from "./devtools.js";
+import devtools, { storage, select } from "./devtools.js";
 import { TouchListener } from "./touchHandler.js";
 import { lazyInitializer } from "./lazyInitializer.js";
 
@@ -47,7 +47,6 @@ export default class devpane {
         zIndex: 18,
         minWidth: "300px",
         maxWidth: "80vw",
-        width: "200px  ",
 
         minHeight: "30vh",
         maxHeight: "60vh",
@@ -411,7 +410,7 @@ export default class devpane {
       style: {
         display: "inline-block",
         zIndex: 18,
-        position: "fixed",
+        position: "absolute",
         //pointerEvents: "none",
         ...(rect ? Rect.toCSS(rect) : {}),
         ...css
@@ -707,6 +706,15 @@ export default class devpane {
           event.preventDefault();
           const e = select();
           e.then(res => {
+            if(res) {
+              let bbText = Element.find("#bbox");
+              let bbox = Element.rect(res);
+              let css = Element.getCSS(res);
+
+              bbText.innerHTML = Rect.toSource(bbox) + "\nfont-size: " + css.fontSize; // `x: ${bbox.x}\ny: ${bbox.y}\nw: ${bbox.width}\nh: ${bbox.height}`;
+            }
+            console.log("selectElement (resolved) = ", res);
+
             if(res && res.length) {
               this.elements = this.elements.concat(res);
               //this.elements.push(res);
@@ -781,7 +789,7 @@ export default class devpane {
         <input type="checkbox" onChange={this.handleToggle} />
         Bounding boxes
         <br />
-        <pre>{[`x: ${rect.x || 0}`, `y: ${rect.y || 0}`, `width: ${rect.w || 0}`, `height: ${rect.h || 0}`, `font-size: ${fontSize || 0}`].join(",\n")}</pre>
+        <pre id={"bbox"}>{[`x: ${rect.x || 0}`, `y: ${rect.y || 0}`, `width: ${rect.w || 0}`, `height: ${rect.h || 0}`, `font-size: ${fontSize || 0}`].join(",\n")}</pre>
       </form>
     );
   }
@@ -851,7 +859,6 @@ export default class devpane {
     let serial = this.serial + 1;
     this.serial = serial;
     let gparent = rect.boxes ? rect.boxes.parentNode : null;
-
     if(gparent) {
       gparent.removeChild(rect.boxes);
       rect.boxes = null;
@@ -872,19 +879,13 @@ export default class devpane {
       if(inside) accu.push(rect);
       return accu;
     }, []);
-
     // rects = rects.filter(item => rect.boxes != null && rect.serial == serial);
-
     rects.sort((a, b) => Rect.area(b) - Rect.area(a));
-
     rects = rects.filter(item => Rect.area(item) > 0);
     console.log("devp.mouseMove", { target, clientX, clientY, rects });
-
     if(rects.length) console.log("rects: ", rects);
     let svg = this.svg();
-
     [...svg.querySelectorAll("rect")].forEach(e => e.parentElement.removeChild(e));
-
     let f = SVG.factory(svg);
     /*
     const g = f('g');
@@ -892,18 +893,25 @@ export default class devpane {
     */
     console.log("devp.mouseMove", f);
     //  f('rect', { x: 10, y: 10, width:  100, height: 100 });
-
     //rects = rects.reverse();
-
     this.svgRects = rects;
-
-    let svgRects = rects.map(({ x, y, width, height }, index) => {
-      const color = new HSLA((60 + (index * 360) / (rects.length - 1)) % 360, 100, 50, 1);
+    rects = rects.map((rect, index) => ({
+      color: new HSLA((60 + (index * 360) / 10) % 360, 100, 50, 1),
+      ...rect
+    }));
+    let svgRects = rects.map(({ x, y, width, height, color }, index) => {
       return f("rect", { x, y, width, height, stroke: color.toString(), strokeWidth: 3, fill: "none" });
     });
-
     console.log("devp.mouseMove", svgRects);
-
+    var selectedList = Element.find("#selected-list");
+    Element.setCSS(selectedList, { display: "block", backgroundColor: "black", padding: "2px", overflow: "scroll" });
+    selectedList.innerHTML =
+      "<pre>" +
+      rects
+        .map(rect => `<span style="color: ${rect.color.toString()};">` + Element.xpath(rect.e, document.body) + `</span>`)
+        .reverse()
+        .join("\n") +
+      `</pre>`;
     if(rects[0]) {
       this.rect = rects[0];
       //  this.renderPaneLayer();

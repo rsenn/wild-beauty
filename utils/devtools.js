@@ -356,27 +356,32 @@ export function gettext(elem, done) {
 }
 
 export function select() {
-  return new Promise(function(resolve, reject) {
-    const e = Element.find("#__next");
-    e.style.cursor = "crosshair";
+  if(!select.promise)
+    select.promise = new Promise(function(resolve, reject) {
+      const e = Element.find("#__next");
+      e.style.cursor = "crosshair";
+      select.element = null;
 
-    const abortsel = () => {
-      e.style.cursor = "default";
-      e.removeEventListener("click", click);
-      e.removeEventListener("keypress", onkey);
-    };
-    const click = event => {
-      event.preventDefault();
-      console.log("selected element ", event.target);
-      resolve(event.target);
-      abortsel();
-    };
-    const onkey = event => {
-      if(event.keyCode == 27) abortsel();
-    };
-    e.addEventListener("click", click);
-    e.addEventListener("keypress", onkey);
-  });
+      const abortsel = () => {
+        select.promise = undefined;
+        e.style.cursor = "default";
+        e.removeEventListener("click", click);
+        e.removeEventListener("keypress", onkey);
+      };
+      const click = event => {
+        event.preventDefault();
+        console.log("selected element ", event.target);
+        select.element = event.target;
+        resolve(event.target);
+        abortsel();
+      };
+      const onkey = event => {
+        if(event.keyCode == 27) abortsel();
+      };
+      e.addEventListener("click", click);
+      e.addEventListener("keypress", onkey);
+    });
+  return select.promise;
 }
 
 export function boxes(state) {

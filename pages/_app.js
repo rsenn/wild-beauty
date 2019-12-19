@@ -41,12 +41,9 @@ class MyApp extends App {
 
   constructor(props) {
     super(props);
-
     const { router } = props;
     this.mobxStore = getOrCreateStore(!global.window, props.pageProps.initialMobxState);
-
     const pageName = router.pathname.replace(/^\//, "");
-
     if(global.window) {
       window.Util = Util;
       window.stores = this.mobxStore;
@@ -82,15 +79,10 @@ class MyApp extends App {
 
     if(Util.isBrowser()) window.component = Component;
 
-    //console.log("App.render", mobxStore);
+    console.log("App.render");
     return (
-      <Container>
-        <Head>
-          <title>StarLottery</title>
-        </Head>
-        <Provider rootStore={this.mobxStore.RootStore} i18nStore={i18nStore} store={this.mobxStore}>
-          <Component {...pageProps} router={router} key={Router.route} />
-        </Provider>
+      <Provider rootStore={this.mobxStore.RootStore} i18nStore={i18nStore} store={this.mobxStore}>
+        <Component {...pageProps} router={router} key={Router.route} />
         <style jsx global>{`
           @font-face {
             font-family: "Fixed";
@@ -108,15 +100,27 @@ class MyApp extends App {
             background-size: auto 50vmin;
             margin: 0;
           }
+          @media (max-width: 375px) {
+            body {
+              font-size: 10px;
+            }
+          }
+
+          #__next {
+            margin: 0px;
+            padding: 0px;
+            overflow-x: hidden;
+          }
 
           .page-layout {
-            margin: 80px 0 0 0;
+            padding: 0 0 0 0;
+            margin: 0 0 0 0;
             width: 100vw;
-            text-align: center;
+            text-align: right;
             display: flex;
             flex-flow: column nowrap;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-end;
+            align-items: flex-end;
             z-index: 1;
           }
           button,
@@ -139,23 +143,15 @@ class MyApp extends App {
             padding: 0px;
           }
           body {
-            position: absolute;
-            top: 0;
-            width: 100vw;
-            height: 100vh;
+            margin: 0px;
+            padding: 0px;
           }
-          .title-bar {
-            position: absolute;
-            left: 0.5em;
-            top: 0.5em;
-            text-align: left;
-            color: black;
-            padding-left: 10px;
-            font-size: 2em;
-            font-family: Fixed;
+
+          .title-bar > span {
+            white-space: pre;
           }
         `}</style>
-      </Container>
+      </Provider>
     );
   }
 }

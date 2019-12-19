@@ -6,7 +6,7 @@ import { Translate, Localize } from "react-i18nify-mobx";
 const NeedAuth = inject("rootStore")(
   observer(({ admin, userStore, rootStore, children, t, style, ...props }) => (
     <React.Fragment>
-      {rootStore.authenticated ? (
+      {rootStore.authenticated === true ? (
         children
       ) : rootStore.state.loading ? (
         <div className={"auth-loading"} style={style}>
