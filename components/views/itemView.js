@@ -29,7 +29,7 @@ export const ItemView = inject("rootStore")(
     return (
       <React.Fragment>
         <div className={"item-view"}>
-          {item.photos.map(photo => (
+          {(item && item.photos && item.photos.map) ? item.photos.map(photo => (
             <SizedAspectRatioBox className={"item-box"}>
               <img
                 src={`/api/image/get/${photo.id}`}
@@ -41,11 +41,11 @@ export const ItemView = inject("rootStore")(
                 }}
               />
             </SizedAspectRatioBox>
-          ))}
-          <div className={"item-data"}>
+          )) : undefined}
+          {(item && item.data) ?      <div className={"item-data"}>
             <h2>{item.data.title}</h2>
             <p>{item.data.text}</p>
-          </div>
+          </div> : undefined }
         </div>
         <a
           className={"button-prev"}

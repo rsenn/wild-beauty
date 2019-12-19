@@ -190,17 +190,18 @@ if (!dev && cluster.isMaster) {
     );
     server.use(bodyParser.json());
 
-    /*server.use(function(req, res, next) {
-      const token = getVar(req, "token");
+    server.use(function(req, res, next) {
+   /*   const token = getVar(req, "token");
       const user_id = getVar(req, "user_id");
       
-      console.log("Cookie: ", { token, user_id });
-
+      console.log("Cookie: ", { token, user_id });*/
+ 
       const { query, params, url } = req;
-      console.log("Request: ", { query, url, parsedUrl, params });
+ 
+  //    console.log("Request: ", { query, url/*, parsedUrl, params*/ });
 
       return next();
-    });*/
+    });
 
     server.post("/api/login", async function(req, res) {
       const { username, password } = req.body;

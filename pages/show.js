@@ -4,7 +4,6 @@ import Layer from "../components/layer.js";
 import { Element, Node, HSLA, PointList, Point, Rect, Matrix, Timer } from "../utils/dom.js";
 import getAPI from "../utils/api.js";
 import Util from "../utils/util.js";
-import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { inject, observer } from "mobx-react";
 import ApolloClient from "apollo-boost";
@@ -87,7 +86,7 @@ class Show extends React.Component {
     //console.log("RootStore.fetchItems");
     let items;
 
-    if(params.id !== undefined) {
+    if(params && params.id !== undefined) {
       let response = await Show.API.select("items", { id: params.id }, Show.fields);
       items = response.items || [];
       console.log("item: ", items[0]);
@@ -120,15 +119,12 @@ class Show extends React.Component {
     });
     //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
-
     if(this.props.params.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
     } else if(this.tree) {
       var item = findInTree(this.tree, "Objects");
-
       item.checked = true;
-
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
     }
   }
@@ -136,13 +132,11 @@ class Show extends React.Component {
   checkTagRemove() {
     if(global.window) {
       let tagRemove = Element.find("button.tag-remove");
-
       if(tagRemove) {
         tagRemove.addEventListener("click", e => {
           e.preventDefault();
           Timer.once(100, () => {
             console.log("tagRemove: ", tagRemove);
-
             Util.traverseTree(this.tree, node => {
               node.checked = false;
             });
@@ -156,7 +150,6 @@ class Show extends React.Component {
 
   componentDidMount() {
     const { rootStore, router } = this.props;
-
     this.checkTagRemove();
   }
 
@@ -205,9 +198,7 @@ class Show extends React.Component {
     if(this.element === e) {
       this.grid.style.transition = `transform ${this.speed}s ease-in-out`;
       this.grid.style.transform = "";
-
       this.element = null;
-
       if(this.back) {
         this.back.parentElement.removeChild(this.back);
         this.back = null;
@@ -339,22 +330,8 @@ class Show extends React.Component {
     let swipeEvents = {};
     var e = null;
     if(global.window !== undefined) window.page = this;
-    if(global.window) {
-      var touchListener = TouchListener(TouchCallback, {
-        element: global.window,
-        step: 1,
-        round: true,
-        listener: MovementListener,
-        noscroll: true
-      });
-      window.dragged = e;
-      MultitouchListener(
-        event => {
-          //console.log("multitouch", event);
-        },
-        { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
-      );
-    }
+
+
     const onError = event => {};
     const onImage = event => {
       const { value } = event.nativeEvent.target;
@@ -373,7 +350,7 @@ class Show extends React.Component {
     const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
     console.log("Show.render" /*, { tree, items }*/);
     return (
-      <div className={"page-layout"} {...TouchEvents(touchListener)}>
+      <div className={"page-layout"}>
         <Head>
           <title>Show</title>
           <link rel="icon" href="/favicon.ico" />
