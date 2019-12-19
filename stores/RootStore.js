@@ -209,8 +209,13 @@ export class RootStore {
 
   get rootItem() {
     if(this.items.size == 0) this.loadItems(/*{ parent_id: null }*/);
-    if(this.items && this.items.entries) for(let [id, item] of this.items.entries()) if (item && item.parent == null) return item;
-    return null;
+    var root = null;
+    if(this.items && this.items.entries)
+      for(let [id, item] of this.items.entries()) {
+        // console.log("item: ", toJS( item));
+        if(item && item.type == "root") root = item;
+      }
+    return root;
   }
 
   get rootItemId() {
@@ -226,7 +231,7 @@ export class RootStore {
    */
   @action
   newItem(item) {
-    var childIds = (item.children && item.children.map) ? item.children.map(child => child.id).sort() : [];
+    var childIds = item.children && item.children.map ? item.children.map(child => child.id).sort() : [];
     var id = parseInt(item.id);
     item = { ...item, id, childIds };
     //delete item.children;
@@ -243,7 +248,7 @@ export class RootStore {
       item.data = data;
     }
 
-    if(item.photos && item.photos.length > 0  && item.photos.map) {
+    if(item.photos && item.photos.length > 0 && item.photos.map) {
       item.photos = item.photos.map(i => ({ ...i.photo, landscape: i.photo.width > i.photo.height }));
     }
 
@@ -328,15 +333,16 @@ export class RootStore {
    *
    * @param      {<type>}  event   The event
    */
-  @action.bound
+  async;
   saveItem(event) {
     const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
     const parent_id = rs.state.parent_id;
 
-    const dataObj = this.entries.reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
-    console.log("saveItem", { photo_id, parent_id, dataObj });
+    const { name = null, ...dataObj } = this.entries.reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
 
-    this.apiRequest("/api/item/new", { photo_id, parent_id, data: dataObj }).then(response => {
+    console.log("saveItem", { photo_id, parent_id, name, dataObj });
+
+    return this.apiRequest("/api/item/new", { photo_id, parent_id, name, data: dataObj }).then(response => {
       console.log("saveitem API response:", response);
     });
   }

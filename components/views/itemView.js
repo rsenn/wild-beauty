@@ -26,34 +26,44 @@ export const ItemView = inject("rootStore")(
     console.log("Item ID: ", id);
     console.log("Item: ", toJS(item));
 
-    if(!item.photos || !item.photos.length )
-      item.photos = [{
-href: '/static/img/no-image.svg',
-width: 512,
-height: 512,
-id: -1
-      }];
+    if(item) {
+      if(!item.photos || !item.photos.length)
+        item.photos = [
+          {
+            href: "/static/img/no-image.svg",
+            width: 512,
+            height: 512,
+            id: -1
+          }
+        ];
+    }
 
     return (
       <React.Fragment>
         <div className={"item-view"}>
-          {(item && item.photos && item.photos.map) ? item.photos.map(photo => (
-            <SizedAspectRatioBox className={"item-box"}>
-              <img
-                src={photo.href || `/api/image/get/${photo.id}`}
-                width={photo.width}
-                height={photo.height}
-                style={{
-                  width: photo.landscape ? `${(photo.width * 100) / photo.height}%` : "100%",
-                  height: photo.landscape ? "100%" : "auto"
-                }}
-              />
-            </SizedAspectRatioBox>
-          )) : undefined}
-          {(item && item.data) ?      <div className={"item-data"}>
-            <h2>{item.data.title}</h2>
-            <p>{item.data.text}</p>
-          </div> : undefined }
+          {item && item.photos && item.photos.map
+            ? item.photos.map(photo => (
+                <SizedAspectRatioBox className={"item-box"}>
+                  <img
+                    src={photo.href || `/api/image/get/${photo.id}`}
+                    width={photo.width}
+                    height={photo.height}
+                    style={{
+                      width: photo.landscape ? `${(photo.width * 100) / photo.height}%` : "100%",
+                      height: photo.landscape ? "100%" : "auto"
+                    }}
+                  />
+                </SizedAspectRatioBox>
+              ))
+            : undefined}
+          {item && item.data ? (
+            <div className={"item-data"}>
+              <h2>{item.data.title}</h2>
+              <p>{item.data.text}</p>
+            </div>
+          ) : (
+            undefined
+          )}
         </div>
         <a
           className={"button-prev"}

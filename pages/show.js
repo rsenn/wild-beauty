@@ -80,7 +80,7 @@ class Show extends React.Component {
   ];
 
   static async getInitialProps(ctx) {
-    const { query, params } = ctx && ctx.req || {};
+    const { query, params } = (ctx && ctx.req) || {};
     console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
     //console.log("RootStore.fetchItems");
@@ -89,7 +89,7 @@ class Show extends React.Component {
     if(params && params.id !== undefined) {
       let id = parseInt(params.id);
       const name = params.id;
-      if(isNaN(id) || typeof(id) != 'number') id = -1;
+      if(isNaN(id) || typeof id != "number") id = -1;
       const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
       console.log("query: ", q);
       let response = await Show.API(q);
@@ -336,7 +336,6 @@ class Show extends React.Component {
     var e = null;
     if(global.window !== undefined) window.page = this;
 
-
     const onError = event => {};
     const onImage = event => {
       const { value } = event.nativeEvent.target;
@@ -440,19 +439,19 @@ class Show extends React.Component {
                           <br />
                           {children.length > 0 ? (
                             <span>
-                              Children ({children.length}): {children.map(ch => ch.id).join(", ")}
+                              Children[{children.length}]: {children.map(ch => ch.id).join(",")}
                               <br />
                             </span>
                           ) : (
                             undefined
                           )}
-                          Parent Id: {parent ? parent.id : -1} <br />
+                          Parent: {parent ? parent.id : -1} <br />
                           {!!type ? `Type: ${type}` : undefined}
                           {!!name ? `Name: ${name}` : undefined}
                           <br />
                           <br />
                           <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>
-                            {[...Object.entries(data)].map(([key, value]) => `${Util.ucfirst(key)}: ${value}`).join("\n")}
+                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
                           </pre>
                         </div>
                       </SizedAspectRatioBox>

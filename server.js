@@ -191,14 +191,14 @@ if (!dev && cluster.isMaster) {
     server.use(bodyParser.json());
 
     server.use(function(req, res, next) {
-   /*   const token = getVar(req, "token");
+      /*   const token = getVar(req, "token");
       const user_id = getVar(req, "user_id");
       
       console.log("Cookie: ", { token, user_id });*/
- 
+
       const { query, params, url } = req;
- 
-  //    console.log("Request: ", { query, url/*, parsedUrl, params*/ });
+
+      //    console.log("Request: ", { query, url/*, parsedUrl, params*/ });
 
       return next();
     });
@@ -298,7 +298,7 @@ if (!dev && cluster.isMaster) {
 
     server.post("/api/item/tree", async function(req, res) {
       let { fields, ...params } = req.body;
-      if(!fields) fields = ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
+      if(!fields) fields = ["id", "type", "name", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
       console.log("params: ", params);
       let itemList = await API.list("items", fields, params);
       itemList = itemList.map(item => {

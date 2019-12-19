@@ -41,7 +41,7 @@ const makeItemToOption = selected => item => {
 
   if(children && children.length) obj.children = children;
   if(label.startsWith("null(")) return null;
-  if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
+  if(!data.name) if (!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
 
   return obj;
 };
@@ -249,9 +249,9 @@ class New extends React.Component {
     const { rootStore, router } = this.props;
     //this.checkQuery();
     rootStore.loadItems().then(response => {
-      //console.log("Items: ", response.items);
+      console.log("Items: ", response.items);
       this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
-      // console.log("this.tree", toJS(this.tree));
+      console.log("this.tree", toJS(this.tree));
     });
   }
 
@@ -307,7 +307,7 @@ class New extends React.Component {
       console.log("onChange: ", value);
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
-    console.log("New.render");
+    console.log("New.render", this.tree);
     return (
       <div className={"page-layout"}>
         <Head>

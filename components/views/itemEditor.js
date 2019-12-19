@@ -98,7 +98,7 @@ export const ItemEditor = inject("rootStore")(
               });
             }}
           >
-            <button onClick={rootStore.saveItem} className={"save"}>
+            <button onClick={rootStore.saveItem.bind(rootStore)} className={"save"}>
               <img src={"/static/img/icon-save.svg"} />
             </button>
           </AddItemBar>
