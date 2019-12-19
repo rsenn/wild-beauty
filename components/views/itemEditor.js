@@ -61,12 +61,13 @@ export const ItemEditor = inject("rootStore")(
           {rootStore.entries.map(field => (
             <EditableField
               options={rootStore.fieldNames}
-              multiline={false}
+              multiline={!!field.multiline}
               hasDraft={false}
               className={"editable-field"}
               name={field.type}
               value={field.value}
               onNameChanged={newName => {
+                field.multiline = String(newName).toLowerCase() == 'text';
                 field.type = newName;
               }}
               onValueChanged={newVal => {
@@ -98,7 +99,7 @@ export const ItemEditor = inject("rootStore")(
             }}
           >
             <button onClick={rootStore.saveItem} className={"save"}>
-              <img src={"static/img/icon-save.svg"} />
+              <img src={"/static/img/icon-save.svg"} />
             </button>
           </AddItemBar>
         </div>
@@ -112,6 +113,7 @@ export const ItemEditor = inject("rootStore")(
             max-width: 50vw;
           }
           .item-fields {
+            width: 96vw;
           }
           .item-photo {
             display: flex;

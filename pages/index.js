@@ -227,9 +227,9 @@ class Home extends React.Component {
         </Head>
         <div className={"subpage flex-vertical"} style={{ opacity: subpage == 1 ? 1 : 0, display: subpage == 1 ? "flex" : "flex" }}>
           <div style={{ transformStyle: "preserve-3d", transform: t }}>
-            <img src={"static/img/logo-transparent.png"} style={{ width: "100%", maxWidth: "1280px" }} />
+            <img src={"/static/img/logo-transparent.png"} style={{ width: "100%", maxWidth: "1280px" }} />
           </div>
-          {/*  <img src={"static/img/arrow-next.svg"} style={{ transform: 'scaleX(-1)' }} />*/}
+          {/*  <img src={"/static/img/arrow-next.svg"} style={{ transform: 'scaleX(-1)' }} />*/}
         </div>
         <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "block" : "block" }}>
           <h1>Title</h1>
@@ -253,13 +253,13 @@ class Home extends React.Component {
         </div>
         {subpage > 1 ? (
           <a className={"button-prev"} href={"#" + (subpage - 1)} onClick={this.handlePrev}>
-            <img src={"static/img/arrow-next.svg"} style={{ transform: "scaleX(-1)" }} />
+            <img src={"/static/img/arrow-next.svg"} style={{ transform: "scaleX(-1)" }} />
           </a>
         ) : (
           undefined
         )}
         <a className={"button-next"} href={subpage < 3 ? "#" + (subpage + 1) : "/show"} onClick={subpage >= 3 ? undefined : this.handleNext}>
-          <img src={"static/img/arrow-next.svg"} />
+          <img src={"/static/img/arrow-next.svg"} />
         </a>
         <SvgOverlay svgRef={this.svgLayer} />
 

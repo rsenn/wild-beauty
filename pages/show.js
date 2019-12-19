@@ -68,7 +68,8 @@ class Show extends React.Component {
   };
 
   static async getInitialProps(ctx) {
-    //console.log("Show.getInitialProps ");
+    const { query, params } = ctx.req;
+    console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
     //console.log("RootStore.fetchItems");
     let items = await getAPI().list("items", [
@@ -82,7 +83,7 @@ class Show extends React.Component {
       "users { user { id username last_seen } }"
     ]);
     //await RootStore.fetchItems();
-    console.log("Show.getInitialProps  items:", items);
+   // console.log("Show.getInitialProps  items:", items);
     items = items.sort((a, b) => a.id - b.id);
     RootStore.items.clear();
     //  items.forEach(item => RootStore.newItem(item));
@@ -116,9 +117,9 @@ class Show extends React.Component {
 
     //this.selectNode(item);
 
-    console.log("this.tree: ", this.tree);
+   /* console.log("this.tree: ", this.tree);
     console.log("item: ", item);
-    console.log("parentIds: ", this.state.parentIds);
+    console.log("parentIds: ", this.state.parentIds);*/
   }
 
   componentDidMount() {
@@ -219,7 +220,7 @@ this.selectNode(item);
       let back = Element.create("div", {
         parent: document.body,
         style: {
-          background: "url(static/img/tile-background.png) repeat",
+          background: "url(/static/img/tile-background.png) repeat",
           backgroundSize: "auto 50vmin",
           zIndex: 8,
           position: "fixed",
@@ -288,7 +289,7 @@ this.selectNode(item);
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
     const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
-    console.log("Show.render", { tree, items });
+    console.log("Show.render"/*, { tree, items }*/);
     return (
       <div className={"page-layout"} {...TouchEvents(touchListener)}>
         <Head>
@@ -317,7 +318,7 @@ this.selectNode(item);
           ) : (
             undefined
           )}
-          {/*          <img src={"static/img/test.svg"} />
+          {/*          <img src={"/static/img/test.svg"} />
            */}
           <div id={"item-grid"} style={{ margin: "0 0" }}>
             <div className={"grid-col grid-gap-20"}>
@@ -326,10 +327,10 @@ this.selectNode(item);
                 const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                 const haveImage = photo_id >= 0;
                 let photo = haveImage ? item.photos[0].photo : null;
-                const path = haveImage ? `/api/image/get/${photo_id}` : "static/img/no-image.svg";
+                const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
                 const opacity = photo_id >= 0 ? 1 : 0.3;
                 if(photo !== null) photo.landscape = photo.width > photo.height;
-                console.log("photo: ", photo);
+            //    console.log("photo: ", photo);
                 let { data, parent, type, children, users } = item;
                 try {
                   data = item.data && item.data.length && JSON.parse(item.data);
@@ -408,6 +409,9 @@ this.selectNode(item);
             padding: 0px 20px;
             width: 100vw;
             text-align: left;
+          }
+          #item-grid {
+            padding: 20px 0;
           }
           .gallery-image {
             height: auto;

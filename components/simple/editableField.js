@@ -11,16 +11,17 @@ export const EditableField = ({ options, key, className, style, multiline = fals
     localStorageKey: key || "editable"
   });
 
-  const lines = value.split(/\n/g).length;
+  const changeName = name => {
+    setName(name);
+    multiline = (String(name).toLowerCase() == 'text');
+    onNameChanged(name.label);
+  };
+
+  const lines = 10; //value.split(/\n/g).length;
   const lineStyle = multiline ? { height: `${lines}em`, whiteSpace: "pre" } : {};
   const ref = trkl();
   const [focus, setFocus] = React.useState(false);
   const [name, setName] = React.useState("");
-
-  const changeName = name => {
-    setName(name);
-    onNameChanged(name.label);
-  };
 
   const changeValue = value => {
     setEditValue(value);
@@ -28,7 +29,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
 
   let content = isEditing ? (
     <React.Fragment>
-      {multiline ? (
+      {(multiline  || String(name).toLowerCase() == 'text') ? (
         <textarea
           className={classNames("content", className + "-content")}
           rows={lines}
@@ -62,7 +63,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         }}
         className={"icon"}
       >
-        <img src={"static/img/icon-apply.svg"} />
+        <img src={"/static/img/icon-apply.svg"} />
       </button>
       <button
         onClick={e => {
@@ -71,7 +72,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         }}
         className={"icon"}
       >
-        <img src={"static/img/icon-cancel.svg"} />
+        <img src={"/static/img/icon-cancel.svg"} />
       </button>
     </React.Fragment>
   ) : (
@@ -80,7 +81,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         {value}
       </div>
       <button onClick={onEditBegin} className={"icon"}>
-        <img src={"static/img/icon-edit.svg"} />
+        <img src={"/static/img/icon-edit.svg"} />
       </button>
     </React.Fragment>
   );
@@ -168,7 +169,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
           align-items: stretch;
         }
         .editable-field-name {
-          width: 100px;
+          width: 120px;
           flex: 0 0 auto;
         }
         .content.editable-field-content {
@@ -191,7 +192,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         div.editable-field-name,
         div.editable-field-content {
           display: flex;
-          justify-content: center;
+          justify-content: flex-start;
           align-content: center;
           flex-direction: column;
         }

@@ -45,6 +45,7 @@
     "mobx-react": "^6.1.4",
     "next": "^9.1.4",
     "next-images": "^1.2.0",
+    "next-page-transitions": "^1.0.0-beta.2",
     "next-server": "^9.0.5",
     "parse-svg-path": "^0.1.2",
     "paste-image": "^0.0.3",

@@ -113,11 +113,11 @@ class Panes extends React.Component {
     let list = imagePaths();
     if(list === null || (list && list.length == undefined))
       list = [
-        "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
-        "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
-        "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
-        "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
-        "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
+        "/static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
+        "/static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
+        "/static/img/cdb466a69cc7944809b20e7f34840486.jpg",
+        "/static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
+        "/static/img/fdcce856cf66f33789dc3934418113a2.jpg"
       ];
 
     /*  let articles = toJS(rootStore.state.articles);
@@ -166,28 +166,28 @@ class Panes extends React.Component {
           </div>
           {/*<div className={"panes-list"}>
             <div className={"panes-item layer"}>
-              <img src="static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
+              <img src="/static/img/63a5110bf12b0acef2f68e0e1a023502.jpg" />
             </div>
             <div className={"panes-item layer"}>
-              <img src="static/img/76619287_430389744517453_4826291339341594624_n.jpg" />
+              <img src="/static/img/76619287_430389744517453_4826291339341594624_n.jpg" />
             </div>
             <div className={"panes-item layer"}>
-              <img src="static/img/69688821_689014168592533_7393339862767632384_n.jpg" />
+              <img src="/static/img/69688821_689014168592533_7393339862767632384_n.jpg" />
             </div>
             <div className={"panes-item layer"}>
-              <img src="static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg" />
+              <img src="/static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg" />
             </div>
             <div className={"panes-item layer"}>
-              <img src="static/img/d415b80a6007124c4e3948b21a7f0ed1.jpg" />
+              <img src="/static/img/d415b80a6007124c4e3948b21a7f0ed1.jpg" />
             </div>
             <div className={"panes-item layer"}>
-              <img src="static/img/69536222_653691828474365_6429980850053447680_n.jpg" />
+              <img src="/static/img/69536222_653691828474365_6429980850053447680_n.jpg" />
             </div>
             <div className={"panes-item layer"}>
-              <img src="static/img/76771501_2539648529692993_599570957710917632_n.jpg" />
+              <img src="/static/img/76771501_2539648529692993_599570957710917632_n.jpg" />
             </div>
             <div className={"panes-item layer"}>
-              <img src="static/img/0c71247f63ff20833347da1484d3caa4.jpg" />
+              <img src="/static/img/0c71247f63ff20833347da1484d3caa4.jpg" />
             </div>
           </div>*/}
 

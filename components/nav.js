@@ -45,7 +45,7 @@ let customStyles = {
     borderRadius: "0",
     border: "none",
     transform: "translate(-50%, -50%)",
-    /*    background: "url(static/img/tile-background.jpg) repeat",
+    /*    background: "url(/static/img/tile-background.jpg) repeat",
     backgroundSize: "auto 50vmin",
 */ zIndex: 13,
     overflow: "hidden"
@@ -247,13 +247,13 @@ const Nav = inject(
             <div className={"flagbox"}>
               <div className={"flaglist"}>
                 <div onClick={() => setLanguage(i18nStore, "de", setLanguageOpen)}>
-                  <img src={"static/img/flag-de.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
+                  <img src={"/static/img/flag-de.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
                 </div>
                 <div onClick={() => setLanguage(i18nStore, "fr", setLanguageOpen)}>
-                  <img src={"static/img/flag-fr.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
+                  <img src={"/static/img/flag-fr.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
                 </div>
                 <div onClick={() => setLanguage(i18nStore, "en", setLanguageOpen)}>
-                  <img src={"static/img/flag-gb.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
+                  <img src={"/static/img/flag-gb.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
                 </div>
               </div>
             </div>
@@ -308,7 +308,7 @@ const Nav = inject(
               width: 100%;
               box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 1);
               overflow: hidden;
-              background: url(static/img/tile-background.png) repeat;
+              background: url(/static/img/tile-background.png) repeat;
               background-size: 33% auto;
             }
             .country-flag {

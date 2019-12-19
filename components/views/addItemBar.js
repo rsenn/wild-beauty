@@ -6,7 +6,7 @@ export const AddItemBar = ({ onAdd, ...props }) => {
   return (
     <div className={"add-item-bar"}>
       <button className={"button-add"} onClick={onAdd}>
-        <img src={"static/img/icon-plus.svg"} />
+        <img src={"/static/img/icon-plus.svg"} />
       </button>
       {props.children}
       <style jsx>{`

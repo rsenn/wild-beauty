@@ -47,7 +47,7 @@ export class RootStore {
   images = observable.map();
   entries = observable.array([], { deep: true });
   users = observable.map();
-  fields = observable.array(["name", "title"]);
+  fields = observable.array(["name", "title", "text"]);
   items = observable.map();
 
   api = getAPI();
@@ -232,7 +232,16 @@ export class RootStore {
     //delete item.children;
     delete item.parent;
 
-    if(typeof item.data == "string" && item.data.length > 0) item.data = JSON.parse(item.data);
+    if(typeof item.data == "string" && item.data.length > 0) {
+      var data = {};
+
+      try { 
+        data = JSON.parse(item.data.replace(/\n/g, "\\n"));
+      }catch(err) {
+        console.error("newItem JSON.parse error", item.data);
+      }
+      item.data = data;
+    }
 
     this.items.set(id, item);
     item = this.items.get(item.id);

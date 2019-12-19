@@ -82,7 +82,7 @@ export const ImageUpload = inject("rootStore")(
                     onDelete(id);
                   }}
                 >
-                  <img src={"static/img/icon-cancel.svg"} />
+                  <img src={"/static/img/icon-cancel.svg"} />
                 </button>
               </div>
             );
