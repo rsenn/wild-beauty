@@ -244,6 +244,9 @@ class Show extends React.Component {
     pt.y += window.scrollY;
     var t = Point.diff(pt, rect.center);
 
+    var origin = Point.diff(rect.center, rect2);
+
+
     var distance = Math.sqrt(t.x * t.x + t.y * t.y);
     this.speed = distance * 0.002;
 
@@ -258,8 +261,12 @@ class Show extends React.Component {
     m.xx *= scale[0];
     m.yy *= scale[1];
     //m = Matrix.scale.apply(Matrix, scale);
-    var dm = Matrix.toDOMMatrix(gm);
     //console.log("matrix: ", m);
+   var    dm = (new DOMMatrix());
+
+   dm.translateSelf(t.x, t.y);
+dm.scaleSelf(scale[0], scale[1]);
+
     var dms = dm.toString();
 
     console.log("b: ", b);
@@ -271,19 +278,24 @@ class Show extends React.Component {
 
     this.grid = grid;
     e = this.grid;
-    Element.setCSS(this.grid, { transition: `transform ${this.speed}s ease-in`, transform: "", zIndex: 8 });
+
+this.grid.style.setProperty('transform-origin', `${origin.x}px ${origin.y}px` )
+this.grid.style.setProperty('transform',  '')
+this.grid.style.setProperty('transition',  `transform 0.5s linear`)
+//    Element.setCSS(this.grid, { /*transformOrigin:  `${origin.x}px ${origin.y}px`, *//*transition: `transform ${this.speed}s ease-in`,*/ transform: "", zIndex: 8 });
 
     var tend = e => {
       console.log("transition end: ", e.target);
+      console.log("transformOrigin: ", e.target.style.transformOrigin);
       /* gm.xx *= scale[0];
     gm.yy *= scale[1];*/
 
-      dm = new DOMMatrix();
+   /*   dm = new DOMMatrix();
       var t2 = Point.diff(srect.center, rect.center);
       dm.translateSelf(0, rect.height + rect2.y + window.scrollY);
 
-      dm.scaleSelf(scale[0], scale[1]);
-      dm.translateSelf(t2.x, t2.y);
+      dm.translateSelf(t2.x, t2.y);*/
+    //  dm.scaleSelf(scale[0], scale[1]);
       console.log("dm: ", dm);
       // var gm2 = Matrix.scale(gm, scale[0], scale[1]);
       e.target.style.transition = `transform 0.5s ease-out`;
