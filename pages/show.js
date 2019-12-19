@@ -66,10 +66,19 @@ class Show extends React.Component {
     zIndex: 99999,
     tree: {},
     parentIds: [],
-    view: 'list'
+    view: "list"
   };
   static API = getAPI();
-  static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize original_name } }", "users { user { id username last_seen } }"];
+  static fields = [
+    "id",
+    "type",
+    "parent_id",
+    "parent { id type data }",
+    "children { id type data }",
+    "data",
+    "photos { photo { id width height filesize original_name } }",
+    "users { user { id username last_seen } }"
+  ];
 
   static async getInitialProps(ctx) {
     const { query, params } = ctx.req;
@@ -112,17 +121,15 @@ class Show extends React.Component {
     //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
 
-    if(this.tree) {
+    if(this.props.params.id !== undefined) {
+      this.state.view = "item";
+      this.state.itemId = parseInt(this.props.params.id);
+    } else if(this.tree) {
       var item = findInTree(this.tree, "Objects");
 
       item.checked = true;
 
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
-    }
-
-    if(this.props.params.id !== undefined) {
-      this.state.view = 'item';
-      this.state.itemId = parseInt(this.props.params.id);
     }
 
     //this.selectNode(item);
@@ -342,94 +349,110 @@ class Show extends React.Component {
         </Head>
         <Nav loading={rootStore.state.loading} />
 
-{this.state.view == 'item' ? <ItemView id={this.state.itemId} /> :       <div className={"show-layout2"}>
-          {/*          <Tree tree={tree} />
-           */}
-          {tree ? (
-            <DropdownTreeSelect
-              data={tree}
-              onChange={obj => {
-                //console.log("Tree value: ", obj);
-                rootStore.state.parent_id = obj.value;
-                makeTreeSelEvent("change")(obj);
-              }}
-              onNodeToggle={makeTreeSelEvent("node-toggle")}
-              onFocus={makeTreeSelEvent("focus")}
-              onBlur={makeTreeSelEvent("blur")}
-              className={"dropdown-tree"}
-              mode={"radioSelect"}
-              texts={{ placeholder: "parent item" }}
-            />
-          ) : (
-            undefined
-          )}
-          {/*          <img src={"/static/img/test.svg"} />
-           */}
-          <div id={"item-grid"} style={{ margin: "0 0" }}>
-            <div className={"grid-col grid-gap-20"}>
-              {items.map(item => {
-                // console.log("item: ", item);
-                const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
-                const haveImage = photo_id >= 0;
-                let photo = haveImage ? item.photos[0].photo : null;
-                const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
-                const opacity = photo_id >= 0 ? 1 : 0.3;
-                if(photo !== null) photo.landscape = photo.width > photo.height;
-                //    console.log("photo: ", photo);
-                let { data, parent, type, children, users } = item;
-                try {
-                  data = item.data && item.data.length && JSON.parse(item.data);
-                } catch(err) {
-                  data = item.data;
-                }
-                if(typeof data != "object" || data === null) data = {};
-                //        console.log("data: ", data);
-                return (
-                  <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
-                    <SizedAspectRatioBox
-                      style={{
-                        position: "relative",
-                        // border: "1px solid black",
-                        boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
-                        overflow: "hidden"
-                      }}
-                      className={"layer gallery-aspect-box"}
-                    >
-                      {haveImage ? <img src={path} width={photo.width} height={photo.height} style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }} className="gallery-image" /> : undefined}
-                      <div
+        {this.state.view == "item" ? (
+          <ItemView id={this.state.itemId} />
+        ) : (
+          <div className={"show-layout2"}>
+            {/*          <Tree tree={tree} />
+             */}
+            {tree ? (
+              <DropdownTreeSelect
+                data={tree}
+                onChange={obj => {
+                  //console.log("Tree value: ", obj);
+                  rootStore.state.parent_id = obj.value;
+                  makeTreeSelEvent("change")(obj);
+                }}
+                onNodeToggle={makeTreeSelEvent("node-toggle")}
+                onFocus={makeTreeSelEvent("focus")}
+                onBlur={makeTreeSelEvent("blur")}
+                className={"dropdown-tree"}
+                mode={"radioSelect"}
+                texts={{ placeholder: "parent item" }}
+              />
+            ) : (
+              undefined
+            )}
+            {/*          <img src={"/static/img/test.svg"} />
+             */}
+            <div id={"item-grid"} style={{ margin: "0 0" }}>
+              <div className={"grid-col grid-gap-20"}>
+                {items.map(item => {
+                  // console.log("item: ", item);
+                  const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
+                  const haveImage = photo_id >= 0;
+                  let photo = haveImage ? item.photos[0].photo : null;
+                  const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
+                  const opacity = photo_id >= 0 ? 1 : 0.3;
+                  if(photo !== null) photo.landscape = photo.width > photo.height;
+                  //    console.log("photo: ", photo);
+                  let { data, parent, type, children, users } = item;
+                  try {
+                    data = item.data && item.data.length && JSON.parse(item.data);
+                  } catch(err) {
+                    data = item.data;
+                  }
+                  if(typeof data != "object" || data === null) data = {};
+                  //        console.log("data: ", data);
+                  return (
+                    <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
+                      <SizedAspectRatioBox
                         style={{
-                          position: "absolute",
-                          padding: "2px",
-                          background: haveImage ? "none" : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
-                          textAlign: "left",
-                          top: "0px",
-                          left: "0px",
-                          fontSize: "15px"
+                          position: "relative",
+                          // border: "1px solid black",
+                          boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
+                          overflow: "hidden"
                         }}
+                        className={"layer gallery-aspect-box"}
                       >
-                        Id: {item.id}
-                        <br />
-                        {children.length > 0 ? (
-                          <span>
-                            Children ({children.length}): {children.map(ch => ch.id).join(", ")}
-                            <br />
-                          </span>
+                        {haveImage ? (
+                          <img
+                            src={path}
+                            width={photo.width}
+                            height={photo.height}
+                            style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }}
+                            className="gallery-image"
+                          />
                         ) : (
                           undefined
                         )}
-                        Parent Id: {parent ? parent.id : -1} <br />
-                        {!!type ? `Type: ${type}` : undefined}
-                        <br />
-                        <br />
-                        <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>{[...Object.entries(data)].map(([key, value]) => `${Util.ucfirst(key)}: ${value}`).join("\n")}</pre>
-                      </div>
-                    </SizedAspectRatioBox>
-                  </div>
-                );
-              })}
+                        <div
+                          style={{
+                            position: "absolute",
+                            padding: "2px",
+                            background: haveImage ? "none" : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                            textAlign: "left",
+                            top: "0px",
+                            left: "0px",
+                            fontSize: "15px"
+                          }}
+                        >
+                          Id: {item.id}
+                          <br />
+                          {children.length > 0 ? (
+                            <span>
+                              Children ({children.length}): {children.map(ch => ch.id).join(", ")}
+                              <br />
+                            </span>
+                          ) : (
+                            undefined
+                          )}
+                          Parent Id: {parent ? parent.id : -1} <br />
+                          {!!type ? `Type: ${type}` : undefined}
+                          <br />
+                          <br />
+                          <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>
+                            {[...Object.entries(data)].map(([key, value]) => `${Util.ucfirst(key)}: ${value}`).join("\n")}
+                          </pre>
+                        </div>
+                      </SizedAspectRatioBox>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div> }
+        )}
         <SvgOverlay />
         <style jsx global>{`
           .show-layout {

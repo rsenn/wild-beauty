@@ -243,8 +243,8 @@ export class RootStore {
       item.data = data;
     }
 
-    if(item.photos   && item.photos.length > 0) {
-      item.photos = item.photos.map(i => i.photo);
+    if(item.photos && item.photos.length > 0) {
+      item.photos = item.photos.map(i => ({ ...i.photo, landscape: i.photo.width > i.photo.height }));
     }
 
     this.items.set(id, item);

@@ -124,8 +124,9 @@ class MyApp extends App {
             display: flex;
             flex-flow: column nowrap;
             justify-content: flex-start;
-            align-items: flex-start;
+            align-items: center;
             z-index: 1;
+            position: relative;
           }
           button,
           textarea,
