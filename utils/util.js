@@ -1513,5 +1513,19 @@ Util.hashString = function(string, bits = 32, mask = 0xffffffff) {
   }
   return ret;
 };
+Util.flatTree = function(tree, addOutput) {
+  var ret = [];
+  if(!addOutput) addOutput = arg => ret.push(arg);
+
+  addOutput(Util.filterKeys(tree, key => key !== "children"));
+
+  if(typeof tree.children == "object" && tree.children.length) for(let child of tree.children) Util.flatTree(child, addOutput);
+  return ret;
+};
+Util.traverseTree = function(tree, fn) {
+  fn(tree);
+  if(typeof tree.children == "object" && tree.children.length) for(let child of tree.children) Util.traverseTree(child, fn);
+};
+
 module.exports = Util;
 module.exports.default = Util;

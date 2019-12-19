@@ -81,8 +81,15 @@ class MyApp extends App {
 
     console.log("App.render");
     return (
+      <React.Fragment>
+            <meta 
+     name="viewport" 
+     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
       <Provider rootStore={this.mobxStore.RootStore} i18nStore={i18nStore} store={this.mobxStore}>
+
         <Component {...pageProps} router={router} key={Router.route} />
+              </Provider>
+
         <style jsx global>{`
           @font-face {
             font-family: "Fixed";
@@ -151,7 +158,8 @@ class MyApp extends App {
             white-space: pre;
           }
         `}</style>
-      </Provider>
+              </React.Fragment>
+
     );
   }
 }

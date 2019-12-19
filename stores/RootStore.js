@@ -59,7 +59,7 @@ export class RootStore {
    * @param      {<type>}  pageProps    The page properties
    */
   constructor(initialData, pageProps) {
-    //console.log("RootStore.constructor ", { initialData, pageProps });
+    console.log("RootStore.constructor ", { initialData, pageProps });
     if(initialData && initialData.RootStore) {
       const init = initialData.RootStore;
       for(let k in init) {
@@ -191,14 +191,12 @@ export class RootStore {
     return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
   }
 
-
   /**
    * Gets the current image
    *
    * @return     {Object}  {Uploaded image}
    */
-  get
-  currentImage() {
+  get currentImage() {
     const id = this.state.image;
     let image = toJS(this.images.get(id) || {});
     image.id = parseInt(id);
@@ -217,9 +215,26 @@ export class RootStore {
     return item === null ? -1 : item.id;
   }
 
-  @action.bound
+  /**
+   * Add new item
+   *
+   * @param      {Object}  item    The item
+   * @return     {Object}  observable item
+   */
+  @action
   newItem(item) {
+    var childIds = item.children.map(child => child.id).sort();
+    var id = parseInt(item.id);
+    item = { ...item, id, childIds };
+    //delete item.children;
+    delete item.parent;
+
+    if(typeof item.data == "string" && item.data.length > 0) item.data = JSON.parse(item.data);
+
+    this.items.set(id, item);
+    item = this.items.get(item.id);
     //console.log("New item: ", item);
+    return item;
   }
 
   /**
@@ -242,8 +257,13 @@ export class RootStore {
 
         let { parent_id } = item;
 
-        if(item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null)).filter(c => c !== null);
+        /*     if(item.childIds && item.childIds.length) item.children = item.childIds.map(id => this.getItem(id, tr, idMap));
+        else */ if(item.children && item.children.length)
+          item.children = item.children.map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null)).filter(c => c !== null);
         else item.children = [];
+        /*
+        if(typeof(item.data) == 'string' && item.data.length > 0)
+          item.data = JSON.parse(item.data);*/
         // item.children = item.children.map(it => this.items.get(it.id, tr, idMap))
         /*.filter(it => it !== undefined)*/
         //

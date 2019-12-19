@@ -1,112 +1,111 @@
 {
-  "build_systems": [
-    {
-      "name": "List",
-      "shell_cmd": "ls -l"
-    },
-    {
-      "name": "Build next.js",
-      "shell_cmd": "node_modules/.bin/next build"
-    },
-    {
-      "name": "Run next.js server in development mode",
-      "shell_cmd": "node_modules/.bin/next dev -H 0.0.0.0 -p 5555"
-    },
-    {
-      "name": "Export next.js to static HTML",
-      "shell_cmd": "node_modules/.bin/next export"
-    },
-    {
-      "shell_cmd": "moonc -t */*.moon *.moon",
-      "file_regex": "^\\s*(.+):(\\d+): (?:lines \\d+-\\d+|character(?:s \\d+-| )(\\d+)) : (.*)$",
-      "name": "Transpile MoonScript to Lua",
-      "working_dir": "${project_path:${folder:${file_path}}}"
-    },
-    {
-      "shell_cmd": "node test-puppeteer.js",
-      "name": "Run Puppetteer tests",
-      "working_dir": "${project_path:${folder:${file_path}}}"
-    },
-    {
-      "name": "Run prettier on current file",
-      "shell_cmd": "scripts/prettier.sh '${file}'",
-      "working_dir": "${project_path}"
-    }
-  ],
-  "folders": [
-    {
-      "folder_exclude_patterns": [
-        "applications",
-        "cookie-auth",
-        "database",
-        //"doc",
-        "docker",
-        "forms",
-        ".git",
-        "github",
-        "helpers",
-        ".idea",
-        "intl",
-        "irc",
-        "logs",
-        "models",
-        ".next",
-        //"node_modules",
-        //"scripts",
-        "service",
-        "service.disabled",
-        "starlottery-html",
-        "tmp",
-        "tzdata2019a",
-        "websocket",
-        "lapis",
-        "compiled",
-        "models-seq",
-        "sampleCode",
-        "servehttp"
-      ],
-      "file_exclude_patterns": [
-        "?",
-        "*.sed",
-        "*swp",
-        "*.map*",
-        "*.log*",
-        "*.backend",
-        "*.png",
-        "*.zip",
-        "*.code-workspace",
-        "*.compiled",
-        "*.conf",
-        "*.crt",
-        "*.disabled",
-        "*.docker-backend",
-        "e",
-        "e$",
-        "*.env",
-        "*.frontend",
-        /*"*.gitignore",
-        "*.gitmodules",*/
-        "*.html",
-        "*.json",
-        "*.key",
-        "*.lock",
-        "lsrv.sublime-project",
-        "lsrv.sublime-workspace",
-        "*.lua",
-        "Makefile",
-        "*.moon",
-        "*.pem",
-        "*.sh",
-        "*.sql",
-        "t",
-        "*.tmp",
-        "*.txt",
-        "*.types",
-        "*.walker",
-        "*.xz",
-        "*.yml"
-      ],
-      "path": "."
-    }
-  ]
+	"build_systems":
+	[
+		{
+			"name": "List",
+			"shell_cmd": "ls -l"
+		},
+		{
+			"name": "Build next.js",
+			"shell_cmd": "node_modules/.bin/next build"
+		},
+		{
+			"name": "Run next.js server in development mode",
+			"shell_cmd": "node_modules/.bin/next dev -H 0.0.0.0 -p 5555"
+		},
+		{
+			"name": "Export next.js to static HTML",
+			"shell_cmd": "node_modules/.bin/next export"
+		},
+		{
+			"file_regex": "^\\s*(.+):(\\d+): (?:lines \\d+-\\d+|character(?:s \\d+-| )(\\d+)) : (.*)$",
+			"name": "Transpile MoonScript to Lua",
+			"shell_cmd": "moonc -t */*.moon *.moon",
+			"working_dir": "${project_path:${folder:${file_path}}}"
+		},
+		{
+			"name": "Run Puppetteer tests",
+			"shell_cmd": "node test-puppeteer.js",
+			"working_dir": "${project_path:${folder:${file_path}}}"
+		},
+		{
+			"name": "Run prettier on current file",
+			"shell_cmd": "scripts/prettier.sh '${file}'",
+			"working_dir": "${project_path}"
+		}
+	],
+	"folders":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				"?",
+				"*.sed",
+				"*swp",
+				"*.map*",
+				"*.log*",
+				"*.backend",
+				"*.png",
+				"*.zip",
+				"*.code-workspace",
+				"*.compiled",
+				"*.conf",
+				"*.crt",
+				"*.disabled",
+				"*.docker-backend",
+				"e",
+				"e$",
+				"*.env",
+				"*.frontend",
+				"*.html",
+				"*.json",
+				"*.key",
+				"*.lock",
+				"lsrv.sublime-project",
+				"lsrv.sublime-workspace",
+				"*.lua",
+				"Makefile",
+				"*.moon",
+				"*.pem",
+				"*.sh",
+				"*.sql",
+				"t",
+				"*.tmp",
+				"*.txt",
+				"*.types",
+				"*.walker",
+				"*.xz",
+				"*.yml"
+			],
+			"folder_exclude_patterns":
+			[
+				"applications",
+				"cookie-auth",
+				"database",
+				"docker",
+				"forms",
+				".git",
+				"github",
+				"helpers",
+				".idea",
+				"intl",
+				"irc",
+				"logs",
+				"models",
+				".next",
+				"service",
+				"service.disabled",
+				"starlottery-html",
+				"tmp",
+				"tzdata2019a",
+				"websocket",
+				"lapis",
+				"compiled",
+				"models-seq",
+				"sampleCode",
+				"servehttp"
+			],
+			"path": "."
+		}
+	]
 }

@@ -44,26 +44,14 @@ const findInTree = (tree, value) => {
   return null;
 };
 
-const makeItemToOption = selected => arg => {
-  let { data, ...item } = arg;
-  data = data || {};
-
-  try {
-    if(typeof arg.data == "string") data = JSON.parse(arg.data);
-  } catch(err) {
-    data = {};
-  }
-  let label = data.title || data.name || data.text || null; //`${item.type}(${item.id})`;
+const makeItemToOption = selected => item => {
+  let data = item && typeof item.data == "string" && item.data.length > 0 ? JSON.parse(item.data) : item && item.data != null && typeof item.data == "object" ? item.data : {};
+  let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
   let value = item.id;
   let children = toJS(item.children);
-  let obj = { label, value, data, expanded: true, checked: selected === value };
-
-  if(label == "null" || label == null) return null;
-
-  if((!item.type || item.type.indexOf("categ") == -1) && !children) return null;
-
-  //if(children && children.length) obj.children = children;
-  // else return null;
+  let obj = { label, title: label, id: value, parent_id: item.parent_id, value, expanded: true, checked: selected === value };
+  if(children && children.length) obj.children = children;
+  if(label.startsWith("null(")) return null;
   return obj;
 };
 
@@ -72,7 +60,8 @@ const makeItemToOption = selected => arg => {
 class Show extends React.Component {
   state = {
     zIndex: 99999,
-    tree: {}
+    tree: {},
+    parentIds: []
   };
 
   static async getInitialProps(ctx) {
@@ -82,6 +71,7 @@ class Show extends React.Component {
     let items = await getAPI().list("items", [
       "id",
       "type",
+      "parent_id",
       "parent { id type data }",
       "children { id type data }",
       "data",
@@ -89,8 +79,10 @@ class Show extends React.Component {
       "users { user { id username last_seen } }"
     ]);
     //await RootStore.fetchItems();
-    //console.log("Show.getInitialProps  items:", items);
-    items.forEach(item => RootStore.newItem(item));
+    console.log("Show.getInitialProps  items:", items);
+    items = items.sort((a, b) => a.id - b.id);
+    RootStore.items.clear();
+    //  items.forEach(item => RootStore.newItem(item));
     return { items };
   }
 
@@ -105,13 +97,14 @@ class Show extends React.Component {
       window.stores = getOrCreateStore();
     }
     //console.log("props.items: ", props.items);
+    rootStore.items.clear();
     props.items.forEach(item => {
-      //console.log("item: ", item);
-      rootStore.items.set(parseInt(item.id), item);
+      rootStore.newItem(item);
+      //      rootStore.items.set(parseInt(item.id), item);
     });
     //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
-    //console.log("this.tree: ", this.tree);
+    console.log("this.tree: ", this.tree);
   }
 
   componentDidMount() {
@@ -123,16 +116,19 @@ class Show extends React.Component {
     const { rootStore } = this.props;
     switch (type) {
       case "change": {
-        //console.log("treeSelEvent: ", this.state.tree, arg.value);
+        console.log("treeSelEvent: ", arg.value);
+        Util.traverseTree(this.tree, item => {
+          item.checked = false;
+        });
         const item = findInTree(this.tree, arg.value);
-
         if(item) {
           item.checked = true;
-
           this.state.node = item.value;
-          this.tree = rootStore.getItem(this.state.node, makeItemToOption());
-
-          console.log("treeSelEvent: ", item);
+          //  this.tree = rootStore.getItem(this.state.node, makeItemToOption());
+          var children = Util.flatTree(item);
+          var ids = children.map(child => child.id);
+          console.log("treeSelEvent: ", ids, item.title);
+          this.setState({ parentIds: ids });
         }
         //rootStore.setState({ selected: arg.value });
         break;
@@ -196,7 +192,6 @@ class Show extends React.Component {
 
   render() {
     const { rootStore } = this.props;
-
     let swipeEvents = {};
     var e = null;
     if(global.window !== undefined) window.page = this;
@@ -217,7 +212,6 @@ class Show extends React.Component {
       );
     }
     const onError = event => {};
-
     const onImage = event => {
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
@@ -230,15 +224,7 @@ class Show extends React.Component {
       "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
       "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
     ];
-
     if(global.window) {
-      /*Element.findAll('*').forEach(e => {
-
-  e.addEventListener('resize', event => {
-    //console.log("Resized: ", event.target);
-  })
-});
-*/
       window.addEventListener("resize", event => {
         const { currentTarget, target } = event;
         //console.log("Resized: ", { currentTarget, target });
@@ -246,7 +232,8 @@ class Show extends React.Component {
     }
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
-    //console.log("Show.render", { tree });
+    const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
+    console.log("Show.render", { tree, items });
     return (
       <div className={"page-layout"} {...TouchEvents(touchListener)}>
         <Head>
@@ -254,7 +241,6 @@ class Show extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-
         <div className={"show-layout"}>
           {tree ? (
             <DropdownTreeSelect
@@ -274,10 +260,11 @@ class Show extends React.Component {
           ) : (
             undefined
           )}
-          <img src={"static/img/test.svg"} />
-          <div id={"item-grid"} style={{}}>
-            <div className={"grid-col grid-gap-1em"}>
-              {this.props.items.map(item => {
+          {/*          <img src={"static/img/test.svg"} />
+           */}{" "}
+          <div id={"item-grid"} style={{ margin: "0 0" }}>
+            <div className={"grid-col grid-gap-20"}>
+              {items.map(item => {
                 // console.log("item: ", item);
                 const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                 const haveImage = photo_id >= 0;
@@ -342,19 +329,17 @@ class Show extends React.Component {
                 );
               })}
             </div>
-            {/*          <Layer w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
-            Layer
-          </Layer>*/}
           </div>
         </div>
         <SvgOverlay />
         <style jsx global>{`
           .show-layout {
-            overflow-x: hidden;
-            overflow-y: scroll;
             text-align: left;
             width: 100vw;
-            padding: 0 10px;
+            padding: 0px 20px;
+            box-sizing: border-box;
+            overflow: auto;
+            min-height: 60vh;
           }
           .gallery-image {
             height: auto;

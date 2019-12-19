@@ -258,7 +258,7 @@ const Nav = inject(
               </div>
             </div>
           </Modal>{" "}
-          <ul>
+          <ul className={"menu"}>
             {SiteMap.map(link => {
               link.key = `nav-link-${typeof link.href == "string" ? link.href : ""}-${typeof link.name == "string" ? link.name : ""}`;
               return link;
@@ -338,7 +338,7 @@ const Nav = inject(
               font-family: Fixed;
               float: right;
             }
-            .menu {
+            div.menu {
               z-index: 12;
               text-align: center;
               display: flex;
@@ -348,6 +348,9 @@ const Nav = inject(
               width: 100vw;
               direction: rtl;
               min-height: 112px;
+              padding: 0 0 0 0;
+              position: relative;
+              left: -14px;
             }
             ul {
               direction: ltr;
@@ -357,7 +360,7 @@ const Nav = inject(
               margin-block-end: 0;
             }
             .menu > ul {
-              padding: 4px 4px;
+              margin: 4px 4px 4px 4px;
             }
             .title-bar {
               float: left;

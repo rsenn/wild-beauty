@@ -9,16 +9,23 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
       url,
       method: "POST",
       headers: {
-        "Accept-Encoding": "deflate, br;q=1.0, gzip;q=0.9, *;q=0.5"
+        "Accept-Encoding": "deflate, br;q=1.0, gzip;q=0.9, *;q=0.5",
+        "X-Hasura-Access-Key": "RUCXOZZjwWXeNxOOzNZBptPxCNl18H"
       },
       data: JSON.stringify({ query }),
       responseType: "blob"
     });
-    //console.log("res: ", res);
     while((await res.data) !== undefined) res = await res.data;
     if(res && res.text !== undefined) res = await res.text();
     if(typeof res == "string") res = JSON.parse(res);
     while((await res.data) !== undefined) res = await res.data;
+
+    //console.log("res: ", res);
+
+    if(res.errors !== undefined) {
+      throw Error(res.errors[0].message);
+    }
+
     return res;
   };
 

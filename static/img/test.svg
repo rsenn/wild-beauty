@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="98.372mm" height="98.372mm" version="1.1" viewBox="0 0 98.372 98.372" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:osb="http://www.openswatchbook.org/uri/2009/osb" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <filter id="filter98514-5-8-0" x="-.25" y="-.25" width="1.5" height="1.5" color-interpolation-filters="sRGB">
+   <feGaussianBlur result="result1" stdDeviation="1"/>
+   <feGaussianBlur in="result1" result="result6" stdDeviation="10"/>
+   <feComposite in="result6" in2="result1" operator="atop" result="result8"/>
+   <feComposite in="result6" in2="result8" operator="xor" result="fbSourceGraphic"/>
+   <feColorMatrix in="fbSourceGraphic" result="fbSourceGraphicAlpha" values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 2 0 "/>
+   <feGaussianBlur in="fbSourceGraphicAlpha" result="result0" stdDeviation="1"/>
+   <feSpecularLighting lighting-color="#ffffff" in="result0" result="result1" specularConstant="1.5" specularExponent="35" surfaceScale="-2">
+    <feDistantLight azimuth="230" elevation="60"/>
+   </feSpecularLighting>
+   <feComposite in="result1" in2="fbSourceGraphicAlpha" operator="in" result="result2"/>
+   <feComposite in="fbSourceGraphic" in2="result2" k2="1" k3="1" operator="arithmetic" result="result4"/>
+   <feComposite in2="result4" operator="atop" result="result91"/>
+   <feBlend in2="result91" mode="multiply"/>
+  </filter>
+ </defs>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <g transform="translate(-190.56 -807.68)">
+  <path d="m206.95 856.87v-32.791h65.581v65.581h-65.581z" fill="#fffa94" fill-opacity=".92063" filter="url(#filter98514-5-8-0)" opacity=".879" stroke="#e63686" stroke-linejoin="round" stroke-width="7.265" style="paint-order:stroke fill markers"/>
+  <g>
+   <flowRoot fill="black" font-family="'DejaVu Sans'" font-size="40px" font-stretch="semi-condensed" font-weight="bold" letter-spacing="0px" word-spacing="0px" style="line-height:1.25" xml:space="preserve"><flowRegion><rect x="736.11" y="-118.94" width="164.83" height="232.26"/></flowRegion><flowPara/></flowRoot>
+   <path d="m610.03 826.45c-12.102 2.1353-17.311 14.854-26.75 21.281-12.039 11.395-25.612 24.432-27.652 41.707 1.2378 9.0442 11.729 11.852 19.514 11.064 14.264 0.15273 28.102-7.5792 36.49-18.832 2.9144-6.1818 9.4378-9.55 14.58-13.742 1.2264 0.68044 1.7334 4.5625 3.7578 5.8613 2.7245 2.9174 7.5182 2.9335 9.8652 6.043 2.8166 8.638 15.141 9.5233 21.314 3.8691 3.002-2.5582-0.48311 4.0918-0.50782 5.459-4.6726 13.642-13.641 26.011-26.018 33.623 5.7206 9.8397 21.744 9.4668 27.078-0.5332 9.2154-11.405 16.198-24.694 19.838-38.924 13.342-1.129 29.339-1.3164 38.758-12.365 3.3262-6.9991-4.8773-13.604-11.494-12.391-8.8983-2.7305-17.15 6.9106-25.49 4.2637 0.36239-7.2764-9.3196-12.101-14.787-6.9805-4.4127 2.5329-7.8381 6.909-11.607 9.8633-1.1333-4.744-6.3171-7.711-10.748-6.5859-6e-3 -5.5039-3.1269-12.187-9.4668-12.289-13.592 0.79023-24.709 10.421-34.679 18.792-6.7313 5.1286-11.676 12.796-19.299 16.524-1.99 0.83863-4.7783 0.0474-6.3281 0.22656 8.6968-17.067 26.541-26.455 37.447-41.672 3.1848-4.2236 4.4576-12.7-2.2578-14.182-0.50999-0.0778-1.0437-0.16397-1.5566-0.082zm99.947 41.799c4.4926 3.412-4.3802 4.4458 0 0zm-106.87 10.123c4.0686 2.4054-3.5648 2.9639-0.32618 0.0566 0.10248-0.038 0.21523-0.0724 0.32618-0.0566z" fill="#fc0" stroke="#000" stroke-width="1.5875" style="paint-order:markers stroke fill"/>
+   <path d="m628.71 920.73c0.0548-1.6007 0.0332-3.2024 0.12927-4.8019 0.10038-1.6716 0.16979-2.1186 0.35247-3.8059 0.48846-3.9209 1.5468-7.7323 2.6907-11.503 0.4601-1.5492 1.0706-3.0423 1.7032-4.5265l2.9268-1.3432c-0.65358 1.4768-1.2828 2.9635-1.7544 4.5112-1.1735 3.7504-2.2528 7.5469-2.7368 11.458-0.29513 2.8195-0.46636 5.6436-0.30235 8.4788l-3.0089 1.5331z" fill="#fc0" stroke="#000" stroke-width=".52917" style="paint-order:markers stroke fill"/>
+  </g>
+ </g>
+</svg>
