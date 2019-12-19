@@ -131,6 +131,9 @@ export const ItemView = inject("rootStore")(
             left: 0;
             margin: 0 0 10px 10px;
           }
+          .aspect-ratio-box, .item-box-outside {
+            overflow: hidden;
+          }
         `}</style>
       </React.Fragment>
     );
