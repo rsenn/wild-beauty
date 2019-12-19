@@ -36,7 +36,6 @@ let customStyles = {
   },
   content: {
     width: "75vmin",
-    height: "75vmin",
     top: "50%",
     left: "50%",
     right: "auto",
@@ -219,7 +218,7 @@ const Nav = inject(
             onRequestClose={() => setLoginOpen(false)}
             style={{
               overlay: customStyles.overlay,
-              content: { ...customStyles.content, maxWidth: "320px", minHeight: "300px", maxHeight: "75vh" }
+              content: { ...customStyles.content, maxWidth: "275px", minHeight: "275px", maxHeight: "75vh" }
             }}
             contentLabel="Login Modal"
             closeTimeoutMS={1000}

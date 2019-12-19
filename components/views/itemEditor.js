@@ -82,7 +82,6 @@ export const ItemEditor = inject("rootStore")(
               }}
             />
           ))}
-
           <AddItemBar
             onAdd={() => {
               let obj = observable({ type: null, value: "" });
@@ -138,6 +137,25 @@ export const ItemEditor = inject("rootStore")(
           ul > li > input,
           .dropdown-tree.react-dropdown-tree-select {
             font-size: 20px;
+          }
+          input {
+            border-radius: 0;
+          }
+          button {
+            -webkit-appearance: none;
+            border: 1px outset #555555;
+            border-radius: 5px;
+            -webkit-border-radius: 5px;
+            background: linear-gradient(top, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
+            background: -webkit-linear-gradient(top, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
+          }
+          button:active {
+            border: 1px inset #555555;
+          }
+          button.save,
+          button.button-add {
+            width: 64px;
+            height: 32px;
           }
           button.save {
             position: absolute;

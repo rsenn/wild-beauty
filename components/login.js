@@ -126,7 +126,7 @@ const LoginForm = inject("rootStore")(
             }
             form.login {
               position: absolute;
-              width: 90%;
+              width: 100%;
               top: 30px;
               padding: 10px;
               display: flex;

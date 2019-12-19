@@ -244,7 +244,8 @@ class Show extends React.Component {
         </Head>
         <Nav loading={rootStore.state.loading} />
         <div className={"show-layout2"}>
-          <Tree tree={tree} />
+          {/*          <Tree tree={tree} />
+           */}{" "}
           {tree ? (
             <DropdownTreeSelect
               data={tree}
@@ -337,8 +338,6 @@ class Show extends React.Component {
         <SvgOverlay />
         <style jsx global>{`
           .show-layout {
-            text-align: left;
-            width: 100vw;
             padding: 0px 20px;
             box-sizing: border-box;
             overflow: visible;
@@ -346,6 +345,8 @@ class Show extends React.Component {
           }
           .show-layout2 {
             padding: 0px 20px;
+            width: 100vw;
+            text-align: left;
           }
           .gallery-image {
             height: auto;
