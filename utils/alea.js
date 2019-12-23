@@ -118,5 +118,4 @@ class AleaClass {
 Object.assign(Alea, AleaClass);
 Object.assign(Alea.prototype, AleaClass.prototype);
 
-
 module.exports = Alea;

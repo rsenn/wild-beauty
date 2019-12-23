@@ -6,7 +6,6 @@ import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 import classNames from "classnames";
 import axios from "../../utils/axios.js";
 
-
 import UploadImages from "react-upload-gallery";
 import "../../static/css/grid.css";
 

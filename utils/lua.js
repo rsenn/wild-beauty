@@ -589,23 +589,17 @@ class MoonScriptGenerator {
     function moonscript_table_expression(node) {
       let list = 0;
       const types = Util.histogram(node.fields.map(f => f.type));
+      var indent = generator.indent+'  ';
       console.error('TYPES: ', types);
       const fields = node.fields.map(field => {
         let key = generator.subtree(field.key, false);
         let num = parseInt(key);
         if(!isNaN(num)) key = num;
-        if(field.type == 'Recfield') return `['${key}']: `+generator.subtree(field.value, false, generator.indent+'  ');
-        return generator.str(field.value, node.multiline, generator.indent+'  ');
+        if(field.type == 'Recfield') return `['${key}']: `+generator.subtree(field.value, false, indent+'  ').replace(/\n/g, "\n"+indent);
+        return generator.str(field.value, node.multiline, indent);
       });
-      return '{'+(fields.join(generator.multiline ? ('\n'+generator.indent) : ', '))+'}';
-  }`;
-/*  else
-    return fields.join(", ");*/
-
-      return fields.join(', ');
-               MoonScriptGenerator.str(f)).join(',')}}
-       */
-    }
+      return '{'+(generator.multiline ? ('\n'+indent) : ' ')+(fields.join(generator.multiline ? ('\n'+indent) : ', '))+(generator.multiline ? ('\n'+generator.indent) : ' ')+'}';
+  }
 
     function moonscript_member_expression(node) {
       return moonscript(node.object)+moonscript(node.property);
