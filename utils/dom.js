@@ -2058,8 +2058,8 @@ export function HSLA(h = 0, s = 0, l = 0, a = 1.0) {
 
   if(args.length >= 3) {
     ret.h = Math.round(h);
-    ret.s = Math.round(s * 2.5) * 0.4;
-    ret.l = Math.round(l * 2.5) * 0.4;
+    ret.s = s;
+    ret.l = l;
     ret.a = a;
   } else {
     const arg = args[0];
@@ -2117,29 +2117,57 @@ HSLA.random = function(rand = Math.random) {
 };
 
 HSLA.prototype.toRGBA = function() {
-  let { h, s, l, a } = this;
-  let r, g, b;
-  h *= 0.01;
-  s *= 0.01;
-  l *= 0.01;
-  if(s == 0) {
-    r = g = b = l; // achromatic
+  var { h, s, l, a } = this;
+
+  var r, g, b, m, c, x;
+
+  if(!isFinite(h)) h = 0;
+  if(!isFinite(s)) s = 0;
+  if(!isFinite(l)) l = 0;
+
+  h /= 60;
+  if(h < 0) h = 6 - (-h % 6);
+  h %= 6;
+
+  s = Math.max(0, Math.min(1, s / 100));
+  l = Math.max(0, Math.min(1, l / 100));
+
+  c = (1 - Math.abs(2 * l - 1)) * s;
+  x = c * (1 - Math.abs((h % 2) - 1));
+
+  if(h < 1) {
+    r = c;
+    g = x;
+    b = 0;
+  } else if(h < 2) {
+    r = x;
+    g = c;
+    b = 0;
+  } else if(h < 3) {
+    r = 0;
+    g = c;
+    b = x;
+  } else if(h < 4) {
+    r = 0;
+    g = x;
+    b = c;
+  } else if(h < 5) {
+    r = x;
+    g = 0;
+    b = c;
   } else {
-    let hue2rgb = function hue2rgb(p, q, t) {
-      if(t < 0) t += 1;
-      if(t > 1) t -= 1;
-      if(t < 1 / 6) return p + (q - p) * 6 * t;
-      if(t < 1 / 2) return q;
-      if(t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-      return p;
-    };
-    let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    let p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1 / 3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1 / 3);
+    r = c;
+    g = 0;
+    b = x;
   }
-  return new RGBA(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), Math.round(a * 255));
+
+  m = l - c / 2;
+  r = Math.round((r + m) * 255);
+  g = Math.round((g + m) * 255);
+  b = Math.round((b + m) * 255);
+  a = Math.round(a * 255);
+
+  return new RGBA(r, g, b, a);
 };
 HSLA.toRGBA = hsla => HSLA.prototype.toRGBA.apply(hsla, arguments);
 

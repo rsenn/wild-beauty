@@ -262,7 +262,7 @@ Util.bitsToNumbers = bits => {
   return r;
 };
 
-Util.shuffle = (arr, rnd = Math.random) => {
+Util.shuffle = (arr, rnd = Util.rng) => {
   arr.sort((a, b) => 0.5 - rnd());
   return arr;
 };
@@ -272,7 +272,7 @@ Util.sortNum = arr => {
   return arr;
 };
 
-Util.draw = (arr, n, rnd = Math.random) => {
+Util.draw = (arr, n, rnd = Util.rng) => {
   const r = Util.shuffle(arr, rnd).splice(0, n);
   //console.log("Util.draw ", { arr, n, r });
   return r;
@@ -1243,11 +1243,12 @@ Util.timeSpan = function(s) {
   if(weeks) ret = weeks + " weeks " + ret;
   return ret;
 };
-Util.randFloat = function(min, max) {
-  return Math.random() * (max - min) + min;
+Util.rng = Math.random;
+Util.randFloat = function(min, max, rnd = Util.rng) {
+  return rnd() * (max - min) + min;
 };
-Util.randInt = function(min, max = 16777215) {
-  return Math.round(Util.randFloat(min, max));
+Util.randInt = function(min, max = 16777215, rnd = Util.rng) {
+  return Math.round(Util.randFloat(min, max, rnd));
 };
 Util.hex = function(num, numDigits = 0) {
   let n = typeof num == "number" ? num : parseInt(num);

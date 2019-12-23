@@ -296,6 +296,16 @@ if (!dev && cluster.isMaster) {
       res.json({ success: false });
     });
 
+    server.post(
+      "/api/put",
+      needAuth(async function(req, res) {
+        const { filename, data } = req.body;
+        var file = fs.openSync(filename, "w");
+        var written = fs.writeSync(file, Buffer.from(data, "base64"));
+        res.json({ success: written > 0, written });
+      })
+    );
+
     server.post("/api/item/tree", async function(req, res) {
       let { fields, ...params } = req.body;
       if(!fields) fields = ["id", "type", "name", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];

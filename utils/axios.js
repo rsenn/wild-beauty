@@ -1,12 +1,13 @@
-import axios from "axios";
+const axios = require("axios");
 
-export const httpClient = axios.create({
+const httpClient = axios.create({
   withCredentials: true
 });
 
 httpClient.interceptors.response.use(
   res => {
-    console.error("axios SUCCESS:", Object.keys(res));
+    const { data, status, statusText, headers, config, request } = res;
+    console.error("axios SUCCESS:", {status, statusText, data });
 
     return res;
   },
@@ -16,4 +17,9 @@ httpClient.interceptors.response.use(
   }
 );
 
-export default httpClient;
+if(global.window)
+ window.axios = httpClient;
+
+exports.default = httpClient;
+exports.axios = httpClient;
+exports.httpClient = httpClient;
