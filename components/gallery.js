@@ -5,7 +5,7 @@ import Alea from "../utils/alea.js";
 import anime from "animejs";
 import { RandomColor } from "../utils/dom.js";
 import Layer from "../components/layer.js";
-import { WrapInAspectBox, SizedAspectRatioBox } from "./simple/aspectBox.js";
+import { SizedAspectRatioBox } from "./simple/aspectBox.js";
 
 const imageNames = [
   "04b79de115044501f1358f829130438d",

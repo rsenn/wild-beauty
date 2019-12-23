@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import classNames from "classnames";
 
 export const AddItemBar = ({ onAdd, ...props }) => {
   const [isOpen, setOpen] = useState(false);

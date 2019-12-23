@@ -11,13 +11,11 @@ import { SvgOverlay } from "../utils/svg-overlay.js";
 import { makeTouchCallback, maxZIndex } from "../components/TouchCallback.js";
 import { toJS, action, set } from "mobx";
 import { inject, observer } from "mobx-react";
-import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
+import { MultitouchListener, MovementListener } from "../utils/touchHandler.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 import NeedAuth from "../components/simple/needAuth.js";
-import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
-import classNames from "classnames";
 import { trkl } from "../utils/trkl.js";
 
 import "../static/css/react-upload-gallery.css";

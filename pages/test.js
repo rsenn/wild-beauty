@@ -6,7 +6,7 @@ import Gallery, { randomImagePaths } from "../components/gallery.js";
 import { ScrollController } from "../utils/scrollController.js";
 import Alea from "../utils/alea.js";
 import { SwipeTracker } from "../utils/swipeTracker.js";
-import { Element, Node, HSLA } from "../utils/dom.js";
+import { HSLA } from "../utils/dom.js";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";

@@ -1,11 +1,9 @@
 import React from "react";
-import Head from "next/head";
-import App, { Container } from "next/app";
+import App from "next/app";
 import { Router } from "next/router";
 import { Provider } from "mobx-react";
 import Util from "../utils/util.js";
-import { createStore, getOrCreateStore } from "../stores/createStore.js";
-import { singleton } from "../stores/RootStore.js";
+import { getOrCreateStore } from "../stores/createStore.js";
 import { withRouter } from "next/router";
 import i18nStore from "../stores/i18nStore.js";
 import SiteMap from "../components/siteMap.js";

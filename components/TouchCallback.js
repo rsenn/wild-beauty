@@ -60,49 +60,49 @@ export const makeTouchCallback = (className = "layer", action = null) => {
   };
 };
 
-export const DrawCallback = (svgRef) => ({
-        start(event) {
-          const { x, y, client, page } = event;
-          console.log("touch start: ", event, { x, y });
+export const DrawCallback = svgRef => ({
+  start(event) {
+    const { x, y, client, page } = event;
+    console.log("touch start: ", event, { x, y });
 
-          const f = svgRef().factory;
-          if(f) {
-            this.g = f("g", { stroke: "#ff0", fill: "none", strokeWidth: 8, transform: `translate(${client.x}, ${client.y})` }, svgRef().svg);
-            this.path = f("path", { d: "", style: "paint-order:markers stroke fill" }, this.g);
-            this.pathData = `M${x},${y}`;
-            page.path = this.path;
-            console.log("new Path: ", this.path);
-          }
-          this.x = x;
-          this.y = y;
-          this.origin = client;
-        },
-        end(event) {
-          const { x, y } = event;
-          console.log("touch end: ", { x, y });
-        },
-        move(event) {
-          const { x, y, distance } = event;
-          const callers = Util.getCallerFunctionNames(1, 50);
-          console.log("touch move: ", { x, y, callers });
+    const f = svgRef().factory;
+    if(f) {
+      this.g = f("g", { stroke: "#ff0", fill: "none", strokeWidth: 8, transform: `translate(${client.x}, ${client.y})` }, svgRef().svg);
+      this.path = f("path", { d: "", style: "paint-order:markers stroke fill" }, this.g);
+      this.pathData = `M${x},${y}`;
+      page.path = this.path;
+      console.log("new Path: ", this.path);
+    }
+    this.x = x;
+    this.y = y;
+    this.origin = client;
+  },
+  end(event) {
+    const { x, y } = event;
+    console.log("touch end: ", { x, y });
+  },
+  move(event) {
+    const { x, y, distance } = event;
+    const callers = Util.getCallerFunctionNames(1, 50);
+    console.log("touch move: ", { x, y, callers });
 
-          const rel = this.relxy(x, y);
+    const rel = this.relxy(x, y);
 
-          if(Math.abs(rel.x) + Math.abs(rel.y) > 3) {
-            this.pathData += ` l${rel.x.toFixed(3)},${rel.y.toFixed(3)}`;
-            this.path.setAttribute("d", this.pathData);
-            this.setxy(x, y);
-          }
-        },
-        cancel(event) {},
-        setxy(x, y) {
-          this.x = x;
-          this.y = y;
-        },
-        relxy(x, y) {
-          return { x: x - this.x, y: y - this.y };
-        }
-      });
+    if(Math.abs(rel.x) + Math.abs(rel.y) > 3) {
+      this.pathData += ` l${rel.x.toFixed(3)},${rel.y.toFixed(3)}`;
+      this.path.setAttribute("d", this.pathData);
+      this.setxy(x, y);
+    }
+  },
+  cancel(event) {},
+  setxy(x, y) {
+    this.x = x;
+    this.y = y;
+  },
+  relxy(x, y) {
+    return { x: x - this.x, y: y - this.y };
+  }
+});
 
 export const TouchCallback = makeTouchCallback();
 

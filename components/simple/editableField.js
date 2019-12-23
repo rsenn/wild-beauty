@@ -1,4 +1,4 @@
-import CreatableSelect, { makeCreatableSelect } from "react-select/creatable";
+import CreatableSelect from "react-select/creatable";
 import classNames from "classnames";
 import { useEditableState } from "react-editable-hooks";
 import { trkl } from "../../utils/trkl.js";

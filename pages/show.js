@@ -1,22 +1,18 @@
 import React from "react";
 import Head from "next/head";
-import Layer from "../components/layer.js";
-import { Element, Node, HSLA, PointList, Point, Rect, Matrix, Timer } from "../utils/dom.js";
+import { Element, HSLA, PointList, Point, Rect, Matrix, Timer } from "../utils/dom.js";
 import getAPI from "../utils/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { inject, observer } from "mobx-react";
-import ApolloClient from "apollo-boost";
-import { TouchCallback } from "../components/TouchCallback.js";
-import LoginForm from "../components/login.js";
-import { WrapInAspectBox, SizedAspectRatioBox } from "../components/simple/aspectBox.js";
+import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
 import { Tree } from "../components/tree.js";
-import { action, toJS, autorun, observable } from "mobx";
+import { action, toJS } from "mobx";
 import Nav from "../components/nav.js";
-import { createStore, getOrCreateStore } from "../stores/createStore.js";
+import { getOrCreateStore } from "../stores/createStore.js";
 import affineFit from "affinefit";
-import { fromTriangles, applyToPoint } from "transformation-matrix";
+import { fromTriangles } from "transformation-matrix";
 
 import "../static/css/grid.css";
 

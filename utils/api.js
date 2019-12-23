@@ -3,7 +3,6 @@ const Blob = require("blob");
 const axios = require("./axios.js").httpClient;
 const Util = require("./util.js");
 
-
 function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
   var api = async function(query) {
     let res = await axios({

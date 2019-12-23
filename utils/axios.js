@@ -7,7 +7,7 @@ const httpClient = axios.create({
 httpClient.interceptors.response.use(
   res => {
     const { data, status, statusText, headers, config, request } = res;
-    console.error("axios SUCCESS:", {status, statusText, data });
+    console.error("axios SUCCESS:", { status, statusText, data });
 
     return res;
   },
@@ -17,9 +17,10 @@ httpClient.interceptors.response.use(
   }
 );
 
-if(global.window)
- window.axios = httpClient;
+if (global.window) window.axios = httpClient;
 
-exports.default = httpClient;
-exports.axios = httpClient;
-exports.httpClient = httpClient;
+module.exports = httpClient;
+
+module.exports.default = httpClient;
+module.exports.axios = httpClient;
+module.exports.httpClient = httpClient;

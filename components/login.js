@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import classNames from "classnames";
-import { action, toJS, autorun } from "mobx";
+import { action } from "mobx";
 import { autofillEvent } from "../utils/autofillEvent.js";
 import { inject, observer } from "mobx-react";
-import { Translate, Localize } from "react-i18nify-mobx";
+import { Translate } from "react-i18nify-mobx";
 
 const LoginForm = inject("rootStore")(
   observer(({ show = true, className, style, onLogin, rootStore, ...props }) => {

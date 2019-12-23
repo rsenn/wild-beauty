@@ -1,5 +1,4 @@
-import Util from "../utils/util.js";
-import { Translate, Localize } from "react-i18nify-mobx";
+import { Translate } from "react-i18nify-mobx";
 
 export const SiteMap = [
   {

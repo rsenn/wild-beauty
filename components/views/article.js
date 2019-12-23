@@ -1,4 +1,4 @@
-import { WrapInAspectBox, SizedAspectRatioBox } from "../simple/aspectBox.js";
+import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 
 export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) => {
   console.log("Rendering Article: ", { text, ...props });

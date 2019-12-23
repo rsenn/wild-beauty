@@ -1,12 +1,11 @@
-import React, { useState } from "react";
-import { Router, withRouter } from "next/router";
+import React from "react";
+import { withRouter } from "next/router";
 import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
-import { WrapInAspectBox, SizedAspectRatioBox } from "../simple/aspectBox.js";
+import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 import classNames from "classnames";
 import axios from "../../utils/axios.js";
 
-import DropdownTreeSelect from "react-dropdown-tree-select";
 
 import UploadImages from "react-upload-gallery";
 import "../../static/css/grid.css";

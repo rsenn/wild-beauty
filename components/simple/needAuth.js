@@ -1,7 +1,6 @@
 import React from "react";
 import { inject, observer } from "mobx-react";
-import Link from "next/link";
-import { Translate, Localize } from "react-i18nify-mobx";
+import { Translate } from "react-i18nify-mobx";
 
 const NeedAuth = inject("rootStore")(
   observer(({ admin, userStore, rootStore, children, t, style, ...props }) => (

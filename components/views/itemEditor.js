@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { WrapInAspectBox, SizedAspectRatioBox } from "../simple/aspectBox.js";
-import { observable, toJS } from "mobx";
+import React from "react";
+import { SizedAspectRatioBox } from "../simple/aspectBox.js";
+import { observable } from "mobx";
 import { inject, observer } from "mobx-react";
 import { AddItemBar } from "../views/addItemBar.js";
 import { EditableField } from "../simple/editableField.js";
@@ -11,7 +11,7 @@ import SortableTree from "react-sortable-tree";
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../../static/css/react-dropdown-tree-select.css";
 
-import "react-sortable-tree/style.css"; // This only needs to be imported once in your app
+import "react-sortable-tree/style.css"; // once app
 
 export const ItemEditor = inject("rootStore")(
   observer(({ rootStore, tree, makeTreeSelEvent }) => {

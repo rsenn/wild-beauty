@@ -5,7 +5,7 @@
 
 var singleton = null;
 
-export function Alea() {
+function Alea() {
   let rnd = singleton || AleaClass.impl(...arguments);
   return rnd == null ? undefined : rnd.double();
 }
@@ -118,4 +118,5 @@ class AleaClass {
 Object.assign(Alea, AleaClass);
 Object.assign(Alea.prototype, AleaClass.prototype);
 
-export default Alea;
+
+module.exports = Alea;

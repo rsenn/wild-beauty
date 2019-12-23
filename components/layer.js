@@ -4,7 +4,6 @@ import { trkl } from "../utils/trkl.js";
 import { Size, Rect, Element } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
-import { toJS } from "mobx";
 
 if ("window" in global) {
   assign_to(window);
