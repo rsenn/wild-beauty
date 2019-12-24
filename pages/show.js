@@ -13,6 +13,7 @@ import Nav from "../components/nav.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
+import { MovementListener, TouchListener } from "../utils/touchHandler.js";
 
 import "../static/css/grid.css";
 
@@ -111,6 +112,8 @@ class Show extends React.Component {
       window.page = this;
       window.rs = rootStore;
       window.stores = getOrCreateStore();
+
+      //   window.addEventListener('mousemove', this.mouseMove);
     }
     //console.log("props.items: ", props.items);
     rootStore.items.clear();
@@ -128,6 +131,16 @@ class Show extends React.Component {
       item.checked = true;
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
     }
+    /*
+     this.touchListener = TouchListener(this.touchEvent,
+      {
+        element: global.window,
+        step: 10,
+        round: false,
+        listener: MovementListener,
+        noscroll: true
+      }
+    );*/
   }
 
   checkTagRemove() {
@@ -157,6 +170,53 @@ class Show extends React.Component {
   componentDidUpdate() {
     this.checkTagRemove();
   }
+
+  touchEvent = event => {
+    console.log("Touch event: ", event);
+  };
+
+  mouseEvent = event => {
+    const { target, nativeEvent } = event;
+    const { x, y, type } = nativeEvent;
+
+    if(!this.rects) {
+      this.rects = Element.findAll("rect");
+    }
+  var r = this.rects.filter(rect => Rect.inside(Element.rect(rect), { x, y }));
+
+if(type.endsWith('move')) {
+      var elem = r[0] && r[0].parentElement;
+
+
+    function getNum(elem, name) {
+      return parseFloat(elem.getAttribute(name));
+    }
+
+      if(this.prevElem && this.prevElem.style) {
+        if(this.prevElem == elem) return;
+        this.prevElem.style.removeProperty("transform");
+      }
+    if(elem && elem.style) {
+
+      const t = ` scale(1.5,1.5)`;
+      console.log("Mouse event: ", t);
+      elem.style.setProperty("transition", 'transform 1s cubic-bezier(0.19, 1, 0.22, 1)');
+
+      elem.style.setProperty("transform", t);
+      this.prevElem = elem;
+    }
+  }  else if(type.endsWith('down')) {
+        var elem = r[0];
+
+    console.log("Mouse event: ", {type,x,y}, r);
+
+    if(elem) {
+     const id = parseInt(elem.parentElement.getAttribute('id').replace(/.*\./, ''));
+     console.log("Clicked id:",id);
+     this.setState({ active: id });
+   }
+  }
+  };
 
   @action.bound
   selectNode(item) {
@@ -350,13 +410,13 @@ class Show extends React.Component {
     const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
     console.log("Show.render" /*, { tree, items }*/);
     return (
-      <div className={"page-layout"}>
+      <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent}>
         <Head>
           <title>Show</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <Tree tree={tree} minWidth={1024} /> {/*treeVerify={node => node.children && node.children.length} */}
+        <Tree tree={tree} minWidth={1024} active={this.state.active} /> {/*treeVerify={node => node.children && node.children.length} */}
         <br />
         <br />
         <br />
