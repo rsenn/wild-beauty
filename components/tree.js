@@ -56,29 +56,26 @@ function numChildren(item) {
   return item.children ? item.children.reduce((acc, child) => acc + 1 + numChildren(child), 0) : 0;
 }
 
-function DistributeX(arr, dist, set = (item,pos) => item.pos = new Point(pos, 0)) {
+function DistributeX(arr, dist, set = (item, pos) => (item.pos = new Point(pos, 0))) {
   var range = (arr.length - 1) * dist;
 
-  var start = -range/2;
+  var start = -range / 2;
 
-  for(let i = 0; i < arr.length; i++)
-    set(arr[i], start + i * dist);
-   return arr;
+  for(let i = 0; i < arr.length; i++) set(arr[i], start + i * dist);
+  return arr;
 }
 
-function DistributeCircular(arr, dist, set = (i,x,y) => item.pos = new Point(x,y), centerAngle) {
+function DistributeCircular(arr, dist, set = (i, x, y) => (item.pos = new Point(x, y)), centerAngle) {
   var range = (arr.length - 1) * Math.PI;
 
-  var start = -range/2 + centerAngle;
+  var start = -range / 2 + centerAngle;
 
   for(let i = 0; i < arr.length; i++) {
-    var angle = start + i * Math.PI / (arr.length - 1);
-      set(i, Math.sin(angle)*dist, Math.cos(angle)*dist);
- }
-   return arr;
+    var angle = start + (i * Math.PI) / (arr.length - 1);
+    set(i, Math.sin(angle) * dist, Math.cos(angle) * dist);
+  }
+  return arr;
 }
-
-
 
 export const SVGText = ({ x, y, yinc = 12, lines }) => {
   const ystart = (-(lines.length - 1) / 2) * yinc;
@@ -129,23 +126,23 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true }) =
   //xdist = Math.PI;
 
   function getParent(item) {
-    if(item.parentIndex || item.parent && item.parent.index) {
+    if(item.parentIndex || (item.parent && item.parent.index)) {
       const [y, x] = item.parentIndex || item.parent.index;
       return table[y][x];
     }
-    return { pos: new Point(0,0)};
+    return { pos: new Point(0, 0) };
   }
   function getParentPos(item) {
-    var p =    getParent(item);
-    return (p && p.pos) ? p.pos : new Point(0,0);
+    var p = getParent(item);
+    return p && p.pos ? p.pos : new Point(0, 0);
   }
 
   function getVector(item) {
-        var p =    getParent(item);
-    return  (p && p.pos && item.pos) ? Point.diff(p.pos, item.pos) : new Point(0,0);
+    var p = getParent(item);
+    return p && p.pos && item.pos ? Point.diff(p.pos, item.pos) : new Point(0, 0);
   }
   function getItem(index) {
-    const [y,x] = index;
+    const [y, x] = index;
     return table[y][x];
   }
 
@@ -153,12 +150,11 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true }) =
     const row = table[y];
     let xstart = (-xdist * (row.length - 1)) / 2;
 
-//if(y < 3)
-  DistributeX(row, y == 1 ? xdist * 2 : xdist, (item,pos) => item.pos = new Point(pos, ystart + y));
-
+    //if(y < 3)
+    DistributeX(row, y == 1 ? xdist * 2 : xdist, (item, pos) => (item.pos = new Point(pos, ystart + y)));
 
     for(var x = 0; x < row.length; x++) {
-/*      let pt = new Point({
+      /*      let pt = new Point({
         x: xstart + x * xdist,
         y: ystart + y
       });
@@ -166,30 +162,32 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true }) =
       table[y][x].color = new HSLA((i++ * 360) / n_items, 100, 80, 1);
       table[y][x].title = splitLines(table[y][x].title, max_chars);
     }
- // xdist *= xdist_mul;
-    if(y >= 1)
-    ystart += ydist;
+    // xdist *= xdist_mul;
+    if(y >= 1) ystart += ydist;
   }
-if(true) {
+  if(true) {
     for(let x = 0; x < table[2].length; x++) {
-    const item = table[2][x];
+      const item = table[2][x];
       const { pos } = item;
-if(item.children) {
-  var vec= getVector(item);
-  var ang = vec.toAngle();
-  console.log("item.children: ", item.children);
-  console.log("pos: ", pos);
+      if(item.children) {
+        var vec = getVector(item);
+        var ang = vec.toAngle();
+        //console.log("item.children: ", item.children);
+        //console.log("pos: ", pos);
 
-    DistributeCircular(item.children, xdist, (i,px,py) => {
-
-console.log("circ", {px,py});
-console.log("item", item);
-getItem(item.children[i].index).pos = new Point(px + pos.x -vec.x, py + pos.y - vec.y);
-
-  }, ang);
+        DistributeCircular(
+          item.children,
+          xdist,
+          (i, px, py) => {
+            //console.log("circ", {px,py});
+            //console.log("item", item);
+            getItem(item.children[i].index).pos = new Point(px + pos.x - vec.x, py + pos.y - vec.y);
+          },
+          ang
+        );
+      }
+    }
   }
-  }
-}
 
   var min_x = 0,
     max_x = 0,
@@ -235,24 +233,22 @@ if(height  < minHeight)
 
   for(var item of Table2DIterator(table)) {
     if(item.children && item.children.length) {
-let dir = direction;
+      let dir = direction;
 
-          const len = item.children.length;
-          const p = new Point(item.pos).add(dir(item.pos,getItem(item.children[len-1].index).pos, radius));
-          let acc = new Point(0,0);
+      const len = item.children.length;
+      const p = new Point(item.pos).add(dir(item.pos, getItem(item.children[len - 1].index).pos, radius));
+      let acc = new Point(0, 0);
 
-          for(let i = 0; i < len; i++) {
+      for(let i = 0; i < len; i++) {
+        acc = Point.sum(acc, getItem(item.children[i].index).pos);
+      }
 
-            acc = Point.sum(acc,getItem(item.children[i].index).pos );
-          }
-
-console.log("acc:",acc);
-getItem(item.index).vector = new Line(p.x, p.y, acc.x / len, acc.y / len );
+      //console.log("acc:",acc);
+      getItem(item.index).vector = new Line(p.x, p.y, acc.x / len, acc.y / len);
     }
   }
 
-
-  console.log("Tree table ", table);
+  //console.log("Tree table ", table);
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
@@ -262,28 +258,23 @@ getItem(item.index).vector = new Line(p.x, p.y, acc.x / len, acc.y / len );
           if(!item.parentIndex) return undefined;
           const [py, px] = item.parentIndex;
           const [iy, ix] = item.index;
-          const parent =  table[py][px];
-dir = item.depth == 2 ?  directionVertical : direction;
+          const parent = table[py][px];
+          dir = item.depth == 2 ? directionVertical : direction;
 
           const d = dir(parent.pos, item.pos, radius);
-
-
-
 
           const a = iy > 1 ? new Point(parent.vector.x1, parent.vector.y1) : new Point(parent.pos.x, parent.pos.y).add(d);
           const b = new Point(item.pos.x, item.pos.y).add(dir(item.pos, parent.pos, radius));
           const ca = iy > 2 ? parent.vector.pointAt(0.2) : new Point(a.x + d.x * 2, a.y + d.y); //(a.x - b.x) * 0.0, a.y + (b.y - a.y) * 0.5);
           const cb = iy > 1 ? parent.vector.pointAt(0.8) : new Point(b.x - d.x * 2, b.y - d.y);
 
-//if(item.depth == 2)
-
-
+          //if(item.depth == 2)
 
           return (
             <React.Fragment>
               <path d={`M${a} C ${ca}, ${cb}, ${b}`} stroke={"black"} strokeWidth={W} fill={"none"} />
-             {item.branch && <circle cx={item.branch.a.x} cy={item.branch.a.y} r={10} fill={'none'} stroke={item.color.toHSL()} />}  
-             { 0 && item.vector && <line x1={item.vector.x1} y1={item.vector.y1} x2={item.vector.x2} y2={item.vector.y2} stroke={item.color.toHSL()} />}  
+              {item.branch && <circle cx={item.branch.a.x} cy={item.branch.a.y} r={10} fill={"none"} stroke={item.color.toHSL()} />}
+              {0 && item.vector && <line x1={item.vector.x1} y1={item.vector.y1} x2={item.vector.x2} y2={item.vector.y2} stroke={item.color.toHSL()} />}
               {/*        <circle cx={ca.x} cy={ca.y} r={4} fill={item.color.toHSL()} />
             <circle cx={cb.x} cy={cb.y} r={4} fill={item.color.toHSL()} />*/}
             </React.Fragment>

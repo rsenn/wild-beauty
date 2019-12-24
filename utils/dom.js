@@ -1819,7 +1819,7 @@ Line.prototype.length = function() {
 };
 
 Line.prototype.pointAt = function(pos) {
-  return new Point(pos * (this.x2-this.x1) + this.x1, pos * (this.y2 - this.y1) + this.y1);
+  return new Point(pos * (this.x2 - this.x1) + this.x1, pos * (this.y2 - this.y1) + this.y1);
 };
 
 Line.prototype.transform = function(m) {

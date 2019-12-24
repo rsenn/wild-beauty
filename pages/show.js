@@ -360,7 +360,6 @@ class Show extends React.Component {
         <br />
         <br />
         <br />
-        
         {this.state.view == "item" ? (
           <ItemView id={this.state.itemId} />
         ) : (
