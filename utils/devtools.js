@@ -831,60 +831,65 @@ export function trackElements() {
   });
 }
 
-export function rect() {
-  let args = [...arguments];
-  let body = Element.find("body");
-  let parent = null;
-
-  let rect = args.shift();
-  if(typeof rect == "string" || rect.tagName !== undefined) {
-    parent = rect;
-    rect = Element.rect(rect);
+export function rect(arg) {
+  if(typeof arg == "object" && arg.length !== undefined) {
+    return [...arg].map(r => __rect(r));
   }
+  function __rect() {
+    let args = [...arguments];
+    let body = Element.find("body");
+    let parent = null;
 
-  console.log("rect ", { rect });
-  let color = args.shift() || "#ffff0030";
-  let borderColor = args.shift() || "#0f0";
-  parent = parent || args.shift() || body;
-  let css = Rect.toCSS(rect) || {};
-  if(typeof parent == "string") parent = Element.find(parent);
-
-  if(parent != body && !parent.style.position) parent.style.setProperty("position", "relative");
-
-  let e = Element.create("div", {
-    parent,
-    style: {
-      display: "inline-block",
-      class: "tracker-rect",
-      position: "absolute",
-      border: `4px dashed ${borderColor}`,
-      borderRadius: "8px",
-      backgroundColor: color,
-      zIndex: 999,
-      pointerEvents: "none",
-      left: "0px",
-      top: "0px",
-      width: `${rect.width}px`,
-      height: `${rect.height}px`
-      /*   WebkitBoxShadow: '0px 0px 9px 0px #000000',
-      boxShadow: '0px 0px 9px 0px #000000',*/
-      /*...css*/
+    let rect = args.shift();
+    if(typeof rect == "string" || rect.tagName !== undefined) {
+      parent = rect;
+      rect = Element.rect(rect);
     }
-  });
 
-  /*  Rect.set(r, e);*/
-  // Rect.inset(rect, TRBL(3, 3, 3, 3));
-  //  Element.setCSS(e, { left: rect.x, top: rect.y, width: rect.width, height: rect.height });
-  // Element.rect(e, rect, 'absolute');
-  let computed = Element.getRect(e);
-  console.log("rect: ", rect, " computed: ", computed);
-  const proxy = new ElementRectProxy(e);
-  ElementXYProps(e, proxy);
-  ElementSizeProps(e, proxy);
+    console.log("rect ", { rect });
+    let color = args.shift() || "#ffff0030";
+    let borderColor = args.shift() || "#0f0";
+    parent = parent || args.shift() || body;
+    let css = Rect.toCSS(rect) || {};
+    if(typeof parent == "string") parent = Element.find(parent);
 
-  e.transformation = ElementTransformation();
-  Object.assign(e, CSSTransformSetters(e));
-  return e;
+    if(parent != body && !parent.style.position) parent.style.setProperty("position", "relative");
+
+    let e = Element.create("div", {
+      parent,
+      style: {
+        display: "inline-block",
+        class: "tracker-rect",
+        position: "absolute",
+        border: `1px dashed ${typeof borderColor == "string" ? borderColor : "#0f0"}`,
+        borderRadius: "0px",
+        backgroundColor: typeof color == "string" ? color : "#ffff0030",
+        zIndex: 999,
+        pointerEvents: "none",
+        left: `${rect.x}px`,
+        top: `${rect.y}px`,
+        width: `${rect.width}px`,
+        height: `${rect.height}px`
+        /*   WebkitBoxShadow: '0px 0px 9px 0px #000000',
+      boxShadow: '0px 0px 9px 0px #000000',*/
+        /*...css*/
+      }
+    });
+
+    /*  Rect.set(r, e);*/
+    // Rect.inset(rect, TRBL(3, 3, 3, 3));
+    //  Element.setCSS(e, { left: rect.x, top: rect.y, width: rect.width, height: rect.height });
+    // Element.rect(e, rect, 'absolute');
+    let computed = Element.getRect(e);
+    console.log("rect: ", rect, " computed: ", computed);
+    const proxy = new ElementRectProxy(e);
+    ElementXYProps(e, proxy);
+    ElementSizeProps(e, proxy);
+
+    e.transformation = ElementTransformation();
+    Object.assign(e, CSSTransformSetters(e));
+    return e;
+  }
 }
 
 export function borders(element) {

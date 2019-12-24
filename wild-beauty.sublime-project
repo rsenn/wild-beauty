@@ -57,7 +57,6 @@
 				"e$",
 				"*.env",
 				"*.frontend",
-				"*.html",
 				"*.json",
 				"*.key",
 				"*.lock",

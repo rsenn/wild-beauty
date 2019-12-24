@@ -7,7 +7,7 @@ const httpClient = axios.create({
 httpClient.interceptors.response.use(
   res => {
     const { data, status, statusText, headers, config, request } = res;
-    console.error("axios SUCCESS:", { status, statusText, data });
+    // console.error("axios SUCCESS:", { status, statusText, data });
 
     return res;
   },

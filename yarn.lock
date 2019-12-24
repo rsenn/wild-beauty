@@ -9578,6 +9578,11 @@ svgo@^0.7.0:
     sax "~1.2.1"
     whet.extend "~0.9.9"
 
+svgtree@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/svgtree/-/svgtree-0.1.0.tgz#69d8b3698dce54c39383446b71a5e69b77b3ad9e"
+  integrity sha1-adizaY3OVMOTg0RrcaXmm3ezrZ4=
+
 symbol-observable@^1.0.2, symbol-observable@^1.0.3, symbol-observable@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"

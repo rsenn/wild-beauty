@@ -247,11 +247,11 @@ Point.dimension = p => [p.width, p.height];
 
 Point.toString = point => {
   if(point instanceof Array) return `[${point[0].toFixed(3)},${point[1].toFixed(3)}]`;
-  return `[${point.x},${point.y}]`;
+  return `${point.x},${point.y}`;
   //  return Point.prototype.toString.call(point);
 };
-Point.prototype.toString = function(brackets = true) {
-  return (brackets ? "{" : "") + "x:" + this.x.toFixed(3) + ",y:" + this.y.toFixed(3) + (brackets ? "}" : "");
+Point.prototype.toString = function(prec) {
+  return this.x.toFixed(prec) + " " + this.y.toFixed(prec);
 };
 Point.prototype.toSource = function() {
   return "{x:" + this.x.toFixed(3) + ",y:" + this.y.toFixed(3) + "}";
@@ -493,6 +493,8 @@ PointList.prototype.minmax = function() {
   }
   return ret;
 };
+PointList.minmax = list => PointList.prototype.minmax.call(list);
+
 PointList.prototype.xrange = function() {
   const minmax = this.minmax();
   return [minmax.x1, minmax.x2];
@@ -833,6 +835,8 @@ Rect.corners = (rect = this) => [
   { x: rect.x + rect.width, y: rect.y + rect.height }, // bottom right
   { x: rect.x, y: rect.y + rect.height } // bottom left
 ];
+
+Rect.centered = (point, rx, ry = rx) => new Rect(point.x - rx * 0.5, point.y - ry * 0.5, rx * 2, ry * 2);
 
 Rect.bbrect = () => {
   const ex = Rect.extrema(arguments);
@@ -1814,6 +1818,10 @@ Line.prototype.length = function() {
   return Point.distance(this.a, this.b);
 };
 
+Line.prototype.pointAt = function(pos) {
+  return new Point(pos * (this.x2-this.x1) + this.x1, pos * (this.y2 - this.y1) + this.y1);
+};
+
 Line.prototype.transform = function(m) {
   this.a = this.a.transform(m);
   this.b = this.b.transform(m);
@@ -1914,6 +1922,11 @@ RGBA.fromHex = (hex, alpha = 255) => {
 RGBA.prototype.hex = function() {
   const { r, g, b, a } = RGBA.clamp(RGBA.round(this));
   return "#" + ("0000000" + ((r << 16) | (g << 8) | b).toString(16)).slice(-6) + (a !== undefined ? ("0" + a.toString(16)).slice(-2) : "");
+};
+
+RGBA.prototype.toRGB = function() {
+  const { r, g, b } = this;
+  return new RGBA(r, g, b, 255);
 };
 
 RGBA.toHex = rgba => RGBA.prototype.hex.call(rgba);
@@ -2091,6 +2104,10 @@ HSLA.setcss = hsla => prop => (prop ? prop + ":" : "") + "hsla(" + hsla.h + "," 
 HSLA.prototype.css = function() {
   const hsla = HSLA.clamp(HSLA.round(this));
   return HSLA.setcss(hsla)();
+};
+HSLA.prototype.toHSL = function() {
+  const { h, s, l } = this;
+  return new HSLA(h, s, l, 1.0);
 };
 
 HSLA.clamp = hsla => HSLA(hsla.h % 360, Math.min(Math.max(hsla.s, 0), 100), Math.min(Math.max(hsla.l, 0), 100), Math.min(Math.max(hsla.a, 0), 1));

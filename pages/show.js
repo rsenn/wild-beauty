@@ -356,13 +356,15 @@ class Show extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-
+        <Tree tree={tree} minWidth={1024} /> {/*treeVerify={node => node.children && node.children.length} */}
+        <br />
+        <br />
+        <br />
+        
         {this.state.view == "item" ? (
           <ItemView id={this.state.itemId} />
         ) : (
           <div className={"show-layout2"}>
-            {/*          <Tree tree={tree} />
-             */}
             {tree ? (
               <DropdownTreeSelect
                 data={tree}
