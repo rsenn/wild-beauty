@@ -182,40 +182,38 @@ class Show extends React.Component {
     if(!this.rects) {
       this.rects = Element.findAll("rect");
     }
-  var r = this.rects.filter(rect => Rect.inside(Element.rect(rect), { x, y }));
+    var r = this.rects.filter(rect => Rect.inside(Element.rect(rect), { x, y }));
 
-if(type.endsWith('move')) {
+    if(type.endsWith("move")) {
       var elem = r[0] && r[0].parentElement;
 
-
-    function getNum(elem, name) {
-      return parseFloat(elem.getAttribute(name));
-    }
+      function getNum(elem, name) {
+        return parseFloat(elem.getAttribute(name));
+      }
 
       if(this.prevElem && this.prevElem.style) {
         if(this.prevElem == elem) return;
         this.prevElem.style.removeProperty("transform");
       }
-    if(elem && elem.style) {
+      if(elem && elem.style) {
+        const t = ` scale(1.5,1.5)`;
+        console.log("Mouse event: ", t);
+        elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
 
-      const t = ` scale(1.5,1.5)`;
-      console.log("Mouse event: ", t);
-      elem.style.setProperty("transition", 'transform 1s cubic-bezier(0.19, 1, 0.22, 1)');
+        elem.style.setProperty("transform", t);
+        this.prevElem = elem;
+      }
+    } else if(type.endsWith("down")) {
+      var elem = r[0];
 
-      elem.style.setProperty("transform", t);
-      this.prevElem = elem;
+      console.log("Mouse event: ", { type, x, y }, r);
+
+      if(elem) {
+        const id = parseInt(elem.parentElement.getAttribute("id").replace(/.*\./, ""));
+        console.log("Clicked id:", id);
+        this.setState({ active: id });
+      }
     }
-  }  else if(type.endsWith('down')) {
-        var elem = r[0];
-
-    console.log("Mouse event: ", {type,x,y}, r);
-
-    if(elem) {
-     const id = parseInt(elem.parentElement.getAttribute('id').replace(/.*\./, ''));
-     console.log("Clicked id:",id);
-     this.setState({ active: id });
-   }
-  }
   };
 
   @action.bound

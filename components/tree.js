@@ -114,7 +114,7 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true, act
     item.index = [depth, table[depth].length];
     //  item.parent = parent;
     n_items++;
-  //  if(item.children) item.children = reorder(item.children, item => numChildren(item));
+    //  if(item.children) item.children = reorder(item.children, item => numChildren(item));
     if(treeVerify(item)) table[depth].push({ ...item, depth, parent });
     if(max_length < item.title.length) max_length = item.title.length;
   });
@@ -219,10 +219,11 @@ if(height  < minHeight)
   width *= scale_x;
   height *= scale_y;
 
-  var offs_x = -min_x + (radius*2+ 1);
-  var offs_y = -min_y + (radius*2 + 1);
+  var offs_x = -min_x + (radius * 2 + 1);
+  var offs_y = -min_y + (radius * 2 + 1);
 
-  if(width < minWidth) {}
+  if(width < minWidth) {
+  }
 
   for(var it of Table2DIterator(table)) {
     const { pos } = it;
@@ -284,13 +285,25 @@ if(height  < minHeight)
         })}
         {[...Table2DIterator(table)].map(item => (
           <g transform={`translate(${item.pos.x},${item.pos.y})`}>
-          <g id={'item.'+item.id}>
-            <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={radius / 2} ry={radius / 2}    vectorEffect={'non-scaling-stroke'} stroke={item.id == active ? 'white'  : "black"} strokeDasharray={item.id  == active ? '4' : ''} fill={item.color} strokeWidth={item.id == active ?  W * 3 : W} />
-          <SVGText lines={item.title} x={0} y={0} />
-          </g>
+            <g id={"item." + item.id}>
+              <rect
+                x={-radius}
+                y={-radius}
+                width={radius * 2}
+                height={radius * 2}
+                rx={radius / 2}
+                ry={radius / 2}
+                vectorEffect={"non-scaling-stroke"}
+                stroke={item.id == active ? "white" : "black"}
+                strokeDasharray={item.id == active ? "4" : ""}
+                fill={item.color}
+                strokeWidth={item.id == active ? W * 3 : W}
+              />
+              <SVGText lines={item.title} x={0} y={0} />
+            </g>
           </g>
         ))}
-     
+
         {/* <line x1={0} x2={width} y1={height / 2} y2={height / 2} stroke={"#f00"} strokeWidth={W} strokeDasharray="4" />
       <line x1={width / 2} x2={width / 2} y1={0} y2={height} stroke={"#f00"} strokeWidth={W} strokeDasharray="4" />*/}
       </g>
