@@ -165,9 +165,9 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true }) =
     // xdist *= xdist_mul;
     if(y >= 1) ystart += ydist;
   }
-  if(true) {
-    for(let x = 0; x < table[2].length; x++) {
-      const item = table[2][x];
+  for(let y = 2; y <= 2; y++) {
+    for(let x = 0; x < table[y].length; x++) {
+      const item = table[y][x];
       const { pos } = item;
       if(item.children) {
         var vec = getVector(item);
