@@ -159,7 +159,7 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true, act
         y: ystart + y
       });
       table[y][x].pos = pt; //new Point(Math.sin(pt.x)*xdist, - Math.cos(pt.y));*/
-      table[y][x].color = new HSLA((i++ * 360) / n_items, 100, 80, 1);
+      table[y][x].color = new HSLA((i++ * 360) / n_items, 85, 70, 1);
       table[y][x].title = splitLines(table[y][x].title, max_chars);
     }
     // xdist *= xdist_mul;
@@ -255,7 +255,11 @@ if(height  < minHeight)
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <defs />
+      <defs>
+          <filter id="shadow">
+      <feDropShadow dx="1" dy="1" stdDeviation="2"/>
+    </filter>
+ </defs>
       <g transform={`translate(${offs_x * scale_x}, ${offs_y * scale_y})`}>
         {[...Table2DIterator(table)].map(item => {
           if(!item.parentIndex) return undefined;
@@ -291,13 +295,14 @@ if(height  < minHeight)
                 y={-radius}
                 width={radius * 2}
                 height={radius * 2}
-                rx={radius / 2}
-                ry={radius / 2}
+                rx={8}
+                ry={8}
                 vectorEffect={"non-scaling-stroke"}
-                stroke={item.id == active ? "white" : "black"}
+                stroke={item.id == active ? "white" : "none"}
                 strokeDasharray={item.id == active ? "4" : ""}
                 fill={item.color}
                 strokeWidth={item.id == active ? W * 3 : W}
+                style={{ filter: 'url(#shadow)' }}
               />
               <SVGText lines={item.title} x={0} y={0} />
             </g>
