@@ -49,6 +49,8 @@ export class SvgOverlay extends React.Component {
     const f = this.factory();
     if(f) f.root = svg;
     SVG.create("defs", {}, svg);
+
+    ReactDOM.render(this.props.children, svg);
     //
     return svg;
   });

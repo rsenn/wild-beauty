@@ -2470,9 +2470,9 @@ export class Element extends Node {
     const prect = Element.rect(pelement, { round: false });
     //Rect.align(rect, prect, anchor);
 
-    const stack = Util.getCallers(3, 4);
+   /* const stack = Util.getCallers(3, 4);
     const ptrbl = Rect.toTRBL(prect);
-    const trbl = Rect.toTRBL(rect);
+    const trbl = Rect.toTRBL(rect);*/
     //console.log('Element.setRect ', { trbl, ptrbl, stack });
     let css = {};
     let remove;

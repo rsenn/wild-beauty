@@ -1,0 +1,1029 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"direct",
+				"directionVertical\twarning"
+			],
+			[
+				"MAX",
+				"MAX_SAFE_INTEGER\tproperty"
+			],
+			[
+				"prev",
+				"previousElementSibling\twarning"
+			],
+			[
+				"distributi",
+				"distribution_parse"
+			],
+			[
+				"requi",
+				"require_timezone"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "components/tree.js",
+			"settings":
+			{
+				"buffer_size": 10112,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utils/dom.js",
+			"settings":
+			{
+				"buffer_size": 100282,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utils/svg-overlay.js",
+			"settings":
+			{
+				"buffer_size": 3372,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/index.js",
+			"settings":
+			{
+				"buffer_size": 10090,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/test.js",
+			"settings":
+			{
+				"buffer_size": 5549,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "node_modules/react-select/dist/base/dist/react-select-306fdb60.browser.cjs.js",
+			"settings":
+			{
+				"buffer_size": 99645,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utils/axios.js",
+			"settings":
+			{
+				"buffer_size": 618,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utils/util.js",
+			"settings":
+			{
+				"buffer_size": 46006,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 95.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"scheme",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
+				"schemeed",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
+				"extract",
+				"PackageResourceViewer: Extract Package"
+			],
+			[
+				"list pack",
+				"Package Control: List Packages"
+			],
+			[
+				"remove pack",
+				"Package Control: Remove Package"
+			],
+			[
+				"schemed",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
+				"install pac",
+				"Package Control: Install Package"
+			],
+			[
+				"outline",
+				"Browse Mode: Outline (Right)"
+			],
+			[
+				"install p",
+				"Package Control: Install Package"
+			],
+			[
+				"add re",
+				"Package Control: Add Repository"
+			],
+			[
+				"remove ac",
+				"Package Control: Remove Package"
+			],
+			[
+				"schemee",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
+				"packager",
+				"PackageResourceViewer: Extract Package"
+			],
+			[
+				"package",
+				"PackageResourceViewer: Open Resource"
+			],
+			[
+				"install pc",
+				"Package Control: Install Package"
+			],
+			[
+				"theme",
+				"Themr: List themes"
+			],
+			[
+				"next the",
+				"Themr: Next theme"
+			],
+			[
+				"themr",
+				"Themr: Next theme"
+			],
+			[
+				"add rep",
+				"Package Control: Add Repository"
+			],
+			[
+				"Package Control: install",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 637.0
+	},
+	"console":
+	{
+		"height": 138.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/roman/wild-beauty",
+		"/home/roman/wild-beauty/components",
+		"/home/roman/wild-beauty/components/simple",
+		"/home/roman/wild-beauty/pages",
+		"/home/roman/wild-beauty/utils"
+	],
+	"file_history":
+	[
+		"/home/roman/the-wild-beauty-company/utils/dom.js",
+		"/home/roman/wild-beauty/utils/devtools.js",
+		"/home/roman/wild-beauty/pages/show.js",
+		"/home/roman/the-wild-beauty-company/pages/show.js",
+		"/home/roman/the-wild-beauty-company/components/tree.js",
+		"/home/roman/wild-beauty/utils/dom.js",
+		"/home/roman/Arduino/libraries/FreqCounter/FreqCounter.h",
+		"/home/roman/the-wild-beauty-company/pages/index.js",
+		"/home/roman/wild-beauty/utils/alea.js",
+		"/home/roman/wild-beauty/server.js",
+		"/home/roman/wild-beauty/wild-beauty.sublime-project",
+		"/home/roman/wild-beauty/svgtree/svgtree.html",
+		"/home/roman/wild-beauty/utils/util.js",
+		"/home/roman/wild-beauty/utils/lua.js",
+		"/home/roman/Dokumente/Sources/lotto/utils/lua.js",
+		"/home/roman/Dokumente/Sources/lotto/transform-lua.js",
+		"/home/roman/wild-beauty/pages/panes.js",
+		"/home/roman/wild-beauty/pages/_document.js",
+		"/home/roman/wild-beauty/pages/index.js",
+		"/home/roman/wild-beauty/utils/colorscheme.js",
+		"/home/roman/wild-beauty/pages/new.js",
+		"/home/roman/wild-beauty/components/TouchCallback.js",
+		"/home/roman/the-wild-beauty-company/components/TouchCallback.js",
+		"/home/roman/wild-beauty/utils/api.js",
+		"/home/roman/wild-beauty/utils/autoStore.js",
+		"/home/roman/wild-beauty/utils/axios.js",
+		"/home/roman/the-wild-beauty-company/utils/api.js",
+		"/home/roman/wild-beauty/components/views/imageUpload.js",
+		"/home/roman/wild-beauty/components/gallery.js",
+		"/home/roman/lotto/helpers/util.moon",
+		"/home/roman/lotto/set-status.moon",
+		"/home/roman/lotto/pages/play.js",
+		"/home/roman/lotto/pages/payment.js",
+		"/mnt/manjaro-new/home/roman/Dokumente/Sources/opencv/modules/core/include/opencv2/core/affine.hpp",
+		"/home/roman/lotto/test-models.moon",
+		"/home/roman/lotto/helpers/app.moon",
+		"/home/roman/lotto/app.moon",
+		"/home/roman/lotto/applications/users.moon",
+		"/home/roman/lotto/helpers/models.moon",
+		"/home/roman/lotto/helpers/binary.moon",
+		"/home/roman/lotto/config.moon",
+		"/home/roman/Dokumente/Sources/lotto/components/svg.js",
+		"/usr/bin/subl",
+		"/home/roman/lotto/applications/tickets.moon",
+		"/home/roman/lotto/applications/payment.moon",
+		"/home/roman/lotto/lapis/console/init.moon",
+		"/home/roman/lotto/models/tickets.moon",
+		"/home/roman/lotto/lsrv.sublime-project",
+		"/home/roman/lotto/models/drawings.moon",
+		"/home/roman/lotto/models/games.moon",
+		"/home/roman/lotto/helpers/debug.moon",
+		"/home/roman/lotto/helpers/api.moon",
+		"/home/roman/lotto/helpers/model.moon",
+		"/home/roman/Dokumente/Sources/lotto/stores/UserStore.js",
+		"/home/roman/lotto/models.moon",
+		"/home/roman/lotto/applications/games.moon",
+		"/home/roman/lotto/helpers/json.moon",
+		"/home/roman/lotto/models/users.moon",
+		"/home/roman/lotto/alter.sql",
+		"/home/roman/Dokumente/Sources/lotto/utils/dom.js",
+		"/home/roman/lotto/applications/socket.moon",
+		"/home/roman/Dokumente/Sources/lotto/stores/RootStore.js",
+		"/home/roman/lotto/applications/api.moon",
+		"/home/roman/Dokumente/Sources/lotto/pages/payment.js",
+		"/home/roman/lotto/models/transactions.moon",
+		"/home/roman/lotto/helpers/payment.moon",
+		"/home/roman/lotto/helpers/paylottery.moon",
+		"/home/roman/lotto/test-req.moon",
+		"/home/roman/Dokumente/Sources/lotto/helpers/util.moon",
+		"/home/roman/Dokumente/Sources/lotto/nginx.conf",
+		"/home/roman/Dokumente/Sources/lotto/test-sourcemap-moon.moon",
+		"/home/roman/.config/sublime-text-3/Packages/User/SchemrFavorites.sublime-settings",
+		"/home/roman/Dokumente/Sources/lotto/components/admin/draw.js",
+		"/home/roman/lotto/test-exception.lua",
+		"/home/roman/lotto/bitcoin-walker.moon",
+		"/home/roman/lotto/helpers/date.moon",
+		"/home/roman/Dokumente/Sources/lotto/components/simple/language.js",
+		"/home/roman/lotto/test-date.moon",
+		"/home/roman/lotto/applications/drawings.moon",
+		"/home/roman/lotto/applications/users.lua.map",
+		"/home/roman/lotto/helpers/app.lua.map",
+		"/home/roman/Dokumente/Sources/lotto/applications/drawings.moon",
+		"/home/roman/Dokumente/Sources/lotto/applications/games.moon",
+		"/home/roman/Dokumente/Sources/lotto/applications/payment.moon",
+		"/home/roman/Dokumente/Sources/lotto/applications/tickets.moon",
+		"/home/roman/lotto/models/accounts.moon",
+		"/home/roman/lotto/models/status.moon",
+		"/home/roman/lotto/app.lua.map",
+		"/home/roman/.config/sublime-text-3/Packages/Theme - Rainbow/Theme - Rainbow.sublime-settings",
+		"/home/roman/lotto/helpers/models.lua.map",
+		"/home/roman/lotto/helpers/query.moon",
+		"/home/roman/Dokumente/Sources/lotto/components/simple/money.js",
+		"/home/roman/Dokumente/Sources/lotto/pages/play.js",
+		"/home/roman/Dokumente/Sources/streak.club/helpers/app.moon",
+		"/home/roman/lotto/test-transactions.moon",
+		"/home/roman/lotto/models/user_profiles.moon",
+		"/home/roman/Dokumente/Sources/lotto/stores/commonStoreFunctions.js",
+		"/home/roman/Dokumente/Sources/lotto/utils/util.js",
+		"/home/roman/lotto/models/user_ip_addresses.moon",
+		"/home/roman/lotto/helpers/string.moon",
+		"/home/roman/lotto/helpers/validate.moon"
+	],
+	"find":
+	{
+		"height": 49.0
+	},
+	"find_in_files":
+	{
+		"height": 131.0,
+		"where_history":
+		[
+			"/home/roman/wild-beauty/components,/home/roman/wild-beauty/pages,/home/roman/wild-beauty/utils,/home/roman/wild-beauty/stores,*.js",
+			"/home/roman/lotto,*.moon",
+			"",
+			"set_time_offset @, @params.hour_offset",
+			"/home/roman/lotto,*.moon",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"colors\\(",
+			"SizeMe",
+			"react.*size",
+			"import.*react.*size",
+			"ReactDOM.rend",
+			"HSLA",
+			"reorder",
+			"down'",
+			"offs_x",
+			"getInt",
+			"inside =",
+			"pointAt",
+			"1 -",
+			"1.0 -",
+			"DistributeCircular",
+			"\\.angle",
+			"Distri",
+			"function rect",
+			"rect\\(",
+			"^Rect\\.",
+			"dir",
+			"directionVertical",
+			"toFixed",
+			"fromAngle",
+			"toAngle",
+			"Polar",
+			"5",
+			"1\\.1",
+			"RGBA[^ ]*to",
+			"Point.*toString",
+			"row",
+			"<Tree",
+			"walk",
+			"indent",
+			"random",
+			"const Readable = stream.Readable;\n",
+			"export ",
+			"import.*axios",
+			"ax",
+			"axios",
+			"window.*axios",
+			"HSLA.*toRGB",
+			"HSLA\\(",
+			"Math.random",
+			"Alea",
+			"getPrng",
+			"Alea",
+			"getPrng",
+			"toHex",
+			"randInt",
+			"TouchLi",
+			"SwipeTracker",
+			"LIVE",
+			"live",
+			"tickets_for_user",
+			"tickets_for",
+			"/profile\"",
+			"height.*auto",
+			"1811",
+			"7import",
+			"`\\${id}-cls-",
+			"`${id}-cls-",
+			"isolation.*isola",
+			" style={{\"isolation\":\"isolate\"}} ",
+			"\"mixBlendMode\":",
+			"={'logo",
+			"id=\"([^\"]*)\"",
+			"={'logo",
+			"className=\"([^\"]*)\"",
+			"logo-logo-",
+			"={'star-icon",
+			"id=\"([^\"]*)\"",
+			"className=\"([^\"]*)\"",
+			"star-icon-star-icon-",
+			"star-final_svg__",
+			"callback",
+			"require_pay",
+			"\"/app/profile",
+			"setmeta",
+			"import.*table_ex",
+			"verify\"",
+			"UNIX_TIMESTAMP",
+			"unix_timestamp",
+			"unix_time",
+			"CONVERT",
+			"^bitarray",
+			"/new\"",
+			"find_by",
+			"find_by_field",
+			"import.*and_rena",
+			"import.*and_re na",
+			"distribution_parse",
+			"implode.*unpack",
+			"Drawings",
+			"add_latest_drawings",
+			"add_upcoming",
+			"add.*drawing",
+			"add_latest_drawings",
+			"to_json",
+			"^merge_rec",
+			"^table_contains",
+			"Drawings",
+			"^extract_ids",
+			"add_latest",
+			"add_upcoming_drawings",
+			"add_up",
+			"add_upcoming",
+			"return_profile",
+			"/profile\"",
+			"add_upcoming_drawings",
+			"upcoming",
+			"table_contains",
+			"contains",
+			"containns",
+			" contains",
+			"import.*contains",
+			"contains",
+			" contains",
+			"contains",
+			"^table_",
+			"^insert",
+			"upcoming",
+			"authenticated",
+			"read_ses",
+			"find_salt",
+			"Ret:",
+			"^json_api_errors",
+			"^\"application/json\""
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"getNum",
+			"W",
+			"",
+			"`${id}-",
+			" ",
+			"mixBlendMode: ",
+			"={id+'",
+			"={className+'",
+			"id={'\\1'}",
+			"={className+'",
+			"className={'\\1'}",
+			"logo-",
+			"={className+'",
+			"id={'\\1'}",
+			"className={'\\1'}",
+			"star-icon-",
+			" table_contains",
+			"prepare_profile",
+			"'",
+			"",
+			"set_time_offset @, @params.hour_offset",
+			"",
+			"require_timezone @",
+			"@params.hour_offset",
+			" = ("
+		],
+		"reverse": false,
+		"show_context": false,
+		"use_buffer2": false,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "components/tree.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10112,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7262,
+								7262
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Babel/Next (Roman).tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 5527.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "utils/dom.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 100282,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								69597,
+								69597
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Babel/Next (Roman).tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 69546.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "utils/svg-overlay.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3372,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3316,
+								3316
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2913.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "pages/index.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10090,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								328,
+								328
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "pages/test.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5549,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								424,
+								424
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "node_modules/react-select/dist/base/dist/react-select-306fdb60.browser.cjs.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 99645,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								53673,
+								53673
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 41004.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "utils/axios.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 618,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								287,
+								287
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "utils/util.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 46006,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								44665,
+								44665
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/Next (Roman).tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 44941.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 37.0
+	},
+	"input":
+	{
+		"height": 43.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.doc":
+	{
+		"height": 0.0
+	},
+	"output.find_results":
+	{
+		"height": 228.0
+	},
+	"pinned_build_system": "",
+	"project": "wild-beauty.sublime-project",
+	"replace":
+	{
+		"height": 90.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"util.js",
+				"utils/util.js"
+			],
+			[
+				"set-stat",
+				"set-status.moon"
+			],
+			[
+				"test-mo",
+				"test-models.moon"
+			],
+			[
+				"app",
+				"helpers/app.moon"
+			],
+			[
+				"config",
+				"config.moon"
+			],
+			[
+				"init",
+				"lapis/console/init.moon"
+			],
+			[
+				"users",
+				"applications/users.moon"
+			],
+			[
+				"pay",
+				"applications/payment.moon"
+			],
+			[
+				"payme",
+				"applications/payment.moon"
+			],
+			[
+				"tick",
+				"models/tickets.moon"
+			],
+			[
+				"users.",
+				"applications/users.moon"
+			],
+			[
+				"ticket.",
+				"models/tickets.moon"
+			],
+			[
+				"util.mo",
+				"helpers/util.moon"
+			],
+			[
+				"trans",
+				"models/transactions.moon"
+			],
+			[
+				"payment",
+				"applications/payment.moon"
+			],
+			[
+				"api.m",
+				"applications/api.moon"
+			],
+			[
+				"api.mo",
+				"helpers/api.moon"
+			],
+			[
+				"app.mo",
+				"app.moon"
+			],
+			[
+				"util",
+				"helpers/util.moon"
+			],
+			[
+				"test-",
+				"test-exception.moon"
+			],
+			[
+				"test-da",
+				"test-date.moon"
+			],
+			[
+				"drawin",
+				"models/drawings.moon"
+			],
+			[
+				"drawing",
+				"models/drawings.moon"
+			],
+			[
+				"status.",
+				"models/status.moon"
+			],
+			[
+				"status.mo",
+				"set-status.moon"
+			],
+			[
+				"tickets",
+				"models/tickets.moon"
+			],
+			[
+				"users.mo",
+				"models/users.moon"
+			],
+			[
+				"model.moo",
+				"helpers/model.moon"
+			],
+			[
+				"draw",
+				"models/drawings.moon"
+			],
+			[
+				"drawings",
+				"applications/drawings.moon"
+			],
+			[
+				"model.moon",
+				"helpers/model.moon"
+			],
+			[
+				"user_pro",
+				"models/user_profiles.moon"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 400.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 907.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 229.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

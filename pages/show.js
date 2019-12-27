@@ -14,11 +14,13 @@ import { getOrCreateStore } from "../stores/createStore.js";
 import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
 import { MovementListener, TouchListener } from "../utils/touchHandler.js";
+import { trkl } from "../utils/trkl.js";
 
 import "../static/css/grid.css";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
+import { SizeMe, withSize } from "react-sizeme";
 
 const RandomColor = () => {
   const c = HSLA.random();
@@ -76,6 +78,8 @@ class Show extends React.Component {
     "users { user { id username last_seen } }"
   ];
 
+  svgRef = trkl();
+
   static async getInitialProps(ctx) {
     const { query, params } = (ctx && ctx.req) || {};
     console.log("Show.getInitialProps ", { query, params });
@@ -119,7 +123,6 @@ class Show extends React.Component {
     rootStore.items.clear();
     props.items.forEach(item => {
       rootStore.newItem(item);
-      //      rootStore.items.set(parseInt(item.id), item);
     });
     //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
@@ -133,14 +136,20 @@ class Show extends React.Component {
     }
     /*
      this.touchListener = TouchListener(this.touchEvent,
-      {
-        element: global.window,
+      f        element: global.window,
         step: 10,
         round: false,
         listener: MovementListener,
         noscroll: true
       }
     );*/
+
+    /*  this.svgRef.subscribe(ref => {
+      var r = Element.rect('#tree');
+      const {x,y} = r;
+     var e =  ref.factory('use', { href: '#tree', x, y }, ref.svg);
+      console.log("svgRef: ", e);   
+    });*/
   }
 
   checkTagRemove() {
@@ -177,39 +186,46 @@ class Show extends React.Component {
 
   mouseEvent = event => {
     const { target, nativeEvent } = event;
-    const { x, y, type } = nativeEvent;
-
+    const { type, clientX, clientY, pageX: x, pageY: y } = nativeEvent;
     if(!this.rects) {
       this.rects = Element.findAll("rect");
     }
     var r = this.rects.filter(rect => Rect.inside(Element.rect(rect), { x, y }));
-
+    function getNum(elem, name) {
+      return parseFloat(elem.getAttribute(name));
+    }
+    function getId(elem) {
+      return parseInt(elem.getAttribute("id").replace(/.*\./, ""));
+    }
     if(type.endsWith("move")) {
       var elem = r[0] && r[0].parentElement;
-
-      function getNum(elem, name) {
-        return parseFloat(elem.getAttribute(name));
-      }
-
+      var hover = -1;
       if(this.prevElem && this.prevElem.style) {
         if(this.prevElem == elem) return;
         this.prevElem.style.removeProperty("transform");
+        hover = -1;
       }
       if(elem && elem.style) {
-        const t = ` scale(1.5,1.5)`;
+        const t = ` scale(1.4,1.4)`;
         console.log("Mouse event: ", t);
+
+        var parent = elem.parentElement;
+        /*  parent.removeChild(elem);
+        parent.appendChild(elem);*/
         elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
 
         elem.style.setProperty("transform", t);
         this.prevElem = elem;
+        hover = getId(elem);
       }
+      // this.setState({ hover });
     } else if(type.endsWith("down")) {
       var elem = r[0];
 
       console.log("Mouse event: ", { type, x, y }, r);
 
       if(elem) {
-        const id = parseInt(elem.parentElement.getAttribute("id").replace(/.*\./, ""));
+        const id = getId(elem.parentElement);
         console.log("Clicked id:", id);
         this.setState({ active: id });
       }
@@ -517,7 +533,9 @@ class Show extends React.Component {
             </div>
           </div>
         )}
-        <SvgOverlay />
+        <SvgOverlay svgRef={this.svgRef}>
+          <use href="#tree" />
+        </SvgOverlay>
         <style jsx global>{`
           .show-layout {
             padding: 0px 20px;

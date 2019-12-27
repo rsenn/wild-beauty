@@ -79,7 +79,7 @@ export const colors = (() => {
   var elements = [];
   return function colors(map) {
     let args = Util.map(map);
-    // console.log('colors map(', args, ')');
+    console.log('colors map(', args, ')');
     const left = elements.length ? Element.rect(elements[0]).x2 + stepX : stepX;
     let e = Element.create("div", {
       parent: Element.find("body"),
@@ -93,17 +93,19 @@ export const colors = (() => {
     });
     let f = Element.factory({}, e);
     let prev = 0;
-    for(let [key, color] of args) {
+    let entries = args.entries();
+    let i = 0, len = entries.length;
+    for(let [key, color] of entries) {
       let diff = key - prev;
       prev = key;
-      // console.log("colors ",{ key, color });
-      const c = typeof color == "string" ? new RGBA(color) : color;
+      const c =  new RGBA(color.r, color.g, color.b, color.a);
+       console.log("colors ",{ key, c });
       f("div", {
         innerHTML: ((typeof key == "number" ? key.toFixed(2) : key) + ": " + c.toString()).replace(/ /g, "&nbsp;"),
         style: {
           margin: "auto",
           //  opacity: c.a / 255,
-          height: `${diff * 100}%`,
+          height: diff > 0 ? `${diff * 100}%` : '100px',
           overflow: "hidden",
           fontFamily: "Arial",
           fontWeight: "bold",

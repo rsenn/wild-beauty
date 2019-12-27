@@ -90,7 +90,7 @@ if (global.window) {
   Object.assign(window, { direction, directionVertical, splitLines, Table2DIterator, FieldIterator });
 }
 
-export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true, active = -1 }) => {
+export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true, active = -1, ...props }) => {
   var width = 200;
   var height = 200;
 
@@ -159,7 +159,7 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true, act
         y: ystart + y
       });
       table[y][x].pos = pt; //new Point(Math.sin(pt.x)*xdist, - Math.cos(pt.y));*/
-      table[y][x].color = new HSLA((i++ * 360) / n_items, 85, 70, 1);
+      table[y][x].color = new HSLA((i++ * 360) / n_items, table[y][x].id == active ? 100 : 85, table[y][x].id == active ? 60 : 70, 1);
       table[y][x].title = splitLines(table[y][x].title, max_chars);
     }
     // xdist *= xdist_mul;
@@ -254,13 +254,13 @@ if(height  < minHeight)
   //console.log("Tree table ", table);
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} {...props}>
       <defs>
-          <filter id="shadow">
-      <feDropShadow dx="1" dy="1" stdDeviation="2"/>
-    </filter>
- </defs>
-      <g transform={`translate(${offs_x * scale_x}, ${offs_y * scale_y})`}>
+        <filter id="shadow">
+          <feDropShadow dx="1" dy="1" stdDeviation="2" />
+        </filter>
+      </defs>
+      <g id={"tree"} transform={`translate(${offs_x * scale_x}, ${offs_y * scale_y})`}>
         {[...Table2DIterator(table)].map(item => {
           if(!item.parentIndex) return undefined;
           const [py, px] = item.parentIndex;
@@ -302,7 +302,7 @@ if(height  < minHeight)
                 strokeDasharray={item.id == active ? "4" : ""}
                 fill={item.color}
                 strokeWidth={item.id == active ? W * 3 : W}
-                style={{ filter: 'url(#shadow)' }}
+                style={{ filter: "url(#shadow)" }}
               />
               <SVGText lines={item.title} x={0} y={0} />
             </g>
