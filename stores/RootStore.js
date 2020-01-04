@@ -1,6 +1,6 @@
 import React from "react";
 import { action, autorun, observable, flow, set, get, values, toJS, computed } from "mobx";
-import getAPI from "../utils/api.js";
+import getAPI from "../stores/api.js";
 import { Element, Timer } from "../utils/dom.js";
 import axios from "../utils/axios.js";
 import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoStore.js";
