@@ -35,7 +35,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     //if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
 
     const { where, ...options } = opts;
-    console.log("api.list ", { where, options });
+    console.log("api.list ", { name, where, options });
     let objStr;
 
     objStr = where

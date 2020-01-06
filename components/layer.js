@@ -10,7 +10,22 @@ if ("window" in global) {
   window.layers = [];
 }
 
-export function Layer({ style, inline, flex, children, border, margin, padding, background, overflow = "visible", opacity, x, y, w, h }) {
+export function Layer({
+  style,
+  inline,
+  flex,
+  children,
+  border,
+  margin,
+  padding,
+  background,
+  overflow = "visible",
+  opacity,
+  x,
+  y,
+  w,
+  h
+}) {
   var rect = w && h ? new Rect({ x: 0, y: 0, width: w, height: h }) : new Rect();
   var refContainer = useRef(null);
   var handler = trkl();

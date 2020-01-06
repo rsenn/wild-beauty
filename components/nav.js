@@ -52,8 +52,19 @@ Modal.setAppElement("#__next");
 
 const NavLink = inject("rootStore")(
   observer(({ href, label, description, path, key, disabled, onClick, active, ...props }) => (
-    <li className={classNames(/*path == href ||*/ active ? "menu-active" : "menu-inactive", "menu-item", disabled && "menu-disabled")} key={key}>
-      <a href={href} className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")} onClick={onClick}>
+    <li
+      className={classNames(
+        /*path == href ||*/ active ? "menu-active" : "menu-inactive",
+        "menu-item",
+        disabled && "menu-disabled"
+      )}
+      key={key}
+    >
+      <a
+        href={href}
+        className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")}
+        onClick={onClick}
+      >
         {typeof label == "function" ? label(props) : label}
         <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
       </a>
@@ -83,8 +94,8 @@ const NavLink = inject("rootStore")(
 
           display: flex;
           flex-flow: column nowrap;
-          transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-width 1s cubic-bezier(0.165, 0.84, 0.44, 1), height 1s cubic-bezier(0.165, 0.84, 0.44, 1),
-            max-height 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+          transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-width 1s cubic-bezier(0.165, 0.84, 0.44, 1),
+            height 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-height 1s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
         li.menu-item:hover,
         li.menu-active {
@@ -147,10 +158,18 @@ const randomColor = () => new HSLA(Util.randInt(0, 359), Util.randInt(50, 99), U
 const randomGradient = () => {
   let hue = 0 - Math.abs(prng.double()) * 200;
   if(hue < 0) hue += 360;
-  let baseColor = new HSLA(Math.floor(hue), Math.floor(prng.double() * 50 + 50), Math.floor(prng.double() * 25 + 60), 0.8);
+  let baseColor = new HSLA(
+    Math.floor(hue),
+    Math.floor(prng.double() * 50 + 50),
+    Math.floor(prng.double() * 25 + 60),
+    0.8
+  );
 
   //console.log("baseColor ", baseColor.toString());
-  let colors = [new HSLA(baseColor.h, baseColor.s, baseColor.l, baseColor.a), new HSLA(baseColor.h, baseColor.s, baseColor.l, baseColor.a)];
+  let colors = [
+    new HSLA(baseColor.h, baseColor.s, baseColor.l, baseColor.a),
+    new HSLA(baseColor.h, baseColor.s, baseColor.l, baseColor.a)
+  ];
   colors[0].l = colors[0].l / 2;
   colors[1].l = 100 - (100 - colors[1].l) / 2;
   /*  console.log(
@@ -181,7 +200,9 @@ const Nav = inject(
 
       const [color, setColor] = React.useState(randomGradient());
       const angle = ((color[0].h + color[0].s + color[0].l) % 360) - 180;
-      customStyles.overlay.background = `linear-gradient(${Math.floor(angle)}deg, ${color[0].toString()} 0%, ${color[1].toString()} 100%)`;
+      customStyles.overlay.background = `linear-gradient(${Math.floor(
+        angle
+      )}deg, ${color[0].toString()} 0%, ${color[1].toString()} 100%)`;
 
       const language = i18nStore.user.lang;
       const authenticated = loginIsOpen ? false : rootStore.authenticated; //      console.log("i18nStore: ", i18nStore);
@@ -240,24 +261,45 @@ const Nav = inject(
               }}
             />
           </Modal>
-          <Modal isOpen={languageIsOpen} onAfterOpen={() => {}} onRequestClose={() => setLanguageOpen(false)} style={customStyles} contentLabel="Language Modal" closeTimeoutMS={1000}>
+          <Modal
+            isOpen={languageIsOpen}
+            onAfterOpen={() => {}}
+            onRequestClose={() => setLanguageOpen(false)}
+            style={customStyles}
+            contentLabel="Language Modal"
+            closeTimeoutMS={1000}
+          >
             <div className={"flagbox"}>
               <div className={"flaglist"}>
                 <div onClick={() => setLanguage(i18nStore, "de", setLanguageOpen)}>
-                  <img src={"/static/img/flag-de.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
+                  <img
+                    src={"/static/img/flag-de.svg"}
+                    className={"country-flag"}
+                    style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }}
+                  />
                 </div>
                 <div onClick={() => setLanguage(i18nStore, "fr", setLanguageOpen)}>
-                  <img src={"/static/img/flag-fr.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
+                  <img
+                    src={"/static/img/flag-fr.svg"}
+                    className={"country-flag"}
+                    style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }}
+                  />
                 </div>
                 <div onClick={() => setLanguage(i18nStore, "en", setLanguageOpen)}>
-                  <img src={"/static/img/flag-gb.svg"} className={"country-flag"} style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }} />
+                  <img
+                    src={"/static/img/flag-gb.svg"}
+                    className={"country-flag"}
+                    style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }}
+                  />
                 </div>
               </div>
             </div>
           </Modal>{" "}
           <ul className={"menu"}>
             {SiteMap.map(link => {
-              link.key = `nav-link-${typeof link.href == "string" ? link.href : ""}-${typeof link.name == "string" ? link.name : ""}`;
+              link.key = `nav-link-${typeof link.href == "string" ? link.href : ""}-${
+                typeof link.name == "string" ? link.name : ""
+              }`;
               return link;
             }).map(item => {
               //     console.log("item.name: ", item.name);
@@ -375,13 +417,15 @@ const Nav = inject(
             }
             .ReactModal__Overlay {
               transition: transform 1000ms linear;
-              transform: perspective(1000px) translate3d(50vw, -50vh, 50px) rotateX(-45deg) rotateY(-45deg) rotateZ(90deg) scale3d(0.02, 0.02, 1);
+              transform: perspective(1000px) translate3d(50vw, -50vh, 50px) rotateX(-45deg) rotateY(-45deg)
+                rotateZ(90deg) scale3d(0.02, 0.02, 1);
             }
             .ReactModal__Overlay--after-open {
               transform: perspective(1000px) translate3d(0, 0, 50px) rotate3d(0, 0, 1, 0deg) scale3d(1, 1, 1);
             }
             .ReactModal__Overlay--before-close {
-              transform: perspective(1000px) translate3d(-50vw, 50vh, 50px) rotateX(45deg) rotateY(45deg) rotateZ(-90deg) scale3d(0.02, 0.02, 1);
+              transform: perspective(1000px) translate3d(-50vw, 50vh, 50px) rotateX(45deg) rotateY(45deg)
+                rotateZ(-90deg) scale3d(0.02, 0.02, 1);
             }
           `}</style>
         </div>

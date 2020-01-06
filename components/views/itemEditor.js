@@ -15,7 +15,8 @@ import "react-sortable-tree/style.css"; // once app
 
 export const ItemEditor = inject("rootStore")(
   observer(({ rootStore, tree, makeTreeSelEvent }) => {
-    console.log("Tree data: ", tree);
+    const { currentImage } = rootStore;
+    console.log("ItemEditor.render ", { tree, currentImage });
 
     return (
       <div className={"content-edit"}>

@@ -16,6 +16,7 @@ import { getOrCreateStore } from "../stores/createStore.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
+import { WithQueryParam, IfQueryParam } from "../components/withQueryParam.js";
 import { trkl } from "../utils/trkl.js";
 
 import "../static/css/react-upload-gallery.css";

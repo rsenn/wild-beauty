@@ -294,16 +294,16 @@ export class RootStore {
   }
 
   async fetchImages(where = {}) {
-    // console.log("fetchImages ", { where });
-    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], where);
-    //  console.log("fetchImages =", response);
+    console.log("⇒ images ", { where });
+    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], { where });
+    console.log("⇐ images =", response);
     return response;
   }
 
   async fetchItems(where = {}) {
-    //console.log("RootStore.fetchItems:", where);
+    console.log("⇒ items:", where);
     let response = await this.api.list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"]);
-    //console.log("fetchItems =", response);
+    console.log("⇐ items =", response);
     return response;
   }
 
@@ -314,18 +314,19 @@ export class RootStore {
    * @return     {Promise}  The items.
    */
   async loadItems(where = {}) {
-    let response = await this.apiRequest("/api/item/tree", { where });
-    let data = response ? await response.data : null;
-    if(await data) {
-      const items = await data.items;
+    let response = await this.apiRequest("/api/item/tree", Util.isEmpty(where) ? {} : { where });
+    let items, data = response ? await response.data : null;
+    if(await data)
+      items = await data.items;
+    if(!items) return 0;
+
       //console.log("RootStore.loadItems", data);
       for(let key in items) {
         const id = parseInt(items[key].id || key);
         this.items.delete(id);
         this.items.set(id, items[key]);
       }
-    }
-    return await data;
+    return items.length;
   }
 
   /**
@@ -404,12 +405,13 @@ export class RootStore {
    */
   async apiRequest(endpoint, data) {
     let res;
-    //console.log("RootStore.apiRequest " + endpoint, data);
+    console.log("RootStore.apiRequest", { endpoint, data });
     if(!data) res = await axios.get(endpoint);
     else res = await axios.post(endpoint, data);
 
-    if((await res.status) != 200 || !(await res.data) || !(await res.data.success)) {
-      //console.log("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
+    if(res && ((await res.status) != 200 || !(await res.data) || !(await res.data.success))) {
+      console.log("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
+      throw new Error(`apiRequest status=${res.status} data=${res.data}`);
     }
 
     return res;
