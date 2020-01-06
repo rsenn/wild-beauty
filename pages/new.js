@@ -76,17 +76,23 @@ class New extends React.Component {
    * @param      {<type>}   ctx     The context
    * @return     {Promise}  The initial properties.
    */
-  static async getInitialProps(ctx) {
-    const { RootStore } = ctx.mobxStore;
+  static async getInitialProps({ res, req, err, mobxStore, ...ctx }) {
+    const { RootStore } = mobxStore;
     let images = await RootStore.fetchImages(/*{ where: { user_id:   }}*/);
 
     images = images.filter(ph => ph.items.length == 0);
     images.forEach(item => RootStore.newImage(item));
 
-    console.log("images:", images);
+const { url,  query,  body, route } = req || {};
+/*
+    const ctxKeys = Object.keys(ctx);
+    const reqKeys = Object.keys(req);
+*/
+//    console.log("New.getInitialProps", { ctx,  url,  query, body });
+    console.log("New.getInitialProps", { images });
 
-    if(ctx && ctx.req && ctx.req.cookies) {
-      const { token, user_id } = ctx.req.cookies;
+    if(ctx && req && req.cookies) {
+      const { token, user_id } = req.cookies;
       //set(RootStore.auth, { token, user_id });
       RootStore.auth.token = token;
       RootStore.auth.user_id = user_id;
@@ -248,9 +254,11 @@ class New extends React.Component {
     const { rootStore, router } = this.props;
     //this.checkQuery();
     rootStore.loadItems().then(response => {
-      console.log("Items: ", response.items);
-      this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
-      console.log("this.tree", toJS(this.tree));
+      if(response) {
+        console.log("Items: ", response.items);
+        this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
+        console.log("this.tree", toJS(this.tree));
+      }
     });
   }
 
@@ -280,13 +288,16 @@ class New extends React.Component {
    */
   @action.bound
   chooseImage(event) {
-    const { rootStore } = this.props;
+    const { rootStore, router } = this.props;
     const { target, currentTarget } = event;
     let id = parseInt(target.getAttribute("id").replace(/.*-/g, ""));
     console.log("New.chooseImage ", { id, target, currentTarget });
 
-    rootStore.state.step = 2;
     rootStore.state.image = id;
+    rootStore.state.step = 2;
+  //  router.push('/new', { query: { act: 'edit', img: id }});
+    
+  //  router.push('/new', `/new?act=edit&img=${id}`, { /*query: { act: 'edit', img: id }, */shallow: true });
   }
 
   /*  @action.bound
@@ -306,7 +317,9 @@ class New extends React.Component {
       console.log("onChange: ", value);
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
+    
     console.log("New.render", this.tree);
+
     return (
       <div className={"page-layout"}>
         <Head>
@@ -318,7 +331,14 @@ class New extends React.Component {
         </Nav>
         <div className={"content-layout"}>
           <NeedAuth>
-            {rootStore.state.step == 1 ? <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
+           {rootStore.state.image === null ? <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
+{/*
+          <IfQueryParam act={false}>
+          <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
+          </IfQueryParam>
+          <IfQueryParam act={'edit'} img={true}>
+          <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
+          </IfQueryParam>*/}
             {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
               Layer
             </Layer>*/}

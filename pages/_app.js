@@ -47,7 +47,7 @@ class MyApp extends App {
       window.stores = this.mobxStore;
       window.site = Util.find(SiteMap, pageName, "name");
     }
-    console.log("App.constructor", pageName, props.pageProps);
+    console.log("App.constructor", pageName/*, props.pageProps*/);
   }
 
   componentDidMount(props) {
