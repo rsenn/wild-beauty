@@ -536,8 +536,11 @@ if (!dev && cluster.isMaster) {
       })
     );
 
-    server.get("/show/category/:category", (req, res) => {
-      return nextApp.render(req, res, "/show", { category: req.params.category });
+    server.get("/show/:item", (req, res) => {
+      return nextApp.render(req, res, "/show", { item: req.params.item });
+    });
+    server.get("/browse/:category", (req, res) => {
+      return nextApp.render(req, res, "/browse", { category: req.params.category });
     });
 
     //    server.get("/show/:id", (req, res) => {
