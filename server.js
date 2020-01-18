@@ -308,37 +308,15 @@ if (!dev && cluster.isMaster) {
     );
 
     server.post("/api/item", async function(req, res) {
-      let { fields, ...params } = req.body;
+      let { fields, update, ...params } = req.body;
       if(!fields)
-        fields = [
-          "id",
-          "type",
-          "name",
-          "parent { id }",
-          "children { id }",
-          "data",
-          "photos { photo { id } }",
-          "users { user { id } }"
-        ];
-      console.log("/api/item: ", params);
-      let result = await API.select("items", params, fields);
-
-      console.log("/api/item= ", result);
-      var itemList = [];
-
-      if(itemList.map)
-        itemList = itemList.map(item => {
-          let newData;
-
-          try {
-            newData = item && item.data ? JSON.parse(item.data) : {};
-          } catch(err) {
-            newData = item.data;
-          }
-          return { ...item, data: newData };
-        });
-      //console.log("itemList: ", itemList);
-      res.json({ success: true, count: itemList.length, items: itemList });
+        fields = ["id", "type", "name", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
+      console.log("/api/item: ", { params, fields, update });
+      let result = update ? await API.update("items", params, update) : await API.select("items", params, fields);
+      let itemList = result.items;
+      let item = itemList[0];
+      console.log("/api/item <= ", item);
+      res.json({ success: true, item });
     });
 
     server.post("/api/item/tree", async function(req, res) {
@@ -354,11 +332,10 @@ if (!dev && cluster.isMaster) {
           "photos { photo { id } }",
           "users { user { id } }"
         ];
-      console.log("params: ", params);
+      //console.log("params: ", params);
       let itemList = await API.list("items", fields, params);
       itemList = itemList.map(item => {
         let newData;
-
         try {
           newData = item && item.data ? JSON.parse(item.data) : {};
         } catch(err) {

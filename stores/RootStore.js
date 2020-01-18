@@ -325,9 +325,17 @@ export class RootStore {
   }
 
   async updateItem(id, props) {
-    let response = await this.api.update("items", { id }, { props });
+    let response = await this.apiRequest("/api/item", { id }, { update: props });
 
-    console.log("U items =", response);
+let { data } = await response;
+let { success } = await data;  
+
+let item = this.getItem(data.item.id);
+
+Object.assign(item, data.item);
+
+    console.log("item updated: ", item);
+    return item;
   }
 
   /**
@@ -350,6 +358,28 @@ export class RootStore {
       this.items.set(id, items[key]);
     }
     return items.length;
+  }
+
+  async loadItem(where = {}) {
+    let response = await this.apiRequest("/api/item", where);
+    let data = response ? await response.data : null;
+    let items = await data.items;
+
+    console.log("RootStore.loadItem", await item);
+
+    let item = this.getItem(await items[0].id);
+
+    for(let prop in items[0]) {
+      item[prop] = items[0][prop];
+    }
+
+    return item;
+    /*for(let key in items) {
+      const id = parseInt(items[key].id || key);
+      this.items.delete(id);
+      this.items.set(id, items[key]);
+    }
+    return items.length;*/
   }
 
   /**
@@ -438,6 +468,8 @@ export class RootStore {
     if(res && ((await res.status) != 200 || !(await res.data) || !(await res.data.success))) {
       console.log("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
       throw new Error(`apiRequest status=${res.status} data=${res.data}`);
+    } else {
+      console.log("RootStore.apiRequest " + endpoint, res);
     }
 
     return res;
