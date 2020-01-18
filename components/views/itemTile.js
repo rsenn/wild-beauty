@@ -6,8 +6,8 @@ import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 export const ItemTile = inject("rootStore")(
   observer(({ rootStore, id, onPrev, onNext }) => {
     let { data, ...item } = rootStore.getItem(id);
-    console.log("Item ID: ", id);
-    console.log("Item: ", toJS(item));
+    //console.log("Item ID: ", id);
+    //console.log("Item: ", toJS(item));
     if(item) {
       if(!item.photos || !item.photos.length)
         item.photos = [
@@ -21,7 +21,7 @@ export const ItemTile = inject("rootStore")(
     }
     data = JSON.parse(data);
     data = { ...item, ...data };
-    console.log("ItemTile.render", data);
+    //console.log("ItemTile.render", data);
 
     // prettier-ignore
     return (
@@ -46,18 +46,14 @@ export const ItemTile = inject("rootStore")(
           <h2>{data.title||data.name}</h2>
           <p>{data.text}</p>
           </div>
-          ) : (
-          undefined
+          ) : (          undefined
           )}
-
-
           <style jsx global>{`
             .item-tile {
               display: block;
               position: relative;
               width: 100%;
               height: 100%;
-
               border: 2px dashed white;
               overflow: hidden;
             }
@@ -65,7 +61,6 @@ export const ItemTile = inject("rootStore")(
               position: absolute;
               top: 0;
               left: 0;
-
             }
             `}</style>
             </div>
