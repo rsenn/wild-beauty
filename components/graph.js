@@ -13,14 +13,22 @@ function forceSimulation(data) {
   const height = +svg.attr("height");
 
   // prettier-ignore
+
+  const simulation = d3.forceSimulation()
+  .force('link', d3.forceLink().id(function(d) { return d.id; }))
+  .force('charge', d3.forceManyBody().strength(-15).distanceMax(300))
+  .force('center', d3.forceCenter( 0,0   ))
+  .on('tick', ticked)
+  /*
   let simulation = d3
     .forceSimulation()
     .force("link", d3.forceLink().id(d => {return d.id; }) )
-    .force("charge", d3.forceManyBody().strength(d => {return -Math.pow(d.group, 3); }))
+      .force("charge", d3.forceManyBody().strength(d => {return -Math.pow(d.group, 2.5); }))
     .force("center", d3.forceCenter(0, 0))
-    .alphaTarget(0.2);
-
-  const grp = svg.append("g").attr("transform", `translate(100,100) scale(0.2,0.2)`);
+//   .force('charge', d3.forceManyBody().strength(2))
+    .alphaTarget(0.2)*/ const grp = svg
+    .append("g")
+    .attr("transform", `translate(100,100) scale(0.5,0.5)`);
 
   const link = grp
     .append("g")
@@ -29,7 +37,7 @@ function forceSimulation(data) {
     .data(data.links)
     .enter()
     .append("line")
-    .attr("stroke-width", "1")
+    .attr("stroke-width", "0.5")
     .attr("stroke", "#000")
     .attr("opacity", 0.5);
 
@@ -48,11 +56,12 @@ function forceSimulation(data) {
     .append("g")
     .attr("class", "nodes")
     .attr("stroke", "#000")
+    .attr("stroke-width", "0.3")
     .selectAll("circle")
     .data(data.nodes)
     .enter()
     .append("circle")
-    .attr("r", d => d.group * 2)
+    .attr("r", d => Math.log(d.group * 4) * 2)
     .attr("fill", getNodeColor(1));
 
   // prettier-ignore
@@ -71,6 +80,7 @@ function forceSimulation(data) {
   };
 
   simulation.nodes(data.nodes).on("tick", ticked);
+
   simulation.force("link").links(data.links);
 }
 

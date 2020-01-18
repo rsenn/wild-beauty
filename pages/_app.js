@@ -16,6 +16,7 @@ class MyApp extends App {
     const basePageProps = {
       initialMobxState: mobxStore // store that will be serialized for ssr (see constructor)
     };
+    const rootStore = basePageProps.initialMobxState["RootStore"];
     var pageProps = { ...basePageProps };
     const getInit =
       Component.getInitialProps ||
@@ -26,6 +27,14 @@ class MyApp extends App {
       let pageCtx = { ...ctx, ...basePageProps };
       // inject the basePageProps in the parameters of getInitialProps
       pageProps = await getInit(ctx);
+
+      if(pageProps.items) {
+        pageProps.items.forEach(item => {
+          console.log("rootStore.items.set ", item.id, item);
+          rootStore.items.set("" + item.id, item);
+        });
+      }
+
       //console.log(`App.getInitialProps ${componentName}.getInitialProps() profile=`, pageProps.profile );
       // return the basePageProps inside the pageProps
       pageProps = { ...basePageProps, ...pageProps };

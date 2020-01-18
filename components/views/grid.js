@@ -3,7 +3,9 @@ import React from "react";
 import Util from "../../utils/util.js";
 
 export const Grid = ({ rows, cols, style, children, className, ...props }) => (
-  <React.Fragment>    <div
+  <React.Fragment>
+    {" "}
+    <div
       className={classNames(className, "grid-view")}
       style={{
         ...style,
