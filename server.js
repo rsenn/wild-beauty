@@ -307,6 +307,40 @@ if (!dev && cluster.isMaster) {
       })
     );
 
+    server.post("/api/item", async function(req, res) {
+      let { fields, ...params } = req.body;
+      if(!fields)
+        fields = [
+          "id",
+          "type",
+          "name",
+          "parent { id }",
+          "children { id }",
+          "data",
+          "photos { photo { id } }",
+          "users { user { id } }"
+        ];
+      console.log("/api/item: ", params);
+      let result = await API.select("items", params, fields);
+
+      console.log("/api/item= ", result);
+      var itemList = [];
+
+      if(itemList.map)
+        itemList = itemList.map(item => {
+          let newData;
+
+          try {
+            newData = item && item.data ? JSON.parse(item.data) : {};
+          } catch(err) {
+            newData = item.data;
+          }
+          return { ...item, data: newData };
+        });
+      //console.log("itemList: ", itemList);
+      res.json({ success: true, count: itemList.length, items: itemList });
+    });
+
     server.post("/api/item/tree", async function(req, res) {
       let { fields, ...params } = req.body;
       if(!fields)
@@ -519,9 +553,9 @@ if (!dev && cluster.isMaster) {
       return nextApp.render(req, res, "/show", { category: req.params.category });
     });
 
-//    server.get("/show/:id", (req, res) => {
-//      return nextApp.render(req, res, "/show", { id: parseInt(req.params.id) });
-//    });
+    //    server.get("/show/:id", (req, res) => {
+    //      return nextApp.render(req, res, "/show", { id: parseInt(req.params.id) });
+    //    });
 
     // Example server-side routing
     server.post("/a", (req, res) => {

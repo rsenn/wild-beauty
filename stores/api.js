@@ -53,7 +53,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
       .join(", ");
     if(objStr.length) objStr = `(${objStr})`;
     const queryStr = `query List${camelCase} { ${name}${objStr} { ${fields} } }`;
-    console.log("query: ", queryStr, { objStr });
+    //console.log("query: ", queryStr, { objStr });
 
     let ret = await this(queryStr);
     if(typeof ret == "object" && ret[name] !== undefined) ret = ret[name];
@@ -62,10 +62,10 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
 
   api.select = function(name, obj, fields = "") {
     const camelCase = Util.ucfirst(name);
-    const objStr = "where: {" + Util.map(obj, (key, value) => `${key}: {_eq:"${value}"}`).join(", ") + "}";
+    const objStr = "where: {" + Util.map(obj, (key, value) => `${key}: {_eq: ${value}}`).join(", ") + "}";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryStr = `query Select${camelCase} { ${name}(${objStr}) { ${fields.join(" ")} } }`;
-    //console.log(queryStr);
+    console.log(`query: ${queryStr}`);
 
     return this(queryStr);
   };
@@ -75,9 +75,9 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     const objStr = "where: {" + Util.map(obj, (key, value) => `${key}: {_eq:"${value}"}`).join(", ") + "}";
     const setStr = "_set: {" + Util.map(fields, (key, value) => `${key}: "${value}"`).join(", ") + "}";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
-    const queryName = `update_${name}`;
+    const queryName = `update_${name.replace(/s*$/, "s")}`;
     const queryStr = `mutation ${queryName}{ ${queryName}(${objStr}, ${setStr}) { affected_rows } }`;
-    //console.log("query: ", queryStr);
+    console.log("query: ", queryStr);
 
     let response = await this(queryStr);
     //console.log("response: ", response[queryName]);
@@ -88,7 +88,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     const camelCase = Util.ucfirst(name);
     const objStr = "where: {" + Util.map(obj, (key, value) => `${key}: {_eq:"${value}"}`).join(", ") + "}";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
-    const queryName = `delete_${name}`;
+    const queryName = `delete_${name.replace(/s?$/, "s")}`;
     const queryStr = `mutation ${queryName}{ ${queryName}(${objStr}) { affected_rows } }`;
     //console.log("query: ", queryStr);
 

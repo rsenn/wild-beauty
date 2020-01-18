@@ -324,6 +324,12 @@ export class RootStore {
     return response;
   }
 
+  async updateItem(id, props) {
+    let response = await this.api.update("items", { id }, { props });
+
+    console.log("U items =", response);
+  }
+
   /**
    * Fetches items.
    *
