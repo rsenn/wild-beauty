@@ -90,6 +90,10 @@ export class RootStore {
     autorun(() => console.log("rootStore.auth: ", toJS(this.auth)));
     autorun(() => console.log("rootStore.auth.token: ", this.auth.token));
 
+    this.items.constructor.prototype.toObject = function() {
+      return Object.fromEntries([...this.entries()].map(([k, v]) => [k, toJS(v)]));
+    };
+
     this.enableAutoRun();
     const { auth, state } = this;
   }

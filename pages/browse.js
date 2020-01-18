@@ -3,6 +3,7 @@ import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import axios from "../utils/axios.js";
 import { Grid, GridItem } from "../components/views/grid.js";
+import { ItemTile } from "../components/views/itemTile.js";
 import Util from "../utils/util.js";
 
 @inject("rootStore")
@@ -100,7 +101,7 @@ class Browse extends React.Component {
           </GridItem>*/}
           {children.map((child, i) => (
             <GridItem row={rows} col={i + 1}>
-              {child.name ? `Name: ${child.name}` : `Id: ${child.id}`}
+              <ItemTile id={child.id} />
             </GridItem>
           ))}
         </Grid>

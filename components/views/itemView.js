@@ -56,8 +56,8 @@ export const ItemView = inject("rootStore")(
         item.photos = [
           {
             href: "/static/img/no-image.svg",
-            width: 512,
-            height: 512,
+            width: 100,
+            height: 100,
             id: -1
           }
         ];
