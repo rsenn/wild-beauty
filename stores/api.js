@@ -62,7 +62,12 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
 
   api.select = function(name, obj, fields = "") {
     const camelCase = Util.ucfirst(name);
-    const objStr = "where: { " + Object.entries(obj).map(([key, value]) => `${key}: {_eq: ${value}}`).join(", ") + "}";
+    const objStr =
+      "where: { " +
+      Object.entries(obj)
+        .map(([key, value]) => `${key}: {_eq: ${value}}`)
+        .join(", ") +
+      "}";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryStr = `query Select${camelCase} { ${name}(${objStr}) { ${fields.join(" ")} } }`;
     console.log(`query: ${queryStr}`);

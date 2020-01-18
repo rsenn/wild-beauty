@@ -310,7 +310,16 @@ if (!dev && cluster.isMaster) {
     server.post("/api/item", async function(req, res) {
       let { fields, update, ...params } = req.body;
       if(!fields)
-        fields = ["id", "type", "name", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
+        fields = [
+          "id",
+          "type",
+          "name",
+          "parent { id }",
+          "children { id }",
+          "data",
+          "photos { photo { id } }",
+          "users { user { id } }"
+        ];
       console.log("/api/item: ", { params, fields, update });
       let result = update ? await API.update("items", params, update) : await API.select("items", params, fields);
       let itemList = result.items;
