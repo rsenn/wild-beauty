@@ -348,19 +348,16 @@ export class RootStore {
     if(typeof where == "number") where = { id: where };
     let response = await this.apiRequest("/api/item", where);
     let data = response ? await response.data : null;
-    let items = (await data.items) || [];
+    let r= (await data.item) || [];
 
-    let r = (await items[0]) || null;
 
     let item = r && this.getItem(r.id);
-    console.log("RootStore.loadItem", await item);
+    console.log("RootStore.loadItem", await r);
 
-    if(item) {
-      for(let prop in item) {
-        item[prop] = r[prop];
-      }
-    }
-    return item || r;
+    this.items.delete(r.id);
+    this.items.set(r.id, r);
+
+    return r;
   }
 
   /**
