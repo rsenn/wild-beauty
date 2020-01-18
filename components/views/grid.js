@@ -33,11 +33,10 @@ export const Grid = ({ rows, cols, style, children, className, ...props }) => (
 export const GridItem = ({ col, row, style, children, className, ...props }) => (
   <div style={{ ...style, gridRow: "" + row, gridCol: "" + col }} className={classNames(className, "grid-item")}>
     {children}
-      <style jsx global>{`
-       .grid-item {
-         position: relative;
-        
-       }
+    <style jsx global>{`
+      .grid-item {
+        position: relative;
+      }
       .grid-view {
         display: grid;
         position: relative;

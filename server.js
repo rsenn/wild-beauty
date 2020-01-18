@@ -339,7 +339,7 @@ if (!dev && cluster.isMaster) {
       let { fields, update, ...params } = req.body;
       let result;
       fields = fields || itemFields;
-      console.log("/api/item: " + util.inspect(req.body), req);
+      //console.log("/api/item: " + util.inspect(req.body), req);
 
       if(update) {
         console.log("/api/item UPD: " + util.inspect(update, { depth: 1 }));

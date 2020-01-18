@@ -111,7 +111,7 @@ class Browse extends React.Component {
       console.log("query: ", q);
       let response = await Browse.API(q);
       items = response.items || [];
-      console.log("item: ", items[0]);
+      //console.log("item: ", items[0]);
     } else {
       items = await Browse.API.list("items", Browse.fields);
     }

@@ -54,25 +54,25 @@ class Browse extends React.Component {
 
     let rows = Math.max(3, depth + 1);
 
-    let children =  [...rootStore.items.keys()].filter( k => { const item = rootStore.items.get(k); 
-console.log("item: ", toJS(item));
-      if(item && (item.parent ? item.parent.id == categoryId : item.parent_id == categoryId))
-      return true;
-      return false;
-    }).map(key => rootStore.items.get(key));
-    
+    let children = [...rootStore.items.keys()]
+      .filter(k => {
+        const item = rootStore.items.get(k);
+        //console.log("item: ", toJS(item));
+        if(item && (item.parent ? item.parent.id == categoryId : item.parent_id == categoryId)) return true;
+        return false;
+      })
+      .map(key => rootStore.items.get(key));
+
     console.log("Browse.render ", { categoryId, depth, rows, children });
 
-
-//    if(typeof children != "object" || children === null || children.length === undefined) children = [];
-
+    //    if(typeof children != "object" || children === null || children.length === undefined) children = [];
 
     return (
       <div className={"grid-container"}>
         Browse
         <Grid
           className={"browse-grid"}
-          rows={`repeat(${rows}, ${100/rows}fr)`}
+          rows={`repeat(${rows}, ${100 / rows}fr)`}
           cols={`repeat(5, 20fr)`}
           style={{ gridGap: "10px" }}
         >
@@ -85,7 +85,7 @@ console.log("item: ", toJS(item));
           <GridItem row={1} col={"4"} style={{ background: "rgba(255,0,0,0.5)" }}>
             D
           </GridItem>
-       {/*   <GridItem row={1} col={"5"} style={{ background: "rgba(255,0,0,0.5)" }}>
+          {/*   <GridItem row={1} col={"5"} style={{ background: "rgba(255,0,0,0.5)" }}>
             E
           </GridItem>
           <GridItem row={2} col={"2"} style={{ background: "rgba(0,127,0,0.5)" }}>
@@ -112,7 +112,6 @@ console.log("item: ", toJS(item));
             border: 1px dashed black;
             height: 100%;
             width: 100%;
-        
           }
           .grid-container,
           .browse-grid {
