@@ -314,7 +314,8 @@ export class RootStore {
     let item;
     let result = [];
     do {
-      if(!(item = await this.findItem(id))) break;
+      item = await this.findItem(id);
+      if(!(typeof item == "object" && item.id !== undefined)) break;
       result.push(item);
       id = item.parent ? item.parent.id : item.parent_id;
     } while(id > -1);

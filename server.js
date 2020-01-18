@@ -316,6 +316,21 @@ if (!dev && cluster.isMaster) {
       "photos { photo { id } }",
       "users { user { id } }"
     ];
+    server.post("/api/tree/parents", async function(req, res) {
+      let { fields, id, ...params } = req.body;
+      fields = fields || ["parent { id }", "parent_id", "id"];
+      let result = await API(`
+        query MyQuery { items(where: {id: {_eq: ${id} }}) { parent { name id parent { name id parent { name id parent { name id parent { name id parent { name id parent { name id parent { name id parent_id } parent_id } parent_id } parent_id } parent_id } parent_id } parent_id } parent_id } parent_id } }
+`);
+      let item = result && result.items && result.items[0];
+      let list = [];
+      for(let node = item; node; node = node.parent) {
+        const { id, name, parent_id } = node;
+        if(node.id) list.push({ id, parent_id, name });
+      }
+      console.log("list: ", list);
+      res.json({ success: true, parents: [], result });
+    });
 
     server.post("/api/tree", async function(req, res) {
       let { fields, ...params } = req.body;

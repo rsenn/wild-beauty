@@ -21,9 +21,9 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     while((await res.data) !== undefined) res = await res.data;
 
     //console.log("res: ", res);
+    console.error("query: ", query);
 
     if(res.errors !== undefined) {
-      console.error("query: ", query);
       console.error("res.errors: ", res.errors);
       throw Error(res.errors[0].message);
     }

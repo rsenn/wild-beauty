@@ -30,12 +30,12 @@ class MyApp extends App {
 
       if(pageProps.items) {
         pageProps.items.forEach(item => {
-          console.log("rootStore.items.set ", item.id, item);
+          //console.log("rootStore.items.set ", item.id, item);
           rootStore.items.set("" + item.id, item);
         });
       }
 
-      console.log(`App.getInitialProps `, { pageProps });
+      //console.log(`App.getInitialProps `, { pageProps });
       // return the basePageProps inside the pageProps
       pageProps = { ...basePageProps, ...pageProps };
     } else {
@@ -56,7 +56,7 @@ class MyApp extends App {
       window.stores = this.mobxStore;
       window.site = Util.find(SiteMap, pageName, "name");
     }
-    console.log("App.constructor", pageName /*, props.pageProps*/);
+    //console.log("App.constructor", pageName /*, props.pageProps*/);
   }
 
   componentDidMount(props) {
@@ -65,21 +65,21 @@ class MyApp extends App {
     const rootStore = this.mobxStore.RootStore;
 
     Router.events.on("routeChangeStart", () => {
-      console.log("routeChangeStart ", router.query);
+      //console.log("routeChangeStart ", router.query);
       rootStore.setState({ loading: true });
     });
 
     Router.events.on("routeChangeComplete", () => {
-      console.log("routeChangeComplete ", router.query);
+      //console.log("routeChangeComplete ", router.query);
       rootStore.setState({ loading: false });
     });
 
-    console.log("App.componentDidMount ", router.query);
+    //console.log("App.componentDidMount ", router.query);
     const obj = ["step", "image", "selected"].reduce(
       (acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc),
       {}
     );
-    console.log("newState: ", obj);
+    //console.log("newState: ", obj);
 
     rootStore.setState(obj);
   }
@@ -89,7 +89,7 @@ class MyApp extends App {
 
     if(Util.isBrowser()) window.component = Component;
 
-    console.log("App.render");
+    //console.log("App.render");
     return (
       <React.Fragment>
         <Provider rootStore={this.mobxStore.RootStore} i18nStore={i18nStore} store={this.mobxStore}>

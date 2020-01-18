@@ -34,12 +34,13 @@ class Browse extends React.Component {
       `query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id } } users { user { id } } } }`
     );
     if(result.items) items = items.concat(result.items);
-    console.log("Browse.getInitialProps ", { items });
-
-    let depth = await rootStore.getDepth(categoryId);
-    let children = await rootStore.getChildren(categoryId);
+    //console.log("Browse.getInitialProps ", { items });
+    let depth, children;
+    /*
+     depth = await rootStore.getDepth(categoryId);
+     children = await rootStore.getChildren(categoryId);
     if(children) items = items.concat(children);
-
+*/
     return { items, categoryId, depth, children };
   }
 
@@ -63,7 +64,7 @@ class Browse extends React.Component {
       })
       .map(key => rootStore.items.get(key));
 
-    console.log("Browse.render ", { categoryId, depth, rows, children });
+    //console.log("Browse.render ", { categoryId, depth, rows, children });
 
     //    if(typeof children != "object" || children === null || children.length === undefined) children = [];
 
