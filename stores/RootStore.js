@@ -286,14 +286,30 @@ export class RootStore {
 
   async getSiblings(id) {
     let item = this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
-  //  console.log("item:", item);
-  
     const parentId = item.parent ? item.parent.id : item.parent_id;
-    let result = await this.loadItems(`{ parent_id: { _eq: ${parentId} } }`);  
-
+    let result = await this.loadItems(`{ parent_id: { _eq: ${parentId} } }`);
 
     return result;
   }
+
+  async getChildren(id) {
+    return await this.loadItems(`{ parent_id: { _eq: ${id} } }`);
+ }
+
+  async getParents(id) {
+    let item;
+    let result = [];
+    do {
+      item = this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
+      //  console.log("item:", item);
+      if(!item) break;
+      result.push(item);
+      id = item.parent ? item.parent.id : item.parent_id;
+    } while(id > -1);
+    result.shift();
+    return result;
+  }
+
   /*
   async fetchImages(where = {}) {
     console.log("⇒ images ", { where });

@@ -53,7 +53,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
       .join(", ");
     if(objStr.length) objStr = `(${objStr})`;
     const queryStr = `query List${camelCase} { ${name}${objStr} { ${fields} } }`;
-    
+
     console.log("query: ", queryStr);
 
     let ret = await this(queryStr);
