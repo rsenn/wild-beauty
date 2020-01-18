@@ -24,7 +24,9 @@ export const ItemEditor = inject("rootStore")(
           <div
             className={"item-entry"}
             style={{
-              width: rootStore.currentImage.landscape ? `${(rootStore.currentImage.height * 100) / rootStore.currentImage.width}%` : "100%"
+              width: rootStore.currentImage.landscape
+                ? `${(rootStore.currentImage.height * 100) / rootStore.currentImage.width}%`
+                : "100%"
             }}
           >
             <SizedAspectRatioBox className={"item-box"}>
@@ -36,7 +38,9 @@ export const ItemEditor = inject("rootStore")(
                 height={rootStore.currentImage.height}
                 orientation={rootStore.currentImage.landscape ? "landscape" : "portrait"}
                 style={{
-                  width: rootStore.currentImage.landscape ? `${(rootStore.currentImage.width * 100) / rootStore.currentImage.height}%` : "100%",
+                  width: rootStore.currentImage.landscape
+                    ? `${(rootStore.currentImage.width * 100) / rootStore.currentImage.height}%`
+                    : "100%",
                   height: rootStore.currentImage.landscape ? "100%" : "auto"
                 }}
               />

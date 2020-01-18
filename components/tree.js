@@ -118,12 +118,15 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true, act
   Util.traverseTree(tree, (item, depth, parent) => {
     if(table[depth] === undefined) table.push([]);
     if(depth > 0) item.parentIndex = [depth - 1, table[depth - 1].length - 1];
-    item.index = [depth, table[depth].length];
-    //  item.parent = parent;
-    n_items++;
-    //  if(item.children) item.children = reorder(item.children, item => numChildren(item));
-    if(treeVerify(item)) table[depth].push({ ...item, depth, parent });
-    if(max_length < item.title.length) max_length = item.title.length;
+
+    if(item !== null) {
+      item.index = [depth, table[depth].length];
+      //  item.parent = parent;
+      n_items++;
+      //  if(item.children) item.children = reorder(item.children, item => numChildren(item));
+      if(treeVerify(item)) table[depth].push({ ...item, depth, parent });
+      if(max_length < item.title.length) max_length = item.title.length;
+    }
   });
 
   for(var y = 0; y < table.length; y++) for (var x = 0; x < table[y].length; x++) table[y][x].index = [y, x];
@@ -178,6 +181,7 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true, act
     if(y >= 1) ystart += ydist;
   }
   for(let y = 2; y <= 2; y++) {
+    if(table[y] == undefined) continue;
     for(let x = 0; x < table[y].length; x++) {
       const item = table[y][x];
       const { pos } = item;

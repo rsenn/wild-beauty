@@ -309,7 +309,17 @@ if (!dev && cluster.isMaster) {
 
     server.post("/api/item/tree", async function(req, res) {
       let { fields, ...params } = req.body;
-      if(!fields) fields = ["id", "type", "name", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
+      if(!fields)
+        fields = [
+          "id",
+          "type",
+          "name",
+          "parent { id }",
+          "children { id }",
+          "data",
+          "photos { photo { id } }",
+          "users { user { id } }"
+        ];
       console.log("params: ", params);
       let itemList = await API.list("items", fields, params);
       itemList = itemList.map(item => {
@@ -329,7 +339,16 @@ if (!dev && cluster.isMaster) {
     server.post("/api/item/new", async function(req, res) {
       let { data, photo_id, parent_id, ...params } = req.body;
       console.log("params: ", params);
-      let result = await API.insert("items", { parent_id, photos: `{data: {photo_id: ${photo_id}}}`, ...params, data: `"${JSON.stringify(data).replace(/"/g, '\\"')}"` }, ["id"]);
+      let result = await API.insert(
+        "items",
+        {
+          parent_id,
+          photos: `{data: {photo_id: ${photo_id}}}`,
+          ...params,
+          data: `"${JSON.stringify(data).replace(/"/g, '\\"')}"`
+        },
+        ["id"]
+      );
       console.log("result: ", result);
       if(result && result.insert_items) result = await result.insert_items;
       if(result && result.returning) result = await result.returning;
@@ -343,7 +362,11 @@ if (!dev && cluster.isMaster) {
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
       //console.log("params: ", params);
-      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }", ...fields], params);
+      let images = await API.list(
+        "photos",
+        ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }", ...fields],
+        params
+      );
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
 
       if(images.length !== undefined) images = images.filter(im => im.items.length == 0);
@@ -363,7 +386,16 @@ if (!dev && cluster.isMaster) {
 
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
-      let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "user_id"]);
+      let response = await API.select("photos", { id }, [
+        "id",
+        "original_name",
+        "data",
+        "width",
+        "height",
+        "uploaded",
+        "filesize",
+        "user_id"
+      ]);
       const photo = response.photos[0];
 
       if(typeof photo == "object") {
@@ -379,7 +411,8 @@ if (!dev && cluster.isMaster) {
         let props = { ...(jpeg.jpegProps(data) || {}), width, height, aspect };
 
         if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
-        for(let key of ["original_name", "uploaded", "user_id"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
+        for(let key of ["original_name", "uploaded", "user_id"])
+          if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
         for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
         res.send(data);
       }
@@ -463,11 +496,19 @@ if (!dev && cluster.isMaster) {
           let data = file.data.toString("base64");
           let word = (file.data[0] << 8) + file.data[1];
           const { depth, channels } = props;
-          let reply = await API.insert("photos", { original_name: `"${file.name}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
+          let reply = await API.insert(
+            "photos",
+            { original_name: `"${file.name}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` },
+            ["id"]
+          );
           console.log("API upload photo: ", reply && reply.returning ? reply.returning : reply);
-          const { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
+          const { affected_rows, returning } =
+            typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
           console.log("API upload photo: ", word.toString(16), { affected_rows, props });
-          if(returning && returning.forEach) returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
+          if(returning && returning.forEach)
+            returning.forEach(({ original_name, filesize, width, height, id }) =>
+              response.push({ original_name, filesize, width, height, id })
+            );
         }
         //console.log("Send response: ", response);
         res.json(response);

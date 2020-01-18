@@ -83,12 +83,12 @@ class New extends React.Component {
     images = images.filter(ph => ph.items.length == 0);
     images.forEach(item => RootStore.newImage(item));
 
-const { url,  query,  body, route } = req || {};
-/*
+    const { url, query, body, route } = req || {};
+    /*
     const ctxKeys = Object.keys(ctx);
     const reqKeys = Object.keys(req);
 */
-//    console.log("New.getInitialProps", { ctx,  url,  query, body });
+    //    console.log("New.getInitialProps", { ctx,  url,  query, body });
     console.log("New.getInitialProps", { images });
 
     if(ctx && req && req.cookies) {
@@ -133,7 +133,8 @@ const { url,  query,  body, route } = req || {};
         let offset = orientation == "landscape" ? event.x : event.y;
         if(offset > 0) offset = 0;
         if(offset < -this.offsetRange) offset = -this.offsetRange;
-        if(event.type.endsWith("move")) this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
+        if(event.type.endsWith("move"))
+          this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
         let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
         console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
 
@@ -160,7 +161,11 @@ const { url,  query,  body, route } = req || {};
           const elem = event.target;
 
           //     if(event.nativeEvent) event.nativeEvent.preventDefault();
-          if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
+          if(
+            event.type.endsWith("start") &&
+            event.target.tagName.toLowerCase() == "img" &&
+            elem.classList.contains("inner-image")
+          ) {
             this.currentImage = event.target;
             let obj = Element.toObject(this.currentImage);
             const orientation = this.currentImage.getAttribute("orientation");
@@ -169,7 +174,9 @@ const { url,  query,  body, route } = req || {};
             let range = orientation == "landscape" ? rect.width - prect.width : rect.height - prect.height;
             this.offsetRange = range;
             console.log("rect: ", { orientation, range, rect, prect });
-            obj.style = `position: fixed; top: ${rect.y - window.scrollY}px; left: ${rect.x}px; width: ${rect.width}px; height: ${rect.height}px`;
+            obj.style = `position: fixed; top: ${rect.y - window.scrollY}px; left: ${rect.x}px; width: ${
+              rect.width
+            }px; height: ${rect.height}px`;
             if(this.clonedImage) Element.remove(this.clonedImage);
             this.clonedImage = Element.create(obj);
             document.body.appendChild(this.clonedImage);
@@ -245,7 +252,10 @@ const { url,  query,  body, route } = req || {};
   checkQuery() {
     const { rootStore, router } = this.props;
     console.log("router.query", router.query);
-    const obj = ["step", "image", "selected"].reduce((acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc), {});
+    const obj = ["step", "image", "selected"].reduce(
+      (acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc),
+      {}
+    );
     console.log("newState: ", obj);
     rootStore.setState(obj);
   }
@@ -295,9 +305,9 @@ const { url,  query,  body, route } = req || {};
 
     rootStore.state.image = id;
     rootStore.state.step = 2;
-  //  router.push('/new', { query: { act: 'edit', img: id }});
-    
-  //  router.push('/new', `/new?act=edit&img=${id}`, { /*query: { act: 'edit', img: id }, */shallow: true });
+    //  router.push('/new', { query: { act: 'edit', img: id }});
+
+    //  router.push('/new', `/new?act=edit&img=${id}`, { /*query: { act: 'edit', img: id }, */shallow: true });
   }
 
   /*  @action.bound
@@ -317,7 +327,7 @@ const { url,  query,  body, route } = req || {};
       console.log("onChange: ", value);
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
-    
+
     console.log("New.render", this.tree);
 
     return (
@@ -327,12 +337,17 @@ const { url,  query,  body, route } = req || {};
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav>
-          {global.window ? window.site.label(this.props) : undefined} - {global.window ? window.site.description(this.props) : undefined}
+          {global.window ? window.site.label(this.props) : undefined} -{" "}
+          {global.window ? window.site.description(this.props) : undefined}
         </Nav>
         <div className={"content-layout"}>
           <NeedAuth>
-           {rootStore.state.image === null ? <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
-{/*
+            {rootStore.state.image === null ? (
+              <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
+            ) : (
+              <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
+            )}
+            {/*
           <IfQueryParam act={false}>
           <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
           </IfQueryParam>

@@ -279,8 +279,13 @@ export class RootStore {
         let { parent_id } = item;
 
         /*     if(item.childIds && item.childIds.length) item.children = item.childIds.map(id => this.getItem(id, tr, idMap));
-        else */ if(item.children && item.children.length)
-          item.children = item.children.map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null)).filter(c => c !== null);
+        else */ if(
+          item.children &&
+          item.children.length
+        )
+          item.children = item.children
+            .map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null))
+            .filter(c => c !== null);
         else item.children = [];
         /*
         if(typeof(item.data) == 'string' && item.data.length > 0)
@@ -295,14 +300,26 @@ export class RootStore {
 
   async fetchImages(where = {}) {
     console.log("⇒ images ", { where });
-    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], { where });
+    let response = await this.api.list(
+      "photos",
+      ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"],
+      { where }
+    );
     console.log("⇐ images =", response);
     return response;
   }
 
   async fetchItems(where = {}) {
     console.log("⇒ items:", where);
-    let response = await this.api.list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"]);
+    let response = await this.api.list("items", [
+      "id",
+      "type",
+      "parent { id }",
+      "children { id }",
+      "data",
+      "photos { photo { id } }",
+      "users { user { id } }"
+    ]);
     console.log("⇐ items =", response);
     return response;
   }
@@ -315,17 +332,17 @@ export class RootStore {
    */
   async loadItems(where = {}) {
     let response = await this.apiRequest("/api/item/tree", Util.isEmpty(where) ? {} : { where });
-    let items, data = response ? await response.data : null;
-    if(await data)
-      items = await data.items;
+    let items,
+      data = response ? await response.data : null;
+    if(await data) items = await data.items;
     if(!items) return 0;
 
-      //console.log("RootStore.loadItems", data);
-      for(let key in items) {
-        const id = parseInt(items[key].id || key);
-        this.items.delete(id);
-        this.items.set(id, items[key]);
-      }
+    //console.log("RootStore.loadItems", data);
+    for(let key in items) {
+      const id = parseInt(items[key].id || key);
+      this.items.delete(id);
+      this.items.set(id, items[key]);
+    }
     return items.length;
   }
 
@@ -339,7 +356,10 @@ export class RootStore {
     const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
     const parent_id = rs.state.parent_id;
 
-    const { name = null, ...dataObj } = this.entries.reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
+    const { name = null, ...dataObj } = this.entries.reduce(
+      (acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }),
+      {}
+    );
 
     console.log("saveItem", { photo_id, parent_id, name, dataObj });
 
