@@ -236,10 +236,8 @@ export class RootStore {
     item = { ...item, id, childIds };
     //delete item.children;
     delete item.parent;
-
     if(typeof item.data == "string" && item.data.length > 0) {
       var data = {};
-
       try {
         data = JSON.parse(item.data.replace(/\n/g, "\\n"));
       } catch(err) {
@@ -247,11 +245,9 @@ export class RootStore {
       }
       item.data = data;
     }
-
     if(item.photos && item.photos.length > 0 && item.photos.map) {
       item.photos = item.photos.map(i => ({ ...i.photo, landscape: i.photo.width > i.photo.height }));
     }
-
     this.items.set("" + id, item);
     item = this.items.get("" + item.id);
     //console.log("New item: ", item);
@@ -284,8 +280,13 @@ export class RootStore {
     return item ? tr(item) : null;
   }
 
+  async findItem(id) {
+    if(typeof id == "object" && id.id !== undefined) id = id.id;
+    return this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
+  }
+
   async getSiblings(id) {
-    let item = this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
+    let item = await this.findItem(id);
     const parentId = item.parent ? item.parent.id : item.parent_id;
     let result = await this.loadItems(`{ parent_id: { _eq: ${parentId} } }`);
 
@@ -294,15 +295,13 @@ export class RootStore {
 
   async getChildren(id) {
     return await this.loadItems(`{ parent_id: { _eq: ${id} } }`);
- }
+  }
 
   async getParents(id) {
     let item;
     let result = [];
     do {
-      item = this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
-      //  console.log("item:", item);
-      if(!item) break;
+      if(!(item = await this.findItem(id))) break;
       result.push(item);
       id = item.parent ? item.parent.id : item.parent_id;
     } while(id > -1);
@@ -337,7 +336,7 @@ export class RootStore {
     return response;
   }
 */
-  async updateItem(id, props) {
+  async refreshItem(id, props) {
     let response = await this.apiRequest("/api/item", { id, update: props });
     let { data } = await response;
     let { success } = await data;
@@ -346,6 +345,16 @@ export class RootStore {
       Object.assign(item, await data.item);
       console.log("item updated: ", item);
     }
+    return item;
+  }
+
+  async updateItem(id, props) {
+    let item=null;
+    if(!this.items.has(''+id))
+      this.items.set(''+id, props);
+    item  = this.items.get(''+id);
+    for(let key in props)
+      item[key] = props[key];
     return item;
   }
 
@@ -406,54 +415,6 @@ export class RootStore {
       console.log("saveitem API response:", response);
     });
   }
-  /*
-  fetchArticles = flow(function*(page = window.location.href.replace(/.*\//g, "")) {
-    // <- note the star, this a generator function!
-    this.result = "pending";
-    let articles;
-    //   let promise = new Promise(async function(resolve, reject) {
-    try {
-      articles = yield this.api(`
-      query MyQuery {
-        pages(where: {name: {_eq: "${page}"}}) {
-          items {
-            id
-            type
-            data
-            page_id
-          }
-        }
-        }`);
-      articles = Util.findVal(articles, "items");
-
-      if(articles) this.setState({ articles });
-      // the asynchronous blocks will automatically be wrapped in actions and can modify state
-      this.result = "done";
-    } catch(error) {
-      //  reject();
-      this.result = "error";
-    }
-    return articles;
-  });
-
-  async loadArticles(page = "") {
-    if(page == "") page = "home";
-    let result = await this.api(`
-      query MyQuery {
-        pages(where: {name: {_eq: "${page}"}}) {
-          items {
-            id
-            type
-            data
-            page_id
-          }
-        }
-        }`);
-    let articles = Util.findVal(await result, "items");
-
-    return result;
-  }
-*/
 
   /**
    * Perform async API request

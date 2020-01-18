@@ -98,7 +98,6 @@ class Browse extends React.Component {
 
   static async getInitialProps(ctx) {
     console.log("Browse.getInitialProps ", [...arguments]);
- 
   }
 
   constructor(props) {
