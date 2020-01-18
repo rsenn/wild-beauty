@@ -270,29 +270,15 @@ export class RootStore {
   getItem(id, tr = it => it, idMap = null) {
     if(idMap === null) idMap = [];
     let item = this.items.get(!id ? this.rootItemId : id);
-
     if(item && idMap.indexOf(item.id) == -1) {
       idMap.push(item.id);
       if(typeof item == "object") {
-        //console.log("item", toJS(item));
-
         let { parent_id } = item;
-
-        /*     if(item.childIds && item.childIds.length) item.children = item.childIds.map(id => this.getItem(id, tr, idMap));
-        else */ if(
-          item.children &&
-          item.children.length
-        )
+        if(item.children && item.children.length)
           item.children = item.children
             .map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null))
             .filter(c => c !== null);
         else item.children = [];
-        /*
-        if(typeof(item.data) == 'string' && item.data.length > 0)
-          item.data = JSON.parse(item.data);*/
-        // item.children = item.children.map(it => this.items.get(it.id, tr, idMap))
-        /*.filter(it => it !== undefined)*/
-        //
       }
     }
     return item ? tr(item) : null;
@@ -308,7 +294,7 @@ export class RootStore {
     console.log("⇐ images =", response);
     return response;
   }*/
-
+/*
   async fetchItems(where = {}) {
     console.log("⇒ items:", where);
     let response = await this.api.list("items", [
@@ -323,14 +309,16 @@ export class RootStore {
     console.log("⇐ items =", response);
     return response;
   }
-
+*/
   async updateItem(id, props) {
     let response = await this.apiRequest("/api/item", { id, update: props });
     let { data } = await response;
     let { success } = await data;
-    let item = this.getItem(data.item.id);
-    Object.assign(item, data.item);
-    console.log("item updated: ", item);
+    let item = typeof (await data.item) == "object" ? this.getItem(data.item.id) : null;
+    if(item) {
+      Object.assign(item, await data.item);
+      console.log("item updated: ", item);
+    }
     return item;
   }
 
@@ -357,25 +345,22 @@ export class RootStore {
   }
 
   async loadItem(where = {}) {
+    if(typeof where == "number") where = { id: where };
     let response = await this.apiRequest("/api/item", where);
     let data = response ? await response.data : null;
-    let items = await data.items;
+    let items = (await data.items) || [];
 
+    let r = (await items[0]) || null;
+
+    let item = r && this.getItem(r.id);
     console.log("RootStore.loadItem", await item);
 
-    let item = this.getItem(await items[0].id);
-
-    for(let prop in items[0]) {
-      item[prop] = items[0][prop];
+    if(item) {
+      for(let prop in item) {
+        item[prop] = r[prop];
+      }
     }
-
-    return item;
-    /*for(let key in items) {
-      const id = parseInt(items[key].id || key);
-      this.items.delete(id);
-      this.items.set(id, items[key]);
-    }
-    return items.length;*/
+    return item || r;
   }
 
   /**

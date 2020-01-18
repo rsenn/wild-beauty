@@ -317,11 +317,11 @@ if (!dev && cluster.isMaster) {
       "users { user { id } }"
     ];
 
-    server.post("/api/item", async function(req, res) {
+    server.post("/api/item*", async function(req, res) {
       let { fields, update, ...params } = req.body;
       let result;
       fields = fields || itemFields;
-      console.log("/api/item: " + util.inspect(req.body));
+      console.log("/api/item: " + util.inspect(req.body) ,req);
 
       if(update) {
         console.log("/api/item UPD: " + util.inspect(update, { depth: 1 }));
