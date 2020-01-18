@@ -349,12 +349,10 @@ export class RootStore {
   }
 
   async updateItem(id, props) {
-    let item=null;
-    if(!this.items.has(''+id))
-      this.items.set(''+id, props);
-    item  = this.items.get(''+id);
-    for(let key in props)
-      item[key] = props[key];
+    let item = null;
+    if(!this.items.has("" + id)) this.items.set("" + id, props);
+    item = this.items.get("" + id);
+    for(let key in props) item[key] = props[key];
     return item;
   }
 
