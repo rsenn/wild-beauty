@@ -324,17 +324,19 @@ if (!dev && cluster.isMaster) {
       console.log("/api/item: " + util.inspect(req.body));
 
       if(update) {
+        console.log("/api/item UPD: " + util.inspect(update, { depth: 1 }));
         result = await API.update("items", params, update);
-
         console.log("/api/item <UPD " + util.inspect(result, { depth: 1 }));
         res.json({ success: true, result });
-      }
-
+//        fields = ['id','parent_id',...Object.keys(update)];
+      } else {
       result = await API.select("items", params, fields);
+
       let itemList = result.items;
       let item = itemList && itemList.length > 0 ? itemList[0] : null;
       console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
       res.json({ success: true, item });
+      }      
     });
 
     server.post("/api/item/tree", async function(req, res) {

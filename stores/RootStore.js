@@ -297,7 +297,7 @@ export class RootStore {
     }
     return item ? tr(item) : null;
   }
-
+/*
   async fetchImages(where = {}) {
     console.log("⇒ images ", { where });
     let response = await this.api.list(
@@ -307,7 +307,7 @@ export class RootStore {
     );
     console.log("⇐ images =", response);
     return response;
-  }
+  }*/
 
   async fetchItems(where = {}) {
     console.log("⇒ items:", where);
@@ -326,14 +326,10 @@ export class RootStore {
 
   async updateItem(id, props) {
     let response = await this.apiRequest("/api/item", { id, update: props });
-
     let { data } = await response;
     let { success } = await data;
-
     let item = this.getItem(data.item.id);
-
     Object.assign(item, data.item);
-
     console.log("item updated: ", item);
     return item;
   }
