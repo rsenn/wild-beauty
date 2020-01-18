@@ -325,7 +325,7 @@ export class RootStore {
   }
 
   async updateItem(id, props) {
-    let response = await this.apiRequest("/api/item", { id }, { update: props });
+    let response = await this.apiRequest("/api/item", { id, update: props });
 
     let { data } = await response;
     let { success } = await data;

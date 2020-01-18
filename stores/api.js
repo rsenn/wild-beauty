@@ -79,7 +79,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
 
   api.update = async function(name, obj, fields = {}) {
     const camelCase = Util.ucfirst(name);
-    const objStr = "where: {" + Util.map(obj, (key, value) => `${key}: {_eq:"${value}"}`).join(", ") + "}";
+    const objStr = "where: {" + Util.map(obj, (key, value) => `${key}: {_eq:${value}}`).join(", ") + "}";
     const setStr = "_set: {" + Util.map(fields, (key, value) => `${key}: "${value}"`).join(", ") + "}";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryName = `update_${name.replace(/s*$/, "s")}`;

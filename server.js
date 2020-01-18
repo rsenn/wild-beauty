@@ -306,41 +306,40 @@ if (!dev && cluster.isMaster) {
         res.json({ success: written > 0, written });
       })
     );
+    const itemFields = [
+      "id",
+      "type",
+      "name",
+      "parent { id }",
+      "children { id }",
+      "data",
+      "photos { photo { id } }",
+      "users { user { id } }"
+    ];
 
     server.post("/api/item", async function(req, res) {
       let { fields, update, ...params } = req.body;
-      if(!fields)
-        fields = [
-          "id",
-          "type",
-          "name",
-          "parent { id }",
-          "children { id }",
-          "data",
-          "photos { photo { id } }",
-          "users { user { id } }"
-        ];
-      console.log("/api/item: ", { params, fields, update });
-      let result = update ? await API.update("items", params, update) : await API.select("items", params, fields);
+      let result;
+      fields = fields || itemFields;
+      console.log("/api/item: " + util.inspect(req.body));
+
+      if(update) {
+        result = await API.update("items", params, update);
+
+        console.log("/api/item <UPD " + util.inspect(result, { depth: 1 }));
+        res.json({ success: true, result });
+      }
+
+      result = await API.select("items", params, fields);
       let itemList = result.items;
-      let item = itemList[0];
-      console.log("/api/item <= ", item);
+      let item = itemList && itemList.length > 0 ? itemList[0] : null;
+      console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
       res.json({ success: true, item });
     });
 
     server.post("/api/item/tree", async function(req, res) {
       let { fields, ...params } = req.body;
-      if(!fields)
-        fields = [
-          "id",
-          "type",
-          "name",
-          "parent { id }",
-          "children { id }",
-          "data",
-          "photos { photo { id } }",
-          "users { user { id } }"
-        ];
+      fields = fields || itemFields;
       //console.log("params: ", params);
       let itemList = await API.list("items", fields, params);
       itemList = itemList.map(item => {
