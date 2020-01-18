@@ -205,14 +205,14 @@ const Nav = inject(
       )}deg, ${color[0].toString()} 0%, ${color[1].toString()} 100%)`;
 
       const language = i18nStore.user.lang;
-      const authenticated = loginIsOpen ? false : rootStore.authenticated; //      console.log("i18nStore: ", i18nStore);
+      const authenticated = loginIsOpen ? false : rootStore.authenticated; //console.log("i18nStore: ", i18nStore);
 
       if(global.window) {
         window.SiteMap = SiteMap;
       }
 
       let entry = Util.find(SiteMap, "lang", "name");
-      //     console.log("SiteMap: ", SiteMap);
+      //console.log("SiteMap: ", SiteMap);
       entry.active = languageIsOpen;
 
       entry = Util.find(SiteMap, "login", "name");
@@ -302,7 +302,7 @@ const Nav = inject(
               }`;
               return link;
             }).map(item => {
-              //     console.log("item.name: ", item.name);
+              //console.log("item.name: ", item.name);
               if(item.name == "login") {
                 if(authenticated) item.label = <span>Logout</span>;
               }

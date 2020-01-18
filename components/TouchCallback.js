@@ -40,7 +40,7 @@ export const makeTouchCallback = (className = "layer", action = null) => {
 
     //    if(depth <= 5) return  typeof cancel == "function" ? cancel() : null;
 
-    //    console.log("TouchCallback event: ", { depth, event, cancel });
+    //console.log("TouchCallback event: ", { depth, event, cancel });
 
     const hasLayerClass = containsClass(className)(e);
     if(hasLayerClass) {
@@ -59,7 +59,7 @@ export const makeTouchCallback = (className = "layer", action = null) => {
 
     if(hasLayerClass) action(event, e);
 
-    // console.log(event.type + " event: ", { event, e });
+    //console.log(event.type + " event: ", { event, e });
   };
 };
 

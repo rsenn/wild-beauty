@@ -55,7 +55,7 @@ export function Layer({
   /*  box.subscribe(rect => {
   });
 */ handler.subscribe(e => {
-    // console.log('Element: ', e);
+    //console.log('Element: ', e);
     do {
       box(Element.rect(e));
     } while(0); //(e = e.parentNode));

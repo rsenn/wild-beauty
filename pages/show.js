@@ -116,7 +116,7 @@ class Browse extends React.Component {
       items = await Browse.API.list("items", Browse.fields);
     }
     //await RootStore.fetchItems();
-    // console.log("Browse.getInitialProps  items:", items);
+    //console.log("Browse.getInitialProps  items:", items);
     items = items.sort((a, b) => a.id - b.id);
     RootStore.items.clear();
     //  items.forEach(item => RootStore.newItem(item));
@@ -489,14 +489,14 @@ class Browse extends React.Component {
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
                 {items.map(item => {
-                  // console.log("item: ", item);
+                  //console.log("item: ", item);
                   const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                   const haveImage = photo_id >= 0;
                   let photo = haveImage ? item.photos[0].photo : null;
                   const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
-                  //    console.log("photo: ", photo);
+                  //console.log("photo: ", photo);
                   let { data, name, parent, type, children, users } = item;
                   try {
                     data = item.data && item.data.length && JSON.parse(item.data);
@@ -504,7 +504,7 @@ class Browse extends React.Component {
                     data = item.data;
                   }
                   if(typeof data != "object" || data === null) data = {};
-                  //        console.log("data: ", data);
+                  //console.log("data: ", data);
                   return (
                     <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                       <SizedAspectRatioBox

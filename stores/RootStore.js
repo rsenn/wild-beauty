@@ -224,7 +224,7 @@ export class RootStore {
     var root = null;
     if(this.items && this.items.entries)
       for(let [id, item] of this.items.entries()) {
-        // console.log("item: ", toJS( item));
+        //console.log("item: ", toJS( item));
         if(item && item.type == "root") root = item;
       }
     return root;
@@ -325,6 +325,20 @@ export class RootStore {
     } while(id > -1);
     result.shift();
     return result;
+  }
+
+  getHierarchy(item) {
+    item =  item || this.rootItem;
+    if(item) {
+      let { name, id } = item;
+      if(!name) name = `Id[${id}]`;
+      let children = item.children && item.children.map ?  item.children.map(child => this.getHierarchy(child)) : [];
+      let ret = { name };
+      if(children && children.length > 0)
+        ret.children = children;
+      return ret;
+    }
+    return null;  
   }
 
   /*

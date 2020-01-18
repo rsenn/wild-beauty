@@ -88,7 +88,7 @@ class New extends React.Component {
     const ctxKeys = Object.keys(ctx);
     const reqKeys = Object.keys(req);
 */
-    //    console.log("New.getInitialProps", { ctx,  url,  query, body });
+    //console.log("New.getInitialProps", { ctx,  url,  query, body });
     console.log("New.getInitialProps", { images });
 
     if(ctx && req && req.cookies) {
@@ -109,7 +109,7 @@ class New extends React.Component {
   constructor(props) {
     let args = [...arguments];
     const { rootStore } = props;
-    //    console.log("constructor args: ", props.initialMobxState.RootStore.images);
+    //console.log("constructor args: ", props.initialMobxState.RootStore.images);
     super(props);
 
     if(global.window) {
@@ -129,7 +129,7 @@ class New extends React.Component {
     if(global.window) {
       const moveImage = (event, e) => {
         const orientation = e.getAttribute("orientation");
-        //   console.log("img ", { orientation });
+        //console.log("img ", { orientation });
         let offset = orientation == "landscape" ? event.x : event.y;
         if(offset > 0) offset = 0;
         if(offset < -this.offsetRange) offset = -this.offsetRange;
@@ -192,7 +192,7 @@ class New extends React.Component {
               let zIndex = parseInt(Element.getCSS(this.currentImage, "z-index")) - 1;
               let irect = Element.rect(this.currentImage);
 
-              //   console.log("irect: ", { irect });
+              //console.log("irect: ", { irect });
               //  if(irect.x >= 1 && irect.y >= 1) Element.move(this.clonedImage, irect);
               //
 

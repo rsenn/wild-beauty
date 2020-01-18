@@ -132,7 +132,7 @@ if (!dev && cluster.isMaster) {
       const user_id = getVar(req, "user_id");
       console.log("Cookie: ", { token, user_id });*/
       const { query, params, url } = req;
-      //    console.log("Request: ", { query, url/*, parsedUrl, params*/ });
+      //console.log("Request: ", { query, url/*, parsedUrl, params*/ });
       return next();
     });
 
@@ -343,11 +343,11 @@ if (!dev && cluster.isMaster) {
         `query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize data } }`
       );
 
-      //      console.log(`/api/image/get/${id}`, Util.filterKeys(response, k => k!="data"));
+      //console.log(`/api/image/get/${id}`, Util.filterKeys(response, k => k!="data"));
 
       const photo = response.photos[0];
       if(typeof photo == "object") {
-        // console.log(`Image get id: `, id, "photo.data:", typeof photo.data);
+        //console.log(`Image get id: `, id, "photo.data:", typeof photo.data);
         if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
         let data = Buffer.from(photo.data, "base64");
         delete photo.data;

@@ -48,7 +48,7 @@ function reorder(arg, by = item => (item.children ? item.children.length : 0)) {
     else ret.unshift(arr[i]);
   }
 
-  //  console.log(arr);
+  //console.log(arr);
   return ret;
 }
 

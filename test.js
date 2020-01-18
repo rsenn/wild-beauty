@@ -31,7 +31,7 @@ console.log(fileBuffer.length);*/
 ////res.then(res => {
 ////  const items = res.data && res.data.insert_items ? res.data.insert_items.returning : [];
 ////  for(let item of items) {
-////    console.log("Inserted item: ", item);
+////console.log("Inserted item: ", item);
 ////  }
 ////
 ////  //console.log("res: ", res.data);
@@ -40,13 +40,13 @@ console.log(fileBuffer.length);*/
 //res.then(res => {
 //  const items = res.data && res.data.insert_photos ? res.data.insert_photos.returning : [];
 //  for(let item of items) {
-//    console.log("Inserted photo: ", item);
+//console.log("Inserted photo: ", item);
 //  }
-//  console.log("res: ", res.insert_photos.returning);
+//console.log("res: ", res.insert_photos.returning);
 //});
 //res = api.list("photos", "width height data filesize");
 //res.then(res => {
-//  console.log("res: ", prettyoutput(res));
+//console.log("res: ", prettyoutput(res));
 //  process.exit(0);
 //});*/
 //
@@ -98,7 +98,7 @@ console.log(fileBuffer.length);*/
 //      return null;
 //    }
 //  }
-//  console.log("image: ", buf.toString("hex").substring(0, 20));
+//console.log("image: ", buf.toString("hex").substring(0, 20));
 //  if(jpeg.isJpeg(buf)) {
 //    const arr = Uint8Array.from(buf);
 //    return { ...item, ...jpeg.jpegProps(arr) };
@@ -129,7 +129,7 @@ console.log(fileBuffer.length);*/
 //  const items = findObjects(res, "photo").map(item => convertImage(item));
 //  if(items)
 //    for(let item of items) {
-//      console.log("Item: ", item);
+//console.log("Item: ", item);
 //    }
 //  // items.forEach(console.log);
 //});
@@ -142,10 +142,10 @@ console.log(fileBuffer.length);*/
 //res = api.select("users", { username: "roman" }, ["id", "username", "password"]);
 //res.then(res => {
 //  const user = res.users[0];
-//  console.log("res: ", Util.inspect(user));
+//console.log("res: ", Util.inspect(user));
 //
 //  let result = bcrypt.compareSync(pass, user.password);
-//  console.log("result: ", result);
+//console.log("result: ", result);
 //  // items.forEach(console.log);
 //});
 //

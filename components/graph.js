@@ -254,9 +254,10 @@ export class Graph extends Component {
     console.log("Graph.componentDidMount svgRef", this.svgRef);
     elem = Element.find("#d3-graph-svg");
     if(!elem) return;
-    const { data } = this.props;
-    console.log("data: ", data);
-    collapsibleForceLayout();
+    let { data } = this.props;
+
+    console.log("Graph.componentDidMount data=", data);
+    collapsibleForceLayout(data);
 //     forceSimulation(data);
   }
 
