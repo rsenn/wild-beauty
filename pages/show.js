@@ -37,11 +37,11 @@ const maxZIndex = () => {
 };
 
 const findInTree = (tree, value) => {
-  if (tree.value === value || tree.label === value) return tree;
-  if (tree.children) {
-    for (let child of tree.children) {
+  if(tree.value === value || tree.label === value) return tree;
+  if(tree.children) {
+    for(let child of tree.children) {
       let ret = findInTree(child, value);
-      if (ret !== null) return ret;
+      if(ret !== null) return ret;
     }
   }
   return null;
@@ -66,9 +66,9 @@ const makeItemToOption = selected => item => {
     expanded: true,
     checked: selected === value
   };
-  if (children && children.length) obj.children = children;
-  if (label.startsWith("null(")) return null;
-  if (!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
+  if(children && children.length) obj.children = children;
+  if(label.startsWith("null(")) return null;
+  if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
   //if(item.parent_id != -1 && item.parent_id != 1 && item.type !== null && !item.type.endsWith('category')) return null;
   return obj;
 };
@@ -103,10 +103,10 @@ class Show extends React.Component {
     //console.log("RootStore.fetchItems");
     let items;
 
-    if (params && params.id !== undefined) {
+    if(params && params.id !== undefined) {
       let id = parseInt(params.id);
       const name = params.id;
-      if (isNaN(id) || typeof id != "number") id = -1;
+      if(isNaN(id) || typeof id != "number") id = -1;
       const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
       console.log("query: ", q);
       let response = await Show.API(q);
@@ -131,7 +131,7 @@ class Show extends React.Component {
         : "/v1/graphql"
     );
     const { rootStore } = this.props;
-    if (global.window) {
+    if(global.window) {
       window.api = this.api;
       window.page = this;
       window.rs = rootStore;
@@ -150,10 +150,10 @@ class Show extends React.Component {
     //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
 
-    if (this.props.params && this.props.params.id !== undefined) {
+    if(this.props.params && this.props.params.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
-    } else if (this.tree) {
+    } else if(this.tree) {
       var item = findInTree(this.tree, "Objects");
       item.checked = true;
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
@@ -177,9 +177,9 @@ class Show extends React.Component {
   }
 
   checkTagRemove() {
-    if (global.window) {
+    if(global.window) {
       let tagRemove = Element.find("button.tag-remove");
-      if (tagRemove) {
+      if(tagRemove) {
         tagRemove.addEventListener("click", e => {
           e.preventDefault();
           Timer.once(100, () => {
@@ -211,7 +211,7 @@ class Show extends React.Component {
   mouseEvent = event => {
     const { target, nativeEvent } = event;
     const { type, clientX, clientY, pageX: x, pageY: y } = nativeEvent;
-    if (!this.rects) {
+    if(!this.rects) {
       this.rects = Element.findAll("rect");
     }
     var r = this.rects.filter(rect => Rect.inside(Element.rect(rect), { x, y }));
@@ -221,15 +221,15 @@ class Show extends React.Component {
     function getId(elem) {
       return parseInt(elem.getAttribute("id").replace(/.*\./, ""));
     }
-    if (type.endsWith("move")) {
+    if(type.endsWith("move")) {
       var elem = r[0] && r[0].parentElement;
       var hover = -1;
-      if (this.prevElem && this.prevElem.style) {
-        if (this.prevElem == elem) return;
+      if(this.prevElem && this.prevElem.style) {
+        if(this.prevElem == elem) return;
         this.prevElem.style.removeProperty("transform");
         hover = -1;
       }
-      if (elem && elem.style) {
+      if(elem && elem.style) {
         const t = ` scale(1.4,1.4)`;
         console.log("Mouse event: ", t);
 
@@ -243,12 +243,12 @@ class Show extends React.Component {
         hover = getId(elem);
       }
       // this.setState({ hover });
-    } else if (type.endsWith("down")) {
+    } else if(type.endsWith("down")) {
       var elem = r[0];
 
       console.log("Mouse event: ", { type, x, y }, r);
 
-      if (elem) {
+      if(elem) {
         const id = getId(elem.parentElement);
         console.log("Clicked id:", id);
         this.setState({ active: id });
@@ -274,7 +274,7 @@ class Show extends React.Component {
           item.checked = false;
         });
         const item = findInTree(this.tree, arg.value);
-        if (item) {
+        if(item) {
           item.checked = true;
           this.state.node = item.value;
           //  this.tree = rootStore.getItem(this.state.node, makeItemToOption());
@@ -294,11 +294,11 @@ class Show extends React.Component {
     console.log("handleClick", event.buttons, nativeEvent.buttons, nativeEvent);
     let e = event.currentTarget;
 
-    if (this.element === e) {
+    if(this.element === e) {
       this.grid.style.transition = `transform ${this.speed}s ease-in-out`;
       this.grid.style.transform = "";
       this.element = null;
-      if (this.back) {
+      if(this.back) {
         this.back.parentElement.removeChild(this.back);
         this.back = null;
       }
@@ -306,12 +306,12 @@ class Show extends React.Component {
     }
 
     Element.findAll(".tile").forEach(e => {
-      if (e !== event.currentTarget)
+      if(e !== event.currentTarget)
         Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
       /*    e.style.setProperty("transition", "transform 0.2s ease-in");*/
       e.style.setProperty("transform", "none");
     });
-    while (e.parentElement && !e.classList.contains("tile")) {
+    while(e.parentElement && !e.classList.contains("tile")) {
       e = e.parentElement;
     }
     let grid = Element.find("#item-grid");
@@ -419,7 +419,7 @@ class Show extends React.Component {
     // e.style.setProperty("background-color", "white");
     e.style.setProperty("z-index", 9);
 
-    if (global.window) {
+    if(global.window) {
       window.t = e;
       window.m = m;
     }
@@ -429,7 +429,7 @@ class Show extends React.Component {
     const { rootStore } = this.props;
     let swipeEvents = {};
     var e = null;
-    if (global.window !== undefined) window.page = this;
+    if(global.window !== undefined) window.page = this;
 
     const onError = event => {};
     const onImage = event => {
@@ -438,7 +438,7 @@ class Show extends React.Component {
       //console.log("onChange: ", value);
     };
 
-    if (global.window) {
+    if(global.window) {
       window.addEventListener("resize", event => {
         const { currentTarget, target } = event;
         //console.log("Resized: ", { currentTarget, target });
@@ -495,15 +495,15 @@ class Show extends React.Component {
                   let photo = haveImage ? item.photos[0].photo : null;
                   const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
                   const opacity = photo_id >= 0 ? 1 : 0.3;
-                  if (photo !== null) photo.landscape = photo.width > photo.height;
+                  if(photo !== null) photo.landscape = photo.width > photo.height;
                   //    console.log("photo: ", photo);
                   let { data, name, parent, type, children, users } = item;
                   try {
                     data = item.data && item.data.length && JSON.parse(item.data);
-                  } catch (err) {
+                  } catch(err) {
                     data = item.data;
                   }
-                  if (typeof data != "object" || data === null) data = {};
+                  if(typeof data != "object" || data === null) data = {};
                   //        console.log("data: ", data);
                   return (
                     <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
