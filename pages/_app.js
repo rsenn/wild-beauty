@@ -35,7 +35,7 @@ class MyApp extends App {
         });
       }
 
-      //console.log(`App.getInitialProps ${componentName}.getInitialProps() profile=`, pageProps.profile );
+      console.log(`App.getInitialProps `, { pageProps });
       // return the basePageProps inside the pageProps
       pageProps = { ...basePageProps, ...pageProps };
     } else {
@@ -85,7 +85,7 @@ class MyApp extends App {
   }
 
   render() {
-    const { Component, pageProps, router } = this.props;
+    const { Component, pageProps, router, initialMobxState } = this.props;
 
     if(Util.isBrowser()) window.component = Component;
 

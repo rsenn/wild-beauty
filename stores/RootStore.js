@@ -59,8 +59,15 @@ export class RootStore {
    * @param      {<type>}  pageProps    The page properties
    */
   constructor(initialData, pageProps) {
-    console.log("RootStore.constructor ", { initialData, pageProps });
     if(initialData && initialData.RootStore) {
+      const { RootStore } = initialData;
+
+      for(let itemId in RootStore.items) {
+        this.items.delete("" + itemId);
+        this.items.set("" + itemId, RootStore.items[itemId]);
+      }
+      console.log("RootStore.constructor ", { initialData, pageProps });
+      /*if(initialData && initialData.RootStore) {
       const init = initialData.RootStore;
       for(let k in init) {
         switch (k) {
@@ -70,6 +77,7 @@ export class RootStore {
           }
         }
       }
+    }*/
     }
     if(global.window) {
       if(!window.devp) window.devp = new devpane();
@@ -285,6 +293,11 @@ export class RootStore {
     return this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
   }
 
+  async getDepth(id) {
+    let parents = await this.getParents(id);
+    return parents.length;
+  }
+
   async getSiblings(id) {
     let item = await this.findItem(id);
     const parentId = item.parent ? item.parent.id : item.parent_id;
@@ -382,7 +395,7 @@ export class RootStore {
     if(typeof where == "number") where = { id: where };
     let response = await this.apiRequest("/api/item", where);
     let data = response ? await response.data : null;
-    let r = (await data.item) || [];
+    let r = (await data) ? await data.item : [];
     console.log("RootStore.loadItem", await r);
     const id = "" + r.id;
 
