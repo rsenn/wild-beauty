@@ -28,13 +28,29 @@
 	"buffers":
 	[
 		{
-			"contents": "",
+			"contents": "function API(url = \"http://wild-beauty.herokuapp.com/v1/graphql\")\napi\n.list\n([key, value]) =>\nkey =>\n.select\n([key, value]) =>\n.update\n(key, value) =>\n(key, value) =>\n.delete\n(key, value) =>\n.insert\nkey =>\nfunction getAPI()",
 			"settings":
 			{
-				"buffer_size": 0,
+				"buffer_size": 223,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
+			}
+		},
+		{
+			"file": "components/graph.js",
+			"settings":
+			{
+				"buffer_size": 3523,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "stores/api.js",
+			"settings":
+			{
+				"buffer_size": 4703,
+				"line_ending": "Unix"
 			}
 		}
 	],
@@ -159,7 +175,9 @@
 	"expanded_folders":
 	[
 		"/home/roman/the-wild-beauty-company",
-		"/home/roman/the-wild-beauty-company/components"
+		"/home/roman/the-wild-beauty-company/components",
+		"/home/roman/the-wild-beauty-company/static",
+		"/home/roman/the-wild-beauty-company/stores"
 	],
 	"file_history":
 	[
@@ -444,7 +462,7 @@
 			"LIVE"
 		],
 		"highlight": true,
-		"in_selection": true,
+		"in_selection": false,
 		"preserve_case": false,
 		"regex": true,
 		"replace_history":
@@ -499,7 +517,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 0,
+						"buffer_size": 223,
 						"regions":
 						{
 						},
@@ -508,15 +526,164 @@
 						],
 						"settings":
 						{
-							"current_file": null,
+							"current_file": "/home/roman/the-wild-beauty-company/stores/api.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
+								[
+									129,
+									194
+								],
+								[
+									203,
+									230
+								],
+								[
+									1006,
+									1058
+								],
+								[
+									1420,
+									1437
+								],
+								[
+									1573,
+									1579
+								],
+								[
+									1924,
+									1966
+								],
+								[
+									2148,
+									2165
+								],
+								[
+									2524,
+									2572
+								],
+								[
+									2663,
+									2678
+								],
+								[
+									2771,
+									2786
+								],
+								[
+									3233,
+									3268
+								],
+								[
+									3359,
+									3374
+								],
+								[
+									3818,
+									3866
+								],
+								[
+									3974,
+									3980
+								],
+								[
+									4543,
+									4560
+								]
 							],
 							"symlist":
 							[
+								"function API(url = \"http://wild-beauty.herokuapp.com/v1/graphql\")",
+								"api",
+								".list",
+								"([key, value]) =>",
+								"key =>",
+								".select",
+								"([key, value]) =>",
+								".update",
+								"(key, value) =>",
+								"(key, value) =>",
+								".delete",
+								"(key, value) =>",
+								".insert",
+								"key =>",
+								"function getAPI()"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 1,
+					"file": "components/graph.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3523,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								509,
+								509
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "stores/api.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4703,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3911,
+								3911
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -525,11 +692,6 @@
 					"stack_index": 0,
 					"type": "text"
 				}
-			]
-		},
-		{
-			"sheets":
-			[
 			]
 		}
 	],
