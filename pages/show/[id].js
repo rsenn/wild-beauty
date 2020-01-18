@@ -1,7 +1,7 @@
 export default (req, res) => {
   const {
-    query: { pid }
+    query: { id }
   } = req;
 
-  res.end(`Post: ${pid}`);
+  res.end(`Post: ${id}`);
 };
