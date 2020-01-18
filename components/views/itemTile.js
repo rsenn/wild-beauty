@@ -3,22 +3,21 @@ import { inject, observer } from "mobx-react";
 import { toJS } from "mobx";
 import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 
-
 export const ItemTile = inject("rootStore")(
   observer(({ rootStore, id, onPrev, onNext }) => {
-    let { data, ... item } = rootStore.getItem(id);
+    let { data, ...item } = rootStore.getItem(id);
     console.log("Item ID: ", id);
     console.log("Item: ", toJS(item));
     if(item) {
       if(!item.photos || !item.photos.length)
         item.photos = [
-      {
-        href: "/static/img/no-image.svg",
-        width: 100,
-        height: 100,
-        id: -1
-      }
-      ];
+          {
+            href: "/static/img/no-image.svg",
+            width: 100,
+            height: 100,
+            id: -1
+          }
+        ];
     }
     data = JSON.parse(data);
     data = { ...item, ...data };
@@ -72,6 +71,6 @@ export const ItemTile = inject("rootStore")(
             </div>
             );
   })
-  );
+);
 
 export default ItemTile;
