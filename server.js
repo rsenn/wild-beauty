@@ -194,13 +194,9 @@ if (!dev && cluster.isMaster) {
     server.use(function(req, res, next) {
       /*   const token = getVar(req, "token");
       const user_id = getVar(req, "user_id");
-      
       console.log("Cookie: ", { token, user_id });*/
-
       const { query, params, url } = req;
-
       //    console.log("Request: ", { query, url/*, parsedUrl, params*/ });
-
       return next();
     });
 
@@ -246,24 +242,21 @@ if (!dev && cluster.isMaster) {
       let response = await API.select("users", { token }, ["id", "username", "token"]);
       const user = await response.users[0];
       console.log("getUser: response =", response);
-
       if(user) {
         if(prop) return await user[prop];
         return await user;
       }
-
       return null;
     };
+
     const needAuth = fn =>
       async function(req, res) {
         let token = getVar(req, "token");
         console.log("needAuth: ", { token });
-
         if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
           console.log("needAuth: response =", response);
-
           if(user) {
             if(token == user.token) return fn(req, res);
           }
@@ -306,16 +299,9 @@ if (!dev && cluster.isMaster) {
         res.json({ success: written > 0, written });
       })
     );
-    const itemFields = [
-      "id",
-      "type",
-      "name",
-      "parent { id }",
-      "children { id }",
-      "data",
-      "photos { photo { id } }",
-      "users { user { id } }"
-    ];
+
+    // prettier-ignore
+    const itemFields = ["id", "type", "name", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
     server.post("/api/tree/parents", async function(req, res) {
       let { fields, id, ...params } = req.body;
       fields = fields || ["parent { id }", "parent_id", "id"];
@@ -422,30 +408,17 @@ if (!dev && cluster.isMaster) {
 
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
-      let response = await API.select("photos", { id }, [
-        "id",
-        "original_name",
-        "data",
-        "width",
-        "height",
-        "uploaded",
-        "filesize",
-        "user_id"
-      ]);
+      // prettier-ignore      let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "user_id"]);
       const photo = response.photos[0];
-
       if(typeof photo == "object") {
         // console.log(`Image get id: `, id, "photo.data:", typeof photo.data);
-
         if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
         let data = Buffer.from(photo.data, "base64");
-
         delete photo.data;
         //console.log(`photo: `, photo);
         res.set("Content-Type", "image/jpeg");
         const { width, height, aspect } = photo;
         let props = { ...(jpeg.jpegProps(data) || {}), width, height, aspect };
-
         if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
         for(let key of ["original_name", "uploaded", "user_id"])
           if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
@@ -457,13 +430,10 @@ if (!dev && cluster.isMaster) {
     server.post(
       "/api/image/upload",
       needAuth(async function(req, res) {
-        /*   if(!req.files || Object.keys(req.files).length === 0) {
-        return res.status(400).send("No files were uploaded.");
-      }*/
+        /*   if(!req.files || Object.keys(req.files).length === 0)
+        return res.status(400).send("No files were uploaded.");*/
 
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
-
-        //  //console.log(`Files: `, Object.entries(req.files));
         let response = [];
         for(let item of Object.entries(req.files)) {
           const file = item[1];
@@ -471,7 +441,6 @@ if (!dev && cluster.isMaster) {
           //const data = ;
           let props = await sharp(file.data).metadata(); // jpeg.jpegProps(file.data);
           console.log(`props: `, props);
-
           let { width, height, aspect } = props || {};
           if(!aspect && width > 0 && height > 0) aspect = width / height;
           console.log(`Image width: ${width} height: ${height}`);
@@ -490,12 +459,10 @@ if (!dev && cluster.isMaster) {
             }
             return { ...restOfProps, width, height };
           };
-
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
           if(typeof props != "object" || props === null) props = {};
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
           console.log(`New Image width: ${newDimensions.width} height: ${newDimensions.height}`);
-
           if(!compareDimensions(props, newDimensions)) {
             //console.log(`new Image aspect: ${aspect}`);
             if(!newDimensions.width) delete newDimensions.width;
@@ -554,6 +521,7 @@ if (!dev && cluster.isMaster) {
     server.get("/show/:item", (req, res) => {
       return nextApp.render(req, res, "/show", { item: req.params.item });
     });
+
     server.get("/browse/:category", (req, res) => {
       return nextApp.render(req, res, "/browse", { category: req.params.category });
     });
@@ -562,25 +530,26 @@ if (!dev && cluster.isMaster) {
     //      return nextApp.render(req, res, "/show", { id: parseInt(req.params.id) });
     //    });
 
-    // Example server-side routing
-    server.post("/a", (req, res) => {
-      return nextApp.render(req, res, "/b", req.query);
-    });
-    // Example server-side routing
-    server.get("/b", (req, res) => {
-      return nextApp.render(req, res, "/a", req.query);
-    });
+    //    // Example server-side routing
+    //    server.post("/a", (req, res) => {
+    //      return nextApp.render(req, res, "/b", req.query);
+    //    });
+    //
+    //    // Example server-side routing
+    //    server.get("/b", (req, res) => {
+    //      return nextApp.render(req, res, "/a", req.query);
+    //    });
+    //
     // Default catch-all renders Next app
     server.get("*", (req, res) => {
-      // res.set({
-      //   'Cache-Control': 'public, max-age=3600'
-      // });
+      res.set({ "Cache-Control": "public, max-age=3600" });
       const parsedUrl = url.parse(req.url, true);
       nextHandler(req, res, parsedUrl);
     });
     server.listen(port, err => {
       if(err) throw err;
-      //console.log(`Listening on http://localhost:${port}`);
+
+      console.log(`Listening on http://localhost:${port}`);
     });
   });
 }

@@ -13,7 +13,6 @@ function forceSimulation(data) {
   const height = +svg.attr("height");
 
   // prettier-ignore
-
   const simulation = d3.forceSimulation()
   .force('link', d3.forceLink().id(function(d) { return d.id; }))
   .force('charge', d3.forceManyBody().strength(-15).distanceMax(300))
