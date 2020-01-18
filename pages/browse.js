@@ -28,11 +28,11 @@ class Browse extends React.Component {
     let result,
       items = [];
     result = await Browse.api(
-      `query MyQuery { items(where: {id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id } } users { user { id } } } }`
+      `query MyQuery { items(where: {id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`
     );
     if(result.items) items = items.concat(result.items);
     result = await Browse.api(
-      `query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id } } users { user { id } } } }`
+      `query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`
     );
     if(result.items) items = items.concat(result.items);
     //console.log("Browse.getInitialProps ", { items });
@@ -78,29 +78,8 @@ class Browse extends React.Component {
           cols={`repeat(5, 20fr)`}
           style={{ gridGap: "10px" }}
         >
-          <GridItem row={1} col={"2"} style={{ background: "rgba(255,0,0,0.5)" }}>
-            B
-          </GridItem>
-          <GridItem row={1} col={"3"} style={{ background: "rgba(255,0,0,0.5)" }}>
-            C
-          </GridItem>
-          <GridItem row={1} col={"4"} style={{ background: "rgba(255,0,0,0.5)" }}>
-            D
-          </GridItem>
-          {/*   <GridItem row={1} col={"5"} style={{ background: "rgba(255,0,0,0.5)" }}>
-            E
-          </GridItem>
-          <GridItem row={2} col={"2"} style={{ background: "rgba(0,127,0,0.5)" }}>
-            B
-          </GridItem>
-          <GridItem row={2} col={"3"} style={{ background: "rgba(0,60,255,0.5)" }}>
-            D
-          </GridItem>
-          <GridItem row={2} col={"4"} style={{ background: "rgba(0,60,255,0.5)" }}>
-            E
-          </GridItem>*/}
           {children.map((child, i) => (
-            <GridItem row={rows} col={i + 1}>
+            <GridItem key={`grid-item-${i}`} row={rows} col={i + 1}>
               <ItemTile id={child.id} />
             </GridItem>
           ))}

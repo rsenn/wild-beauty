@@ -23,24 +23,28 @@ export const ItemTile = inject("rootStore")(
     data = { ...item, ...data };
     //console.log("ItemTile.render", data);
 
+    let photos = item && item.photos && item.photos.map ? item.photos : [];
+
     // prettier-ignore
     return (
       <div className={"item-tile"}>
-      {item && item.photos && item.photos.map
-        ? item.photos.map(photo => (
-          <div className={"item-image"}>
+      {photos.map((photo,i)=>  {
+        if(photo && photo.photo)
+         photo = photo.photo; 
+console.log("photo: ", toJS(photo));
+        return (
+          <div key={i} className={"item-image"}>
           <img
           src={photo.href || `/api/image/get/${photo.id}`}
           width={photo.width}
           height={photo.height}
           style={{
-            width: photo.landscape ? `${(photo.width * 100) / photo.height}%` : "100%",
-            height: photo.landscape ? "100%" : "auto"
+            width: photo.width >= photo.height ? `${(photo.width * 100) / photo.height}%` : "100%",
+            height:photo.width >= photo.height  ? "100%" : "auto"
           }}
           />
           </div>
-          ))
-        : undefined}
+          ); })       }
         {item && data ? (
           <div className={"item-data"}>
           <h2>{data.title||data.name}</h2>

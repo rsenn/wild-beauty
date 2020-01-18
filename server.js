@@ -42,7 +42,13 @@ const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5555;
 
 // prettier-ignore
-const itemFields = ["id", "type", "name", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
+const itemFields = ["id", "type", "name", "parent { id }", "children { id }", "data", `photos { photo { id
+ filesize
+        height
+        id
+        offset
+        width
+        original_name } }`, "users { user { id } }"];
 
 // Multi-process to utilize all CPU cores.
 if (!dev && cluster.isMaster) {
@@ -332,7 +338,13 @@ if (!dev && cluster.isMaster) {
 
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
-      // prettier-ignore      let response = await API.select("photos", { id }, ["id", "original_name", "data", "width", "height", "uploaded", "filesize", "user_id"]);
+      // prettier-ignores
+      let response = await API(
+        `query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize data } }`
+      );
+
+      //      console.log(`/api/image/get/${id}`, Util.filterKeys(response, k => k!="data"));
+
       const photo = response.photos[0];
       if(typeof photo == "object") {
         // console.log(`Image get id: `, id, "photo.data:", typeof photo.data);
