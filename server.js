@@ -317,29 +317,7 @@ if (!dev && cluster.isMaster) {
       "users { user { id } }"
     ];
 
-    server.post("/api/item*", async function(req, res) {
-      let { fields, update, ...params } = req.body;
-      let result;
-      fields = fields || itemFields;
-      console.log("/api/item: " + util.inspect(req.body) ,req);
-
-      if(update) {
-        console.log("/api/item UPD: " + util.inspect(update, { depth: 1 }));
-        result = await API.update("items", params, update);
-        console.log("/api/item <UPD " + util.inspect(result, { depth: 1 }));
-        res.json({ success: true, result });
-        //        fields = ['id','parent_id',...Object.keys(update)];
-      } else {
-        result = await API.select("items", params, fields);
-
-        let itemList = result.items;
-        let item = itemList && itemList.length > 0 ? itemList[0] : null;
-        console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
-        res.json({ success: true, item });
-      }
-    });
-
-    server.post("/api/item/tree", async function(req, res) {
+    server.post("/api/tree", async function(req, res) {
       let { fields, ...params } = req.body;
       fields = fields || itemFields;
       //console.log("params: ", params);
@@ -355,6 +333,28 @@ if (!dev && cluster.isMaster) {
       });
       //console.log("itemList: ", itemList);
       res.json({ success: true, count: itemList.length, items: itemList });
+    });
+
+    server.post("/api/item*", async function(req, res) {
+      let { fields, update, ...params } = req.body;
+      let result;
+      fields = fields || itemFields;
+      console.log("/api/item: " + util.inspect(req.body), req);
+
+      if(update) {
+        console.log("/api/item UPD: " + util.inspect(update, { depth: 1 }));
+        result = await API.update("items", params, update);
+        console.log("/api/item <UPD " + util.inspect(result, { depth: 1 }));
+        res.json({ success: true, result });
+        //        fields = ['id','parent_id',...Object.keys(update)];
+      } else {
+        result = await API.select("items", params, fields);
+
+        let itemList = result.items;
+        let item = itemList && itemList.length > 0 ? itemList[0] : null;
+        console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
+        res.json({ success: true, item });
+      }
     });
 
     server.post("/api/item/new", async function(req, res) {

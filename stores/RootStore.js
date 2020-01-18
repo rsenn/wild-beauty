@@ -252,8 +252,8 @@ export class RootStore {
       item.photos = item.photos.map(i => ({ ...i.photo, landscape: i.photo.width > i.photo.height }));
     }
 
-    this.items.set(''+id, item);
-    item = this.items.get(''+item.id);
+    this.items.set("" + id, item);
+    item = this.items.get("" + item.id);
     //console.log("New item: ", item);
     return item;
   }
@@ -269,7 +269,7 @@ export class RootStore {
   /*  @action*/
   getItem(id, tr = it => it, idMap = null) {
     if(idMap === null) idMap = [];
-    let item = this.items.get(''+(!id ? this.rootItemId : id));
+    let item = this.items.get("" + (!id ? this.rootItemId : id));
     if(item && idMap.indexOf(item.id) == -1) {
       idMap.push(item.id);
       if(typeof item == "object") {
@@ -283,6 +283,17 @@ export class RootStore {
     }
     return item ? tr(item) : null;
   }
+
+  async getSiblings(id) {
+    let item = this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
+  //  console.log("item:", item);
+  
+    const parentId = item.parent ? item.parent.id : item.parent_id;
+    let result = await this.loadItems(`{ parent_id: { _eq: ${parentId} } }`);  
+
+
+    return result;
+  }
   /*
   async fetchImages(where = {}) {
     console.log("⇒ images ", { where });
@@ -294,7 +305,7 @@ export class RootStore {
     console.log("⇐ images =", response);
     return response;
   }*/
-/*
+  /*
   async fetchItems(where = {}) {
     console.log("⇒ items:", where);
     let response = await this.api.list("items", [
@@ -329,7 +340,7 @@ export class RootStore {
    * @return     {Promise}  The items.
    */
   async loadItems(where = {}) {
-    let response = await this.apiRequest("/api/item/tree", Util.isEmpty(where) ? {} : { where });
+    let response = await this.apiRequest("/api/tree", Util.isEmpty(where) ? {} : { where });
     let items,
       data = response ? await response.data : null;
     if(await data) items = await data.items;
@@ -338,22 +349,21 @@ export class RootStore {
     //console.log("RootStore.loadItems", data);
     for(let key in items) {
       const id = parseInt(items[key].id || key);
-      this.items.delete(''+id);
-      this.items.set(''+id, items[key]);
+      this.items.delete("" + id);
+      this.items.set("" + id, items[key]);
     }
-    return items.length;
+    return items;
   }
 
   async loadItem(where = {}) {
     if(typeof where == "number") where = { id: where };
     let response = await this.apiRequest("/api/item", where);
     let data = response ? await response.data : null;
-    let r= (await data.item) || [];
+    let r = (await data.item) || [];
     console.log("RootStore.loadItem", await r);
-   const id = ''+r.id;
+    const id = "" + r.id;
 
-if(!this.items.has(id))
-    this.items.set(id, r);
+    if(!this.items.has(id)) this.items.set(id, r);
     let it = this.items.get(id);
     Object.assign(it, r);
     return it;
