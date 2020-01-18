@@ -1,7 +1,8 @@
-export default (req, res) => {
-  const {
-    query: { id }
-  } = req;
+export default (props,res) => {
 
-  res.end(`Post: ${id}`);
+const { initialMobxState, router, className } = props;
+const { query } = router;
+
+console.log(`Post: req:`, query);
+ res.end(`Post: req:`, query.id);
 };
