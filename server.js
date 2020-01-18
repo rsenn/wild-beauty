@@ -35,85 +35,15 @@ function bufferToStream(buffer) {
   stream.push(null);
   return stream;
 }
-/*
-var multer = require("multer");
-var cloudinary = require("cloudinary");
-var cloudinaryStorage = require("multer-storage-cloudinary");
-*/
+
 var secret = fs.readFileSync("secret.key");
-/*
-const userType = new graphql.GraphQLObjectType({
-  name: "users",
-  fields: {
-    id: { type: graphql.GraphQLInt },
-    name: { type: graphql.GraphQLString },
-    password: { type: graphql.GraphQLString },
-    last_seen: { type: graphql.GraphQLString }
-  }
-});
-const itemType = new graphql.GraphQLObjectType({
-  name: "items",
-  fields: {
-    id: { type: graphql.GraphQLInt },
-    author: { type: userType },
-    image: { type: graphql.GraphQLString }
-  }
-});
-const photoType = new graphql.GraphQLObjectType({
-  name: "photos",
-  fields: {
-    id: { type: graphql.GraphQLInt },
-    src: { type: graphql.GraphQLString },
-    width: { type: graphql.GraphQLInt },
-    height: { type: graphql.GraphQLInt }
-  }
-});
-var schema = new graphql.GraphQLSchema({
-  query: itemType,
-  mutation: new graphql.GraphQLObjectType({
-    //⚠️ NOT mutiation
-    name: "Mutation",
-    fields: () => ({
-      incrementCounter: {
-        type: graphql.GraphQLInt,
-        resolve: () => ++counter
-      }
-    })
-  })
-});*/
-// The root provides a resolver function for each API endpoint
-/*var rootValue = {
-  items: ({ id, author, image }) => {
-    //console.log("item: ", { id, author, image });
-  },
-  users: ({ id, name, email, password, last_seen }) => {
-    //console.log("user: ", { id, name, email, password, last_seen });
-  },
-  photos: ({ id, src, width, height }) => {
-    //console.log("photo: ", { id, author, image });
-  }
-};*/
+
 const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5555;
-/*
-const insertItem = ({ id, image, author }) => {
-  return `mutation Mutation {
-  __typename
-  insert_items(objects: {id: ${id}, author: "${author}", image: "${image}"}) {
-    affected_rows
-    returning {
-      author
-      id
-      image
-    }
-  }
-}`;
-};
-var ret = API.insert('users', { name: 'test2' });
-ret.then(ret => {
-  //console.log(ret);
-});
-*/
+
+// prettier-ignore
+const itemFields = ["id", "type", "name", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
+
 // Multi-process to utilize all CPU cores.
 if (!dev && cluster.isMaster) {
   //console.log(`Node cluster master ${process.pid} is running`);
@@ -299,9 +229,6 @@ if (!dev && cluster.isMaster) {
         res.json({ success: written > 0, written });
       })
     );
-
-    // prettier-ignore
-    const itemFields = ["id", "type", "name", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"];
     server.post("/api/tree/parents", async function(req, res) {
       let { fields, id, ...params } = req.body;
       fields = fields || ["parent { id }", "parent_id", "id"];
@@ -341,7 +268,6 @@ if (!dev && cluster.isMaster) {
       let result;
       fields = fields || itemFields;
       //console.log("/api/item: " + util.inspect(req.body), req);
-
       if(update) {
         console.log("/api/item UPD: " + util.inspect(update, { depth: 1 }));
         result = await API.update("items", params, update);
@@ -390,9 +316,7 @@ if (!dev && cluster.isMaster) {
         params
       );
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
-
       if(images.length !== undefined) images = images.filter(im => im.items.length == 0);
-
       res.json({ success: true, count: images.length, images });
     });
 
