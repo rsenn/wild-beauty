@@ -28,81 +28,20 @@
 	"buffers":
 	[
 		{
-			"contents": "function bufferToStream(buffer)\n(worker, code, signal) =>\n() =>\nfunction(req, res, next)\nfunction(req, res, next)\nasync function(req, res)\nkey =>\ngetVar\ngetUser\nneedAuth\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nitem =>\nasync function(req, res)\nasync function(req, res)\nimage =>\nim =>\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\ncalcDimensions\ncompareDimensions\nfunction(info)\n() =>\n({ original_name, filesize, width, height, id }) =>\n(req, res) =>\n(req, res) =>\n(req, res) =>\n(req, res) =>\n(req, res) =>\nerr =>",
+			"contents": ".accumulateClasses\n(e, acc) =>\ne =>\ni =>\n() =>\n() =>\n.prototype.last\nfunction stylesheets()\n(s, i) =>\nr =>\n() =>\nfunction colors(map)\narg =>\nasync function getStars()\ns =>\ngr =>\nfunction getRect(e)\ne =>\ne =>\ne =>\ne =>\n.putStars\nname =>\nname =>\ne =>\nc =>\nfunction gradient(element)\ne =>\ns =>\n() =>\nGradientIterator\nnext\ngetColors()\n(acc, step) =>\nfunction starAnim()\nMakePointList\nfunction stores(stores)\nfunction gettext(elem, done)\nelem =>\ngetNodeText\nfunction(resolve, reject)\n(node, root) =>\ntag =>\nfunction select()\nfunction(resolve, reject)\nabortsel\nclick\nonkey\nfunction boxes(state)\nfunction(elem, accu, root)\nfunction res(width, height)\nb64toText\nfunction arrayBuffer2String(b)\nfunction ws(cmd = \"send\", filename, data)\n(resolve, reject) =>\nfunction decodeBase64(b)\n.onclose\n.onerror\n.onopen\n.onmessage\nfunction settext(en, fa)\nx =>\nasync function img(name, arg = {})\nobj =>\nfunction(arg)\nasync (resolve, reject) =>\ngetID\n() =>\n() =>\nfunction createsvg(wh, fixed = false)\nfunction setpos(element)\n.onmousemove\n.onclick\nfunction dump(element)\nfunction walk(element)\ne =>\nobj =>\nobj =>\nelement =>\ne =>\ntxt =>\ntxt =>\nkey =>\n(a, b) =>\ntext =>\ntext =>\nfunction measure(element)\nfunction trackElements()\ne =>\n() =>\nfunction rect(arg)\nr =>\nfunction __rect()\nfunction borders(element)\n(o, name) =>\nfunction storage(name)\nnewValue =>\n() =>\n() =>\nvalue =>\n.get\n.set\n.has\n.assign\nfunction assign_to(obj)",
 			"settings":
 			{
-				"buffer_size": 600,
+				"buffer_size": 1399,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "stores/RootStore.js",
+			"file": "lib/devtools.js",
 			"settings":
 			{
-				"buffer_size": 13988,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pages/new.js",
-			"settings":
-			{
-				"buffer_size": 12331,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/api.js",
-			"settings":
-			{
-				"buffer_size": 4552,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pages/_app.js",
-			"settings":
-			{
-				"buffer_size": 5909,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "server.js",
-			"settings":
-			{
-				"buffer_size": 18659,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/roman/the-wild-beauty-company/pages/new.js",
-			"settings":
-			{
-				"buffer_size": 12331,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "components/withQueryParam.js",
-			"settings":
-			{
-				"buffer_size": 997,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/util.js",
-			"settings":
-			{
-				"buffer_size": 47044,
+				"buffer_size": 29480,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -228,23 +167,23 @@
 	},
 	"expanded_folders":
 	[
-		"/home/roman/wild-beauty",
-		"/home/roman/wild-beauty/components",
-		"/home/roman/wild-beauty/pages",
-		"/home/roman/wild-beauty/wild-beauty"
+		"/home/roman/the-wild-beauty-company",
+		"/home/roman/the-wild-beauty-company/lib"
 	],
 	"file_history":
 	[
-		"/home/roman/wild-beauty/pages/_app.js",
+		"/home/roman/wild-beauty/stores/RootStore.js",
 		"/home/roman/wild-beauty/pages/new.js",
-		"/home/roman/wild-beauty/components/views/itemEditor.js",
-		"/home/roman/wild-beauty/components/withQueryParam.js",
-		"/home/roman/the-wild-beauty-company/components/withQueryParam.js",
 		"/home/roman/wild-beauty/stores/api.js",
+		"/home/roman/wild-beauty/pages/_app.js",
+		"/home/roman/wild-beauty/lib/util.js",
+		"/home/roman/wild-beauty/server.js",
+		"/home/roman/the-wild-beauty-company/pages/new.js",
+		"/home/roman/wild-beauty/components/withQueryParam.js",
+		"/home/roman/wild-beauty/components/views/itemEditor.js",
+		"/home/roman/the-wild-beauty-company/components/withQueryParam.js",
 		"/home/roman/the-wild-beauty-company/lib/axios.js",
 		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
-		"/home/roman/the-wild-beauty-company/pages/new.js",
-		"/home/roman/wild-beauty/lib/util.js",
 		"/home/roman/the-wild-beauty-company/lib/util.js",
 		"/home/roman/wild-beauty/pages/show.js",
 		"/home/roman/the-wild-beauty-company/components/views/itemEditor.js",
@@ -264,7 +203,6 @@
 		"/home/roman/Arduino/libraries/FreqCounter/FreqCounter.h",
 		"/home/roman/the-wild-beauty-company/pages/index.js",
 		"/home/roman/wild-beauty/utils/alea.js",
-		"/home/roman/wild-beauty/server.js",
 		"/home/roman/wild-beauty/svgtree/svgtree.html",
 		"/home/roman/wild-beauty/utils/lua.js",
 		"/home/roman/Dokumente/Sources/lotto/utils/lua.js",
@@ -354,7 +292,7 @@
 	],
 	"find":
 	{
-		"height": 41.0
+		"height": 51.0
 	},
 	"find_in_files":
 	{
@@ -374,6 +312,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"colors",
 			"dataObj",
 			"res.errors",
 			"choose",
@@ -500,8 +439,7 @@
 			"add_upcoming_drawings",
 			"add_up",
 			"add_upcoming",
-			"return_profile",
-			"/profile\""
+			"return_profile"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -553,7 +491,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 600,
+						"buffer_size": 1399,
 						"regions":
 						{
 						},
@@ -562,178 +500,538 @@
 						],
 						"settings":
 						{
-							"current_file": "/home/roman/wild-beauty/server.js",
+							"current_file": "/home/roman/the-wild-beauty-company/lib/devtools.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									1109,
-									1140
+									903,
+									929
+								],
+								[
+									1071,
+									1082
+								],
+								[
+									1297,
+									1301
+								],
+								[
+									1387,
+									1391
+								],
+								[
+									1642,
+									1647
+								],
+								[
+									1671,
+									1676
+								],
+								[
+									1814,
+									1842
+								],
+								[
+									1894,
+									1916
+								],
+								[
+									1960,
+									1969
+								],
+								[
+									2035,
+									2039
+								],
+								[
+									2137,
+									2142
+								],
+								[
+									2193,
+									2213
+								],
+								[
+									2266,
+									2272
 								],
 								[
 									3527,
 									3552
 								],
 								[
-									3792,
-									3797
+									3746,
+									3750
 								],
 								[
-									3904,
-									3928
+									3814,
+									3819
 								],
 								[
-									5501,
-									5525
+									3886,
+									3905
 								],
 								[
-									5863,
-									5887
+									4201,
+									4205
 								],
 								[
-									7046,
-									7052
+									4256,
+									4260
 								],
 								[
-									7285,
-									7308
+									4366,
+									4370
 								],
 								[
-									7394,
-									7431
+									4416,
+									4420
 								],
 								[
-									7750,
-									7766
+									4447,
+									4469
 								],
 								[
-									7773,
-									7797
+									4553,
+									4560
 								],
 								[
-									8381,
-									8405
+									4590,
+									4597
 								],
 								[
-									9344,
-									9368
+									4648,
+									4652
 								],
 								[
-									9638,
-									9662
+									4729,
+									4733
 								],
 								[
-									9987,
-									9994
+									5626,
+									5652
 								],
 								[
-									10381,
-									10405
+									5910,
+									5914
 								],
 								[
-									11193,
-									11217
+									6328,
+									6332
 								],
 								[
-									11619,
-									11627
+									6396,
+									6401
 								],
 								[
-									11725,
-									11730
+									6419,
+									6435
 								],
 								[
-									11888,
-									11912
+									6465,
+									6469
 								],
 								[
-									12196,
-									12220
+									6650,
+									6661
 								],
 								[
-									13370,
-									13394
+									6701,
+									6715
 								],
 								[
-									14264,
-									14296
+									6892,
+									6911
 								],
 								[
-									14827,
-									14856
+									7454,
+									7474
 								],
 								[
-									15662,
-									15676
+									8526,
+									8549
 								],
 								[
-									15970,
-									15975
+									9051,
+									9079
 								],
 								[
-									17483,
-									17534
+									9121,
+									9128
 								],
 								[
-									17749,
-									17762
+									9173,
+									9194
 								],
 								[
-									17885,
-									17898
+									9514,
+									9539
 								],
 								[
-									18048,
-									18061
+									9655,
+									9670
 								],
 								[
-									18184,
-									18197
+									9934,
+									9940
 								],
 								[
-									18326,
-									18339
+									10533,
+									10550
 								],
 								[
-									18547,
-									18553
+									10608,
+									10633
+								],
+								[
+									10755,
+									10771
+								],
+								[
+									10964,
+									10980
+								],
+								[
+									11182,
+									11198
+								],
+								[
+									11384,
+									11405
+								],
+								[
+									11814,
+									11840
+								],
+								[
+									12598,
+									12625
+								],
+								[
+									12924,
+									12996
+								],
+								[
+									13180,
+									13210
+								],
+								[
+									13361,
+									13402
+								],
+								[
+									13426,
+									13446
+								],
+								[
+									13931,
+									13955
+								],
+								[
+									14027,
+									14053
+								],
+								[
+									14133,
+									14159
+								],
+								[
+									14380,
+									14405
+								],
+								[
+									14719,
+									14738
+								],
+								[
+									15224,
+									15248
+								],
+								[
+									15526,
+									15530
+								],
+								[
+									15821,
+									15855
+								],
+								[
+									16031,
+									16037
+								],
+								[
+									16163,
+									16176
+								],
+								[
+									16862,
+									16888
+								],
+								[
+									17106,
+									17119
+								],
+								[
+									18543,
+									18548
+								],
+								[
+									18691,
+									18696
+								],
+								[
+									19212,
+									19249
+								],
+								[
+									20397,
+									20421
+								],
+								[
+									20518,
+									20548
+								],
+								[
+									20820,
+									20846
+								],
+								[
+									20948,
+									20970
+								],
+								[
+									21050,
+									21072
+								],
+								[
+									21132,
+									21136
+								],
+								[
+									21333,
+									21339
+								],
+								[
+									21756,
+									21762
+								],
+								[
+									22372,
+									22382
+								],
+								[
+									22409,
+									22413
+								],
+								[
+									23346,
+									23352
+								],
+								[
+									23401,
+									23407
+								],
+								[
+									23473,
+									23479
+								],
+								[
+									23523,
+									23532
+								],
+								[
+									23630,
+									23637
+								],
+								[
+									23684,
+									23691
+								],
+								[
+									24496,
+									24521
+								],
+								[
+									24725,
+									24749
+								],
+								[
+									24840,
+									24844
+								],
+								[
+									24980,
+									24985
+								],
+								[
+									25131,
+									25149
+								],
+								[
+									25235,
+									25239
+								],
+								[
+									25258,
+									25275
+								],
+								[
+									27099,
+									27124
+								],
+								[
+									27244,
+									27256
+								],
+								[
+									27919,
+									27941
+								],
+								[
+									28118,
+									28129
+								],
+								[
+									28252,
+									28257
+								],
+								[
+									28319,
+									28324
+								],
+								[
+									28337,
+									28345
+								],
+								[
+									28369,
+									28389
+								],
+								[
+									28450,
+									28467
+								],
+								[
+									28650,
+									28670
+								],
+								[
+									28727,
+									28752
+								],
+								[
+									28887,
+									28910
 								]
 							],
 							"symlist":
 							[
-								"function bufferToStream(buffer)",
-								"(worker, code, signal) =>",
+								".accumulateClasses",
+								"(e, acc) =>",
+								"e =>",
+								"i =>",
 								"() =>",
-								"function(req, res, next)",
-								"function(req, res, next)",
-								"async function(req, res)",
+								"() =>",
+								".prototype.last",
+								"function stylesheets()",
+								"(s, i) =>",
+								"r =>",
+								"() =>",
+								"function colors(map)",
+								"arg =>",
+								"async function getStars()",
+								"s =>",
+								"gr =>",
+								"function getRect(e)",
+								"e =>",
+								"e =>",
+								"e =>",
+								"e =>",
+								".putStars",
+								"name =>",
+								"name =>",
+								"e =>",
+								"c =>",
+								"function gradient(element)",
+								"e =>",
+								"s =>",
+								"() =>",
+								"GradientIterator",
+								"next",
+								"getColors()",
+								"(acc, step) =>",
+								"function starAnim()",
+								"MakePointList",
+								"function stores(stores)",
+								"function gettext(elem, done)",
+								"elem =>",
+								"getNodeText",
+								"function(resolve, reject)",
+								"(node, root) =>",
+								"tag =>",
+								"function select()",
+								"function(resolve, reject)",
+								"abortsel",
+								"click",
+								"onkey",
+								"function boxes(state)",
+								"function(elem, accu, root)",
+								"function res(width, height)",
+								"b64toText",
+								"function arrayBuffer2String(b)",
+								"function ws(cmd = \"send\", filename, data)",
+								"(resolve, reject) =>",
+								"function decodeBase64(b)",
+								".onclose",
+								".onerror",
+								".onopen",
+								".onmessage",
+								"function settext(en, fa)",
+								"x =>",
+								"async function img(name, arg = {})",
+								"obj =>",
+								"function(arg)",
+								"async (resolve, reject) =>",
+								"getID",
+								"() =>",
+								"() =>",
+								"function createsvg(wh, fixed = false)",
+								"function setpos(element)",
+								".onmousemove",
+								".onclick",
+								"function dump(element)",
+								"function walk(element)",
+								"e =>",
+								"obj =>",
+								"obj =>",
+								"element =>",
+								"e =>",
+								"txt =>",
+								"txt =>",
 								"key =>",
-								"getVar",
-								"getUser",
-								"needAuth",
-								"async function(req, res)",
-								"async function(req, res)",
-								"async function(req, res)",
-								"async function(req, res)",
-								"item =>",
-								"async function(req, res)",
-								"async function(req, res)",
-								"image =>",
-								"im =>",
-								"async function(req, res)",
-								"async function(req, res)",
-								"async function(req, res)",
-								"calcDimensions",
-								"compareDimensions",
-								"function(info)",
+								"(a, b) =>",
+								"text =>",
+								"text =>",
+								"function measure(element)",
+								"function trackElements()",
+								"e =>",
 								"() =>",
-								"({ original_name, filesize, width, height, id }) =>",
-								"(req, res) =>",
-								"(req, res) =>",
-								"(req, res) =>",
-								"(req, res) =>",
-								"(req, res) =>",
-								"err =>"
+								"function rect(arg)",
+								"r =>",
+								"function __rect()",
+								"function borders(element)",
+								"(o, name) =>",
+								"function storage(name)",
+								"newValue =>",
+								"() =>",
+								"() =>",
+								"value =>",
+								".get",
+								".set",
+								".has",
+								".assign",
+								"function assign_to(obj)"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -741,30 +1039,30 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 4,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 1,
-					"file": "stores/RootStore.js",
+					"file": "lib/devtools.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 13988,
+						"buffer_size": 29480,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								9888,
-								9888
+								277,
+								277
 							]
 						],
 						"settings":
@@ -772,254 +1070,13 @@
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 6643.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "pages/new.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 12331,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								10439,
-								10439
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 5840.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "stores/api.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4552,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								4093,
-								4093
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1560.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "pages/_app.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5909,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1890,
-								1890
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 660.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "server.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 18659,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								10676,
-								10676
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"use_tab_stops": false
-						},
-						"translation.x": 444.0,
-						"translation.y": 6203.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "/home/roman/the-wild-beauty-company/pages/new.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 12331,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								10208,
-								10208
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 5263.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "components/withQueryParam.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 997,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								964,
-								964
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
 							"use_tab_stops": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "lib/util.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 47044,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								28888,
-								28888
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 24183.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -1027,7 +1084,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 29.0
+		"height": 39.0
 	},
 	"input":
 	{
