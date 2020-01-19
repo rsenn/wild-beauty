@@ -42,13 +42,12 @@ const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5555;
 
 // prettier-ignore
-const itemFields = ["id", "type", "name", "parent { id }", "children { id }", "data", `photos { photo { id
- filesize
-        height
-        id
-        offset
-        width
-        original_name } }`, "users { user { id } }"];
+const itemFields = ["id", "type", "name", "parent { id }", 
+"children { id }", 
+"data", 
+`photos { photo { id filesize height id offset width original_name } }`,
+"users { user { id } }"
+];
 
 // Multi-process to utilize all CPU cores.
 if (!dev && cluster.isMaster) {
@@ -239,7 +238,8 @@ if (!dev && cluster.isMaster) {
       let { fields, id, ...params } = req.body;
       fields = fields || ["parent { id }", "parent_id", "id"];
       let result = await API(`
-        query MyQuery { items(where: {id: {_eq: ${id} }}) { parent { name id parent { name id parent { name id parent { name id parent { name id parent { name id parent { name id parent { name id parent_id } parent_id } parent_id } parent_id } parent_id } parent_id } parent_id } parent_id } parent_id } }
+        query TreeItem {items(where: {id: {_eq: ${id} }}) {id name type parent_id parent {id name type parent_id parent {id name type parent_id parent {id } } } } }
+
 `);
       let item = result && result.items && result.items[0];
       let list = [];
@@ -281,7 +281,10 @@ if (!dev && cluster.isMaster) {
         res.json({ success: true, result });
         //        fields = ['id','parent_id',...Object.keys(update)];
       } else {
-        result = await API.select("items", params, fields);
+//        result = await API.select("items", params, fields);
+        result = await API.list("items", fields, params);
+        console.log("/api/item <LST " + util.inspect(result, { depth: 1 }));
+
 
         let itemList = result.items;
         let item = itemList && itemList.length > 0 ? itemList[0] : null;
