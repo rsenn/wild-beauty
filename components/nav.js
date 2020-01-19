@@ -1,5 +1,6 @@
 import React from "react";
-import { withRouter } from "next/router";
+import { withRouter, useRouter } from "next/router";
+import  Link from "next/link";
 import classNames from "classnames";
 import LoginForm from "./login.js";
 import SiteMap from "./siteMap.js";
@@ -61,18 +62,17 @@ const NavLink = inject("rootStore")(
       )}
       key={key}
     >
-      <MyLink href={href} title={typeof label == "function" ? label(props) : label} prefetch={true}>
-        {/*       <a
-          href={href}
+      <Link href={href} data-label={typeof label == "function" ? label(props) : label} prefetch={false} passHref>
+      <a
           data-href={href}
           data-name={path}
           className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")}
           onClick={onClick}
-        >*/}
+        >
         {typeof label == "function" ? label(props) : label}
         <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
-        {/* </a>*/}
-      </MyLink>
+        </a>
+      </Link>
       <style jsx global>{`
         li.menu-active {
           border: 1px solid #00000040;
@@ -199,9 +199,10 @@ const Nav = inject(
   "i18nStore"
 )(
   observer(
-    withRouter(({ rootStore, i18nStore, loading, router, children, ...props }) => {
+    (({ rootStore, i18nStore, loading,  children, ...props }) => {
       const [loginIsOpen, setLoginOpen] = React.useState(false);
       const [languageIsOpen, setLanguageOpen] = React.useState(false);
+       const router = useRouter();
 
       const [color, setColor] = React.useState(randomGradient());
       const angle = ((color[0].h + color[0].s + color[0].l) % 360) - 180;
@@ -342,8 +343,12 @@ const Nav = inject(
                           }
                         }
                       : () => {
-                          console.log("click " + item.name);
-                          router.push(item.href || `/${item.name}`);
+//                          router.replace(router.asPath.replace(/#.*/g, '')+'#');
+const href = item.href.startsWith('/') ? item.href :  `/${item.name}`;
+                          console.log("click " + item.name, " href: ", href);
+                          router.replace(href);
+                          if(globa.window)
+                          window.location.replace(href);
                         }
                   }
                 />
