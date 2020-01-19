@@ -16,7 +16,7 @@ i18nStore.setTranslations({
       new_description: "Create a new tile",
       show_name: "Show",
       show_description: "View artists work",
-        list_name: "Tree",
+      list_name: "Tree",
       list_description: "Explore tree",
       login_name: "Login",
       login_description: "Login as member",

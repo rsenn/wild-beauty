@@ -35,11 +35,29 @@ export const collapsibleForceLayout = data => {
     .attr("transform", "translate(-45,10) scale(0.25,0.25)");
 
 
+
+   const startFn = () =>  {
+    var ticksPerRender = 3;
+    requestAnimationFrame(function render() {
+      for (var i = 0; i < ticksPerRender; i++) {
+        force.tick();
+      }
+        link
+    .attr("x1", function(d) {return d.source.x; })
+    .attr("y1", function(d) {return d.source.y; })
+    .attr("x2", function(d) {return d.target.x; })
+    .attr("y2", function(d) {return d.target.y; });
+    node.attr("transform", function(d) {return `translate(${d.x}, ${d.y})`; });
+    });
+  };
+
+
   const simulation = d3
     .forceSimulation()
     .force("link", d3.forceLink().id(function(d) {return d.id; }) )
     .force("charge", d3 .forceManyBody() .strength(-15) .distanceMax(300) )
     .force("center", d3.forceCenter(width / 2, height / 4))
+        
     .on("tick", ticked);
 
   function update() {
@@ -105,6 +123,9 @@ console.log("collapsibleForceLayout update ", { nodes,links});
     return d._children ? 8 : d.children ? 8 : 4;
   }
   function ticked() {
+   /*   for (let i = 0; i < 5; i++) {
+    simulation.tick();
+  }*/
     link
     .attr("x1", function(d) {return d.source.x; })
     .attr("y1", function(d) {return d.source.y; })
@@ -152,6 +173,7 @@ console.log("collapsibleForceLayout update ", { nodes,links});
   function zoomed() {
     svg.attr("transform", d3.event.transform);
   }
+
 
   update();
 };
