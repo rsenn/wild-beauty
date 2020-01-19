@@ -410,8 +410,8 @@ export class RootStore {
   }
 
   async loadItem(where = {}) {
-    if(typeof where == "number") where = `{id: { _eq: ${where} }}`;
-    let response = await this.apiRequest("/api/item", { where });
+    if(typeof where == "number") where = { id: where };
+    let response = await this.apiRequest("/api/item", where);
     let data = response ? await response.data : null;
     let r = (await data) ? await data.item : [];
     

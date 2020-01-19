@@ -281,8 +281,8 @@ if (!dev && cluster.isMaster) {
         res.json({ success: true, result });
         //        fields = ['id','parent_id',...Object.keys(update)];
       } else {
-         result = await API.select("items", params, fields);
-       // result = await API.list("items", fields, params);
+       //  result = await API.select("items", params, fields);
+        result = await API.list("items", fields, params);
         console.log("/api/item <LST " + util.inspect(result, { depth: 1 }));
 
         let itemList = result.items;
