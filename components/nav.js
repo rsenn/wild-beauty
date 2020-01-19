@@ -62,16 +62,16 @@ const NavLink = inject("rootStore")(
       key={key}
     >
       <MyLink href={href} title={typeof label == "function" ? label(props) : label} prefetch={true}>
-        <a
+ {/*       <a
           href={href}
           data-href={href}
           data-name={path}
           className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")}
           onClick={onClick}
-        >
+        >*/}
           {typeof label == "function" ? label(props) : label}
           <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
-        </a>
+       {/* </a>*/}
       </MyLink>
       <style jsx global>{`
         li.menu-active {
