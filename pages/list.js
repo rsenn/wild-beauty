@@ -175,7 +175,7 @@ class List extends React.Component {
 
   componentDidMount() {
     const { rootStore, router } = this.props;
-   // this.checkTagRemove();
+    // this.checkTagRemove();
   }
 
   componentDidUpdate() {

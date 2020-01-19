@@ -39,7 +39,7 @@ export const collapsibleForceLayout = data => {
    const startFn = () =>  {
     var ticksPerRender = 3;
     requestAnimationFrame(function render() {
-      for (var i = 0; i < ticksPerRender; i++) {
+      for(var i = 0; i < ticksPerRender; i++) {
         force.tick();
       }
         link
@@ -123,7 +123,7 @@ console.log("collapsibleForceLayout update ", { nodes,links});
     return d._children ? 8 : d.children ? 8 : 4;
   }
   function ticked() {
-   /*   for (let i = 0; i < 5; i++) {
+   /*   for(let i = 0; i < 5; i++) {
     simulation.tick();
   }*/
     link
