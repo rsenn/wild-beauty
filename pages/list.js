@@ -111,7 +111,7 @@ class List extends React.Component {
         console.log("Items: ", response.items);
 
         this.tree = rootStore.getHierarchy(undefined, it => {
-      if(!it.children) it.size = 10;
+      if(!it.children) it.size = 20;
       it.value = it.id;
       return it;
     });

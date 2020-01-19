@@ -109,8 +109,8 @@ console.log("collapsibleForceLayout update ", { nodes,links});
     .attr("y", function(d) {return -(d.data.size > 0 ? d.data.size*0.3 : 8); })
     .attr("width", function(d) {return 2*(d.data.size > 0 ? d.data.size*0.3 : 8); })
     .attr("height", function(d) {return 2*(d.data.size > 0 ? d.data.size*0.3 : 8); })
-    .attr("rx", 999)
-    .attr("ry", 999)
+    .attr("rx", 1)
+    .attr("ry", 1)
     .style("text-anchor", function(d) {return d.children ? "end" : "start"; })
     .text(function(d) {return d.data.name; });
 
