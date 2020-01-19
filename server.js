@@ -129,7 +129,7 @@ if (!dev && cluster.isMaster) {
     server.use(function(req, res, next) {
       /*   const token = getVar(req, "token");
       const user_id = getVar(req, "user_id");
-      console.log("Cookie: ", { token, user_id });*/
+      //console.log("Cookie: ", { token, user_id });*/
       const { query, params, url } = req;
       //console.log("Request: ", { query, url/*, parsedUrl, params*/ });
       return next();
@@ -176,7 +176,7 @@ if (!dev && cluster.isMaster) {
     const getUser = async function(token, prop) {
       let response = await API.select("users", { token }, ["id", "username", "token"]);
       const user = await response.users[0];
-      console.log("getUser: response =", response);
+      //console.log("getUser: response =", response);
       if(user) {
         if(prop) return await user[prop];
         return await user;
@@ -187,11 +187,11 @@ if (!dev && cluster.isMaster) {
     const needAuth = fn =>
       async function(req, res) {
         let token = getVar(req, "token");
-        console.log("needAuth: ", { token });
+        //console.log("needAuth: ", { token });
         if(token) {
           let response = await API.select("users", { token }, ["id", "username", "token"]);
           const user = response.users[0];
-          console.log("needAuth: response =", response);
+          //console.log("needAuth: response =", response);
           if(user) {
             if(token == user.token) return fn(req, res);
           }
@@ -247,7 +247,7 @@ if (!dev && cluster.isMaster) {
         const { id, name, parent_id } = node;
         if(node.id) list.push({ id, parent_id, name });
       }
-      console.log("list: ", list);
+      //console.log("list: ", list);
       res.json({ success: true, parents: [], result });
     });
 
@@ -275,26 +275,26 @@ if (!dev && cluster.isMaster) {
       fields = fields || itemFields;
       //console.log("/api/item: " + util.inspect(req.body), req);
       if(update) {
-        console.log("/api/item UPD: " + util.inspect(update, { depth: 1 }));
+        //console.log("/api/item UPD: " + util.inspect(update, { depth: 1 }));
         result = await API.update("items", params, update);
-        console.log("/api/item <UPD " + util.inspect(result, { depth: 1 }));
+        //console.log("/api/item <UPD " + util.inspect(result, { depth: 1 }));
         res.json({ success: true, result });
         //        fields = ['id','parent_id',...Object.keys(update)];
       } else {
        //  result = await API.select("items", params, fields);
         result = await API.list("items", fields,  { where: params });
-        console.log("/api/item <LST " + util.inspect(result, { depth: 1 }));
+        //console.log("/api/item <LST " + util.inspect(result, { depth: 1 }));
 
         let itemList = result.items;
         let item = itemList && itemList.length > 0 ? itemList[0] : null;
-        console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
+        //console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
         res.json({ success: true, item });
       }
     });
 
     server.post("/api/item/new", async function(req, res) {
       let { data, photo_id, parent_id, ...params } = req.body;
-      console.log("params: ", params);
+      //console.log("params: ", params);
       let result = await API.insert(
         "items",
         {
@@ -305,7 +305,7 @@ if (!dev && cluster.isMaster) {
         },
         ["id"]
       );
-      console.log("result: ", result);
+      //console.log("result: ", result);
       if(result && result.insert_items) result = await result.insert_items;
       if(result && result.returning) result = await result.returning;
       res.json({ success: true, result });
@@ -378,10 +378,10 @@ if (!dev && cluster.isMaster) {
           //console.log(`item: `, item);
           //const data = ;
           let props = await sharp(file.data).metadata(); // jpeg.jpegProps(file.data);
-          console.log(`props: `, props);
+          //console.log(`props: `, props);
           let { width, height, aspect } = props || {};
           if(!aspect && width > 0 && height > 0) aspect = width / height;
-          console.log(`Image width: ${width} height: ${height}`);
+          //console.log(`Image width: ${width} height: ${height}`);
           //console.log(`Image aspect: ${aspect}`);
           const calcDimensions = (max, props) => {
             if(typeof props != "object" || props === null) props = {};
@@ -400,12 +400,12 @@ if (!dev && cluster.isMaster) {
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
           if(typeof props != "object" || props === null) props = {};
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
-          console.log(`New Image width: ${newDimensions.width} height: ${newDimensions.height}`);
+          //console.log(`New Image width: ${newDimensions.width} height: ${newDimensions.height}`);
           if(!compareDimensions(props, newDimensions)) {
             //console.log(`new Image aspect: ${aspect}`);
             if(!newDimensions.width) delete newDimensions.width;
             if(!newDimensions.height) delete newDimensions.height;
-            console.log(`newDimensions `, newDimensions);
+            //console.log(`newDimensions `, newDimensions);
             const transformer = sharp()
               .jpeg({
                 quality: 95 /*,
@@ -442,10 +442,10 @@ if (!dev && cluster.isMaster) {
             { original_name: `"${file.name}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` },
             ["id"]
           );
-          console.log("API upload photo: ", reply && reply.returning ? reply.returning : reply);
+          //console.log("API upload photo: ", reply && reply.returning ? reply.returning : reply);
           const { affected_rows, returning } =
             typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
-          console.log("API upload photo: ", word.toString(16), { affected_rows, props });
+          //console.log("API upload photo: ", word.toString(16), { affected_rows, props });
           if(returning && returning.forEach)
             returning.forEach(({ original_name, filesize, width, height, id }) =>
               response.push({ original_name, filesize, width, height, id })
@@ -487,7 +487,7 @@ if (!dev && cluster.isMaster) {
     server.listen(port, err => {
       if(err) throw err;
 
-      console.log(`Listening on http://localhost:${port}`);
+      //console.log(`Listening on http://localhost:${port}`);
     });
   });
 }
