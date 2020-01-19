@@ -1,7 +1,6 @@
 import React from "react";
 import { inject, observer } from "mobx-react";
 import { toJS } from "mobx";
-import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 
 export const ItemTile = inject("rootStore")(
   observer(({ rootStore, id, onPrev, onNext }) => {

@@ -1,9 +1,6 @@
-import React, { Component, PureComponent } from "react";
+import React, { Component } from "react";
 import * as d3 from "d3";
-import { HSLA, RGBA, Element } from "../utils/dom.js";
-import { trkl } from "../utils/trkl.js";
-import { SizeMe, withSize } from "react-sizeme";
-import windowSize from "react-window-size";
+import { HSLA, Element } from "../utils/dom.js";
 import withSizes from "react-sizes";
 
 // prettier-ignore
