@@ -217,7 +217,7 @@ if (!dev && cluster.isMaster) {
             }
             console.log("logout response: ", response);
 
-           // return res.json({ success: !!(response && response.affected_rows) });
+            // return res.json({ success: !!(response && response.affected_rows) });
           }
         }
       } catch(err) {

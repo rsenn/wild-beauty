@@ -9,6 +9,7 @@ import { set } from "mobx";
 import { HSLA, Timer } from "../utils/dom.js";
 import Util from "../utils/util.js";
 import Alea from "../utils/alea.js";
+import MyLink from "./simple/myLink.js";
 
 const LoginIcon = ({ style }) => (
   <svg style={style} height="56" width="34" viewBox="0 0 8.996 14.817" xmlns="http://www.w3.org/2000/svg">
@@ -60,16 +61,18 @@ const NavLink = inject("rootStore")(
       )}
       key={key}
     >
-      <a
-        href={href}
-        data-href={href}
-        data-name={path}
-        className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")}
-        onClick={onClick}
-      >
-        {typeof label == "function" ? label(props) : label}
-        <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
-      </a>
+      <MyLink href={href} title={typeof label == "function" ? label(props) : label} prefetch={true}>
+        <a
+          href={href}
+          data-href={href}
+          data-name={path}
+          className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")}
+          onClick={onClick}
+        >
+          {typeof label == "function" ? label(props) : label}
+          <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
+        </a>
+      </MyLink>
       <style jsx global>{`
         li.menu-active {
           border: 1px solid #00000040;
