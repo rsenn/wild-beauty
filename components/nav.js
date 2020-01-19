@@ -306,7 +306,7 @@ const Nav = inject(
             }).map(item => {
               //console.log("item.name: ", item.name);
               if(item.name == "login") {
-                if(authenticated) item.label = <span>Logout</span>;
+                if(rootStore.authenticated) item.label = <span>Logout</span>;
               }
               if(item.disabled) return undefined;
               return (
