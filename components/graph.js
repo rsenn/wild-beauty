@@ -15,7 +15,9 @@ export const collapsibleForceLayout = data => {
 //  if(!data)
 //    data = collapsibleForceLayoutData;
 console.log("collapsibleForceLayout ", data );
-  const root = d3.hierarchy(data);
+  const root = d3.hierarchy(
+{"name":"Id[1]","children":[{"name":"Id[41]","size":10},{"name":"org","size":10},{"name":"Id[57]","size":10},{"name":"Id[58]","size":10},{"name":"Id[59]","size":10},{"name":"Id[60]","size":10},{"name":"Id[61]","size":10},{"name":"Id[62]","size":10},{"name":"objects","children":[{"name":"electronics","children":[{"name":"Id[119]","size":10},{"name":"Id[120]","size":10},{"name":"Id[121]","size":10},{"name":"Id[122]","size":10},{"name":"Id[123]","size":10},{"name":"Id[124]","size":10},{"name":"pic","children":[{"name":"lc-meter","size":10},{"name":"rgb-led","size":10},{"name":"picstick-25k50","size":10}]},{"name":"Audio","size":10},{"name":"RS232","children":[{"name":"jdm2-programmer","size":10}]}]},{"name":"boxes","children":[{"name":"Id[99]","size":10},{"name":"Id[103]","size":10},{"name":"Id[98]","size":10},{"name":"Id[86]","size":10},{"name":"Test","size":10}]},{"name":"bags","children":[{"name":"Id[64]","size":10}]}]},{"name":"subjects","children":[{"name":"Id[89]","children":[{"name":"Id[105]","size":10},{"name":"Roman","size":10}]},{"name":"groups","size":10}]}]}
+    );
   const transform = d3.zoomIdentity;
   let node, link;
 
@@ -28,7 +30,7 @@ console.log("collapsibleForceLayout ", data );
     .append("g")
     .call(d3 .zoom() .scaleExtent([1 / 2, 8]) .on("zoom", zoomed) )
     .append("g")
-    .attr("transform", "translate(-45,10) scale(0.25,0.25)");
+    .attr("transform", "translate(-140,-30) scale(0.5,0.5)");
 
 
 
@@ -97,7 +99,7 @@ console.log("collapsibleForceLayout update ", { nodes,links});
 
     nodeEnter
     .append("circle")
-    .attr("r", function(d) {return Math.sqrt(d.data.size) / 10 || 4.5; })
+    .attr("r", function(d) {return d.data.size > 0 ? d.data.size*0.3 : 8; })
     .style("text-anchor", function(d) {return d.children ? "end" : "start"; })
     .text(function(d) {return d.data.name; });
 
