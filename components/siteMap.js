@@ -32,6 +32,16 @@ export const SiteMap = [
     description: () => <Translate value="nav.show_description" />
   },
   {
+    href: "/list",
+    name: "list",
+    label: () => (
+      <span>
+        <Translate value="nav.list_name" />
+      </span>
+    ),
+    description: () => <Translate value="nav.list_description" />
+  },
+  {
     href: "/new",
     name: "new",
     label: () => (

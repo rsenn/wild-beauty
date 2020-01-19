@@ -45,6 +45,8 @@ i18nStore.setTranslations({
       new_description: "Neue Kachel erstellen",
       show_name: "Show",
       show_description: "Siehe die Arbeit der Künstler",
+      list_name: "Tree",
+      list_description: "Entdecke Baumstruktur",
       login_name: "Login",
       login_description: "Einloggen als Mitglied",
       logout_name: "Logout",
