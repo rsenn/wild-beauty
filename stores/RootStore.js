@@ -296,6 +296,7 @@ export class RootStore {
     let arr = Object.values(this.items.toObject());
     let ret = [];
     for(let item of arr) {
+     console.log("children: ", item.children);
       if(item.children && item.children.length) {
         for(let child of item.children) {
           const id = child && child.id;
@@ -303,6 +304,7 @@ export class RootStore {
         }
       }
     }
+    return ret;
   }
 
   async findItem(id) {
@@ -345,9 +347,10 @@ export class RootStore {
     if(item) {
       let { name, id } = item;
       if(!name) name = `Id[${id}]`;
-      let children = item.children && item.children.map ? item.children.map(child => this.getHierarchy(child)) : [];
+      let children = [...this.items.values()].filter(child => child.parent && child.parent.id == id).map(child => this.getHierarchy(child));
       let ret = { name };
       if(children && children.length > 0) ret.children = children;
+    //  else ret.children = [];
       return ret;
     }
     return null;
