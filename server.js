@@ -215,7 +215,8 @@ if (!dev && cluster.isMaster) {
               req.session.user_id = -1;
               req.session.destroy();
             }
-            ////console.log("response: ", response.affected_rows);
+            console.log("logout response: ", response);
+
             return res.json({ success: !!(response && response.affected_rows) });
           }
         }
