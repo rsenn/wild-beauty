@@ -269,6 +269,25 @@ if (!dev && cluster.isMaster) {
       res.json({ success: true, count: itemList.length, items: itemList });
     });
 
+    server.post("/api/item/new", async function(req, res) {
+      let { data, photo_id, parent_id, ...params } = req.body;
+      //console.log("params: ", params);
+      let result = await API.insert(
+        "items",
+        {
+          parent_id,
+          photos: `{data: {photo_id: ${photo_id}}}`,
+          ...params,
+          data: `"${JSON.stringify(data).replace(/"/g, '\\"')}"`
+        },
+        ["id"]
+      );
+      //console.log("result: ", result);
+      if(result && result.insert_items) result = await result.insert_items;
+      if(result && result.returning) result = await result.returning;
+      res.json({ success: true, result });
+    });
+
     server.post("/api/item*", async function(req, res) {
       let { fields, update, ...params } = req.body;
       let result;
@@ -290,25 +309,6 @@ if (!dev && cluster.isMaster) {
         //console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
         res.json({ success: true, item });
       }
-    });
-
-    server.post("/api/item/new", async function(req, res) {
-      let { data, photo_id, parent_id, ...params } = req.body;
-      //console.log("params: ", params);
-      let result = await API.insert(
-        "items",
-        {
-          parent_id,
-          photos: `{data: {photo_id: ${photo_id}}}`,
-          ...params,
-          data: `"${JSON.stringify(data).replace(/"/g, '\\"')}"`
-        },
-        ["id"]
-      );
-      //console.log("result: ", result);
-      if(result && result.insert_items) result = await result.insert_items;
-      if(result && result.returning) result = await result.returning;
-      res.json({ success: true, result });
     });
 
     //   server.use(bodyParser.json());

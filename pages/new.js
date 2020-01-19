@@ -13,11 +13,11 @@ import { toJS, action, set } from "mobx";
 import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchListener } from "../utils/touchHandler.js";
 import { getOrCreateStore } from "../stores/createStore.js";
-import NeedAuth from "../components/simple/needAuth.js";
 import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
 import { WithQueryParam, IfQueryParam } from "../components/withQueryParam.js";
 import { trkl } from "../utils/trkl.js";
+import NeedAuth from "../components/simple/needAuth.js";
 import { BehaveHooks, Behave } from "../utils/behave.js";
 
 import "../static/css/react-upload-gallery.css";
@@ -57,33 +57,6 @@ const findInTree = (tree, value) => {
   return null;
 };
 
-  function behaveTextarea(element) {
- element = Element.find(element);      
-      /*
-       * This hook adds autosizing functionality
-       * to your textarea
-       */
-      BehaveHooks.add(['keydown'], function(data){
-        var numLines = data.lines.total,
-          fontSize = parseInt( getComputedStyle(data.editor.element)['font-size'] ),
-          padding = parseInt( getComputedStyle(data.editor.element)['padding'] );
-        data.editor.element.style.height = (((numLines*fontSize)+padding))+'px';
-      });
-      var editor = new Behave({
-        textarea:     element,
-        replaceTab:   true,
-          softTabs:     true,
-          tabSize:     4,
-          autoOpen:     true,
-          overwrite:     true,
-          autoStrip:     true,
-          autoIndent:   true
-      });
-      return editor;      
-    };
-  
-
-
 @inject("rootStore")
 @observer
 //@withRouter
@@ -106,30 +79,29 @@ class New extends React.Component {
    */
   static async getInitialProps({ res, req, err, mobxStore, ...ctx }) {
     const { RootStore } = mobxStore;
-    let images =[];
+    let images = [];
 
     if(!global.window) {
+      images = await RootStore.fetchImages(/*{ where: { user_id:   }}*/);
 
-    images = await RootStore.fetchImages(/*{ where: { user_id:   }}*/);
+      images = images.filter(ph => ph.items.length == 0);
+      images.forEach(item => RootStore.newImage(item));
 
-    images = images.filter(ph => ph.items.length == 0);
-    images.forEach(item => RootStore.newImage(item));
-
-    const { url, query, body, route } = req || {};
-    /*
+      const { url, query, body, route } = req || {};
+      /*
     const ctxKeys = Object.keys(ctx);
     const reqKeys = Object.keys(req);
 */
-    //console.log("New.getInitialProps", { ctx,  url,  query, body });
-    console.log("New.getInitialProps", { images });
+      //console.log("New.getInitialProps", { ctx,  url,  query, body });
+      console.log("New.getInitialProps", { images });
 
-    if(ctx && req && req.cookies) {
-      const { token, user_id } = req.cookies;
-      //set(RootStore.auth, { token, user_id });
-      RootStore.auth.token = token;
-      RootStore.auth.user_id = user_id;
+      if(ctx && req && req.cookies) {
+        const { token, user_id } = req.cookies;
+        //set(RootStore.auth, { token, user_id });
+        RootStore.auth.token = token;
+        RootStore.auth.user_id = user_id;
+      }
     }
-  }
 
     return { images };
   }
@@ -169,7 +141,7 @@ class New extends React.Component {
         if(event.type.endsWith("move"))
           this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
         let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
-     //   console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
+        //   console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
 
         //e.style.setProperty("transform", event.type.endsWith("move") ? transformation : "");
 
@@ -179,7 +151,7 @@ class New extends React.Component {
         }
       };
       this.touchCallback = makeTouchCallback("inner-image", (event, e) => {
-    //    console.log("touchCallback ", { event, e });
+        //    console.log("touchCallback ", { event, e });
 
         const zIndex = maxZIndex() + 1;
         if(e) Element.setCSS(e, { zIndex });
@@ -304,26 +276,12 @@ class New extends React.Component {
       }
     });
 
-Element.findAll('textarea').forEach(behaveTextarea);
-  }
+    let textEditor = Element.findAll("textarea");
 
-  @action.bound
-  treeSelEvent(type, arg) {
-    const { rootStore } = this.props;
-    switch (type) {
-      case "change": {
-        console.log("treeSelEvent: ", this.tree, arg.value);
-        const item = findInTree(this.tree, arg.value);
-        item.checked = true;
-        //rootStore.setState({ selected: arg.value });
-        console.log("treeSelEvent: ", type, item);
-        break;
-      }
-      default: {
-        console.log("treeSelEvent: ", type, arg);
-        break;
-      }
-    }
+    textEditor.forEach(e => {
+      console.log("behaveTextarea: ", e);
+      behaveTextarea(e);
+    });
   }
 
   /**
@@ -341,8 +299,7 @@ Element.findAll('textarea').forEach(behaveTextarea);
     rootStore.state.image = id;
     rootStore.state.step = 2;
 
-
-     router.push('/edit', `/edit/${id}`);
+    router.push("/edit", `/edit/${id}`);
 
     //  router.push('/new', `/new?act=edit&img=${id}`, { /*query: { act: 'edit', img: id }, */shallow: true });
   }

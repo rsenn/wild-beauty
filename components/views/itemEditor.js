@@ -14,16 +14,13 @@ import "../../static/css/react-dropdown-tree-select.css";
 import "react-sortable-tree/style.css"; // once app
 
 export const ItemEditor = inject("rootStore")(
-  observer(({ rootStore, tree, makeTreeSelEvent }) => {
-    const { currentImage } = rootStore;
-    console.log("ItemEditor.render ", { tree, currentImage });
-let img  = rootStore.currentImage;
+  observer(({ rootStore, image, tree, makeTreeSelEvent }) => {
+    let img = image || rootStore.currentImage;
+    console.log("ItemEditor.render ", { tree, img });
 
-if(img === null)
-return undefined;
+    if(img === null) return undefined;
 
-  if(img && img.landscape === undefined)
-    img.landscape = img.width >= img.height;
+    if(img && img.landscape === undefined) img.landscape = img.width >= img.height;
 
     return (
       <div className={"content-edit"}>
@@ -31,9 +28,7 @@ return undefined;
           <div
             className={"item-entry"}
             style={{
-              width: img.landscape
-                ? `${(img.height * 100) / img.width}%`
-                : "100%"
+              width: img.landscape ? `${(img.height * 100) / img.width}%` : "100%"
             }}
           >
             <SizedAspectRatioBox className={"item-box"}>
@@ -45,9 +40,7 @@ return undefined;
                 height={img.height}
                 orientation={img.landscape ? "landscape" : "portrait"}
                 style={{
-                  width: img.landscape
-                    ? `${(img.width * 100) / img.height}%`
-                    : "100%",
+                  width: img.landscape ? `${(img.width * 100) / img.height}%` : "100%",
                   height: img.landscape ? "100%" : "auto"
                 }}
               />
@@ -100,11 +93,11 @@ return undefined;
               let obj = observable({ type: null, value: "" });
               rootStore.entries.push(obj);
               Timer.once(100, () => {
-                let a = [...dom.Element.findAll("img").filter(i => /edit/.test(i.src))];
+                let a = [...Element.findAll("img").filter(i => /edit/.test(i.src))];
                 let button = a[a.length - 1].parentElement;
                 console.log("Button: ", button);
                 if(button && button.click) button.click();
-                let inputs = Util.array([...dom.Element.findAll("input", button.parentElement)]);
+                let inputs = Util.array([...Element.findAll("input", button.parentElement)]);
                 console.log("inputs:", inputs);
                 inputs[0].focus();
               });

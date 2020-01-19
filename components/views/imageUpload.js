@@ -53,7 +53,7 @@ export const ImageUpload = inject("rootStore")(
         <div className={"image-list grid-col grid-gap-20"}>
           {images.map((image, index) => {
             let id = image.id;
-            
+
             image = toJS(image);
             //console.log("image-list entry", {id,image});
             const { width, height } = image;
