@@ -19,14 +19,12 @@ export const ItemTile = inject("rootStore")(
           }
         ];
     }
-    
-if(typeof(data) == 'string') {
-  try {
-    data = JSON.parse(data);
-  } catch(e) {
 
-  }
-}
+    if(typeof data == "string") {
+      try {
+        data = JSON.parse(data);
+      } catch(e) {}
+    }
 
     data = { ...item, ...data };
     //console.log("ItemTile.render", data);
