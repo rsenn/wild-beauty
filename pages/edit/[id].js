@@ -93,18 +93,12 @@ export class Edit extends React.Component {
 
   constructor(props) {
     super(props);
-
     if(global.window) window.page = this;
-
     console.error({ Behave, BehaveHooks });
-
     const { rootStore, router } = this.props;
-
     let image = router.query.id;
-
     if(image) {
       image = parseInt(image);
-
       if(rootStore.state.image != image) rootStore.setState({ image });
     }
   }
