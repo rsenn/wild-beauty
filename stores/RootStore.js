@@ -296,7 +296,7 @@ export class RootStore {
     let arr = Object.values(this.items.toObject());
     let ret = [];
     for(let item of arr) {
-     console.log("children: ", item.children);
+      console.log("children: ", item.children);
       if(item.children && item.children.length) {
         for(let child of item.children) {
           const id = child && child.id;
@@ -342,16 +342,18 @@ export class RootStore {
     return result;
   }
 
-  getHierarchy(item) {
+  getHierarchy(item, fn = it => it) {
     item = item || this.rootItem;
     if(item) {
       let { name, id } = item;
       if(!name) name = `Id[${id}]`;
-      let children = [...this.items.values()].filter(child => child.parent && child.parent.id == id).map(child => this.getHierarchy(child));
+      let children = [...this.items.values()]
+        .filter(child => child.parent && child.parent.id == id)
+        .map(child => this.getHierarchy(child, fn));
       let ret = { name };
       if(children && children.length > 0) ret.children = children;
-    //  else ret.children = [];
-      return ret;
+
+      return  fn ? fn(ret)  : ret;
     }
     return null;
   }

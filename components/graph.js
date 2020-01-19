@@ -16,7 +16,7 @@ export const collapsibleForceLayout = data => {
   height = 1000;
   let i = 0;
   
-//  if(!data)
+  if(!data)
     data = collapsibleForceLayoutData;
 
   const root = d3.hierarchy(data);
@@ -237,18 +237,10 @@ function forceSimulation(data) {
 
 export class Graph extends Component {
   svgRef = React.createRef();
-  //svgRef = trkl();
-
-  constructor(props) {
-    super(props);
-    /* this.svgRef.subscribe(function(value) {
-   console.log("value:", value);
- });*/
-  }
-
-  componentDidUpdate() {
+ 
+/* componentDidUpdate() {
     console.log("Graph.componentDidUpdate");
-  }
+  }*/
 
   componentDidMount() {
     let elem = this.svgRef.current;
