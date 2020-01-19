@@ -174,7 +174,7 @@ if (!dev && cluster.isMaster) {
     const getVar = (req, name) => (req.cookies && req.cookies[name]) || (req.session && req.session[name]);
 
     const getUser = async function(token, prop) {
-      let response = await API.select("users", {  token: `"${token}"` }, ["id", "username", "token"]);
+      let response = await API.select("users", { token: `"${token}"` }, ["id", "username", "token"]);
       const user = await response.users[0];
       //console.log("getUser: response =", response);
       if(user) {
@@ -204,7 +204,7 @@ if (!dev && cluster.isMaster) {
       let token = getVar(req, "token");
       try {
         if(token) {
-          let response = await API.select("users", {  token: `"${token}"` }, ["id", "username", "token"]);
+          let response = await API.select("users", { token: `"${token}"` }, ["id", "username", "token"]);
           const user = response.users[0];
           //console.log("req.cookies.token: ", req.cookies.token, ", user.token: ", user.token);
           if(user && token == user.token) {

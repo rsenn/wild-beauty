@@ -157,7 +157,7 @@ class New extends React.Component {
           moveImage(event, e);
         }
       });
-/*
+      /*
       this.touchListener = TouchListener(
         event => {
           console.log("Touch ", event);
