@@ -139,7 +139,7 @@ if (!dev && cluster.isMaster) {
       const { username, password } = req.body;
       ////console.log("req: ", { username, password });
       try {
-        let response = await API.select("users", { username }, ["id", "username", "password"]);
+        let response = await API.select("users", { username: `"${username}"` }, ["id", "username", "password"]);
         let user = response.users[0];
         let success = user ? bcrypt.compareSync(password, user.password) : false;
         let token,
@@ -149,7 +149,7 @@ if (!dev && cluster.isMaster) {
           user_id = user.id;
           token = signature.replace(/.*\./g, "");
           last_seen = new Date().toISOString();
-          response = await API.update("users", { username }, { token, last_seen });
+          response = await API.update("users", { username: `"${username}"` }, { token, last_seen });
         }
         const cookieOptions = {
           maxAge: 1000 * 60 * 60 * 24, // 1 day

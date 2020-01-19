@@ -477,12 +477,12 @@ export class RootStore {
     if(!data) res = await axios.get(endpoint);
     else res = await axios.post(endpoint, data);
 
-    if(res && ((await res.status) != 200 || !(await res.data) || !(await res.data.success))) {
-      console.log("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
+    if((await res) && ((await res.status) != 200 || !(await res.data)) /*|| !(await res.data.success)*/) {
+      console.error("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
       throw new Error(`apiRequest status=${res.status} data=${res.data}`);
     } else {
-      console.log("RootStore.apiRequest " + endpoint, res);
     }
+    console.log("RootStore.apiRequest " + endpoint, res);
 
     return res;
   }
@@ -499,6 +499,7 @@ export class RootStore {
     this.setState({ loading: true });
     Timer.once(100, () => {
       this.apiRequest("/api/login", { username, password }).then(res => {
+        console.log("RootStore.doLogin ", res);
         const { success, token, user_id, user } = res.data;
         const { username } = user;
         this.setState({
@@ -514,10 +515,10 @@ export class RootStore {
         set(this.auth, newAuth);
         if(global.window) localStorage.setItem("auth", JSON.stringify(newAuth));
         this.enableAutoRun();
-        //console.log("API login result: ", { success, token });
+        console.log("API login result: ", { success, token });
         if(success && window.global) {
           for(let name of ["token"]) document.cookie += `${name}=${res.data[name]}; Path=/; `;
-          //console.log("Cookies: ", document.cookie);
+          console.log("Cookies: ", document.cookie);
         }
         completed(res.data);
       });

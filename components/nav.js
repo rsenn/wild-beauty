@@ -62,6 +62,8 @@ const NavLink = inject("rootStore")(
     >
       <a
         href={href}
+        data-href={href}
+        data-name={path}
         className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")}
         onClick={onClick}
       >
@@ -309,8 +311,12 @@ const Nav = inject(
               if(item.disabled) return undefined;
               return (
                 <NavLink
+                  href={item.href}
                   key={item.key}
-                  {...{ ...props, ...item, path: router.asPath }}
+                  path={item.href}
+                  label={item.label}
+                  description={item.description}
+                  /*   {...{ ...props, ...item, path: router.asPath }}*/
                   onClick={
                     item.name.startsWith("log")
                       ? () => {
