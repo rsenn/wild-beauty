@@ -60,4 +60,3 @@ Checkbox.defaultProps = {
 };
 
 export default Checkbox;*/
-

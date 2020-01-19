@@ -184,4 +184,3 @@ export const ItemEditor = inject("rootStore")(
 );
 
 export default ItemEditor;
-

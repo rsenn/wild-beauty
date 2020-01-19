@@ -17,7 +17,7 @@ export default function MyLink({ href, title, prefetch }) {
       e.preventDefault();
       console.log(`Link ${href} clicked`);
       router.push(href);
-     // window.location.href = href;
+      // window.location.href = href;
     };
 
     return (
@@ -33,4 +33,3 @@ export default function MyLink({ href, title, prefetch }) {
 
   return title;
 }
-

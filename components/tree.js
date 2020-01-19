@@ -344,4 +344,3 @@ if(height  < minHeight)
 };
 
 export default Tree;
-

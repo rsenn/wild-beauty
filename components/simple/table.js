@@ -25,4 +25,3 @@ export const Cell = ({ children, className, ...props }) => (
     {children}
   </td>
 );
-

@@ -50,4 +50,3 @@ export const GridItem = ({ col, row, style, children, className, ...props }) => 
 );
 
 export default Grid;
-

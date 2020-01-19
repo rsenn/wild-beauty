@@ -36,7 +36,7 @@ export const ItemTile = inject("rootStore")(
       {photos.map((photo,i)=>  {
         if(photo && photo.photo)
          photo = photo.photo; 
-console.log("photo: ", toJS(photo));
+//console.log("photo: ", toJS(photo));
         return (
           <div key={i} className={"item-image"}>
           <img
@@ -78,4 +78,3 @@ console.log("photo: ", toJS(photo));
 );
 
 export default ItemTile;
-

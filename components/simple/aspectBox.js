@@ -41,4 +41,3 @@ export const SizedAspectRatioBox = ({
     </AspectRatioBox>
   </div>
 );
-

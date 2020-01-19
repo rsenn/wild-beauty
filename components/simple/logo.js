@@ -10,4 +10,3 @@ export default styled.h1`
     text-shadow: 1px 0px 3px rgba(150, 150, 150, 1);
   }
 `;
-

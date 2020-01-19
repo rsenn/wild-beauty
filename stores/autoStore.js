@@ -109,4 +109,3 @@ export const makeAutoStoreHandler = (name, store) => {
 
   return fn;
 };
-

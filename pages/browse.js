@@ -117,4 +117,3 @@ class Browse extends React.Component {
 }
 
 export default Browse;
-

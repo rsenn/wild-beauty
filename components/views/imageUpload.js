@@ -155,4 +155,3 @@ export const ImageUpload = inject("rootStore")(
 );
 
 export default ImageUpload;
-

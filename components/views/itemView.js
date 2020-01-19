@@ -167,4 +167,3 @@ export const ItemView = inject("rootStore")(
 );
 
 export default ItemView;
-

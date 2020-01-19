@@ -236,4 +236,3 @@ class Panes extends React.Component {
 }
 
 export default Panes;
-

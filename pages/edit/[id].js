@@ -172,4 +172,3 @@ export class Edit extends React.Component {
 }
 
 export default Edit;
-

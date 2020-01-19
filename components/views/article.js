@@ -70,4 +70,3 @@ export const Article = ({ children, title /* = "Untitled"*/, text, ...props }) =
 };
 
 export default Article;
-

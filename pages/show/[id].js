@@ -11,4 +11,3 @@ export default (props, res) => {
     </div>
   );
 };
-

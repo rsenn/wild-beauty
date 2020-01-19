@@ -55,4 +55,3 @@ export function getStores() {
 }
 
 export default getOrCreateStore;
-

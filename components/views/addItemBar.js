@@ -21,4 +21,3 @@ export const AddItemBar = ({ onAdd, ...props }) => {
 };
 
 export default AddItemBar;
-

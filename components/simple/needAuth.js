@@ -27,4 +27,3 @@ const NeedAuth = inject("rootStore")(
 );
 
 export default NeedAuth;
-

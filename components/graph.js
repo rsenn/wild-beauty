@@ -294,4 +294,3 @@ const mapSizesToProps = ({ width, height }) => ({
 });
 
 export default withSizes(mapSizesToProps)(Graph);
-
