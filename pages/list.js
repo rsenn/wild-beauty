@@ -426,10 +426,13 @@ class List extends React.Component {
     const items = this.props.items
       ? this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1)
       : [];
-   
-    const data = rootStore.getHierarchy(undefined, it => { if(!it.children) it.size = 10; return it; });
 
-   // console.log("data: ", data);
+    const data = rootStore.getHierarchy(undefined, it => {
+      if(!it.children) it.size = 10;
+      return it;
+    });
+
+    // console.log("data: ", data);
     return (
       <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent}>
         <Head>

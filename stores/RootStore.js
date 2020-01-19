@@ -353,7 +353,7 @@ export class RootStore {
       let ret = { name };
       if(children && children.length > 0) ret.children = children;
 
-      return  fn ? fn(ret)  : ret;
+      return fn ? fn(ret) : ret;
     }
     return null;
   }

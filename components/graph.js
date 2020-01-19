@@ -237,8 +237,8 @@ function forceSimulation(data) {
 
 export class Graph extends Component {
   svgRef = React.createRef();
- 
-/* componentDidUpdate() {
+
+  /* componentDidUpdate() {
     console.log("Graph.componentDidUpdate");
   }*/
 
