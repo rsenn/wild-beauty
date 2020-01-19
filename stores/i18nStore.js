@@ -119,3 +119,4 @@ if (global.navigator) {
 }
 
 export default i18nStore;
+

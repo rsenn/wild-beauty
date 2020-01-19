@@ -32,3 +32,4 @@ export const Center = ({ horizontal, vertical, children, style, ...props }) => (
     <div style={{ margin: "auto" }}>{children}</div>
   </div>
 );
+

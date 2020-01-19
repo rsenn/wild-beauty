@@ -91,3 +91,4 @@ function isNumber(str) {
 }
 
 export default LocalStore;
+

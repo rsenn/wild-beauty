@@ -553,3 +553,4 @@ export class RootStore {
 export const singleton = new RootStore();
 
 export default RootStore;
+

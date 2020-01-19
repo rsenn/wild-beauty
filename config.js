@@ -8,3 +8,4 @@ const config = {
 };
 
 export default withData(config);
+

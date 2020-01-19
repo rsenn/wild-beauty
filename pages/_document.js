@@ -19,3 +19,4 @@ export default class DefaultDocument extends Document {
     );
   }
 }
+
