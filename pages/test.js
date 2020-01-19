@@ -1,13 +1,11 @@
 import React, { useState } from "react";
-import Head from "next/head";
-import Nav from "../components/nav.js";
 import Layer from "../components/layer.js";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import { ScrollController } from "../utils/scrollController.js";
 import Alea from "../utils/alea.js";
 import { SwipeTracker } from "../utils/swipeTracker.js";
 import { HSLA } from "../utils/dom.js";
-import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
+import { MultitouchListener, MovementListener } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";

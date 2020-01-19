@@ -1,10 +1,8 @@
 import React from "react";
 import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
-import axios from "../utils/axios.js";
 import { Grid, GridItem } from "../components/views/grid.js";
 import { ItemTile } from "../components/views/itemTile.js";
-import Util from "../utils/util.js";
 import Layout from "../components/layout.js";
 
 @inject("rootStore")

@@ -1,7 +1,5 @@
 import React from "react";
 import { withRouter } from "next/router";
-import Head from "next/head";
-import Nav from "../components/nav.js";
 import Layer from "../components/layer.js";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../utils/alea.js";
@@ -15,10 +13,9 @@ import { MultitouchListener, MovementListener, TouchListener } from "../utils/to
 import { getOrCreateStore } from "../stores/createStore.js";
 import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
-import { WithQueryParam, IfQueryParam } from "../components/withQueryParam.js";
+import { IfQueryParam } from "../components/withQueryParam.js";
 import { trkl } from "../utils/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
-import { BehaveHooks, Behave } from "../utils/behave.js";
 import Layout from "../components/layout.js";
 
 import "../static/css/react-upload-gallery.css";
