@@ -5,6 +5,7 @@ import axios from "../utils/axios.js";
 import { Grid, GridItem } from "../components/views/grid.js";
 import { ItemTile } from "../components/views/itemTile.js";
 import Util from "../utils/util.js";
+import Layout from "../components/layout.js";
 
 @inject("rootStore")
 @observer
@@ -70,6 +71,7 @@ class Browse extends React.Component {
     //    if(typeof children != "object" || children === null || children.length === undefined) children = [];
 
     return (
+      <Layout>
       <div className={"grid-container"}>
         Browse
         <Grid
@@ -84,6 +86,7 @@ class Browse extends React.Component {
             </GridItem>
           ))}
         </Grid>
+        </div>
         <style jsx global>{`
           .grid-container {
             padding: 0 20px;
@@ -110,7 +113,7 @@ class Browse extends React.Component {
             box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 1);
           }
         `}</style>
-      </div>
+      </Layout>
     );
   }
 }
