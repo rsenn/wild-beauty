@@ -16,6 +16,7 @@ import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
 import { MovementListener, TouchListener } from "../utils/touchHandler.js";
 import { trkl } from "../utils/trkl.js";
+import Layout from "../components/layout.js";
 
 import "../static/css/grid.css";
 
@@ -434,12 +435,7 @@ class List extends React.Component {
 
     // console.log("data: ", data);
     return (
-      <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent}>
-        <Head>
-          <title>List</title>
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <Nav loading={rootStore.state.loading} />
+     <Layout>
         <Tree tree={tree} minWidth={1024} active={this.state.active} />{" "}
         {/*treeVerify={node => node.children && node.children.length} */}
         <br />
@@ -650,7 +646,7 @@ class List extends React.Component {
             font-size: 15px;
           }
         `}</style>
-      </div>
+      </Layout>
     );
   }
 }

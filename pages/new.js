@@ -19,6 +19,7 @@ import { WithQueryParam, IfQueryParam } from "../components/withQueryParam.js";
 import { trkl } from "../utils/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import { BehaveHooks, Behave } from "../utils/behave.js";
+import Layout from "../components/layout.js";
 
 import "../static/css/react-upload-gallery.css";
 
@@ -325,16 +326,7 @@ class New extends React.Component {
     console.log("New.render", this.tree);
 
     return (
-      <div className={"page-layout"}>
-        <Head>
-          <title>New</title>
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <Nav>
-          {global.window ? window.site.label(this.props) : undefined} -{" "}
-          {global.window ? window.site.description(this.props) : undefined}
-        </Nav>
-        <div className={"content-layout"}>
+      <Layout>
           <NeedAuth>
             {rootStore.state.image === null ? (
               <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
@@ -364,8 +356,7 @@ class New extends React.Component {
               text-align: left;
             }
           `}</style>
-        </div>
-      </div>
+        </Layout>
     );
   }
 }

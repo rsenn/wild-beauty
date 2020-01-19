@@ -11,6 +11,7 @@ import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touc
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
+import Layout from "../components/layout.js";
 
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
@@ -78,14 +79,8 @@ const Test = () => {
       "/static/img/fdcce856cf66f33789dc3934418113a2.jpg"
     ];
   return (
-    <div className={"main-layout"} {...TouchEvents(touchListener)}>
-      <Head>
-        <title>Test</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Nav />
-      <div className={"page-layout"}>
-        {/*    <form action="upload" method="POST" onSubmit={e => e.preventDefault()}>
+    <Layout>
+      {/*    <form action="upload" method="POST" onSubmit={e => e.preventDefault()}>
         <Dropzone onDrop={acceptedFiles => console.log(acceptedFiles)}>
           {({ getRootProps, getInputProps }) => (
             <section>
@@ -97,103 +92,102 @@ const Test = () => {
           )}
         </Dropzone>
       </form>*/}
-        <Gallery />
-        <div
-          className={"panels"}
-          style={{
-            overflow: "visible",
-            display: "flex",
-            flexFlow: "row wrap",
-            justifyContent: "space-around",
-            alignItems: "stretch",
-            position: "absolute",
-            maxWidth: "100%",
-            maxHeight: "100%"
-          }}
-        >
-          {list.map(path => (
-            <Layer inline style={{ flex: "1 0 auto", backgroundColor: RandomColor() }}>
-              <img src={path} style={{ maxWidth: "50vmin", width: "100%", height: "auto" }} className="gallery-image" />
-            </Layer>
-          ))}
-        </div>
-        <Layer className={"layer"} w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
-          Layer
-        </Layer>
-        <SvgOverlay />
-        <style jsx global>{`
-          .main-layout {
-            overflow: hidden;
-          }
-
-          .gallery-image {
-            height: auto;
-          }
-
-          .panels {
-            margin: 100px;
-            overflow: visible;
-          }
-
-          img {
-            border: 0px;
-            outline: 0px;
-            padding: 0px;
-            margin: 0px;
-          }
-
-          .panels .layer {
-            margin: 0px;
-            padding: 0px;
-          }
-
-          .layout {
-            margin: 0px;
-            padding: 0px;
-            overflow: visible;
-          }
-
-          .panels > div {
-            flex: 1 1 auto;
-          }
-
-          .layer > div {
-            width: 100%;
-            height: 100%;
-          }
-
-          .layer > div {
-            width: 100%;
-            height: 100%;
-          }
-
-          .layer.dragging {
-            opacity: 50%;
-          }
-
-          .title {
-            margin: 0;
-            width: 100%;
-            padding-top: 80px;
-            line-height: 1.15;
-            font-size: 48px;
-          }
-
-          .title,
-          .description {
-            text-align: center;
-          }
-
-          .row {
-            max-width: 880px;
-            margin: 80px auto 40px;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-around;
-          }
-        `}</style>
+      <Gallery />
+      <div
+        className={"panels"}
+        style={{
+          overflow: "visible",
+          display: "flex",
+          flexFlow: "row wrap",
+          justifyContent: "space-around",
+          alignItems: "stretch",
+          position: "absolute",
+          maxWidth: "100%",
+          maxHeight: "100%"
+        }}
+      >
+        {list.map(path => (
+          <Layer inline style={{ flex: "1 0 auto", backgroundColor: RandomColor() }}>
+            <img src={path} style={{ maxWidth: "50vmin", width: "100%", height: "auto" }} className="gallery-image" />
+          </Layer>
+        ))}
       </div>
-    </div>
+      <Layer className={"layer"} w={300} h={"300px"} margin={10} padding={2} border={"2px dashed red"}>
+        Layer
+      </Layer>
+      <SvgOverlay />
+      <style jsx global>{`
+        .main-layout {
+          overflow: hidden;
+        }
+
+        .gallery-image {
+          height: auto;
+        }
+
+        .panels {
+          margin: 100px;
+          overflow: visible;
+        }
+
+        img {
+          border: 0px;
+          outline: 0px;
+          padding: 0px;
+          margin: 0px;
+        }
+
+        .panels .layer {
+          margin: 0px;
+          padding: 0px;
+        }
+
+        .layout {
+          margin: 0px;
+          padding: 0px;
+          overflow: visible;
+        }
+
+        .panels > div {
+          flex: 1 1 auto;
+        }
+
+        .layer > div {
+          width: 100%;
+          height: 100%;
+        }
+
+        .layer > div {
+          width: 100%;
+          height: 100%;
+        }
+
+        .layer.dragging {
+          opacity: 50%;
+        }
+
+        .title {
+          margin: 0;
+          width: 100%;
+          padding-top: 80px;
+          line-height: 1.15;
+          font-size: 48px;
+        }
+
+        .title,
+        .description {
+          text-align: center;
+        }
+
+        .row {
+          max-width: 880px;
+          margin: 80px auto 40px;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-around;
+        }
+      `}</style>
+    </Layout>
   );
 };
 
