@@ -104,17 +104,17 @@ class List extends React.Component {
   }
 
   componentDidMount() {
-      const { rootStore, router } = this.props;
+    const { rootStore, router } = this.props;
 
     rootStore.loadItems().then(response => {
       if(response) {
         console.log("Items: ", response.items);
 
         this.tree = rootStore.getHierarchy(undefined, it => {
-      if(!it.children) it.size = 20;
-      it.value = it.id;
-      return it;
-    });
+          if(!it.children) it.size = 20;
+          it.value = it.id;
+          return it;
+        });
         console.log("this.tree", toJS(this.tree));
       }
     });
@@ -286,10 +286,74 @@ class List extends React.Component {
         {/*<Tree tree={tree} minWidth={1024} active={this.state.active} />*/}
         {/*treeVerify={node => node.children && node.children.length} */}
         <br />
-        <Graph data={ 
-//          tree
-{"name":"Id[1]","children":[{"name":"Id[41]","size":30},{"name":"org","size":30},{"name":"Id[57]","size":30},{"name":"Id[58]","size":30},{"name":"Id[59]","size":30},{"name":"Id[60]","size":30},{"name":"Id[61]","size":30},{"name":"Id[62]","size":30},{"name":"objects","children":[{"name":"electronics","children":[{"name":"Id[119]","size":30},{"name":"Id[120]","size":30},{"name":"Id[121]","size":30},{"name":"Id[122]","size":30},{"name":"Id[123]","size":30},{"name":"Id[124]","size":30},{"name":"pic","children":[{"name":"lc-meter","size":30},{"name":"rgb-led","size":30},{"name":"picstick-25k50","size":30}]},{"name":"Audio","size":30},{"name":"RS232","children":[{"name":"jdm2-programmer","size":30}]}]},{"name":"boxes","children":[{"name":"Id[99]","size":30},{"name":"Id[103]","size":30},{"name":"Id[98]","size":30},{"name":"Id[86]","size":30},{"name":"Test","size":30}]},{"name":"bags","children":[{"name":"Id[64]","size":30}]}]},{"name":"subjects","children":[{"name":"Id[89]","children":[{"name":"Id[105]","size":30},{"name":"Roman","size":30}]},{"name":"groups","size":30}]}]}
-} />
+        <Graph
+          data={
+            //          tree
+            {
+              name: "Id[1]",
+              children: [
+                { name: "Id[41]", size: 30 },
+                { name: "org", size: 30 },
+                { name: "Id[57]", size: 30 },
+                { name: "Id[58]", size: 30 },
+                { name: "Id[59]", size: 30 },
+                { name: "Id[60]", size: 30 },
+                { name: "Id[61]", size: 30 },
+                { name: "Id[62]", size: 30 },
+                {
+                  name: "objects",
+                  children: [
+                    {
+                      name: "electronics",
+                      children: [
+                        { name: "Id[119]", size: 30 },
+                        { name: "Id[120]", size: 30 },
+                        { name: "Id[121]", size: 30 },
+                        { name: "Id[122]", size: 30 },
+                        { name: "Id[123]", size: 30 },
+                        { name: "Id[124]", size: 30 },
+                        {
+                          name: "pic",
+                          children: [
+                            { name: "lc-meter", size: 30 },
+                            { name: "rgb-led", size: 30 },
+                            { name: "picstick-25k50", size: 30 }
+                          ]
+                        },
+                        { name: "Audio", size: 30 },
+                        { name: "RS232", children: [{ name: "jdm2-programmer", size: 30 }] }
+                      ]
+                    },
+                    {
+                      name: "boxes",
+                      children: [
+                        { name: "Id[99]", size: 30 },
+                        { name: "Id[103]", size: 30 },
+                        { name: "Id[98]", size: 30 },
+                        { name: "Id[86]", size: 30 },
+                        { name: "Test", size: 30 }
+                      ]
+                    },
+                    { name: "bags", children: [{ name: "Id[64]", size: 30 }] }
+                  ]
+                },
+                {
+                  name: "subjects",
+                  children: [
+                    {
+                      name: "Id[89]",
+                      children: [
+                        { name: "Id[105]", size: 30 },
+                        { name: "Roman", size: 30 }
+                      ]
+                    },
+                    { name: "groups", size: 30 }
+                  ]
+                }
+              ]
+            }
+          }
+        />
         <br />
         <br />
         {this.state.view == "item" ? (

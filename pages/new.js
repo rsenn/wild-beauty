@@ -19,7 +19,6 @@ import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
 
 import "../static/css/react-upload-gallery.css";
-
 import "../static/style.css";
 
 const getPrng = () => Alea;
@@ -57,7 +56,6 @@ const findInTree = (tree, value) => {
 
 @inject("rootStore")
 @observer
-//@withRouter
 class New extends React.Component {
   currentImage = null;
   clonedImage = null;
@@ -78,29 +76,18 @@ class New extends React.Component {
   static async getInitialProps({ res, req, err, mobxStore, ...ctx }) {
     const { RootStore } = mobxStore;
     let images = [];
-
     if(!global.window) {
       images = await RootStore.fetchImages(/*{ where: { user_id:   }}*/);
-
       images = images.filter(ph => ph.items.length == 0);
       images.forEach(item => RootStore.newImage(item));
-
       const { url, query, body, route } = req || {};
-      /*
-    const ctxKeys = Object.keys(ctx);
-    const reqKeys = Object.keys(req);
-*/
-      //console.log("New.getInitialProps", { ctx,  url,  query, body });
       console.log("New.getInitialProps", { images });
-
       if(ctx && req && req.cookies) {
         const { token, user_id } = req.cookies;
-        //set(RootStore.auth, { token, user_id });
         RootStore.auth.token = token;
         RootStore.auth.user_id = user_id;
       }
     }
-
     return { images };
   }
 
@@ -112,23 +99,17 @@ class New extends React.Component {
   constructor(props) {
     let args = [...arguments];
     const { rootStore } = props;
-    //console.log("constructor args: ", props.initialMobxState.RootStore.images);
     super(props);
-
     if(global.window) {
       window.page = this;
       window.rs = rootStore;
-      //    window.stores = getOrCreateStore();
     }
-
     let swipeEvents = {};
     var e = null;
-
     if(global.window !== undefined) {
       window.page = this;
       window.rs = rootStore;
     }
-
     if(global.window) {
       const moveImage = (event, e) => {
         const orientation = e.getAttribute("orientation");
@@ -139,10 +120,6 @@ class New extends React.Component {
         if(event.type.endsWith("move"))
           this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
         let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
-        //   console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
-
-        //e.style.setProperty("transform", event.type.endsWith("move") ? transformation : "");
-
         if(event.type.endsWith("move")) {
           e.style.setProperty("transform", transformation);
           this.clonedImage.style.setProperty("transform", transformation);
@@ -150,20 +127,17 @@ class New extends React.Component {
       };
       this.touchCallback = makeTouchCallback("inner-image", (event, e) => {
         //    console.log("touchCallback ", { event, e });
-
         const zIndex = maxZIndex() + 1;
         if(e) Element.setCSS(e, { zIndex });
         if(e && e.style) {
           moveImage(event, e);
         }
       });
-      /*
+
       this.touchListener = TouchListener(
         event => {
           console.log("Touch ", event);
           const elem = event.target;
-
-          //     if(event.nativeEvent) event.nativeEvent.preventDefault();
           if(
             event.type.endsWith("start") &&
             event.target.tagName.toLowerCase() == "img" &&
@@ -183,32 +157,19 @@ class New extends React.Component {
             if(this.clonedImage) Element.remove(this.clonedImage);
             this.clonedImage = Element.create(obj);
             document.body.appendChild(this.clonedImage);
-
             this.clonedImage.style.zIndex = -1;
             this.clonedImage.style.opacity = 0.3;
-            //   Element.move(this.clonedImage, rect);
-            //console.log("clonedImage obj:", this.clonedImage);
           }
-
           if(event.type.endsWith("move")) {
             if(this.clonedImage && this.currentImage) {
               let zIndex = parseInt(Element.getCSS(this.currentImage, "z-index")) - 1;
               let irect = Element.rect(this.currentImage);
-
-              //console.log("irect: ", { irect });
-              //  if(irect.x >= 1 && irect.y >= 1) Element.move(this.clonedImage, irect);
-              //
-
               moveImage(event, this.currentImage);
             }
           }
-     
           if(event.type.endsWith("end")) {
             if(this.clonedImage && this.currentImage) {
               this.currentImage.style.position = "relative";
-             //this.currentImage.style.left = `${this.currentOffset.x}px`;
-           //this.currentImage.style.top = `${this.currentOffset.y}px`;
-
               console.log("currentOffset: ", this.currentOffset);
               console.log("currentImage: ", this.currentImage);
               Element.remove(this.clonedImage);
@@ -216,14 +177,8 @@ class New extends React.Component {
             }
           }
         },
-        {
-          element: global.window,
-          step: 1,
-          round: true,
-          listener: MovementListener,
-          noscroll: true
-        }
-      );*/
+        { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
+      );
     }
     rootStore.state.step = 1;
     //    this.checkQuery();
@@ -240,7 +195,7 @@ class New extends React.Component {
     console.log("addContent: ", event);
     rootStore.fields.push({ type: null, value: "" });
   }
-
+  /*
   @action.bound
   checkQuery() {
     const { rootStore, router } = this.props;
@@ -251,25 +206,19 @@ class New extends React.Component {
     );
     console.log("newState: ", obj);
     rootStore.setState(obj);
-  }
+  }*/
 
   componentDidMount() {
     const { rootStore, router } = this.props;
     //this.checkQuery();
-    rootStore.loadItems().then(response => {
+    /*    rootStore.loadItems().then(response => {
       if(response) {
         console.log("Items: ", response.items);
         this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
         console.log("this.tree", toJS(this.tree));
       }
     });
-
-    let textEditor = Element.findAll("textarea");
-
-    textEditor.forEach(e => {
-      console.log("behaveTextarea: ", e);
-      behaveTextarea(e);
-    });
+*/
   }
 
   /**

@@ -281,20 +281,19 @@ export class Graph extends Component {
     let { data } = this.props;
 
     if(data !== null) {
-    console.log("Graph.componentDidIUpdate data=", data);
-    collapsibleForceLayout(data);
-    //     forceSimulation(data);
-  }
+      console.log("Graph.componentDidIUpdate data=", data);
+      collapsibleForceLayout(data);
+      //     forceSimulation(data);
+    }
   }
 
-  
   componentDidUpdate() {
     const { data } = this.props;
     if(data !== null) {
-    console.log("Graph.componentDidIUpdate data=", data);
-    collapsibleForceLayout(data);
-    //     forceSimulation(data);
-  }
+      console.log("Graph.componentDidIUpdate data=", data);
+      collapsibleForceLayout(data);
+      //     forceSimulation(data);
+    }
   }
 
   render() {
