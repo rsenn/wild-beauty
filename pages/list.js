@@ -18,7 +18,6 @@ import Layout from "../components/layout.js";
 
 import "../static/css/grid.css";
 
-import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
 import { withSize } from "react-sizeme";
 
@@ -44,32 +43,6 @@ const findInTree = (tree, value) => {
     }
   }
   return null;
-};
-
-const makeItemToOption = selected => item => {
-  let data =
-    item && typeof item.data == "string" && item.data.length > 0
-      ? JSON.parse(item.data)
-      : item && item.data != null && typeof item.data == "object"
-      ? item.data
-      : {};
-  let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
-  let value = item.id;
-  let children = toJS(item.children);
-  let obj = {
-    label,
-    title: label,
-    id: value,
-    parent_id: item.parent_id,
-    value,
-    expanded: true,
-    checked: selected === value
-  };
-  if(children && children.length) obj.children = children;
-  if(label.startsWith("null(")) return null;
-  if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
-  //if(item.parent_id != -1 && item.parent_id != 1 && item.type !== null && !item.type.endsWith('category')) return null;
-  return obj;
 };
 
 @inject("rootStore")
@@ -101,12 +74,14 @@ class List extends React.Component {
 
   constructor(props) {
     super(props);
+
+    const { rootStore } = this.props;
+
     this.api = getAPI(
       global.window && /192\.168/.test(window.location.href)
         ? "http://wild-beauty.herokuapp.com/v1/graphql"
         : "/v1/graphql"
     );
-    const { rootStore } = this.props;
     if(global.window) {
       window.api = this.api;
       window.page = this;
@@ -115,16 +90,8 @@ class List extends React.Component {
 
       //   window.addEventListener('mousemove', this.mouseMove);
     }
-    //console.log("props.items: ", props.items);
     rootStore.items.clear();
-
-    /*    props.items.forEach(item => {
-      rootStore.newItem(item);
-    });
-*/
-
-    //console.log("rootItemId: ", rootStore.rootItemId);
-    this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
+    this.tree = rootStore.getHierarchy();
 
     if(this.props.params && this.props.params.id !== undefined) {
       this.state.view = "item";
@@ -133,135 +100,6 @@ class List extends React.Component {
       var item = findInTree(this.tree, "Objects");
       item.checked = true;
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
-    }
-    /*
-     this.touchListener = TouchListener(this.touchEvent,
-      f        element: global.window,
-        step: 10,
-        round: false,
-        listener: MovementListener,
-        noscroll: true
-      }
-    );*/
-
-    /*  this.svgRef.subscribe(ref => {
-      var r = Element.rect('#tree');
-      const {x,y} = r;
-     var e =  ref.factory('use', { href: '#tree', x, y }, ref.svg);
-      console.log("svgRef: ", e);   
-    });*/
-  }
-
-  checkTagRemove() {
-    if(global.window) {
-      let tagRemove = Element.find("button.tag-remove");
-      if(tagRemove) {
-        tagRemove.addEventListener("click", e => {
-          e.preventDefault();
-          Timer.once(100, () => {
-            console.log("tagRemove: ", tagRemove);
-            Util.traverseTree(this.tree, node => {
-              node.checked = false;
-            });
-            this.forceUpdate();
-          });
-        });
-      }
-      return tagRemove;
-    }
-  }
-
-  componentDidMount() {
-    const { rootStore, router } = this.props;
-    // this.checkTagRemove();
-  }
-
-  componentDidUpdate() {
-    //this.checkTagRemove();
-  }
-
-  touchEvent = event => {
-    console.log("Touch event: ", event);
-  };
-
-  mouseEvent = event => {
-    const { target, nativeEvent } = event;
-    const { type, clientX, clientY, pageX: x, pageY: y } = nativeEvent;
-    if(!this.rects) {
-      this.rects = Element.findAll("rect");
-    }
-    var r = this.rects.filter(rect => Rect.inside(Element.rect(rect), { x, y }));
-    function getNum(elem, name) {
-      return parseFloat(elem.getAttribute(name));
-    }
-    function getId(elem) {
-      return parseInt(elem.getAttribute("id").replace(/.*\./, ""));
-    }
-    if(type.endsWith("move")) {
-      var elem = r[0] && r[0].parentElement;
-      var hover = -1;
-      if(this.prevElem && this.prevElem.style) {
-        if(this.prevElem == elem) return;
-        this.prevElem.style.removeProperty("transform");
-        hover = -1;
-      }
-      if(elem && elem.style) {
-        const t = ` scale(1.4,1.4)`;
-        console.log("Mouse event: ", t);
-
-        var parent = elem.parentElement;
-        /*  parent.removeChild(elem);
-        parent.appendChild(elem);*/
-        elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
-
-        elem.style.setProperty("transform", t);
-        this.prevElem = elem;
-        hover = getId(elem);
-      }
-      // this.setState({ hover });
-    } else if(type.endsWith("down")) {
-      var elem = r[0];
-
-      console.log("Mouse event: ", { type, x, y }, r);
-
-      if(elem) {
-        const id = getId(elem.parentElement);
-        console.log("Clicked id:", id);
-        this.setState({ active: id });
-      }
-    }
-  };
-
-  @action.bound
-  selectNode(item) {
-    var children = Util.flatTree(item);
-    var ids = children.map(child => child.id);
-    console.log("treeSelEvent: ", ids, item.title);
-    this.setState({ parentIds: ids });
-  }
-
-  treeSelEvent(type, arg) {
-    const { rootStore } = this.props;
-    console.log("treeSelEvent: ", type, arg);
-    switch (type) {
-      case "change": {
-        console.log("treeSelEvent: ", arg.value);
-        Util.traverseTree(this.tree, item => {
-          item.checked = false;
-        });
-        const item = findInTree(this.tree, arg.value);
-        if(item) {
-          item.checked = true;
-          this.state.node = item.value;
-          //  this.tree = rootStore.getItem(this.state.node, makeItemToOption());
-          this.selectNode(item);
-        }
-        //rootStore.setState({ selected: arg.value });
-        break;
-      }
-      default: {
-        break;
-      }
     }
   }
 
@@ -420,7 +258,6 @@ class List extends React.Component {
         //console.log("Resized: ", { currentTarget, target });
       });
     }
-    const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
     const items = this.props.items
       ? this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1)
@@ -444,22 +281,6 @@ class List extends React.Component {
           <ItemView id={this.state.itemId} />
         ) : (
           <div className={"show-layout2"}>
-            {tree ? (
-              <DropdownTreeSelect
-                data={tree}
-                onChange={makeTreeSelEvent("change")}
-                onNodeToggle={makeTreeSelEvent("node-toggle")}
-                onFocus={makeTreeSelEvent("focus")}
-                onBlur={makeTreeSelEvent("blur")}
-                className={"dropdown-tree"}
-                mode={"radioSelect"}
-                texts={{ placeholder: "parent item" }}
-              />
-            ) : (
-              undefined
-            )}
-            {/*          <img src={"/static/img/test.svg"} />
-             */}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
                 {items.map(item => {

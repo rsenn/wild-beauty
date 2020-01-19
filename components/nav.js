@@ -1,6 +1,6 @@
 import React from "react";
 import { withRouter, useRouter } from "next/router";
-import  Link from "next/link";
+import Link from "next/link";
 import classNames from "classnames";
 import LoginForm from "./login.js";
 import SiteMap from "./siteMap.js";
@@ -63,14 +63,14 @@ const NavLink = inject("rootStore")(
       key={key}
     >
       <Link href={href} data-label={typeof label == "function" ? label(props) : label} prefetch={false} passHref>
-      <a
+        <a
           data-href={href}
           data-name={path}
           className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")}
           onClick={onClick}
         >
-        {typeof label == "function" ? label(props) : label}
-        <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
+          {typeof label == "function" ? label(props) : label}
+          <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
         </a>
       </Link>
       <style jsx global>{`
@@ -198,254 +198,251 @@ const Nav = inject(
   "rootStore",
   "i18nStore"
 )(
-  observer(
-    (({ rootStore, i18nStore, loading,  children, ...props }) => {
-      const [loginIsOpen, setLoginOpen] = React.useState(false);
-      const [languageIsOpen, setLanguageOpen] = React.useState(false);
-       const router = useRouter();
+  observer(({ rootStore, i18nStore, loading, children, ...props }) => {
+    const [loginIsOpen, setLoginOpen] = React.useState(false);
+    const [languageIsOpen, setLanguageOpen] = React.useState(false);
+    const router = useRouter();
 
-      const [color, setColor] = React.useState(randomGradient());
-      const angle = ((color[0].h + color[0].s + color[0].l) % 360) - 180;
-      customStyles.overlay.background = `linear-gradient(${Math.floor(
-        angle
-      )}deg, ${color[0].toString()} 0%, ${color[1].toString()} 100%)`;
+    const [color, setColor] = React.useState(randomGradient());
+    const angle = ((color[0].h + color[0].s + color[0].l) % 360) - 180;
+    customStyles.overlay.background = `linear-gradient(${Math.floor(
+      angle
+    )}deg, ${color[0].toString()} 0%, ${color[1].toString()} 100%)`;
 
-      const language = i18nStore.user.lang;
-      const authenticated = loginIsOpen ? false : rootStore.authenticated; //console.log("i18nStore: ", i18nStore);
+    const language = i18nStore.user.lang;
+    const authenticated = loginIsOpen ? false : rootStore.authenticated; //console.log("i18nStore: ", i18nStore);
 
-      if(global.window) {
-        window.SiteMap = SiteMap;
-      }
+    if(global.window) {
+      window.SiteMap = SiteMap;
+    }
 
-      let entry = Util.find(SiteMap, "lang", "name");
-      //console.log("SiteMap: ", SiteMap);
-      entry.active = languageIsOpen;
+    let entry = Util.find(SiteMap, "lang", "name");
+    //console.log("SiteMap: ", SiteMap);
+    entry.active = languageIsOpen;
 
-      entry = Util.find(SiteMap, "login", "name");
-      entry.active = loginIsOpen;
+    entry = Util.find(SiteMap, "login", "name");
+    entry.active = loginIsOpen;
 
-      entry = Util.find(SiteMap, "new", "name");
-      entry.disabled = !authenticated;
+    entry = Util.find(SiteMap, "new", "name");
+    entry.disabled = !authenticated;
 
-      entry = Util.find(SiteMap, "logout", "name");
-      entry.disabled = !authenticated;
+    entry = Util.find(SiteMap, "logout", "name");
+    entry.disabled = !authenticated;
 
-      entry = Util.find(SiteMap, "login", "name");
-      entry.disabled = authenticated;
+    entry = Util.find(SiteMap, "login", "name");
+    entry.disabled = authenticated;
 
-      console.log("Nav.render", { angle, authenticated });
+    console.log("Nav.render", { angle, authenticated });
 
-      return (
-        <div className="menu">
-          <Modal
-            isOpen={loginIsOpen}
-            onAfterOpen={() => {}}
-            onRequestClose={() => setLoginOpen(false)}
+    return (
+      <div className="menu">
+        <Modal
+          isOpen={loginIsOpen}
+          onAfterOpen={() => {}}
+          onRequestClose={() => setLoginOpen(false)}
+          style={{
+            overlay: customStyles.overlay,
+            content: { ...customStyles.content, maxWidth: "275px", minHeight: "275px", maxHeight: "75vh" }
+          }}
+          contentLabel="Login Modal"
+          closeTimeoutMS={1000}
+        >
+          <LoginForm
+            show={true}
             style={{
-              overlay: customStyles.overlay,
-              content: { ...customStyles.content, maxWidth: "275px", minHeight: "275px", maxHeight: "75vh" }
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              boxShadow: "1px 1px 2px 2px rgba(0, 0, 0, 1)"
             }}
-            contentLabel="Login Modal"
-            closeTimeoutMS={1000}
-          >
-            <LoginForm
-              show={true}
-              style={{
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                boxShadow: "1px 1px 2px 2px rgba(0, 0, 0, 1)"
-              }}
-              loading={loading}
-              onLogin={(user, pass) => {
-                rootStore.doLogin(user, pass, res => {
-                  if(res.success)
-                    Timer.once(1333, () => {
-                      setLoginOpen(false);
-                    });
-                });
-              }}
-            />
-          </Modal>
-          <Modal
-            isOpen={languageIsOpen}
-            onAfterOpen={() => {}}
-            onRequestClose={() => setLanguageOpen(false)}
-            style={customStyles}
-            contentLabel="Language Modal"
-            closeTimeoutMS={1000}
-          >
-            <div className={"flagbox"}>
-              <div className={"flaglist"}>
-                <div onClick={() => setLanguage(i18nStore, "de", setLanguageOpen)}>
-                  <img
-                    src={"/static/img/flag-de.svg"}
-                    className={"country-flag"}
-                    style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }}
-                  />
-                </div>
-                <div onClick={() => setLanguage(i18nStore, "fr", setLanguageOpen)}>
-                  <img
-                    src={"/static/img/flag-fr.svg"}
-                    className={"country-flag"}
-                    style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }}
-                  />
-                </div>
-                <div onClick={() => setLanguage(i18nStore, "en", setLanguageOpen)}>
-                  <img
-                    src={"/static/img/flag-gb.svg"}
-                    className={"country-flag"}
-                    style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }}
-                  />
-                </div>
+            loading={loading}
+            onLogin={(user, pass) => {
+              rootStore.doLogin(user, pass, res => {
+                if(res.success)
+                  Timer.once(1333, () => {
+                    setLoginOpen(false);
+                  });
+              });
+            }}
+          />
+        </Modal>
+        <Modal
+          isOpen={languageIsOpen}
+          onAfterOpen={() => {}}
+          onRequestClose={() => setLanguageOpen(false)}
+          style={customStyles}
+          contentLabel="Language Modal"
+          closeTimeoutMS={1000}
+        >
+          <div className={"flagbox"}>
+            <div className={"flaglist"}>
+              <div onClick={() => setLanguage(i18nStore, "de", setLanguageOpen)}>
+                <img
+                  src={"/static/img/flag-de.svg"}
+                  className={"country-flag"}
+                  style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }}
+                />
+              </div>
+              <div onClick={() => setLanguage(i18nStore, "fr", setLanguageOpen)}>
+                <img
+                  src={"/static/img/flag-fr.svg"}
+                  className={"country-flag"}
+                  style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }}
+                />
+              </div>
+              <div onClick={() => setLanguage(i18nStore, "en", setLanguageOpen)}>
+                <img
+                  src={"/static/img/flag-gb.svg"}
+                  className={"country-flag"}
+                  style={{ width: "24vmin", height: "18vmin", margin: "10px 10px" }}
+                />
               </div>
             </div>
-          </Modal>{" "}
-          <ul className={"menu"}>
-            {SiteMap.map(link => {
-              link.key = `nav-link-${typeof link.href == "string" ? link.href : ""}-${
-                typeof link.name == "string" ? link.name : ""
-              }`;
-              return link;
-            }).map(item => {
-              //console.log("item.name: ", item.name);
-              if(item.name == "login") {
-                if(rootStore.authenticated) item.label = <span>Logout</span>;
-              }
-              if(item.disabled) return undefined;
-              return (
-                <NavLink
-                  href={item.href}
-                  key={item.key}
-                  path={item.href}
-                  label={item.label}
-                  description={item.description}
-                  /*   {...{ ...props, ...item, path: router.asPath }}*/
-                  onClick={
-                    item.name.startsWith("log")
-                      ? () => {
-                          console.log("click login");
-                          if(item.name == "login") {
-                            if(!loginIsOpen) {
-                              setColor(randomGradient());
-                              setLoginOpen(!loginIsOpen);
-                            }
-                          } else if(item.name == "logout") {
-                            rootStore.doLogout();
-                          }
-                        }
-                      : item.name == "lang"
-                      ? () => {
-                          console.log("click language");
-                          if(!languageIsOpen) {
+          </div>
+        </Modal>{" "}
+        <ul className={"menu"}>
+          {SiteMap.map(link => {
+            link.key = `nav-link-${typeof link.href == "string" ? link.href : ""}-${
+              typeof link.name == "string" ? link.name : ""
+            }`;
+            return link;
+          }).map(item => {
+            //console.log("item.name: ", item.name);
+            if(item.name == "login") {
+              if(rootStore.authenticated) item.label = <span>Logout</span>;
+            }
+            if(item.disabled) return undefined;
+            return (
+              <NavLink
+                href={item.href}
+                key={item.key}
+                path={item.href}
+                label={item.label}
+                description={item.description}
+                /*   {...{ ...props, ...item, path: router.asPath }}*/
+                onClick={
+                  item.name.startsWith("log")
+                    ? () => {
+                        console.log("click login");
+                        if(item.name == "login") {
+                          if(!loginIsOpen) {
                             setColor(randomGradient());
-                            setLanguageOpen(!languageIsOpen);
+                            setLoginOpen(!loginIsOpen);
                           }
+                        } else if(item.name == "logout") {
+                          rootStore.doLogout();
                         }
-                      : () => {
-//                          router.replace(router.asPath.replace(/#.*/g, '')+'#');
-const href = item.href.startsWith('/') ? item.href :  `/${item.name}`;
-                          console.log("click " + item.name, " href: ", href);
-                          router.replace(href);
-                          if(globa.window)
-                          window.location.replace(href);
+                      }
+                    : item.name == "lang"
+                    ? () => {
+                        console.log("click language");
+                        if(!languageIsOpen) {
+                          setColor(randomGradient());
+                          setLanguageOpen(!languageIsOpen);
                         }
-                  }
-                />
-              );
-            })}
-          </ul>
-          {children ? <span className={"title-bar"}>{children}</span> : undefined}
-          <style jsx global>{`
-            .flagbox {
-              width: 100%;
-              box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 1);
-              overflow: hidden;
-              background: url(/static/img/tile-background.png) repeat;
-              background-size: 33% auto;
-            }
-            .country-flag {
-              opacity: 1;
-              border: 2px solid rgba(0, 0, 0, 0);
-              transition: transform 800ms, opacity 800ms;
-              transform: scale3d(0.5, 0.5, 1) rotateY(-180deg);
-            }
-            .country-flag:hover {
-              opacity: 1;
-              border: 2px solid rgba(0, 0, 0, 0);
-              transform: scale3d(1, 1, 1) rotateY(0);
-            }
-            div < .country-flag:hover {
-              transform: rotateZ(360deg);
-            }
+                      }
+                    : () => {
+                        //                          router.replace(router.asPath.replace(/#.*/g, '')+'#');
+                        const href = item.href.startsWith("/") ? item.href : `/${item.name}`;
+                        console.log("click " + item.name, " href: ", href);
+                        router.replace(href);
+                        if(globa.window) window.location.replace(href);
+                      }
+                }
+              />
+            );
+          })}
+        </ul>
+        {children ? <span className={"title-bar"}>{children}</span> : undefined}
+        <style jsx global>{`
+          .flagbox {
+            width: 100%;
+            box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 1);
+            overflow: hidden;
+            background: url(/static/img/tile-background.png) repeat;
+            background-size: 33% auto;
+          }
+          .country-flag {
+            opacity: 1;
+            border: 2px solid rgba(0, 0, 0, 0);
+            transition: transform 800ms, opacity 800ms;
+            transform: scale3d(0.5, 0.5, 1) rotateY(-180deg);
+          }
+          .country-flag:hover {
+            opacity: 1;
+            border: 2px solid rgba(0, 0, 0, 0);
+            transform: scale3d(1, 1, 1) rotateY(0);
+          }
+          div < .country-flag:hover {
+            transform: rotateZ(360deg);
+          }
 
-            .flaglist > div > img {
-            }
+          .flaglist > div > img {
+          }
 
-            .flaglist {
-              position: relative;
-              top: 50%;
+          .flaglist {
+            position: relative;
+            top: 50%;
 
-              display: flex;
-              flex-flow: row wrap;
-              justify-content: center;
-              align-items: center;
-              padding: auto 0;
-              border: 1px solid black;
-            }
-            ul.menu {
-              font-family: Fixed;
-              float: right;
-            }
-            div.menu {
-              z-index: 9;
-              text-align: center;
-              display: flex;
-              color: white;
-              flex-flow: row wrap;
-              justify-content: space-between;
-              width: 100vw;
-              direction: rtl;
-              min-height: 112px;
-              padding: 0 0 0 0;
-              position: relative;
-              left: 0px;
-            }
-            ul {
-              direction: ltr;
-              display: flex;
-              justify-content: flex-end;
-              margin-block-start: 0;
-              margin-block-end: 0;
-            }
-            .menu > ul {
-              margin: 4px 4px 4px 4px;
-            }
-            .title-bar {
-              float: left;
-              text-align: left;
-              color: black;
-              padding: 10px 10px 0 10px;
-              font-size: 2em;
-              font-family: Fixed;
-            }
-            .ReactModal__Overlay {
-              transition: transform 1000ms linear;
-              transform: perspective(1000px) translate3d(50vw, -50vh, 50px) rotateX(-45deg) rotateY(-45deg)
-                rotateZ(90deg) scale3d(0.02, 0.02, 1);
-            }
-            .ReactModal__Overlay--after-open {
-              transform: perspective(1000px) translate3d(0, 0, 50px) rotate3d(0, 0, 1, 0deg) scale3d(1, 1, 1);
-            }
-            .ReactModal__Overlay--before-close {
-              transform: perspective(1000px) translate3d(-50vw, 50vh, 50px) rotateX(45deg) rotateY(45deg)
-                rotateZ(-90deg) scale3d(0.02, 0.02, 1);
-            }
-          `}</style>
-        </div>
-      );
-    })
-  )
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: center;
+            align-items: center;
+            padding: auto 0;
+            border: 1px solid black;
+          }
+          ul.menu {
+            font-family: Fixed;
+            float: right;
+          }
+          div.menu {
+            z-index: 9;
+            text-align: center;
+            display: flex;
+            color: white;
+            flex-flow: row wrap;
+            justify-content: space-between;
+            width: 100vw;
+            direction: rtl;
+            min-height: 112px;
+            padding: 0 0 0 0;
+            position: relative;
+            left: 0px;
+          }
+          ul {
+            direction: ltr;
+            display: flex;
+            justify-content: flex-end;
+            margin-block-start: 0;
+            margin-block-end: 0;
+          }
+          .menu > ul {
+            margin: 4px 4px 4px 4px;
+          }
+          .title-bar {
+            float: left;
+            text-align: left;
+            color: black;
+            padding: 10px 10px 0 10px;
+            font-size: 2em;
+            font-family: Fixed;
+          }
+          .ReactModal__Overlay {
+            transition: transform 1000ms linear;
+            transform: perspective(1000px) translate3d(50vw, -50vh, 50px) rotateX(-45deg) rotateY(-45deg) rotateZ(90deg)
+              scale3d(0.02, 0.02, 1);
+          }
+          .ReactModal__Overlay--after-open {
+            transform: perspective(1000px) translate3d(0, 0, 50px) rotate3d(0, 0, 1, 0deg) scale3d(1, 1, 1);
+          }
+          .ReactModal__Overlay--before-close {
+            transform: perspective(1000px) translate3d(-50vw, 50vh, 50px) rotateX(45deg) rotateY(45deg) rotateZ(-90deg)
+              scale3d(0.02, 0.02, 1);
+          }
+        `}</style>
+      </div>
+    );
+  })
 );
 
 export default Nav;
