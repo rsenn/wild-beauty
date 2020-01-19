@@ -217,13 +217,13 @@ if (!dev && cluster.isMaster) {
             }
             console.log("logout response: ", response);
 
-            return res.json({ success: !!(response && response.affected_rows) });
+           // return res.json({ success: !!(response && response.affected_rows) });
           }
         }
       } catch(err) {
         console.error("Logout error: ", err);
       }
-      res.json({ success: false });
+      res.json({ success: true });
     });
 
     server.post(
