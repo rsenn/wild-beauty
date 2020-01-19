@@ -11,13 +11,14 @@ import { SvgOverlay } from "../utils/svg-overlay.js";
 import { makeTouchCallback, maxZIndex } from "../components/TouchCallback.js";
 import { toJS, action, set } from "mobx";
 import { inject, observer } from "mobx-react";
-import { MultitouchListener, MovementListener } from "../utils/touchHandler.js";
+import { MultitouchListener, MovementListener, TouchListener } from "../utils/touchHandler.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
 import { WithQueryParam, IfQueryParam } from "../components/withQueryParam.js";
 import { trkl } from "../utils/trkl.js";
+import { BehaveHooks, Behave } from "../utils/behave.js";
 
 import "../static/css/react-upload-gallery.css";
 
@@ -56,6 +57,33 @@ const findInTree = (tree, value) => {
   return null;
 };
 
+  function behaveTextarea(element) {
+ element = Element.find(element);      
+      /*
+       * This hook adds autosizing functionality
+       * to your textarea
+       */
+      BehaveHooks.add(['keydown'], function(data){
+        var numLines = data.lines.total,
+          fontSize = parseInt( getComputedStyle(data.editor.element)['font-size'] ),
+          padding = parseInt( getComputedStyle(data.editor.element)['padding'] );
+        data.editor.element.style.height = (((numLines*fontSize)+padding))+'px';
+      });
+      var editor = new Behave({
+        textarea:     element,
+        replaceTab:   true,
+          softTabs:     true,
+          tabSize:     4,
+          autoOpen:     true,
+          overwrite:     true,
+          autoStrip:     true,
+          autoIndent:   true
+      });
+      return editor;      
+    };
+  
+
+
 @inject("rootStore")
 @observer
 //@withRouter
@@ -78,7 +106,11 @@ class New extends React.Component {
    */
   static async getInitialProps({ res, req, err, mobxStore, ...ctx }) {
     const { RootStore } = mobxStore;
-    let images = await RootStore.fetchImages(/*{ where: { user_id:   }}*/);
+    let images =[];
+
+    if(!global.window) {
+
+    images = await RootStore.fetchImages(/*{ where: { user_id:   }}*/);
 
     images = images.filter(ph => ph.items.length == 0);
     images.forEach(item => RootStore.newImage(item));
@@ -97,6 +129,7 @@ class New extends React.Component {
       RootStore.auth.token = token;
       RootStore.auth.user_id = user_id;
     }
+  }
 
     return { images };
   }
@@ -136,7 +169,7 @@ class New extends React.Component {
         if(event.type.endsWith("move"))
           this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
         let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
-        console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
+     //   console.log("touchCallback ", { offset, transformation, range: this.offsetRange });
 
         //e.style.setProperty("transform", event.type.endsWith("move") ? transformation : "");
 
@@ -146,7 +179,7 @@ class New extends React.Component {
         }
       };
       this.touchCallback = makeTouchCallback("inner-image", (event, e) => {
-        console.log("touchCallback ", { event, e });
+    //    console.log("touchCallback ", { event, e });
 
         const zIndex = maxZIndex() + 1;
         if(e) Element.setCSS(e, { zIndex });
@@ -270,6 +303,8 @@ class New extends React.Component {
         console.log("this.tree", toJS(this.tree));
       }
     });
+
+Element.findAll('textarea').forEach(behaveTextarea);
   }
 
   @action.bound
@@ -305,7 +340,9 @@ class New extends React.Component {
 
     rootStore.state.image = id;
     rootStore.state.step = 2;
-    //  router.push('/new', { query: { act: 'edit', img: id }});
+
+
+     router.push('/edit', `/edit/${id}`);
 
     //  router.push('/new', `/new?act=edit&img=${id}`, { /*query: { act: 'edit', img: id }, */shallow: true });
   }
@@ -343,7 +380,7 @@ class New extends React.Component {
         <div className={"content-layout"}>
           <NeedAuth>
             {rootStore.state.image === null ? (
-              <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
+              <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
             ) : (
               <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
             )}

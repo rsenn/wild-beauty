@@ -11,7 +11,7 @@ import "../../static/css/grid.css";
 
 export const ImageUpload = inject("rootStore")(
   observer(
-    /*withRouter*/ ({ rootStore, onChoose, onDelete }) => (
+    /*withRouter*/ ({ images, rootStore, onChoose, onDelete }) => (
       <div
         className={"upload-area"}
         style={{
@@ -51,7 +51,9 @@ export const ImageUpload = inject("rootStore")(
           }}
         ></UploadImages>
         <div className={"image-list grid-col grid-gap-20"}>
-          {[...rootStore.images.entries()].map(([id, image], index) => {
+          {images.map((image, index) => {
+            let id = image.id;
+            
             image = toJS(image);
             //console.log("image-list entry", {id,image});
             const { width, height } = image;

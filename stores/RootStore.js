@@ -358,7 +358,7 @@ export class RootStore {
     return null;
   }
 
-  /*
+  
   async fetchImages(where = {}) {
     console.log("⇒ images ", { where });
     let response = await this.api.list(
@@ -368,7 +368,7 @@ export class RootStore {
     );
     console.log("⇐ images =", response);
     return response;
-  }*/
+  }
   /*
   async fetchItems(where = {}) {
     console.log("⇒ items:", where);

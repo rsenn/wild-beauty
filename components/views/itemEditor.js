@@ -17,6 +17,13 @@ export const ItemEditor = inject("rootStore")(
   observer(({ rootStore, tree, makeTreeSelEvent }) => {
     const { currentImage } = rootStore;
     console.log("ItemEditor.render ", { tree, currentImage });
+let img  = rootStore.currentImage;
+
+if(img === null)
+return undefined;
+
+  if(img && img.landscape === undefined)
+    img.landscape = img.width >= img.height;
 
     return (
       <div className={"content-edit"}>
@@ -24,24 +31,24 @@ export const ItemEditor = inject("rootStore")(
           <div
             className={"item-entry"}
             style={{
-              width: rootStore.currentImage.landscape
-                ? `${(rootStore.currentImage.height * 100) / rootStore.currentImage.width}%`
+              width: img.landscape
+                ? `${(img.height * 100) / img.width}%`
                 : "100%"
             }}
           >
             <SizedAspectRatioBox className={"item-box"}>
               <img
-                id={`image-${rootStore.currentImage.id}`}
+                id={`image-${img.id}`}
                 className={"inner-image"}
-                src={`/api/image/get/${rootStore.currentImage.id}.jpg`}
-                width={rootStore.currentImage.width}
-                height={rootStore.currentImage.height}
-                orientation={rootStore.currentImage.landscape ? "landscape" : "portrait"}
+                src={`/api/image/get/${img.id}.jpg`}
+                width={img.width}
+                height={img.height}
+                orientation={img.landscape ? "landscape" : "portrait"}
                 style={{
-                  width: rootStore.currentImage.landscape
-                    ? `${(rootStore.currentImage.width * 100) / rootStore.currentImage.height}%`
+                  width: img.landscape
+                    ? `${(img.width * 100) / img.height}%`
                     : "100%",
-                  height: rootStore.currentImage.landscape ? "100%" : "auto"
+                  height: img.landscape ? "100%" : "auto"
                 }}
               />
             </SizedAspectRatioBox>
