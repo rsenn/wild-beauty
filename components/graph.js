@@ -96,10 +96,21 @@ console.log("collapsibleForceLayout update ", { nodes,links});
       .on("drag", dragged)
       .on("end", dragended)
       );
-
+/*
     nodeEnter
     .append("circle")
     .attr("r", function(d) {return d.data.size > 0 ? d.data.size*0.3 : 8; })
+    .style("text-anchor", function(d) {return d.children ? "end" : "start"; })
+    .text(function(d) {return d.data.name; });
+*/
+    nodeEnter
+    .append("rect")
+    .attr("x", function(d) {return -(d.data.size > 0 ? d.data.size*0.3 : 8); })
+    .attr("y", function(d) {return -(d.data.size > 0 ? d.data.size*0.3 : 8); })
+    .attr("width", function(d) {return 2*(d.data.size > 0 ? d.data.size*0.3 : 8); })
+    .attr("height", function(d) {return 2*(d.data.size > 0 ? d.data.size*0.3 : 8); })
+    .attr("rx", 999)
+    .attr("ry", 999)
     .style("text-anchor", function(d) {return d.children ? "end" : "start"; })
     .text(function(d) {return d.data.name; });
 
