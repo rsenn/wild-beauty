@@ -346,7 +346,7 @@ const Nav = inject(
                         const href = item.href.startsWith("/") ? item.href : `/${item.name}`;
                         console.log("click " + item.name, " href: ", href);
                         router.replace(href);
-                        if(globa.window) window.location.replace(href);
+                        if(global.window) window.location.replace(href);
                       }
                 }
               />
