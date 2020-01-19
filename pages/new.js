@@ -157,7 +157,7 @@ class New extends React.Component {
           moveImage(event, e);
         }
       });
-
+/*
       this.touchListener = TouchListener(
         event => {
           console.log("Touch ", event);
@@ -202,15 +202,12 @@ class New extends React.Component {
               moveImage(event, this.currentImage);
             }
           }
-          /* console.log("Touch obj:", this.touchCallback);
-
-          this.touchCallback(event, this.currentImage);
-*/
+     
           if(event.type.endsWith("end")) {
             if(this.clonedImage && this.currentImage) {
               this.currentImage.style.position = "relative";
-              /*           this.currentImage.style.left = `${this.currentOffset.x}px`;
-           this.currentImage.style.top = `${this.currentOffset.y}px`;*/
+             //this.currentImage.style.left = `${this.currentOffset.x}px`;
+           //this.currentImage.style.top = `${this.currentOffset.y}px`;
 
               console.log("currentOffset: ", this.currentOffset);
               console.log("currentImage: ", this.currentImage);
@@ -226,13 +223,6 @@ class New extends React.Component {
           listener: MovementListener,
           noscroll: true
         }
-      );
-      window.dragged = e;
-      /*   MultitouchListener(
-        event => {
-          console.log("multitouch", event);
-        },
-        { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
       );*/
     }
     rootStore.state.step = 1;
