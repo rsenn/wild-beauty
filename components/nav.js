@@ -62,10 +62,10 @@ const NavLink = inject("rootStore")(
       )}
       key={key}
     >
-      <Link href={href} data-label={typeof label == "function" ? label(props) : label} prefetch={false} passHref>
+      <Link href={href} /*label={typeof label == "function" ? label(props) : label}*/ prefetch={false} passHref>
         <a
-          data-href={href}
-          data-name={path}
+          href={href}
+          name={path}
           className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")}
           onClick={onClick}
         >

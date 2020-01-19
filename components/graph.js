@@ -296,6 +296,10 @@ export class Graph extends Component {
     }
   }
 
+  shouldComponentUpdate() {
+    return false;
+  }
+
   render() {
     return (
       <div style={{ position: "absolute", top: 0 }}>
