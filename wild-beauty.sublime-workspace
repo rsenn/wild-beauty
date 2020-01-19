@@ -28,44 +28,28 @@
 	"buffers":
 	[
 		{
-			"contents": "collapsibleForceLayout\nfunction(d)\nfunction update()\nfunction(d)\nfunction(d)\nfunction(d)\nfunction(d)\nfunction(d)\nfunction sizeContain(num)\nfunction color(d)\nfunction radius(d)\nfunction ticked()\nfunction(d)\nfunction(d)\nfunction(d)\nfunction(d)\nfunction(d)\nfunction clicked(d)\nfunction dragstarted(d)\nfunction dragged(d)\nfunction dragended(d)\nfunction flatten(root)\nfunction recurse(node)\nfunction zoomed()\nfunction forceSimulation(data)\nfunction(d)\ngetNodeColor\nd =>\nd =>\nd =>\nticked\nd =>\nd =>\nd =>\nd =>\nd =>\nd =>\nGraph\ncomponentDidMount\nrender\nmapSizesToProps",
+			"contents": "function bufferToStream(buffer)\n(worker, code, signal) =>\n() =>\nfunction(req, res, next)\nfunction(req, res, next)\nasync function(req, res)\nkey =>\ngetVar\ngetUser\nneedAuth\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nitem =>\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nimage =>\nim =>\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\ncalcDimensions\ncompareDimensions\nfunction(info)\n() =>\n({ original_name, filesize, width, height, id }) =>\n(req, res) =>\n(req, res) =>\n(req, res) =>\nerr =>",
 			"settings":
 			{
-				"buffer_size": 558,
+				"buffer_size": 622,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "components/graph.js",
+			"file": "pages/new.js",
 			"settings":
 			{
-				"buffer_size": 13908,
+				"buffer_size": 11825,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "stores/autoStore.js",
+			"file": "components/nav.js",
 			"settings":
 			{
-				"buffer_size": 2888,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/api.js",
-			"settings":
-			{
-				"buffer_size": 4703,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "server.js",
-			"settings":
-			{
-				"buffer_size": 19076,
+				"buffer_size": 22658,
 				"line_ending": "Unix"
 			}
 		},
@@ -73,24 +57,49 @@
 			"file": "stores/RootStore.js",
 			"settings":
 			{
-				"buffer_size": 15873,
+				"buffer_size": 15922,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "pages/browse.js",
+			"file": "/home/roman/wild-beauty/components/login.js",
 			"settings":
 			{
-				"buffer_size": 3881,
+				"buffer_size": 10648,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "pages/list.js",
+			"file": "/home/roman/wild-beauty/stores/RootStore.js",
 			"settings":
 			{
-				"buffer_size": 21632,
+				"buffer_size": 15922,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server.js",
+			"settings":
+			{
+				"buffer_size": 19110,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "components/views/addItemBar.js",
+			"settings":
+			{
+				"buffer_size": 576,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "components/siteMap.js",
+			"settings":
+			{
+				"buffer_size": 1929,
 				"line_ending": "Unix"
 			}
 		}
@@ -219,44 +228,56 @@
 		"/home/roman/the-wild-beauty-company/components",
 		"/home/roman/the-wild-beauty-company/components/views",
 		"/home/roman/the-wild-beauty-company/pages",
+		"/home/roman/the-wild-beauty-company/pages/edit",
 		"/home/roman/the-wild-beauty-company/stores"
 	],
 	"file_history":
 	[
-		"/home/roman/wild-beauty/pages/list.js",
-		"/home/roman/the-wild-beauty-company/server.js",
+		"/home/roman/the-wild-beauty-company/pages/browse.js",
 		"/home/roman/the-wild-beauty-company/components/graph.js",
-		"/home/roman/the-wild-beauty-company/lib/devpane.js",
+		"/home/roman/the-wild-beauty-company/components/nav.js",
+		"/home/roman/the-wild-beauty-company/components/siteMap.js",
+		"/home/roman/wild-beauty/stores/i18nStore.js",
+		"/home/roman/the-wild-beauty-company/pages/edit/[id].js",
+		"/home/roman/the-wild-beauty-company/components/layout.js",
+		"/home/roman/the-wild-beauty-company/pages/new.js",
+		"/home/roman/the-wild-beauty-company/pages/show.js",
 		"/home/roman/the-wild-beauty-company/pages/list.js",
-		"/home/roman/the-wild-beauty-company/tmp.js",
-		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
-		"/home/roman/the-wild-beauty-company/lib/dom.js",
+		"/home/roman/wild-beauty/pages/test.js",
 		"/home/roman/the-wild-beauty-company/components/views/itemTile.js",
-		"/home/roman/the-wild-beauty-company/components/views/grid.js",
+		"/home/roman/the-wild-beauty-company/server.js",
+		"/home/roman/wild-beauty/pages/list.js",
+		"/home/roman/the-wild-beauty-company/components/views/itemEditor.js",
+		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
+		"/home/roman/the-wild-beauty-company/lib/behave.js",
+		"/home/roman/the-wild-beauty-company/components/layout.ks",
+		"/home/roman/the-wild-beauty-company/stores/autoStore.js",
 		"/home/roman/the-wild-beauty-company/stores/api.js",
+		"/home/roman/wild-beauty/pages/new.js",
+		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
+		"/home/roman/the-wild-beauty-company/pages/_document.js",
+		"/home/roman/the-wild-beauty-company/components/(function(undefined){",
+		"/home/roman/the-wild-beauty-company/lib/devpane.js",
+		"/home/roman/the-wild-beauty-company/tmp.js",
+		"/home/roman/the-wild-beauty-company/lib/dom.js",
+		"/home/roman/the-wild-beauty-company/components/views/grid.js",
 		"/home/roman/the-wild-beauty-company/node_modules/d3-hierarchy/src/hierarchy/index.js",
 		"/home/roman/the-wild-beauty-company/components/views/itemView.js",
 		"/home/roman/the-wild-beauty-company/lib/devtools.js",
-		"/home/roman/the-wild-beauty-company/pages/browse.js",
-		"/home/roman/the-wild-beauty-company/components/views/itemEditor.js",
 		"/home/roman/wild-beauty/pages/browse.js",
 		"/home/roman/the-wild-beauty-company/pages/_app.js",
 		"/home/roman/wild-beauty/stores/RootStore.js",
 		"/home/roman/wild-beauty/utils/stars.js",
-		"/home/roman/the-wild-beauty-company/stores/autoStore.js",
 		"/home/roman/the-wild-beauty-company/pages/index.js",
-		"/home/roman/the-wild-beauty-company/pages/show.js",
 		"/home/roman/the-wild-beauty-company/test.js",
 		"/home/roman/the-wild-beauty-company/lib/scripts/prettier.sh",
 		"/home/roman/wild-beauty/pages/show.js",
 		"/home/roman/the-wild-beauty-company/node_modules/d3-selection/src/selection/attr.js",
 		"/home/roman/the-wild-beauty-company/pages/test.js",
-		"/home/roman/the-wild-beauty-company/pages/new.js",
 		"/home/roman/the-wild-beauty-company/lib/util.es5.js",
 		"/home/roman/the-wild-beauty-company/components/tree.js",
 		"/home/roman/the-wild-beauty-company/lib/util.js",
 		"/home/roman/the-wild-beauty-company/pages/show/[id].js",
-		"/home/roman/wild-beauty/pages/new.js",
 		"/home/roman/wild-beauty/stores/api.js",
 		"/home/roman/wild-beauty/pages/_app.js",
 		"/home/roman/wild-beauty/lib/util.js",
@@ -270,7 +291,6 @@
 		"/home/roman/wild-beauty/utils/dom.js",
 		"/home/roman/wild-beauty/utils/svg-overlay.js",
 		"/home/roman/wild-beauty/pages/index.js",
-		"/home/roman/wild-beauty/pages/test.js",
 		"/home/roman/wild-beauty/utils/axios.js",
 		"/home/roman/wild-beauty/utils/util.js",
 		"/home/roman/wild-beauty/node_modules/react-select/dist/base/dist/react-select-306fdb60.browser.cjs.js",
@@ -340,21 +360,11 @@
 		"/home/roman/lotto/bitcoin-walker.moon",
 		"/home/roman/lotto/helpers/date.moon",
 		"/home/roman/Dokumente/Sources/lotto/components/simple/language.js",
-		"/home/roman/lotto/test-date.moon",
-		"/home/roman/lotto/applications/drawings.moon",
-		"/home/roman/lotto/applications/users.lua.map",
-		"/home/roman/lotto/helpers/app.lua.map",
-		"/home/roman/Dokumente/Sources/lotto/applications/drawings.moon",
-		"/home/roman/Dokumente/Sources/lotto/applications/games.moon",
-		"/home/roman/Dokumente/Sources/lotto/applications/payment.moon",
-		"/home/roman/Dokumente/Sources/lotto/applications/tickets.moon",
-		"/home/roman/lotto/models/accounts.moon",
-		"/home/roman/lotto/models/status.moon",
-		"/home/roman/lotto/app.lua.map"
+		"/home/roman/lotto/test-date.moon"
 	],
 	"find":
 	{
-		"height": 44.0
+		"height": 39.0
 	},
 	"find_in_files":
 	{
@@ -374,6 +384,63 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"doLogin",
+			"api/login",
+			"apiReq",
+			"NavLink",
+			"browse",
+			"new",
+			"\"new\"",
+			"\"#",
+			"onClick",
+			"tick",
+			"checkTagRemove",
+			"Timer",
+			"show_desc",
+			"how",
+			"/show",
+			"<Graph",
+			"Graph",
+			"Grap",
+			"page-lay",
+			"page-la",
+			"currentIm",
+			"saveIte",
+			"this.state.treeSel",
+			"this.tree",
+			"findIn",
+			"/new\"",
+			"modules",
+			"add",
+			"add[^A-Z]",
+			"add",
+			"add[^A-Za-z]",
+			"add",
+			"dom.Element",
+			"dom\\.",
+			"treeSelEv",
+			"makeTreeSelEvent",
+			"ItemEd",
+			"this.tree",
+			"makeIte",
+			"behaveT",
+			"props",
+			"DidM",
+			"this.tree =",
+			"this.tree",
+			"treeSelEve",
+			"makeTree",
+			"makeTr",
+			"Maketreeseel",
+			"ItemEd",
+			".push",
+			"rootStore.currentImage",
+			"\\.images",
+			"images",
+			"touch",
+			"fetchImages",
+			"TouchList",
+			"Behave",
 			"getHier",
 			"compo",
 			"Browse.render",
@@ -444,64 +511,7 @@
 			"^",
 			"loadItems",
 			"loadIte",
-			"r:",
-			"r=",
-			"rad",
-			"radius",
-			"links",
-			"request",
-			"requestAnimationFrame",
-			"0\\.2",
-			"blue",
-			"green",
-			"red",
-			"backgroundColor",
-			"20fr",
-			"grid.*col",
-			"100px",
-			"api.sele",
-			"fields",
-			"fields.=",
-			"fields",
-			"parent",
-			"parente",
-			"parent_id",
-			"getPare",
-			"Sib",
-			"loadSib",
-			"item/tree",
-			"/tree",
-			"getItem",
-			"getParent",
-			"getParet",
-			"items\\.[a-z]*\\(",
-			"getItem",
-			"this\\.api",
-			"api/",
-			"util.inspect\\(",
-			"Item\\(",
-			"getItem",
-			"apiReq",
-			"itemList",
-			"query:",
-			"items.set",
-			"props",
-			"simula",
-			"\\.group",
-			"alpha",
-			"svgRef",
-			"traverseTre",
-			"withSize",
-			"sizeMe",
-			"JSON.par",
-			"data =",
-			"<Tree",
-			"colors",
-			"dataObj",
-			"res.errors",
-			"choose",
-			"router\\.query",
-			"parseURL"
+			"r:"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -509,6 +519,11 @@
 		"regex": true,
 		"replace_history":
 		[
+			"this.treeSel",
+			"this.state.tree",
+			"Element",
+			"this.state.tree",
+			"img",
 			"h",
 			"w",
 			"y",
@@ -564,7 +579,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 558,
+						"buffer_size": 622,
 						"regions":
 						{
 						},
@@ -573,218 +588,178 @@
 						],
 						"settings":
 						{
-							"current_file": "/home/roman/the-wild-beauty-company/components/graph.js",
+							"current_file": "/home/roman/the-wild-beauty-company/server.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									7067,
-									7099
+									1109,
+									1140
 								],
 								[
-									7675,
-									7686
+									1825,
+									1850
 								],
 								[
-									7870,
-									7887
+									2090,
+									2095
 								],
 								[
-									8066,
-									8077
+									2202,
+									2226
 								],
 								[
-									8392,
-									8403
+									3799,
+									3823
 								],
 								[
-									8849,
-									8860
+									4149,
+									4173
 								],
 								[
-									8934,
-									8945
+									5366,
+									5372
 								],
 								[
-									8997,
-									9008
+									5605,
+									5628
 								],
 								[
-									9147,
-									9172
+									5714,
+									5751
 								],
 								[
-									9269,
-									9286
+									6071,
+									6087
 								],
 								[
-									9439,
-									9457
+									6094,
+									6118
 								],
 								[
-									9515,
-									9532
+									6704,
+									6728
 								],
 								[
-									9560,
-									9571
+									7667,
+									7691
 								],
 								[
-									9611,
-									9622
+									7963,
+									7987
 								],
 								[
-									9662,
-									9673
+									8679,
+									8703
 								],
 								[
-									9713,
-									9724
+									8920,
+									8927
 								],
 								[
-									9776,
-									9787
+									9313,
+									9337
 								],
 								[
-									9835,
-									9854
+									9972,
+									9996
 								],
 								[
-									10091,
-									10114
+									11266,
+									11290
 								],
 								[
-									10219,
-									10238
+									11724,
+									11732
 								],
 								[
-									10293,
-									10314
+									11829,
+									11834
 								],
 								[
-									10409,
-									10431
+									11991,
+									12015
 								],
 								[
-									10460,
-									10482
+									12299,
+									12323
 								],
 								[
-									10664,
-									10681
+									13606,
+									13630
 								],
 								[
-									10752,
-									10782
+									14427,
+									14459
 								],
 								[
-									11028,
-									11039
+									14989,
+									15018
 								],
 								[
-									11871,
-									11903
+									15827,
+									15841
 								],
 								[
-									11917,
-									11921
+									16135,
+									16140
 								],
 								[
-									12430,
-									12434
+									17724,
+									17775
 								],
 								[
-									12548,
-									12552
+									18004,
+									18017
 								],
 								[
-									12601,
-									12615
+									18140,
+									18153
 								],
 								[
-									12644,
-									12648
+									18799,
+									18812
 								],
 								[
-									12688,
-									12692
-								],
-								[
-									12732,
-									12736
-								],
-								[
-									12776,
-									12780
-								],
-								[
-									12830,
-									12834
-								],
-								[
-									12867,
-									12871
-								],
-								[
-									13009,
-									13014
-								],
-								[
-									13147,
-									13164
-								],
-								[
-									13496,
-									13502
-								],
-								[
-									13790,
-									13830
+									18997,
+									19003
 								]
 							],
 							"symlist":
 							[
-								"collapsibleForceLayout",
-								"function(d)",
-								"function update()",
-								"function(d)",
-								"function(d)",
-								"function(d)",
-								"function(d)",
-								"function(d)",
-								"function sizeContain(num)",
-								"function color(d)",
-								"function radius(d)",
-								"function ticked()",
-								"function(d)",
-								"function(d)",
-								"function(d)",
-								"function(d)",
-								"function(d)",
-								"function clicked(d)",
-								"function dragstarted(d)",
-								"function dragged(d)",
-								"function dragended(d)",
-								"function flatten(root)",
-								"function recurse(node)",
-								"function zoomed()",
-								"function forceSimulation(data)",
-								"function(d)",
-								"getNodeColor",
-								"d =>",
-								"d =>",
-								"d =>",
-								"ticked",
-								"d =>",
-								"d =>",
-								"d =>",
-								"d =>",
-								"d =>",
-								"d =>",
-								"Graph",
-								"componentDidMount",
-								"render",
-								"mapSizesToProps"
+								"function bufferToStream(buffer)",
+								"(worker, code, signal) =>",
+								"() =>",
+								"function(req, res, next)",
+								"function(req, res, next)",
+								"async function(req, res)",
+								"key =>",
+								"getVar",
+								"getUser",
+								"needAuth",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"item =>",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"image =>",
+								"im =>",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"calcDimensions",
+								"compareDimensions",
+								"function(info)",
+								"() =>",
+								"({ original_name, filesize, width, height, id }) =>",
+								"(req, res) =>",
+								"(req, res) =>",
+								"(req, res) =>",
+								"err =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -792,30 +767,30 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 8,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 0,
+			"selected": 5,
 			"sheets":
 			[
 				{
 					"buffer": 1,
-					"file": "components/graph.js",
+					"file": "pages/new.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 13908,
+						"buffer_size": 11825,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								7280,
-								7280
+								415,
+								415
 							]
 						],
 						"settings":
@@ -835,16 +810,189 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "stores/autoStore.js",
+					"file": "components/nav.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2888,
+						"buffer_size": 22658,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								18273,
+								18273
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 4959.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "stores/RootStore.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15922,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								13969,
+								13969
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 126.0,
+						"translation.y": 7951.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/home/roman/wild-beauty/components/login.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10648,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								650,
+								650
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 272.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/home/roman/wild-beauty/stores/RootStore.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15922,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								482,
+								482
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "server.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 19110,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4844,
+								4844
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2307.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "components/views/addItemBar.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 576,
 						"regions":
 						{
 						},
@@ -860,6 +1008,12 @@
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true,
+							"typescript_plugin_format_options":
+							{
+								"convertTabsToSpaces": true,
+								"indentSize": 2,
+								"tabSize": 2
+							},
 							"use_tab_stops": false
 						},
 						"translation.x": 0.0,
@@ -870,20 +1024,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "stores/api.js",
+					"buffer": 8,
+					"file": "components/siteMap.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4703,
+						"buffer_size": 1929,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1283,
-								1283
+								939,
+								939
 							]
 						],
 						"settings":
@@ -891,161 +1045,13 @@
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
 							"use_tab_stops": false
 						},
-						"translation.x": 165.0,
-						"translation.y": 276.0,
+						"translation.x": 0.0,
+						"translation.y": 624.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "server.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 19076,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9959,
-								9959
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 5980.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "stores/RootStore.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 15873,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9209,
-								9209
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 7682.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "pages/browse.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3881,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2676,
-								2676
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1127.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "pages/list.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 21632,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								13025,
-								13025
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 9453.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -1053,11 +1059,11 @@
 	],
 	"incremental_find":
 	{
-		"height": 32.0
+		"height": 26.0
 	},
 	"input":
 	{
-		"height": 43.0
+		"height": 44.0
 	},
 	"layout":
 	{
@@ -1103,7 +1109,7 @@
 	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
-		"height": 80.0
+		"height": 70.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -1113,16 +1119,44 @@
 		"selected_items":
 		[
 			[
+				"server.",
+				"server.js"
+			],
+			[
+				"rootS",
+				"stores/RootStore.js"
+			],
+			[
+				"siteMa",
+				"components/siteMap.js"
+			],
+			[
+				"itema",
+				"components/siteMap.js"
+			],
+			[
+				"lay",
+				"components/layout.js"
+			],
+			[
+				"server",
+				"server.js"
+			],
+			[
+				"ehave",
+				"lib/behave.js"
+			],
+			[
+				"beha",
+				"lib/behave.js"
+			],
+			[
 				"list.js",
 				"pages/list.js"
 			],
 			[
 				"brow",
 				"pages/browse.js"
-			],
-			[
-				"server",
-				"server.js"
 			],
 			[
 				"root",
