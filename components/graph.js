@@ -259,7 +259,7 @@ export class Graph extends Component {
 
     console.log("Graph.componentDidMount data=", data);
     collapsibleForceLayout(data);
-//     forceSimulation(data);
+    //     forceSimulation(data);
   }
 
   render() {

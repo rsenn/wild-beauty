@@ -22,7 +22,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     //console.log("res: ", res);
     if(res.errors !== undefined) {
       console.error("res.errors: ", res.errors);
-    console.error("query: ", query);
+      console.error("query: ", query);
       throw Error(res.errors[0].message);
     }
     return res;
@@ -39,6 +39,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     objStr += Object.keys(options)
       .map(key => `${key}: ${options[key]}`)
       .join(", ");
+
     if(objStr.length) objStr = `(${objStr})`;
     const queryStr = `query List${camelCase} { ${name}${objStr} { ${fields} } }`;
     console.log("query: ", queryStr);
@@ -50,7 +51,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
   api.select = function(name, obj, fields = "") {
     const camelCase = Util.ucfirst(name);
     // prettier-ignore
-    const objStr =   "{ " + (typeof obj == "string"? `where: ${obj} }` : "where: { " + Object.entries(obj) .map(([key, value]) => `${key}: {_eq: ${value}}`) .join(", ") + "}") + " }";
+    const objStr =   "{ " + (typeof obj == "string"? `where: ${obj}` : "where: { " + Object.entries(obj) .map(([key, value]) => `${key}: {_eq: ${value}}`) .join(", ") + "}") + " }";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryStr = `query Select${camelCase} { ${name}(${objStr}) { ${fields.join(" ")} } }`;
     console.log(`query: ${queryStr}`);

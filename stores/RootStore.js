@@ -328,17 +328,16 @@ export class RootStore {
   }
 
   getHierarchy(item) {
-    item =  item || this.rootItem;
+    item = item || this.rootItem;
     if(item) {
       let { name, id } = item;
       if(!name) name = `Id[${id}]`;
-      let children = item.children && item.children.map ?  item.children.map(child => this.getHierarchy(child)) : [];
+      let children = item.children && item.children.map ? item.children.map(child => this.getHierarchy(child)) : [];
       let ret = { name };
-      if(children && children.length > 0)
-        ret.children = children;
+      if(children && children.length > 0) ret.children = children;
       return ret;
     }
-    return null;  
+    return null;
   }
 
   /*
@@ -411,12 +410,14 @@ export class RootStore {
   }
 
   async loadItem(where = {}) {
-    if(typeof where == "number") where =  `{id: { _eq: ${where} }}`;
+    if(typeof where == "number") where = `{id: { _eq: ${where} }}`;
     let response = await this.apiRequest("/api/item", { where });
     let data = response ? await response.data : null;
     let r = (await data) ? await data.item : [];
-    console.log("RootStore.loadItem", { r, data });
-    const id = "" + (r.id > 0 ? r.id  : where.id);
+    
+    console.log("RootStore.loadItem", { r, response });
+
+    const id = "" + r.id;
 
     if(!this.items.has(id)) this.items.set(id, r);
     let it = this.items.get(id);
