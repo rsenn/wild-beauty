@@ -5,6 +5,7 @@ import { toJS, action, set } from "mobx";
 import { inject, observer } from "mobx-react";
 import { trkl } from "../../utils/trkl.js";
 import NeedAuth from "../../components/simple/needAuth.js";
+import Layout from "../../components/layout.js";
 import { BehaveHooks, Behave } from "../../utils/behave.js";
 
 const makeItemToOption = selected => item => {
@@ -154,6 +155,8 @@ export class Edit extends React.Component {
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
 
     return (
+      
+<Layout>
       <NeedAuth>
         <div>
           <h4>/edit/{query.id}</h4>
@@ -164,6 +167,7 @@ export class Edit extends React.Component {
           )}
         </div>
       </NeedAuth>
+      </Layout>
     );
   }
 }
