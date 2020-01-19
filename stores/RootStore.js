@@ -417,7 +417,7 @@ export class RootStore {
     
     console.log("RootStore.loadItem", { r, response });
 
-    const id = "" + r.id;
+    const id = "" + (r ? r.id : where.id)
 
     if(!this.items.has(id)) this.items.set(id, r);
     let it = this.items.get(id);
