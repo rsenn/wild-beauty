@@ -292,6 +292,19 @@ export class RootStore {
     return item ? tr(item) : null;
   }
 
+  notLoadedChildren() {
+    let arr = Object.values(this.items.toObject());
+    let ret = [];
+    for(let item of arr) {
+      if(item.children && item.children.length) {
+        for(let child of item.children) {
+          const id = child && child.id;
+          if(!this.items.has("" + id)) ret.push(id);
+        }
+      }
+    }
+  }
+
   async findItem(id) {
     if(typeof id == "object" && id.id !== undefined) id = id.id;
     return this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
@@ -414,10 +427,10 @@ export class RootStore {
     let response = await this.apiRequest("/api/item", where);
     let data = response ? await response.data : null;
     let r = (await data) ? await data.item : [];
-    
+
     console.log("RootStore.loadItem", { r, response });
 
-    const id = "" + (r ? r.id : where.id)
+    const id = "" + (r ? r.id : where.id);
 
     if(!this.items.has(id)) this.items.set(id, r);
     let it = this.items.get(id);
