@@ -35,7 +35,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     console.log("api.list ", { name, where, options });
     let objStr;
     // prettier-ignore
-    objStr = where     ? (typeof where == "string"? `where: ${where}` : ("where: {"+Object.entries(where) .map(([key, value]) => `${key}: {` + (value === null ? `_is_null: true` : `_eq:"${value}"`) + `}`) .join(", ") +" } }")) : "";
+    objStr = where     ? (typeof where == "string"? `where: ${where}` : ("where: {"+Object.entries(where) .map(([key, value]) => `${key}: {` + (value === null ? `_is_null: true` : `_eq:${value}`) + `}`) .join(", ") +" } }")) : "";
     objStr += Object.keys(options)
       .map(key => `${key}: ${options[key]}`)
       .join(", ");
