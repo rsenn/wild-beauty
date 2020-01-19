@@ -327,36 +327,36 @@ class New extends React.Component {
 
     return (
       <Layout>
-          <NeedAuth>
-            {rootStore.state.image === null ? (
-              <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
-            ) : (
-              <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
-            )}
-            {/*
+        <NeedAuth>
+          {rootStore.state.image === null ? (
+            <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
+          ) : (
+            <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
+          )}
+          {/*
           <IfQueryParam act={false}>
           <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
           </IfQueryParam>
           <IfQueryParam act={'edit'} img={true}>
           <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
           </IfQueryParam>*/}
-            {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
+          {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
               Layer
             </Layer>*/}
-          </NeedAuth>
-          <SvgOverlay svgRef={this.svgLayer} />
-          <style jsx global>{`
-            button.tag-remove {
-              border: 1px outset #55555580;
-            }
-            .dropdown-tree {
-            }
-            .content-layout {
-              width: 100vw;
-              text-align: left;
-            }
-          `}</style>
-        </Layout>
+        </NeedAuth>
+        <SvgOverlay svgRef={this.svgLayer} />
+        <style jsx global>{`
+          button.tag-remove {
+            border: 1px outset #55555580;
+          }
+          .dropdown-tree {
+          }
+          .content-layout {
+            width: 100vw;
+            text-align: left;
+          }
+        `}</style>
+      </Layout>
     );
   }
 }

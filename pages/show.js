@@ -667,7 +667,7 @@ class Browse extends React.Component {
           }
         `}</style>
       </Layout>
-          );
+    );
   }
 }
 

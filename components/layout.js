@@ -9,7 +9,7 @@ export const Layout = props => (
       <link rel="icon" href="/favicon.ico" />
     </Head>
     <Nav>
-    {/*  {global.window ? window.site.label(props) : undefined} -{" "}
+      {/*  {global.window ? window.site.label(props) : undefined} -{" "}
       {global.window ? window.site.description(props) : undefined}*/}
     </Nav>
     <div className={"content-layout"}>{props.children}</div>
