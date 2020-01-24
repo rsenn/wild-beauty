@@ -77,11 +77,11 @@ export const treeToGraph = (graph, tree) => {
     );
 
     let n = new Node(node.title || node.label || node.name || node.id, 60 + 5 * nchildren, 100);
-    console.log("node: ", { parent_node, nchildren });
+    //   console.log("node: ", { parent_node, nchildren });
 
     if(parent_node) {
       let e = new Edge(parent_node, n);
-      console.log("edge: ", e);
+      //  console.log("edge: ", e);
       graph.addEdge(e);
     }
 

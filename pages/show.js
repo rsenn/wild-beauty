@@ -85,10 +85,11 @@ export function createGraph(svg) {
         svg
       );
     },
-    onUpdateNode: node => {
+    onUpdateNode: (node, i) => {
       if(!node.element) {
         // prettier-ignore
         node.element = SVG.create("g", {
+          id: `node-${i}`, 
             transform: `translate(${node.x},${node.y})`,
             fill: "#00f",
             stroke: "#000",
@@ -120,9 +121,10 @@ export function createGraph(svg) {
         );
       } else Element.attr(node.element, { transform: `translate(${node.x},${node.y})` });
     },
-    onUpdateEdge: edge => {
+    onUpdateEdge: (edge, i) => {
       const { x1, y1, x2, y2 } = edge;
-      if(!edge.element) edge.element = SVG.create("line", { x1, y1, x2, y2, stroke: "#000", strokeWidth }, svg);
+      if(!edge.element)
+        edge.element = SVG.create("line", { id: `edge-${i}`, x1, y1, x2, y2, stroke: "#000", strokeWidth }, svg);
       else Element.attr(edge.element, { x1, y1, x2, y2 });
     }
   });
