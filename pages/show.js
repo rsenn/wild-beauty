@@ -41,7 +41,7 @@ const removeParent = (element, pred = e => true) => {
 };
 
 export function createGraph(svg) {
-  console.log("createGraph", svg);
+  //console.log("createGraph", svg);
 
   svg = SVG.create("g", {}, svg);
 
@@ -53,34 +53,24 @@ export function createGraph(svg) {
     onRenderGraph: graph => {
       let bb = new Rect(svg.getBBox()).round();
       let client = Element.rect(svg.parentElement);
-
       let trbl = new TRBL(50, 20, 50, 20);
       let aspect = bb.aspect();
-
-      console.log("trbl:", trbl);
+      //console.log("trbl:", trbl);
       client = client.inset(200);
-
-      console.log("bbox:", { bb, client });
-
+      //console.log("bbox:", { bb, client });
       let m = Matrix.getAffineTransform(bb, client);
-      console.log("m:", m.toString());
-
+      //console.log("m:", m.toString());
       //      if(m.xx > m.yy)       m.scale(1, m.xx / m.yy);
-
       if(m.xx > m.yy) m.scale(m.yy / m.xx, 1);
       let t = m.toSVG();
       Element.attr(svg, { transform: t });
-
       bb = new Rect(svg.getBBox());
-
       let gcenter = bb.center;
       let move = Point.diff(Element.rect(svg.parentElement).center, gcenter);
-      console.log("center: ", gcenter);
-      console.log("move: ", move);
-
+      //console.log("center: ", gcenter);
+      //console.log("move: ", move);
       m.translate(move.x / m.xx, 0);
       Element.attr(svg, { transform: m.toSVG() });
-
       t = ` translate(${move.x},${move.y}) ` + t;
     },
     onUpdateNode: node => {
@@ -109,7 +99,7 @@ export function createGraph(svg) {
             fontSize: 15,
             fill: "#fff",
             stroke: "none",
-                        textAnchor: "middle",
+                    textAnchor: "middle",
           }, node.element
         )
         );
@@ -244,7 +234,7 @@ class Show extends React.Component {
 
   static async getInitialProps(ctx) {
     const { query, params } = (ctx && ctx.req) || {};
-    console.log("Show.getInitialProps ", { query, params });
+    //console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
     let items;
     if(params && params.id !== undefined) {
@@ -252,10 +242,10 @@ class Show extends React.Component {
       const name = params.id;
       if(isNaN(id) || typeof id != "number") id = -1;
       const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
-      console.log("query: ", q);
+      //console.log("query: ", q);
       let response = await Show.API(q);
       items = response.items || [];
-      console.log("item: ", items[0]);
+      //console.log("item: ", items[0]);
     } else {
       items = await Show.API.list("items", Show.fields);
     }
@@ -294,21 +284,21 @@ class Show extends React.Component {
     let a = new Rect(10, 10, 100, 50);
     let b = new Rect(200, 200, 200, 100);
     let bc = b.center;
-    console.log("center:", bc.toString());
+    //console.log("center:", bc.toString());
     let r = new Matrix();
     // r.init_identity();
     r.translate(bc.x, bc.y);
-    console.log("translate:", r.toString());
+    //console.log("translate:", r.toString());
     r.rotate((-15 * Math.PI) / 180);
     r.translate(-bc.x, -bc.y);
-    console.log("rotate:", r.toString());
+    //console.log("rotate:", r.toString());
     let dr = null;
     if(global.window) {
       dr = new DOMMatrix();
       dr.translateSelf(bc.x, bc.y);
-      console.log("dtranslate:", dr.toString());
+      //console.log("dtranslate:", dr.toString());
       dr.rotateSelf(-15);
-      console.log("drotate:", dr.toString());
+      //console.log("drotate:", dr.toString());
       dr.translateSelf(-bc.x, -bc.y);
     }
     //  r = Matrix.rotate(-45);
@@ -321,7 +311,7 @@ class Show extends React.Component {
     this.b = b;
     this.c = c;
     this.a = a;
-    console.log("getAffineTransform", { a, b, m });
+    //console.log("getAffineTransform", { a, b, m });
 
     if(Util.isBrowser() && !this.g) {
       this.g = createGraph(this.svg());
@@ -336,7 +326,7 @@ class Show extends React.Component {
         tagRemove.addEventListener("click", e => {
           e.preventDefault();
           Timer.once(100, () => {
-            console.log("tagRemove: ", tagRemove);
+            //console.log("tagRemove: ", tagRemove);
             Util.traverseTree(this.tree, node => {
               node.checked = false;
             });
@@ -358,7 +348,7 @@ class Show extends React.Component {
   }
 
   touchEvent = event => {
-    console.log("Touch event: ", event);
+    //console.log("Touch event: ", event);
   };
 
   mouseEvent = event => {
@@ -384,7 +374,7 @@ class Show extends React.Component {
       }
       if(elem && elem.style) {
         const t = ` scale(1.4,1.4)`;
-        console.log("Mouse event: ", t);
+        //console.log("Mouse event: ", t);
         var parent = elem.parentElement;
         elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
         elem.style.setProperty("transform", t);
@@ -393,10 +383,10 @@ class Show extends React.Component {
       }
     } else if(type.endsWith("down")) {
       var elem = r[0];
-      console.log("Mouse event: ", { type, x, y }, r);
+      //console.log("Mouse event: ", { type, x, y }, r);
       if(elem) {
         const id = getId(elem.parentElement);
-        console.log("Clicked id:", id);
+        //console.log("Clicked id:", id);
         this.setState({ active: id });
       }
     }
@@ -406,16 +396,16 @@ class Show extends React.Component {
   selectNode(item) {
     var children = Util.flatTree(item);
     var ids = children.map(child => child.id);
-    console.log("treeSelEvent: ", ids, item.title);
+    //console.log("treeSelEvent: ", ids, item.title);
     this.setState({ parentIds: ids });
   }
 
   treeSelEvent(type, arg) {
     const { rootStore } = this.props;
-    console.log("treeSelEvent: ", type, arg);
+    //console.log("treeSelEvent: ", type, arg);
     switch (type) {
       case "change": {
-        console.log("treeSelEvent: ", arg.value);
+        //console.log("treeSelEvent: ", arg.value);
         Util.traverseTree(this.tree, item => {
           item.checked = false;
         });
@@ -435,7 +425,7 @@ class Show extends React.Component {
 
   handleTransitionEnd = event => {
     const { nativeEvent, target, currentTarget } = event;
-    console.log("handleTransitionEnd", { target, currentTarget, event });
+    //console.log("handleTransitionEnd", { target, currentTarget, event });
     if(this.element) {
       insertParent(this.element, Element.create("a", { href: `/show/${this.state.currentItem}` }));
     } else if(this.previousElement) {
@@ -447,7 +437,7 @@ class Show extends React.Component {
     const { nativeEvent, target, currentTarget } = event;
     let e = event.currentTarget;
     let id = Element.attr(currentTarget, "id").replace(/^item-/, "");
-    console.log("handleClick", { target, currentTarget, id });
+    //console.log("handleClick", { target, currentTarget, id });
     if(this.element === e) {
       this.grid.style.transition = `transform ${this.speed}s ease-in-out`;
       this.grid.style.transform = "";
@@ -479,7 +469,7 @@ class Show extends React.Component {
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
     var trn = affineFit(points, points2);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
-    console.log("matrix fromTriangles: ", matrix);
+    //console.log("matrix fromTriangles: ", matrix);
     var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
     var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
     var pt = new Point(srect.center);
@@ -489,7 +479,7 @@ class Show extends React.Component {
     var distance = Math.sqrt(t.x * t.x + t.y * t.y);
     this.speed = distance * 0.002;
     var gm = Matrix.init_translate(t.x, t.y);
-    console.log("translation:  ", t);
+    //console.log("translation:  ", t);
     var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
@@ -501,7 +491,7 @@ class Show extends React.Component {
     dm.translateSelf(t.x, t.y);
     dm.scaleSelf(scale[0], scale[1]);
     var dms = dm.toString();
-    console.log("b: ", b);
+    //console.log("b: ", b);
     this.element = e;
     this.grid = grid;
     e = this.grid;
@@ -509,15 +499,15 @@ class Show extends React.Component {
     this.grid.style.setProperty("transform", "");
     this.grid.style.setProperty("transition", `transform 0.5s linear`);
     var tend = e => {
-      console.log("transition end: ", e.target);
-      console.log("transformOrigin: ", e.target.style.transformOrigin);
-      console.log("dm: ", dm);
+      //console.log("transition end: ", e.target);
+      //console.log("transformOrigin: ", e.target.style.transformOrigin);
+      //console.log("dm: ", dm);
       e.target.style.transition = `transform 0.5s ease-out`;
       e.target.style.transform = dm.toString();
       e.target.removeEventListener("transitionend", tend);
     };
     e.addEventListener("transitionend", tend);
-    console.log("rect: ", rect);
+    //console.log("rect: ", rect);
     e.style.setProperty("transition", `transform ${this.speed} ease-out`);
     e.style.setProperty("transform", dms);
     e.style.setProperty("z-index", 9);
