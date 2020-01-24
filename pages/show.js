@@ -65,24 +65,23 @@ export function createGraph(svg) {
       let m = Matrix.getAffineTransform(bb, client);
       console.log("m:", m.toString());
 
-//      if(m.xx > m.yy)       m.scale(1, m.xx / m.yy);
+      //      if(m.xx > m.yy)       m.scale(1, m.xx / m.yy);
 
-      if(m.xx > m.yy)       m.scale(m.yy / m.xx, 1);
-     let t = m.toSVG();
+      if(m.xx > m.yy) m.scale(m.yy / m.xx, 1);
+      let t = m.toSVG();
       Element.attr(svg, { transform: t });
 
       bb = new Rect(svg.getBBox());
 
       let gcenter = bb.center;
-let move = Point.diff(Element.rect(svg.parentElement).center, gcenter);
+      let move = Point.diff(Element.rect(svg.parentElement).center, gcenter);
       console.log("center: ", gcenter);
       console.log("move: ", move);
 
-      m.translate(move.x  / m.xx, 0);
-            Element.attr(svg, { transform: m.toSVG() });
+      m.translate(move.x / m.xx, 0);
+      Element.attr(svg, { transform: m.toSVG() });
 
-
-      t = ` translate(${move.x},${move.y}) `+t;
+      t = ` translate(${move.x},${move.y}) ` + t;
     },
     onUpdateNode: node => {
       if(!node.element) {
@@ -105,14 +104,14 @@ let move = Point.diff(Element.rect(svg.parentElement).center, gcenter);
           }, node.element
         );
         // prettier-ignore
-        SVG.create("text", {
+        SVG.create("tspan", {alignmentBaseline: "middle", text: node.label },
+          SVG.create("text", {
             fontSize: 15,
-            alignmentBaseline: "middle",
-            textAnchor: "middle",
             fill: "#fff",
             stroke: "none",
-            text: node.label
+                        textAnchor: "middle",
           }, node.element
+        )
         );
       } else Element.attr(node.element, { transform: `translate(${node.x},${node.y})` });
     },
