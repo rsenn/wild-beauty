@@ -1,6 +1,6 @@
 import React from "react";
 import { action, autorun, observable, flow, set, get, values, toJS, computed } from "mobx";
-import getAPI from "../stores/api.js";
+import { Queries } from "./queries.js";
 import { Element, Timer } from "../utils/dom.js";
 import axios from "../utils/axios.js";
 import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoStore.js";
@@ -22,7 +22,7 @@ if (global.window) {
  *
  * @class      RootStore (name)
  */
-export class RootStore {
+export class RootStore extends Queries {
   @observable
   state = {
     articles: [],
@@ -50,7 +50,6 @@ export class RootStore {
   fields = observable.array(["name", "title", "text"]);
   items = observable.map();
 
-  api = getAPI();
 
   /**
    * Constructs the RootStore
@@ -59,6 +58,9 @@ export class RootStore {
    * @param      {<type>}  pageProps    The page properties
    */
   constructor(initialData, pageProps) {
+
+    super();
+
     if(initialData && initialData.RootStore) {
       const { RootStore } = initialData;
 
@@ -126,13 +128,13 @@ export class RootStore {
     set(this.state, obj);
   }
 
-  @action.bound
   /**
    * Add new image record
    *
    * @param      {<type>}  imageObj  The image object
    * @return     {number}  { description_of_the_return_value }
-   */
+   */  
+  @action.bound
   newImage(imageObj) {
     let { id, ...photo } = imageObj;
     id = parseInt(id);
@@ -307,40 +309,6 @@ export class RootStore {
     return ret;
   }
 
-  async findItem(id) {
-    if(typeof id == "object" && id.id !== undefined) id = id.id;
-    return this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
-  }
-
-  async getDepth(id) {
-    let parents = await this.getParents(id);
-    return parents.length;
-  }
-
-  async getSiblings(id) {
-    let item = await this.findItem(id);
-    const parentId = item.parent ? item.parent.id : item.parent_id;
-    let result = await this.loadItems(`{ parent_id: { _eq: ${parentId} } }`);
-
-    return result;
-  }
-
-  async getChildren(id) {
-    return await this.loadItems(`{ parent_id: { _eq: ${id} } }`);
-  }
-
-  async getParents(id) {
-    let item;
-    let result = [];
-    do {
-      item = await this.findItem(id);
-      if(!(typeof item == "object" && item.id !== undefined)) break;
-      result.push(item);
-      id = item.parent ? item.parent.id : item.parent_id;
-    } while(id > -1);
-    result.shift();
-    return result;
-  }
 
   getHierarchy(item, fn = it => it) {
     item = item || this.rootItem;
@@ -356,130 +324,6 @@ export class RootStore {
       return fn ? fn(ret) : ret;
     }
     return null;
-  }
-
-  async fetchImages(where = {}) {
-    console.log("⇒ images ", { where });
-    let response = await this.api.list(
-      "photos",
-      ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"],
-      { where }
-    );
-    console.log("⇐ images =", response);
-    return response;
-  }
-  /*
-  async fetchItems(where = {}) {
-    console.log("⇒ items:", where);
-    let response = await this.api.list("items", [
-      "id",
-      "type",
-      "parent { id }",
-      "children { id }",
-      "data",
-      "photos { photo { id } }",
-      "users { user { id } }"
-    ]);
-    console.log("⇐ items =", response);
-    return response;
-  }
-*/
-  async refreshItem(id, props) {
-    let response = await this.apiRequest("/api/item", { id, update: props });
-    let { data } = await response;
-    let { success } = await data;
-    let item = typeof (await data.item) == "object" ? this.getItem(data.item.id) : null;
-    if(item) {
-      Object.assign(item, await data.item);
-      console.log("item updated: ", item);
-    }
-    return item;
-  }
-
-  async updateItem(id, props) {
-    let item = null;
-    if(!this.items.has("" + id)) this.items.set("" + id, props);
-    item = this.items.get("" + id);
-    for(let key in props) item[key] = props[key];
-    return item;
-  }
-
-  /**
-   * Fetches items.
-   *
-   * @param      {<type>}   [where={}]  The where
-   * @return     {Promise}  The items.
-   */
-  async loadItems(where = {}) {
-    let response = await this.apiRequest("/api/tree", Util.isEmpty(where) ? {} : { where });
-    let items,
-      data = response ? await response.data : null;
-    if(await data) items = await data.items;
-    if(!items) return 0;
-
-    //console.log("RootStore.loadItems", data);
-    for(let key in items) {
-      const id = parseInt(items[key].id || key);
-      this.items.delete("" + id);
-      this.items.set("" + id, items[key]);
-    }
-    return items;
-  }
-
-  async loadItem(where = {}) {
-    if(typeof where == "number") where = { id: where };
-    let response = Util.isServer()
-      ? await this.api.select("items", where, [
-          "id",
-          "type",
-          "parent { id }",
-          "children { id }",
-          "data",
-          "photos { photo { id original_name width height filesize } }",
-          "users { user { id } }"
-        ])
-      : await this.apiRequest("/api/item", where);
-    let items = response ? await response.items : null;
-    let r = (await items) ? await items[0] : null;
-
-    const id = "" + (r && r.id !== undefined ? r.id : where.id);
-
-    if(r.photos && r.photos.length) {
-      for(let i = 0; i < r.photos.length; i++) {
-        r.photos[i] = this.newImage(r.photos[i].photo);
-        /*        let photo = r.photos[i];
-        if(!this.images.has(photo.id))
-          this.images.set(photo.id, photo);
-        r.photos[i] = this.images.get(photo.id);
- */
-      }
-    }
-    if(!this.items.has(id)) this.items.set(id, r);
-    let it = this.items.get(id);
-    Object.assign(it, r);
-    return it;
-  }
-
-  /**
-   * Saves an item.
-   *
-   * @param      {<type>}  event   The event
-   */
-  async;
-  saveItem(event) {
-    const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
-    const parent_id = rs.state.parent_id;
-
-    const { name = null, ...dataObj } = this.entries.reduce(
-      (acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }),
-      {}
-    );
-
-    console.log("saveItem", { photo_id, parent_id, name, dataObj });
-
-    return this.apiRequest("/api/item/new", { photo_id, parent_id, name, data: dataObj }).then(response => {
-      console.log("saveitem API response:", response);
-    });
   }
 
   /**

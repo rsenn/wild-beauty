@@ -201,7 +201,7 @@ class Show extends React.Component {
     let c = new Rect(b);
     let c2 = c.toPoints();
     c = c.toPoints();
- 
+
     c.transform(r);
     this.b = b;
     this.c = c;
@@ -514,6 +514,9 @@ class Show extends React.Component {
                     data = item.data;
                   }
                   if(typeof data != "object" || data === null) data = {};
+
+if(!haveImage)
+  return undefined;
 
                   return (
                     <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>

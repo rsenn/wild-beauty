@@ -7,11 +7,8 @@ export class ShowItem extends React.Component {
   static async getInitialProps(ctx) {
     const { err, req, res, pathname, query, asPath, AppTree, mobxStore } = ctx;
     const rootStore = mobxStore.RootStore;
-
     let item = await rootStore.loadItem({ id: query.id });
-
     console.log("item: ", item);
-
     return { item, query };
   }
 
