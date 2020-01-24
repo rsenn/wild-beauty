@@ -50,6 +50,7 @@ export class RootStore extends Queries {
   fields = observable.array(["name", "title", "text"]);
   items = observable.map();
 
+  toasts = observable.array([]);
 
   /**
    * Constructs the RootStore
@@ -58,7 +59,6 @@ export class RootStore extends Queries {
    * @param      {<type>}  pageProps    The page properties
    */
   constructor(initialData, pageProps) {
-
     super();
 
     if(initialData && initialData.RootStore) {
@@ -133,7 +133,8 @@ export class RootStore extends Queries {
    *
    * @param      {<type>}  imageObj  The image object
    * @return     {number}  { description_of_the_return_value }
-   */  
+   */
+
   @action.bound
   newImage(imageObj) {
     let { id, ...photo } = imageObj;
@@ -309,7 +310,6 @@ export class RootStore extends Queries {
     return ret;
   }
 
-
   getHierarchy(item, fn = it => it) {
     item = item || this.rootItem;
     if(item) {
@@ -409,6 +409,43 @@ export class RootStore extends Queries {
       //    this.enableAutoRun();
       completed();
     });
+  }
+
+  @action.bound
+  addToast(title, message, ttl = 30000) {
+    const rootStore = this;
+    let deadline = Date.now() + ttl;
+    let toast = message ? { title, message, deadline } : { message: title, deadline };
+    let timer = Timer.until(
+      deadline,
+      function() {
+        console.log("Toast timer:", this);
+        rootStore.removeToasts(this);
+      }.bind(toast)
+    );
+    toast.timer = timer;
+    this.toasts.push(toast);
+    return this.toasts[this.toasts.length - 1];
+  }
+
+  @action.bound
+  removeToasts() {
+    while(this.toasts.length > 0) {
+      let toast = this.toasts[0];
+      if(toast.deadline <= Date.now()) {
+        toast = this.toasts.shift();
+        console.log("Removed toast:", toast);
+      } else {
+        break;
+      }
+    }
+
+    /*
+
+    let removed = this.toasts.remove(toast);
+    console.log("removeToast ", toast, removed);
+    return removed;
+*/
   }
 }
 

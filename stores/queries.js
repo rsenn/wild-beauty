@@ -2,7 +2,6 @@ import getAPI from "./api.js";
 import Util from "../utils/util.js";
 
 export class Queries {
-
   api = getAPI();
 
   async fetchImages(where = {}) {
@@ -90,8 +89,7 @@ export class Queries {
     let item = (await items) ? await items[0] : null;
     const id = "" + (item && item.id !== undefined ? item.id : where.id);
     if(item.photos && item.photos.length) {
-      for(let i = 0; i < item.photos.length; i++)
-        item.photos[i] = this.newImage(item.photos[i].photo);
+      for(let i = 0; i < item.photos.length; i++) item.photos[i] = this.newImage(item.photos[i].photo);
     }
     if(item.data) {
       let obj = {};
@@ -99,10 +97,8 @@ export class Queries {
       delete item.data;
       try {
         obj = JSON.parse(jsonStr);
-      } catch(err) {
-      }
-      if(typeof(obj) == 'object')
-        Object.assign(item, obj);
+      } catch(err) {}
+      if(typeof obj == "object") Object.assign(item, obj);
     }
     if(!this.items.has(id)) this.items.set(id, item);
     let it = this.items.get(id);
@@ -115,7 +111,7 @@ export class Queries {
    *
    * @param      {<type>}  event   The event
    */
-  async
+  async;
   saveItem(event) {
     const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
     const parent_id = rs.state.parent_id;
@@ -132,7 +128,6 @@ export class Queries {
     });
   }
 
-  
   async findItem(id) {
     if(typeof id == "object" && id.id !== undefined) id = id.id;
     return this.items.has("" + id) ? this.items.get("" + id) : await this.loadItem(id);
@@ -167,7 +162,6 @@ export class Queries {
     result.shift();
     return result;
   }
-
-};
+}
 
 export default Queries;

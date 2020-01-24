@@ -515,8 +515,7 @@ class Show extends React.Component {
                   }
                   if(typeof data != "object" || data === null) data = {};
 
-if(!haveImage)
-  return undefined;
+                  if(!haveImage) return undefined;
 
                   return (
                     <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
