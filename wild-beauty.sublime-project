@@ -74,10 +74,15 @@
 				"*.types",
 				"*.walker",
 				"*.xz",
-				"*.yml"
+				"*.yml",
+				"*.1",
 			],
 			"folder_exclude_patterns":
 			[
+				 "nextjs-*",
+				 "react-*",
+				 "wild-beauty",
+				 "svgtree",
 				"applications",
 				"cookie-auth",
 				"database",

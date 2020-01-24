@@ -427,16 +427,15 @@ export class RootStore {
 
     const id = "" + (r && r.id !== undefined ? r.id : where.id);
 
-
     if(r.photos && r.photos.length) {
       for(let i = 0; i < r.photos.length; i++) {
-
         r.photos[i] = this.newImage(r.photos[i].photo);
-/*        let photo = r.photos[i];
+        /*        let photo = r.photos[i];
         if(!this.images.has(photo.id))
           this.images.set(photo.id, photo);
         r.photos[i] = this.images.get(photo.id);
- */     }
+ */
+      }
     }
     if(!this.items.has(id)) this.items.set(id, r);
     let it = this.items.get(id);

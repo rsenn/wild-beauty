@@ -28,9 +28,7 @@ const RandomColor = () => {
 };
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -47,12 +45,7 @@ const findInTree = (tree, value) => {
 };
 
 const makeItemToOption = selected => item => {
-  let data =
-    item && typeof item.data == "string" && item.data.length > 0
-      ? JSON.parse(item.data)
-      : item && item.data != null && typeof item.data == "object"
-      ? item.data
-      : {};
+  let data = item && typeof item.data == "string" && item.data.length > 0 ? JSON.parse(item.data) : item && item.data != null && typeof item.data == "object" ? item.data : {};
   let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
   let value = item.id;
   let children = toJS(item.children);
@@ -68,8 +61,25 @@ const makeItemToOption = selected => item => {
   if(children && children.length) obj.children = children;
   if(label.startsWith("null(")) return null;
   if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
-  //if(item.parent_id != -1 && item.parent_id != 1 && item.type !== null && !item.type.endsWith('category')) return null;
+
   return obj;
+};
+
+const insertParent = (element, newParent) => {
+  const p = element.parentElement;
+  p.removeChild(element);
+  p.appendChild(newParent);
+  newParent.appendChild(element);
+};
+
+const removeParent = (element, pred = e => true) => {
+  const p = element.parentElement;
+  const pp = p.parentElement;
+
+  if(pred(p)) {
+    pp.removeChild(p);
+    pp.appendChild(element);
+  }
 };
 
 @inject("rootStore")
@@ -79,7 +89,8 @@ class Show extends React.Component {
     zIndex: 99999,
     tree: {},
     parentIds: [],
-    view: "list"
+    view: "list",
+    currentItem: null
   };
   static API = getAPI();
   static fields = [
@@ -99,7 +110,7 @@ class Show extends React.Component {
     const { query, params } = (ctx && ctx.req) || {};
     console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
-    //console.log("RootStore.fetchItems");
+
     let items;
 
     if(params && params.id !== undefined) {
@@ -114,36 +125,29 @@ class Show extends React.Component {
     } else {
       items = await Show.API.list("items", Show.fields);
     }
-    //await RootStore.fetchItems();
-    // console.log("Show.getInitialProps  items:", items);
+
     items = items.sort((a, b) => a.id - b.id);
     RootStore.items.clear();
-    //  items.forEach(item => RootStore.newItem(item));
+
     return { items, params };
   }
 
   constructor(props) {
     super(props);
-    this.api = getAPI(
-      global.window && /192\.168/.test(window.location.href)
-        ? "http://wild-beauty.herokuapp.com/v1/graphql"
-        : "/v1/graphql"
-    );
+    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
     const { rootStore } = this.props;
     if(global.window) {
       window.api = this.api;
       window.page = this;
       window.rs = rootStore;
       window.stores = getOrCreateStore();
-
-      //   window.addEventListener('mousemove', this.mouseMove);
     }
-    //console.log("props.items: ", props.items);
+
     rootStore.items.clear();
     props.items.forEach(item => {
       rootStore.newItem(item);
     });
-    //console.log("rootItemId: ", rootStore.rootItemId);
+
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
     if(this.props.params.id !== undefined) {
       this.state.view = "item";
@@ -153,22 +157,12 @@ class Show extends React.Component {
       item.checked = true;
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
     }
-    /*
-     this.touchListener = TouchListener(this.touchEvent,
-      f        element: global.window,
-        step: 10,
-        round: false,
-        listener: MovementListener,
-        noscroll: true
-      }
-    );*/
 
-    /*  this.svgRef.subscribe(ref => {
-      var r = Element.rect('#tree');
-      const {x,y} = r;
-     var e =  ref.factory('use', { href: '#tree', x, y }, ref.svg);
-      console.log("svgRef: ", e);   
-    });*/
+  let a = new Rect(0,0,100,50);
+  let b = new Rect(30,20,200,100);
+
+    let m = Matrix.getAffineTransform(a, b);
+    console.log("getAffineTransform", { a,b,m});
   }
 
   checkTagRemove() {
@@ -229,15 +223,13 @@ class Show extends React.Component {
         console.log("Mouse event: ", t);
 
         var parent = elem.parentElement;
-        /*  parent.removeChild(elem);
-        parent.appendChild(elem);*/
+
         elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
 
         elem.style.setProperty("transform", t);
         this.prevElem = elem;
         hover = getId(elem);
       }
-      // this.setState({ hover });
     } else if(type.endsWith("down")) {
       var elem = r[0];
 
@@ -272,10 +264,10 @@ class Show extends React.Component {
         if(item) {
           item.checked = true;
           this.state.node = item.value;
-          //  this.tree = rootStore.getItem(this.state.node, makeItemToOption());
+
           this.selectNode(item);
         }
-        //rootStore.setState({ selected: arg.value });
+
         break;
       }
       default: {
@@ -284,28 +276,44 @@ class Show extends React.Component {
     }
   }
 
+  handleTransitionEnd = event => {
+    const { nativeEvent, target, currentTarget } = event;
+    console.log("handleTransitionEnd", { target, currentTarget, event });
+
+    if(this.element) {
+      insertParent(this.element, Element.create("a", { href: `/show/${this.state.currentItem}` }));
+    } else if(this.previousElement) {
+      removeParent(this.previousElement, e => e.tagName.toLowerCase() == "a");
+    }
+  };
+
   handleClick = event => {
-    const { nativeEvent } = event;
-    console.log("handleClick", event.buttons, nativeEvent.buttons, nativeEvent);
+    const { nativeEvent, target, currentTarget } = event;
     let e = event.currentTarget;
+    let id = Element.attr(currentTarget, "id").replace(/^item-/, "");
+    console.log("handleClick", { target, currentTarget, id });
 
     if(this.element === e) {
       this.grid.style.transition = `transform ${this.speed}s ease-in-out`;
       this.grid.style.transform = "";
+      this.previousElement = this.element;
       this.element = null;
       if(this.back) {
         this.back.parentElement.removeChild(this.back);
         this.back = null;
       }
+      this.state.currentItem = null;
       return;
     }
 
+    this.state.currentItem = parseInt(id);
+
     Element.findAll(".tile").forEach(e => {
-      if(e !== event.currentTarget)
-        Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
-      /*    e.style.setProperty("transition", "transform 0.2s ease-in");*/
+      if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
+
       e.style.setProperty("transform", "none");
     });
+
     while(e.parentElement && !e.classList.contains("tile")) {
       e = e.parentElement;
     }
@@ -318,7 +326,7 @@ class Show extends React.Component {
     let rect2 = Element.rect("#item-grid");
     let lrect = Element.rect(".show-layout2");
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
-    //console.log("handleClick:\nrect: ", rect.toString(), "\npoints: ", PointList.toString(points), "\nrect2: ", rect2.toString(), "\npoints2: ", PointList.toString(points2));
+
     var trn = affineFit(points, points2);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
     console.log("matrix fromTriangles: ", matrix);
@@ -345,8 +353,7 @@ class Show extends React.Component {
     m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2);
     m.xx *= scale[0];
     m.yy *= scale[1];
-    //m = Matrix.scale.apply(Matrix, scale);
-    //console.log("matrix: ", m);
+
     var dm = new DOMMatrix();
 
     dm.translateSelf(t.x, t.y);
@@ -356,9 +363,6 @@ class Show extends React.Component {
 
     console.log("b: ", b);
 
-    //  Element.setCSS(back, { opacity: 1 });
-    //  Element.setCSS(back, Rect.toCSS(brect));
-    //    Element.setCSS(back, { left: 0, top: 0, width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
     this.element = e;
 
     this.grid = grid;
@@ -367,51 +371,22 @@ class Show extends React.Component {
     this.grid.style.setProperty("transform-origin", `${origin.x}px ${origin.y}px`);
     this.grid.style.setProperty("transform", "");
     this.grid.style.setProperty("transition", `transform 0.5s linear`);
-    //    Element.setCSS(this.grid, { /*transformOrigin:  `${origin.x}px ${origin.y}px`, *//*transition: `transform ${this.speed}s ease-in`,*/ transform: "", zIndex: 8 });
 
     var tend = e => {
       console.log("transition end: ", e.target);
       console.log("transformOrigin: ", e.target.style.transformOrigin);
-      /* gm.xx *= scale[0];
-    gm.yy *= scale[1];*/
-
-      /*   dm = new DOMMatrix();
-      var t2 = Point.diff(srect.center, rect.center);
-      dm.translateSelf(0, rect.height + rect2.y + window.scrollY);
-
-      dm.translateSelf(t2.x, t2.y);*/
-      //  dm.scaleSelf(scale[0], scale[1]);
       console.log("dm: ", dm);
-      // var gm2 = Matrix.scale(gm, scale[0], scale[1]);
       e.target.style.transition = `transform 0.5s ease-out`;
-
-      e.target.style.transform = /*Matrix.toDOMMatrix(gm)*/ dm.toString();
-      /* let back = Element.create("div", {
-        parent: document.body,
-        style: {
-         background: "url(/static/img/tile-background.png) repeat",
-          backgroundSize: "auto 50vmin",
-          zIndex: 8,
-          position: "fixed",
-          ...Rect.toCSS(Element.rect(e.target)),
-          //  transition: 'opacity 1s ease-in-out'
-          transition: "left 0.2s ease-out, top 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out"
-        }
-      });
-      this.back = back;
-      Element.setCSS(back, Rect.toCSS(brect));*/
+      e.target.style.transform = dm.toString();
       e.target.removeEventListener("transitionend", tend);
     };
 
     e.addEventListener("transitionend", tend);
     console.log("rect: ", rect);
 
-    /*  back.style.setProperty("opacity", 1);
-   });
-*/
     e.style.setProperty("transition", `transform ${this.speed} ease-out`);
     e.style.setProperty("transform", dms);
-    // e.style.setProperty("background-color", "white");
+
     e.style.setProperty("z-index", 9);
 
     if(global.window) {
@@ -430,28 +405,25 @@ class Show extends React.Component {
     const onImage = event => {
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
-      //console.log("onChange: ", value);
     };
 
     if(global.window) {
       window.addEventListener("resize", event => {
         const { currentTarget, target } = event;
-        //console.log("Resized: ", { currentTarget, target });
       });
     }
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
     const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
-    console.log("Show.render" /*, { tree, items }*/);
+    console.log("Show.render");
     return (
-      <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent}>
+      <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
         <Head>
           <title>Show</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <Tree tree={tree} minWidth={1024} active={this.state.active} />{" "}
-        {/*treeVerify={node => node.children && node.children.length} */}
+        <Tree tree={tree} minWidth={1024} active={this.state.active} /> {}
         <br />
         <br />
         <br />
@@ -473,19 +445,17 @@ class Show extends React.Component {
             ) : (
               undefined
             )}
-            {/*          <img src={"/static/img/test.svg"} />
-             */}
+            {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
                 {items.map(item => {
-                  // console.log("item: ", item);
                   const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                   const haveImage = photo_id >= 0;
                   let photo = haveImage ? item.photos[0].photo : null;
                   const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
-                  //    console.log("photo: ", photo);
+
                   let { data, name, parent, type, children, users } = item;
                   try {
                     data = item.data && item.data.length && JSON.parse(item.data);
@@ -493,13 +463,13 @@ class Show extends React.Component {
                     data = item.data;
                   }
                   if(typeof data != "object" || data === null) data = {};
-                  //        console.log("data: ", data);
+
                   return (
                     <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                       <SizedAspectRatioBox
                         style={{
                           position: "relative",
-                          // border: "1px solid black",
+
                           boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
                           overflow: "hidden"
                         }}
@@ -524,9 +494,7 @@ class Show extends React.Component {
                           style={{
                             position: "absolute",
                             padding: "2px",
-                            background: haveImage
-                              ? "none"
-                              : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                            background: haveImage ? "none" : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
                             textAlign: "left",
                             top: "0px",
                             left: "0px",
@@ -554,9 +522,7 @@ class Show extends React.Component {
                               fontSize: "16px"
                             }}
                           >
-                            {[...Object.entries(data)]
-                              .map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`))
-                              .join("\n")}
+                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
                           </pre>
                         </div>
                       </SizedAspectRatioBox>

@@ -5,7 +5,7 @@ import Head from "next/head";
 
 export class ShowItem extends React.Component {
   static async getInitialProps(ctx) {
-    const {err, req, res, pathname, query, asPath, AppTree, mobxStore } = ctx;
+    const { err, req, res, pathname, query, asPath, AppTree, mobxStore } = ctx;
     const rootStore = mobxStore.RootStore;
 
     let item = await rootStore.loadItem({ id: query.id });
@@ -20,9 +20,9 @@ export class ShowItem extends React.Component {
   }
 
   render() {
-    const { initialMobxState,  className, item, query } = this.props;
+    const { initialMobxState, className, item, query } = this.props;
 
- //   console.log(`props:`, { item});
+    //   console.log(`props:`, { item});
 
     return (
       <div className={"page-layout"}>

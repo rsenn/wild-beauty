@@ -72,12 +72,7 @@ class Browse extends React.Component {
       <Layout>
         <div className={"grid-container"}>
           Browse
-          <Grid
-            className={"browse-grid"}
-            rows={`repeat(${rows}, ${100 / rows}fr)`}
-            cols={`repeat(5, 20fr)`}
-            style={{ gridGap: "10px" }}
-          >
+          <Grid className={"browse-grid"} rows={`repeat(${rows}, ${100 / rows}fr)`} cols={`repeat(5, 20fr)`} style={{ gridGap: "10px" }}>
             {children.map((child, i) => (
               <GridItem key={`grid-item-${i}`} row={rows} col={i + 1}>
                 <ItemTile id={child.id} />

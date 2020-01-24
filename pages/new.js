@@ -117,8 +117,7 @@ class New extends React.Component {
         let offset = orientation == "landscape" ? event.x : event.y;
         if(offset > 0) offset = 0;
         if(offset < -this.offsetRange) offset = -this.offsetRange;
-        if(event.type.endsWith("move"))
-          this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
+        if(event.type.endsWith("move")) this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
         let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
         if(event.type.endsWith("move")) {
           e.style.setProperty("transform", transformation);
@@ -138,11 +137,7 @@ class New extends React.Component {
         event => {
           console.log("Touch ", event);
           const elem = event.target;
-          if(
-            event.type.endsWith("start") &&
-            event.target.tagName.toLowerCase() == "img" &&
-            elem.classList.contains("inner-image")
-          ) {
+          if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
             this.currentImage = event.target;
             let obj = Element.toObject(this.currentImage);
             const orientation = this.currentImage.getAttribute("orientation");
@@ -151,9 +146,7 @@ class New extends React.Component {
             let range = orientation == "landscape" ? rect.width - prect.width : rect.height - prect.height;
             this.offsetRange = range;
             console.log("rect: ", { orientation, range, rect, prect });
-            obj.style = `position: fixed; top: ${rect.y - window.scrollY}px; left: ${rect.x}px; width: ${
-              rect.width
-            }px; height: ${rect.height}px`;
+            obj.style = `position: fixed; top: ${rect.y - window.scrollY}px; left: ${rect.x}px; width: ${rect.width}px; height: ${rect.height}px`;
             if(this.clonedImage) Element.remove(this.clonedImage);
             this.clonedImage = Element.create(obj);
             document.body.appendChild(this.clonedImage);
