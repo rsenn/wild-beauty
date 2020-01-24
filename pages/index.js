@@ -11,7 +11,6 @@ import { trkl } from "../utils/trkl.js";
 import axios from "../utils/axios.js";
 import { ColorScheme } from "../utils/colorscheme.js";
 
-
 import "../static/style.css";
 
 const rng = Alea.singleton(Date.now());

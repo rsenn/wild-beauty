@@ -3,25 +3,25 @@ import * as d3 from "d3";
 import { HSLA, Element } from "../utils/dom.js";
 import withSizes from "react-sizes";
 
-// prettier-ignore
-//{"name":"[1]","children":[{"name":"[41]"},{"name":"[104]"},{"name":"[57]"},{"name":"[58]"},{"name":"[59]"},{"name":"[60]"},{"name":"[61]"},{"name":"[62]"},{"name":"[3]"},{"name":"[2]"}]};
 
-// prettier-ignore
+
+
+
 export const collapsibleForceLayout = data => {
   const width = 1000,
   height = 1000;
   let i = 0;
   
-//  if(!data)
-//    data = collapsibleForceLayoutData;
-console.log("collapsibleForceLayout ", data );
+
+
+//console.log("collapsibleForceLayout ", data );
   const root = d3.hierarchy(
 {"name":"[1]","children":[{"name":"[41]","size":10},{"name":"org","size":10},{"name":"[57]","size":10},{"name":"[58]","size":10},{"name":"[59]","size":10},{"name":"[60]","size":10},{"name":"[61]","size":10},{"name":"[62]","size":10},{"name":"objects","children":[{"name":"electronics","children":[{"name":"[119]","size":10},{"name":"[120]","size":10},{"name":"[121]","size":10},{"name":"[122]","size":10},{"name":"[123]","size":10},{"name":"[124]","size":10},{"name":"pic","children":[{"name":"lc-meter","size":10},{"name":"rgb-led","size":10},{"name":"picstick-25k50","size":10}]},{"name":"Audio","size":10},{"name":"RS232","children":[{"name":"jdm2-programmer","size":10}]}]},{"name":"boxes","children":[{"name":"[99]","size":10},{"name":"[103]","size":10},{"name":"[98]","size":10},{"name":"[86]","size":10},{"name":"Test","size":10}]},{"name":"bags","children":[{"name":"[64]","size":10}]}]},{"name":"subjects","children":[{"name":"[89]","children":[{"name":"[105]","size":10},{"name":"Roman","size":10}]},{"name":"groups","size":10}]}]}
     );
   const transform = d3.zoomIdentity;
   let node, link;
 
-  console.log("collapsibleForceLayout data=",data);
+  //console.log("collapsibleForceLayout data=",data);
 
   const svgElem = d3
     .select("#d3-graph-svg");
@@ -60,7 +60,7 @@ console.log("collapsibleForceLayout ", data );
     const nodes = flatten(root);
     const links = root.links();
 
-console.log("collapsibleForceLayout update ", { nodes,links});
+//console.log("collapsibleForceLayout update ", { nodes,links});
 
     link = svg.selectAll(".link").data(links, function(d) {return d.target.id; });
 
@@ -86,7 +86,7 @@ console.log("collapsibleForceLayout update ", { nodes,links});
     .attr("stroke-width", 0.3)
     .style("fill", color)
     .style("opacity", 1)
-    .on("click", clicked)
+
     .call(
       d3
       .drag()
@@ -94,13 +94,7 @@ console.log("collapsibleForceLayout update ", { nodes,links});
       .on("drag", dragged)
       .on("end", dragended)
       );
-/*
-    nodeEnter
-    .append("circle")
-    .attr("r", function(d) {return d.data.size > 0 ? d.data.size*0.3 : 8; })
-    .style("text-anchor", function(d) {return d.children ? "end" : "start"; })
-    .text(function(d) {return d.data.name; });
-*/
+
     nodeEnter
     .append("rect")
     .attr("x", function(d) {return -(d.data.size > 0 ? d.data.size*0.5 : 8); })
@@ -116,7 +110,7 @@ console.log("collapsibleForceLayout update ", { nodes,links});
     .style("font-size", '4')
     .style("alignment-baseline", 'middle')
     .style("text-anchor", 'middle')
-//    .style("text-anchor", function(d) {return d.children ? "end" : "start"; })
+
     .text(function(d) {return d.data.name; });
 
     node = nodeEnter.merge(node);
@@ -129,17 +123,15 @@ console.log("collapsibleForceLayout update ", { nodes,links});
     return num;
   }
   function color(d) {
-    return !!d._children  ? "#40df20" // collapsed package 
-    : (!!d.children ? "#ffc000" // expanded package 
-    : "#b366ff"); // leaf node
+    return !!d._children  ? "#40df20" 
+    : (!!d.children ? "#ffc000" 
+    : "#b366ff"); 
   }
   function radius(d) {
     return d._children ? 8 : d.children ? 8 : 4;
   }
   function ticked() {
-   /*   for(let i = 0; i < 5; i++) {
-    simulation.tick();
-  }*/
+   
     link
     .attr("x1", function(d) {return d.source.x; })
     .attr("y1", function(d) {return d.source.y; })
@@ -148,16 +140,7 @@ console.log("collapsibleForceLayout update ", { nodes,links});
     node.attr("transform", function(d) {return `translate(${d.x}, ${d.y})`; });
   }
   function clicked(d) {
-    if(!d3.event.defaultPrevented) {
-      if(d.children) {
-        d._children = d.children;
-        d.children = null;
-      } else {
-        d.children = d._children;
-        d._children = null;
-      }
-      update();
-    }
+   
   }
   function dragstarted(d) {
     if(!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -194,24 +177,17 @@ console.log("collapsibleForceLayout update ", { nodes,links});
 
 function forceSimulation(data) {
   const svg = d3.select("#d3-graph-svg");
-  console.log("svg:", svg);
+  //console.log("svg:", svg);
   const width = +svg.attr("width");
   const height = +svg.attr("height");
 
-  // prettier-ignore
+  
   const simulation = d3.forceSimulation()
   .force('link', d3.forceLink().id(function(d) { return d.id; }))
   .force('charge', d3.forceManyBody().strength(-15).distanceMax(300))
   .force('center', d3.forceCenter( 0,0   ))
   .on('tick', ticked);
-  /*
-  let simulation = d3
-    .forceSimulation()
-    .force("link", d3.forceLink().id(d => {return d.id; }) )
-      .force("charge", d3.forceManyBody().strength(d => {return -Math.pow(d.group, 2.5); }))
-    .force("center", d3.forceCenter(0, 0))
-//   .force('charge', d3.forceManyBody().strength(2))
-.alphaTarget(0.2)*/
+  
 
   const grp = svg.append("g").attr("transform", `translate(100,100) scale(0.5,0.5)`);
 
@@ -251,10 +227,10 @@ function forceSimulation(data) {
     .attr("r", d => Math.log(d.group * 4) * 2)
     .attr("fill", getNodeColor(1));
 
-  // prettier-ignore
+  
   node.append("title").text(d => {return d.id; });
 
-  // prettier-ignore
+  
   const ticked = () => {
     link 
     .attr("x1", d => {return d.source.x; })
@@ -274,30 +250,28 @@ function forceSimulation(data) {
 export class Graph extends Component {
   svgRef = React.createRef();
 
-  /* componentDidUpdate() {
-    console.log("Graph.componentDidUpdate");
-  }*/
+  
 
   componentDidMount() {
     let elem = this.svgRef.current;
-    console.log("Graph.componentDidMount svgRef", this.svgRef);
+    //console.log("Graph.componentDidMount svgRef", this.svgRef);
     elem = Element.find("#d3-graph-svg");
     if(!elem) return;
     let { data } = this.props;
 
     if(data !== null) {
-      console.log("Graph.componentDidIUpdate data=", data);
+      //console.log("Graph.componentDidIUpdate data=", data);
       collapsibleForceLayout(data);
-      //     forceSimulation(data);
+      
     }
   }
 
   componentDidUpdate() {
     const { data } = this.props;
     if(data !== null) {
-      console.log("Graph.componentDidIUpdate data=", data);
+      //console.log("Graph.componentDidIUpdate data=", data);
       collapsibleForceLayout(data);
-      //     forceSimulation(data);
+      
     }
   }
 
