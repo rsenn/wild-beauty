@@ -1,23 +1,21 @@
 import React from "react";
-import { withRouter } from "next/router";
 import Layer from "../components/layer.js";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../utils/alea.js";
-import { Element, HSLA } from "../utils/dom.js";
+import { Element } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { makeTouchCallback } from "../components/TouchCallback.js";
-import { toJS, action, set } from "mobx";
+import { toJS, action } from "mobx";
 import { inject, observer } from "mobx-react";
-import { MultitouchListener, MovementListener, TouchListener } from "../utils/touchHandler.js";
-import { getOrCreateStore } from "../stores/createStore.js";
+import { MovementListener, TouchListener } from "../utils/touchHandler.js";
 import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
 import { IfQueryParam } from "../components/withQueryParam.js";
 import { trkl } from "../utils/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
-import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/functions.js";
+import { maxZIndex, makeItemToOption } from "../stores/functions.js";
 
 import "../static/css/react-upload-gallery.css";
 import "../static/style.css";

@@ -133,7 +133,7 @@ class MyApp extends App {
             margin: 0 0 0 0;
             width: 100vw;
             min-height: 100vh;
-            text-align: left;
+            text-align: center;
             display: flex;
             flex-flow: column nowrap;
             justify-content: flex-start;

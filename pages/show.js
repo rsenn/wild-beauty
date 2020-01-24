@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import { Element, HSLA, PointList, Point, Rect, Matrix, Timer } from "../utils/dom.js";
+import { Element, Point, Rect, Matrix, Timer } from "../utils/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
@@ -8,20 +8,18 @@ import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
 import { Tree } from "../components/tree.js";
-import { action, toJS } from "mobx";
+import { action } from "mobx";
 import Nav from "../components/nav.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
-import { MovementListener, TouchListener } from "../utils/touchHandler.js";
 import { trkl } from "../utils/trkl.js";
-import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/functions.js";
+import { makeItemToOption, findInTree } from "../stores/functions.js";
 
 import "../static/css/grid.css";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
-import { SizeMe, withSize } from "react-sizeme";
 
 const insertParent = (element, newParent) => {
   const p = element.parentElement;

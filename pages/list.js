@@ -1,5 +1,5 @@
 import React from "react";
-import { Element, HSLA, PointList, Point, Rect, Matrix, Timer } from "../utils/dom.js";
+import { Element, PointList, Point, Rect, Matrix } from "../utils/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
@@ -8,15 +8,14 @@ import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
 import { Tree } from "../components/tree.js";
 import { Graph } from "../components/graph.js";
-import { action, toJS } from "mobx";
+import { toJS } from "mobx";
 import { getOrCreateStore } from "../stores/createStore.js";
 import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
-import { MovementListener, TouchListener } from "../utils/touchHandler.js";
 import { trkl } from "../utils/trkl.js";
 import Layout from "../components/layout.js";
 //import { ForceGraph2D } from "react-force-graph";
-import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/functions.js";
+import { findInTree } from "../stores/functions.js";
 
 import "../static/css/grid.css";
 

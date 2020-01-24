@@ -3,7 +3,7 @@ import Head from "next/head";
 import { withRouter } from "next/router";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../utils/alea.js";
-import { HSLA, Timer } from "../utils/dom.js";
+import { Timer } from "../utils/dom.js";
 import { MovementListener, TouchHandler } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
@@ -13,7 +13,6 @@ import { inject, observer } from "mobx-react";
 import { trkl } from "../utils/trkl.js";
 import axios from "../utils/axios.js";
 import { ColorScheme } from "../utils/colorscheme.js";
-import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/functions.js";
 
 import tims from "tims";
 
