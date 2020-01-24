@@ -1,117 +1,17 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="256"
-   height="256"
-   viewBox="0 0 67.733337 67.733335"
-   version="1.1"
-   id="svg8"
-   inkscape:version="0.92.4 (0.92.4+202001151120+f053d5d)"
-   sodipodi:docname="favicon.svg"
-   inkscape:export-filename="/home/roman/wild-beauty/public/favicon.png"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96">
-  <defs
-     id="defs2">
-    <filter
-       inkscape:label="Oil Painting"
-       inkscape:menu="Image Paint and Draw"
-       inkscape:menu-tooltip="Simulate oil painting style"
-       style="color-interpolation-filters:sRGB;"
-       id="filter833">
-      <feColorMatrix
-         type="hueRotate"
-         values="0"
-         id="feColorMatrix827" />
-      <feColorMatrix
-         type="saturate"
-         values="1"
-         id="feColorMatrix829" />
-      <feColorMatrix
-         type="matrix"
-         values="2 -1 0 0 0 0 2 -1 0 0 -1 0 2 0 0 0 0 0 1 0 "
-         id="feColorMatrix831"
-         result="fbSourceGraphic" />
-      <feColorMatrix
-         result="fbSourceGraphicAlpha"
-         in="fbSourceGraphic"
-         values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"
-         id="feColorMatrix969" />
-      <feMorphology
-         id="feMorphology971"
-         radius="2"
-         in="fbSourceGraphic"
-         result="result0" />
-      <feTurbulence
-         id="feTurbulence973"
-         numOctaves="1"
-         baseFrequency="0.078"
-         result="result91" />
-      <feDisplacementMap
-         in2="result91"
-         id="feDisplacementMap975"
-         in="result0"
-         scale="6.3"
-         xChannelSelector="R"
-         yChannelSelector="G" />
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 67.733 67.733">
+  <defs/>
+  <defs>
+    <filter id="favicon_svg__a" color-interpolation-filters="sRGB">
+      <feColorMatrix type="hueRotate" values="0"/>
+      <feColorMatrix type="saturate" values="1"/>
+      <feColorMatrix result="fbSourceGraphic" values="2 -1 0 0 0 0 2 -1 0 0 -1 0 2 0 0 0 0 0 1 0"/>
+      <feColorMatrix in="fbSourceGraphic" result="fbSourceGraphicAlpha" values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"/>
+      <feMorphology in="fbSourceGraphic" radius="2" result="result0"/>
+      <feTurbulence baseFrequency=".078" result="result91"/>
+      <feDisplacementMap in="result0" in2="result91" scale="6.3" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
   </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="-50.12616"
-     inkscape:cy="288.93305"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     units="px"
-     inkscape:window-width="1920"
-     inkscape:window-height="991"
-     inkscape:window-x="1360"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1" />
-  <metadata
-     id="metadata5">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <g
-     inkscape:label="Ebene 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(0,-229.26665)">
-    <g
-       aria-label="WB"
-       style="font-style:normal;font-weight:normal;font-size:152.30445862px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.80761147"
-       id="text817"
-       transform="matrix(0.3293357,0,0,0.3293357,2.2648082,223.71308)">
-      <path
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Hobo BT';-inkscape-font-specification:'Hobo BT Bold';fill:#550000;stroke-width:3.80761147;filter:url(#filter833)"
-         d="m 101.26172,41.747379 c -7.165698,1.436548 -22.447846,-3.590438 -20.95468,8.667499 1.890726,10.272183 4.346536,36.900093 3.532501,47.456635 -0.284612,13.881547 -3.088692,37.893877 -10.25751,49.937077 -9.983893,-18.31216 -8.03737,-66.502855 -6.723453,-86.538673 3.025347,-9.156327 1.974485,-12.795652 -11.18769,-9.415188 -9.48466,-1.704363 -24.297362,0.946268 -17.571013,13.971643 2.257646,21.77589 1.759577,71.657968 -9.863547,90.970028 -6.172595,-4.0237 -6.099099,-19.51837 -7.461525,-28.09874 C 19.757521,114.1023 21.548126,83.050585 24.240632,68.779072 23.179058,57.711441 9.5654991,62.853697 2.1849721,61.925162 -7.6998408,60.119188 -9.7805807,72.235099 -9.2452868,79.512754 c -2.1043932,33.188076 2.4405,84.307076 20.1036898,113.099206 3.257675,7.85717 14.789803,16.95257 20.925637,6.68357 6.483721,-9.00354 11.846291,-18.71381 16.52846,-28.77062 6.063907,11.61019 10.374117,15.21783 21.298828,23.354 11.201044,1.76501 15.188487,-12.36241 20.592427,-19.62827 C 106.86286,144.5405 113.9991,73.406308 110.05273,39.556454 c -1.0231,-3.961078 -4.42518,2.083682 -8.79101,2.190925 z m 61.89868,-9.604987 c -13.3267,0.392519 -26.67628,-0.570043 -39.98828,0.410156 -10.11953,4.337012 -8.32618,17.292236 -9.6966,26.296312 -2.41625,30.417198 -2.67083,103.86685 1.74738,134.11957 5.46114,11.28821 20.50372,3.55824 30.36031,6.01737 12.90471,-0.10772 26.71026,11.32788 38.82669,6.13685 16.75627,-10.39211 17.56534,-51.81985 6.95551,-66.93322 -3.22758,-6.69554 -12.45814,-12.32796 -14.11526,-17.8479 10.29694,-9.85866 18.58533,-52.017253 11.44118,-65.995405 -4.86446,-8.96983 -15.88673,-22.380949 -25.53093,-22.203733 z m -6.38867,25.34375 c 14.05481,3.482857 -3.63217,43.482958 -9.3732,47.636888 -5.2394,5.12275 -10.67027,4.41476 -7.78387,-3.59883 -1.14646,-8.145027 3.95819,-44.915185 13.43568,-43.885815 1.23968,-0.06943 2.4811,-0.09692 3.72139,-0.152243 z m 0.19531,69.406918 c 7.52714,5.07862 15.97534,26.97327 9.04356,35.39168 -7.09285,6.43165 -24.66134,-3.38632 -25.03908,-15.79919 -3.95565,-12.46027 6.68005,-15.85896 15.99552,-19.59249 z"
-         id="path821"
-         inkscape:connector-curvature="0"
-         transform="matrix(0.98373243,0,0,0.98373243,1.5657294,2.3515757)"
-         sodipodi:nodetypes="cccccccccccccccccccccccccccccccccccscc" />
-    </g>
+  <g style="line-height:1.25">
+    <path style="-inkscape-font-specification:'Hobo BT Bold'" fill="#500" stroke-width="3.808" d="M101.262 41.747c-7.166 1.437-22.448-3.59-20.955 8.668 1.89 10.272 4.347 36.9 3.533 47.457-.285 13.881-3.09 37.893-10.258 49.937-9.984-18.313-8.037-66.503-6.723-86.54 3.025-9.155 1.974-12.795-11.188-9.414-9.485-1.705-24.297.946-17.571 13.971 2.258 21.776 1.76 71.658-9.864 90.97-6.172-4.023-6.099-19.518-7.461-28.098-1.017-14.596.773-45.647 3.466-59.919-1.062-11.068-14.676-5.925-22.056-6.854C-7.7 60.12-9.781 72.235-9.245 79.513c-2.105 33.188 2.44 84.307 20.103 113.099 3.258 7.857 14.79 16.953 20.926 6.684 6.484-9.004 11.846-18.714 16.528-28.771 6.064 11.61 10.375 15.218 21.3 23.354 11.2 1.765 15.188-12.362 20.592-19.628 16.659-29.71 23.795-100.845 19.849-134.695-1.023-3.96-4.425 2.084-8.791 2.191zm61.898-9.605c-13.326.393-26.676-.57-39.988.41-10.12 4.338-8.326 17.293-9.696 26.297-2.417 30.417-2.671 103.867 1.747 134.12 5.461 11.288 20.504 3.558 30.36 6.017 12.905-.108 26.71 11.328 38.827 6.137 16.756-10.392 17.565-51.82 6.955-66.934-3.227-6.695-12.458-12.328-14.115-17.847 10.297-9.86 18.585-52.018 11.441-65.996-4.864-8.97-15.886-22.38-25.53-22.204zm-6.388 25.344c14.055 3.483-3.632 43.483-9.373 47.637-5.24 5.123-10.67 4.415-7.784-3.599-1.147-8.145 3.958-44.915 13.435-43.886 1.24-.069 2.481-.097 3.722-.152zm.195 69.407c7.527 5.079 15.975 26.973 9.044 35.392-7.093 6.431-24.662-3.387-25.04-15.8-3.955-12.46 6.68-15.858 15.996-19.592z" aria-label="WB" filter="url(#favicon_svg__a)" font-family="Hobo BT" font-size="152.304" font-weight="700" letter-spacing="0" transform="matrix(.32398 0 0 .32398 2.78 -4.78)" word-spacing="0"/>
   </g>
 </svg>
