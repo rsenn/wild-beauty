@@ -8,7 +8,7 @@ import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
 import { Tree } from "../components/tree.js";
-import { action } from "mobx";
+import { action,toJS } from "mobx";
 import Nav from "../components/nav.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 import affineFit from "affinefit";
