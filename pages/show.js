@@ -40,7 +40,7 @@ const removeParent = (element, pred = e => true) => {
 };
 
 export function createGraph() {
-  let g = new Graph();
+  let g = new Graph(new Point(300,200), true);
 
     var node1 = new Node("test", 200);
   var node2 = new Node("test", 200);
