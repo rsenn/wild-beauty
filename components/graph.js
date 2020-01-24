@@ -94,8 +94,7 @@ export const collapsibleForceLayout = data => {
   const ANIMATE_EVERY_NTH_FRAME = 6;
     const TICKS_PER_RENDER = 3;
 
-  const startFn = () => {
-    function render() {
+  function render() {
       if(animFrame % ANIMATE_EVERY_NTH_FRAME == 0) {
         for(var i = 0; i < TICKS_PER_RENDER; i++) {
           force.tick();
@@ -113,6 +112,9 @@ export const collapsibleForceLayout = data => {
       }
       animFrame++;
     }
+
+  const startFn = () => {
+  
 
    // requestAnimationFrame(render);
     //Timer.interval(500, render);
