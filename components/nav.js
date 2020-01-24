@@ -1,5 +1,5 @@
 import React from "react";
-import { withRouter, useRouter } from "next/router";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import classNames from "classnames";
 import LoginForm from "./login.js";
@@ -10,7 +10,6 @@ import { set } from "mobx";
 import { HSLA, Timer } from "../utils/dom.js";
 import Util from "../utils/util.js";
 import Alea from "../utils/alea.js";
-import MyLink from "./simple/myLink.js";
 
 const LoginIcon = ({ style }) => (
   <svg style={style} height="56" width="34" viewBox="0 0 8.996 14.817" xmlns="http://www.w3.org/2000/svg">

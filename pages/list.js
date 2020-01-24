@@ -1,12 +1,11 @@
 import React from "react";
-import { Element, PointList, Point, Rect, Matrix } from "../utils/dom.js";
+import { Element, Point, Rect, Matrix } from "../utils/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
-import { Tree } from "../components/tree.js";
 import { Graph } from "../components/graph.js";
 import { toJS } from "mobx";
 import { getOrCreateStore } from "../stores/createStore.js";

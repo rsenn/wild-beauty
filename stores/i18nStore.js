@@ -1,5 +1,5 @@
 import { i18nStore } from "react-i18nify-mobx";
-import { makeAutoStoreHandler, getLocalStorage } from "./autoStore.js";
+import { makeAutoStoreHandler } from "./autoStore.js";
 import { observable, autorun, toJS } from "mobx";
 
 i18nStore.setTranslations({

@@ -1,20 +1,16 @@
 import React from "react";
 import Head from "next/head";
-import { withRouter } from "next/router";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../utils/alea.js";
 import { Timer } from "../utils/dom.js";
-import { MovementListener, TouchHandler } from "../utils/touchHandler.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import Util from "../utils/util.js";
-import { DrawCallback } from "../components/TouchCallback.js";
 import { inject, observer } from "mobx-react";
 import { trkl } from "../utils/trkl.js";
 import axios from "../utils/axios.js";
 import { ColorScheme } from "../utils/colorscheme.js";
 
-import tims from "tims";
 
 import "../static/style.css";
 

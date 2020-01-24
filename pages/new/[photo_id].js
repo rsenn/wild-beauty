@@ -1,9 +1,8 @@
 import React from "react";
 import { ItemEditor } from "../../components/views/itemEditor.js";
-import { Element, HSLA } from "../../utils/dom.js";
-import { toJS, action, set } from "mobx";
+import { Element } from "../../utils/dom.js";
+import { toJS, action } from "mobx";
 import { inject, observer } from "mobx-react";
-import { trkl } from "../../utils/trkl.js";
 import NeedAuth from "../../components/simple/needAuth.js";
 import Layout from "../../components/layout.js";
 import { BehaveHooks, Behave } from "../../utils/behave.js";

@@ -1,5 +1,4 @@
 import React from "react";
-import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { Grid, GridItem } from "../components/views/grid.js";
 import { ItemTile } from "../components/views/itemTile.js";
