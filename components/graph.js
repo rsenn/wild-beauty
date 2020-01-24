@@ -115,7 +115,7 @@ export const collapsibleForceLayout = data => {
 
   const startFn = () => {
     // requestAnimationFrame(render);
-   // Timer.interval(500, render);
+    // Timer.interval(500, render);
   };
 
   // prettier-ignore
@@ -125,8 +125,6 @@ export const collapsibleForceLayout = data => {
     .force("charge", d3 .forceManyBody() .strength(-15) .distanceMax(300) )
     .force("center", d3.forceCenter(width / 2, height / 4))
     .on("tick", ticked)
-    ;
-
   function update() {
     const nodes = flatten(root);
     const links = root.links();
@@ -219,9 +217,7 @@ export const collapsibleForceLayout = data => {
       return `translate(${d.x}, ${d.y})`;
     });
   }
-  function clicked(d) {
-
-  }
+  function clicked(d) {}
   function dragstarted(d) {
     if(!d3.event.active) simulation.alphaTarget(0.3).restart();
     d.fx = d.x;
@@ -266,9 +262,7 @@ function forceSimulation(data) {
     .force("link", d3.forceLink().id(function(d) {return d.id; }) )
     .force("charge", d3 .forceManyBody() .strength(-15) .distanceMax(300) )
     .force("center", d3.forceCenter(0, 0))
-//    .on("tick", ticked)
-    ;
-
+  //    .on("tick", ticked)
   const grp = svg.append("g").attr("transform", `translate(100,100) scale(0.5,0.5)`);
 
   const link = grp

@@ -40,9 +40,9 @@ const removeParent = (element, pred = e => true) => {
 };
 
 export function createGraph() {
-  let g = new Graph(new Point(300,200), true);
+  let g = new Graph(new Point(300, 200), true);
 
-    var node1 = new Node("test", 200);
+  var node1 = new Node("test", 200);
   var node2 = new Node("test", 200);
   var node3 = new Node("test", 200);
   var node4 = new Node("test", 200);
@@ -61,7 +61,6 @@ export function createGraph() {
   var node17 = new Node("test", 90);
   var node18 = new Node("test", 90);
   var node19 = new Node("test", 90);
-
 
   var connection1 = new Edge(node1, node2);
   var connection2 = new Edge(node2, node3);
@@ -122,6 +121,8 @@ export function createGraph() {
   g.addNode(node17);
   g.addNode(node18);
   g.addNode(node19);
+
+  return g;
 }
 
 @inject("rootStore")
@@ -229,7 +230,8 @@ class Show extends React.Component {
     this.a = a;
     console.log("getAffineTransform", { a, b, m });
 
-    createGraph(new Point(300,200));
+    this.g = createGraph(new Point(300, 200));
+    this.g.timer.stop();
   }
 
   checkTagRemove() {
