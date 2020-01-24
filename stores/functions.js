@@ -1,5 +1,4 @@
-import {  toJS } from "mobx";
-
+import { toJS } from "mobx";
 
 export const RandomColor = () => {
   const c = HSLA.random();
