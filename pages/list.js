@@ -191,7 +191,7 @@ class List extends React.Component {
     const items = this.props.items
       ? this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1)
       : [];
-    //console.log("List.render ", { tree });
+    console.log("List.render ");
     return (
       <Layout>
         <br />

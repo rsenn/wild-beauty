@@ -14,6 +14,7 @@ import { getOrCreateStore } from "../stores/createStore.js";
 import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
 import { trkl } from "../utils/trkl.js";
+import { Graph, Node, Edge } from "../utils/fd-graph.js";
 import { makeItemToOption, findInTree } from "../stores/functions.js";
 
 import "../static/css/grid.css";
@@ -37,6 +38,91 @@ const removeParent = (element, pred = e => true) => {
     pp.appendChild(element);
   }
 };
+
+export function createGraph() {
+  let g = new Graph();
+
+    var node1 = new Node("test", 200);
+  var node2 = new Node("test", 200);
+  var node3 = new Node("test", 200);
+  var node4 = new Node("test", 200);
+  var node5 = new Node("test", 200);
+  var node6 = new Node("test", 70);
+  var node7 = new Node("test", 70);
+  var node8 = new Node("test", 70);
+  var node9 = new Node("test", 70);
+  var node10 = new Node("test", 70);
+  var node11 = new Node("test", 70);
+  var node12 = new Node("test", 70);
+  var node13 = new Node("test", 70);
+  var node14 = new Node("test", 90);
+  var node15 = new Node("test", 90);
+  var node16 = new Node("test", 90);
+  var node17 = new Node("test", 90);
+  var node18 = new Node("test", 90);
+  var node19 = new Node("test", 90);
+
+
+  var connection1 = new Edge(node1, node2);
+  var connection2 = new Edge(node2, node3);
+  var connection3 = new Edge(node3, node4);
+  var connection4 = new Edge(node4, node5);
+  var connection5 = new Edge(node5, node1);
+  var connection6 = new Edge(node1, node6);
+  var connection7 = new Edge(node2, node7);
+  var connection8 = new Edge(node3, node8);
+  var connection9 = new Edge(node4, node9);
+  var connection10 = new Edge(node5, node10);
+  var connection11 = new Edge(node6, node7);
+  var connection12 = new Edge(node7, node8);
+  var connection13 = new Edge(node8, node9);
+  var connection14 = new Edge(node9, node10);
+  var connection15 = new Edge(node10, node6);
+  var connection16 = new Edge(node11, node12);
+  var connection17 = new Edge(node12, node13);
+  var connection18 = new Edge(node13, node11);
+  var connection19 = new Edge(node14, node15);
+  var connection20 = new Edge(node15, node16);
+  var connection21 = new Edge(node16, node17);
+  var connection22 = new Edge(node17, node18);
+  var connection23 = new Edge(node18, node19);
+
+  g.addEdge(connection1);
+  g.addEdge(connection2);
+  g.addEdge(connection3);
+  g.addEdge(connection4);
+  g.addEdge(connection5);
+  g.addEdge(connection6);
+  g.addEdge(connection7);
+  g.addEdge(connection8);
+  g.addEdge(connection9);
+  g.addEdge(connection10);
+  g.addEdge(connection11);
+  g.addEdge(connection12);
+  g.addEdge(connection13);
+  g.addEdge(connection14);
+  g.addEdge(connection15);
+
+  g.addNode(node1);
+  g.addNode(node2);
+  g.addNode(node3);
+  g.addNode(node4);
+  g.addNode(node5);
+  g.addNode(node6);
+  g.addNode(node7);
+  g.addNode(node8);
+  g.addNode(node9);
+  g.addNode(node10);
+  g.addNode(node11);
+  g.addNode(node12);
+  g.addNode(node13);
+  g.addNode(node14);
+  g.addNode(node15);
+  g.addNode(node16);
+  g.addNode(node17);
+  g.addNode(node18);
+  g.addNode(node19);
+}
 
 @inject("rootStore")
 @observer
@@ -142,6 +228,8 @@ class Show extends React.Component {
     this.c = c;
     this.a = a;
     console.log("getAffineTransform", { a, b, m });
+
+    createGraph(new Point(300,200));
   }
 
   checkTagRemove() {
