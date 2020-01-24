@@ -1,7 +1,7 @@
 import React from "react";
 import { action, autorun, observable, flow, set, get, values, toJS, computed } from "mobx";
 import { Queries } from "./queries.js";
-import { Element, Timer } from "../utils/dom.js";
+import dom, { Element, Timer } from "../utils/dom.js";
 import axios from "../utils/axios.js";
 import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoStore.js";
 import Util from "../utils/util.js";
@@ -11,17 +11,14 @@ import devpane from "../utils/devpane.js";
 const isServer = !global.window;
 
 if (global.window) {
-  window.dev = {};
+  window.dev = { dom };
   window.fns = {};
+  window.dom = dom;
 
   assign_to(window);
 }
 
-/**
- * This class describes the root store.
- *
- * @class      RootStore (name)
- */
+
 export class RootStore extends Queries {
   @observable
   state = {
@@ -52,12 +49,7 @@ export class RootStore extends Queries {
 
   toasts = observable.array([]);
 
-  /**
-   * Constructs the RootStore
-   *
-   * @param      {<type>}  initialData  The initial data
-   * @param      {<type>}  pageProps    The page properties
-   */
+  
   constructor(initialData, pageProps) {
     super();
 
@@ -68,18 +60,8 @@ export class RootStore extends Queries {
         this.items.delete("" + itemId);
         this.items.set("" + itemId, RootStore.items[itemId]);
       }
-      console.log("RootStore.constructor ", { initialData, pageProps });
-      /*if(initialData && initialData.RootStore) {
-      const init = initialData.RootStore;
-      for(let k in init) {
-        switch (k) {
-          case "images": {
-            this.images = observable.map(init[k]);
-            break;
-          }
-        }
-      }
-    }*/
+      //console.log("RootStore.constructor ", { initialData, pageProps });
+      
     }
     if(global.window) {
       if(!window.devp) window.devp = new devpane();
@@ -87,11 +69,11 @@ export class RootStore extends Queries {
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
     }
 
-    autorun(() => console.log("rootStore.authenticated: ", this.authenticated));
+  /*  autorun(() => console.log("rootStore.authenticated: ", this.authenticated));
     autorun(() => console.log("rootStore.loading: ", this.state.loading));
     autorun(() => console.log("rootStore.auth: ", toJS(this.auth)));
     autorun(() => console.log("rootStore.auth.token: ", this.auth.token));
-
+*/
     this.items.constructor.prototype.toObject = function() {
       return Object.fromEntries([...this.entries()].map(([k, v]) => [k, toJS(v)]));
     };
@@ -120,7 +102,7 @@ export class RootStore extends Queries {
   updateState(obj) {
     set(this.state, obj);
     this.state.updated = true;
-    //console.log("RootStore.updateState ", obj);
+    
   }
 
   @action.bound
@@ -128,19 +110,14 @@ export class RootStore extends Queries {
     set(this.state, obj);
   }
 
-  /**
-   * Add new image record
-   *
-   * @param      {<type>}  imageObj  The image object
-   * @return     {number}  { description_of_the_return_value }
-   */
+  
 
   @action.bound
   newImage(imageObj) {
     let { id, ...photo } = imageObj;
     id = parseInt(id);
 
-    console.log("rootStore.newImage ", imageObj);
+    //console.log("rootStore.newImage ", imageObj);
     if(imageObj.src === undefined) imageObj.src = `/api/image/get/${id}.jpg`;
 
     this.images.set(id, observable.object(imageObj));
@@ -153,7 +130,7 @@ export class RootStore extends Queries {
           const { naturalWidth, naturalHeight, width, height } = e;
           image.width = naturalWidth;
           image.height = naturalHeight;
-          //console.log({ naturalWidth, naturalHeight, width, height });
+          
           tm.stop();
         }
       });
@@ -161,23 +138,13 @@ export class RootStore extends Queries {
     return image;
   }
 
-  /**
-   * Gets an image.
-   *
-   * @param      {<type>}  id      The identifier
-   * @return     {<type>}  The image.
-   */
+  
   getImage(id) {
     id = "" + id;
     return this.images.has(id) ? this.images.get(id) : null;
   }
 
-  /**
-   * Determines if image exists.
-   *
-   * @param      {<type>}  id      The identifier
-   * @return     {<type>}  True if image exists, False otherwise.
-   */
+  
   imageExists(id) {
     id = parseInt(id);
     return this.images.has(id);
@@ -186,7 +153,7 @@ export class RootStore extends Queries {
   @action.bound
   deleteImage(id) {
     let image = this.getImage(id);
-    //console.log("deleteImage :", image);
+    
     this.apiRequest("/api/image/delete", { id }).then(response => {
       let data, result;
       if(response && response.data) data = response.data;
@@ -194,24 +161,16 @@ export class RootStore extends Queries {
       if(result.affected_rows) {
         this.images.delete(id);
       }
-      //console.log("deleteImage API response:", result);
+      
     });
   }
 
-  /**
-   * Get field names
-   *
-   * @return     {<type>}  { description_of_the_return_value }
-   */
+  
   get fieldNames() {
     return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
   }
 
-  /**
-   * Gets the current image
-   *
-   * @return     {Object}  {Uploaded image}
-   */
+  
   get currentImage() {
     const id = this.state.image;
     let image = this.getImage(id);
@@ -223,11 +182,11 @@ export class RootStore extends Queries {
   }
 
   get rootItem() {
-    if(this.items.size == 0) this.loadItems(/*{ parent_id: null }*/);
+    if(this.items.size == 0) this.loadItems();
     var root = null;
     if(this.items && this.items.entries)
       for(let [id, item] of this.items.entries()) {
-        //console.log("item: ", toJS( item));
+        
         if(item && item.type == "root") root = item;
       }
     return root;
@@ -238,18 +197,13 @@ export class RootStore extends Queries {
     return item === null ? -1 : item.id;
   }
 
-  /**
-   * Add new item
-   *
-   * @param      {Object}  item    The item
-   * @return     {Object}  observable item
-   */
+  
   @action
   newItem(item) {
     var childIds = item.children && item.children.map ? item.children.map(child => child.id).sort() : [];
     var id = parseInt(item.id);
     item = { ...item, id, childIds };
-    //delete item.children;
+    
     delete item.parent;
     if(typeof item.data == "string" && item.data.length > 0) {
       var data = {};
@@ -265,19 +219,12 @@ export class RootStore extends Queries {
     }
     this.items.set("" + id, item);
     item = this.items.get("" + item.id);
-    //console.log("New item: ", item);
+    
     return item;
   }
 
-  /**
-   * Gets an item.
-   *
-   * @param      {<type>}          id            The identifier
-   * @param      {Function}        [tr=it=>it]   { parameter_description }
-   * @param      {(Array|string)}  [idMap=null]  The identifier map
-   * @return     {<type>}          The item.
-   */
-  /*  @action*/
+  
+  
   getItem(id, tr = it => it, idMap = null) {
     if(idMap === null) idMap = [];
     let item = this.items.get("" + (!id ? this.rootItemId : id));
@@ -299,7 +246,7 @@ export class RootStore extends Queries {
     let arr = Object.values(this.items.toObject());
     let ret = [];
     for(let item of arr) {
-      console.log("children: ", item.children);
+      //console.log("children: ", item.children);
       if(item.children && item.children.length) {
         for(let child of item.children) {
           const id = child && child.id;
@@ -326,42 +273,30 @@ export class RootStore extends Queries {
     return null;
   }
 
-  /**
-   * Perform async API request
-   *
-   * @param      {string}   endpoint  The endpoint
-   * @param      {<type>}   data      The data
-   * @return     {Promise}  { description_of_the_return_value }
-   */
+  
   async apiRequest(endpoint, data) {
     let res;
-    console.log("RootStore.apiRequest", { endpoint, data });
+    //console.log("RootStore.apiRequest", { endpoint, data });
     if(!data) res = await axios.get(endpoint);
     else res = await axios.post(endpoint, data);
 
-    if((await res) && ((await res.status) != 200 || !(await res.data)) /*|| !(await res.data.success)*/) {
+    if((await res) && ((await res.status) != 200 || !(await res.data)) ) {
       console.error("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
       throw new Error(`apiRequest status=${res.status} data=${res.data}`);
     } else {
     }
-    console.log("RootStore.apiRequest " + endpoint, res);
+    //console.log("RootStore.apiRequest " + endpoint, res);
 
     return res;
   }
 
-  /**
-   * Does a login.
-   *
-   * @param      {<type>}    username            The username
-   * @param      {<type>}    password            The password
-   * @param      {Function}  [completed=()=>{}]  The completed
-   */
+  
   @action.bound
   doLogin(username, password, completed = () => {}) {
     this.setState({ loading: true });
     Timer.once(100, () => {
       this.apiRequest("/api/login", { username, password }).then(res => {
-        console.log("RootStore.doLogin ", res);
+        //console.log("RootStore.doLogin ", res);
         const { success, token, user_id, user } = res.data;
         const { username } = user;
         this.setState({
@@ -370,17 +305,16 @@ export class RootStore extends Queries {
           error: success ? undefined : "Login failed"
         });
         this.users.set(user_id, user);
-        /*   this.auth.token = token;
-        this.auth.user_id = user_id;*/
+        
         this.disableAutoRun();
         let newAuth = { token, user_id, user };
         set(this.auth, newAuth);
         if(global.window) localStorage.setItem("auth", JSON.stringify(newAuth));
         this.enableAutoRun();
-        console.log("API login result: ", { success, token });
+        //console.log("API login result: ", { success, token });
         if(success && window.global) {
           for(let name of ["token"]) document.cookie += `${name}=${res.data[name]}; Path=/; `;
-          console.log("Cookies: ", document.cookie);
+          //console.log("Cookies: ", document.cookie);
         }
         completed(res.data);
       });
@@ -394,19 +328,19 @@ export class RootStore extends Queries {
    */
   @action.bound
   doLogout(completed = () => {}) {
-    console.log("rootStore.doLogout ");
+    //console.log("rootStore.doLogout ");
     this.setState({ loading: true });
     this.apiRequest("/api/logout").then(res => {
       const { success, token, user_id } = res.data;
       this.setState({ loading: false, authenticated: false });
-      //      this.disableAutoRun();
+      
       set(this.auth, { token: "", user_id: -1 });
       this.auth.token = "";
       this.auth.user_id = -1;
       localStorage.removeItem("auth");
       Util.deleteCookie("token");
       Util.deleteCookie("user_id");
-      //    this.enableAutoRun();
+      
       completed();
     });
   }
@@ -419,7 +353,7 @@ export class RootStore extends Queries {
     let timer = Timer.until(
       deadline,
       function() {
-        console.log("Toast timer:", this);
+        //console.log("Toast timer:", this);
         rootStore.removeToasts(this);
       }.bind(toast)
     );
@@ -430,7 +364,7 @@ export class RootStore extends Queries {
 
   @action.bound
   removeToast(deadline) {
-    console.log("rootStore.removeToast ", deadline);
+    //console.log("rootStore.removeToast ", deadline);
     let toasts = this.toasts.filter(t => t.deadline != deadline);
     this.toasts.replace(toasts);
   }
@@ -441,18 +375,13 @@ export class RootStore extends Queries {
       let toast = this.toasts[0];
       if(toast.deadline <= Date.now()) {
         toast = this.toasts.shift();
-        console.log("Removed toast:", toast);
+        //console.log("Removed toast:", toast);
       } else {
         break;
       }
     }
 
-    /*
-
-    let removed = this.toasts.remove(toast);
-    console.log("removeToast ", toast, removed);
-    return removed;
-*/
+    
   }
 }
 

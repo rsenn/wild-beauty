@@ -47,8 +47,7 @@ export const ItemEditor = inject("rootStore")(
             </SizedAspectRatioBox>
           </div>
         </div>
-        <div className={"item-fields"}>
-          <DropdownTreeSelect
+        <DropdownTreeSelect
             data={[tree]}
             onChange={obj => {
               console.log("Tree value: ", obj);
@@ -63,6 +62,8 @@ export const ItemEditor = inject("rootStore")(
             texts={{ placeholder: "parent item" }}
           />
           <SortableTree treeData={tree} />
+        <div className={"item-fields"}>
+          
           {rootStore.entries.map(field => (
             <EditableField
               options={rootStore.fieldNames}
@@ -105,9 +106,8 @@ export const ItemEditor = inject("rootStore")(
           >
             <button
               onClick={e => {
-                rootStore.saveItem(e, result => {
-                  let insertId = data.result[0].id;
-                  //             console.log("saveItem result: ", response);
+                rootStore.saveItem(e, response => {
+                  let insertId = response.data.result[0].id;
                   rootStore.addToast(`Saved item (Id: ${insertId})`);
                 });
               }}
