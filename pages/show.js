@@ -15,7 +15,7 @@ import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
 import { trkl } from "../utils/trkl.js";
 import { Graph, Node, Edge } from "../utils/fd-graph.js";
-import { makeItemToOption, findInTree } from "../stores/functions.js";
+import { makeItemToOption, findInTree, walkTree, treeToGraph } from "../stores/functions.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
 
 import "../static/css/grid.css";
@@ -66,7 +66,7 @@ export function createGraph(svg) {
       //console.log("bbox:", { bb, client });
       let m = Matrix.getAffineTransform(bb, client);
       //console.log("m:", m.toString());
-      //      if(m.xx > m.yy)       m.scale(1, m.xx / m.yy);
+        //if(m.xx > m.yy)       m.scale(1, m.xx / m.yy);
       if(m.xx > m.yy) m.scale(m.yy / m.xx, 1);
       let t = m.toSVG();
       Element.attr(svg, { transform: t });
@@ -78,6 +78,8 @@ export function createGraph(svg) {
       m.translate(move.x / m.xx, 0);
       Element.attr(svg, { transform: m.toSVG() });
       t = ` translate(${move.x},${move.y}) ` + t;
+
+      SVG.create('circle', { cx: graph.config.origin.x, cy: graph.config.origin.y, r: 30, stroke: '#f00', strokeWidth: 2, fill: 'none' }, svg);
     },
     onUpdateNode: node => {
       if(!node.element) {
@@ -91,10 +93,10 @@ export function createGraph(svg) {
         );
         // prettier-ignore
         SVG.create("rect", {
-            x: -15,
-            y: -16,
-            width: 30,
-            height: 30,
+            x: -16,
+            y: -17,
+            width: 32,
+            height: 32,
             rx: 1.5,
             ry: 1.5,
             fill: "#ffdd00",
@@ -105,7 +107,7 @@ export function createGraph(svg) {
         // prettier-ignore
         SVG.create("tspan", {alignmentBaseline: "middle", text: node.label },
           SVG.create("text", {
-            fontSize: 15,
+            fontSize: 10,
             fill: "#000",
             stroke: "none",
                     textAnchor: "middle",
@@ -121,6 +123,72 @@ export function createGraph(svg) {
     }
   });
 
+  var hier = {
+    name: "[1]",
+    children: [
+      { name: "[41]", size: 10 },
+      { name: "org", size: 10 },
+      { name: "[57]", size: 10 },
+      { name: "[58]", size: 10 },
+      { name: "[59]", size: 10 },
+      { name: "[60]", size: 10 },
+      { name: "[61]", size: 10 },
+      { name: "[62]", size: 10 },
+      {
+        name: "objects",
+        children: [
+          {
+            name: "electronics",
+            children: [
+              { name: "[119]", size: 10 },
+              { name: "[120]", size: 10 },
+              { name: "[121]", size: 10 },
+              { name: "[122]", size: 10 },
+              { name: "[123]", size: 10 },
+              { name: "[124]", size: 10 },
+              {
+                name: "pic",
+                children: [
+                  { name: "lc-meter", size: 10 },
+                  { name: "rgb-led", size: 10 },
+                  { name: "picstick-25k50", size: 10 }
+                ]
+              },
+              { name: "Audio", size: 10 },
+              { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] }
+            ]
+          },
+          {
+            name: "boxes",
+            children: [
+              { name: "[99]", size: 10 },
+              { name: "[103]", size: 10 },
+              { name: "[98]", size: 10 },
+              { name: "[86]", size: 10 },
+              { name: "Test", size: 10 }
+            ]
+          },
+          { name: "bags", children: [{ name: "[64]", size: 10 }] }
+        ]
+      },
+      {
+        name: "subjects",
+        children: [
+          {
+            name: "[89]",
+            children: [
+              { name: "[105]", size: 10 },
+              { name: "Roman", size: 10 }
+            ]
+          },
+          { name: "groups", size: 10 }
+        ]
+      }
+    ]
+  };
+
+  treeToGraph(g, hier);
+  /*
   var node1 = new Node("1", 200);
   var node2 = new Node("2", 200);
   var node3 = new Node("3", 200);
@@ -156,14 +224,6 @@ export function createGraph(svg) {
   var connection13 = new Edge(node8, node9);
   var connection14 = new Edge(node9, node10);
   var connection15 = new Edge(node10, node6);
-  /*  var connection16 = new Edge(node11, node12);
-  var connection17 = new Edge(node12, node13);
-  var connection18 = new Edge(node13, node11);
-  var connection19 = new Edge(node14, node15);
-  var connection20 = new Edge(node15, node16);
-  var connection21 = new Edge(node16, node17);
-  var connection22 = new Edge(node17, node18);
-  var connection23 = new Edge(node18, node19);*/
 
   g.addEdge(connection1);
   g.addEdge(connection2);
@@ -190,17 +250,7 @@ export function createGraph(svg) {
   g.addNode(node7);
   g.addNode(node8);
   g.addNode(node9);
-  g.addNode(node10);
-  /* g.addNode(node11);
-  g.addNode(node12);
-  g.addNode(node13);
-  g.addNode(node14);
-  g.addNode(node15);
-  g.addNode(node16);
-  g.addNode(node17);
-  g.addNode(node18);
-  g.addNode(node19);
-*/
+  g.addNode(node10);*/
   return g;
 }
 
