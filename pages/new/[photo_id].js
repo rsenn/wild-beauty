@@ -7,31 +7,7 @@ import { trkl } from "../../utils/trkl.js";
 import NeedAuth from "../../components/simple/needAuth.js";
 import Layout from "../../components/layout.js";
 import { BehaveHooks, Behave } from "../../utils/behave.js";
-
-const makeItemToOption = selected => item => {
-  let data = (item && item.data) || {};
-  let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
-  let value = item.id;
-  let children = toJS(item.children);
-  let obj = { label, title: label, value, expanded: true, checked: selected === value };
-
-  if(children && children.length) obj.children = children;
-  if(label.startsWith("null(")) return null;
-  if(!data.name) if (!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
-
-  return obj;
-};
-
-const findInTree = (tree, value) => {
-  if(tree.value === value || tree.label === value) return tree;
-  if(tree.children) {
-    for(let child of tree.children) {
-      let ret = findInTree(child, value);
-      if(ret !== null) return ret;
-    }
-  }
-  return null;
-};
+import { makeItemToOption, findInTree } from "../../stores/functions.js";
 
 function behaveTextarea(element) {
   element = Element.find(element);
@@ -60,7 +36,7 @@ function behaveTextarea(element) {
 
 @inject("rootStore")
 @observer
-export class Edit extends React.Component {
+export class New extends React.Component {
   state = {
     tree: null
   };
@@ -73,7 +49,7 @@ export class Edit extends React.Component {
    */
   static async getInitialProps({ res, req, query, asPath, mobxStore }) {
     const rootStore = mobxStore.RootStore;
-    const imageId = query.id || 4;
+    const imageId = query.photo_id;
     let images = [];
 
     if(!global.window) {
@@ -87,7 +63,7 @@ export class Edit extends React.Component {
 
     if(image) rootStore.setState({ image: imageId });
 
-    //     console.log("Edit.getInitialProps", { images });
+        console.log("New.getInitialProps", { query });
 
     return { images };
   }
@@ -97,7 +73,7 @@ export class Edit extends React.Component {
     if(global.window) window.page = this;
     console.error({ Behave, BehaveHooks });
     const { rootStore, router } = this.props;
-    let image = router.query.id;
+    let image = router.query.photo_id;
     if(image) {
       image = parseInt(image);
       if(rootStore.state.image != image) rootStore.setState({ image });
@@ -147,10 +123,10 @@ export class Edit extends React.Component {
 
     let img = images[0];
 
-    console.log(`/edit/${query.id}`, query);
-    // res.end(`Post: req:`, query.id);
+    console.log(`/new/${query.photo_id}`, query);
+    // res.end(`Post: req:`, query.photo_id);
 
-    console.log("Edit{:id}.render ", this.state.tree);
+    console.log("New {:id}.render ", this.state.tree);
 
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
 
@@ -158,7 +134,7 @@ export class Edit extends React.Component {
       <Layout>
         <NeedAuth>
           <div>
-            <h4>/edit/{query.id}</h4>
+            <a href={`/new/${query.photo_id}`}>New item {query.photo_id}</a>
             {this.state.tree ? (
               <ItemEditor tree={this.state.tree} makeTreeSelEvent={makeTreeSelEvent} image={img} />
             ) : (
@@ -171,4 +147,4 @@ export class Edit extends React.Component {
   }
 }
 
-export default Edit;
+export default New;

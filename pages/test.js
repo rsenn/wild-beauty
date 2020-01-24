@@ -10,21 +10,12 @@ import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
 import Layout from "../components/layout.js";
+import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/functions.js";
 
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
-const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
-  arr.sort((a, b) => a < b);
-  return arr[0];
-};
 
-const RandomColor = () => {
-  const c = HSLA.random();
-  return c.toString();
-};
+
 
 const Test = () => {
   let swipeEvents = {};

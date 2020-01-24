@@ -16,35 +16,13 @@ import { MovementListener, TouchListener } from "../utils/touchHandler.js";
 import { trkl } from "../utils/trkl.js";
 import Layout from "../components/layout.js";
 //import { ForceGraph2D } from "react-force-graph";
+import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/functions.js";
 
 import "../static/css/grid.css";
 
 import "../static/css/react-dropdown-tree-select.css";
 import { withSize } from "react-sizeme";
 
-const RandomColor = () => {
-  const c = HSLA.random();
-  return c.toString();
-};
-
-const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
-  arr.sort((a, b) => a < b);
-  return arr[0];
-};
-
-const findInTree = (tree, value) => {
-  if(tree.value === value || tree.label === value) return tree;
-  if(tree.children) {
-    for(let child of tree.children) {
-      let ret = findInTree(child, value);
-      if(ret !== null) return ret;
-    }
-  }
-  return null;
-};
 
 @inject("rootStore")
 @observer

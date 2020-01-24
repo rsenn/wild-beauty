@@ -14,6 +14,7 @@ import { toJS, autorun } from "mobx";
 import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchEvents } from "../utils/touchHandler.js";
 import { getOrCreateStore } from "../stores/createStore.js";
+import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/functions.js";
 
 import RUG from "react-upload-gallery";
 import "react-upload-gallery/dist/style.css";
@@ -23,10 +24,6 @@ import "../static/style.css";
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
-const RandomColor = () => {
-  const c = HSLA.random();
-  return c.toString();
-};
 
 @inject("rootStore")
 @observer

@@ -6,7 +6,7 @@ import Alea from "../utils/alea.js";
 import { Element, HSLA } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
-import { makeTouchCallback, maxZIndex } from "../components/TouchCallback.js";
+import { makeTouchCallback } from "../components/TouchCallback.js";
 import { toJS, action, set } from "mobx";
 import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchListener } from "../utils/touchHandler.js";
@@ -17,42 +17,13 @@ import { IfQueryParam } from "../components/withQueryParam.js";
 import { trkl } from "../utils/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
+import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/functions.js";
 
 import "../static/css/react-upload-gallery.css";
 import "../static/style.css";
 
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
-
-const RandomColor = () => {
-  const c = HSLA.random();
-  return c.toString();
-};
-
-const makeItemToOption = selected => item => {
-  let data = (item && item.data) || {};
-  let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
-  let value = item.id;
-  let children = toJS(item.children);
-  let obj = { label, title: label, value, expanded: true, checked: selected === value };
-
-  if(children && children.length) obj.children = children;
-  if(label.startsWith("null(")) return null;
-  if(!data.name) if (!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
-
-  return obj;
-};
-
-const findInTree = (tree, value) => {
-  if(tree.value === value) return tree;
-  if(tree.children) {
-    for(let child of tree.children) {
-      let ret = findInTree(child, value);
-      if(ret !== null) return ret;
-    }
-  }
-  return null;
-};
 
 @inject("rootStore")
 @observer
@@ -230,13 +201,13 @@ class New extends React.Component {
   chooseImage(event) {
     const { rootStore, router } = this.props;
     const { target, currentTarget } = event;
-    let id = parseInt(target.getAttribute("id").replace(/.*-/g, ""));
-    console.log("New.chooseImage ", { id, target, currentTarget });
+    let photo_id = parseInt(target.getAttribute("id").replace(/.*-/g, ""));
+    console.log("New.chooseImage ", { photo_id, target, currentTarget });
 
-    rootStore.state.image = id;
+    rootStore.state.image = photo_id;
     rootStore.state.step = 2;
 
-    router.push("/edit", `/edit/${id}`);
+    router.push("/new", `/new/${photo_id}`);
 
     //  router.push('/new', `/new?act=edit&img=${id}`, { /*query: { act: 'edit', img: id }, */shallow: true });
   }

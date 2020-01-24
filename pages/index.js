@@ -13,6 +13,7 @@ import { inject, observer } from "mobx-react";
 import { trkl } from "../utils/trkl.js";
 import axios from "../utils/axios.js";
 import { ColorScheme } from "../utils/colorscheme.js";
+import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/functions.js";
 
 import tims from "tims";
 
@@ -21,18 +22,6 @@ import "../static/style.css";
 const rng = Alea.singleton(Date.now());
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
-const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
-  arr.sort((a, b) => a < b);
-  return arr[0];
-};
-
-const RandomColor = () => {
-  const c = HSLA.random();
-  return c.toString();
-};
 
 @inject("rootStore")
 @observer
