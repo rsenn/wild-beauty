@@ -8,17 +8,6 @@ import Layout from "../components/layout.js";
 @inject("rootStore")
 @observer
 class Browse extends React.Component {
-  /**
-   * Gets the initial properties.
-   *
-   * @param      {Object}   arg1            The argument 1
-   * @param      {<type>}   arg1.res        The resource
-   * @param      {<type>}   arg1.req        The request
-   * @param      {<type>}   arg1.query      The query
-   * @param      {<type>}   arg1.asPath     As path
-   * @param      {<type>}   arg1.mobxStore  The mobx store
-   * @return     {Promise}  The initial properties.
-   */
   static async getInitialProps({ res, req, query, asPath, mobxStore }) {
     const rootStore = mobxStore.RootStore;
     const categoryId = query.category || 4;
@@ -34,40 +23,25 @@ class Browse extends React.Component {
       `query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`
     );
     if(result.items) items = items.concat(result.items);
-    //console.log("Browse.getInitialProps ", { items });
     let depth, children;
-    /*
-     depth = await rootStore.getDepth(categoryId);
-     children = await rootStore.getChildren(categoryId);
-    if(children) items = items.concat(children);
-*/
     return { items, categoryId, depth, children };
   }
 
   constructor(props) {
     super(props);
-
     if(global.window) window.page = this;
   }
 
   render() {
     const { rootStore, categoryId, items, depth } = this.props;
-
     let rows = Math.max(3, depth + 1);
-
     let children = [...rootStore.items.keys()]
       .filter(k => {
         const item = rootStore.items.get(k);
-        //console.log("item: ", toJS(item));
         if(item && (item.parent ? item.parent.id == categoryId : item.parent_id == categoryId)) return true;
         return false;
       })
       .map(key => rootStore.items.get(key));
-
-    //console.log("Browse.render ", { categoryId, depth, rows, children });
-
-    //    if(typeof children != "object" || children === null || children.length === undefined) children = [];
-
     return (
       <Layout>
         <div className={"grid-container"}>

@@ -51,20 +51,14 @@ export class New extends React.Component {
     const rootStore = mobxStore.RootStore;
     const imageId = query.photo_id;
     let images = [];
-
     if(!global.window) {
       images = await rootStore.fetchImages(`{ id: { _eq: ${imageId} } }`);
-
       images = images.filter(ph => ph.items.length == 0);
       images.forEach(item => rootStore.newImage(item));
     }
-
     let image = images && images.length ? images[0] : null;
-
     if(image) rootStore.setState({ image: imageId });
-
     console.log("New.getInitialProps", { query });
-
     return { images };
   }
 
@@ -120,16 +114,11 @@ export class New extends React.Component {
   render() {
     const { rootStore, router, className, images } = this.props;
     const { query } = router;
-
     let img = images[0];
-
     console.log(`/new/${query.photo_id}`, query);
     // res.end(`Post: req:`, query.photo_id);
-
     console.log("New {:id}.render ", this.state.tree);
-
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
-
     return (
       <Layout>
         <NeedAuth>

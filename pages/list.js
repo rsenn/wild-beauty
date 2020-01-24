@@ -14,13 +14,11 @@ import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
 import { trkl } from "../utils/trkl.js";
 import Layout from "../components/layout.js";
-//import { ForceGraph2D } from "react-force-graph";
 import { findInTree } from "../stores/functions.js";
+import { withSize } from "react-sizeme";
 
 import "../static/css/grid.css";
-
 import "../static/css/react-dropdown-tree-select.css";
-import { withSize } from "react-sizeme";
 
 @inject("rootStore")
 @observer
@@ -46,14 +44,12 @@ class List extends React.Component {
   svgRef = trkl();
 
   static async getInitialProps(ctx) {
-    console.log("List.getInitialProps ", [...arguments]);
+    //console.log("List.getInitialProps ", [...arguments]);
   }
 
   constructor(props) {
     super(props);
-
     const { rootStore } = this.props;
-
     this.api = getAPI(
       global.window && /192\.168/.test(window.location.href)
         ? "http://wild-beauty.herokuapp.com/v1/graphql"
@@ -64,12 +60,9 @@ class List extends React.Component {
       window.page = this;
       window.rs = rootStore;
       window.stores = getOrCreateStore();
-
-      //   window.addEventListener('mousemove', this.mouseMove);
     }
     rootStore.items.clear();
     this.tree = rootStore.getHierarchy();
-
     if(this.props.params && this.props.params.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
@@ -82,26 +75,23 @@ class List extends React.Component {
 
   componentDidMount() {
     const { rootStore, router } = this.props;
-
     rootStore.loadItems().then(response => {
       if(response) {
-        console.log("Items: ", response.items);
-
+        //console.log("Items: ", response.items);
         this.tree = rootStore.getHierarchy(undefined, it => {
           if(!it.children) it.size = 20;
           it.value = it.id;
           return it;
         });
-        console.log("this.tree", toJS(this.tree));
+        //console.log("this.tree", toJS(this.tree));
       }
     });
   }
 
   handleClick = event => {
     const { nativeEvent } = event;
-    console.log("handleClick", event.buttons, nativeEvent.buttons, nativeEvent);
+    //console.log("handleClick", event.buttons, nativeEvent.buttons, nativeEvent);
     let e = event.currentTarget;
-
     if(this.element === e) {
       this.grid.style.transition = `transform ${this.speed}s ease-in-out`;
       this.grid.style.transform = "";
@@ -112,11 +102,9 @@ class List extends React.Component {
       }
       return;
     }
-
     Element.findAll(".tile").forEach(e => {
       if(e !== event.currentTarget)
         Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
-      /*    e.style.setProperty("transition", "transform 0.2s ease-in");*/
       e.style.setProperty("transform", "none");
     });
     while(e.parentElement && !e.classList.contains("tile")) {
@@ -125,32 +113,24 @@ class List extends React.Component {
     let grid = Element.find("#item-grid");
     let b = Element.find(".page-layout");
     let brect = Element.rect("body");
-
     let rect = Element.rect(e);
     let points = rect.toPoints().map(p => [p.x, p.y]);
     let rect2 = Element.rect("#item-grid");
     let lrect = Element.rect(".show-layout2");
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
-    //console.log("handleClick:\nrect: ", rect.toString(), "\npoints: ", PointList.toString(points), "\nrect2: ", rect2.toString(), "\npoints2: ", PointList.toString(points2));
     var trn = affineFit(points, points2);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
-    console.log("matrix fromTriangles: ", matrix);
-
+    //console.log("matrix fromTriangles: ", matrix);
     var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
     var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
-
     var pt = new Point(srect.center);
     pt.y += window.scrollY;
     var t = Point.diff(pt, rect.center);
-
     var origin = Point.diff(rect.center, rect2);
-
     var distance = Math.sqrt(t.x * t.x + t.y * t.y);
     this.speed = distance * 0.002;
-
     var gm = Matrix.init_translate(t.x, t.y);
-    console.log("translation:  ", t);
-
+    //console.log("translation:  ", t);
     var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
@@ -158,75 +138,30 @@ class List extends React.Component {
     m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2);
     m.xx *= scale[0];
     m.yy *= scale[1];
-    //m = Matrix.scale.apply(Matrix, scale);
-    //console.log("matrix: ", m);
     var dm = new DOMMatrix();
-
     dm.translateSelf(t.x, t.y);
     dm.scaleSelf(scale[0], scale[1]);
-
     var dms = dm.toString();
-
-    console.log("b: ", b);
-
-    //  Element.setCSS(back, { opacity: 1 });
-    //  Element.setCSS(back, Rect.toCSS(brect));
-    //    Element.setCSS(back, { left: 0, top: 0, width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
+    //console.log("b: ", b);
     this.element = e;
-
     this.grid = grid;
     e = this.grid;
-
     this.grid.style.setProperty("transform-origin", `${origin.x}px ${origin.y}px`);
     this.grid.style.setProperty("transform", "");
     this.grid.style.setProperty("transition", `transform 0.5s linear`);
-    //    Element.setCSS(this.grid, { /*transformOrigin:  `${origin.x}px ${origin.y}px`, *//*transition: `transform ${this.speed}s ease-in`,*/ transform: "", zIndex: 8 });
-
     var tend = e => {
-      console.log("transition end: ", e.target);
-      console.log("transformOrigin: ", e.target.style.transformOrigin);
-      /* gm.xx *= scale[0];
-    gm.yy *= scale[1];*/
-
-      /*   dm = new DOMMatrix();
-      var t2 = Point.diff(srect.center, rect.center);
-      dm.translateSelf(0, rect.height + rect2.y + window.scrollY);
-
-      dm.translateSelf(t2.x, t2.y);*/
-      //  dm.scaleSelf(scale[0], scale[1]);
-      console.log("dm: ", dm);
-      // var gm2 = Matrix.scale(gm, scale[0], scale[1]);
+      //console.log("transition end: ", e.target);
+      //console.log("transformOrigin: ", e.target.style.transformOrigin);
+      //console.log("dm: ", dm);
       e.target.style.transition = `transform 0.5s ease-out`;
-
-      e.target.style.transform = /*Matrix.toDOMMatrix(gm)*/ dm.toString();
-      /* let back = Element.create("div", {
-        parent: document.body,
-        style: {
-         background: "url(/static/img/tile-background.png) repeat",
-          backgroundSize: "auto 50vmin",
-          zIndex: 8,
-          position: "fixed",
-          ...Rect.toCSS(Element.rect(e.target)),
-          //  transition: 'opacity 1s ease-in-out'
-          transition: "left 0.2s ease-out, top 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out"
-        }
-      });
-      this.back = back;
-      Element.setCSS(back, Rect.toCSS(brect));*/
+      e.target.style.transform = dm.toString();
       e.target.removeEventListener("transitionend", tend);
     };
-
     e.addEventListener("transitionend", tend);
-    console.log("rect: ", rect);
-
-    /*  back.style.setProperty("opacity", 1);
-   });
-*/
+    //console.log("rect: ", rect);
     e.style.setProperty("transition", `transform ${this.speed} ease-out`);
     e.style.setProperty("transform", dms);
-    // e.style.setProperty("background-color", "white");
     e.style.setProperty("z-index", 9);
-
     if(global.window) {
       window.t = e;
       window.m = m;
@@ -238,34 +173,24 @@ class List extends React.Component {
     let swipeEvents = {};
     var e = null;
     if(global.window !== undefined) window.page = this;
-
     const onError = event => {};
     const onImage = event => {
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
-      //console.log("onChange: ", value);
     };
-
     if(global.window) {
       window.addEventListener("resize", event => {
         const { currentTarget, target } = event;
-        //console.log("Resized: ", { currentTarget, target });
       });
     }
     let tree = this.tree;
     const items = this.props.items
       ? this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1)
       : [];
-
-    console.log("List.render ", { tree });
+    //console.log("List.render ", { tree });
     return (
       <Layout>
-        {/*<Tree tree={tree} minWidth={1024} active={this.state.active} />*/}
-        {/*treeVerify={node => node.children && node.children.length} */}
         <br />
-        {/*   <div id="2D Graph">
-          <ForceGraph2D graphData={getTreeData()} style={{ height: "600px" }} />
-        </div>*/}
         <Graph data={getTreeData()} />
         <br />
         <br />
@@ -283,7 +208,6 @@ class List extends React.Component {
                   const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
-                  //console.log("photo: ", photo);
                   let { data, name, parent, type, children, users } = item;
                   try {
                     data = item.data && item.data.length && JSON.parse(item.data);
@@ -291,13 +215,11 @@ class List extends React.Component {
                     data = item.data;
                   }
                   if(typeof data != "object" || data === null) data = {};
-                  //console.log("data: ", data);
                   return (
                     <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                       <SizedAspectRatioBox
                         style={{
                           position: "relative",
-                          // border: "1px solid black",
                           boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
                           overflow: "hidden"
                         }}
@@ -463,7 +385,6 @@ class List extends React.Component {
 }
 
 function getTreeData() {
-  //          tree
   return {
     name: "Id[1]",
     children: [

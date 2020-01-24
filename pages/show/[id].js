@@ -18,9 +18,7 @@ export class ShowItem extends React.Component {
 
   render() {
     const { initialMobxState, className, item, query } = this.props;
-
     //   console.log(`props:`, { item});
-
     return (
       <div className={"page-layout"}>
         <Head>

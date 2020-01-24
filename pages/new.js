@@ -36,21 +36,15 @@ class New extends React.Component {
   };
   svgLayer = trkl();
 
-  /**
-   * Gets the initial properties.
-   *
-   * @param      {<type>}   ctx     The context
-   * @return     {Promise}  The initial properties.
-   */
   static async getInitialProps({ res, req, err, mobxStore, ...ctx }) {
     const { RootStore } = mobxStore;
     let images = [];
     if(!global.window) {
-      images = await RootStore.fetchImages(/*{ where: { user_id:   }}*/);
+      images = await RootStore.fetchImages();
       images = images.filter(ph => ph.items.length == 0);
       images.forEach(item => RootStore.newImage(item));
       const { url, query, body, route } = req || {};
-      console.log("New.getInitialProps", { images });
+      //console.log("New.getInitialProps", { images });
       if(ctx && req && req.cookies) {
         const { token, user_id } = req.cookies;
         RootStore.auth.token = token;
@@ -60,11 +54,6 @@ class New extends React.Component {
     return { images };
   }
 
-  /**
-   * Constructs a new instance.
-   *
-   * @param      {<type>}  props   The properties
-   */
   constructor(props) {
     let args = [...arguments];
     const { rootStore } = props;
@@ -82,7 +71,6 @@ class New extends React.Component {
     if(global.window) {
       const moveImage = (event, e) => {
         const orientation = e.getAttribute("orientation");
-        //console.log("img ", { orientation });
         let offset = orientation == "landscape" ? event.x : event.y;
         if(offset > 0) offset = 0;
         if(offset < -this.offsetRange) offset = -this.offsetRange;
@@ -95,17 +83,15 @@ class New extends React.Component {
         }
       };
       this.touchCallback = makeTouchCallback("inner-image", (event, e) => {
-        //    console.log("touchCallback ", { event, e });
         const zIndex = maxZIndex() + 1;
         if(e) Element.setCSS(e, { zIndex });
         if(e && e.style) {
           moveImage(event, e);
         }
       });
-
       this.touchListener = TouchListener(
         event => {
-          console.log("Touch ", event);
+          //console.log("Touch ", event);
           const elem = event.target;
           if(
             event.type.endsWith("start") &&
@@ -119,7 +105,7 @@ class New extends React.Component {
             let prect = Element.rect(this.currentImage.parentElement.parentElement);
             let range = orientation == "landscape" ? rect.width - prect.width : rect.height - prect.height;
             this.offsetRange = range;
-            console.log("rect: ", { orientation, range, rect, prect });
+            //console.log("rect: ", { orientation, range, rect, prect });
             obj.style = `position: fixed; top: ${rect.y - window.scrollY}px; left: ${rect.x}px; width: ${
               rect.width
             }px; height: ${rect.height}px`;
@@ -139,8 +125,8 @@ class New extends React.Component {
           if(event.type.endsWith("end")) {
             if(this.clonedImage && this.currentImage) {
               this.currentImage.style.position = "relative";
-              console.log("currentOffset: ", this.currentOffset);
-              console.log("currentImage: ", this.currentImage);
+              //console.log("currentOffset: ", this.currentOffset);
+              //console.log("currentImage: ", this.currentImage);
               Element.remove(this.clonedImage);
               this.clonedImage = null;
             }
@@ -150,76 +136,32 @@ class New extends React.Component {
       );
     }
     rootStore.state.step = 1;
-    //    this.checkQuery();
   }
 
-  /**
-   * Adds content.
-   *
-   * @param      {<type>}  event   The event
-   */
   @action.bound
   addContent(event) {
     const { rootStore } = this.props;
-    console.log("addContent: ", event);
+    //console.log("addContent: ", event);
     rootStore.fields.push({ type: null, value: "" });
   }
-  /*
-  @action.bound
-  checkQuery() {
-    const { rootStore, router } = this.props;
-    console.log("router.query", router.query);
-    const obj = ["step", "image", "selected"].reduce(
-      (acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc),
-      {}
-    );
-    console.log("newState: ", obj);
-    rootStore.setState(obj);
-  }*/
 
   componentDidMount() {
     const { rootStore, router } = this.props;
-    //this.checkQuery();
-    /*    rootStore.loadItems().then(response => {
-      if(response) {
-        console.log("Items: ", response.items);
-        this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
-        console.log("this.tree", toJS(this.tree));
-      }
-    });
-*/
   }
 
-  /**
-   * Choose image for new item }
-   *
-   * @param      {<type>}  event   The event
-   */
   @action.bound
   chooseImage(event) {
     const { rootStore, router } = this.props;
     const { target, currentTarget } = event;
     let photo_id = parseInt(target.getAttribute("id").replace(/.*-/g, ""));
-    console.log("New.chooseImage ", { photo_id, target, currentTarget });
-
+    //console.log("New.chooseImage ", { photo_id, target, currentTarget });
     rootStore.state.image = photo_id;
     rootStore.state.step = 2;
-
     router.push("/new", `/new/${photo_id}`);
-
-    //  router.push('/new', `/new?act=edit&img=${id}`, { /*query: { act: 'edit', img: id }, */shallow: true });
   }
 
-  /*  @action.bound
-  deleteImage(id) {
-    const { rootStore } = this.props;
-
-    rootStore.deleteImage()
-
-  }
-*/
   handleClick = event => {
-    console.log("New handleClick ", event);
+    //console.log("New handleClick ", event);
   };
 
   render() {
@@ -228,12 +170,10 @@ class New extends React.Component {
     const onImage = event => {
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
-      console.log("onChange: ", value);
+      //console.log("onChange: ", value);
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
-
-    console.log("New.render", this.tree);
-
+    //console.log("New.render", this.tree);
     return (
       <Layout toastsClick={this.handleClick}>
         <NeedAuth>
@@ -242,16 +182,8 @@ class New extends React.Component {
           ) : (
             <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
           )}
-          {/*
-          <IfQueryParam act={false}>
-          <ImageUpload onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
-          </IfQueryParam>
-          <IfQueryParam act={'edit'} img={true}>
-          <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
-          </IfQueryParam>*/}
-          {/*            <Layer w={300} h={"300px"} margin={10} padding={20} border={"2px dashed red"} multiSelect={false} style={{ cursor: "move" }}>
-              Layer
-            </Layer>*/}
+          {}
+          {}
         </NeedAuth>
         <SvgOverlay svgRef={this.svgLayer} />
         <style jsx global>{`

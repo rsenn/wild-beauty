@@ -23,7 +23,6 @@ const imagePaths = lazyInitializer(() => randomImagePaths());
 
 @inject("rootStore")
 @observer
-//@withRouter
 class Home extends React.Component {
   state = {
     mirrored: false,
@@ -46,21 +45,6 @@ class Home extends React.Component {
       window.ColorSchemeToObject = ColorScheme.toObject;
     }
     this.getHash();
-
-    /*    this.svgLayer.subscribe(newLayer => {
-      console.log("svgLayer: ", newLayer);
-    });
-    const svgRef = this.svgLayer;
-    const page = this;
-    this.touchListener = TouchHandler(DrawCallback(svgRef),
-      {
-        element: global.window,
-        step: 10,
-        round: false,
-        listener: MovementListener,
-        noscroll: true
-      }
-    );*/
   }
 
   readHash() {
@@ -83,15 +67,13 @@ class Home extends React.Component {
         }
       }
     } else {
-      console.log("query: ", router.query);
+      //console.log("query: ", router.query);
     }
   }
-  /**
-   * { function_description }
-   */
+
   componentDidMount() {
     const { rootStore, router } = this.props;
-    console.log("Home.componentDidMount ");
+    //console.log("Home.componentDidMount ");
     this.getHash();
     var counter = 0;
     Timer.interval(1000, () => {
@@ -107,9 +89,6 @@ class Home extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { pathname, query } = this.props.router;
-    /*  if(query !== prevProps.router.query) {
-      this.getHash();
-    }*/
   }
 
   handleNext = () => {
@@ -117,7 +96,6 @@ class Home extends React.Component {
     const subpage = rootStore.state.subpage;
     rootStore.setState({ subpage: subpage + 1 });
     if(global.window) window.location.hash = `#${subpage + 1}`;
-    //this.forceUpdate();
   };
 
   handlePrev = () => {
@@ -125,7 +103,6 @@ class Home extends React.Component {
     const subpage = rootStore.state.subpage;
     rootStore.setState({ subpage: subpage - 1 });
     if(global.window) window.location.hash = `#${subpage - 1}`;
-    //this.forceUpdate();
   };
 
   render() {
@@ -134,17 +111,16 @@ class Home extends React.Component {
     var e = null;
     if(global.window !== undefined) window.page = this;
 
-    const t = ` perspective(100vw) scaleX(${rootStore.state.mirrored ? -1 : 1})`; // `rotateZ(${rootStore.state.angle}deg) ` + (rootStore.state.mirrored ? " rotateY(-180deg) " : "");
+    const t = ` perspective(100vw) scaleX(${rootStore.state.mirrored ? -1 : 1})`;
     const endDate = new Date("01.01.2035");
     const now = new Date();
 
     const seconds = (endDate.getTime() - now.getTime()) / 1000;
 
-    //const timespan = tims.text(, {    lang: "fr"   }); /*.split(/,/g).slice(0, 2).join(', ')*/
     const timespan = Util.timeSpan(Math.floor(seconds));
 
-    const subpage = this.readHash(); //rootStore.state.subpage;
-    //console.log("Home.render", { subpage });
+    const subpage = this.readHash();
+
     return (
       <div className={"main-layout"}>
         <Head>
@@ -158,7 +134,7 @@ class Home extends React.Component {
           <div style={{ transformStyle: "preserve-3d", transform: t }}>
             <img src={"/static/img/logo-transparent.png"} style={{ width: "100%", maxWidth: "1280px" }} />
           </div>
-          {/*  <img src={"/static/img/arrow-next.svg"} style={{ transform: 'scaleX(-1)' }} />*/}
+          {}
         </div>
         <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "block" : "block" }}>
           <h1>Title</h1>
@@ -176,11 +152,7 @@ class Home extends React.Component {
             Remington Typewriter (1890), and Typewriting Instructor and Stenographer's Hand-book (1892). By the turn of
             the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic
             Journal, it is referred to as "the well known memorized typing line embracing all the letters of the
-            alphabet".{" "}
-            {/*Robert Baden-Powell's book Scouting for Boys (1908) uses the phrase as a practice sentence for signaling. The
-            first message sent on the Moscow–Washington hotline on August 30, 1963, was the test phrase "THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG'S BACK 1234567890". Later, during testing, the
-            Russian translators sent a message asking their American counterparts, "What does it mean when your people say 'The quick brown fox jumped over the lazy dog'?" During the 20th century,
-            technicians tested typewriters and teleprinters by typing the sentence.*/}
+            alphabet". {}
           </span>
         </div>
         <div
