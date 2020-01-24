@@ -27,7 +27,9 @@ const RandomColor = () => {
 };
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")]
+    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
+    .filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -75,7 +77,11 @@ class List extends React.Component {
 
     const { rootStore } = this.props;
 
-    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
+    this.api = getAPI(
+      global.window && /192\.168/.test(window.location.href)
+        ? "http://wild-beauty.herokuapp.com/v1/graphql"
+        : "/v1/graphql"
+    );
     if(global.window) {
       window.api = this.api;
       window.page = this;
@@ -131,7 +137,8 @@ class List extends React.Component {
     }
 
     Element.findAll(".tile").forEach(e => {
-      if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
+      if(e !== event.currentTarget)
+        Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
       /*    e.style.setProperty("transition", "transform 0.2s ease-in");*/
       e.style.setProperty("transform", "none");
     });
@@ -269,7 +276,9 @@ class List extends React.Component {
       });
     }
     let tree = this.tree;
-    const items = this.props.items ? this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1) : [];
+    const items = this.props.items
+      ? this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1)
+      : [];
 
     console.log("List.render ", { tree });
     return (
@@ -400,7 +409,9 @@ class List extends React.Component {
                           style={{
                             position: "absolute",
                             padding: "2px",
-                            background: haveImage ? "none" : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                            background: haveImage
+                              ? "none"
+                              : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
                             textAlign: "left",
                             top: "0px",
                             left: "0px",
@@ -428,7 +439,9 @@ class List extends React.Component {
                               fontSize: "16px"
                             }}
                           >
-                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
+                            {[...Object.entries(data)]
+                              .map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`))
+                              .join("\n")}
                           </pre>
                         </div>
                       </SizedAspectRatioBox>

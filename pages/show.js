@@ -28,7 +28,9 @@ const RandomColor = () => {
 };
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")]
+    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
+    .filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -45,7 +47,12 @@ const findInTree = (tree, value) => {
 };
 
 const makeItemToOption = selected => item => {
-  let data = item && typeof item.data == "string" && item.data.length > 0 ? JSON.parse(item.data) : item && item.data != null && typeof item.data == "object" ? item.data : {};
+  let data =
+    item && typeof item.data == "string" && item.data.length > 0
+      ? JSON.parse(item.data)
+      : item && item.data != null && typeof item.data == "object"
+      ? item.data
+      : {};
   let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
   let value = item.id;
   let children = toJS(item.children);
@@ -134,7 +141,11 @@ class Show extends React.Component {
 
   constructor(props) {
     super(props);
-    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
+    this.api = getAPI(
+      global.window && /192\.168/.test(window.location.href)
+        ? "http://wild-beauty.herokuapp.com/v1/graphql"
+        : "/v1/graphql"
+    );
     const { rootStore } = this.props;
     if(global.window) {
       window.api = this.api;
@@ -158,11 +169,45 @@ class Show extends React.Component {
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
     }
 
-  let a = new Rect(0,0,100,50);
-  let b = new Rect(30,20,200,100);
+    let a = new Rect(10, 10, 100, 50);
+    let b = new Rect(200, 200, 200, 100);
+    let bc = b.center;
+    console.log("center:", bc.toString());
+
+    let r = new Matrix();
+    // r.init_identity();
+
+    r.translate(bc.x, bc.y);
+    console.log("translate:", r.toString());
+
+    r.rotate((-15 * Math.PI) / 180);
+    r.translate(-bc.x, -bc.y);
+    console.log("rotate:", r.toString());
+
+    let dr = null;
+    if(global.window) {
+      dr = new DOMMatrix();
+      dr.translateSelf(bc.x, bc.y);
+      console.log("dtranslate:", dr.toString());
+      dr.rotateSelf(-15);
+      console.log("drotate:", dr.toString());
+      dr.translateSelf(-bc.x, -bc.y);
+    }
+
+    //  r = Matrix.rotate(-45);
+    //    r = Matrix.translate(r, 50,50);
 
     let m = Matrix.getAffineTransform(a, b);
-    console.log("getAffineTransform", { a,b,m});
+    let c = new Rect(b);
+    let c2 = c.toPoints();
+    c = c.toPoints();
+ 
+    c.transform(r);
+    this.b = b;
+    this.c = c;
+    this.a = a;
+
+    console.log("getAffineTransform", { a, b, m });
   }
 
   checkTagRemove() {
@@ -309,7 +354,8 @@ class Show extends React.Component {
     this.state.currentItem = parseInt(id);
 
     Element.findAll(".tile").forEach(e => {
-      if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
+      if(e !== event.currentTarget)
+        Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
 
       e.style.setProperty("transform", "none");
     });
@@ -417,7 +463,12 @@ class Show extends React.Component {
     const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
     console.log("Show.render");
     return (
-      <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
+      <div
+        className={"page-layout"}
+        onMouseMove={this.mouseEvent}
+        onMouseDown={this.mouseEvent}
+        onTransitionEnd={this.handleTransitionEnd}
+      >
         <Head>
           <title>Show</title>
           <link rel="icon" href="/favicon.ico" />
@@ -494,7 +545,9 @@ class Show extends React.Component {
                           style={{
                             position: "absolute",
                             padding: "2px",
-                            background: haveImage ? "none" : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                            background: haveImage
+                              ? "none"
+                              : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
                             textAlign: "left",
                             top: "0px",
                             left: "0px",
@@ -522,7 +575,9 @@ class Show extends React.Component {
                               fontSize: "16px"
                             }}
                           >
-                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
+                            {[...Object.entries(data)]
+                              .map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`))
+                              .join("\n")}
                           </pre>
                         </div>
                       </SizedAspectRatioBox>

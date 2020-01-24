@@ -47,9 +47,7 @@ const ArrowNext = ({ innerFill = "#ffffff", ...props }) => (
 
 export const ItemView = inject("rootStore")(
   observer(({ rootStore, item, id, onPrev, onNext }) => {
-
-  if(item === undefined && id !== undefined)
-    item = rootStore.getItem(id);
+    if(item === undefined && id !== undefined) item = rootStore.getItem(id);
 
     console.log("Item ID: ", id);
     console.log("Item: ", toJS(item));

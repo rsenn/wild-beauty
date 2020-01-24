@@ -159,7 +159,11 @@ export class Edit extends React.Component {
         <NeedAuth>
           <div>
             <h4>/edit/{query.id}</h4>
-            {this.state.tree ? <ItemEditor tree={this.state.tree} makeTreeSelEvent={makeTreeSelEvent} image={img} /> : undefined}
+            {this.state.tree ? (
+              <ItemEditor tree={this.state.tree} makeTreeSelEvent={makeTreeSelEvent} image={img} />
+            ) : (
+              undefined
+            )}
           </div>
         </NeedAuth>
       </Layout>
