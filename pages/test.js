@@ -15,8 +15,6 @@ import { RandomColor, maxZIndex, makeItemToOption, findInTree } from "../stores/
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
-
-
 const Test = () => {
   let swipeEvents = {};
   var e = null;

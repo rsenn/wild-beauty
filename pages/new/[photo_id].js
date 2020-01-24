@@ -63,7 +63,7 @@ export class New extends React.Component {
 
     if(image) rootStore.setState({ image: imageId });
 
-        console.log("New.getInitialProps", { query });
+    console.log("New.getInitialProps", { query });
 
     return { images };
   }

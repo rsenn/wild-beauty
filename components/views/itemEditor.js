@@ -48,22 +48,21 @@ export const ItemEditor = inject("rootStore")(
           </div>
         </div>
         <DropdownTreeSelect
-            data={[tree]}
-            onChange={obj => {
-              console.log("Tree value: ", obj);
-              rootStore.state.parent_id = obj.value;
-              makeTreeSelEvent("change")(obj);
-            }}
-            onNodeToggle={makeTreeSelEvent("node-toggle")}
-            onFocus={makeTreeSelEvent("focus")}
-            onBlur={makeTreeSelEvent("blur")}
-            className={"dropdown-tree"}
-            mode={"radioSelect"}
-            texts={{ placeholder: "parent item" }}
-          />
-          <SortableTree treeData={tree} />
+          data={[tree]}
+          onChange={obj => {
+            console.log("Tree value: ", obj);
+            rootStore.state.parent_id = obj.value;
+            makeTreeSelEvent("change")(obj);
+          }}
+          onNodeToggle={makeTreeSelEvent("node-toggle")}
+          onFocus={makeTreeSelEvent("focus")}
+          onBlur={makeTreeSelEvent("blur")}
+          className={"dropdown-tree"}
+          mode={"radioSelect"}
+          texts={{ placeholder: "parent item" }}
+        />
+        <SortableTree treeData={tree} />
         <div className={"item-fields"}>
-          
           {rootStore.entries.map(field => (
             <EditableField
               options={rootStore.fieldNames}

@@ -22,7 +22,6 @@ import "../static/style.css";
 const rng = Alea.singleton(Date.now());
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
-
 @inject("rootStore")
 @observer
 //@withRouter

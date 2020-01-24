@@ -23,7 +23,6 @@ import "../static/css/grid.css";
 import "../static/css/react-dropdown-tree-select.css";
 import { withSize } from "react-sizeme";
 
-
 @inject("rootStore")
 @observer
 class List extends React.Component {

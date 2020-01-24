@@ -18,7 +18,6 @@ if (global.window) {
   assign_to(window);
 }
 
-
 export class RootStore extends Queries {
   @observable
   state = {
@@ -49,7 +48,6 @@ export class RootStore extends Queries {
 
   toasts = observable.array([]);
 
-  
   constructor(initialData, pageProps) {
     super();
 
@@ -61,7 +59,6 @@ export class RootStore extends Queries {
         this.items.set("" + itemId, RootStore.items[itemId]);
       }
       //console.log("RootStore.constructor ", { initialData, pageProps });
-      
     }
     if(global.window) {
       if(!window.devp) window.devp = new devpane();
@@ -69,7 +66,7 @@ export class RootStore extends Queries {
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
     }
 
-  /*  autorun(() => console.log("rootStore.authenticated: ", this.authenticated));
+    /*  autorun(() => console.log("rootStore.authenticated: ", this.authenticated));
     autorun(() => console.log("rootStore.loading: ", this.state.loading));
     autorun(() => console.log("rootStore.auth: ", toJS(this.auth)));
     autorun(() => console.log("rootStore.auth.token: ", this.auth.token));
@@ -102,15 +99,12 @@ export class RootStore extends Queries {
   updateState(obj) {
     set(this.state, obj);
     this.state.updated = true;
-    
   }
 
   @action.bound
   setState(obj) {
     set(this.state, obj);
   }
-
-  
 
   @action.bound
   newImage(imageObj) {
@@ -130,7 +124,7 @@ export class RootStore extends Queries {
           const { naturalWidth, naturalHeight, width, height } = e;
           image.width = naturalWidth;
           image.height = naturalHeight;
-          
+
           tm.stop();
         }
       });
@@ -138,13 +132,11 @@ export class RootStore extends Queries {
     return image;
   }
 
-  
   getImage(id) {
     id = "" + id;
     return this.images.has(id) ? this.images.get(id) : null;
   }
 
-  
   imageExists(id) {
     id = parseInt(id);
     return this.images.has(id);
@@ -153,7 +145,7 @@ export class RootStore extends Queries {
   @action.bound
   deleteImage(id) {
     let image = this.getImage(id);
-    
+
     this.apiRequest("/api/image/delete", { id }).then(response => {
       let data, result;
       if(response && response.data) data = response.data;
@@ -161,16 +153,13 @@ export class RootStore extends Queries {
       if(result.affected_rows) {
         this.images.delete(id);
       }
-      
     });
   }
 
-  
   get fieldNames() {
     return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
   }
 
-  
   get currentImage() {
     const id = this.state.image;
     let image = this.getImage(id);
@@ -186,7 +175,6 @@ export class RootStore extends Queries {
     var root = null;
     if(this.items && this.items.entries)
       for(let [id, item] of this.items.entries()) {
-        
         if(item && item.type == "root") root = item;
       }
     return root;
@@ -197,13 +185,12 @@ export class RootStore extends Queries {
     return item === null ? -1 : item.id;
   }
 
-  
   @action
   newItem(item) {
     var childIds = item.children && item.children.map ? item.children.map(child => child.id).sort() : [];
     var id = parseInt(item.id);
     item = { ...item, id, childIds };
-    
+
     delete item.parent;
     if(typeof item.data == "string" && item.data.length > 0) {
       var data = {};
@@ -219,12 +206,10 @@ export class RootStore extends Queries {
     }
     this.items.set("" + id, item);
     item = this.items.get("" + item.id);
-    
+
     return item;
   }
 
-  
-  
   getItem(id, tr = it => it, idMap = null) {
     if(idMap === null) idMap = [];
     let item = this.items.get("" + (!id ? this.rootItemId : id));
@@ -273,14 +258,13 @@ export class RootStore extends Queries {
     return null;
   }
 
-  
   async apiRequest(endpoint, data) {
     let res;
     //console.log("RootStore.apiRequest", { endpoint, data });
     if(!data) res = await axios.get(endpoint);
     else res = await axios.post(endpoint, data);
 
-    if((await res) && ((await res.status) != 200 || !(await res.data)) ) {
+    if((await res) && ((await res.status) != 200 || !(await res.data))) {
       console.error("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
       throw new Error(`apiRequest status=${res.status} data=${res.data}`);
     } else {
@@ -290,7 +274,6 @@ export class RootStore extends Queries {
     return res;
   }
 
-  
   @action.bound
   doLogin(username, password, completed = () => {}) {
     this.setState({ loading: true });
@@ -305,7 +288,7 @@ export class RootStore extends Queries {
           error: success ? undefined : "Login failed"
         });
         this.users.set(user_id, user);
-        
+
         this.disableAutoRun();
         let newAuth = { token, user_id, user };
         set(this.auth, newAuth);
@@ -333,14 +316,14 @@ export class RootStore extends Queries {
     this.apiRequest("/api/logout").then(res => {
       const { success, token, user_id } = res.data;
       this.setState({ loading: false, authenticated: false });
-      
+
       set(this.auth, { token: "", user_id: -1 });
       this.auth.token = "";
       this.auth.user_id = -1;
       localStorage.removeItem("auth");
       Util.deleteCookie("token");
       Util.deleteCookie("user_id");
-      
+
       completed();
     });
   }
@@ -380,8 +363,6 @@ export class RootStore extends Queries {
         break;
       }
     }
-
-    
   }
 }
 

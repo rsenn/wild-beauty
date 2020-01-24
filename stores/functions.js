@@ -1,5 +1,3 @@
-
-
 export const RandomColor = () => {
   const c = HSLA.random();
   return c.toString();
@@ -26,7 +24,6 @@ export const makeItemToOption = selected => item => {
 
   return obj;
 };
-
 
 export const findInTree = (tree, value) => {
   if(tree.value === value || tree.label === value) return tree;

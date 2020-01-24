@@ -24,7 +24,6 @@ import "../static/style.css";
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
-
 @inject("rootStore")
 @observer
 class Panes extends React.Component {
