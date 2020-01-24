@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import { Element, Point, Rect, Matrix, Timer } from "../utils/dom.js";
+import { Element, Point, Rect, Matrix, Timer, SVG, TRBL } from "../utils/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
@@ -16,6 +16,7 @@ import { fromTriangles } from "transformation-matrix";
 import { trkl } from "../utils/trkl.js";
 import { Graph, Node, Edge } from "../utils/fd-graph.js";
 import { makeItemToOption, findInTree } from "../stores/functions.js";
+import { lazyInitializer } from "../lib/lazyInitializer.js";
 
 import "../static/css/grid.css";
 
@@ -39,28 +40,108 @@ const removeParent = (element, pred = e => true) => {
   }
 };
 
-export function createGraph() {
-  let g = new Graph(new Point(300, 200), true);
+export function createGraph(svg) {
+  console.log("createGraph", svg);
 
-  var node1 = new Node("test", 200);
-  var node2 = new Node("test", 200);
-  var node3 = new Node("test", 200);
-  var node4 = new Node("test", 200);
-  var node5 = new Node("test", 200);
-  var node6 = new Node("test", 70);
-  var node7 = new Node("test", 70);
-  var node8 = new Node("test", 70);
-  var node9 = new Node("test", 70);
-  var node10 = new Node("test", 70);
-  var node11 = new Node("test", 70);
-  var node12 = new Node("test", 70);
-  var node13 = new Node("test", 70);
-  var node14 = new Node("test", 90);
-  var node15 = new Node("test", 90);
-  var node16 = new Node("test", 90);
-  var node17 = new Node("test", 90);
-  var node18 = new Node("test", 90);
-  var node19 = new Node("test", 90);
+  svg = SVG.create("g", {}, svg);
+
+  let g = new Graph({
+    origin: new Point(300, 200),
+    gravitate_to_origin: true,
+    spacing: 10,
+    timestep: 300,
+    onRenderGraph: graph => {
+      let bb = new Rect(svg.getBBox()).round();
+      let client = Element.rect(svg.parentElement);
+
+      let trbl = new TRBL(50, 20, 50, 20);
+      let aspect = bb.aspect();
+
+      console.log("trbl:", trbl);
+      client = client.inset(200);
+
+      console.log("bbox:", { bb, client });
+
+      let m = Matrix.getAffineTransform(bb, client);
+      console.log("m:", m.toString());
+
+//      if(m.xx > m.yy)       m.scale(1, m.xx / m.yy);
+
+      if(m.xx > m.yy)       m.scale(m.yy / m.xx, 1);
+     let t = m.toSVG();
+      Element.attr(svg, { transform: t });
+
+      bb = new Rect(svg.getBBox());
+
+      let gcenter = bb.center;
+let move = Point.diff(Element.rect(svg.parentElement).center, gcenter);
+      console.log("center: ", gcenter);
+      console.log("move: ", move);
+
+      m.translate(move.x  / m.xx, 0);
+            Element.attr(svg, { transform: m.toSVG() });
+
+
+      t = ` translate(${move.x},${move.y}) `+t;
+    },
+    onUpdateNode: node => {
+      if(!node.element) {
+        // prettier-ignore
+        node.element = SVG.create("g", {
+            transform: `translate(${node.x},${node.y})`,
+            fill: "#00f",
+            stroke: "#000",
+            strokeWidth: 1
+          }, svg
+        );
+        // prettier-ignore
+        SVG.create("circle", {
+            cx: 0,
+            cy: 0,
+            r: 10,
+            fill: "#00f",
+            stroke: "#000",
+            strokeWidth: 1
+          }, node.element
+        );
+        // prettier-ignore
+        SVG.create("text", {
+            fontSize: 15,
+            alignmentBaseline: "middle",
+            textAnchor: "middle",
+            fill: "#fff",
+            stroke: "none",
+            text: node.label
+          }, node.element
+        );
+      } else Element.attr(node.element, { transform: `translate(${node.x},${node.y})` });
+    },
+    onUpdateEdge: edge => {
+      const { x1, y1, x2, y2 } = edge;
+      if(!edge.element) edge.element = SVG.create("line", { x1, y1, x2, y2, stroke: "#000", strokeWidth: 1 }, svg);
+      else Element.attr(edge.element, { x1, y1, x2, y2 });
+    }
+  });
+
+  var node1 = new Node("1", 200);
+  var node2 = new Node("2", 200);
+  var node3 = new Node("3", 200);
+  var node4 = new Node("4", 200);
+  var node5 = new Node("5", 200);
+  var node6 = new Node("6", 70);
+  var node7 = new Node("7", 70);
+  var node8 = new Node("8", 70);
+  var node9 = new Node("9", 70);
+  var node10 = new Node("10", 70);
+  var node11 = new Node("11", 70);
+  var node12 = new Node("12", 70);
+  var node13 = new Node("13", 70);
+  var node14 = new Node("14", 90);
+  var node15 = new Node("15", 90);
+  var node16 = new Node("16", 90);
+  var node17 = new Node("17", 90);
+  var node18 = new Node("18", 90);
+  var node19 = new Node("19", 90);
 
   var connection1 = new Edge(node1, node2);
   var connection2 = new Edge(node2, node3);
@@ -77,14 +158,14 @@ export function createGraph() {
   var connection13 = new Edge(node8, node9);
   var connection14 = new Edge(node9, node10);
   var connection15 = new Edge(node10, node6);
-  var connection16 = new Edge(node11, node12);
+  /*  var connection16 = new Edge(node11, node12);
   var connection17 = new Edge(node12, node13);
   var connection18 = new Edge(node13, node11);
   var connection19 = new Edge(node14, node15);
   var connection20 = new Edge(node15, node16);
   var connection21 = new Edge(node16, node17);
   var connection22 = new Edge(node17, node18);
-  var connection23 = new Edge(node18, node19);
+  var connection23 = new Edge(node18, node19);*/
 
   g.addEdge(connection1);
   g.addEdge(connection2);
@@ -112,7 +193,7 @@ export function createGraph() {
   g.addNode(node8);
   g.addNode(node9);
   g.addNode(node10);
-  g.addNode(node11);
+  /* g.addNode(node11);
   g.addNode(node12);
   g.addNode(node13);
   g.addNode(node14);
@@ -121,7 +202,7 @@ export function createGraph() {
   g.addNode(node17);
   g.addNode(node18);
   g.addNode(node19);
-
+*/
   return g;
 }
 
@@ -148,6 +229,19 @@ class Show extends React.Component {
   ];
 
   svgRef = trkl();
+
+  svg = lazyInitializer(() =>
+    SVG.create(
+      "svg",
+      {
+        id: "graph-svg",
+        width: window.innerWidth,
+        height: window.innerHeight,
+        style: "position: absolute; left: 0; top: 0; z-index: 1000001;"
+      },
+      document.body
+    )
+  );
 
   static async getInitialProps(ctx) {
     const { query, params } = (ctx && ctx.req) || {};
@@ -230,8 +324,10 @@ class Show extends React.Component {
     this.a = a;
     console.log("getAffineTransform", { a, b, m });
 
-    this.g = createGraph(new Point(300, 200));
-    this.g.timer.stop();
+    if(Util.isBrowser() && !this.g) {
+      this.g = createGraph(this.svg());
+      // this.g.timer.stop();
+    }
   }
 
   checkTagRemove() {
@@ -463,7 +559,7 @@ class Show extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <Tree tree={tree} minWidth={1024} active={this.state.active} /> {}
+        {/*  <Tree tree={tree} minWidth={1024} active={this.state.active} /> {}*/}
         <br />
         <br />
         <br />
