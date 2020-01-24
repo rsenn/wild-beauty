@@ -103,7 +103,16 @@ export const ItemEditor = inject("rootStore")(
               });
             }}
           >
-            <button onClick={rootStore.saveItem.bind(rootStore)} className={"save"}>
+            <button
+              onClick={e => {
+                rootStore.saveItem(e, result => {
+                  let insertId = data.result[0].id;
+                  //             console.log("saveItem result: ", response);
+                  rootStore.addToast(`Saved item (Id: ${insertId})`);
+                });
+              }}
+              className={"save"}
+            >
               <img src={"/static/img/icon-save.svg"} />
             </button>
           </AddItemBar>

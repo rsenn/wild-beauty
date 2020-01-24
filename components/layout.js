@@ -3,7 +3,7 @@ import Head from "next/head";
 import Nav from "../components/nav.js";
 import ToastsContainer from "./views/toastsContainer.js";
 
-export const Layout = props => (
+export const Layout = ({ toastsClick, ...props }) => (
   <React.Fragment>
     <div className={"page-layout"}>
       <Head>
@@ -16,7 +16,7 @@ export const Layout = props => (
       </Nav>
       <div className={"content-layout"}>{props.children}</div>
     </div>
-    <ToastsContainer />
+    <ToastsContainer onClick={toastsClick} />
     <style jsx global>{`
       .toasts-container {
         position: fixed;

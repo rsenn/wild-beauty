@@ -76,6 +76,7 @@
     "react-sizeme": "^2.6.10",
     "react-sizes": "^2.0.0",
     "react-sortable-tree": "2.0.0",
+    "react-spring": "^8.0.27",
     "react-swipeable": "^5.5.0",
     "react-upload-gallery": "^0.0.4",
     "react-window-size": "^1.2.2",

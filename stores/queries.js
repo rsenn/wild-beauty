@@ -111,8 +111,8 @@ export class Queries {
    *
    * @param      {<type>}  event   The event
    */
-  async;
-  saveItem(event) {
+
+  saveItem(event, doneHandler = result => {}) {
     const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
     const parent_id = rs.state.parent_id;
 
@@ -125,6 +125,7 @@ export class Queries {
 
     return this.apiRequest("/api/item/new", { photo_id, parent_id, name, data: dataObj }).then(response => {
       console.log("saveitem API response:", response);
+      doneHandler(response);
     });
   }
 

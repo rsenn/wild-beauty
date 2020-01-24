@@ -37,3 +37,15 @@ li.menu-item > a {
     font-size: 18px;
   }
 }
+.toast-button:hover {
+    color: white;
+    text-decoration: underline;
+    -webkit-filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  }
+
+a:hover {
+      -webkit-filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+
+   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}

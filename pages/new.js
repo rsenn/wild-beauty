@@ -249,6 +249,10 @@ class New extends React.Component {
 
   }
 */
+  handleClick = event => {
+    console.log("New handleClick ", event);
+  };
+
   render() {
     const { rootStore } = this.props;
     const onError = event => {};
@@ -262,7 +266,7 @@ class New extends React.Component {
     console.log("New.render", this.tree);
 
     return (
-      <Layout>
+      <Layout toastsClick={this.handleClick}>
         <NeedAuth>
           {rootStore.state.image === null ? (
             <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />

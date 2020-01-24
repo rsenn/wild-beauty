@@ -429,6 +429,13 @@ export class RootStore extends Queries {
   }
 
   @action.bound
+  removeToast(deadline) {
+    console.log("rootStore.removeToast ", deadline);
+    let toasts = this.toasts.filter(t => t.deadline != deadline);
+    this.toasts.replace(toasts);
+  }
+
+  @action.bound
   removeToasts() {
     while(this.toasts.length > 0) {
       let toast = this.toasts[0];
