@@ -145,7 +145,7 @@ export class RootStore {
 
     if(image.width === undefined || image.height === undefined) {
       var tm = Timer.interval(500, () => {
-        let e = Element.find(`#image-${id}`);
+        let e = Util.isBrowser() ? Element.find(`#image-${id}`) : null;
         if(e && e.naturalWidth > 0 && e.naturalHeight > 0) {
           const { naturalWidth, naturalHeight, width, height } = e;
           image.width = naturalWidth;
@@ -282,10 +282,7 @@ export class RootStore {
       idMap.push(item.id);
       if(typeof item == "object") {
         let { parent_id } = item;
-        if(item.children && item.children.length)
-          item.children = item.children
-            .map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null))
-            .filter(c => c !== null);
+        if(item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null)).filter(c => c !== null);
         else item.children = [];
       }
     }
@@ -347,9 +344,7 @@ export class RootStore {
     if(item) {
       let { name, id } = item;
       if(!name) name = `Id[${id}]`;
-      let children = [...this.items.values()]
-        .filter(child => child.parent && child.parent.id == id)
-        .map(child => this.getHierarchy(child, fn));
+      let children = [...this.items.values()].filter(child => child.parent && child.parent.id == id).map(child => this.getHierarchy(child, fn));
       let ret = { name };
       if(children && children.length > 0) ret.children = children;
 
@@ -360,11 +355,7 @@ export class RootStore {
 
   async fetchImages(where = {}) {
     console.log("⇒ images ", { where });
-    let response = await this.api.list(
-      "photos",
-      ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"],
-      { where }
-    );
+    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], { where });
     console.log("⇐ images =", response);
     return response;
   }
@@ -428,14 +419,25 @@ export class RootStore {
 
   async loadItem(where = {}) {
     if(typeof where == "number") where = { id: where };
-    let response = await this.apiRequest("/api/item", where);
-    let data = response ? await response.data : null;
-    let r = (await data) ? await data.item : [];
+    let response = Util.isServer()
+      ? await this.api.select("items", where, ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id original_name width height filesize } }", "users { user { id } }"])
+      : await this.apiRequest("/api/item", where);
+    let items = response ? await response.items : null;
+    let r = (await items) ? await items[0] : null;
 
-    console.log("RootStore.loadItem", { r, response });
+    const id = "" + (r && r.id !== undefined ? r.id : where.id);
 
-    const id = "" + (r ? r.id : where.id);
 
+    if(r.photos && r.photos.length) {
+      for(let i = 0; i < r.photos.length; i++) {
+
+        r.photos[i] = this.newImage(r.photos[i].photo);
+/*        let photo = r.photos[i];
+        if(!this.images.has(photo.id))
+          this.images.set(photo.id, photo);
+        r.photos[i] = this.images.get(photo.id);
+ */     }
+    }
     if(!this.items.has(id)) this.items.set(id, r);
     let it = this.items.get(id);
     Object.assign(it, r);
@@ -452,10 +454,7 @@ export class RootStore {
     const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
     const parent_id = rs.state.parent_id;
 
-    const { name = null, ...dataObj } = this.entries.reduce(
-      (acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }),
-      {}
-    );
+    const { name = null, ...dataObj } = this.entries.reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
 
     console.log("saveItem", { photo_id, parent_id, name, dataObj });
 

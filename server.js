@@ -301,13 +301,13 @@ if (!dev && cluster.isMaster) {
         res.json({ success: true, result });
         //        fields = ['id','parent_id',...Object.keys(update)];
       } else {
-        //  result = await API.select("items", params, fields);
-        result = await API.list("items", fields, { where: params });
+         result = await API.select("items", params, fields);
+     //   result = await API.list("items", fields, { where: params });
         //console.log("/api/item <LST " + util.inspect(result, { depth: 1 }));
 
         let itemList = result.items;
         let item = itemList && itemList.length > 0 ? itemList[0] : null;
-        //console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
+        console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
         res.json({ success: true, item });
       }
     });
@@ -456,10 +456,10 @@ if (!dev && cluster.isMaster) {
         res.json(response);
       })
     );
-
+    /*
     server.get("/show/:item", (req, res) => {
       return nextApp.render(req, res, "/show", { item: req.params.item });
-    });
+    });*/
 
     server.get("/browse/:category", (req, res) => {
       return nextApp.render(req, res, "/browse", { category: req.params.category });

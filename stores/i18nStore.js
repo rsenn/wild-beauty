@@ -112,8 +112,7 @@ if (global.navigator) {
     i18nStore.user.lang = navigator.language.substring(0, 2);
   }
 
-  if(!i18nStore.user.lang || i18nStore.user.lang.length != 2)
-    i18nStore.user.lang = (navigator.language || navigator.userLanguage).substring(0, 2);
+  if(!i18nStore.user.lang || i18nStore.user.lang.length != 2) i18nStore.user.lang = (navigator.language || navigator.userLanguage).substring(0, 2);
   window.i18n = i18nStore;
   window.toJS = toJS;
 }

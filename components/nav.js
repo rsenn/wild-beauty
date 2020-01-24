@@ -198,7 +198,8 @@ const Nav = inject(
   "rootStore",
   "i18nStore"
 )(
-  observer(({ rootStore, i18nStore, loading, children, ...props }) => {
+  observer(({ rootStore, i18nStore, children, ...props }) => {
+    const { loading } = rootStore;
     const [loginIsOpen, setLoginOpen] = React.useState(false);
     const [languageIsOpen, setLanguageOpen] = React.useState(false);
     const router = useRouter();
