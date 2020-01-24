@@ -58,6 +58,7 @@
     "react-sizes": "^2.0.0",
     "react-sortable-tree": "2.0.0",
     "react-spring": "^8.0.27",
+    "react-transition-group": "^4.3.0",
     "react-upload-gallery": "^0.0.4",
     "sharp": "^0.24.0",
     "time-span-format": "^1.0.1",
