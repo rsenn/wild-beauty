@@ -1,6 +1,6 @@
 import React from "react";
 import Util from "../utils/util.js";
-import { HSLA, Point, Line } from "../utils/dom.js";
+import { HSLA, Point, isPoint, Line } from "../utils/dom.js";
 
 function* Table2DIterator(table) {
   for(var y = 0; y < table.length; y++) for (var x = 0; x < table[y].length; x++) yield table[y][x];
@@ -259,7 +259,12 @@ if(height  < minHeight)
       let acc = new Point(0, 0);
 
       for(let i = 0; i < len; i++) {
-        acc = Point.sum(acc, getItem(item.children[i].index).pos);
+        let pos = getItem(item.children[i].index).pos;
+
+        if(isPoint(pos)) {
+          acc.x += pos.x;
+          acc.y += pos.y;
+        }
       }
 
       //console.log("acc:",acc);
