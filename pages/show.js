@@ -54,7 +54,7 @@ export function createGraph(svg) {
   let g = new Graph({
     origin: new Point(300, 200),
     gravitate_to_origin: true,
-    spacing: 10,
+    spacing: 12,
     timestep: 300,
     onRenderGraph: graph => {
       let bb = new Rect(svg.getBBox()).round();
@@ -66,7 +66,7 @@ export function createGraph(svg) {
       //console.log("bbox:", { bb, client });
       let m = Matrix.getAffineTransform(bb, client);
       //console.log("m:", m.toString());
-        //if(m.xx > m.yy)       m.scale(1, m.xx / m.yy);
+      //if(m.xx > m.yy)       m.scale(1, m.xx / m.yy);
       if(m.xx > m.yy) m.scale(m.yy / m.xx, 1);
       let t = m.toSVG();
       Element.attr(svg, { transform: t });
@@ -79,7 +79,11 @@ export function createGraph(svg) {
       Element.attr(svg, { transform: m.toSVG() });
       t = ` translate(${move.x},${move.y}) ` + t;
 
-      SVG.create('circle', { cx: graph.config.origin.x, cy: graph.config.origin.y, r: 30, stroke: '#f00', strokeWidth: 2, fill: 'none' }, svg);
+      SVG.create(
+        "circle",
+        { cx: graph.config.origin.x, cy: graph.config.origin.y, r: 30, stroke: "#f00", strokeWidth: 2, fill: "none" },
+        svg
+      );
     },
     onUpdateNode: node => {
       if(!node.element) {

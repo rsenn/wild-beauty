@@ -52,10 +52,32 @@ export const walkTree = (tree, fn = (node, parent) => {}, parent = null, pret) =
   return ret;
 };
 
+export const reduceTree = (tree, fn = (acc, node) => {}, acc) => {
+  let children = tree.children ? tree.children : null;
+
+  acc = fn(acc, tree);
+
+  if(children) {
+    for(let child of children) {
+      acc = reduceTree(child, fn, acc);
+    }
+  }
+  return acc;
+};
+
 export const treeToGraph = (graph, tree) => {
   walkTree(tree, (node, parent, parent_node) => {
-    let n = new Node(node.title || node.label || node.name || node.id);
-    console.log("parent_node: ", parent_node);
+    let nchildren = reduceTree(
+      node,
+      (acc, n, p) => {
+        acc += 1;
+        return acc;
+      },
+      0
+    );
+
+    let n = new Node(node.title || node.label || node.name || node.id, 60 + 5 * nchildren, 100);
+    console.log("node: ", { parent_node, nchildren });
 
     if(parent_node) {
       let e = new Edge(parent_node, n);
