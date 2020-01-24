@@ -42,8 +42,14 @@ const removeParent = (element, pred = e => true) => {
 
 export function createGraph(svg) {
   //console.log("createGraph", svg);
+  let d = Element.create("defs", {}, svg);
+  let lg = Element.create("linearGradient", { id: "lg1", x1: 0, y1: 0, x2: 0, y2: 100, spreadMethod: "pad" }, d);
+  Element.create("stop", { offset: 0, stopColor: "#00cc00", stopOpacity: 1 }, lg);
+  Element.create("stop", { offset: 100, stopColor: "#006600", stopOpacity: 1 }, lg);
 
   svg = SVG.create("g", {}, svg);
+
+  let strokeWidth = 1.1;
 
   let g = new Graph({
     origin: new Point(300, 200),
@@ -84,20 +90,23 @@ export function createGraph(svg) {
           }, svg
         );
         // prettier-ignore
-        SVG.create("circle", {
-            cx: 0,
-            cy: 0,
-            r: 10,
-            fill: "#00f",
+        SVG.create("rect", {
+            x: -15,
+            y: -16,
+            width: 30,
+            height: 30,
+            rx: 1.5,
+            ry: 1.5,
+            fill: "#ffdd00",
             stroke: "#000",
-            strokeWidth: 1
+            strokeWidth
           }, node.element
         );
         // prettier-ignore
         SVG.create("tspan", {alignmentBaseline: "middle", text: node.label },
           SVG.create("text", {
             fontSize: 15,
-            fill: "#fff",
+            fill: "#000",
             stroke: "none",
                     textAnchor: "middle",
           }, node.element
@@ -107,7 +116,7 @@ export function createGraph(svg) {
     },
     onUpdateEdge: edge => {
       const { x1, y1, x2, y2 } = edge;
-      if(!edge.element) edge.element = SVG.create("line", { x1, y1, x2, y2, stroke: "#000", strokeWidth: 1 }, svg);
+      if(!edge.element) edge.element = SVG.create("line", { x1, y1, x2, y2, stroke: "#000", strokeWidth }, svg);
       else Element.attr(edge.element, { x1, y1, x2, y2 });
     }
   });
