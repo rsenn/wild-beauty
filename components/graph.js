@@ -90,23 +90,32 @@ export const collapsibleForceLayout = data => {
     .append("g")
     .attr("transform", "translate(-140,-30) scale(0.5,0.5)");
 
+  var animFrame = 0;
+  const ANIMATE_EVERY_NTH_FRAME = 6;
+    const TICKS_PER_RENDER = 3;
+
   const startFn = () => {
-    var ticksPerRender = 3;
-    requestAnimationFrame(function render() {
-      for(var i = 0; i < ticksPerRender; i++) {
-        force.tick();
-      }
-      // prettier-ignore
-      link
+    function render() {
+      if(animFrame % ANIMATE_EVERY_NTH_FRAME == 0) {
+        for(var i = 0; i < TICKS_PER_RENDER; i++) {
+          force.tick();
+        }
+        // prettier-ignore
+        link
         .attr("x1", function(d) {return d.source.x; })
         .attr("y1", function(d) {return d.source.y; })
         .attr("x2", function(d) {return d.target.x; })
         .attr("y2", function(d) {return d.target.y; });
 
-      node.attr("transform", function(d) {
-        return `translate(${d.x}, ${d.y})`;
-      });
-    });
+        node.attr("transform", function(d) {
+          return `translate(${d.x}, ${d.y})`;
+        });
+      }
+      animFrame++;
+    }
+
+   // requestAnimationFrame(render);
+    //Timer.interval(500, render);
   };
 
   const simulation = d3
