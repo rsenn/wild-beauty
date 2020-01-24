@@ -146,22 +146,27 @@ class List extends React.Component {
     this.element = e;
     this.grid = grid;
     e = this.grid;
-    this.grid.style.setProperty("transform-origin", `${origin.x}px ${origin.y}px`);
-    this.grid.style.setProperty("transform", "");
-    this.grid.style.setProperty("transition", `transform 0.5s linear`);
+    Element.setCSS(this.grid, {
+      transformOrigin: `${origin.x}px ${origin.y}px`,
+      transform: "",
+      transition: `transform 0.5s linear`
+    });
+
     var tend = e => {
       //console.log("transition end: ", e.target);
       //console.log("transformOrigin: ", e.target.style.transformOrigin);
       //console.log("dm: ", dm);
-      e.target.style.transition = `transform 0.5s ease-out`;
-      e.target.style.transform = dm.toString();
+      Element.setCSS(e.target, { transition: `transform 0.5s ease-out`, transform: dm.toString() });
       e.target.removeEventListener("transitionend", tend);
     };
     e.addEventListener("transitionend", tend);
     //console.log("rect: ", rect);
-    e.style.setProperty("transition", `transform ${this.speed} ease-out`);
-    e.style.setProperty("transform", dms);
-    e.style.setProperty("z-index", 9);
+
+    Element.setCSS(e, {
+      transition: `transform ${this.speed} ease-out`,
+      transform: dms,
+      zIndex: 9
+    });
     if(global.window) {
       window.t = e;
       window.m = m;
@@ -386,28 +391,28 @@ class List extends React.Component {
 
 function getTreeData() {
   return {
-    name: "Id[1]",
+    name: "[1]",
     children: [
-      { name: "Id[41]", size: 30 },
+      { name: "[41]", size: 30 },
       { name: "org", size: 30 },
-      { name: "Id[57]", size: 30 },
-      { name: "Id[58]", size: 30 },
-      { name: "Id[59]", size: 30 },
-      { name: "Id[60]", size: 30 },
-      { name: "Id[61]", size: 30 },
-      { name: "Id[62]", size: 30 },
+      { name: "[57]", size: 30 },
+      { name: "[58]", size: 30 },
+      { name: "[59]", size: 30 },
+      { name: "[60]", size: 30 },
+      { name: "[61]", size: 30 },
+      { name: "[62]", size: 30 },
       {
         name: "objects",
         children: [
           {
             name: "electronics",
             children: [
-              { name: "Id[119]", size: 30 },
-              { name: "Id[120]", size: 30 },
-              { name: "Id[121]", size: 30 },
-              { name: "Id[122]", size: 30 },
-              { name: "Id[123]", size: 30 },
-              { name: "Id[124]", size: 30 },
+              { name: "[119]", size: 30 },
+              { name: "[120]", size: 30 },
+              { name: "[121]", size: 30 },
+              { name: "[122]", size: 30 },
+              { name: "[123]", size: 30 },
+              { name: "[124]", size: 30 },
               {
                 name: "pic",
                 children: [
@@ -423,23 +428,23 @@ function getTreeData() {
           {
             name: "boxes",
             children: [
-              { name: "Id[99]", size: 30 },
-              { name: "Id[103]", size: 30 },
-              { name: "Id[98]", size: 30 },
-              { name: "Id[86]", size: 30 },
+              { name: "[99]", size: 30 },
+              { name: "[103]", size: 30 },
+              { name: "[98]", size: 30 },
+              { name: "[86]", size: 30 },
               { name: "Test", size: 30 }
             ]
           },
-          { name: "bags", children: [{ name: "Id[64]", size: 30 }] }
+          { name: "bags", children: [{ name: "[64]", size: 30 }] }
         ]
       },
       {
         name: "subjects",
         children: [
           {
-            name: "Id[89]",
+            name: "[89]",
             children: [
-              { name: "Id[105]", size: 30 },
+              { name: "[105]", size: 30 },
               { name: "Roman", size: 30 }
             ]
           },

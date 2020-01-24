@@ -246,7 +246,7 @@ export class RootStore extends Queries {
     item = item || this.rootItem;
     if(item) {
       let { name, id } = item;
-      if(!name) name = `Id[${id}]`;
+      if(!name) name = `[${id}]`;
       let children = [...this.items.values()]
         .filter(child => child.parent && child.parent.id == id)
         .map(child => this.getHierarchy(child, fn));

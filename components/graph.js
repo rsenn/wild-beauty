@@ -4,7 +4,7 @@ import { HSLA, Element } from "../utils/dom.js";
 import withSizes from "react-sizes";
 
 // prettier-ignore
-//{"name":"Id[1]","children":[{"name":"Id[41]"},{"name":"Id[104]"},{"name":"Id[57]"},{"name":"Id[58]"},{"name":"Id[59]"},{"name":"Id[60]"},{"name":"Id[61]"},{"name":"Id[62]"},{"name":"Id[3]"},{"name":"Id[2]"}]};
+//{"name":"[1]","children":[{"name":"[41]"},{"name":"[104]"},{"name":"[57]"},{"name":"[58]"},{"name":"[59]"},{"name":"[60]"},{"name":"[61]"},{"name":"[62]"},{"name":"[3]"},{"name":"[2]"}]};
 
 // prettier-ignore
 export const collapsibleForceLayout = data => {
@@ -16,7 +16,7 @@ export const collapsibleForceLayout = data => {
 //    data = collapsibleForceLayoutData;
 console.log("collapsibleForceLayout ", data );
   const root = d3.hierarchy(
-{"name":"Id[1]","children":[{"name":"Id[41]","size":10},{"name":"org","size":10},{"name":"Id[57]","size":10},{"name":"Id[58]","size":10},{"name":"Id[59]","size":10},{"name":"Id[60]","size":10},{"name":"Id[61]","size":10},{"name":"Id[62]","size":10},{"name":"objects","children":[{"name":"electronics","children":[{"name":"Id[119]","size":10},{"name":"Id[120]","size":10},{"name":"Id[121]","size":10},{"name":"Id[122]","size":10},{"name":"Id[123]","size":10},{"name":"Id[124]","size":10},{"name":"pic","children":[{"name":"lc-meter","size":10},{"name":"rgb-led","size":10},{"name":"picstick-25k50","size":10}]},{"name":"Audio","size":10},{"name":"RS232","children":[{"name":"jdm2-programmer","size":10}]}]},{"name":"boxes","children":[{"name":"Id[99]","size":10},{"name":"Id[103]","size":10},{"name":"Id[98]","size":10},{"name":"Id[86]","size":10},{"name":"Test","size":10}]},{"name":"bags","children":[{"name":"Id[64]","size":10}]}]},{"name":"subjects","children":[{"name":"Id[89]","children":[{"name":"Id[105]","size":10},{"name":"Roman","size":10}]},{"name":"groups","size":10}]}]}
+{"name":"[1]","children":[{"name":"[41]","size":10},{"name":"org","size":10},{"name":"[57]","size":10},{"name":"[58]","size":10},{"name":"[59]","size":10},{"name":"[60]","size":10},{"name":"[61]","size":10},{"name":"[62]","size":10},{"name":"objects","children":[{"name":"electronics","children":[{"name":"[119]","size":10},{"name":"[120]","size":10},{"name":"[121]","size":10},{"name":"[122]","size":10},{"name":"[123]","size":10},{"name":"[124]","size":10},{"name":"pic","children":[{"name":"lc-meter","size":10},{"name":"rgb-led","size":10},{"name":"picstick-25k50","size":10}]},{"name":"Audio","size":10},{"name":"RS232","children":[{"name":"jdm2-programmer","size":10}]}]},{"name":"boxes","children":[{"name":"[99]","size":10},{"name":"[103]","size":10},{"name":"[98]","size":10},{"name":"[86]","size":10},{"name":"Test","size":10}]},{"name":"bags","children":[{"name":"[64]","size":10}]}]},{"name":"subjects","children":[{"name":"[89]","children":[{"name":"[105]","size":10},{"name":"Roman","size":10}]},{"name":"groups","size":10}]}]}
     );
   const transform = d3.zoomIdentity;
   let node, link;
@@ -31,8 +31,6 @@ console.log("collapsibleForceLayout ", data );
     .call(d3 .zoom() .scaleExtent([1 / 2, 8]) .on("zoom", zoomed) )
     .append("g")
     .attr("transform", "translate(-140,-30) scale(0.5,0.5)");
-
-
 
    const startFn = () =>  {
     var ticksPerRender = 3;
@@ -85,7 +83,7 @@ console.log("collapsibleForceLayout update ", { nodes,links});
     .append("g")
     .attr("class", "node")
     .attr("stroke", "#000")
-    .attr("stroke-width", 1)
+    .attr("stroke-width", 0.3)
     .style("fill", color)
     .style("opacity", 1)
     .on("click", clicked)
@@ -105,13 +103,20 @@ console.log("collapsibleForceLayout update ", { nodes,links});
 */
     nodeEnter
     .append("rect")
-    .attr("x", function(d) {return -(d.data.size > 0 ? d.data.size*0.3 : 8); })
-    .attr("y", function(d) {return -(d.data.size > 0 ? d.data.size*0.3 : 8); })
-    .attr("width", function(d) {return 2*(d.data.size > 0 ? d.data.size*0.3 : 8); })
-    .attr("height", function(d) {return 2*(d.data.size > 0 ? d.data.size*0.3 : 8); })
+    .attr("x", function(d) {return -(d.data.size > 0 ? d.data.size*0.5 : 8); })
+    .attr("y", function(d) {return -(d.data.size > 0 ? d.data.size*0.5 : 8); })
+    .attr("width", function(d) {return 2*(d.data.size > 0 ? d.data.size*0.5 : 8); })
+    .attr("height", function(d) {return 2*(d.data.size > 0 ? d.data.size*0.5 : 8); })
     .attr("rx", 1)
-    .attr("ry", 1)
-    .style("text-anchor", function(d) {return d.children ? "end" : "start"; })
+    .attr("ry", 1);
+
+   nodeEnter.append("text")
+    .style("stroke", 'none')
+    .style("fill", 'black')
+    .style("font-size", '4')
+    .style("alignment-baseline", 'middle')
+    .style("text-anchor", 'middle')
+//    .style("text-anchor", function(d) {return d.children ? "end" : "start"; })
     .text(function(d) {return d.data.name; });
 
     node = nodeEnter.merge(node);
@@ -126,7 +131,7 @@ console.log("collapsibleForceLayout update ", { nodes,links});
   function color(d) {
     return !!d._children  ? "#40df20" // collapsed package 
     : (!!d.children ? "#ffc000" // expanded package 
-    : "#8000ff"); // leaf node
+    : "#b366ff"); // leaf node
   }
   function radius(d) {
     return d._children ? 8 : d.children ? 8 : 4;
