@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import { Element, Point, Rect, Matrix, Timer, SVG, TRBL } from "../utils/dom.js";
+import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align } from "../utils/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
@@ -79,9 +79,15 @@ export function createGraph(svg) {
       Element.attr(svg, { transform: m.toSVG() });
       t = ` translate(${move.x},${move.y}) ` + t;
 
+      let gbb = graph.getBBox();
+      let rbb = new Rect(gbb);
+      let nbb = new Rect(rbb);
+
+      Rect.align(nbb, client, Align.CENTER | Align.MIDDLE);
+      console.log("nbb:", nbb);
       SVG.create(
         "circle",
-        { cx: graph.config.origin.x, cy: graph.config.origin.y, r: 30, stroke: "#f00", strokeWidth: 2, fill: "none" },
+        { cx: rbb.center.x, cy: rbb.center.y, r: 30, stroke: "#f00", strokeWidth: 2, fill: "none" },
         svg
       );
     },
@@ -129,69 +135,8 @@ export function createGraph(svg) {
     }
   });
 
-  var hier = {
-    name: "[1]",
-    children: [
-      { name: "[41]", size: 10 },
-      { name: "org", size: 10 },
-      { name: "[57]", size: 10 },
-      { name: "[58]", size: 10 },
-      { name: "[59]", size: 10 },
-      { name: "[60]", size: 10 },
-      { name: "[61]", size: 10 },
-      { name: "[62]", size: 10 },
-      {
-        name: "objects",
-        children: [
-          {
-            name: "electronics",
-            children: [
-              { name: "[119]", size: 10 },
-              { name: "[120]", size: 10 },
-              { name: "[121]", size: 10 },
-              { name: "[122]", size: 10 },
-              { name: "[123]", size: 10 },
-              { name: "[124]", size: 10 },
-              {
-                name: "pic",
-                children: [
-                  { name: "lc-meter", size: 10 },
-                  { name: "rgb-led", size: 10 },
-                  { name: "picstick-25k50", size: 10 }
-                ]
-              },
-              { name: "Audio", size: 10 },
-              { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] }
-            ]
-          },
-          {
-            name: "boxes",
-            children: [
-              { name: "[99]", size: 10 },
-              { name: "[103]", size: 10 },
-              { name: "[98]", size: 10 },
-              { name: "[86]", size: 10 },
-              { name: "Test", size: 10 }
-            ]
-          },
-          { name: "bags", children: [{ name: "[64]", size: 10 }] }
-        ]
-      },
-      {
-        name: "subjects",
-        children: [
-          {
-            name: "[89]",
-            children: [
-              { name: "[105]", size: 10 },
-              { name: "Roman", size: 10 }
-            ]
-          },
-          { name: "groups", size: 10 }
-        ]
-      }
-    ]
-  };
+  // prettier-ignore
+  var hier = {name: "[1]", children: [{ name: "[41]", size: 10 }, { name: "org", size: 10 }, { name: "[57]", size: 10 }, { name: "[58]", size: 10 }, { name: "[59]", size: 10 }, { name: "[60]", size: 10 }, { name: "[61]", size: 10 }, { name: "[62]", size: 10 }, {name: "objects", children: [{name: "electronics", children: [{ name: "[119]", size: 10 }, { name: "[120]", size: 10 }, { name: "[121]", size: 10 }, { name: "[122]", size: 10 }, { name: "[123]", size: 10 }, { name: "[124]", size: 10 }, {name: "pic", children: [{ name: "lc-meter", size: 10 }, { name: "rgb-led", size: 10 }, { name: "picstick-25k50", size: 10 } ] }, { name: "Audio", size: 10 }, { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] } ] }, {name: "boxes", children: [{ name: "[99]", size: 10 }, { name: "[103]", size: 10 }, { name: "[98]", size: 10 }, { name: "[86]", size: 10 }, { name: "Test", size: 10 } ] }, { name: "bags", children: [{ name: "[64]", size: 10 }] } ] }, {name: "subjects", children: [{name: "[89]", children: [{ name: "[105]", size: 10 }, { name: "Roman", size: 10 } ] }, { name: "groups", size: 10 } ] } ] };
 
   treeToGraph(g, hier);
   /*
