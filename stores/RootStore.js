@@ -7,13 +7,15 @@ import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoSt
 import Util from "../utils/util.js";
 import { assign_to } from "../utils/devtools.js";
 import devpane from "../utils/devpane.js";
+import Iterator from "../lib/iterator.js";
 
 const isServer = !global.window;
 
 if (global.window) {
-  window.dev = { dom };
+  window.dev = { dom, Iterator };
   window.fns = {};
   window.dom = dom;
+  window.Iterator = Iterator;
 
   assign_to(window);
 }
