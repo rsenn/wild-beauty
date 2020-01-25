@@ -41,7 +41,7 @@ class Browse extends React.Component {
         return false;
       })
       .map(key => rootStore.items.get(key));
-    connsole.log("Browse.render");
+    console.log("Browse.render");
     return (
       <Layout>
         <div className={"grid-container"}>
