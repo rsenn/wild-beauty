@@ -81,12 +81,13 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
     </React.Fragment>
   );
 
-  if(wrapFlex)
+  if(wrapFlex) {
     content = (
       <div className={classNames(className, "editable-text")} style={style}>
         {content}
       </div>
     );
+  }
 
   return (
     <React.Fragment>

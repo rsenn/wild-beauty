@@ -119,7 +119,7 @@ export const EditableField = ({
       {isEditing ? (
         <CreatableSelect
           createOptionPosition={"first"}
-          allowCreateWhileLoading={true}
+          allowCreateWhileLoading
           isValidNewOption={value => true}
           onCreateOption={onCreateName}
           formatCreateLabel={value => {
