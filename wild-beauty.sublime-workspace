@@ -8,10 +8,10 @@
 	"buffers":
 	[
 		{
-			"contents": "insertParent\nremoveParent\ncreateGraph\nonRenderGraph\nonUpdateNode\nonUpdateEdge\nShow\ngetInitialProps\nconstructor\ncheckTagRemove\ncomponentDidMount\ncomponentDidUpdate\ngetNum\ngetId\nselectNode\ntreeSelEvent\ntend\nrender\nonError\nonImage\nmakeTreeSelEvent",
+			"contents": "insertParent\nremoveParent\n function createGraph(svg)\nonRenderGraph: graph\nonUpdateNode: (node, i)\nonUpdateEdge: (edge, i)\nShow\n() =>\nstatic async getInitialProps(ctx)\n(a, b) =>\nconstructor(props)\nitem =>\n i =>\ncheckTagRemove()\n e =>\n () =>\n node =>\ncomponentDidMount()\ncomponentDidUpdate()\n event =>\n event =>\nrect =>\n function getNum(elem, name)\n function getId(elem)\nselectNode(item)\nchild =>\ntreeSelEvent(type, arg)\n item =>\n event =>\n e =>\n event =>\ne =>\np =>\np =>\ntend\nrender()\nonError\nonImage\n event =>\nmakeTreeSelEvent\nitem =>",
 			"settings":
 			{
-				"buffer_size": 244,
+				"buffer_size": 533,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
@@ -38,6 +38,22 @@
 		"selected_items":
 		[
 			[
+				"edit",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
+				"schemeed",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
+				"install pac",
+				"Package Control: Install Package"
+			],
+			[
+				"add re",
+				"Package Control: Add Repository"
+			],
+			[
 				"scheme",
 				"SchemeEditor: Edit Current Scheme"
 			],
@@ -58,10 +74,6 @@
 				"Package Control: Install Package"
 			],
 			[
-				"add re",
-				"Package Control: Add Repository"
-			],
-			[
 				"install",
 				"Package Control: Install Package"
 			]
@@ -70,7 +82,7 @@
 	},
 	"console":
 	{
-		"height": 0.0,
+		"height": 178.0,
 		"history":
 		[
 		]
@@ -91,6 +103,7 @@
 	],
 	"file_history":
 	[
+		"/home/roman/.config/sublime-text-3-20200125/Packages/User/Default (Linux).sublime-keymap"
 	],
 	"find":
 	{
@@ -133,7 +146,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 244,
+						"buffer_size": 533,
 						"regions":
 						{
 						},
@@ -142,118 +155,219 @@
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
 							"current_file": "/home/roman/the-wild-beauty-company/pages/show.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
 									1103,
-									1115
+									1141
 								],
 								[
 									1277,
-									1289
+									1322
 								],
 								[
-									1483,
-									1494
+									1473,
+									1499
 								],
 								[
 									2052,
-									2065
+									2075
 								],
 								[
 									3353,
-									3365
+									3379
 								],
 								[
 									4379,
-									4391
+									4405
 								],
 								[
 									7803,
 									7807
 								],
 								[
-									8533,
-									8548
+									8267,
+									8272
+								],
+								[
+									8520,
+									8553
+								],
+								[
+									9348,
+									9357
 								],
 								[
 									9438,
-									9449
+									9456
+								],
+								[
+									9895,
+									9902
+								],
+								[
+									10290,
+									10295
 								],
 								[
 									11438,
-									11452
+									11454
+								],
+								[
+									11603,
+									11608
+								],
+								[
+									11666,
+									11672
+								],
+								[
+									11768,
+									11776
 								],
 								[
 									11934,
-									11951
+									11953
 								],
 								[
 									12036,
-									12054
+									12056
 								],
 								[
-									12474,
-									12480
+									12105,
+									12114
 								],
 								[
-									12564,
-									12569
+									12180,
+									12189
+								],
+								[
+									12409,
+									12416
+								],
+								[
+									12461,
+									12492
+								],
+								[
+									12551,
+									12575
 								],
 								[
 									13588,
-									13598
+									13604
+								],
+								[
+									13674,
+									13682
 								],
 								[
 									13794,
-									13806
+									13817
+								],
+								[
+									14037,
+									14045
+								],
+								[
+									14377,
+									14386
+								],
+								[
+									14724,
+									14729
+								],
+								[
+									14790,
+									14799
+								],
+								[
+									15489,
+									15493
+								],
+								[
+									15970,
+									15974
+								],
+								[
+									16118,
+									16122
 								],
 								[
 									17555,
-									17559
+									17566
 								],
 								[
 									18219,
-									18225
+									18227
 								],
 								[
 									18378,
-									18385
+									18396
 								],
 								[
 									18411,
-									18418
+									18429
+								],
+								[
+									18586,
+									18595
 								],
 								[
 									18673,
-									18689
+									18708
+								],
+								[
+									18809,
+									18816
 								]
 							],
 							"symlist":
 							[
 								"insertParent",
 								"removeParent",
-								"createGraph",
-								"onRenderGraph",
-								"onUpdateNode",
-								"onUpdateEdge",
+								" function createGraph(svg)",
+								"onRenderGraph: graph",
+								"onUpdateNode: (node, i)",
+								"onUpdateEdge: (edge, i)",
 								"Show",
-								"getInitialProps",
-								"constructor",
-								"checkTagRemove",
-								"componentDidMount",
-								"componentDidUpdate",
-								"getNum",
-								"getId",
-								"selectNode",
-								"treeSelEvent",
+								"() =>",
+								"static async getInitialProps(ctx)",
+								"(a, b) =>",
+								"constructor(props)",
+								"item =>",
+								" i =>",
+								"checkTagRemove()",
+								" e =>",
+								" () =>",
+								" node =>",
+								"componentDidMount()",
+								"componentDidUpdate()",
+								" event =>",
+								" event =>",
+								"rect =>",
+								" function getNum(elem, name)",
+								" function getId(elem)",
+								"selectNode(item)",
+								"child =>",
+								"treeSelEvent(type, arg)",
+								" item =>",
+								" event =>",
+								" e =>",
+								" event =>",
+								"e =>",
+								"p =>",
+								"p =>",
 								"tend",
-								"render",
+								"render()",
 								"onError",
 								"onImage",
-								"makeTreeSelEvent"
+								" event =>",
+								"makeTreeSelEvent",
+								"item =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -283,18 +397,18 @@
 						"selection":
 						[
 							[
-								14183,
-								14080
+								2288,
+								2288
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 6325.0,
+						"translation.y": 1575.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -309,7 +423,7 @@
 	},
 	"input":
 	{
-		"height": 38.0
+		"height": 46.0
 	},
 	"layout":
 	{
