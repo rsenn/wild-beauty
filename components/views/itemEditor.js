@@ -11,7 +11,7 @@ import { Element, Timer } from "../../utils/dom.js";
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../../static/css/react-dropdown-tree-select.css";
 
-import "react-sortable-tree/style.css"; // once app
+//import "react-sortable-tree/style.css"; // once app
 
 export const ItemEditor = inject("rootStore")(
   observer(({ rootStore, image, tree, makeTreeSelEvent }) => {
