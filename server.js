@@ -7,19 +7,19 @@ const numCPUs = require("os").cpus().length;
 const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
 //const graphqlHTTP = require("express-graphql");
-const graphql = require("graphql");
+//const graphql = require("graphql");
 const API = require("./stores/api.js")();
 const jpeg = require("./utils/jpeg.js");
 const Util = require("./utils/util.js");
-const cors = require("cors");
+//const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const cookieParser = require("cookie-parser");
 const sharp = require("sharp");
 const util = require("util");
-const session = require("express-session");
-const cookieSession = require("cookie-session");
+//const session = require("express-session");
+//const cookieSession = require("cookie-session");
 const maxWidthOrHeight = 1024;
 const MemoryStream = require("memory-stream");
 const stream = require("stream");
@@ -89,7 +89,7 @@ if (!dev && cluster.isMaster) {
       expires: new Date(Date.now() + 30 * 24 * 3600 * 1000)
     };
     //server.use(session(sess));
-    server.use(cors({ credentials: true }));
+  //  server.use(cors({ credentials: true }));
     server.use(cookieParser());
 
     // Static files

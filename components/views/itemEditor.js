@@ -6,7 +6,7 @@ import { AddItemBar } from "../views/addItemBar.js";
 import { EditableField } from "../simple/editableField.js";
 import { Element, Timer } from "../../utils/dom.js";
 
-import SortableTree from "react-sortable-tree";
+//import SortableTree from "react-sortable-tree";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../../static/css/react-dropdown-tree-select.css";
@@ -61,7 +61,7 @@ export const ItemEditor = inject("rootStore")(
           mode={"radioSelect"}
           texts={{ placeholder: "parent item" }}
         />
-        <SortableTree treeData={tree} />
+ {/*       <SortableTree treeData={tree} />*/}
         <div className={"item-fields"}>
           {rootStore.entries.map(field => (
             <EditableField
