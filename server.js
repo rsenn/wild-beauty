@@ -89,7 +89,7 @@ if (!dev && cluster.isMaster) {
       expires: new Date(Date.now() + 30 * 24 * 3600 * 1000)
     };
     //server.use(session(sess));
-  //  server.use(cors({ credentials: true }));
+    //  server.use(cors({ credentials: true }));
     server.use(cookieParser());
 
     // Static files

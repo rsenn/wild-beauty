@@ -61,7 +61,7 @@ export const ItemEditor = inject("rootStore")(
           mode={"radioSelect"}
           texts={{ placeholder: "parent item" }}
         />
- {/*       <SortableTree treeData={tree} />*/}
+        {/*       <SortableTree treeData={tree} />*/}
         <div className={"item-fields"}>
           {rootStore.entries.map(field => (
             <EditableField

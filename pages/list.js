@@ -116,8 +116,8 @@ class List extends React.Component {
     let rect2 = Element.rect("#item-grid");
     let lrect = Element.rect(".show-layout2");
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
-//    var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
-//    //console.log("matrix fromTriangles: ", matrix);
+    //    var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
+    //    //console.log("matrix fromTriangles: ", matrix);
     var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
     var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
     var pt = new Point(srect.center);
@@ -193,7 +193,7 @@ class List extends React.Component {
     return (
       <Layout>
         <br />
-      {/*  <Graph data={getTreeData()} />*/}
+        {/*  <Graph data={getTreeData()} />*/}
         <br />
         <br />
         {this.state.view == "item" ? (
