@@ -1,1 +1,397 @@
-{}
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "insertParent\nremoveParent\ncreateGraph\nonRenderGraph\nonUpdateNode\nonUpdateEdge\nShow\ngetInitialProps\nconstructor\ncheckTagRemove\ncomponentDidMount\ncomponentDidUpdate\ngetNum\ngetId\nselectNode\ntreeSelEvent\ntend\nrender\nonError\nonImage\nmakeTreeSelEvent",
+			"settings":
+			{
+				"buffer_size": 244,
+				"line_ending": "Unix",
+				"name": "𝌆 Outline",
+				"scratch": true
+			}
+		},
+		{
+			"file": "pages/show.js",
+			"settings":
+			{
+				"buffer_size": 26493,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"scheme",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
+				"outli",
+				"Browse Mode: Outline (Right)"
+			],
+			[
+				"install pa",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"install pack",
+				"Package Control: Install Package"
+			],
+			[
+				"add re",
+				"Package Control: Add Repository"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/roman/the-wild-beauty-company",
+		"/home/roman/the-wild-beauty-company/pages"
+	],
+	"file_history":
+	[
+	],
+	"find":
+	{
+		"height": 0.0
+	},
+	"find_in_files":
+	{
+		"height": 101.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 244,
+						"regions":
+						{
+						},
+						"selection":
+						[
+						],
+						"settings":
+						{
+							"current_file": "/home/roman/the-wild-beauty-company/pages/show.js",
+							"outline_rename_mode": false,
+							"symkeys":
+							[
+								[
+									1103,
+									1115
+								],
+								[
+									1277,
+									1289
+								],
+								[
+									1483,
+									1494
+								],
+								[
+									2052,
+									2065
+								],
+								[
+									3353,
+									3365
+								],
+								[
+									4379,
+									4391
+								],
+								[
+									7803,
+									7807
+								],
+								[
+									8533,
+									8548
+								],
+								[
+									9438,
+									9449
+								],
+								[
+									11438,
+									11452
+								],
+								[
+									11934,
+									11951
+								],
+								[
+									12036,
+									12054
+								],
+								[
+									12474,
+									12480
+								],
+								[
+									12564,
+									12569
+								],
+								[
+									13588,
+									13598
+								],
+								[
+									13794,
+									13806
+								],
+								[
+									17555,
+									17559
+								],
+								[
+									18219,
+									18225
+								],
+								[
+									18378,
+									18385
+								],
+								[
+									18411,
+									18418
+								],
+								[
+									18673,
+									18689
+								]
+							],
+							"symlist":
+							[
+								"insertParent",
+								"removeParent",
+								"createGraph",
+								"onRenderGraph",
+								"onUpdateNode",
+								"onUpdateEdge",
+								"Show",
+								"getInitialProps",
+								"constructor",
+								"checkTagRemove",
+								"componentDidMount",
+								"componentDidUpdate",
+								"getNum",
+								"getId",
+								"selectNode",
+								"treeSelEvent",
+								"tend",
+								"render",
+								"onError",
+								"onImage",
+								"makeTreeSelEvent"
+							],
+							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 1,
+					"file": "pages/show.js",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 26493,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								14183,
+								14080
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6325.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 38.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				2,
+				0,
+				3,
+				2
+			],
+			[
+				0,
+				0,
+				2,
+				2
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.2,
+			0.8,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			0.5,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "wild-beauty.sublime-project",
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 1,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 240.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
