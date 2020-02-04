@@ -159,3 +159,4 @@ console.log(fileBuffer.length);*/
   let r2 = await api.select("items", { id: 102 }, fields);
   console.log("r2   = ", await r2.items);
 })();
+
