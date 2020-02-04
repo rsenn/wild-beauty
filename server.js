@@ -37,10 +37,10 @@ function bufferToStream(buffer) {
 }
 
 var secret = fs.readFileSync("secret.key");
+var etc_hostname = fs.readFileSync("/etc/hostname");
 
 const dev = process.env.NODE_ENV !== "production";
-const port = process.env.PORT || 5555;
-
+const port = process.env.PORT || (/hostwinds/.test(etc_hostname) ? 8040 : 5555);
 // prettier-ignore
 const itemFields = ["id", "type", "name", "parent { id }", 
 "children { id }", 
