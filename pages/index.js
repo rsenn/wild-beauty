@@ -165,8 +165,8 @@ class Home extends React.Component {
         )}
         <a
           className={"button-next"}
-          href={subpage < 3 ? "#" + (subpage + 1) : "/browse"}
-          onClick={subpage >= 3 ? undefined : this.handleNext}
+          href={subpage < 2 ? "#" + (subpage + 1) : "/browse"}
+          onClick={subpage >= 2 ? undefined : this.handleNext}
         >
           <img src={"/static/img/arrow-next.svg"} />
         </a>
