@@ -34,7 +34,7 @@
 			"file": "pages/index.js",
 			"settings":
 			{
-				"buffer_size": 13771,
+				"buffer_size": 13901,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -282,48 +282,48 @@
 									4910
 								],
 								[
-									5442,
-									5455
+									5487,
+									5500
 								],
 								[
-									5653,
-									5657
+									5771,
+									5775
 								],
 								[
-									5751,
-									5756
+									5881,
+									5886
 								],
 								[
-									5854,
-									5882
+									5984,
+									6012
 								],
 								[
-									6010,
-									6017
+									6140,
+									6147
 								],
 								[
-									6387,
-									6392
+									6505,
+									6510
 								],
 								[
-									6703,
-									6708
+									6821,
+									6826
 								],
 								[
-									6945,
-									6950
+									7063,
+									7068
 								],
 								[
-									7141,
-									7149
+									7259,
+									7267
 								],
 								[
-									7836,
-									7842
+									7954,
+									7960
 								],
 								[
-									8703,
-									8716
+									8821,
+									8834
 								]
 							],
 							"symlist":
@@ -412,26 +412,26 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 13771,
+						"buffer_size": 13901,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6750,
-								6750
+								8488,
+								8488
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
+							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
 							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2686.0,
+						"translation.y": 4114.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
