@@ -173,13 +173,14 @@ class Home extends React.Component {
           this.tLogo.style.transition = "";
           Element.setCSS(this.tLogo, {
             //  transform: `perspective(300px) translateZ(-150px) rotateX(${this.angles.x}deg)  rotateY(${this.angles.y}deg) rotateZ(${this.angles.z}deg) `
-            transform: `perspective(300px) translateZ(-150px) rotate3d(${this.vector.x}, ${this.vector.y}, ${this.vector.z}, ${this.angle}deg)`
+            transform: `perspective(300px) translateZ(-150px) scale(-1,1) rotate3d(${this.vector.x.toFixed(3)}, ${this.vector.y.toFixed(3)}, ${this.vector.z.toFixed(3)}, ${this.angle}deg)`
           });
           this.tLogo.style.transition = oldT;
         },
         transitionAngles(endfn = () => {}) {
-          Element.transition(this.tLogo, { transform: `perspective(300px) translateZ(-150px)  rotate3d(${this.vector.x}, ${this.vector.y}, ${this.vector.z}, ${this.angle}deg) ` }, 1000).then(t => {
-            console.log("Transition END", this.time);
+          const transform = `perspective(300px) translateZ(-150px) scale(-1,1)  rotate3d(${this.vector.x.toFixed(3)}, ${this.vector.y.toFixed(3)}, ${this.vector.z.toFixed(3)}, ${this.angle}deg) `;
+          Element.transition(this.tLogo, { transform }, 1000).then(t => {
+            console.log("Transition END ", this.time, transform);
             Timer.promise(1000).then(() => endfn());
           });
           console.log("Transition START", this.time);
