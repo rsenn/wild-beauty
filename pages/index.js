@@ -111,6 +111,25 @@ class Home extends React.Component {
         angle: 0,
         step: 0,
         angles: { x: 0, y: 0, z: 0 },
+        vector: {
+          x: 0,
+          y: 0,
+          z: 0,
+          get magnitude() {
+            return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+          },
+          clear() {
+            this.x = 0;
+            this.y = 0;
+            this.z = 0;
+          },
+          normalize() {
+            const mag = this.magnitude;
+            this.x /= mag;
+            this.y /= mag;
+            this.z /= mag;
+          }
+        },
         init() {
           if(!this.initialized) {
             const e = Element.find("#t-logo");
@@ -118,12 +137,29 @@ class Home extends React.Component {
               this.tLogo = e;
               this.initialized = Date.now();
               console.log(" anim initialized");
-              this.tick();
+              this.tick(0);
             }
           }
         },
+        get time() {
+          return Date.now() - this.initialized;
+        },
+        get delta() {
+          let prev = this.prev || this.initialized;
+          let now = Date.now();
+          let delta = now - prev;
+          this.prev = now;
+          return `+${delta}ms`;
+        },
         makeRandAngles(scale = 180) {
           this.setAngles(Math.floor((Math.random() * 2 - 1) * scale), Math.floor((Math.random() * 2 - 1) * scale), Math.floor((Math.random() * 2 - 1) * scale));
+          this.angle = Math.floor((Math.random() * 2 - 1) * scale);
+        },
+        makeRandDirection() {
+          this.vector.x = Math.random() * 2 - 1;
+          this.vector.y = Math.random() * 2 - 1;
+          this.vector.z = Math.random() * 2 - 1;
+          this.vector.normalize();
         },
         setAngles(x, y, z) {
           this.angles.x = x;
@@ -136,43 +172,49 @@ class Home extends React.Component {
           let oldT = this.tLogo.style.transition;
           this.tLogo.style.transition = "";
           Element.setCSS(this.tLogo, {
-            transform: `perspective(300px) translateZ(-150px) rotateX(${this.angles.x}deg)  rotateY(${this.angles.y}deg) rotateZ(${this.angles.z}deg) `
+            //  transform: `perspective(300px) translateZ(-150px) rotateX(${this.angles.x}deg)  rotateY(${this.angles.y}deg) rotateZ(${this.angles.z}deg) `
+            transform: `perspective(300px) translateZ(-150px) rotate3d(${this.vector.x}, ${this.vector.y}, ${this.vector.z}, ${this.angle}deg)`
           });
           this.tLogo.style.transition = oldT;
         },
-        transitionAngles() {
-          Element.transition(this.tLogo, { transform: `perspective(300px) translateZ(-150px) rotateX(${this.angles.x}deg)  rotateY(${this.angles.y}deg) rotateZ(${this.angles.z}deg) ` }, 1000).then(
-            t => {
-              console.log("transition succeeded");
-              Timer.promise(1000).then(() => this.tick());
-            }
-          );
+        transitionAngles(endfn = () => {}) {
+          Element.transition(this.tLogo, { transform: `perspective(300px) translateZ(-150px)  rotate3d(${this.vector.x}, ${this.vector.y}, ${this.vector.z}, ${this.angle}deg) ` }, 1000).then(t => {
+            console.log("Transition END", this.time);
+            Timer.promise(1000).then(() => endfn());
+          });
+          console.log("Transition START", this.time);
         },
         setTransition(enable = true) {
           Element.setCSS(this.tLogo, { transition: enable ? `transform ${this.interva}ms linear` : "" });
         },
-        tick() {
-          console.log("anim tick()", this.step % 3, Date.now() - this.initialized);
-          switch (this.step % 3) {
+        tick(i) {
+          console.log(`Anim tick(${i % 3}) ${this.delta}`);
+          switch (i % 3) {
             case 0: {
-              this.makeRandAngles(360);
-              this.transitionAngles();
+              this.makeRandDirection();
+              //this.makeRandAngles(360);
+              this.angle = Math.floor((Math.random() * 2 - 1) * 180);
+              this.angle += Math.sign(this.angle) * 180;
+
+              this.transitionAngles(() => this.tick(i + 1));
               break;
             }
             case 1: {
-              this.setAngles(Math.sign(this.angles.x) * 360, Math.sign(this.angles.y) * 360, Math.sign(this.angles.z) * 360);
-              this.transitionAngles();
+              this.angle = Math.sign(this.angle) * 360;
+              //              this.setAngles(Math.sign(this.angles.x) * 360, Math.sign(this.angles.y) * 360, Math.sign(this.angles.z) * 360);
+              this.transitionAngles(() => this.tick(i + 1));
               break;
             }
             case 2: {
-              this.setAngles(0, 0, 0);
+              this.angle = 0;
+
+              //              this.setAngles(0, 0, 0);
               this.updateAngles();
-              Timer.promise(1000).then(() => this.tick());
+              Timer.promise(1000).then(() => this.tick(i + 1));
               break;
             }
           }
-          console.log("anim tick ", this.step % 3, this.angles);
-          this.step++;
+          //  console.log("anim tick ", this.step % 3, this.angles);
         }
       };
     }
