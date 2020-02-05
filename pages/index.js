@@ -10,6 +10,7 @@ import { inject, observer } from "mobx-react";
 import { trkl } from "../utils/trkl.js";
 import axios from "../utils/axios.js";
 import { ColorScheme } from "../utils/colorscheme.js";
+import { withSize, SizeMe } from "react-sizeme";
 
 import "../static/style.css";
 
@@ -101,7 +102,7 @@ class Home extends React.Component {
   };
 
   render() {
-    const { rootStore, router } = this.props;
+    const { rootStore, router, size } = this.props;
     let swipeEvents = {};
     var e = null;
     if(global.window !== undefined) window.page = this;
@@ -115,6 +116,7 @@ class Home extends React.Component {
     const timespan = Util.timeSpan(Math.floor(seconds));
 
     const subpage = this.readHash();
+    //console.log("Home.render ", { size });
 
     return (
       <div className={"main-layout"}>
@@ -132,23 +134,47 @@ class Home extends React.Component {
           {}
         </div>
         <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "block" : "block" }}>
-          <h1>Title</h1>
-          <span className={"paragraph"}>
-            The earliest known appearance of the phrase is from The Boston Journal. In an article titled "Current Notes"
-            in the February 9, 1885, edition, the phrase is mentioned as a good practice sentence for writing students:
-            "A favorite copy set by writing teachers for their pupils is the following, because it contains every letter
-            of the alphabet: 'A quick brown fox jumps over the lazy dog.'" Dozens of other newspapers published the
-            phrase over the next few months, all using the version of the sentence starting with "A" rather than "The".
-            The earliest known use of the phrase in its modern form (starting with "The") is from the 1888 book
-            Illustrative Shorthand by Linda Bronson. The modern form (starting with "The") became more common despite
-            the fact that it is slightly longer than the original (starting with "A"). As the use of typewriters grew in
-            the late 19th century, the phrase began appearing in typing lesson books as a practice sentence. Early
-            examples include How to Become Expert in Typewriting: A Complete Instructor Designed Especially for the
-            Remington Typewriter (1890), and Typewriting Instructor and Stenographer's Hand-book (1892). By the turn of
-            the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic
-            Journal, it is referred to as "the well known memorized typing line embracing all the letters of the
-            alphabet". {}
-          </span>
+          <SizeMe>
+            {({ size }) => {
+              const fontSize = Math.round(size.width / 60);
+              const charWidth = fontSize - 1;
+              const maxLineLength = Math.floor(size.width / charWidth);
+
+              const padding = Math.round((size.width - fontSize * 45) / 3 + 80);
+              const paragraphWidth = Math.floor(size.width - padding * 2);
+              const lineLength = Math.floor((paragraphWidth + 2) / charWidth);
+
+              // console.log("SizeMe: ", size, { fontSize, maxLineLength, paragraphWidth, lineLength, padding });
+
+              return (
+                <div
+                  style={{
+                    fontSize: `${fontSize}px`,
+                    padding: `${padding >= 19 ? Math.round((padding - 19) / 2) : 0}px ${padding}px 0 ${padding}px`
+                  }}
+                >
+                  <h1>Title</h1>
+                  <span className={"paragraph"}>
+                    The earliest known appearance of the phrase is from The Boston Journal. In an article titled
+                    "Current Notes" in the February 9, 1885, edition, the phrase is mentioned as a good practice
+                    sentence for writing students: "A favorite copy set by writing teachers for their pupils is the
+                    following, because it contains every letter of the alphabet: 'A quick brown fox jumps over the lazy
+                    dog.'" Dozens of other newspapers published the phrase over the next few months, all using the
+                    version of the sentence starting with "A" rather than "The". The earliest known use of the phrase in
+                    its modern form (starting with "The") is from the 1888 book Illustrative Shorthand by Linda Bronson.
+                    The modern form (starting with "The") became more common despite the fact that it is slightly longer
+                    than the original (starting with "A"). As the use of typewriters grew in the late 19th century, the
+                    phrase began appearing in typing lesson books as a practice sentence. Early examples include How to
+                    Become Expert in Typewriting: A Complete Instructor Designed Especially for the Remington Typewriter
+                    (1890), and Typewriting Instructor and Stenographer's Hand-book (1892). By the turn of the 20th
+                    century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic
+                    Journal, it is referred to as "the well known memorized typing line embracing all the letters of the
+                    alphabet". {}
+                  </span>
+                </div>
+              );
+            }}
+          </SizeMe>
         </div>
         <div
           className={"subpage flex-vertical"}
@@ -214,10 +240,9 @@ class Home extends React.Component {
             top: 0;
             left: 0;
             width: 100vw;
-            font-size: 2vw;
+            font-size: 13px;
 
             transition: opacity 0.5s;
-            padding: 0 10px 0 10px;
             overflow: auto;
           }
 
@@ -250,4 +275,4 @@ class Home extends React.Component {
   }
 }
 
-export default Home;
+export default /* withSize()*/ Home;
