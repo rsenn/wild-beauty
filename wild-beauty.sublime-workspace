@@ -3,25 +3,39 @@
 	{
 		"selected_items":
 		[
+			[
+				"init",
+				"initialized"
+			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"contents": "",
+			"contents": "() =>\nHome\nconstructor(props)\nreadHash()\ngetHash()\ncomponentDidMount()\ncomponentDidUpdate(prevProps)\n () =>\n () =>\n () =>\nget magnitude()\nclear()\nnormalize()\ninit()\nget time()\nget delta()\nmakeRandAngles(scale = 180)\nmakeRandDirection()\nsetAngles(x, y, z)\nupdateAngles()\nendfn\nt =>\n() =>\nsetTransition(enable = true)\ntick(i)\n() =>\n() =>\n() =>\nrender()\n () =>\n({ size }) =>",
 			"settings":
 			{
-				"buffer_size": 0,
+				"buffer_size": 371,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "pages/show.js",
+			"file": "lib/dom.js",
 			"settings":
 			{
-				"buffer_size": 26493,
+				"buffer_size": 112438,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/index.js",
+			"settings":
+			{
+				"buffer_size": 13901,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		}
@@ -38,6 +52,10 @@
 		"selected_items":
 		[
 			[
+				"scheme",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
 				"edit",
 				"SchemeEditor: Edit Current Scheme"
 			],
@@ -52,10 +70,6 @@
 			[
 				"add re",
 				"Package Control: Add Repository"
-			],
-			[
-				"scheme",
-				"SchemeEditor: Edit Current Scheme"
 			],
 			[
 				"outli",
@@ -98,40 +112,67 @@
 	},
 	"expanded_folders":
 	[
-		"/home/roman/the-wild-beauty-company",
-		"/home/roman/the-wild-beauty-company/pages"
+		"/home/roman/the-wild-beauty-company"
 	],
 	"file_history":
 	[
+		"/home/roman/the-wild-beauty-company/pages/index.js",
+		"/home/roman/wild-beauty/components/nav.js",
+		"/home/roman/wild-beauty/pages/show.js",
+		"/home/roman/the-wild-beauty-company/lib/dom.es5.js",
+		"/home/roman/the-wild-beauty-company/lib/devtools.js",
+		"/home/roman/the-wild-beauty-company/lib/util.js",
 		"/home/roman/.config/sublime-text-3-20200125/Packages/User/Default (Linux).sublime-keymap"
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 39.0
 	},
 	"find_in_files":
 	{
 		"height": 101.0,
 		"where_history":
 		[
+			"/home/roman/wild-beauty/lib,/home/roman/wild-beauty/pages,/home/roman/wild-beauty/components,/home/roman/wild-beauty/stores,*.js",
+			""
 		]
 	},
 	"find_state":
 	{
-		"case_sensitive": false,
+		"case_sensitive": true,
 		"find_history":
 		[
+			"transition",
+			"this.delta",
+			"tihs.delta",
+			"\"transition ",
+			"Timer",
+			"Timer.default",
+			"on Tran",
+			"tick\\(",
+			"deca",
+			"cubic.*bez",
+			"transform",
+			"rect(",
+			"rect\\(",
+			"outset",
+			"outset =",
+			"static rect",
+			"withSize",
+			"paragraph"
 		],
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": false,
+		"regex": true,
 		"replace_history":
 		[
+			"\"Transition ",
+			"Timer.std"
 		],
 		"reverse": false,
 		"show_context": true,
-		"use_buffer2": true,
+		"use_buffer2": false,
 		"whole_word": false,
 		"wrap": true
 	},
@@ -146,7 +187,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 0,
+						"buffer_size": 371,
 						"regions":
 						{
 						},
@@ -156,13 +197,168 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/favicon.svg.2020_01_24_16_24_57.0.svg",
+							"current_file": "/home/roman/the-wild-beauty-company/pages/index.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
+								[
+									706,
+									711
+								],
+								[
+									771,
+									775
+								],
+								[
+									877,
+									895
+								],
+								[
+									1384,
+									1394
+								],
+								[
+									1607,
+									1616
+								],
+								[
+									1968,
+									1987
+								],
+								[
+									2344,
+									2373
+								],
+								[
+									2446,
+									2452
+								],
+								[
+									2672,
+									2678
+								],
+								[
+									2899,
+									2905
+								],
+								[
+									3222,
+									3237
+								],
+								[
+									3346,
+									3353
+								],
+								[
+									3451,
+									3462
+								],
+								[
+									3617,
+									3623
+								],
+								[
+									3923,
+									3933
+								],
+								[
+									4003,
+									4014
+								],
+								[
+									4213,
+									4240
+								],
+								[
+									4491,
+									4510
+								],
+								[
+									4714,
+									4732
+								],
+								[
+									4896,
+									4910
+								],
+								[
+									5487,
+									5500
+								],
+								[
+									5771,
+									5775
+								],
+								[
+									5881,
+									5886
+								],
+								[
+									5984,
+									6012
+								],
+								[
+									6140,
+									6147
+								],
+								[
+									6505,
+									6510
+								],
+								[
+									6821,
+									6826
+								],
+								[
+									7063,
+									7068
+								],
+								[
+									7259,
+									7267
+								],
+								[
+									7954,
+									7960
+								],
+								[
+									8821,
+									8834
+								]
 							],
 							"symlist":
 							[
+								"() =>",
+								"Home",
+								"constructor(props)",
+								"readHash()",
+								"getHash()",
+								"componentDidMount()",
+								"componentDidUpdate(prevProps)",
+								" () =>",
+								" () =>",
+								" () =>",
+								"get magnitude()",
+								"clear()",
+								"normalize()",
+								"init()",
+								"get time()",
+								"get delta()",
+								"makeRandAngles(scale = 180)",
+								"makeRandDirection()",
+								"setAngles(x, y, z)",
+								"updateAngles()",
+								"endfn",
+								"t =>",
+								"() =>",
+								"setTransition(enable = true)",
+								"tick(i)",
+								"() =>",
+								"() =>",
+								"() =>",
+								"render()",
+								" () =>",
+								"({ size }) =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -170,39 +366,72 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
 		},
 		{
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 1,
-					"file": "pages/show.js",
-					"semi_transient": true,
+					"file": "lib/dom.js",
+					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 26493,
+						"buffer_size": 112438,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3434,
-								3434
+								94547,
+								94547
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
 							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1575.0,
+						"translation.y": 56275.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "pages/index.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 13901,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8488,
+								8488
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
+							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4114.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -253,13 +482,13 @@
 	"menu_visible": true,
 	"output.find_results":
 	{
-		"height": 0.0
+		"height": 321.0
 	},
 	"pinned_build_system": "",
 	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
-		"height": 0.0
+		"height": 70.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -268,6 +497,14 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"index",
+				"pages/index.js"
+			],
+			[
+				"util.js",
+				"lib/util.js"
+			]
 		],
 		"width": 0.0
 	},
