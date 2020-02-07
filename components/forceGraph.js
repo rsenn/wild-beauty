@@ -204,6 +204,7 @@ module.exports = ForceGraph;
 
 ForceGraph.createStyle = () => {
   return style(`
+  
     .links line {
       stroke: #999;
       stroke-opacity: 0.6;
