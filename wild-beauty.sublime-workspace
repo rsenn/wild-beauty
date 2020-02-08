@@ -388,8 +388,8 @@
 						"selection":
 						[
 							[
-								94547,
-								94547
+								94933,
+								94933
 							]
 						],
 						"settings":
@@ -400,7 +400,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 56275.0,
+						"translation.y": 56530.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -419,19 +419,19 @@
 						"selection":
 						[
 							[
-								8488,
-								8488
+								6149,
+								6149
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
+							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
 							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4114.0,
+						"translation.y": 2431.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
