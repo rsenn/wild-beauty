@@ -261,7 +261,7 @@ class Home extends React.Component {
           {}
         </div>
         <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "block" : "block" }}>
-          <SizeMe>
+          <div>
             {({ size }) => {
               const fontSize = Math.round(size.width / 60);
               const charWidth = fontSize - 1;
@@ -294,7 +294,7 @@ class Home extends React.Component {
                 </div>
               );
             }}
-          </SizeMe>
+          </div>
         </div>
         <div className={"subpage flex-vertical"} style={{ opacity: subpage == 3 ? 1 : 0, display: subpage == 3 ? "flex" : "flex" }}>
           <div className={"time-counter"}>{timespan}</div>
