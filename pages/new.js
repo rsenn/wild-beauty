@@ -4,10 +4,8 @@ import Alea from "../utils/alea.js";
 import { Element } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
-import { makeTouchCallback } from "../components/TouchCallback.js";
 import { action } from "mobx";
 import { inject, observer } from "mobx-react";
-import { MovementListener, TouchListener } from "../utils/touchHandler.js";
 import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
 import { trkl } from "../utils/trkl.js";
@@ -66,66 +64,7 @@ class New extends React.Component {
       window.page = this;
       window.rs = rootStore;
     }
-    if(global.window) {
-      const moveImage = (event, e) => {
-        const orientation = e.getAttribute("orientation");
-        let offset = orientation == "landscape" ? event.x : event.y;
-        if(offset > 0) offset = 0;
-        if(offset < -this.offsetRange) offset = -this.offsetRange;
-        if(event.type.endsWith("move")) this.currentOffset = orientation == "landscape" ? { x: offset, y: 0 } : { x: 0, y: offset };
-        let transformation = orientation == "landscape" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
-        if(event.type.endsWith("move")) {
-          e.style.setProperty("transform", transformation);
-          this.clonedImage.style.setProperty("transform", transformation);
-        }
-      };
-      this.touchCallback = makeTouchCallback("inner-image", (event, e) => {
-        const zIndex = maxZIndex() + 1;
-        if(e) Element.setCSS(e, { zIndex });
-        if(e && e.style) {
-          moveImage(event, e);
-        }
-      });
-      this.touchListener = TouchListener(
-        event => {
-          //console.log("Touch ", event);
-          const elem = event.target;
-          if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
-            this.currentImage = event.target;
-            let obj = Element.toObject(this.currentImage);
-            const orientation = this.currentImage.getAttribute("orientation");
-            let rect = Element.rect(this.currentImage);
-            let prect = Element.rect(this.currentImage.parentElement.parentElement);
-            let range = orientation == "landscape" ? rect.width - prect.width : rect.height - prect.height;
-            this.offsetRange = range;
-            //console.log("rect: ", { orientation, range, rect, prect });
-            obj.style = `position: fixed; top: ${rect.y - window.scrollY}px; left: ${rect.x}px; width: ${rect.width}px; height: ${rect.height}px`;
-            if(this.clonedImage) Element.remove(this.clonedImage);
-            this.clonedImage = Element.create(obj);
-            document.body.appendChild(this.clonedImage);
-            this.clonedImage.style.zIndex = -1;
-            this.clonedImage.style.opacity = 0.3;
-          }
-          if(event.type.endsWith("move")) {
-            if(this.clonedImage && this.currentImage) {
-              let zIndex = parseInt(Element.getCSS(this.currentImage, "z-index")) - 1;
-              let irect = Element.rect(this.currentImage);
-              moveImage(event, this.currentImage);
-            }
-          }
-          if(event.type.endsWith("end")) {
-            if(this.clonedImage && this.currentImage) {
-              this.currentImage.style.position = "relative";
-              //console.log("currentOffset: ", this.currentOffset);
-              //console.log("currentImage: ", this.currentImage);
-              Element.remove(this.clonedImage);
-              this.clonedImage = null;
-            }
-          }
-        },
-        { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
-      );
-    }
+  
     rootStore.state.step = 1;
   }
 

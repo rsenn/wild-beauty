@@ -53,7 +53,7 @@ const makeItemToOption = selected => item => {
   if(children && children.length) obj.children = children;
   if(label.startsWith("null(")) return null;
   if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
-  //if(item.parent_id != -1 && item.parent_id != 1 && item.type !== null && !item.type.endsWith('category')) return null;
+  
   return obj;
 };
 
@@ -82,9 +82,9 @@ class Show extends React.Component {
 
   static async getInitialProps(ctx) {
     const { query, params } = (ctx && ctx.req) || {};
-    console.log("Show.getInitialProps ", { query, params });
+    //console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
-    //console.log("RootStore.fetchItems");
+    
     let items;
 
     if(params && params.id !== undefined) {
@@ -92,18 +92,18 @@ class Show extends React.Component {
       const name = params.id;
       if(isNaN(id) || typeof id != "number") id = -1;
       const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
-      console.log("query: ", q);
+      //console.log("query: ", q);
       let response = await Show.API(q);
       items = response.items || [];
-      console.log("item: ", items[0]);
+      console.log("items: ", items);
     } else {
       items = await Show.API.list("items", Show.fields);
     }
-    //await RootStore.fetchItems();
-    // console.log("Show.getInitialProps  items:", items);
+    
+    
     items = items.sort((a, b) => a.id - b.id);
     RootStore.items.clear();
-    //  items.forEach(item => RootStore.newItem(item));
+    
     return { items, params };
   }
 
@@ -111,20 +111,15 @@ class Show extends React.Component {
     super(props);
     this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
     const { rootStore } = this.props;
-    if(global.window) {
-      window.api = this.api;
+    if(global.window) {      window.api = this.api;
       window.page = this;
       window.rs = rootStore;
       window.stores = getOrCreateStore();
-
-      //   window.addEventListener('mousemove', this.mouseMove);
     }
-    //console.log("props.items: ", props.items);
     rootStore.items.clear();
     props.items.forEach(item => {
       rootStore.newItem(item);
     });
-    //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
     if(this.props.params && this.props.params.id !== undefined) {
       this.state.view = "item";
@@ -134,22 +129,7 @@ class Show extends React.Component {
       item.checked = true;
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
     }
-    /*
-     this.touchListener = TouchListener(this.touchEvent,
-      f        element: global.window,
-        step: 10,
-        round: false,
-        listener: MovementListener,
-        noscroll: true
-      }
-    );*/
-
-    /*  this.svgRef.subscribe(ref => {
-      var r = Element.rect('#tree');
-      const {x,y} = r;
-     var e =  ref.factory('use', { href: '#tree', x, y }, ref.svg);
-      console.log("svgRef: ", e);   
-    });*/
+    
   }
 
   checkTagRemove() {
@@ -159,7 +139,7 @@ class Show extends React.Component {
         tagRemove.addEventListener("click", e => {
           e.preventDefault();
           Timer.once(100, () => {
-            console.log("tagRemove: ", tagRemove);
+            //console.log("tagRemove: ", tagRemove);
             Util.traverseTree(this.tree, node => {
               node.checked = false;
             });
@@ -181,7 +161,7 @@ class Show extends React.Component {
   }
 
   touchEvent = event => {
-    console.log("Touch event: ", event);
+    //console.log("Touch event: ", event);
   };
 
   mouseEvent = event => {
@@ -207,26 +187,25 @@ class Show extends React.Component {
       }
       if(elem && elem.style) {
         const t = ` scale(1.4,1.4)`;
-        console.log("Mouse event: ", t);
+        //console.log("Mouse event: ", t);
 
         var parent = elem.parentElement;
-        /*  parent.removeChild(elem);
-        parent.appendChild(elem);*/
+        
         elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
 
         elem.style.setProperty("transform", t);
         this.prevElem = elem;
         hover = getId(elem);
       }
-      // this.setState({ hover });
+      
     } else if(type.endsWith("down")) {
       var elem = r[0];
 
-      console.log("Mouse event: ", { type, x, y }, r);
+      //console.log("Mouse event: ", { type, x, y }, r);
 
       if(elem) {
         const id = getId(elem.parentElement);
-        console.log("Clicked id:", id);
+        //console.log("Clicked id:", id);
         this.setState({ active: id });
       }
     }
@@ -236,16 +215,15 @@ class Show extends React.Component {
   selectNode(item) {
     var children = Util.flatTree(item);
     var ids = children.map(child => child.id);
-    console.log("treeSelEvent: ", ids, item.title);
+    //console.log("treeSelEvent: ", ids, item.title);
     this.setState({ parentIds: ids });
   }
-
   treeSelEvent(type, arg) {
     const { rootStore } = this.props;
-    console.log("treeSelEvent: ", type, arg);
+    //console.log("treeSelEvent: ", type, arg);
     switch (type) {
       case "change": {
-        console.log("treeSelEvent: ", arg.value);
+        //console.log("treeSelEvent: ", arg.value);
         Util.traverseTree(this.tree, item => {
           item.checked = false;
         });
@@ -253,10 +231,8 @@ class Show extends React.Component {
         if(item) {
           item.checked = true;
           this.state.node = item.value;
-          //  this.tree = rootStore.getItem(this.state.node, makeItemToOption());
           this.selectNode(item);
         }
-        //rootStore.setState({ selected: arg.value });
         break;
       }
       default: {
@@ -267,7 +243,7 @@ class Show extends React.Component {
 
   handleClick = event => {
     const { nativeEvent } = event;
-    console.log("handleClick", event.buttons, nativeEvent.buttons, nativeEvent);
+    //console.log("handleClick", event.buttons, nativeEvent.buttons, nativeEvent);
     let e = event.currentTarget;
 
     if(this.element === e) {
@@ -283,7 +259,7 @@ class Show extends React.Component {
 
     Element.findAll(".tile").forEach(e => {
       if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
-      /*    e.style.setProperty("transition", "transform 0.2s ease-in");*/
+      
       e.style.setProperty("transform", "none");
     });
     while(e.parentElement && !e.classList.contains("tile")) {
@@ -298,10 +274,10 @@ class Show extends React.Component {
     let rect2 = Element.rect("#item-grid");
     let lrect = Element.rect(".show-layout2");
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
-    //console.log("handleClick:\nrect: ", rect.toString(), "\npoints: ", PointList.toString(points), "\nrect2: ", rect2.toString(), "\npoints2: ", PointList.toString(points2));
+    
     var trn = affineFit(points, points2);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
-    console.log("matrix fromTriangles: ", matrix);
+    //console.log("matrix fromTriangles: ", matrix);
 
     var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
     var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
@@ -316,7 +292,7 @@ class Show extends React.Component {
     this.speed = distance * 0.002;
 
     var gm = Matrix.init_translate(t.x, t.y);
-    console.log("translation:  ", t);
+    //console.log("translation:  ", t);
 
     var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
@@ -325,81 +301,35 @@ class Show extends React.Component {
     m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2);
     m.xx *= scale[0];
     m.yy *= scale[1];
-    //m = Matrix.scale.apply(Matrix, scale);
-    //console.log("matrix: ", m);
-    var dm = new DOMMatrix();
-
+        var dm = new DOMMatrix();
     dm.translateSelf(t.x, t.y);
     dm.scaleSelf(scale[0], scale[1]);
-
     var dms = dm.toString();
-
-    console.log("b: ", b);
-
-    //  Element.setCSS(back, { opacity: 1 });
-    //  Element.setCSS(back, Rect.toCSS(brect));
-    //    Element.setCSS(back, { left: 0, top: 0, width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
+    //console.log("b: ", b);
     this.element = e;
-
     this.grid = grid;
     e = this.grid;
-
     this.grid.style.setProperty("transform-origin", `${origin.x}px ${origin.y}px`);
     this.grid.style.setProperty("transform", "");
     this.grid.style.setProperty("transition", `transform 0.5s linear`);
-    //    Element.setCSS(this.grid, { /*transformOrigin:  `${origin.x}px ${origin.y}px`, *//*transition: `transform ${this.speed}s ease-in`,*/ transform: "", zIndex: 8 });
-
     var tend = e => {
-      console.log("transition end: ", e.target);
-      console.log("transformOrigin: ", e.target.style.transformOrigin);
-      /* gm.xx *= scale[0];
-    gm.yy *= scale[1];*/
-
-      /*   dm = new DOMMatrix();
-      var t2 = Point.diff(srect.center, rect.center);
-      dm.translateSelf(0, rect.height + rect2.y + window.scrollY);
-
-      dm.translateSelf(t2.x, t2.y);*/
-      //  dm.scaleSelf(scale[0], scale[1]);
-      console.log("dm: ", dm);
-      // var gm2 = Matrix.scale(gm, scale[0], scale[1]);
+      //console.log("transition end: ", e.target);
+      //console.log("transformOrigin: ", e.target.style.transformOrigin);
+      //console.log("dm: ", dm);
       e.target.style.transition = `transform 0.5s ease-out`;
-
-      e.target.style.transform = /*Matrix.toDOMMatrix(gm)*/ dm.toString();
-      /* let back = Element.create("div", {
-        parent: document.body,
-        style: {
-         background: "url(/static/img/tile-background.png) repeat",
-          backgroundSize: "auto 50vmin",
-          zIndex: 8,
-          position: "fixed",
-          ...Rect.toCSS(Element.rect(e.target)),
-          //  transition: 'opacity 1s ease-in-out'
-          transition: "left 0.2s ease-out, top 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out"
-        }
-      });
-      this.back = back;
-      Element.setCSS(back, Rect.toCSS(brect));*/
+      e.target.style.transform =  dm.toString();
       e.target.removeEventListener("transitionend", tend);
     };
-
     e.addEventListener("transitionend", tend);
-    console.log("rect: ", rect);
-
-    /*  back.style.setProperty("opacity", 1);
-   });
-*/
+    //console.log("rect: ", rect);
     e.style.setProperty("transition", `transform ${this.speed} ease-out`);
     e.style.setProperty("transform", dms);
-    // e.style.setProperty("background-color", "white");
     e.style.setProperty("z-index", 9);
-
     if(global.window) {
       window.t = e;
       window.m = m;
     }
   };
-
   render() {
     const { rootStore } = this.props;
     let swipeEvents = {};
@@ -410,19 +340,19 @@ class Show extends React.Component {
     const onImage = event => {
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
-      //console.log("onChange: ", value);
+      
     };
 
     if(global.window) {
       window.addEventListener("resize", event => {
         const { currentTarget, target } = event;
-        //console.log("Resized: ", { currentTarget, target });
+        
       });
     }
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
     const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
-    console.log("Show.render" /*, { tree, items }*/);
+    //console.log("Show.render" );
     return (
       <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent}>
         <Head>
@@ -430,7 +360,7 @@ class Show extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <Tree tree={tree} minWidth={1024} active={this.state.active} /> {/*treeVerify={node => node.children && node.children.length} */}
+        <Tree tree={tree} minWidth={1024} active={this.state.active} /> {}
         <br />
         <br />
         <br />
@@ -452,19 +382,18 @@ class Show extends React.Component {
             ) : (
               undefined
             )}
-            {/*          <img src={"/static/img/test.svg"} />
-             */}
+            {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
                 {items.map(item => {
-                  // console.log("item: ", item);
+                  
                   const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                   const haveImage = photo_id >= 0;
                   let photo = haveImage ? item.photos[0].photo : null;
                   const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
-                  //    console.log("photo: ", photo);
+                  
                   let { data, name, parent, type, children, users } = item;
                   try {
                     data = item.data && item.data.length && JSON.parse(item.data);
@@ -472,13 +401,13 @@ class Show extends React.Component {
                     data = item.data;
                   }
                   if(typeof data != "object" || data === null) data = {};
-                  //        console.log("data: ", data);
+                  
                   return (
                     <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                       <SizedAspectRatioBox
                         style={{
                           position: "relative",
-                          // border: "1px solid black",
+                          
                           boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
                           overflow: "hidden"
                         }}

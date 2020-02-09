@@ -65,6 +65,7 @@
     "time-span-format": "^1.0.1",
     "tims": "^1.0.4",
     "transformation-matrix": "^2.2.0",
+    "uncomment": "^0.3.0",
     "watchpack": "2.0.0-beta.10",
     "webpack": "^4"
   },
