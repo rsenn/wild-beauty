@@ -84,11 +84,7 @@ export function createGraph(svg) {
 
       Rect.align(nbb, client, Align.CENTER | Align.MIDDLE);
       console.log("nbb:", nbb);
-      SVG.create(
-        "circle",
-        { cx: rbb.center.x, cy: rbb.center.y, r: 30, stroke: "#f00", strokeWidth: 2, fill: "none" },
-        svg
-      );
+      SVG.create("circle", { cx: rbb.center.x, cy: rbb.center.y, r: 30, stroke: "#f00", strokeWidth: 2, fill: "none" }, svg);
     },
     onUpdateNode: (node, i) => {
       if(!node.element) {
@@ -128,8 +124,7 @@ export function createGraph(svg) {
     },
     onUpdateEdge: (edge, i) => {
       const { x1, y1, x2, y2 } = edge;
-      if(!edge.element)
-        edge.element = SVG.create("line", { id: `edge-${i}`, x1, y1, x2, y2, stroke: "#000", strokeWidth }, svg);
+      if(!edge.element) edge.element = SVG.create("line", { id: `edge-${i}`, x1, y1, x2, y2, stroke: "#000", strokeWidth }, svg);
       else Element.attr(edge.element, { x1, y1, x2, y2 });
     }
   });
@@ -265,11 +260,7 @@ class Show extends React.Component {
 
   constructor(props) {
     super(props);
-    this.api = getAPI(
-      global.window && /192\.168/.test(window.location.href)
-        ? "http://wild-beauty.herokuapp.com/v1/graphql"
-        : "/v1/graphql"
-    );
+    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
     const { rootStore } = this.props;
     if(global.window) {
       window.api = this.api;
@@ -461,8 +452,7 @@ class Show extends React.Component {
     }
     this.state.currentItem = parseInt(id);
     Element.findAll(".tile").forEach(e => {
-      if(e !== event.currentTarget)
-        Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
+      if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
       e.style.setProperty("transform", "none");
     });
     while(e.parentElement && !e.classList.contains("tile")) {
@@ -545,12 +535,7 @@ class Show extends React.Component {
     const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
     console.log("Show.render");
     return (
-      <div
-        className={"page-layout"}
-        onMouseMove={this.mouseEvent}
-        onMouseDown={this.mouseEvent}
-        onTransitionEnd={this.handleTransitionEnd}
-      >
+      <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
         <Head>
           <title>Show</title>
           <link rel="icon" href="/favicon.ico" />
@@ -625,9 +610,7 @@ class Show extends React.Component {
                           style={{
                             position: "absolute",
                             padding: "2px",
-                            background: haveImage
-                              ? "none"
-                              : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                            background: haveImage ? "none" : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
                             textAlign: "left",
                             top: "0px",
                             left: "0px",
@@ -655,9 +638,7 @@ class Show extends React.Component {
                               fontSize: "16px"
                             }}
                           >
-                            {[...Object.entries(data)]
-                              .map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`))
-                              .join("\n")}
+                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
                           </pre>
                         </div>
                       </SizedAspectRatioBox>
