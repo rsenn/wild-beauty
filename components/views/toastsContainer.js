@@ -26,8 +26,7 @@ export const ToastsContainer = inject("rootStore")(
       enter: { opacity: 1 },
       leave: { opacity: 0 }
     });*/
-    let toasts =
-      rootStore.toasts.length > 0 ? Util.range(rootStore.toasts.length - 1, 0).map(i => rootStore.toasts[i]) : [];
+    let toasts = rootStore.toasts.length > 0 ? Util.range(rootStore.toasts.length - 1, 0).map(i => rootStore.toasts[i]) : [];
 
     console.log("toasts: ", toasts);
     return (

@@ -2,15 +2,12 @@ import React, { Component } from "react";
 import { Node, Element } from "../utils/dom.js";
 
 export const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")]
-    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
-    .filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
 export const containsClass = className => {
-  return e =>
-    [...Node.parents(e)].some(item => item && item.classList && item.classList.contains(className || "layer"));
+  return e => [...Node.parents(e)].some(item => item && item.classList && item.classList.contains(className || "layer"));
 };
 
 export const defaultTouchAction = (event, e) => {
@@ -70,11 +67,7 @@ export const DrawCallback = svgRef => ({
 
     const f = svgRef().factory;
     if(f) {
-      this.g = f(
-        "g",
-        { stroke: "#ff0", fill: "none", strokeWidth: 8, transform: `translate(${client.x}, ${client.y})` },
-        svgRef().svg
-      );
+      this.g = f("g", { stroke: "#ff0", fill: "none", strokeWidth: 8, transform: `translate(${client.x}, ${client.y})` }, svgRef().svg);
       this.path = f("path", { d: "", style: "paint-order:markers stroke fill" }, this.g);
       this.pathData = `M${x},${y}`;
       page.path = this.path;

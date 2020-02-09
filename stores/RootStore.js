@@ -219,10 +219,7 @@ export class RootStore extends Queries {
       idMap.push(item.id);
       if(typeof item == "object") {
         let { parent_id } = item;
-        if(item.children && item.children.length)
-          item.children = item.children
-            .map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null))
-            .filter(c => c !== null);
+        if(item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null)).filter(c => c !== null);
         else item.children = [];
       }
     }
@@ -249,9 +246,7 @@ export class RootStore extends Queries {
     if(item) {
       let { name, id } = item;
       if(!name) name = `[${id}]`;
-      let children = [...this.items.values()]
-        .filter(child => child.parent && child.parent.id == id)
-        .map(child => this.getHierarchy(child, fn));
+      let children = [...this.items.values()].filter(child => child.parent && child.parent.id == id).map(child => this.getHierarchy(child, fn));
       let ret = { name };
       if(children && children.length > 0) ret.children = children;
 

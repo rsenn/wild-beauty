@@ -10,10 +10,8 @@ export const Layout = ({ toastsClick, ...props }) => (
         <title>New</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Nav>
-        {/*  {global.window ? window.site.label(props) : undefined} -{" "}
-      {global.window ? window.site.description(props) : undefined}*/}
-      </Nav>
+      <Nav>{/*  {global.window ? window.site.label(props) : undefined} -{" "}
+      {global.window ? window.site.description(props) : undefined}*/}</Nav>
       <div className={"content-layout"}>{props.children}</div>
     </div>
     <ToastsContainer onClick={toastsClick} />

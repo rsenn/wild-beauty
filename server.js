@@ -25,6 +25,8 @@ const MemoryStream = require("memory-stream");
 const stream = require("stream");
 const Alea = require("./utils/alea.js");
 const Readable = stream.Readable;
+const getColors = require("get-image-colors");
+const tempfile = require("tempfile");
 
 util.inspect.defaultOptions.colors = true;
 util.inspect.defaultOptions.depth = 10;
@@ -371,6 +373,7 @@ if (!dev && cluster.isMaster) {
           const file = item[1];
           //console.log(`item: `, item);
           //const data = ;
+
           let props = await sharp(file.data).metadata(); // jpeg.jpegProps(file.data);
           //console.log(`props: `, props);
           let { width, height, aspect } = props || {};
@@ -419,12 +422,32 @@ if (!dev && cluster.isMaster) {
             inputStream.pipe(transformer).pipe(outputStream);
             await finished(outputStream);
             let newData = outputStream.buffer[0];
+
+
+            inputStream = bufferToStream(outputStream.buffer);
+            transformer = sharp()
+              .png({})
+              .resize(newDimensions)
+              .on("info", function(info) {
+                console.log("Image height is " + info.height);
+              });
+            outputStream = fs.createWriteStream("temp.png", "w+");
+
+            inputStream.pipe(transformer).pipe(outputStream);
+
+
+            getColors("temp.png", "image/png").then(colors => {
+              console.log("image colors: ", colors);
+              // `colors` is an array of color objects
+            });
+
             //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
             //console.log("newData.length: ", newData.length);
             file.data = newData;
             props = jpeg.jpegProps(file.data);
             width = newDimensions.width ? newDimensions.width : props.width;
             height = newDimensions.height ? newDimensions.height : props.height;
+
             //console.log(`new Image props: `, props);
           }
           /*.resize*/

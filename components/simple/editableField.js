@@ -4,29 +4,8 @@ import { useEditableState } from "react-editable-hooks";
 import { trkl } from "../../utils/trkl.js";
 import Util from "../../utils/util.js";
 
-export const EditableField = ({
-  options,
-  key,
-  className,
-  style,
-  multiline = false,
-  wrapFlex = true,
-  mame,
-  onCreateName,
-  onNameChanged,
-  value,
-  onValueChanged
-}) => {
-  const {
-    onEditBegin,
-    onEditConfirm,
-    onEditCancel,
-    isEditing,
-    editValue,
-    setEditValue,
-    useDraft,
-    hasDraft
-  } = useEditableState({
+export const EditableField = ({ options, key, className, style, multiline = false, wrapFlex = true, mame, onCreateName, onNameChanged, value, onValueChanged }) => {
+  const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
     value,
     onValueChanged,
     localStorageKey: key || "editable"
@@ -136,10 +115,7 @@ export const EditableField = ({
         />
       ) : (
         <div className={classNames("editable-field-name", "editable-field-name-noedit", className + "-name")}>
-          <div className={classNames("editable-field-name-inner", "editable-field-name-noedit-inner")}>
-            {" "}
-            {name.label}
-          </div>
+          <div className={classNames("editable-field-name-inner", "editable-field-name-noedit-inner")}> {name.label}</div>
         </div>
       )}
 
