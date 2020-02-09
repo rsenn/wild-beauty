@@ -48,8 +48,7 @@ class New extends React.Component {
       images.forEach(item => RootStore.newImage(item));
       const { url, query, body, route } = req || {};
 
-
-console.log("New.getInitialProps", { images });
+      console.log("New.getInitialProps", { url });
     }
     return { images };
   }

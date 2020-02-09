@@ -20,7 +20,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     if(typeof res == "string") res = JSON.parse(res);
     while((await res.data) !== undefined) res = await res.data;
     //console.log("res: ", res);
-    if(res.errors &&  typeof(res.errors) == 'object' && res.errors[0]) {
+    if(res.errors && typeof res.errors == "object" && res.errors[0]) {
       console.error("res.errors: ", res.errors, query.substring(0, 100) + "...");
       //  console.error("query: ", query);
       throw Error(res.errors[0].message);

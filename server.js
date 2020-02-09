@@ -403,7 +403,7 @@ if (!dev && cluster.isMaster) {
             if(!newDimensions.width) delete newDimensions.width;
             if(!newDimensions.height) delete newDimensions.height;
             //console.log(`newDimensions `, newDimensions);
-            const transformer = sharp()
+            let transformer = sharp()
               .jpeg({
                 quality: 95 /*,
               chromaSubsampling: "4:4:4"*/
@@ -412,9 +412,9 @@ if (!dev && cluster.isMaster) {
               .on("info", function(info) {
                 //console.log("Image height is " + info.height);
               });
-            var inputStream = bufferToStream(file.data);
+            var inputStream = bufferToStream(Buffer.from(file.data));
             var outputStream = new MemoryStream();
-            const finished = util.promisify(stream.finished);
+            let finished = util.promisify(stream.finished);
             outputStream.on("finish", () => {
               //console.log("outputStream: ", outputStream.buffer);
             });
@@ -423,18 +423,19 @@ if (!dev && cluster.isMaster) {
             await finished(outputStream);
             let newData = outputStream.buffer[0];
 
-
-            inputStream = bufferToStream(outputStream.buffer);
+            inputStream = bufferToStream(Buffer.from(outputStream.buffer));
             transformer = sharp()
-              .png({})
+              .png({ palette: true, colours: 256, force: true })
               .resize(newDimensions)
               .on("info", function(info) {
                 console.log("Image height is " + info.height);
               });
-            outputStream = fs.createWriteStream("temp.png", "w+");
+            outputStream = new MemoryStream();
+
+            let fileStream = fs.createWriteStream("temp.png");
 
             inputStream.pipe(transformer).pipe(outputStream);
-
+            inputStream.pipe(transformer).pipe(fileStream);
 
             getColors("temp.png", "image/png").then(colors => {
               console.log("image colors: ", colors);
@@ -453,10 +454,10 @@ if (!dev && cluster.isMaster) {
           /*.resize*/
           let data = file.data.toString("base64");
           let word = (file.data[0] << 8) + file.data[1];
-          const { depth, channels } = props;
+          let { depth, channels } = props;
           let reply = await API.insert("photos", { original_name: `"${file.name}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
           //console.log("API upload photo: ", reply && reply.returning ? reply.returning : reply);
-          const { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
+          let { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
           //console.log("API upload photo: ", word.toString(16), { affected_rows, props });
           if(returning && returning.forEach) returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
         }

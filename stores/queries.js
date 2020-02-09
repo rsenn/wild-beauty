@@ -5,9 +5,9 @@ export class Queries {
   api = getAPI();
 
   async fetchImages(where = {}) {
-    console.log("⇒ images ", { where });
+    //console.log("⇒ images ", { where });
     let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], { where });
-    console.log("⇐ images =", response);
+    //console.log("⇐ images =", response);
     return response;
   }
   /*
