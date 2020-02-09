@@ -40,7 +40,6 @@ const removeParent = (element, pred = e => true) => {
 };
 
 export function createGraph(svg) {
-  
   let d = Element.create("defs", {}, svg);
   let lg = Element.create("linearGradient", { id: "lg1", x1: 0, y1: 0, x2: 0, y2: 100, spreadMethod: "pad" }, d);
   Element.create("stop", { offset: 0, stopColor: "#00cc00", stopOpacity: 1 }, lg);
@@ -60,20 +59,18 @@ export function createGraph(svg) {
       let client = Element.rect(svg.parentElement);
       let trbl = new TRBL(50, 20, 50, 20);
       let aspect = bb.aspect();
-      
+
       client = client.inset(200);
-      
+
       let m = Matrix.getAffineTransform(bb, client);
-      
-      
+
       if(m.xx > m.yy) m.scale(m.yy / m.xx, 1);
       let t = m.toSVG();
       Element.attr(svg, { transform: t });
       bb = new Rect(svg.getBBox());
       let gcenter = bb.center;
       let move = Point.diff(Element.rect(svg.parentElement).center, gcenter);
-      
-      
+
       m.translate(move.x / m.xx, 0);
       Element.attr(svg, { transform: m.toSVG() });
       t = ` translate(${move.x},${move.y}) ` + t;
@@ -88,17 +85,21 @@ export function createGraph(svg) {
     },
     onUpdateNode: (node, i) => {
       if(!node.element) {
-        
-        node.element = SVG.create("g", {
-          id: `node-${i}`, 
+        node.element = SVG.create(
+          "g",
+          {
+            id: `node-${i}`,
             transform: `translate(${node.x},${node.y})`,
             fill: "#00f",
             stroke: "#000",
             strokeWidth: 1
-          }, svg
+          },
+          svg
         );
-        
-        SVG.create("rect", {
+
+        SVG.create(
+          "rect",
+          {
             x: -16,
             y: -17,
             width: 32,
@@ -108,17 +109,23 @@ export function createGraph(svg) {
             fill: "#ffdd00",
             stroke: "#000",
             strokeWidth
-          }, node.element
+          },
+          node.element
         );
-        
-        SVG.create("tspan", {alignmentBaseline: "middle", text: node.label },
-          SVG.create("text", {
-            fontSize: 10,
-            fill: "#000",
-            stroke: "none",
-                    textAnchor: "middle",
-          }, node.element
-        )
+
+        SVG.create(
+          "tspan",
+          { alignmentBaseline: "middle", text: node.label },
+          SVG.create(
+            "text",
+            {
+              fontSize: 10,
+              fill: "#000",
+              stroke: "none",
+              textAnchor: "middle"
+            },
+            node.element
+          )
         );
       } else Element.attr(node.element, { transform: `translate(${node.x},${node.y})` });
     },
@@ -129,11 +136,72 @@ export function createGraph(svg) {
     }
   });
 
-  
-  var hier = {name: "[1]", children: [{ name: "[41]", size: 10 }, { name: "org", size: 10 }, { name: "[57]", size: 10 }, { name: "[58]", size: 10 }, { name: "[59]", size: 10 }, { name: "[60]", size: 10 }, { name: "[61]", size: 10 }, { name: "[62]", size: 10 }, {name: "objects", children: [{name: "electronics", children: [{ name: "[119]", size: 10 }, { name: "[120]", size: 10 }, { name: "[121]", size: 10 }, { name: "[122]", size: 10 }, { name: "[123]", size: 10 }, { name: "[124]", size: 10 }, {name: "pic", children: [{ name: "lc-meter", size: 10 }, { name: "rgb-led", size: 10 }, { name: "picstick-25k50", size: 10 } ] }, { name: "Audio", size: 10 }, { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] } ] }, {name: "boxes", children: [{ name: "[99]", size: 10 }, { name: "[103]", size: 10 }, { name: "[98]", size: 10 }, { name: "[86]", size: 10 }, { name: "Test", size: 10 } ] }, { name: "bags", children: [{ name: "[64]", size: 10 }] } ] }, {name: "subjects", children: [{name: "[89]", children: [{ name: "[105]", size: 10 }, { name: "Roman", size: 10 } ] }, { name: "groups", size: 10 } ] } ] };
+  var hier = {
+    name: "[1]",
+    children: [
+      { name: "[41]", size: 10 },
+      { name: "org", size: 10 },
+      { name: "[57]", size: 10 },
+      { name: "[58]", size: 10 },
+      { name: "[59]", size: 10 },
+      { name: "[60]", size: 10 },
+      { name: "[61]", size: 10 },
+      { name: "[62]", size: 10 },
+      {
+        name: "objects",
+        children: [
+          {
+            name: "electronics",
+            children: [
+              { name: "[119]", size: 10 },
+              { name: "[120]", size: 10 },
+              { name: "[121]", size: 10 },
+              { name: "[122]", size: 10 },
+              { name: "[123]", size: 10 },
+              { name: "[124]", size: 10 },
+              {
+                name: "pic",
+                children: [
+                  { name: "lc-meter", size: 10 },
+                  { name: "rgb-led", size: 10 },
+                  { name: "picstick-25k50", size: 10 }
+                ]
+              },
+              { name: "Audio", size: 10 },
+              { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] }
+            ]
+          },
+          {
+            name: "boxes",
+            children: [
+              { name: "[99]", size: 10 },
+              { name: "[103]", size: 10 },
+              { name: "[98]", size: 10 },
+              { name: "[86]", size: 10 },
+              { name: "Test", size: 10 }
+            ]
+          },
+          { name: "bags", children: [{ name: "[64]", size: 10 }] }
+        ]
+      },
+      {
+        name: "subjects",
+        children: [
+          {
+            name: "[89]",
+            children: [
+              { name: "[105]", size: 10 },
+              { name: "Roman", size: 10 }
+            ]
+          },
+          { name: "groups", size: 10 }
+        ]
+      }
+    ]
+  };
 
   treeToGraph(g, hier);
-  
+
   return g;
 }
 
@@ -184,7 +252,7 @@ class TreePage extends React.Component {
       const name = params.id;
       if(isNaN(id) || typeof id != "number") id = -1;
       const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
-      
+
       let response = await TreePage.API(q);
       items = response.items || [];
       console.log("item: ", items[0]);
@@ -222,25 +290,24 @@ class TreePage extends React.Component {
     let a = new Rect(10, 10, 100, 50);
     let b = new Rect(200, 200, 200, 100);
     let bc = b.center;
-    
+
     let r = new Matrix();
-    
+
     r.translate(bc.x, bc.y);
-    
+
     r.rotate((-15 * Math.PI) / 180);
     r.translate(-bc.x, -bc.y);
-    
+
     let dr = null;
     if(global.window) {
       dr = new DOMMatrix();
       dr.translateSelf(bc.x, bc.y);
-      
+
       dr.rotateSelf(-15);
-      
+
       dr.translateSelf(-bc.x, -bc.y);
     }
-    
-    
+
     let m = Matrix.getAffineTransform(a, b);
     let c = new Rect(b);
     let c2 = c.toPoints();
@@ -249,11 +316,9 @@ class TreePage extends React.Component {
     this.b = b;
     this.c = c;
     this.a = a;
-    
 
     if(Util.isBrowser() && !this.g) {
       this.g = createGraph(this.svg());
-      
     }
   }
 
@@ -264,7 +329,6 @@ class TreePage extends React.Component {
         tagRemove.addEventListener("click", e => {
           e.preventDefault();
           Timer.once(100, () => {
-            
             Util.traverseTree(this.tree, node => {
               node.checked = false;
             });
@@ -285,9 +349,7 @@ class TreePage extends React.Component {
     this.checkTagRemove();
   }
 
-  touchEvent = event => {
-    
-  };
+  touchEvent = event => {};
 
   mouseEvent = event => {
     const { target, nativeEvent } = event;
@@ -312,7 +374,7 @@ class TreePage extends React.Component {
       }
       if(elem && elem.style) {
         const t = ` scale(1.4,1.4)`;
-        
+
         var parent = elem.parentElement;
         elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
         elem.style.setProperty("transform", t);
@@ -321,10 +383,10 @@ class TreePage extends React.Component {
       }
     } else if(type.endsWith("down")) {
       var elem = r[0];
-      
+
       if(elem) {
         const id = getId(elem.parentElement);
-        
+
         this.setState({ active: id });
       }
     }
@@ -334,16 +396,15 @@ class TreePage extends React.Component {
   selectNode(item) {
     var children = Util.flatTree(item);
     var ids = children.map(child => child.id);
-    
+
     this.setState({ parentIds: ids });
   }
 
   treeSelEvent(type, arg) {
     const { rootStore } = this.props;
-    
+
     switch (type) {
       case "change": {
-        
         Util.traverseTree(this.tree, item => {
           item.checked = false;
         });
@@ -363,7 +424,7 @@ class TreePage extends React.Component {
 
   handleTransitionEnd = event => {
     const { nativeEvent, target, currentTarget } = event;
-    
+
     if(this.element) {
       insertParent(this.element, Element.create("a", { href: `/show/${this.state.currentItem}` }));
     } else if(this.previousElement) {
@@ -375,7 +436,7 @@ class TreePage extends React.Component {
     const { nativeEvent, target, currentTarget } = event;
     let e = event.currentTarget;
     let id = Element.attr(currentTarget, "id").replace(/^item-/, "");
-    
+
     if(this.element === e) {
       this.grid.style.transition = `transform ${this.speed}s ease-in-out`;
       this.grid.style.transform = "";
@@ -404,8 +465,7 @@ class TreePage extends React.Component {
     let rect2 = Element.rect("#item-grid");
     let lrect = Element.rect(".show-layout2");
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
-    
-    
+
     var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
     var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
     var pt = new Point(srect.center);
@@ -415,7 +475,7 @@ class TreePage extends React.Component {
     var distance = Math.sqrt(t.x * t.x + t.y * t.y);
     this.speed = distance * 0.002;
     var gm = Matrix.init_translate(t.x, t.y);
-    
+
     var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
@@ -427,7 +487,7 @@ class TreePage extends React.Component {
     dm.translateSelf(t.x, t.y);
     dm.scaleSelf(scale[0], scale[1]);
     var dms = dm.toString();
-    
+
     this.element = e;
     this.grid = grid;
     e = this.grid;
@@ -435,15 +495,12 @@ class TreePage extends React.Component {
     this.grid.style.setProperty("transform", "");
     this.grid.style.setProperty("transition", `transform 0.5s linear`);
     var tend = e => {
-      
-      
-      
       e.target.style.transition = `transform 0.5s ease-out`;
       e.target.style.transform = dm.toString();
       e.target.removeEventListener("transitionend", tend);
     };
     e.addEventListener("transitionend", tend);
-    
+
     e.style.setProperty("transition", `transform ${this.speed} ease-out`);
     e.style.setProperty("transform", dms);
     e.style.setProperty("z-index", 9);

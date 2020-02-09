@@ -53,7 +53,7 @@ const makeItemToOption = selected => item => {
   if(children && children.length) obj.children = children;
   if(label.startsWith("null(")) return null;
   if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
-  
+
   return obj;
 };
 
@@ -84,7 +84,7 @@ class Show extends React.Component {
     const { query, params } = (ctx && ctx.req) || {};
     //console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
-    
+
     let items;
 
     if(params && params.id !== undefined) {
@@ -95,15 +95,14 @@ class Show extends React.Component {
       //console.log("query: ", q);
       let response = await Show.API(q);
       items = response.items || [];
-      console.log("items: ", items);
     } else {
       items = await Show.API.list("items", Show.fields);
     }
-    
-    
+
     items = items.sort((a, b) => a.id - b.id);
-    RootStore.items.clear();
-    
+    console.log("items: ", items);
+    if(typeof RootStore.items == "object" && RootStore.items.clear) RootStore.items.clear();
+
     return { items, params };
   }
 
@@ -111,7 +110,8 @@ class Show extends React.Component {
     super(props);
     this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
     const { rootStore } = this.props;
-    if(global.window) {      window.api = this.api;
+    if(global.window) {
+      window.api = this.api;
       window.page = this;
       window.rs = rootStore;
       window.stores = getOrCreateStore();
@@ -128,8 +128,11 @@ class Show extends React.Component {
       var item = findInTree(this.tree, "Objects");
       item.checked = true;
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
+
+      for(let node in Util.walkTree(this.tree)) {
+        console.log("walkTree: ", node);
+      }
     }
-    
   }
 
   checkTagRemove() {
@@ -190,14 +193,13 @@ class Show extends React.Component {
         //console.log("Mouse event: ", t);
 
         var parent = elem.parentElement;
-        
+
         elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
 
         elem.style.setProperty("transform", t);
         this.prevElem = elem;
         hover = getId(elem);
       }
-      
     } else if(type.endsWith("down")) {
       var elem = r[0];
 
@@ -259,7 +261,7 @@ class Show extends React.Component {
 
     Element.findAll(".tile").forEach(e => {
       if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
-      
+
       e.style.setProperty("transform", "none");
     });
     while(e.parentElement && !e.classList.contains("tile")) {
@@ -274,7 +276,7 @@ class Show extends React.Component {
     let rect2 = Element.rect("#item-grid");
     let lrect = Element.rect(".show-layout2");
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
-    
+
     var trn = affineFit(points, points2);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
     //console.log("matrix fromTriangles: ", matrix);
@@ -301,7 +303,7 @@ class Show extends React.Component {
     m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2);
     m.xx *= scale[0];
     m.yy *= scale[1];
-        var dm = new DOMMatrix();
+    var dm = new DOMMatrix();
     dm.translateSelf(t.x, t.y);
     dm.scaleSelf(scale[0], scale[1]);
     var dms = dm.toString();
@@ -317,7 +319,7 @@ class Show extends React.Component {
       //console.log("transformOrigin: ", e.target.style.transformOrigin);
       //console.log("dm: ", dm);
       e.target.style.transition = `transform 0.5s ease-out`;
-      e.target.style.transform =  dm.toString();
+      e.target.style.transform = dm.toString();
       e.target.removeEventListener("transitionend", tend);
     };
     e.addEventListener("transitionend", tend);
@@ -340,13 +342,11 @@ class Show extends React.Component {
     const onImage = event => {
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
-      
     };
 
     if(global.window) {
       window.addEventListener("resize", event => {
         const { currentTarget, target } = event;
-        
       });
     }
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
@@ -386,14 +386,13 @@ class Show extends React.Component {
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
                 {items.map(item => {
-                  
                   const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                   const haveImage = photo_id >= 0;
                   let photo = haveImage ? item.photos[0].photo : null;
                   const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
-                  
+
                   let { data, name, parent, type, children, users } = item;
                   try {
                     data = item.data && item.data.length && JSON.parse(item.data);
@@ -401,13 +400,13 @@ class Show extends React.Component {
                     data = item.data;
                   }
                   if(typeof data != "object" || data === null) data = {};
-                  
+
                   return (
                     <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                       <SizedAspectRatioBox
                         style={{
                           position: "relative",
-                          
+
                           boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
                           overflow: "hidden"
                         }}

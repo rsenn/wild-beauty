@@ -64,7 +64,7 @@ class New extends React.Component {
       window.page = this;
       window.rs = rootStore;
     }
-  
+
     rootStore.state.step = 1;
   }
 
