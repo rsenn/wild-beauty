@@ -426,16 +426,22 @@ if (!dev && cluster.isMaster) {
 
             inputStream = bufferToStream(outputStream.buffer);
             transformer = sharp()
-              .png({})
+              .png({ palette: true, colours: 256, force: true })
               .resize(newDimensions)
               .on("info", function(info) {
                 console.log("Image height is " + info.height);
               });
-            outputStream = fs.createWriteStream("temp.png", "w+");
+            outputStream =  new MemoryStream();
+
+
+    let fileStream = fs.createWriteStream("temp.png", "w+");
 
             inputStream.pipe(transformer).pipe(outputStream);
+            inputStream.pipe(transformer).pipe(fileStream);
 
 
+
+        
             getColors("temp.png", "image/png").then(colors => {
               console.log("image colors: ", colors);
               // `colors` is an array of color objects
