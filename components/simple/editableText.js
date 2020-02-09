@@ -4,16 +4,7 @@ import classNames from "classnames";
 import { trkl } from "../../utils/trkl.js";
 
 export const EditableText = ({ className, style, multiline = false, wrapFlex = true, value, onValueChanged }) => {
-  const {
-    onEditBegin,
-    onEditConfirm,
-    onEditCancel,
-    isEditing,
-    editValue,
-    setEditValue,
-    useDraft,
-    hasDraft
-  } = useEditableState({
+  const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
     value,
     onValueChanged,
     localStorageKey: "editable"

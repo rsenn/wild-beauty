@@ -440,6 +440,11 @@ if (!dev && cluster.isMaster) {
 
             inputStream.pipe(transformer).pipe(outputStream);
 
+            getColors(outputStream.buffer, "image/png").then(colors => {
+              console.log("image colors: ", colors);
+              // `colors` is an array of color objects
+            });
+
             //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
             //console.log("newData.length: ", newData.length);
             file.data = newData;

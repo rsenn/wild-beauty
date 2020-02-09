@@ -73,7 +73,7 @@ export class New extends React.Component {
       image = parseInt(image);
       if(rootStore.state.image != image) rootStore.setState({ image });
     }
-      if(global.window) {
+    if(global.window) {
       const moveImage = (event, e) => {
         const orientation = e.getAttribute("orientation");
         let offset = orientation == "landscape" ? event.x : event.y;
@@ -185,11 +185,7 @@ export class New extends React.Component {
         <NeedAuth>
           <div>
             <a href={`/new/${query.photo_id}`}>New item {query.photo_id}</a>
-            {this.state.tree ? (
-              <ItemEditor tree={this.state.tree} makeTreeSelEvent={makeTreeSelEvent} image={img} />
-            ) : (
-              undefined
-            )}
+            {this.state.tree ? <ItemEditor tree={this.state.tree} makeTreeSelEvent={makeTreeSelEvent} image={img} /> : undefined}
           </div>
         </NeedAuth>
       </Layout>

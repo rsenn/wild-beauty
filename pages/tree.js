@@ -216,16 +216,7 @@ class TreePage extends React.Component {
     currentItem: null
   };
   static API = getAPI();
-  static fields = [
-    "id",
-    "type",
-    "parent_id",
-    "parent { id type data }",
-    "children { id type data }",
-    "data",
-    "photos { photo { id width height filesize original_name } }",
-    "users { user { id username last_seen } }"
-  ];
+  static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize original_name } }", "users { user { id username last_seen } }"];
 
   svgRef = trkl();
 
@@ -545,16 +536,7 @@ class TreePage extends React.Component {
         ) : (
           <div className={"show-layout2"}>
             {tree ? (
-              <DropdownTreeSelect
-                data={tree}
-                onChange={makeTreeSelEvent("change")}
-                onNodeToggle={makeTreeSelEvent("node-toggle")}
-                onFocus={makeTreeSelEvent("focus")}
-                onBlur={makeTreeSelEvent("blur")}
-                className={"dropdown-tree"}
-                mode={"radioSelect"}
-                texts={{ placeholder: "parent item" }}
-              />
+              <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} />
             ) : (
               undefined
             )}

@@ -41,7 +41,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
       .join(", ");
 
     if(objStr.length) objStr = `(${objStr})`;
-    const queryStr = `query List${camelCase} { ${name}${objStr} { ${typeof(fields) == 'string' ? fields : fields.join(" ")} } }`;
+    const queryStr = `query List${camelCase} { ${name}${objStr} { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
     console.log("query: ", queryStr);
     let ret = await this(queryStr);
     if(typeof ret == "object" && ret[name] !== undefined) ret = ret[name];
@@ -53,7 +53,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     // prettier-ignore
     const objStr =    (typeof obj == "string"? `where: ${obj}` : "where: { " + Object.entries(obj) .map(([key, value]) => `${key}: {_eq: ${value}}`) .join(", ") + "}");
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
-    const queryStr = `query Select${camelCase} { ${name}(${objStr}) { ${typeof(fields) == 'string' ? fields : fields.join(" ")} } }`;
+    const queryStr = `query Select${camelCase} { ${name}(${objStr}) { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
     console.log(`query: ${queryStr}`);
 
     let result = this(queryStr);
@@ -96,7 +96,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     __typename
     insert_${name}(objects: { ${objStr} }) {
       affected_rows
-      returning { ${typeof(fields) == 'string' ? fields : fields.join(" ")} }
+      returning { ${typeof fields == "string" ? fields : fields.join(" ")} }
     }
   }`;
 

@@ -28,16 +28,7 @@ class List extends React.Component {
     view: "list"
   };
   /*  static API = getAPI();
-   */ static fields = [
-    "id",
-    "type",
-    "parent_id",
-    "parent { id type data }",
-    "children { id type data }",
-    "data",
-    "photos { photo { id width height filesize original_name } }",
-    "users { user { id username last_seen } }"
-  ];
+   */ static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize original_name } }", "users { user { id username last_seen } }"];
 
   svgRef = trkl();
 
@@ -48,13 +39,9 @@ class List extends React.Component {
     List.api = api;
     let result,
       items = [];
-    result = await List.api(
-      `query MyQuery { items(where: {id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`
-    );
+    result = await List.api(`query MyQuery { items(where: {id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`);
     if(result.items) items = items.concat(result.items);
-    result = await List.api(
-      `query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`
-    );
+    result = await List.api(`query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`);
     if(result.items) items = items.concat(result.items);
     let depth, children;
     return { items, categoryId, depth, children };

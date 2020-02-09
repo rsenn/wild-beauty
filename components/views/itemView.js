@@ -4,16 +4,7 @@ import { toJS } from "mobx";
 import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 
 const ArrowNext = ({ innerFill = "#ffffff", ...props }) => (
-  <svg
-    height="48"
-    id="svg8"
-    width="48"
-    {...props}
-    preserveAspectRatio="xMidYMid meet"
-    version="1.0"
-    viewBox="0 0 47.487945 47.487945"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+  <svg height="48" id="svg8" width="48" {...props} preserveAspectRatio="xMidYMid meet" version="1.0" viewBox="0 0 47.487945 47.487945" xmlns="http://www.w3.org/2000/svg">
     <defs />
     <path
       id="path5290-5-6-6-3"

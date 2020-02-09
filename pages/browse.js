@@ -14,13 +14,9 @@ class Browse extends React.Component {
     Browse.api = api;
     let result,
       items = [];
-    result = await Browse.api(
-      `query MyQuery { items(where: {id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`
-    );
+    result = await Browse.api(`query MyQuery { items(where: {id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`);
     if(result.items) items = items.concat(result.items);
-    result = await Browse.api(
-      `query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`
-    );
+    result = await Browse.api(`query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`);
     if(result.items) items = items.concat(result.items);
     let depth, children;
     return { items, categoryId, depth, children };

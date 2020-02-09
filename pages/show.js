@@ -67,16 +67,7 @@ class Show extends React.Component {
     view: "list"
   };
   static API = getAPI();
-  static fields = [
-    "id",
-    "type",
-    "parent_id",
-    "parent { id type data }",
-    "children { id type data }",
-    "data",
-    "photos { photo { id width height filesize original_name } }",
-    "users { user { id username last_seen } }"
-  ];
+  static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize original_name } }", "users { user { id username last_seen } }"];
 
   svgRef = trkl();
 
@@ -369,16 +360,7 @@ class Show extends React.Component {
         ) : (
           <div className={"show-layout2"}>
             {tree ? (
-              <DropdownTreeSelect
-                data={tree}
-                onChange={makeTreeSelEvent("change")}
-                onNodeToggle={makeTreeSelEvent("node-toggle")}
-                onFocus={makeTreeSelEvent("focus")}
-                onBlur={makeTreeSelEvent("blur")}
-                className={"dropdown-tree"}
-                mode={"radioSelect"}
-                texts={{ placeholder: "parent item" }}
-              />
+              <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} />
             ) : (
               undefined
             )}
@@ -412,17 +394,7 @@ class Show extends React.Component {
                         }}
                         className={"layer gallery-aspect-box"}
                       >
-                        {haveImage ? (
-                          <img
-                            src={path}
-                            width={photo.width}
-                            height={photo.height}
-                            style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }}
-                            className="gallery-image"
-                          />
-                        ) : (
-                          undefined
-                        )}
+                        {haveImage ? <img src={path} width={photo.width} height={photo.height} style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }} className="gallery-image" /> : undefined}
                         <div
                           style={{
                             position: "absolute",
@@ -449,9 +421,7 @@ class Show extends React.Component {
                           {!!name ? `Name: ${name}` : undefined}
                           <br />
                           <br />
-                          <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>
-                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
-                          </pre>
+                          <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>{[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}</pre>
                         </div>
                       </SizedAspectRatioBox>
                     </div>

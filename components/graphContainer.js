@@ -6,7 +6,7 @@ export class GraphContainer extends React.Component {
     const children = this.props.children;
     return (
       // sizeMe doesnt work properly on svg element, so wrap in div
-      <div className="graph-container" style={{ width: "100%", height: "100%", pointerEvents: 'none' }}>
+      <div className="graph-container" style={{ width: "100%", height: "100%", pointerEvents: "none" }}>
         <svg width="100%" height="100%">
           {children}
         </svg>

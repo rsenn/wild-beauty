@@ -34,18 +34,20 @@ class New extends React.Component {
 
   static async getInitialProps({ res, req, err, mobxStore, ...ctx }) {
     const { RootStore } = mobxStore;
+    let token, user_id;
     let images = [];
+    if(ctx && req && req.cookies) {
+      token = req.cookies.token;
+      user_id = req.cookies.user_id;
+      RootStore.auth.token = token;
+      RootStore.auth.user_id = user_id;
+    }
     if(!global.window) {
-      images = await RootStore.fetchImages();
+      images = await RootStore.fetchImages({ user_id });
       images = images.filter(ph => ph.items.length == 0);
       images.forEach(item => RootStore.newImage(item));
       const { url, query, body, route } = req || {};
       //console.log("New.getInitialProps", { images });
-      if(ctx && req && req.cookies) {
-        const { token, user_id } = req.cookies;
-        RootStore.auth.token = token;
-        RootStore.auth.user_id = user_id;
-      }
     }
     return { images };
   }
@@ -107,11 +109,7 @@ class New extends React.Component {
     return (
       <Layout toastsClick={this.handleClick}>
         <NeedAuth>
-          {rootStore.state.image === null ? (
-            <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} />
-          ) : (
-            <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
-          )}
+          {rootStore.state.image === null ? <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}
           {}
           {}
         </NeedAuth>

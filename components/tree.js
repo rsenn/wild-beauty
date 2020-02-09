@@ -80,14 +80,7 @@ function DistributeCircular(arr, dist, set = (i, x, y) => (item.pos = new Point(
 export const SVGText = ({ x, y, yinc = 12, lines }) => {
   const ystart = (-(lines.length - 1) / 2) * yinc;
   return lines.map((line, i) => (
-    <text
-      textAnchor="middle"
-      alignmentBaseline="middle"
-      fontFamily={"Fixed"}
-      fontSize={13}
-      y={y + ystart + i * yinc}
-      x={x}
-    >
+    <text textAnchor="middle" alignmentBaseline="middle" fontFamily={"Fixed"} fontSize={13} y={y + ystart + i * yinc} x={x}>
       {line}
     </text>
   ));
@@ -169,12 +162,7 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true, act
         y: ystart + y
       });
       table[y][x].pos = pt; //new Point(Math.sin(pt.x)*xdist, - Math.cos(pt.y));*/
-      table[y][x].color = new HSLA(
-        (i++ * 360) / n_items,
-        table[y][x].id == active ? 100 : 85,
-        table[y][x].id == active ? 60 : 70,
-        1
-      );
+      table[y][x].color = new HSLA((i++ * 360) / n_items, table[y][x].id == active ? 100 : 85, table[y][x].id == active ? 60 : 70, 1);
       table[y][x].title = splitLines(table[y][x].title, max_chars);
     }
     // xdist *= xdist_mul;
@@ -291,8 +279,7 @@ if(height  < minHeight)
 
           const d = dir(parent.pos, item.pos, radius);
 
-          const a =
-            iy > 1 ? new Point(parent.vector.x1, parent.vector.y1) : new Point(parent.pos.x, parent.pos.y).add(d);
+          const a = iy > 1 ? new Point(parent.vector.x1, parent.vector.y1) : new Point(parent.pos.x, parent.pos.y).add(d);
           const b = new Point(item.pos.x, item.pos.y).add(dir(item.pos, parent.pos, radius));
           const ca = iy > 2 ? parent.vector.pointAt(0.2) : new Point(a.x + d.x * 2, a.y + d.y); //(a.x - b.x) * 0.0, a.y + (b.y - a.y) * 0.5);
           const cb = iy > 1 ? parent.vector.pointAt(0.8) : new Point(b.x - d.x * 2, b.y - d.y);
@@ -302,18 +289,8 @@ if(height  < minHeight)
           return (
             <React.Fragment>
               <path d={`M${a} C ${ca}, ${cb}, ${b}`} stroke={"black"} strokeWidth={W} fill={"none"} />
-              {item.branch && (
-                <circle cx={item.branch.a.x} cy={item.branch.a.y} r={10} fill={"none"} stroke={item.color.toHSL()} />
-              )}
-              {0 && item.vector && (
-                <line
-                  x1={item.vector.x1}
-                  y1={item.vector.y1}
-                  x2={item.vector.x2}
-                  y2={item.vector.y2}
-                  stroke={item.color.toHSL()}
-                />
-              )}
+              {item.branch && <circle cx={item.branch.a.x} cy={item.branch.a.y} r={10} fill={"none"} stroke={item.color.toHSL()} />}
+              {0 && item.vector && <line x1={item.vector.x1} y1={item.vector.y1} x2={item.vector.x2} y2={item.vector.y2} stroke={item.color.toHSL()} />}
               {/*        <circle cx={ca.x} cy={ca.y} r={4} fill={item.color.toHSL()} />
             <circle cx={cb.x} cy={cb.y} r={4} fill={item.color.toHSL()} />*/}
             </React.Fragment>

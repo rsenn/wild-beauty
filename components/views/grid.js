@@ -11,12 +11,7 @@ export const Grid = ({ rows, cols, style, children, className, ...props }) => (
         ...style,
         display: "grid",
         gridAutoRows: "20vh",
-        gridTemplateCols:
-          typeof rows == "number"
-            ? Util.repeat(cols, "" + 100 / cols + "%").join(" ")
-            : cols instanceof Array
-            ? cols.join(" ")
-            : cols
+        gridTemplateCols: typeof rows == "number" ? Util.repeat(cols, "" + 100 / cols + "%").join(" ") : cols instanceof Array ? cols.join(" ") : cols
       }}
     >
       {children}
@@ -31,11 +26,7 @@ export const Grid = ({ rows, cols, style, children, className, ...props }) => (
 );
 
 export const GridItem = ({ col, row, style, children, className, ...props }) => (
-  <div
-    style={{ ...style, gridRow: "" + row, gridCol: "" + col }}
-    className={classNames(className, "grid-item")}
-    {...props}
-  >
+  <div style={{ ...style, gridRow: "" + row, gridCol: "" + col }} className={classNames(className, "grid-item")} {...props}>
     {children}
     <style jsx global>{`
       .grid-item {
