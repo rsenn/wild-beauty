@@ -126,7 +126,7 @@ class Show extends React.Component {
     });
     //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
-    if(this.props.params.id !== undefined) {
+    if(this.props.params && this.props.params.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
     } else if(this.tree) {
