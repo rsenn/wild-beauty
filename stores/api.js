@@ -32,7 +32,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     const camelCase = Util.ucfirst(name);
     //if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const { where, ...options } = opts;
-    console.log("api.list ", { name, fields, where, options });
+    //console.log("api.list ", { name, fields, where, options });
     let objStr;
     // prettier-ignore
     objStr = where     ? (typeof where == "string"? `where: ${where}` : ("where: {"+Object.entries(where) .map(([key, value]) => `${key}: {` + (value === null ? `_is_null: true` : `_eq:${value}`) + `}`) .join(", ") +" }")) : "";
@@ -42,7 +42,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
 
     if(objStr.length) objStr = `(${objStr})`;
     const queryStr = `query List${camelCase} { ${name}${objStr} { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
-    console.log("query: ", queryStr);
+    //console.log("query: ", queryStr);
     let ret = await this(queryStr);
     if(typeof ret == "object" && ret[name] !== undefined) ret = ret[name];
     return ret;
@@ -54,10 +54,10 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     const objStr =    (typeof obj == "string"? `where: ${obj}` : "where: { " + Object.entries(obj) .map(([key, value]) => `${key}: {_eq: ${value}}`) .join(", ") + "}");
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryStr = `query Select${camelCase} { ${name}(${objStr}) { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
-    console.log(`query: ${queryStr}`);
+    //console.log(`query: ${queryStr}`);
 
     let result = this(queryStr);
-    console.log(`result: ${result}`);
+    //console.log(`result: ${result}`);
     return result;
   };
 
@@ -68,7 +68,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryName = `update_${name.replace(/s*$/, "s")}`;
     const queryStr = `mutation ${queryName}{ ${queryName}(${objStr}, ${setStr}) { affected_rows } }`;
-    console.log("query: ", queryStr);
+    //console.log("query: ", queryStr);
 
     let response = await this(queryStr);
     //console.log("response: ", response[queryName]);
@@ -101,7 +101,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
   }`;
 
     let response = await this(queryStr);
-    console.log("response: ", response, "query: ", queryStr);
+    //console.log("response: ", response, "query: ", queryStr);
     return response;
   };
 

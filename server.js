@@ -423,11 +423,6 @@ if (!dev && cluster.isMaster) {
             await finished(outputStream);
             let newData = outputStream.buffer[0];
 
-            let temp = tempfile(".jpg");
-            console.log("temp: ", temp);
-
-            fs.writeSync(temp, outputStream.buffer);
-            fs.closeSync(temp);
 
             inputStream = bufferToStream(outputStream.buffer);
             transformer = sharp()
@@ -436,11 +431,12 @@ if (!dev && cluster.isMaster) {
               .on("info", function(info) {
                 console.log("Image height is " + info.height);
               });
-            outputStream = new MemoryStream();
+            outputStream = fs.createWriteStream("temp.png", "w+");
 
             inputStream.pipe(transformer).pipe(outputStream);
 
-            getColors(outputStream.buffer, "image/png").then(colors => {
+
+            getColors("temp.png", "image/png").then(colors => {
               console.log("image colors: ", colors);
               // `colors` is an array of color objects
             });
