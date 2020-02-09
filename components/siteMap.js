@@ -32,14 +32,14 @@ export const SiteMap = [
     description: () => <Translate value="nav.show_description" />
   },
   {
-    href: "/list",
-    name: "list",
+    href: "/tree",
+    name: "tree",
     label: () => (
       <span>
-        <Translate value="nav.list_name" />
+        <Translate value="nav.tree_name" />
       </span>
     ),
-    description: () => <Translate value="nav.list_description" />
+    description: () => <Translate value="nav.tree_description" />
   },
   {
     href: "/new",

@@ -1,5 +1,6 @@
 import React from "react";
 import Head from "next/head";
+import Link from "next/link";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../utils/alea.js";
 import { Timer, Element } from "../utils/dom.js";
@@ -247,7 +248,7 @@ class Home extends React.Component {
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <div className={"subpage flex-vertical"} style={{ opacity: subpage == 1 ? 1 : 0, display: subpage == 1 ? "flex" : "flex" }}>
+        <div className={"subpage flex-vertical"} style={{ opacity: /*subpage == 1 ?*/ 1 /*: 0*/, display: /* subpage == 1 ? "flex" :*/ "flex" }}>
           <div
             id="t-logo"
             style={{
@@ -261,7 +262,7 @@ class Home extends React.Component {
           {}
         </div>
         <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "block" : "block" }}>
-          <SizeMe>
+          <div>
             {({ size }) => {
               const fontSize = Math.round(size.width / 60);
               const charWidth = fontSize - 1;
@@ -294,21 +295,23 @@ class Home extends React.Component {
                 </div>
               );
             }}
-          </SizeMe>
+          </div>
         </div>
         <div className={"subpage flex-vertical"} style={{ opacity: subpage == 3 ? 1 : 0, display: subpage == 3 ? "flex" : "flex" }}>
           <div className={"time-counter"}>{timespan}</div>
         </div>
-        {subpage > 1 ? (
+        {/*subpage > 1 ? (
           <a className={"button-prev"} href={"#" + (subpage - 1)} onClick={this.handlePrev}>
             <img src={"/static/img/arrow-next.svg"} style={{ transform: "scaleX(-1)" }} />
           </a>
         ) : (
           undefined
-        )}
-        <a className={"button-next"} href={subpage < 2 ? "#" + (subpage + 1) : "/browse"} onClick={subpage >= 2 ? undefined : this.handleNext}>
-          <img src={"/static/img/arrow-next.svg"} />
-        </a>
+        )*/}
+        <Link href={"/browse"}>
+          <a className={"button-next"} onClick={this.handleNext}>
+            <img src={"/static/img/arrow-next.svg"} />
+          </a>
+        </Link>
         <SvgOverlay svgRef={this.svgLayer} />
 
         <style jsx global>{`

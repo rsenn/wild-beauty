@@ -1,70 +1,213 @@
 import React from "react";
 import Head from "next/head";
-import { Element, HSLA, PointList, Point, Rect, Matrix, Timer } from "../utils/dom.js";
+import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align } from "../utils/dom.js";
 import getAPI from "../stores/api.js";
-import Util from "../lib/util.js";
+import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
 import { Tree } from "../components/tree.js";
-import { action, toJS } from "mobx";
+import { action } from "mobx";
 import Nav from "../components/nav.js";
 import { getOrCreateStore } from "../stores/createStore.js";
-import affineFit from "affinefit";
-import { fromTriangles } from "transformation-matrix";
-import { MovementListener, TouchListener } from "../utils/touchHandler.js";
-import { trkl } from "../lib/trkl.js";
+//import { fromTriangles } from "transformation-matrix";
+import { trkl } from "../utils/trkl.js";
+import { Graph, Node, Edge } from "../utils/fd-graph.js";
+import { makeItemToOption, findInTree, walkTree, treeToGraph } from "../stores/functions.js";
+import { lazyInitializer } from "../lib/lazyInitializer.js";
 
 import "../static/css/grid.css";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
-import { SizeMe, withSize } from "react-sizeme";
 
-const RandomColor = () => {
-  const c = HSLA.random();
-  return c.toString();
+const insertParent = (element, newParent) => {
+  const p = element.parentElement;
+  p.removeChild(element);
+  p.appendChild(newParent);
+  newParent.appendChild(element);
 };
 
-const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
-  arr.sort((a, b) => a < b);
-  return arr[0];
-};
+const removeParent = (element, pred = e => true) => {
+  const p = element.parentElement;
+  const pp = p.parentElement;
 
-const findInTree = (tree, value) => {
-  if(tree.value === value || tree.label === value) return tree;
-  if(tree.children) {
-    for(let child of tree.children) {
-      let ret = findInTree(child, value);
-      if(ret !== null) return ret;
-    }
+  if(pred(p)) {
+    pp.removeChild(p);
+    pp.appendChild(element);
   }
-  return null;
 };
 
-const makeItemToOption = selected => item => {
-  let data = item && typeof item.data == "string" && item.data.length > 0 ? JSON.parse(item.data) : item && item.data != null && typeof item.data == "object" ? item.data : {};
-  let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
-  let value = item.id;
-  let children = toJS(item.children);
-  let obj = { label, title: label, id: value, parent_id: item.parent_id, value, expanded: true, checked: selected === value };
-  if(children && children.length) obj.children = children;
-  if(label.startsWith("null(")) return null;
-  if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
-  //if(item.parent_id != -1 && item.parent_id != 1 && item.type !== null && !item.type.endsWith('category')) return null;
-  return obj;
-};
+export function createGraph(svg) {
+  //console.log("createGraph", svg);
+  let d = Element.create("defs", {}, svg);
+  let lg = Element.create("linearGradient", { id: "lg1", x1: 0, y1: 0, x2: 0, y2: 100, spreadMethod: "pad" }, d);
+  Element.create("stop", { offset: 0, stopColor: "#00cc00", stopOpacity: 1 }, lg);
+  Element.create("stop", { offset: 100, stopColor: "#006600", stopOpacity: 1 }, lg);
+
+  svg = SVG.create("g", {}, svg);
+
+  let strokeWidth = 1.1;
+
+  let g = new Graph({
+    origin: new Point(300, 200),
+    gravitate_to_origin: true,
+    spacing: 12,
+    timestep: 300,
+    onRenderGraph: graph => {
+      let bb = new Rect(svg.getBBox()).round();
+      let client = Element.rect(svg.parentElement);
+      let trbl = new TRBL(50, 20, 50, 20);
+      let aspect = bb.aspect();
+      //console.log("trbl:", trbl);
+      client = client.inset(200);
+      //console.log("bbox:", { bb, client });
+      let m = Matrix.getAffineTransform(bb, client);
+      //console.log("m:", m.toString());
+      //if(m.xx > m.yy)       m.scale(1, m.xx / m.yy);
+      if(m.xx > m.yy) m.scale(m.yy / m.xx, 1);
+      let t = m.toSVG();
+      Element.attr(svg, { transform: t });
+      bb = new Rect(svg.getBBox());
+      let gcenter = bb.center;
+      let move = Point.diff(Element.rect(svg.parentElement).center, gcenter);
+      //console.log("center: ", gcenter);
+      //console.log("move: ", move);
+      m.translate(move.x / m.xx, 0);
+      Element.attr(svg, { transform: m.toSVG() });
+      t = ` translate(${move.x},${move.y}) ` + t;
+
+      let gbb = graph.getBBox();
+      let rbb = new Rect(gbb);
+      let nbb = new Rect(rbb);
+
+      Rect.align(nbb, client, Align.CENTER | Align.MIDDLE);
+      console.log("nbb:", nbb);
+      SVG.create("circle", { cx: rbb.center.x, cy: rbb.center.y, r: 30, stroke: "#f00", strokeWidth: 2, fill: "none" }, svg);
+    },
+    onUpdateNode: (node, i) => {
+      if(!node.element) {
+        // prettier-ignore
+        node.element = SVG.create("g", {
+          id: `node-${i}`, 
+            transform: `translate(${node.x},${node.y})`,
+            fill: "#00f",
+            stroke: "#000",
+            strokeWidth: 1
+          }, svg
+        );
+        // prettier-ignore
+        SVG.create("rect", {
+            x: -16,
+            y: -17,
+            width: 32,
+            height: 32,
+            rx: 1.5,
+            ry: 1.5,
+            fill: "#ffdd00",
+            stroke: "#000",
+            strokeWidth
+          }, node.element
+        );
+        // prettier-ignore
+        SVG.create("tspan", {alignmentBaseline: "middle", text: node.label },
+          SVG.create("text", {
+            fontSize: 10,
+            fill: "#000",
+            stroke: "none",
+                    textAnchor: "middle",
+          }, node.element
+        )
+        );
+      } else Element.attr(node.element, { transform: `translate(${node.x},${node.y})` });
+    },
+    onUpdateEdge: (edge, i) => {
+      const { x1, y1, x2, y2 } = edge;
+      if(!edge.element) edge.element = SVG.create("line", { id: `edge-${i}`, x1, y1, x2, y2, stroke: "#000", strokeWidth }, svg);
+      else Element.attr(edge.element, { x1, y1, x2, y2 });
+    }
+  });
+
+  // prettier-ignore
+  var hier = {name: "[1]", children: [{ name: "[41]", size: 10 }, { name: "org", size: 10 }, { name: "[57]", size: 10 }, { name: "[58]", size: 10 }, { name: "[59]", size: 10 }, { name: "[60]", size: 10 }, { name: "[61]", size: 10 }, { name: "[62]", size: 10 }, {name: "objects", children: [{name: "electronics", children: [{ name: "[119]", size: 10 }, { name: "[120]", size: 10 }, { name: "[121]", size: 10 }, { name: "[122]", size: 10 }, { name: "[123]", size: 10 }, { name: "[124]", size: 10 }, {name: "pic", children: [{ name: "lc-meter", size: 10 }, { name: "rgb-led", size: 10 }, { name: "picstick-25k50", size: 10 } ] }, { name: "Audio", size: 10 }, { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] } ] }, {name: "boxes", children: [{ name: "[99]", size: 10 }, { name: "[103]", size: 10 }, { name: "[98]", size: 10 }, { name: "[86]", size: 10 }, { name: "Test", size: 10 } ] }, { name: "bags", children: [{ name: "[64]", size: 10 }] } ] }, {name: "subjects", children: [{name: "[89]", children: [{ name: "[105]", size: 10 }, { name: "Roman", size: 10 } ] }, { name: "groups", size: 10 } ] } ] };
+
+  treeToGraph(g, hier);
+  /*
+  var node1 = new Node("1", 200);
+  var node2 = new Node("2", 200);
+  var node3 = new Node("3", 200);
+  var node4 = new Node("4", 200);
+  var node5 = new Node("5", 200);
+  var node6 = new Node("6", 70);
+  var node7 = new Node("7", 70);
+  var node8 = new Node("8", 70);
+  var node9 = new Node("9", 70);
+  var node10 = new Node("10", 70);
+  var node11 = new Node("11", 70);
+  var node12 = new Node("12", 70);
+  var node13 = new Node("13", 70);
+  var node14 = new Node("14", 90);
+  var node15 = new Node("15", 90);
+  var node16 = new Node("16", 90);
+  var node17 = new Node("17", 90);
+  var node18 = new Node("18", 90);
+  var node19 = new Node("19", 90);
+
+  var connection1 = new Edge(node1, node2);
+  var connection2 = new Edge(node2, node3);
+  var connection3 = new Edge(node3, node4);
+  var connection4 = new Edge(node4, node5);
+  var connection5 = new Edge(node5, node1);
+  var connection6 = new Edge(node1, node6);
+  var connection7 = new Edge(node2, node7);
+  var connection8 = new Edge(node3, node8);
+  var connection9 = new Edge(node4, node9);
+  var connection10 = new Edge(node5, node10);
+  var connection11 = new Edge(node6, node7);
+  var connection12 = new Edge(node7, node8);
+  var connection13 = new Edge(node8, node9);
+  var connection14 = new Edge(node9, node10);
+  var connection15 = new Edge(node10, node6);
+
+  g.addEdge(connection1);
+  g.addEdge(connection2);
+  g.addEdge(connection3);
+  g.addEdge(connection4);
+  g.addEdge(connection5);
+  g.addEdge(connection6);
+  g.addEdge(connection7);
+  g.addEdge(connection8);
+  g.addEdge(connection9);
+  g.addEdge(connection10);
+  g.addEdge(connection11);
+  g.addEdge(connection12);
+  g.addEdge(connection13);
+  g.addEdge(connection14);
+  g.addEdge(connection15);
+
+  g.addNode(node1);
+  g.addNode(node2);
+  g.addNode(node3);
+  g.addNode(node4);
+  g.addNode(node5);
+  g.addNode(node6);
+  g.addNode(node7);
+  g.addNode(node8);
+  g.addNode(node9);
+  g.addNode(node10);*/
+  return g;
+}
 
 @inject("rootStore")
 @observer
-class Show extends React.Component {
+class TreePage extends React.Component {
   state = {
     zIndex: 99999,
     tree: {},
     parentIds: [],
-    view: "list"
+    view: "list",
+    currentItem: null
   };
   static API = getAPI();
   static fields = [
@@ -80,30 +223,38 @@ class Show extends React.Component {
 
   svgRef = trkl();
 
+  svg = lazyInitializer(() =>
+    SVG.create(
+      "svg",
+      {
+        id: "graph-svg",
+        width: window.innerWidth,
+        height: window.innerHeight,
+        style: "position: absolute; left: 0; top: 0; z-index: 1000001; pointer-events: none;"
+      },
+      document.body
+    )
+  );
+
   static async getInitialProps(ctx) {
     const { query, params } = (ctx && ctx.req) || {};
-    console.log("Show.getInitialProps ", { query, params });
+    //console.log("TreePage.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
-    //console.log("RootStore.fetchItems");
     let items;
-
     if(params && params.id !== undefined) {
       let id = parseInt(params.id);
       const name = params.id;
       if(isNaN(id) || typeof id != "number") id = -1;
       const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
-      console.log("query: ", q);
-      let response = await Show.API(q);
+      //console.log("query: ", q);
+      let response = await TreePage.API(q);
       items = response.items || [];
-      console.log("item: ", items[0]);
+      //console.log("item: ", items[0]);
     } else {
-      items = await Show.API.list("items", Show.fields);
+      items = await TreePage.API.list("items", TreePage.fields);
     }
-    //await RootStore.fetchItems();
-    // console.log("Show.getInitialProps  items:", items);
     items = items.sort((a, b) => a.id - b.id);
     RootStore.items.clear();
-    //  items.forEach(item => RootStore.newItem(item));
     return { items, params };
   }
 
@@ -116,15 +267,11 @@ class Show extends React.Component {
       window.page = this;
       window.rs = rootStore;
       window.stores = getOrCreateStore();
-
-      //   window.addEventListener('mousemove', this.mouseMove);
     }
-    //console.log("props.items: ", props.items);
     rootStore.items.clear();
     props.items.forEach(item => {
       rootStore.newItem(item);
     });
-    //console.log("rootItemId: ", rootStore.rootItemId);
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
     if(this.props.params.id !== undefined) {
       this.state.view = "item";
@@ -134,22 +281,42 @@ class Show extends React.Component {
       item.checked = true;
       Util.traverseTree(item, i => this.state.parentIds.push(i.id));
     }
-    /*
-     this.touchListener = TouchListener(this.touchEvent,
-      f        element: global.window,
-        step: 10,
-        round: false,
-        listener: MovementListener,
-        noscroll: true
-      }
-    );*/
+    let a = new Rect(10, 10, 100, 50);
+    let b = new Rect(200, 200, 200, 100);
+    let bc = b.center;
+    //console.log("center:", bc.toString());
+    let r = new Matrix();
+    // r.init_identity();
+    r.translate(bc.x, bc.y);
+    //console.log("translate:", r.toString());
+    r.rotate((-15 * Math.PI) / 180);
+    r.translate(-bc.x, -bc.y);
+    //console.log("rotate:", r.toString());
+    let dr = null;
+    if(global.window) {
+      dr = new DOMMatrix();
+      dr.translateSelf(bc.x, bc.y);
+      //console.log("dtranslate:", dr.toString());
+      dr.rotateSelf(-15);
+      //console.log("drotate:", dr.toString());
+      dr.translateSelf(-bc.x, -bc.y);
+    }
+    //  r = Matrix.rotate(-45);
+    //    r = Matrix.translate(r, 50,50);
+    let m = Matrix.getAffineTransform(a, b);
+    let c = new Rect(b);
+    let c2 = c.toPoints();
+    c = c.toPoints();
+    c.transform(r);
+    this.b = b;
+    this.c = c;
+    this.a = a;
+    //console.log("getAffineTransform", { a, b, m });
 
-    /*  this.svgRef.subscribe(ref => {
-      var r = Element.rect('#tree');
-      const {x,y} = r;
-     var e =  ref.factory('use', { href: '#tree', x, y }, ref.svg);
-      console.log("svgRef: ", e);   
-    });*/
+    if(Util.isBrowser() && !this.g) {
+      this.g = createGraph(this.svg());
+      // this.g.timer.stop();
+    }
   }
 
   checkTagRemove() {
@@ -159,7 +326,7 @@ class Show extends React.Component {
         tagRemove.addEventListener("click", e => {
           e.preventDefault();
           Timer.once(100, () => {
-            console.log("tagRemove: ", tagRemove);
+            //console.log("tagRemove: ", tagRemove);
             Util.traverseTree(this.tree, node => {
               node.checked = false;
             });
@@ -181,7 +348,7 @@ class Show extends React.Component {
   }
 
   touchEvent = event => {
-    console.log("Touch event: ", event);
+    //console.log("Touch event: ", event);
   };
 
   mouseEvent = event => {
@@ -207,26 +374,19 @@ class Show extends React.Component {
       }
       if(elem && elem.style) {
         const t = ` scale(1.4,1.4)`;
-        console.log("Mouse event: ", t);
-
+        //console.log("Mouse event: ", t);
         var parent = elem.parentElement;
-        /*  parent.removeChild(elem);
-        parent.appendChild(elem);*/
         elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
-
         elem.style.setProperty("transform", t);
         this.prevElem = elem;
         hover = getId(elem);
       }
-      // this.setState({ hover });
     } else if(type.endsWith("down")) {
       var elem = r[0];
-
-      console.log("Mouse event: ", { type, x, y }, r);
-
+      //console.log("Mouse event: ", { type, x, y }, r);
       if(elem) {
         const id = getId(elem.parentElement);
-        console.log("Clicked id:", id);
+        //console.log("Clicked id:", id);
         this.setState({ active: id });
       }
     }
@@ -236,16 +396,16 @@ class Show extends React.Component {
   selectNode(item) {
     var children = Util.flatTree(item);
     var ids = children.map(child => child.id);
-    console.log("treeSelEvent: ", ids, item.title);
+    //console.log("treeSelEvent: ", ids, item.title);
     this.setState({ parentIds: ids });
   }
 
   treeSelEvent(type, arg) {
     const { rootStore } = this.props;
-    console.log("treeSelEvent: ", type, arg);
+    //console.log("treeSelEvent: ", type, arg);
     switch (type) {
       case "change": {
-        console.log("treeSelEvent: ", arg.value);
+        //console.log("treeSelEvent: ", arg.value);
         Util.traverseTree(this.tree, item => {
           item.checked = false;
         });
@@ -253,10 +413,8 @@ class Show extends React.Component {
         if(item) {
           item.checked = true;
           this.state.node = item.value;
-          //  this.tree = rootStore.getItem(this.state.node, makeItemToOption());
           this.selectNode(item);
         }
-        //rootStore.setState({ selected: arg.value });
         break;
       }
       default: {
@@ -265,25 +423,36 @@ class Show extends React.Component {
     }
   }
 
-  handleClick = event => {
-    const { nativeEvent } = event;
-    console.log("handleClick", event.buttons, nativeEvent.buttons, nativeEvent);
-    let e = event.currentTarget;
+  handleTransitionEnd = event => {
+    const { nativeEvent, target, currentTarget } = event;
+    //console.log("handleTransitionEnd", { target, currentTarget, event });
+    if(this.element) {
+      insertParent(this.element, Element.create("a", { href: `/show/${this.state.currentItem}` }));
+    } else if(this.previousElement) {
+      removeParent(this.previousElement, e => e.tagName.toLowerCase() == "a");
+    }
+  };
 
+  handleClick = event => {
+    const { nativeEvent, target, currentTarget } = event;
+    let e = event.currentTarget;
+    let id = Element.attr(currentTarget, "id").replace(/^item-/, "");
+    //console.log("handleClick", { target, currentTarget, id });
     if(this.element === e) {
       this.grid.style.transition = `transform ${this.speed}s ease-in-out`;
       this.grid.style.transform = "";
+      this.previousElement = this.element;
       this.element = null;
       if(this.back) {
         this.back.parentElement.removeChild(this.back);
         this.back = null;
       }
+      this.state.currentItem = null;
       return;
     }
-
+    this.state.currentItem = parseInt(id);
     Element.findAll(".tile").forEach(e => {
       if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
-      /*    e.style.setProperty("transition", "transform 0.2s ease-in");*/
       e.style.setProperty("transform", "none");
     });
     while(e.parentElement && !e.classList.contains("tile")) {
@@ -292,32 +461,23 @@ class Show extends React.Component {
     let grid = Element.find("#item-grid");
     let b = Element.find(".page-layout");
     let brect = Element.rect("body");
-
     let rect = Element.rect(e);
     let points = rect.toPoints().map(p => [p.x, p.y]);
     let rect2 = Element.rect("#item-grid");
     let lrect = Element.rect(".show-layout2");
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
-    //console.log("handleClick:\nrect: ", rect.toString(), "\npoints: ", PointList.toString(points), "\nrect2: ", rect2.toString(), "\npoints2: ", PointList.toString(points2));
-    var trn = affineFit(points, points2);
-    var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
-    console.log("matrix fromTriangles: ", matrix);
-
+    //    var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
+    //    //console.log("matrix fromTriangles: ", matrix);
     var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
     var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
-
     var pt = new Point(srect.center);
     pt.y += window.scrollY;
     var t = Point.diff(pt, rect.center);
-
     var origin = Point.diff(rect.center, rect2);
-
     var distance = Math.sqrt(t.x * t.x + t.y * t.y);
     this.speed = distance * 0.002;
-
     var gm = Matrix.init_translate(t.x, t.y);
-    console.log("translation:  ", t);
-
+    //console.log("translation:  ", t);
     var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
@@ -325,75 +485,30 @@ class Show extends React.Component {
     m = Matrix.translate(m, 0, window.scrollY + rect2.y / 2);
     m.xx *= scale[0];
     m.yy *= scale[1];
-    //m = Matrix.scale.apply(Matrix, scale);
-    //console.log("matrix: ", m);
     var dm = new DOMMatrix();
-
     dm.translateSelf(t.x, t.y);
     dm.scaleSelf(scale[0], scale[1]);
-
     var dms = dm.toString();
-
-    console.log("b: ", b);
-
-    //  Element.setCSS(back, { opacity: 1 });
-    //  Element.setCSS(back, Rect.toCSS(brect));
-    //    Element.setCSS(back, { left: 0, top: 0, width: `${window.innerWidth}px`, height: `${window.innerHeight}px` });
+    //console.log("b: ", b);
     this.element = e;
-
     this.grid = grid;
     e = this.grid;
-
     this.grid.style.setProperty("transform-origin", `${origin.x}px ${origin.y}px`);
     this.grid.style.setProperty("transform", "");
     this.grid.style.setProperty("transition", `transform 0.5s linear`);
-    //    Element.setCSS(this.grid, { /*transformOrigin:  `${origin.x}px ${origin.y}px`, *//*transition: `transform ${this.speed}s ease-in`,*/ transform: "", zIndex: 8 });
-
     var tend = e => {
-      console.log("transition end: ", e.target);
-      console.log("transformOrigin: ", e.target.style.transformOrigin);
-      /* gm.xx *= scale[0];
-    gm.yy *= scale[1];*/
-
-      /*   dm = new DOMMatrix();
-      var t2 = Point.diff(srect.center, rect.center);
-      dm.translateSelf(0, rect.height + rect2.y + window.scrollY);
-
-      dm.translateSelf(t2.x, t2.y);*/
-      //  dm.scaleSelf(scale[0], scale[1]);
-      console.log("dm: ", dm);
-      // var gm2 = Matrix.scale(gm, scale[0], scale[1]);
+      //console.log("transition end: ", e.target);
+      //console.log("transformOrigin: ", e.target.style.transformOrigin);
+      //console.log("dm: ", dm);
       e.target.style.transition = `transform 0.5s ease-out`;
-
-      e.target.style.transform = /*Matrix.toDOMMatrix(gm)*/ dm.toString();
-      /* let back = Element.create("div", {
-        parent: document.body,
-        style: {
-         background: "url(/static/img/tile-background.png) repeat",
-          backgroundSize: "auto 50vmin",
-          zIndex: 8,
-          position: "fixed",
-          ...Rect.toCSS(Element.rect(e.target)),
-          //  transition: 'opacity 1s ease-in-out'
-          transition: "left 0.2s ease-out, top 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out"
-        }
-      });
-      this.back = back;
-      Element.setCSS(back, Rect.toCSS(brect));*/
+      e.target.style.transform = dm.toString();
       e.target.removeEventListener("transitionend", tend);
     };
-
     e.addEventListener("transitionend", tend);
-    console.log("rect: ", rect);
-
-    /*  back.style.setProperty("opacity", 1);
-   });
-*/
+    //console.log("rect: ", rect);
     e.style.setProperty("transition", `transform ${this.speed} ease-out`);
     e.style.setProperty("transform", dms);
-    // e.style.setProperty("background-color", "white");
     e.style.setProperty("z-index", 9);
-
     if(global.window) {
       window.t = e;
       window.m = m;
@@ -405,32 +520,28 @@ class Show extends React.Component {
     let swipeEvents = {};
     var e = null;
     if(global.window !== undefined) window.page = this;
-
     const onError = event => {};
     const onImage = event => {
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
-      //console.log("onChange: ", value);
     };
-
     if(global.window) {
       window.addEventListener("resize", event => {
         const { currentTarget, target } = event;
-        //console.log("Resized: ", { currentTarget, target });
       });
     }
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
     const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
-    console.log("Show.render" /*, { tree, items }*/);
+    console.log("TreePage.render");
     return (
-      <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent}>
+      <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
         <Head>
-          <title>Show</title>
+          <title>Tree</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <Tree tree={tree} minWidth={1024} active={this.state.active} /> {/*treeVerify={node => node.children && node.children.length} */}
+        {/*  <Tree tree={tree} minWidth={1024} active={this.state.active} /> {}*/}
         <br />
         <br />
         <br />
@@ -452,19 +563,16 @@ class Show extends React.Component {
             ) : (
               undefined
             )}
-            {/*          <img src={"/static/img/test.svg"} />
-             */}
+            {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
                 {items.map(item => {
-                  // console.log("item: ", item);
                   const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                   const haveImage = photo_id >= 0;
                   let photo = haveImage ? item.photos[0].photo : null;
                   const path = haveImage ? `/api/image/get/${photo_id}` : "/static/img/no-image.svg";
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
-                  //    console.log("photo: ", photo);
                   let { data, name, parent, type, children, users } = item;
                   try {
                     data = item.data && item.data.length && JSON.parse(item.data);
@@ -472,13 +580,12 @@ class Show extends React.Component {
                     data = item.data;
                   }
                   if(typeof data != "object" || data === null) data = {};
-                  //        console.log("data: ", data);
+                  if(!haveImage) return undefined;
                   return (
                     <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                       <SizedAspectRatioBox
                         style={{
                           position: "relative",
-                          // border: "1px solid black",
                           boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.75)",
                           overflow: "hidden"
                         }}
@@ -489,7 +596,11 @@ class Show extends React.Component {
                             src={path}
                             width={photo.width}
                             height={photo.height}
-                            style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }}
+                            style={{
+                              width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%",
+                              height: "auto",
+                              opacity
+                            }}
                             className="gallery-image"
                           />
                         ) : (
@@ -521,7 +632,12 @@ class Show extends React.Component {
                           {!!name ? `Name: ${name}` : undefined}
                           <br />
                           <br />
-                          <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>
+                          <pre
+                            style={{
+                              fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed",
+                              fontSize: "16px"
+                            }}
+                          >
                             {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
                           </pre>
                         </div>
@@ -630,4 +746,4 @@ class Show extends React.Component {
   }
 }
 
-export default Show;
+export default TreePage;
