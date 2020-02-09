@@ -307,7 +307,7 @@ class Home extends React.Component {
         ) : (
           undefined
         )*/}
-        <Link href={"/browse"}>
+        <Link href={"/show"}>
           <a className={"button-next"} onClick={this.handleNext}>
             <img src={"/static/img/arrow-next.svg"} />
           </a>
