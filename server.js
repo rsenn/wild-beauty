@@ -432,7 +432,7 @@ if (!dev && cluster.isMaster) {
               });
             outputStream = new MemoryStream();
 
-            let fileStream = fs.createWriteStream("temp.png", "w+");
+            let fileStream = fs.createWriteStream("temp.png");
 
             inputStream.pipe(transformer).pipe(outputStream);
             inputStream.pipe(transformer).pipe(fileStream);
