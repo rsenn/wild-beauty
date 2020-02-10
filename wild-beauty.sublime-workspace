@@ -12,65 +12,85 @@
 	"buffers":
 	[
 		{
-			"contents": "",
+			"contents": "function behaveTextarea(element)\nfunction(data)\nNewItem\ngetInitialProps\nph =>\nitem =>\nconstructor\nmoveImage\n(event, e) =>\nevent =>\ncomponentDidMount\nresponse =>\ne =>\ntreeSelEvent\nrender\nmakeTreeSelEvent\nevent =>",
 			"settings":
 			{
-				"buffer_size": 0,
+				"buffer_size": 211,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "lib/dom.js",
+			"file": "pages/tree.js",
 			"settings":
 			{
-				"buffer_size": 112438,
+				"buffer_size": 24650,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/new/[photo_id].js",
+			"settings":
+			{
+				"buffer_size": 7357,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/new.js",
+			"settings":
+			{
+				"buffer_size": 4299,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "static/style.css",
+			"settings":
+			{
+				"buffer_size": 2128,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "pages/index.js",
+			"file": "components/TouchCallback.js",
 			"settings":
 			{
-				"buffer_size": 13874,
-				"encoding": "UTF-8",
+				"buffer_size": 3423,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "/home/roman/wild-beauty/components/graphContainer.js",
+			"file": "lib/touchHandler.js",
 			"settings":
 			{
-				"buffer_size": 579,
-				"encoding": "UTF-8",
+				"buffer_size": 13390,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "components/forceGraph.js",
+			"file": "components/login.js",
 			"settings":
 			{
-				"buffer_size": 5975,
-				"encoding": "UTF-8",
+				"buffer_size": 10648,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "lib/fd-graph.js",
+			"file": "components/layout.js",
 			"settings":
 			{
-				"buffer_size": 10902,
+				"buffer_size": 907,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "stores/i18nStore.js",
+			"file": "pages/_document.js",
 			"settings":
 			{
-				"buffer_size": 3574,
-				"encoding": "UTF-8",
+				"buffer_size": 606,
 				"line_ending": "Unix"
 			}
 		}
@@ -87,12 +107,8 @@
 		"selected_items":
 		[
 			[
-				"scheme",
-				"SchemeEditor: Edit Current Scheme"
-			],
-			[
-				"edit",
-				"SchemeEditor: Edit Current Scheme"
+				"install",
+				"Package Control: Install Package"
 			],
 			[
 				"schemeed",
@@ -101,6 +117,14 @@
 			[
 				"install pac",
 				"Package Control: Install Package"
+			],
+			[
+				"scheme",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
+				"edit",
+				"SchemeEditor: Edit Current Scheme"
 			],
 			[
 				"add re",
@@ -120,10 +144,6 @@
 			],
 			[
 				"install pack",
-				"Package Control: Install Package"
-			],
-			[
-				"install",
 				"Package Control: Install Package"
 			]
 		],
@@ -149,26 +169,60 @@
 	[
 		"/home/roman/the-wild-beauty-company",
 		"/home/roman/the-wild-beauty-company/components",
+		"/home/roman/the-wild-beauty-company/components/views",
 		"/home/roman/the-wild-beauty-company/lib",
-		"/home/roman/the-wild-beauty-company/static"
+		"/home/roman/the-wild-beauty-company/lib/ecmascript",
+		"/home/roman/the-wild-beauty-company/pages",
+		"/home/roman/the-wild-beauty-company/pages/new",
+		"/home/roman/the-wild-beauty-company/public",
+		"/home/roman/the-wild-beauty-company/static",
+		"/home/roman/the-wild-beauty-company/stores"
 	],
 	"file_history":
 	[
-		"/home/roman/the-wild-beauty-company/pages/index.js",
-		"/home/roman/wild-beauty/components/nav.js",
-		"/home/roman/wild-beauty/pages/show.js",
+		"/home/roman/the-wild-beauty-company/lib/dom.js",
 		"/home/roman/the-wild-beauty-company/lib/dom.es5.js",
-		"/home/roman/the-wild-beauty-company/lib/devtools.js",
+		"/home/roman/the-wild-beauty-company/node_modules/@babel/node/node_modules/core-js/modules/web.queue-microtask.js",
+		"/home/roman/wild-beauty/lib/touchHandler.js",
+		"/home/roman/the-wild-beauty-company/components/layout.js",
+		"/home/roman/the-wild-beauty-company/components/views/itemEditor.js",
+		"/home/roman/the-wild-beauty-company/stores/queries.js",
+		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
+		"/home/roman/the-wild-beauty-company/stores/functions.js",
 		"/home/roman/the-wild-beauty-company/lib/util.js",
+		"/home/roman/the-wild-beauty-company/lib/fd-graph.js",
+		"/home/roman/the-wild-beauty-company/lib/touchHandler.js",
+		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
+		"/home/roman/the-wild-beauty-company/pages/tree.js",
+		"/home/roman/the-wild-beauty-company/lib/devtools.js",
+		"/home/roman/wild-beauty/pages/tree.js",
+		"/home/roman/the-wild-beauty-company/server.js",
+		"/home/roman/the-wild-beauty-company/pages/show.js",
+		"/home/roman/wild-beauty/stores/functions.js",
+		"/home/roman/the-wild-beauty-company/pages/index.js",
+		"/home/roman/the-wild-beauty-company/pages/browse.js",
+		"/home/roman/the-wild-beauty-company/pages/new.js",
+		"/home/roman/the-wild-beauty-company/stores/api.js",
+		"/home/roman/the-wild-beauty-company/lib/jpeg.js",
+		"/home/roman/the-wild-beauty-company/components/tree.js",
+		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
+		"/home/roman/the-wild-beauty-company/pages/list.js",
+		"/home/roman/the-wild-beauty-company/pages/_app.js",
+		"/home/roman/wild-beauty/pages/show.js",
+		"/home/roman/the-wild-beauty-company/lib/devpane.js",
+		"/home/roman/wild-beauty/components/graphContainer.js",
+		"/home/roman/the-wild-beauty-company/components/forceGraph.js",
+		"/home/roman/the-wild-beauty-company/stores/i18nStore.js",
+		"/home/roman/wild-beauty/components/nav.js",
 		"/home/roman/.config/sublime-text-3-20200125/Packages/User/Default (Linux).sublime-keymap"
 	],
 	"find":
 	{
-		"height": 39.0
+		"height": 44.0
 	},
 	"find_in_files":
 	{
-		"height": 101.0,
+		"height": 116.0,
 		"where_history":
 		[
 			"/home/roman/wild-beauty/lib,/home/roman/wild-beauty/pages,/home/roman/wild-beauty/components,/home/roman/wild-beauty/stores,*.js",
@@ -180,6 +234,85 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"BBox upda",
+			"client",
+			" Element\\(",
+			"Element\\(",
+			"class BBox",
+			"new BBox",
+			"Line.prototype.bbox",
+			"resize =",
+			"class BBox",
+			"rect =",
+			"BBox\\(",
+			"Line.prototype.toStrin",
+			"Line.prototype\\.",
+			"Line.prototype..",
+			"noscroll",
+			"MovementList",
+			"isArray",
+			"PointList.*round",
+			"PointList.*center",
+			"Point.round",
+			"points\\(",
+			"PointList\\(",
+			"dom.js",
+			"addEdge",
+			"applyAttractiveForce",
+			"Point.prototype.move",
+			"applyAttractiveForce",
+			"addNode",
+			"filterOut",
+			"round =",
+			"round",
+			"walkTre",
+			"g, ",
+			"function Line",
+			"Point.equal",
+			"function Line",
+			"Point.prototype.move",
+			"function POoint",
+			"addNode",
+			"getItem",
+			"root",
+			"filterOut",
+			"console.log",
+			"\n        ",
+			"filterOut",
+			"parent_id",
+			"getItem",
+			"Empty",
+			"empty",
+			"toJS",
+			"nchildren",
+			"walkTree",
+			"treeToGraph",
+			"ignore",
+			"Edge.prototype.(.*) = function(\\**)",
+			"Node.prototype.(.*) = function(\\**)",
+			"prototype",
+			"Graph.prototype.(.*) = function",
+			"getItem",
+			"const ",
+			"bufferToStream",
+			"temp.jpg",
+			"////console.log",
+			"console.log",
+			"query:",
+			"token",
+			"upload",
+			"makeItemToOption",
+			"treeToGraph",
+			"makeTouchCallback",
+			"Tree\\.",
+			"Tree[^A-Za-z]\\.",
+			"Tree[^A-Za-z]",
+			"Tree[^A-Za-z]$",
+			"graph-svg",
+			"api/tree",
+			"loadItems",
+			"fields",
+			"route.*change",
 			"<svg",
 			"svg",
 			"SVG",
@@ -209,6 +342,10 @@
 		"regex": true,
 		"replace_history":
 		[
+			"\\2\\1",
+			"\\1",
+			"//console.log",
+			"TreePage.",
 			"\"Transition ",
 			"Timer.std"
 		],
@@ -229,7 +366,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 0,
+						"buffer_size": 211,
 						"regions":
 						{
 						},
@@ -239,13 +376,98 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/lib/fd-graph.js",
+							"current_file": "/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
+								[
+									617,
+									649
+								],
+								[
+									796,
+									810
+								],
+								[
+									1350,
+									1357
+								],
+								[
+									1583,
+									1598
+								],
+								[
+									1870,
+									1875
+								],
+								[
+									1920,
+									1927
+								],
+								[
+									2156,
+									2167
+								],
+								[
+									2527,
+									2552
+								],
+								[
+									3287,
+									3300
+								],
+								[
+									3516,
+									3524
+								],
+								[
+									5580,
+									5597
+								],
+								[
+									5704,
+									5715
+								],
+								[
+									6020,
+									6024
+								],
+								[
+									6117,
+									6129
+								],
+								[
+									6613,
+									6619
+								],
+								[
+									6928,
+									6954
+								],
+								[
+									6955,
+									6963
+								]
 							],
 							"symlist":
 							[
+								"function behaveTextarea(element)",
+								"function(data)",
+								"NewItem",
+								"getInitialProps",
+								"ph =>",
+								"item =>",
+								"constructor",
+								"moveImage",
+								"(event, e) =>",
+								"event =>",
+								"componentDidMount",
+								"response =>",
+								"e =>",
+								"treeSelEvent",
+								"render",
+								"makeTreeSelEvent",
+								"event =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -253,212 +475,292 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 9,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 4,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 1,
-					"file": "lib/dom.js",
+					"file": "pages/tree.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 112438,
+						"buffer_size": 24650,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								94933,
-								94933
+								9810,
+								9810
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/Rainglow/rainglow/Banner Contrast (rainglow).tmTheme",
-							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
+							"color_scheme": "Packages/Babel/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 56530.0,
+						"translation.y": 2059.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "pages/index.js",
+					"file": "pages/new/[photo_id].js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 13874,
+						"buffer_size": 7357,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-<<<<<<< HEAD
-								6149,
-								6149
-=======
-								11961,
-								11961
->>>>>>> 05af10d3e39de09997e825548bf1c3b2532131e7
+								6981,
+								6981
 							]
 						],
 						"settings":
 						{
-<<<<<<< HEAD
-							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
-=======
-							"color_scheme": "Packages/Rainglow/rainglow/Banner Contrast (rainglow).tmTheme",
->>>>>>> 05af10d3e39de09997e825548bf1c3b2532131e7
-							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
+							"color_scheme": "Packages/Babel/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-<<<<<<< HEAD
-						"translation.y": 2431.0,
-=======
-						"translation.y": 4641.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "/home/roman/wild-beauty/components/graphContainer.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 579,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								353,
-								353
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Rainglow/rainglow/Banner Contrast (rainglow).tmTheme",
-							"syntax": "Packages/JSX/JSX.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "components/forceGraph.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5975,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5789,
-								5789
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Rainglow/rainglow/Banner Contrast (rainglow).tmTheme",
-							"syntax": "Packages/JSX/JSX.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 3009.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "lib/fd-graph.js",
-					"semi_transient": true,
-					"settings":
-					{
-						"buffer_size": 10902,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								59,
-								59
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Rainglow/rainglow/Banner Contrast (rainglow).tmTheme",
-							"syntax": "Packages/JSX/JSX.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
->>>>>>> 05af10d3e39de09997e825548bf1c3b2532131e7
+						"translation.y": 3614.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
-					"file": "stores/i18nStore.js",
+					"buffer": 3,
+					"file": "pages/new.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3574,
+						"buffer_size": 4299,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2031,
-								2031
+								2392,
+								2392
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/Rainglow/rainglow/Banner Contrast (rainglow).tmTheme",
-							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
+							"color_scheme": "Packages/Babel/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 612.0,
+						"translation.y": 1173.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "static/style.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2128,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								515,
+								515
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Babel/Next.tmTheme",
+							"syntax": "Packages/CSS/CSS.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 138.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "components/TouchCallback.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3423,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1271,
+								1271
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Babel/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "lib/touchHandler.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 13390,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								10257,
+								10257
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Babel/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 7225.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "components/login.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10648,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Babel/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "components/layout.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 907,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								562,
+								562
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Babel/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "pages/_document.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 606,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								606,
+								606
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Babel/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
 					"type": "text"
 				}
 			]
@@ -466,7 +768,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 32.0
 	},
 	"input":
 	{
@@ -512,7 +814,7 @@
 	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
-		"height": 70.0
+		"height": 80.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -522,12 +824,96 @@
 		"selected_items":
 		[
 			[
-				"index",
-				"pages/index.js"
+				"dom",
+				"lib/dom.js"
+			],
+			[
+				"touchHa",
+				"lib/touchHandler.js"
+			],
+			[
+				"touch",
+				"components/TouchCallback.js"
+			],
+			[
+				"new.js",
+				"pages/new.js"
+			],
+			[
+				"new.mjs",
+				"node_modules/@babel/node/node_modules/core-js/modules/web.queue-microtask.js"
+			],
+			[
+				"dom.j",
+				"lib/dom.js"
+			],
+			[
+				"layout",
+				"components/layout.js"
+			],
+			[
+				"func",
+				"stores/functions.js"
+			],
+			[
+				"dom.js",
+				"lib/dom.js"
+			],
+			[
+				"fd-gra",
+				"lib/fd-graph.js"
+			],
+			[
+				"util.j",
+				"lib/util.js"
+			],
+			[
+				"tree.js",
+				"pages/tree.js"
+			],
+			[
+				"fd-gr",
+				"lib/fd-graph.js"
 			],
 			[
 				"util.js",
 				"lib/util.js"
+			],
+			[
+				"function",
+				"stores/functions.js"
+			],
+			[
+				"funct",
+				"stores/functions.js"
+			],
+			[
+				"rootStore",
+				"stores/RootStore.js"
+			],
+			[
+				"dom.es",
+				"lib/dom.es5.js"
+			],
+			[
+				"how.js",
+				"pages/show.js"
+			],
+			[
+				"server",
+				"server.js"
+			],
+			[
+				"imag",
+				"components/views/imageUpload.js"
+			],
+			[
+				"server.js",
+				"server.js"
+			],
+			[
+				"index",
+				"pages/index.js"
 			]
 		],
 		"width": 0.0
