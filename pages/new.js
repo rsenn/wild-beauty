@@ -88,9 +88,9 @@ class New extends React.Component {
     const { target, currentTarget } = event;
     let photo_id = parseInt(target.getAttribute("id").replace(/.*-/g, ""));
     //console.log("New.chooseImage ", { photo_id, target, currentTarget });
-    rootStore.state.image = photo_id;
-    rootStore.state.step = 2;
-    router.push("/new", `/new/${photo_id}`);
+/*    rootStore.state.image = photo_id;
+    rootStore.state.step = 2;*/
+    router.push(`/new/${photo_id}`);
   }
 
   handleClick = event => {

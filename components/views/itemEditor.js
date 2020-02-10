@@ -63,7 +63,7 @@ export const ItemEditor = inject("rootStore")(
         />
         {/*       <SortableTree treeData={tree} />*/}
         <div className={"item-fields"}>
-          {rootStore.entries.map(field => (
+          {typeof(rootStore.entries) == 'object' && rootStore.entries && typeof(rootStore.entries.map) == 'function'  && rootStore.entries.map(field => (
             <EditableField
               options={rootStore.fieldNames}
               multiline={!!field.multiline}
@@ -91,15 +91,20 @@ export const ItemEditor = inject("rootStore")(
           <AddItemBar
             onAdd={() => {
               let obj = observable({ type: null, value: "" });
+              if(typeof(rootStore.entries ) == 'object' && rootStore.entries&& rootStore.entries.push !== undefined)  
               rootStore.entries.push(obj);
               Timer.once(100, () => {
                 let a = [...Element.findAll("img").filter(i => /edit/.test(i.src))];
-                let button = a[a.length - 1].parentElement;
+                let button = a[a.length - 1] ?a[a.length - 1].parentElement : null;
                 console.log("Button: ", button);
-                if(button && button.click) button.click();
+                if(button) {
+
+                if( button.click) button.click();
+
                 let inputs = Util.array([...Element.findAll("input", button.parentElement)]);
                 console.log("inputs:", inputs);
                 inputs[0].focus();
+              }
               });
             }}
           >

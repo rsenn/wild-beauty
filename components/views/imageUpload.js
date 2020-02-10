@@ -27,25 +27,20 @@ export const ImageUpload = inject("rootStore")(
               const { id } = photo;
               const url = `/api/image/get/${id}.jpg`;
               let entry = rootStore.newImage(photo);
-
               axios.head(url).then(res => {
                 if(res.status == 200) {
                   const { width, height, aspect, channels, depth } = res.headers;
                   console.log("HEAD: ", res);
-
                   Object.assign(entry, { width, height, aspect, channels, depth, ...entry });
                 }
               });
-
               return url;
             })[0];
           }}
           onSuccess={arg => {
             const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
             console.log("UploadImages success:", { id, arg });
-
             let entry = rootStore.newImage({ id });
-
             console.log("UploadImages success:", toJS(entry));
             arg.remove();
           }}

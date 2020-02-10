@@ -232,18 +232,15 @@ class TreePage extends React.Component {
       let p;
       if(parent_id > 0) {
         iter[key].parent = iter[parent_id];
-        
       }
-      item = iter[key]; 
+      item = iter[key];
       item.depth = depth;
       if(childIds.length) item.children = childIds.map(id => iter[id]);
-      
+
       if(item.data === null || Util.isEmpty(item.data)) delete item.data;
     }
 
     let root = RootStore.getItem(RootStore.rootItemId, it => Util.filterOutKeys(toJS(it), ["childIds", "photos", "users"]));
-
-    
 
     treeToGraph(g, root, item => {
       let { children, parent, users, photos, parent_id, ...restOfItem } = item;
@@ -274,7 +271,7 @@ class TreePage extends React.Component {
         delete e.b.parent;
         delete e.b.children;
       }
-    }    
+    }
     g.checkRedraw();
     g.checkRedraw();
     g.roundAll(0.003);
@@ -288,7 +285,7 @@ class TreePage extends React.Component {
 
   constructor(props) {
     super(props);
-    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http:
+    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
     const { rootStore } = this.props;
     if(global.window) {
       window.api = this.api;
@@ -297,7 +294,7 @@ class TreePage extends React.Component {
       window.stores = getOrCreateStore();
     }
     rootStore.items.clear();
-     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
+    this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
     if(this.props.params.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
@@ -335,7 +332,6 @@ class TreePage extends React.Component {
     this.b = b;
     this.c = c;
     this.a = a;
-    
   }
 
   checkTagRemove() {
@@ -543,7 +539,7 @@ class TreePage extends React.Component {
     }
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
-    const items = []; 
+    const items = [];
     console.log("TreePage.render");
     return (
       <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
@@ -745,4 +741,3 @@ class TreePage extends React.Component {
 }
 
 export default TreePage;
-
