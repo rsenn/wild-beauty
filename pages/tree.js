@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align } from "../utils/dom.js";
+import { Element, Point, PointList, Rect, Matrix, Timer, SVG, TRBL, Align } from "../utils/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
@@ -232,18 +232,18 @@ class TreePage extends React.Component {
       let p;
       if(parent_id > 0) {
         iter[key].parent = iter[parent_id];
-        //  delete iter[key].parent_id;
+        
       }
-      item = iter[key]; // RootStore.items.get(key);
+      item = iter[key]; 
       item.depth = depth;
       if(childIds.length) item.children = childIds.map(id => iter[id]);
-      //delete item.childIds;
+      
       if(item.data === null || Util.isEmpty(item.data)) delete item.data;
     }
 
     let root = RootStore.getItem(RootStore.rootItemId, it => Util.filterOutKeys(toJS(it), ["childIds", "photos", "users"]));
 
-    //console.log("root: ", root);
+    
 
     treeToGraph(g, root, item => {
       let { children, parent, users, photos, parent_id, ...restOfItem } = item;
@@ -274,27 +274,21 @@ class TreePage extends React.Component {
         delete e.b.parent;
         delete e.b.children;
       }
-    }
-    /*
-    console.log("nodes: ", [...Util.walkTree(g.nodes, 1000, i => true, i => { delete i.children; return i; } )].map(it => Util.filterOutKeys(it,['children','parent'])).slice(0,2));
-    console.log("edges:",[...Util.walkTree(g.edges)].map(it => Util.filterOutKeys(it,['children','parent'])).slice(0,2));
-*/
-
+    }    
     g.checkRedraw();
     g.checkRedraw();
     g.roundAll(0.003);
-    /*for(let n of g.nodes) {
-  let { children, parent, parent_id, ...node } = n;
-}
-*/
-    console.log("tree: ", g.serialize());
-
+    let pl = g.points;
+    let center = g.rect.center;
+    g.translate(-center.x, -center.y);
+    console.log("g.points: ", g.points);
+    console.log("g.rect: ", g.rect);
     return { params };
   }
 
   constructor(props) {
     super(props);
-    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
+    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http:
     const { rootStore } = this.props;
     if(global.window) {
       window.api = this.api;
@@ -303,10 +297,7 @@ class TreePage extends React.Component {
       window.stores = getOrCreateStore();
     }
     rootStore.items.clear();
-    /*  props.items.forEach(item => {
-      rootStore.newItem(item);
-    });
-  */ this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
+     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
     if(this.props.params.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
@@ -344,10 +335,7 @@ class TreePage extends React.Component {
     this.b = b;
     this.c = c;
     this.a = a;
-    /*
-    if(Util.isBrowser() && !this.g) {
-      this.g = createGraph(this.svg());
-    }*/
+    
   }
 
   checkTagRemove() {
@@ -555,7 +543,7 @@ class TreePage extends React.Component {
     }
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
-    const items = []; //this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
+    const items = []; 
     console.log("TreePage.render");
     return (
       <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
@@ -564,7 +552,7 @@ class TreePage extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        {/*  <Tree tree={tree} minWidth={1024} active={this.state.active} /> {}*/}
+        {}
         <br />
         <br />
         <br />
@@ -757,3 +745,4 @@ class TreePage extends React.Component {
 }
 
 export default TreePage;
+
