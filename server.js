@@ -422,8 +422,9 @@ if (!dev && cluster.isMaster) {
             inputStream.pipe(transformer).pipe(outputStream);
             await finished(outputStream);
             let newData = outputStream.buffer[0];
+            let inBuf = Buffer.from(outputStream.buffer);
 
-            inputStream = bufferToStream(Buffer.from(outputStream.buffer));
+        //    inputStream = bufferToStream(inBuf);
             transformer = sharp()
               .png({ palette: true, colours: 256, force: true })
               .resize(newDimensions)
@@ -434,14 +435,23 @@ if (!dev && cluster.isMaster) {
 
             let fileStream = fs.createWriteStream("temp.png");
 
-            inputStream.pipe(transformer).pipe(outputStream);
-            inputStream.pipe(transformer).pipe(fileStream);
+            inputStream = bufferToStream(Buffer.from(inBuf));
+            try {
 
-            getColors("temp.png", "image/png").then(colors => {
+            inputStream.pipe(transformer).pipe(fileStream);
+/*
+            inputStream = bufferToStream(Buffer.from(inBuf));
+            inputStream.pipe(transformer).pipe(fileStream);
+*/
+          } catch(err) {
+            console.error("ERROR:",err);
+          }
+
+          /*  getColors("temp.png", "image/png").then(colors => {
               console.log("image colors: ", colors);
               // `colors` is an array of color objects
             });
-
+*/
             //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
             //console.log("newData.length: ", newData.length);
             file.data = newData;
