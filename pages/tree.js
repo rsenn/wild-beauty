@@ -146,48 +146,9 @@ export function createGraph(svg) {
     },
     onUpdateNode: (node, i) => {
       if(!node.element) {
-        node.element = SVG.create(
-          "g",
-          {
-            id: `node-${i}`,
-            transform: `translate(${node.x},${node.y})`,
-            fill: "#00f",
-            stroke: "#000",
-            strokeWidth: 1
-          },
-          svg
-        );
-
-        SVG.create(
-          "rect",
-          {
-            x: -16,
-            y: -17,
-            width: 32,
-            height: 32,
-            rx: 1.5,
-            ry: 1.5,
-            fill: "#ffdd00",
-            stroke: "#000",
-            strokeWidth
-          },
-          node.element
-        );
-
-        SVG.create(
-          "tspan",
-          { alignmentBaseline: "middle", text: node.label },
-          SVG.create(
-            "text",
-            {
-              fontSize: 10,
-              fill: "#000",
-              stroke: "none",
-              textAnchor: "middle"
-            },
-            node.element
-          )
-        );
+        node.element = SVG.create("g", { id: `node-${i}`, transform: `translate(${node.x},${node.y})`, fill: "#00f", stroke: "#000", strokeWidth: 1 }, svg);
+        SVG.create("rect", { x: -16, y: -17, width: 32, height: 32, rx: 1.5, ry: 1.5, fill: "#ffdd00", stroke: "#000", strokeWidth }, node.element);
+        SVG.create("tspan", { alignmentBaseline: "middle", text: node.label }, SVG.create("text", { fontSize: 10, fill: "#000", stroke: "none", textAnchor: "middle" }, node.element));
       } else Element.attr(node.element, { transform: `translate(${node.x},${node.y})` });
     },
     onUpdateEdge: (edge, i) => {
@@ -240,7 +201,6 @@ class TreePage extends React.Component {
       const name = params.id;
       if(isNaN(id) || typeof id != "number") id = -1;
       const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
-
       let response = await TreePage.API(q);
       items = response.items || [];
       console.log("item: ", items[0]);
@@ -248,13 +208,10 @@ class TreePage extends React.Component {
       items = await TreePage.API.list("items", TreePage.fields);
     }
     items = items.sort((a, b) => a.id - b.id);
-
     if(RootStore.items && RootStore.items.clear) RootStore.items.clear();
     items = items.map(item => RootStore.newItem(item));
-
     let rootItem = RootStore.rootItem;
     let tree = RootStore.getItem(rootItem.id);
-
     let g = new Graph({
       origin: new Point(0, 0),
       gravitate_to_origin: true,
@@ -277,25 +234,50 @@ class TreePage extends React.Component {
         iter[key].parent = iter[parent_id];
         //  delete iter[key].parent_id;
       }
-     item =
-     RootStore.items.get(key);
-     item.depth = depth;
+      item = iter[key]; // RootStore.items.get(key);
+      item.depth = depth;
       if(childIds.length) item.children = childIds.map(id => iter[id]);
       delete item.childIds;
       if(item.data === null || Util.isEmpty(item.data)) delete item.data;
     }
-    
-    let root = toJS(RootStore.rootItem);
+
+    let root = RootStore.getItem(RootStore.rootItemId, it => Util.filterOutKeys(toJS(it), ["childIds", "photos", "users"]));
+
+    //console.log("root: ", root);
 
     treeToGraph(g, root, item => {
       let { children, parent, users, photos, parent_id, ...restOfItem } = item;
       let numChildren = children ? children.length : 0;
       let output = { itemKeys: Object.keys(item), parent_id, restOfItem };
-      if(numChildren) output.numChildren = numChildren;
-      if(numChildren) return true;
+      if(numChildren) item.num_children = numChildren;
+      if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
+      console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
+      return true;
     });
-    console.log("item: ", g);
-    return { items, g, params };
+
+    for(let i in g.nodes) {
+      let n = g.nodes[i];
+      n.x = n.x ? parseFloat(n.x.toFixed(3)) : 0;
+      n.y = n.y ? parseFloat(n.y.toFixed(3)) : 0;
+
+      delete n.parent;
+      delete n.children;
+    }
+    for(let i in g.edges) {
+      let e = g.edges[i];
+
+      delete e.a.parent;
+      delete e.b.parent;
+      delete e.a.children;
+      delete e.b.children;
+    }
+
+    console.log("graph: ", g.nodes, g.edges);
+
+    g.checkRedraw();
+    g.checkRedraw();
+
+    return { params };
   }
 
   constructor(props) {
@@ -309,10 +291,10 @@ class TreePage extends React.Component {
       window.stores = getOrCreateStore();
     }
     rootStore.items.clear();
-    props.items.forEach(item => {
+    /*  props.items.forEach(item => {
       rootStore.newItem(item);
     });
-    this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
+  */ this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
     if(this.props.params.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
@@ -561,7 +543,7 @@ class TreePage extends React.Component {
     }
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
-    const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
+    const items = []; //this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
     console.log("TreePage.render");
     return (
       <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
@@ -578,11 +560,7 @@ class TreePage extends React.Component {
           <ItemView id={this.state.itemId} />
         ) : (
           <div className={"show-layout2"}>
-            {tree ? (
-              <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} />
-            ) : (
-              undefined
-            )}
+            {tree ? <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} /> : undefined}
             {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>

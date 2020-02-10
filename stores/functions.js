@@ -65,9 +65,20 @@ export const reduceTree = (tree, fn = (acc, node) => {}, acc) => {
 };
 
 export const treeToGraph = (graph, tree, pred = item => true) => {
-  if(!(typeof tree == "object" && tree && tree.length !== undefined)) tree = Util.walkTree(tree, 1000, null, pred);
+  // if(!(typeof tree == "object" && tree && tree.length !== undefined))
 
-  for(let node of tree) {
+  tree = new Map([...Util.walkTree(tree, 1000, null, pred)].map(it => [it.id, it]));
+  //tree = Object.fromEntries([...tree].map(it => ([ it.id, it ] )));
+
+  for(let key of tree.keys()) {
+    let node = tree.get(key);
+    node.parent = node.parent_id > 0 ? tree.get(node.parent_id) : null;
+    tree.set(key, node);
+  }
+
+  console.log("tree: ", tree);
+  for(let [key, node] of tree.entries()) {
+    // let node = tree.get(key);
     let depth = 0;
     let p = node;
     while(p && p.parent) {
@@ -77,14 +88,16 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
     /* let { children, parent, ...restOfNode } = node;*/
     //  console.log("treeToGraph", { depth, pred });
     let n = new Node(node.title || node.label || node.name || node.id, 60, 100);
-    console.log("node: ", { node });
+    //console.log("node: ", Util.filterOutKeys(node, ['children','parent','photos','users']));
 
-    if(node.parent) {
-      let e = new Edge(node.parent, n);
+    if(node.parent_id > 0) {
+      let parent = tree.get(node.parent_id);
+      let e = new Edge(parent, n);
       graph.addEdge(e);
     }
 
-    graph.addNode(n);
+    graph.addNode(n).id = node.id;
+    graph.addNode(n).parent_id = node.parent_id;
   }
 
   /* walkTree(tree, (node, parent, parent_node) => {

@@ -346,11 +346,7 @@ class Show extends React.Component {
           <ItemView id={this.state.itemId} />
         ) : (
           <div className={"show-layout2"}>
-            {tree ? (
-              <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} />
-            ) : (
-              undefined
-            )}
+            {tree ? <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} /> : undefined}
             {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
