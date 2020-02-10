@@ -259,6 +259,8 @@ class TreePage extends React.Component {
 
     treeToGraph(g, items);
 
+    console.log("graph: ", g);
+
     return { items, g, params };
   }
 

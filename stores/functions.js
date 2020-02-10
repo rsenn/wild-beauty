@@ -1,5 +1,6 @@
 import { toJS } from "mobx";
 import { Graph, Node, Edge } from "../lib/fd-graph.js";
+import Util from "../lib/util.js";
 
 export const RandomColor = () => {
   const c = HSLA.random();
@@ -64,7 +65,20 @@ export const reduceTree = (tree, fn = (acc, node) => {}, acc) => {
 };
 
 export const treeToGraph = (graph, tree) => {
-  walkTree(tree, (node, parent, parent_node) => {
+  for(let [node, depth, parent_node] of Util.walkTree(tree, 1000, null, item => true)) {
+    /* let { children, parent, ...restOfNode } = node;*/
+    console.log("treeToGraph", { depth });
+    let n = new Node(node.title || node.label || node.name || node.id, 60, 100);
+
+    if(parent_node) {
+      let e = new Edge(parent_node, n);
+      graph.addEdge(e);
+    }
+
+    graph.addNode(n);
+  }
+
+  /* walkTree(tree, (node, parent, parent_node) => {
     let nchildren = reduceTree(
       node,
       (acc, n, p) => {
@@ -87,5 +101,5 @@ export const treeToGraph = (graph, tree) => {
     return n;
   });
   const { nodes, edges } = graph;
-  console.log("graph: ", { nodes, edges });
+  console.log("graph: ", { nodes, edges });*/
 };
