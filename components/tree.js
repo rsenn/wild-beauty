@@ -299,20 +299,7 @@ if(height  < minHeight)
         {[...Table2DIterator(table)].map(item => (
           <g transform={`translate(${item.pos.x},${item.pos.y})`}>
             <g id={"item." + item.id}>
-              <rect
-                x={-radius}
-                y={-radius}
-                width={radius * 2}
-                height={radius * 2}
-                rx={8}
-                ry={8}
-                vectorEffect={"non-scaling-stroke"}
-                stroke={item.id == active ? "white" : "none"}
-                strokeDasharray={item.id == active ? "4" : ""}
-                fill={item.color}
-                strokeWidth={item.id == active ? W * 3 : W}
-                style={{ filter: "url(#shadow)" }}
-              />
+              <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={8} ry={8} vectorEffect={"non-scaling-stroke"} stroke={item.id == active ? "white" : "none"} strokeDasharray={item.id == active ? "4" : ""} fill={item.color} strokeWidth={item.id == active ? W * 3 : W} style={{ filter: "url(#shadow)" }} />
               <SVGText lines={item.title} x={0} y={0} />
             </g>
           </g>

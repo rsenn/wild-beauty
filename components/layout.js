@@ -2,10 +2,11 @@ import React from "react";
 import Head from "next/head";
 import Nav from "../components/nav.js";
 import ToastsContainer from "./views/toastsContainer.js";
+import classNames from "classnames";
 
-export const Layout = ({ toastsClick, ...props }) => (
+export const Layout = ({ toastsClick, className, ...props }) => (
   <React.Fragment>
-    <div className={"page-layout"}>
+    <div className={classNames("page-layout", className)} {...props}>
       <Head>
         <title>New</title>
         <link rel="icon" href="/favicon.ico" />

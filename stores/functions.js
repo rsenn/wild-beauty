@@ -1,5 +1,6 @@
 import { toJS } from "mobx";
 import { Graph, Node, Edge } from "../lib/fd-graph.js";
+import Util from "../lib/util.js";
 
 export const RandomColor = () => {
   const c = HSLA.random();
@@ -63,8 +64,44 @@ export const reduceTree = (tree, fn = (acc, node) => {}, acc) => {
   return acc;
 };
 
-export const treeToGraph = (graph, tree) => {
-  walkTree(tree, (node, parent, parent_node) => {
+export const treeToGraph = (graph, tree, pred = item => true) => {
+  // if(!(typeof tree == "object" && tree && tree.length !== undefined))
+
+  tree = new Map([...Util.walkTree(tree, 1000, null, pred)].map(it => [it.id, it]));
+  //tree = Object.fromEntries([...tree].map(it => ([ it.id, it ] )));
+
+  for(let key of tree.keys()) {
+    let node = tree.get(key);
+    node.parent = node.parent_id > 0 ? tree.get(node.parent_id) : null;
+    tree.set(key, node);
+  }
+
+  console.log("tree: ", tree);
+  for(let [key, node] of tree.entries()) {
+    // let node = tree.get(key);
+    let depth = 0;
+    let p = node;
+    while(p && p.parent) {
+      p = p.parent;
+      depth++;
+    }
+    /* let { children, parent, ...restOfNode } = node;*/
+    //  console.log("treeToGraph", { depth, pred });
+    let n = new Node(node.title || node.label || node.name || node.id, 60, 100);
+    // console.log("node: ", Util.filterOutKeys(node, ['children','parent','photos','users']));
+
+    graph.addNode(n).node = node;
+
+    if(node.parent_id > 0) {
+      let parent = graph.findNode(node.parent_id);
+      let e = new Edge(parent, n);
+      graph.addEdge(e);
+    }
+
+    //   graph.addNode(n).parent_id = node.parent_id;
+  }
+
+  /* walkTree(tree, (node, parent, parent_node) => {
     let nchildren = reduceTree(
       node,
       (acc, n, p) => {
@@ -87,5 +124,5 @@ export const treeToGraph = (graph, tree) => {
     return n;
   });
   const { nodes, edges } = graph;
-  console.log("graph: ", { nodes, edges });
+  console.log("graph: ", { nodes, edges });*/
 };

@@ -50,9 +50,14 @@ const makeItemToOption = selected => item => {
   let value = item.id;
   let children = toJS(item.children);
   let obj = { label, title: label, id: value, parent_id: item.parent_id, value, expanded: true, checked: selected === value };
-  if(children && children.length) obj.children = children;
+  if(children && typeof children == "object" && children.length !== undefined) obj.children = children;
+  else obj.children = [];
   if(label.startsWith("null(")) return null;
   if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
+  /*
+  if(obj.children && obj.children.length == 0) {
+    return null;
+  }*/
 
   return obj;
 };
@@ -75,9 +80,7 @@ class Show extends React.Component {
     const { query, params } = (ctx && ctx.req) || {};
     //console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
-
     let items;
-
     if(params && params.id !== undefined) {
       let id = parseInt(params.id);
       const name = params.id;
@@ -89,11 +92,9 @@ class Show extends React.Component {
     } else {
       items = await Show.API.list("items", Show.fields);
     }
-
     items = items.sort((a, b) => a.id - b.id);
     console.log("items: ", items);
     if(typeof RootStore.items == "object" && RootStore.items.clear) RootStore.items.clear();
-
     return { items, params };
   }
 
@@ -111,7 +112,7 @@ class Show extends React.Component {
     props.items.forEach(item => {
       rootStore.newItem(item);
     });
-    this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
+    this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption(), null);
     if(this.props.params && this.props.params.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
@@ -182,20 +183,15 @@ class Show extends React.Component {
       if(elem && elem.style) {
         const t = ` scale(1.4,1.4)`;
         //console.log("Mouse event: ", t);
-
         var parent = elem.parentElement;
-
         elem.style.setProperty("transition", "transform 1s cubic-bezier(0.19, 1, 0.22, 1)");
-
         elem.style.setProperty("transform", t);
         this.prevElem = elem;
         hover = getId(elem);
       }
     } else if(type.endsWith("down")) {
       var elem = r[0];
-
       //console.log("Mouse event: ", { type, x, y }, r);
-
       if(elem) {
         const id = getId(elem.parentElement);
         //console.log("Clicked id:", id);
@@ -261,32 +257,24 @@ class Show extends React.Component {
     let grid = Element.find("#item-grid");
     let b = Element.find(".page-layout");
     let brect = Element.rect("body");
-
     let rect = Element.rect(e);
     let points = rect.toPoints().map(p => [p.x, p.y]);
     let rect2 = Element.rect("#item-grid");
     let lrect = Element.rect(".show-layout2");
     let points2 = rect2.toPoints().map(p => [p.x, p.y]);
-
     var trn = affineFit(points, points2);
     var matrix = fromTriangles(points.slice(0, 3), points2.slice(0, 3));
     //console.log("matrix fromTriangles: ", matrix);
-
     var srect = new Rect({ x: 0, y: 0, width: window.innerWidth, height: window.innerHeight });
     var size = Math.min(rect2.width, window.innerHeight - 20, window.innerWidth - 20);
-
     var pt = new Point(srect.center);
     pt.y += window.scrollY;
     var t = Point.diff(pt, rect.center);
-
     var origin = Point.diff(rect.center, rect2);
-
     var distance = Math.sqrt(t.x * t.x + t.y * t.y);
     this.speed = distance * 0.002;
-
     var gm = Matrix.init_translate(t.x, t.y);
     //console.log("translation:  ", t);
-
     var scale = [(size / rect.width) * 1, (size / rect.height) * 1];
     var m = Matrix.init_identity();
     m = Matrix.translate(m, -rect.center.x, -rect.center.y);
@@ -323,18 +311,17 @@ class Show extends React.Component {
       window.m = m;
     }
   };
+
   render() {
     const { rootStore } = this.props;
     let swipeEvents = {};
     var e = null;
     if(global.window !== undefined) window.page = this;
-
     const onError = event => {};
     const onImage = event => {
       const { value } = event.nativeEvent.target;
       document.forms[0].submit();
     };
-
     if(global.window) {
       window.addEventListener("resize", event => {
         const { currentTarget, target } = event;
@@ -359,11 +346,7 @@ class Show extends React.Component {
           <ItemView id={this.state.itemId} />
         ) : (
           <div className={"show-layout2"}>
-            {tree ? (
-              <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} />
-            ) : (
-              undefined
-            )}
+            {tree ? <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} /> : undefined}
             {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>

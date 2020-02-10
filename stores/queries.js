@@ -102,7 +102,7 @@ export class Queries {
     const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
     const parent_id = rs.state.parent_id;
 
-    const { name = null, ...dataObj } = this.entries.reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
+    const { name = null, ...dataObj } = (Util.isArray(this.entries) ? this.entries : []).reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
 
     console.log("saveItem", { photo_id, parent_id, name, dataObj });
 

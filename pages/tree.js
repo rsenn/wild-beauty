@@ -1,9 +1,10 @@
 import React from "react";
 import Head from "next/head";
-import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align } from "../utils/dom.js";
+import { Element, Point, PointList, Rect, Matrix, Timer, SVG, TRBL, Align } from "../utils/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
+import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
@@ -11,16 +12,77 @@ import { Tree } from "../components/tree.js";
 import { action } from "mobx";
 import Nav from "../components/nav.js";
 import { getOrCreateStore } from "../stores/createStore.js";
-
 import { trkl } from "../utils/trkl.js";
 import { Graph, Node, Edge } from "../utils/fd-graph.js";
 import { makeItemToOption, findInTree, walkTree, treeToGraph } from "../stores/functions.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
-
 import "../static/css/grid.css";
-
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
+
+var hier = {
+  name: "[1]",
+  children: [
+    { name: "[41]", size: 10 },
+    { name: "org", size: 10 },
+    { name: "[57]", size: 10 },
+    { name: "[58]", size: 10 },
+    { name: "[59]", size: 10 },
+    { name: "[60]", size: 10 },
+    { name: "[61]", size: 10 },
+    { name: "[62]", size: 10 },
+    {
+      name: "objects",
+      children: [
+        {
+          name: "electronics",
+          children: [
+            { name: "[119]", size: 10 },
+            { name: "[120]", size: 10 },
+            { name: "[121]", size: 10 },
+            { name: "[122]", size: 10 },
+            { name: "[123]", size: 10 },
+            { name: "[124]", size: 10 },
+            {
+              name: "pic",
+              children: [
+                { name: "lc-meter", size: 10 },
+                { name: "rgb-led", size: 10 },
+                { name: "picstick-25k50", size: 10 }
+              ]
+            },
+            { name: "Audio", size: 10 },
+            { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] }
+          ]
+        },
+        {
+          name: "boxes",
+          children: [
+            { name: "[99]", size: 10 },
+            { name: "[103]", size: 10 },
+            { name: "[98]", size: 10 },
+            { name: "[86]", size: 10 },
+            { name: "Test", size: 10 }
+          ]
+        },
+        { name: "bags", children: [{ name: "[64]", size: 10 }] }
+      ]
+    },
+    {
+      name: "subjects",
+      children: [
+        {
+          name: "[89]",
+          children: [
+            { name: "[105]", size: 10 },
+            { name: "Roman", size: 10 }
+          ]
+        },
+        { name: "groups", size: 10 }
+      ]
+    }
+  ]
+};
 
 const insertParent = (element, newParent) => {
   const p = element.parentElement;
@@ -32,7 +94,6 @@ const insertParent = (element, newParent) => {
 const removeParent = (element, pred = e => true) => {
   const p = element.parentElement;
   const pp = p.parentElement;
-
   if(pred(p)) {
     pp.removeChild(p);
     pp.appendChild(element);
@@ -50,7 +111,7 @@ export function createGraph(svg) {
   let strokeWidth = 1.1;
 
   let g = new Graph({
-    origin: new Point(300, 200),
+    origin: new Point(0, 0),
     gravitate_to_origin: true,
     spacing: 12,
     timestep: 300,
@@ -85,48 +146,9 @@ export function createGraph(svg) {
     },
     onUpdateNode: (node, i) => {
       if(!node.element) {
-        node.element = SVG.create(
-          "g",
-          {
-            id: `node-${i}`,
-            transform: `translate(${node.x},${node.y})`,
-            fill: "#00f",
-            stroke: "#000",
-            strokeWidth: 1
-          },
-          svg
-        );
-
-        SVG.create(
-          "rect",
-          {
-            x: -16,
-            y: -17,
-            width: 32,
-            height: 32,
-            rx: 1.5,
-            ry: 1.5,
-            fill: "#ffdd00",
-            stroke: "#000",
-            strokeWidth
-          },
-          node.element
-        );
-
-        SVG.create(
-          "tspan",
-          { alignmentBaseline: "middle", text: node.label },
-          SVG.create(
-            "text",
-            {
-              fontSize: 10,
-              fill: "#000",
-              stroke: "none",
-              textAnchor: "middle"
-            },
-            node.element
-          )
-        );
+        node.element = SVG.create("g", { id: `node-${i}`, transform: `translate(${node.x},${node.y})`, fill: "#00f", stroke: "#000", strokeWidth: 1 }, svg);
+        SVG.create("rect", { x: -16, y: -17, width: 32, height: 32, rx: 1.5, ry: 1.5, fill: "#ffdd00", stroke: "#000", strokeWidth }, node.element);
+        SVG.create("tspan", { alignmentBaseline: "middle", text: node.label }, SVG.create("text", { fontSize: 10, fill: "#000", stroke: "none", textAnchor: "middle" }, node.element));
       } else Element.attr(node.element, { transform: `translate(${node.x},${node.y})` });
     },
     onUpdateEdge: (edge, i) => {
@@ -135,70 +157,6 @@ export function createGraph(svg) {
       else Element.attr(edge.element, { x1, y1, x2, y2 });
     }
   });
-
-  var hier = {
-    name: "[1]",
-    children: [
-      { name: "[41]", size: 10 },
-      { name: "org", size: 10 },
-      { name: "[57]", size: 10 },
-      { name: "[58]", size: 10 },
-      { name: "[59]", size: 10 },
-      { name: "[60]", size: 10 },
-      { name: "[61]", size: 10 },
-      { name: "[62]", size: 10 },
-      {
-        name: "objects",
-        children: [
-          {
-            name: "electronics",
-            children: [
-              { name: "[119]", size: 10 },
-              { name: "[120]", size: 10 },
-              { name: "[121]", size: 10 },
-              { name: "[122]", size: 10 },
-              { name: "[123]", size: 10 },
-              { name: "[124]", size: 10 },
-              {
-                name: "pic",
-                children: [
-                  { name: "lc-meter", size: 10 },
-                  { name: "rgb-led", size: 10 },
-                  { name: "picstick-25k50", size: 10 }
-                ]
-              },
-              { name: "Audio", size: 10 },
-              { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] }
-            ]
-          },
-          {
-            name: "boxes",
-            children: [
-              { name: "[99]", size: 10 },
-              { name: "[103]", size: 10 },
-              { name: "[98]", size: 10 },
-              { name: "[86]", size: 10 },
-              { name: "Test", size: 10 }
-            ]
-          },
-          { name: "bags", children: [{ name: "[64]", size: 10 }] }
-        ]
-      },
-      {
-        name: "subjects",
-        children: [
-          {
-            name: "[89]",
-            children: [
-              { name: "[105]", size: 10 },
-              { name: "Roman", size: 10 }
-            ]
-          },
-          { name: "groups", size: 10 }
-        ]
-      }
-    ]
-  };
 
   treeToGraph(g, hier);
 
@@ -243,7 +201,6 @@ class TreePage extends React.Component {
       const name = params.id;
       if(isNaN(id) || typeof id != "number") id = -1;
       const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
-
       let response = await TreePage.API(q);
       items = response.items || [];
       console.log("item: ", items[0]);
@@ -251,8 +208,79 @@ class TreePage extends React.Component {
       items = await TreePage.API.list("items", TreePage.fields);
     }
     items = items.sort((a, b) => a.id - b.id);
-    RootStore.items.clear();
-    return { items, params };
+    if(RootStore.items && RootStore.items.clear) RootStore.items.clear();
+    items = items.map(item => RootStore.newItem(item));
+    let rootItem = RootStore.rootItem;
+    let tree = RootStore.getItem(rootItem.id);
+    let g = new Graph({
+      origin: new Point(0, 0),
+      gravitate_to_origin: true,
+      spacing: 12,
+      timestep: 300
+    });
+    let iter = Object.fromEntries([
+      ...RootStore.entries(({ photos, children, users, key, ...item }) => {
+        item = toJS(item);
+        if(!item.type) delete item.type;
+        if(!Util.isEmpty(item.data)) delete item.data;
+        return item;
+      })
+    ]);
+    for(let key in iter) {
+      let { parent, parent_id, childIds, children, ...item } = iter[key];
+      let depth = ((iter[parent_id] && iter[parent_id].depth) || 0) + 1;
+      let p;
+      if(parent_id > 0) {
+        iter[key].parent = iter[parent_id];
+      }
+      item = iter[key];
+      item.depth = depth;
+      if(childIds.length) item.children = childIds.map(id => iter[id]);
+
+      if(item.data === null || Util.isEmpty(item.data)) delete item.data;
+    }
+
+    let root = RootStore.getItem(RootStore.rootItemId, it => Util.filterOutKeys(toJS(it), ["childIds", "photos", "users"]));
+
+    treeToGraph(g, root, item => {
+      let { children, parent, users, photos, parent_id, ...restOfItem } = item;
+      let numChildren = children ? children.length : 0;
+      let output = { itemKeys: Object.keys(item), parent_id, restOfItem };
+      if(numChildren) item.num_children = numChildren;
+      if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
+      console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
+      return true;
+    });
+
+    for(let i in g.nodes) {
+      let n = g.nodes[i];
+      n.x = n.x ? parseFloat(n.x.toFixed(3)) : 0;
+      n.y = n.y ? parseFloat(n.y.toFixed(3)) : 0;
+
+      delete n.parent;
+      delete n.children;
+    }
+    for(let i in g.edges) {
+      let e = g.edges[i];
+
+      if(e.a) {
+        delete e.a.parent;
+        delete e.a.children;
+      }
+      if(e.b) {
+        delete e.b.parent;
+        delete e.b.children;
+      }
+    }
+    g.checkRedraw();
+    g.checkRedraw();
+    g.roundAll(0.003);
+    let pl = g.points;
+    let center = g.rect.center;
+    g.translate(-center.x, -center.y);
+    console.log("g.points: ", g.points);
+    console.log("g.rect: ", g.rect);
+    return { params };
   }
 
   constructor(props) {
@@ -266,9 +294,6 @@ class TreePage extends React.Component {
       window.stores = getOrCreateStore();
     }
     rootStore.items.clear();
-    props.items.forEach(item => {
-      rootStore.newItem(item);
-    });
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
     if(this.props.params.id !== undefined) {
       this.state.view = "item";
@@ -307,10 +332,6 @@ class TreePage extends React.Component {
     this.b = b;
     this.c = c;
     this.a = a;
-
-    if(Util.isBrowser() && !this.g) {
-      this.g = createGraph(this.svg());
-    }
   }
 
   checkTagRemove() {
@@ -518,7 +539,7 @@ class TreePage extends React.Component {
     }
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
-    const items = this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1);
+    const items = [];
     console.log("TreePage.render");
     return (
       <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
@@ -527,7 +548,7 @@ class TreePage extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        {/*  <Tree tree={tree} minWidth={1024} active={this.state.active} /> {}*/}
+        {}
         <br />
         <br />
         <br />
@@ -535,11 +556,7 @@ class TreePage extends React.Component {
           <ItemView id={this.state.itemId} />
         ) : (
           <div className={"show-layout2"}>
-            {tree ? (
-              <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} />
-            ) : (
-              undefined
-            )}
+            {tree ? <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} /> : undefined}
             {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
