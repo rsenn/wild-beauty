@@ -212,15 +212,16 @@ export class RootStore extends Queries {
     return item;
   }
 
-  getItem(id, tr = it => it, idMap = null) {
+  getItem(id, tr = it => it, idMap = null, depth = 1000) {
     if(idMap === null) idMap = [];
     let item = this.items.get("" + (!id ? this.rootItemId : id));
     if(item && idMap.indexOf(item.id) == -1) {
       idMap.push(item.id);
       if(typeof item == "object") {
         let { parent_id } = item;
-        if(item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap) : null)).filter(c => c !== null);
+        if(depth > 0 && item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap, depth - 1) : null)).filter(c => c !== null);
         else item.children = [];
+        item.children = item.children.filter(i => i !== null);
       }
     }
     return item ? tr(item) : null;
