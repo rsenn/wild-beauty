@@ -11,16 +11,77 @@ import { Tree } from "../components/tree.js";
 import { action } from "mobx";
 import Nav from "../components/nav.js";
 import { getOrCreateStore } from "../stores/createStore.js";
-
 import { trkl } from "../utils/trkl.js";
 import { Graph, Node, Edge } from "../utils/fd-graph.js";
 import { makeItemToOption, findInTree, walkTree, treeToGraph } from "../stores/functions.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
-
 import "../static/css/grid.css";
-
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
+
+var hier = {
+  name: "[1]",
+  children: [
+    { name: "[41]", size: 10 },
+    { name: "org", size: 10 },
+    { name: "[57]", size: 10 },
+    { name: "[58]", size: 10 },
+    { name: "[59]", size: 10 },
+    { name: "[60]", size: 10 },
+    { name: "[61]", size: 10 },
+    { name: "[62]", size: 10 },
+    {
+      name: "objects",
+      children: [
+        {
+          name: "electronics",
+          children: [
+            { name: "[119]", size: 10 },
+            { name: "[120]", size: 10 },
+            { name: "[121]", size: 10 },
+            { name: "[122]", size: 10 },
+            { name: "[123]", size: 10 },
+            { name: "[124]", size: 10 },
+            {
+              name: "pic",
+              children: [
+                { name: "lc-meter", size: 10 },
+                { name: "rgb-led", size: 10 },
+                { name: "picstick-25k50", size: 10 }
+              ]
+            },
+            { name: "Audio", size: 10 },
+            { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] }
+          ]
+        },
+        {
+          name: "boxes",
+          children: [
+            { name: "[99]", size: 10 },
+            { name: "[103]", size: 10 },
+            { name: "[98]", size: 10 },
+            { name: "[86]", size: 10 },
+            { name: "Test", size: 10 }
+          ]
+        },
+        { name: "bags", children: [{ name: "[64]", size: 10 }] }
+      ]
+    },
+    {
+      name: "subjects",
+      children: [
+        {
+          name: "[89]",
+          children: [
+            { name: "[105]", size: 10 },
+            { name: "Roman", size: 10 }
+          ]
+        },
+        { name: "groups", size: 10 }
+      ]
+    }
+  ]
+};
 
 const insertParent = (element, newParent) => {
   const p = element.parentElement;
@@ -32,7 +93,6 @@ const insertParent = (element, newParent) => {
 const removeParent = (element, pred = e => true) => {
   const p = element.parentElement;
   const pp = p.parentElement;
-
   if(pred(p)) {
     pp.removeChild(p);
     pp.appendChild(element);
@@ -50,7 +110,7 @@ export function createGraph(svg) {
   let strokeWidth = 1.1;
 
   let g = new Graph({
-    origin: new Point(300, 200),
+    origin: new Point(0, 0),
     gravitate_to_origin: true,
     spacing: 12,
     timestep: 300,
@@ -136,70 +196,6 @@ export function createGraph(svg) {
     }
   });
 
-  var hier = {
-    name: "[1]",
-    children: [
-      { name: "[41]", size: 10 },
-      { name: "org", size: 10 },
-      { name: "[57]", size: 10 },
-      { name: "[58]", size: 10 },
-      { name: "[59]", size: 10 },
-      { name: "[60]", size: 10 },
-      { name: "[61]", size: 10 },
-      { name: "[62]", size: 10 },
-      {
-        name: "objects",
-        children: [
-          {
-            name: "electronics",
-            children: [
-              { name: "[119]", size: 10 },
-              { name: "[120]", size: 10 },
-              { name: "[121]", size: 10 },
-              { name: "[122]", size: 10 },
-              { name: "[123]", size: 10 },
-              { name: "[124]", size: 10 },
-              {
-                name: "pic",
-                children: [
-                  { name: "lc-meter", size: 10 },
-                  { name: "rgb-led", size: 10 },
-                  { name: "picstick-25k50", size: 10 }
-                ]
-              },
-              { name: "Audio", size: 10 },
-              { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] }
-            ]
-          },
-          {
-            name: "boxes",
-            children: [
-              { name: "[99]", size: 10 },
-              { name: "[103]", size: 10 },
-              { name: "[98]", size: 10 },
-              { name: "[86]", size: 10 },
-              { name: "Test", size: 10 }
-            ]
-          },
-          { name: "bags", children: [{ name: "[64]", size: 10 }] }
-        ]
-      },
-      {
-        name: "subjects",
-        children: [
-          {
-            name: "[89]",
-            children: [
-              { name: "[105]", size: 10 },
-              { name: "Roman", size: 10 }
-            ]
-          },
-          { name: "groups", size: 10 }
-        ]
-      }
-    ]
-  };
-
   treeToGraph(g, hier);
 
   return g;
@@ -251,8 +247,19 @@ class TreePage extends React.Component {
       items = await TreePage.API.list("items", TreePage.fields);
     }
     items = items.sort((a, b) => a.id - b.id);
-    RootStore.items.clear();
-    return { items, params };
+
+    if(RootStore.items && RootStore.items.clear) RootStore.items.clear();
+
+    let g = new Graph({
+      origin: new Point(0, 0),
+      gravitate_to_origin: true,
+      spacing: 12,
+      timestep: 300
+    });
+
+    treeToGraph(g, items);
+
+    return { items, g, params };
   }
 
   constructor(props) {
@@ -307,10 +314,10 @@ class TreePage extends React.Component {
     this.b = b;
     this.c = c;
     this.a = a;
-
+    /*
     if(Util.isBrowser() && !this.g) {
       this.g = createGraph(this.svg());
-    }
+    }*/
   }
 
   checkTagRemove() {
