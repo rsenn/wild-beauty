@@ -257,9 +257,13 @@ class TreePage extends React.Component {
       timestep: 300
     });
 
-    treeToGraph(g, items);
+    treeToGraph(g, items, item => {
+      let { children, parent, parent_id, ...restOfItem } = item;
+          console.log("item: ", restOfItem);
+          return true;
 
-    console.log("graph: ", g);
+    });
+
 
     return { items, g, params };
   }

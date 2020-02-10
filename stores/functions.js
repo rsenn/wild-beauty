@@ -64,8 +64,8 @@ export const reduceTree = (tree, fn = (acc, node) => {}, acc) => {
   return acc;
 };
 
-export const treeToGraph = (graph, tree) => {
-  for(let [node, depth, parent_node] of Util.walkTree(tree, 1000, null, item => true)) {
+export const treeToGraph = (graph, tree, pred =  item => true) => {
+  for(let [node, depth, parent_node] of Util.walkTree(tree, 1000, null, pred)) {
     /* let { children, parent, ...restOfNode } = node;*/
     console.log("treeToGraph", { depth });
     let n = new Node(node.title || node.label || node.name || node.id, 60, 100);
