@@ -4,6 +4,7 @@ import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align } from "../utils/
 import getAPI from "../stores/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
+import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
@@ -249,6 +250,10 @@ class TreePage extends React.Component {
     items = items.sort((a, b) => a.id - b.id);
 
     if(RootStore.items && RootStore.items.clear) RootStore.items.clear();
+    items = items.map(item => RootStore.newItem(item));
+
+    let rootItem = RootStore.rootItem;
+    let tree = RootStore.getItem(rootItem.id);
 
     let g = new Graph({
       origin: new Point(0, 0),
@@ -256,15 +261,40 @@ class TreePage extends React.Component {
       spacing: 12,
       timestep: 300
     });
+    let iter = Object.fromEntries([
+      ...RootStore.entries(({ photos, children, users, key, ...item }) => {
+        item = toJS(item);
+        if(!item.type) delete item.type;
+        if(!Util.isEmpty(item.data)) delete item.data;
+        return item;
+      })
+    ]);
+    for(let key in iter) {
+      let { parent, parent_id, childIds, children, ...item } = iter[key];
+      let depth = ((iter[parent_id] && iter[parent_id].depth) || 0) + 1;
+      let p;
+      if(parent_id > 0) {
+        iter[key].parent = iter[parent_id];
+        //  delete iter[key].parent_id;
+      }
+     item =
+     RootStore.items.get(key);
+     item.depth = depth;
+      if(childIds.length) item.children = childIds.map(id => iter[id]);
+      delete item.childIds;
+      if(item.data === null || Util.isEmpty(item.data)) delete item.data;
+    }
+    
+    let root = toJS(RootStore.rootItem);
 
-    treeToGraph(g, items, item => {
-      let { children, parent, parent_id, ...restOfItem } = item;
-          console.log("item: ", restOfItem);
-          return true;
-
+    treeToGraph(g, root, item => {
+      let { children, parent, users, photos, parent_id, ...restOfItem } = item;
+      let numChildren = children ? children.length : 0;
+      let output = { itemKeys: Object.keys(item), parent_id, restOfItem };
+      if(numChildren) output.numChildren = numChildren;
+      if(numChildren) return true;
     });
-
-
+    console.log("item: ", g);
     return { items, g, params };
   }
 

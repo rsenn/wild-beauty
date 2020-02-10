@@ -64,14 +64,23 @@ export const reduceTree = (tree, fn = (acc, node) => {}, acc) => {
   return acc;
 };
 
-export const treeToGraph = (graph, tree, pred =  item => true) => {
-  for(let [node, depth, parent_node] of Util.walkTree(tree, 1000, null, pred)) {
-    /* let { children, parent, ...restOfNode } = node;*/
-    console.log("treeToGraph", { depth,  pred });
-    let n = new Node(node.title || node.label || node.name || node.id, 60, 100);
+export const treeToGraph = (graph, tree, pred = item => true) => {
+  if(!(typeof tree == "object" && tree && tree.length !== undefined)) tree = Util.walkTree(tree, 1000, null, pred);
 
-    if(parent_node) {
-      let e = new Edge(parent_node, n);
+  for(let node of tree) {
+    let depth = 0;
+    let p = node;
+    while(p && p.parent) {
+      p = p.parent;
+      depth++;
+    }
+    /* let { children, parent, ...restOfNode } = node;*/
+    //  console.log("treeToGraph", { depth, pred });
+    let n = new Node(node.title || node.label || node.name || node.id, 60, 100);
+    console.log("node: ", { node });
+
+    if(node.parent) {
+      let e = new Edge(node.parent, n);
       graph.addEdge(e);
     }
 

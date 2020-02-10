@@ -203,8 +203,9 @@ export class RootStore extends Queries {
       }
       item.data = data;
     }
-    if(item.photos && item.photos.length > 0 && item.photos.map) {
-      item.photos = item.photos.map(i => ({ ...i.photo, landscape: i.photo.width > i.photo.height }));
+    if(item.photos && typeof item.photos == "object" && item.photos.length > 0 && item.photos.map) {
+      //      if(ite && typeof(i) == 'object' && i.photo !== undefined)
+      //    item.photos = item.photos.map(i => ({ ...i.photo, landscape: i.photo && i.photo.width !== undefined ? (i.photo.width > i.photo.height) : 0 }));
     }
     this.items.set("" + id, item);
     item = this.items.get("" + item.id);
@@ -226,6 +227,11 @@ export class RootStore extends Queries {
     }
     return item ? tr(item) : null;
   }
+
+  entries = function*(map = null) {
+    if(map === null) map = item => item;
+    for(let [key, item] of this.items.entries()) yield [key, map(item)];
+  };
 
   notLoadedChildren() {
     let arr = Object.values(this.items.toObject());
