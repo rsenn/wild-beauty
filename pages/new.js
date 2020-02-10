@@ -69,9 +69,12 @@ class New extends React.Component {
       window.rs = rootStore;
     }
 
-    this.touchListener = SelectionListener(event => {
-      //  console.log("client: ", new Point(event.client ? event.client : event).toString());
-    });
+    this.touchListener = SelectionListener(
+      event => {
+        //  console.log("client: ", new Point(event.client ? event.client : event).toString());
+      },
+      { color: "#40ff00", shadow: "#000000" }
+    );
 
     rootStore.state.step = 1;
   }
@@ -114,7 +117,7 @@ class New extends React.Component {
     //console.log("New.render", this.tree);
 
     return (
-      <Layout toastsClick={this.handleClick} className={'noselect'} {...this.touchListener.events}>
+      <Layout toastsClick={this.handleClick} className={"noselect"} {...this.touchListener.events}>
         <NeedAuth>{rootStore.state.image === null ? <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}</NeedAuth>
         <SvgOverlay svgRef={this.svgLayer} />
         <style jsx global>{`
