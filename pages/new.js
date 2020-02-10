@@ -114,7 +114,7 @@ class New extends React.Component {
     //console.log("New.render", this.tree);
 
     return (
-      <Layout toastsClick={this.handleClick} {...this.touchListener.events}>
+      <Layout toastsClick={this.handleClick} className={'noselect'} {...this.touchListener.events}>
         <NeedAuth>{rootStore.state.image === null ? <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}</NeedAuth>
         <SvgOverlay svgRef={this.svgLayer} />
         <style jsx global>{`
