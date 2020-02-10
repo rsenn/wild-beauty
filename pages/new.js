@@ -70,7 +70,7 @@ class New extends React.Component {
     }
 
     this.touchListener = SelectionListener(event => {
-    //  console.log("client: ", new Point(event.client ? event.client : event).toString());
+      //  console.log("client: ", new Point(event.client ? event.client : event).toString());
     });
 
     rootStore.state.step = 1;
