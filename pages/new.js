@@ -1,7 +1,7 @@
 import React from "react";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../utils/alea.js";
-import { Element } from "../utils/dom.js";
+import { Element, Point, Line, Rect } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { action } from "mobx";
@@ -12,6 +12,7 @@ import { trkl } from "../utils/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
 import { maxZIndex } from "../stores/functions.js";
+import { MovementListener, TouchListener, SelectionListener } from "../lib/touchHandler.js";
 
 import "../static/css/react-upload-gallery.css";
 import "../static/style.css";
@@ -68,6 +69,10 @@ class New extends React.Component {
       window.rs = rootStore;
     }
 
+    this.touchListener = SelectionListener(event => {
+    //  console.log("client: ", new Point(event.client ? event.client : event).toString());
+    });
+
     rootStore.state.step = 1;
   }
 
@@ -88,7 +93,7 @@ class New extends React.Component {
     const { target, currentTarget } = event;
     let photo_id = parseInt(target.getAttribute("id").replace(/.*-/g, ""));
     //console.log("New.chooseImage ", { photo_id, target, currentTarget });
-/*    rootStore.state.image = photo_id;
+    /*    rootStore.state.image = photo_id;
     rootStore.state.step = 2;*/
     router.push(`/new/${photo_id}`);
   }
@@ -102,13 +107,14 @@ class New extends React.Component {
     const onError = event => {};
     const onImage = event => {
       const { value } = event.nativeEvent.target;
-      document.forms[0].submit();
+      //  document.forms[0].submit();
       //console.log("onChange: ", value);
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     //console.log("New.render", this.tree);
+
     return (
-      <Layout toastsClick={this.handleClick}>
+      <Layout toastsClick={this.handleClick} {...this.touchListener.events}>
         <NeedAuth>{rootStore.state.image === null ? <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}</NeedAuth>
         <SvgOverlay svgRef={this.svgLayer} />
         <style jsx global>{`

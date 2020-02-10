@@ -5,14 +5,16 @@ import ToastsContainer from "./views/toastsContainer.js";
 
 export const Layout = ({ toastsClick, ...props }) => (
   <React.Fragment>
-    <div className={"page-layout"}>
+    <div className={"page-layout"} {...props}>
       <Head>
         <title>New</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Nav>{/*  {global.window ? window.site.label(props) : undefined} -{" "}
       {global.window ? window.site.description(props) : undefined}*/}</Nav>
-      <div className={"content-layout"}>{props.children}</div>
+      <div className={"content-layout"}>
+        {props.children}
+      </div>
     </div>
     <ToastsContainer onClick={toastsClick} />
     <style jsx global>{`

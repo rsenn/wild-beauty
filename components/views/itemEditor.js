@@ -63,48 +63,49 @@ export const ItemEditor = inject("rootStore")(
         />
         {/*       <SortableTree treeData={tree} />*/}
         <div className={"item-fields"}>
-          {typeof(rootStore.entries) == 'object' && rootStore.entries && typeof(rootStore.entries.map) == 'function'  && rootStore.entries.map(field => (
-            <EditableField
-              options={rootStore.fieldNames}
-              multiline={!!field.multiline}
-              hasDraft={false}
-              className={"editable-field"}
-              name={field.type}
-              value={field.value}
-              onNameChanged={newName => {
-                field.multiline = String(newName).toLowerCase() == "text";
-                field.type = newName;
-              }}
-              onValueChanged={newVal => {
-                field.value = newVal;
-              }}
-              onCreateName={name => {
-                console.log("onCreateName: ", name);
-                if(typeof name == "string" && name.length > 0) {
-                  name = name.toLowerCase();
-                  rootStore.fields.push(name);
-                  field.type = name;
-                }
-              }}
-            />
-          ))}
+          {typeof rootStore.entries == "object" &&
+            rootStore.entries &&
+            typeof rootStore.entries.map == "function" &&
+            rootStore.entries.map(field => (
+              <EditableField
+                options={rootStore.fieldNames}
+                multiline={!!field.multiline}
+                hasDraft={false}
+                className={"editable-field"}
+                name={field.type}
+                value={field.value}
+                onNameChanged={newName => {
+                  field.multiline = String(newName).toLowerCase() == "text";
+                  field.type = newName;
+                }}
+                onValueChanged={newVal => {
+                  field.value = newVal;
+                }}
+                onCreateName={name => {
+                  console.log("onCreateName: ", name);
+                  if(typeof name == "string" && name.length > 0) {
+                    name = name.toLowerCase();
+                    rootStore.fields.push(name);
+                    field.type = name;
+                  }
+                }}
+              />
+            ))}
           <AddItemBar
             onAdd={() => {
               let obj = observable({ type: null, value: "" });
-              if(typeof(rootStore.entries ) == 'object' && rootStore.entries&& rootStore.entries.push !== undefined)  
-              rootStore.entries.push(obj);
+              if(typeof rootStore.entries == "object" && rootStore.entries && rootStore.entries.push !== undefined) rootStore.entries.push(obj);
               Timer.once(100, () => {
                 let a = [...Element.findAll("img").filter(i => /edit/.test(i.src))];
-                let button = a[a.length - 1] ?a[a.length - 1].parentElement : null;
+                let button = a[a.length - 1] ? a[a.length - 1].parentElement : null;
                 console.log("Button: ", button);
                 if(button) {
+                  if(button.click) button.click();
 
-                if( button.click) button.click();
-
-                let inputs = Util.array([...Element.findAll("input", button.parentElement)]);
-                console.log("inputs:", inputs);
-                inputs[0].focus();
-              }
+                  let inputs = Util.array([...Element.findAll("input", button.parentElement)]);
+                  console.log("inputs:", inputs);
+                  inputs[0].focus();
+                }
               });
             }}
           >
