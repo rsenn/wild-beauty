@@ -88,16 +88,17 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
     /* let { children, parent, ...restOfNode } = node;*/
     //  console.log("treeToGraph", { depth, pred });
     let n = new Node(node.title || node.label || node.name || node.id, 60, 100);
-    //console.log("node: ", Util.filterOutKeys(node, ['children','parent','photos','users']));
+    // console.log("node: ", Util.filterOutKeys(node, ['children','parent','photos','users']));
+
+    graph.addNode(n).node = node;
 
     if(node.parent_id > 0) {
-      let parent = tree.get(node.parent_id);
+      let parent = graph.findNode(node.parent_id);
       let e = new Edge(parent, n);
       graph.addEdge(e);
     }
 
-    graph.addNode(n).id = node.id;
-    graph.addNode(n).parent_id = node.parent_id;
+    //   graph.addNode(n).parent_id = node.parent_id;
   }
 
   /* walkTree(tree, (node, parent, parent_node) => {

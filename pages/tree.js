@@ -237,7 +237,7 @@ class TreePage extends React.Component {
       item = iter[key]; // RootStore.items.get(key);
       item.depth = depth;
       if(childIds.length) item.children = childIds.map(id => iter[id]);
-      delete item.childIds;
+      //delete item.childIds;
       if(item.data === null || Util.isEmpty(item.data)) delete item.data;
     }
 
@@ -266,16 +266,28 @@ class TreePage extends React.Component {
     for(let i in g.edges) {
       let e = g.edges[i];
 
-      delete e.a.parent;
-      delete e.b.parent;
-      delete e.a.children;
-      delete e.b.children;
+      if(e.a) {
+        delete e.a.parent;
+        delete e.a.children;
+      }
+      if(e.b) {
+        delete e.b.parent;
+        delete e.b.children;
+      }
     }
-
-    console.log("graph: ", g.nodes, g.edges);
+    /*
+    console.log("nodes: ", [...Util.walkTree(g.nodes, 1000, i => true, i => { delete i.children; return i; } )].map(it => Util.filterOutKeys(it,['children','parent'])).slice(0,2));
+    console.log("edges:",[...Util.walkTree(g.edges)].map(it => Util.filterOutKeys(it,['children','parent'])).slice(0,2));
+*/
 
     g.checkRedraw();
     g.checkRedraw();
+    g.roundAll(0.003);
+    /*for(let n of g.nodes) {
+  let { children, parent, parent_id, ...node } = n;
+}
+*/
+    console.log("tree: ", g.serialize());
 
     return { params };
   }
