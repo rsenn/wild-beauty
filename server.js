@@ -27,6 +27,7 @@ const Alea = require("./utils/alea.js");
 const Readable = stream.Readable;
 const getColors = require("get-image-colors");
 const tempfile = require("tempfile");
+const cquant = require("cquant");
 
 util.inspect.defaultOptions.colors = true;
 util.inspect.defaultOptions.depth = 10;
@@ -364,22 +365,13 @@ if (!dev && cluster.isMaster) {
     server.post(
       "/api/image/upload",
       needAuth(async function(req, res) {
-        /*   if(!req.files || Object.keys(req.files).length === 0)
-        return res.status(400).send("No files were uploaded.");*/
-
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
         let response = [];
         for(let item of Object.entries(req.files)) {
           const file = item[1];
-          //console.log(`item: `, item);
-          //const data = ;
-
-          let props = await sharp(file.data).metadata(); // jpeg.jpegProps(file.data);
-          //console.log(`props: `, props);
+          let props = await sharp(file.data).metadata();
           let { width, height, aspect } = props || {};
           if(!aspect && width > 0 && height > 0) aspect = width / height;
-          //console.log(`Image width: ${width} height: ${height}`);
-          //console.log(`Image aspect: ${aspect}`);
           const calcDimensions = (max, props) => {
             if(typeof props != "object" || props === null) props = {};
             let { width, height, ...restOfProps } = props;
@@ -397,51 +389,55 @@ if (!dev && cluster.isMaster) {
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
           if(typeof props != "object" || props === null) props = {};
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
-          //console.log(`New Image width: ${newDimensions.width} height: ${newDimensions.height}`);
           if(!compareDimensions(props, newDimensions)) {
-            //console.log(`new Image aspect: ${aspect}`);
             if(!newDimensions.width) delete newDimensions.width;
             if(!newDimensions.height) delete newDimensions.height;
-            //console.log(`newDimensions `, newDimensions);
             let transformer = sharp()
               .jpeg({
-                quality: 95 /*,
-              chromaSubsampling: "4:4:4"*/
+                quality: 95
               })
               .resize(newDimensions)
-              .on("info", function(info) {
-                //console.log("Image height is " + info.height);
-              });
+              .on("info", function(info) {});
             var inputStream = bufferToStream(file.data);
             var outputStream = new MemoryStream();
             const finished = util.promisify(stream.finished);
-            outputStream.on("finish", () => {
-              //console.log("outputStream: ", outputStream.buffer);
-            });
-            //console.log("inputStream: ", inputStream);
+            outputStream.on("finish", () => {});
             inputStream.pipe(transformer).pipe(outputStream);
             await finished(outputStream);
             let newData = outputStream.buffer[0];
-            //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
-            //console.log("newData.length: ", newData.length);
             file.data = newData;
             props = jpeg.jpegProps(file.data);
             width = newDimensions.width ? newDimensions.width : props.width;
             height = newDimensions.height ? newDimensions.height : props.height;
-
-            //console.log(`new Image props: `, props);
           }
-          /*.resize*/
           let data = file.data.toString("base64");
           let word = (file.data[0] << 8) + file.data[1];
+          console.log("sharp");
+
+        let buf =   sharp(file.data)
+            .resize(newDimensions.width * .3515625, newDimensions.height *.3515625)
+            .raw()
+            .toBuffer((_err, buffer, info) => {
+              if(!_err) {
+                let colorCount = 16;
+                cquant
+                  .paletteAsync(buffer, info.channels, colorCount)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => {
+                    console.log(err);
+                  });
+              }
+            })
+            .toFile('output.png', (err, info) => console.log("sharp.toFile", {err,info}));
+            console.error("sharp output buf: ",buf);
+
           let { depth, channels } = props;
           let reply = await API.insert("photos", { original_name: `"${file.name}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
-          //console.log("API upload photo: ", reply && reply.returning ? reply.returning : reply);
           let { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
-          //console.log("API upload photo: ", word.toString(16), { affected_rows, props });
           if(returning && returning.forEach) returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
         }
-        //console.log("Send response: ", response);
         res.json(response);
       })
     );
