@@ -12,10 +12,10 @@
 	"buffers":
 	[
 		{
-			"contents": "DefaultDocument\nrender",
+			"contents": "function bufferToStream(buffer)\n(worker, code, signal) =>\n() =>\nfunction(req, res, next)\nfunction(req, res, next)\nasync function(req, res)\nkey =>\ngetVar\ngetUser\nneedAuth\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nitem =>\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nimage =>\nim =>\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\ncalcDimensions\ncompareDimensions\nfunction(info)\n() =>\nfunction(info)\n({ original_name, filesize, width, height, id }) =>\n(req, res) =>\n(req, res) =>\nerr =>",
 			"settings":
 			{
-				"buffer_size": 22,
+				"buffer_size": 623,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
@@ -26,6 +26,14 @@
 			"settings":
 			{
 				"buffer_size": 606,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server.js",
+			"settings":
+			{
+				"buffer_size": 19193,
 				"line_ending": "Unix"
 			}
 		}
@@ -170,6 +178,7 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			" transformer = sharp()\n              .png({ palette: true, colours: 256, force: true })\n              .resize(newDimensions)\n              .on(\"info\", function(info) {\n                console.log(\"Image height is \" + info.height);\n              });\n            outputStream = new MemoryStream();\n\n            let fileStream = fs.createWriteStream(\"temp.png\");\n\n            inputStream = bufferToStream(Buffer.from(inBuf));\n            try {\n              inputStream.pipe(transformer).pipe(fileStream);\n  \n            } catch(err) {\n              console.error(\"ERROR:\", err);\n            }",
 			"BBox upda",
 			"client",
 			" Element\\(",
@@ -302,7 +311,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 22,
+						"buffer_size": 623,
 						"regions":
 						{
 						},
@@ -312,23 +321,178 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/pages/_document.js",
+							"current_file": "/home/roman/the-wild-beauty-company/server.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									154,
-									169
+									1204,
+									1235
 								],
 								[
-									191,
-									197
+									2014,
+									2039
+								],
+								[
+									2279,
+									2284
+								],
+								[
+									2391,
+									2415
+								],
+								[
+									3992,
+									4016
+								],
+								[
+									4342,
+									4366
+								],
+								[
+									5559,
+									5565
+								],
+								[
+									5798,
+									5821
+								],
+								[
+									5907,
+									5944
+								],
+								[
+									6278,
+									6294
+								],
+								[
+									6301,
+									6325
+								],
+								[
+									6925,
+									6949
+								],
+								[
+									7894,
+									7918
+								],
+								[
+									8190,
+									8214
+								],
+								[
+									8906,
+									8930
+								],
+								[
+									9157,
+									9164
+								],
+								[
+									9550,
+									9574
+								],
+								[
+									10209,
+									10233
+								],
+								[
+									11502,
+									11526
+								],
+								[
+									11928,
+									11936
+								],
+								[
+									12033,
+									12038
+								],
+								[
+									12195,
+									12219
+								],
+								[
+									12503,
+									12527
+								],
+								[
+									13784,
+									13808
+								],
+								[
+									14606,
+									14638
+								],
+								[
+									15168,
+									15197
+								],
+								[
+									16004,
+									16018
+								],
+								[
+									16323,
+									16328
+								],
+								[
+									16902,
+									16916
+								],
+								[
+									18888,
+									18939
+								],
+								[
+									19285,
+									19298
+								],
+								[
+									19944,
+									19957
+								],
+								[
+									20142,
+									20148
 								]
 							],
 							"symlist":
 							[
-								"DefaultDocument",
-								"render"
+								"function bufferToStream(buffer)",
+								"(worker, code, signal) =>",
+								"() =>",
+								"function(req, res, next)",
+								"function(req, res, next)",
+								"async function(req, res)",
+								"key =>",
+								"getVar",
+								"getUser",
+								"needAuth",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"item =>",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"image =>",
+								"im =>",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"calcDimensions",
+								"compareDimensions",
+								"function(info)",
+								"() =>",
+								"function(info)",
+								"({ original_name, filesize, width, height, id }) =>",
+								"(req, res) =>",
+								"(req, res) =>",
+								"err =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -336,13 +500,13 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -358,19 +522,49 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								205,
+								205
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/Teito University.tmTheme",
+							"color_scheme": "Packages/Ublime Color Schemes/Teito University.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "server.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 19193,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								16720,
+								16720
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6773.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -436,6 +630,10 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"server.j",
+				"server.js"
+			],
 			[
 				"dom",
 				"lib/dom.js"
