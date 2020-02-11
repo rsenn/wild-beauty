@@ -12,10 +12,10 @@
 	"buffers":
 	[
 		{
-			"contents": "RandomColor\nmaxZIndex\ne =>\ne =>\n(a, b) =>\nfindInTree\nmakeItemToOption\nitem =>\nShow\ngetInitialProps\n(a, b) =>\nconstructor\nitem =>\nfunction removeLeafs(tree)\nchild =>\ni =>\ncheckTagRemove\ne =>\n() =>\nnode =>\ncomponentDidMount\ncomponentDidUpdate\nevent =>\nevent =>\nrect =>\nfunction getNum(elem, name)\nfunction getId(elem)\nselectNode\nchild =>\ntreeSelEvent\nitem =>\nevent =>\ne =>\np =>\np =>\ntend\nrender\nonError\nonImage\nevent =>\nmakeTreeSelEvent\nevent =>\nitem =>\nnode =>\nitem =>\nch =>\n([key, value]) =>",
+			"contents": "function bufferToStream(buffer)\nasync function getImagePalette(data)\ngetImageColors\n(resolve, reject) =>\n(_err, buffer, info) =>\nc =>\n(worker, code, signal) =>\n() =>\nfunction(req, res, next)\nfunction(req, res, next)\nasync function(req, res)\nkey =>\ngetVar\ngetUser\nneedAuth\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nitem =>\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nimage =>\nim =>\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\ncalcDimensions\ncompareDimensions\nfunction(info)\n() =>\n({ original_name, filesize, colors, width, height, id }) =>\n(req, res) =>\n(req, res) =>\nerr =>",
 			"settings":
 			{
-				"buffer_size": 491,
+				"buffer_size": 718,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
@@ -33,7 +33,26 @@
 			"file": "pages/new.js",
 			"settings":
 			{
-				"buffer_size": 3807,
+				"buffer_size": 3833,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/new/[photo_id].js",
+			"settings":
+			{
+				"buffer_size": 7550,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server.js",
+			"settings":
+			{
+				"buffer_size": 18803,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
@@ -42,6 +61,33 @@
 			"settings":
 			{
 				"buffer_size": 18776,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/devtools.js",
+			"settings":
+			{
+				"buffer_size": 30695,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "stores/api.js",
+			"settings":
+			{
+				"buffer_size": 4838,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "stores/i18nStore.js",
+			"settings":
+			{
+				"buffer_size": 3571,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
@@ -137,7 +183,6 @@
 	[
 		"/home/roman/the-wild-beauty-company",
 		"/home/roman/the-wild-beauty-company/components",
-		"/home/roman/the-wild-beauty-company/components/simple",
 		"/home/roman/the-wild-beauty-company/pages",
 		"/home/roman/the-wild-beauty-company/pages/new",
 		"/home/roman/the-wild-beauty-company/public",
@@ -205,6 +250,7 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"colors",
 			"makeItemTo",
 			"\\.pos",
 			"treeVerify",
@@ -351,7 +397,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 491,
+						"buffer_size": 718,
 						"regions":
 						{
 						},
@@ -361,248 +407,198 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/pages/show.js",
+							"current_file": "/home/roman/the-wild-beauty-company/server.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									1049,
-									1068
+									1309,
+									1340
 								],
 								[
-									1131,
-									1148
+									1438,
+									1474
 								],
 								[
-									1203,
-									1207
+									1506,
+									1530
 								],
 								[
-									1286,
-									1290
+									1543,
+									1563
 								],
 								[
-									1314,
-									1323
+									1703,
+									1726
 								],
 								[
-									1359,
-									1388
+									1962,
+									1966
 								],
 								[
-									1627,
-									1657
+									2756,
+									2781
 								],
 								[
-									1658,
-									1665
+									3021,
+									3026
 								],
 								[
-									2422,
-									2426
+									3133,
+									3157
 								],
 								[
-									2825,
-									2840
+									4734,
+									4758
 								],
 								[
-									3607,
-									3616
+									5084,
+									5108
 								],
 								[
-									3796,
-									3807
+									6301,
+									6307
 								],
 								[
-									4225,
-									4232
+									6540,
+									6563
 								],
 								[
-									4361,
-									4387
+									6649,
+									6686
 								],
 								[
-									4506,
-									4514
+									7020,
+									7036
 								],
 								[
-									4941,
-									4945
+									7043,
+									7067
 								],
 								[
-									5093,
-									5107
+									7667,
+									7691
 								],
 								[
-									5259,
-									5263
+									8636,
+									8660
 								],
 								[
-									5322,
-									5327
+									8932,
+									8956
 								],
 								[
-									5424,
-									5431
+									9648,
+									9672
 								],
 								[
-									5589,
-									5606
+									9899,
+									9906
 								],
 								[
-									5691,
-									5709
+									10292,
+									10316
 								],
 								[
-									5761,
-									5769
+									10951,
+									10975
 								],
 								[
-									5836,
-									5844
+									12244,
+									12268
 								],
 								[
-									6064,
-									6071
+									12680,
+									12688
 								],
 								[
-									6120,
-									6147
+									12785,
+									12790
 								],
 								[
-									6210,
-									6230
+									12947,
+									12971
 								],
 								[
-									7243,
-									7253
+									13255,
+									13279
 								],
 								[
-									7329,
-									7337
+									14554,
+									14578
 								],
 								[
-									7448,
-									7460
+									14980,
+									15012
 								],
 								[
-									7692,
-									7699
+									15542,
+									15571
 								],
 								[
-									8024,
-									8032
+									16113,
+									16127
 								],
 								[
-									8526,
-									8530
+									16341,
+									16346
 								],
 								[
-									9000,
-									9004
+									17472,
+									17531
 								],
 								[
-									9148,
-									9152
+									17833,
+									17846
 								],
 								[
-									10615,
-									10626
+									18492,
+									18505
 								],
 								[
-									11279,
-									11285
-								],
-								[
-									11438,
-									11456
-								],
-								[
-									11471,
-									11489
-								],
-								[
-									11647,
-									11655
-								],
-								[
-									11733,
-									11759
-								],
-								[
-									11760,
-									11768
-								],
-								[
-									11869,
-									11876
-								],
-								[
-									12296,
-									12303
-								],
-								[
-									13222,
-									13229
-								],
-								[
-									15531,
-									15536
-								],
-								[
-									16149,
-									16166
+									18690,
+									18696
 								]
 							],
 							"symlist":
 							[
-								"RandomColor",
-								"maxZIndex",
-								"e =>",
-								"e =>",
-								"(a, b) =>",
-								"findInTree",
-								"makeItemToOption",
-								"item =>",
-								"Show",
-								"getInitialProps",
-								"(a, b) =>",
-								"constructor",
-								"item =>",
-								"function removeLeafs(tree)",
-								"child =>",
-								"i =>",
-								"checkTagRemove",
-								"e =>",
+								"function bufferToStream(buffer)",
+								"async function getImagePalette(data)",
+								"getImageColors",
+								"(resolve, reject) =>",
+								"(_err, buffer, info) =>",
+								"c =>",
+								"(worker, code, signal) =>",
 								"() =>",
-								"node =>",
-								"componentDidMount",
-								"componentDidUpdate",
-								"event =>",
-								"event =>",
-								"rect =>",
-								"function getNum(elem, name)",
-								"function getId(elem)",
-								"selectNode",
-								"child =>",
-								"treeSelEvent",
+								"function(req, res, next)",
+								"function(req, res, next)",
+								"async function(req, res)",
+								"key =>",
+								"getVar",
+								"getUser",
+								"needAuth",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
 								"item =>",
-								"event =>",
-								"e =>",
-								"p =>",
-								"p =>",
-								"tend",
-								"render",
-								"onError",
-								"onImage",
-								"event =>",
-								"makeTreeSelEvent",
-								"event =>",
-								"item =>",
-								"node =>",
-								"item =>",
-								"ch =>",
-								"([key, value]) =>"
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"image =>",
+								"im =>",
+								"async function(req, res)",
+								"async function(req, res)",
+								"async function(req, res)",
+								"calcDimensions",
+								"compareDimensions",
+								"function(info)",
+								"() =>",
+								"({ original_name, filesize, colors, width, height, id }) =>",
+								"(req, res) =>",
+								"(req, res) =>",
+								"err =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -610,13 +606,13 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 10,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 2,
+			"selected": 3,
 			"sheets":
 			[
 				{
@@ -647,7 +643,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
@@ -656,15 +652,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3807,
+						"buffer_size": 3833,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1772,
+								1772
 							]
 						],
 						"settings":
@@ -674,7 +670,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 459.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
@@ -682,6 +678,67 @@
 				},
 				{
 					"buffer": 3,
+					"file": "pages/new/[photo_id].js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7550,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3548,
+								3548
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1173.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "server.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 18803,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1945,
+								1969
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 816.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
 					"file": "pages/show.js",
 					"semi_transient": false,
 					"settings":
@@ -693,8 +750,8 @@
 						"selection":
 						[
 							[
-								3793,
-								3793
+								1203,
+								1207
 							]
 						],
 						"settings":
@@ -705,14 +762,104 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1450.0,
+						"translation.y": 71.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 6,
+					"file": "lib/devtools.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 30695,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3028,
+								3028
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1280.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "stores/api.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4838,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								967,
+								967
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "stores/i18nStore.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3571,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2559,
+								2559
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 816.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
 					"file": "lib/util.js",
 					"semi_transient": false,
 					"settings":
@@ -738,11 +885,11 @@
 						"translation.y": 25902.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 10,
 					"file": "components/tree.js",
 					"semi_transient": false,
 					"settings":
@@ -768,7 +915,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 9,
 					"type": "text"
 				}
 			]
@@ -832,12 +979,12 @@
 		"selected_items":
 		[
 			[
-				"util",
-				"lib/util.js"
-			],
-			[
 				"devtools",
 				"lib/devtools.js"
+			],
+			[
+				"util",
+				"lib/util.js"
 			],
 			[
 				"api",

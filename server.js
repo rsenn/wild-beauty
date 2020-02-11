@@ -43,12 +43,17 @@ function bufferToStream(buffer) {
 
 async function getImagePalette(data) {
   // prettier-ignore
-  const getImageColors = data => new Promise((resolve, reject) => {let img = sharp(data); 
-    img /*.resize(newDimensions.width * 0.3515625, newDimensions.height * 0.3515625)*/ .raw() .toBuffer((_err, buffer, info) => {if(!_err) {let colorCount = 16; cquant .paletteAsync(buffer, info.channels, colorCount) .then(resolve) .catch(reject); } }); });
+  const getImageColors = data => new Promise((resolve, reject) => {
+    let img = sharp(data); 
+    img /*.resize(newDimensions.width * 0.3515625, newDimensions.height * 0.3515625)*/
+     .raw() .toBuffer((_err, buffer, info) => {
+      if(!_err) {let colorCount = 16;
+       cquant .paletteAsync(buffer, info.channels, colorCount).then(resolve).catch(reject); }
+       }); });
   let ret = await getImageColors(data);
   return Object.fromEntries(
     [...ret].map(c => {
-      let color = new RGBA(c.R, c.B, c.G, 255);
+      let color = new RGBA(c.R, c.G, c.B, 255);
       return [color.hex(), c.count];
     })
   );
