@@ -102,6 +102,10 @@ export const ToastsContainer = inject("rootStore")(
             transform: translateY(50px);
             opacity: 0;
           }
+
+          .toasts-container {
+            pointer-events: none;
+          }
         `}</style>
       </React.Fragment>
     );

@@ -1,268 +1,25 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Gallery, { randomImagePaths } from "../components/gallery.js";
-import Alea from "../utils/alea.js";
-import { Timer, Element } from "../utils/dom.js";
-import { lazyInitializer } from "../utils/lazyInitializer.js";
+import Gallery from "../components/gallery.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
-import Util from "../utils/util.js";
 import { inject, observer } from "mobx-react";
-import { trkl } from "../utils/trkl.js";
-import axios from "../utils/axios.js";
-import { ColorScheme } from "../utils/colorscheme.js";
-import { withSize, SizeMe } from "react-sizeme";
-import { TouchListener, TouchHandler, TouchEvents, MouseEvents, MultitouchListener, MovementListener } from "../lib/touchHandler.js";
-import { TouchCallback, makeTouchCallback } from "../components/TouchCallback.js";
 import Layout from "../components/layout.js";
-
-import "../static/style.css";
-
-const rng = Alea.singleton(Date.now());
-const imagePaths = lazyInitializer(() => randomImagePaths());
+import { CubeSpinner } from "../components/simple/cubeSpinner.js";
 
 @inject("rootStore")
 @observer
 class Home extends React.Component {
-  state = {
-    mirrored: false,
-    angle: 0
-  };
-  svgLayer = trkl();
-  touchListener = null;
-
   constructor(props) {
     super(props);
-    const { rootStore } = this.props;
-    rootStore.setState({ subpage: 1 });
-    if(global.window) {
-      window.page = this;
-      window.rs = rootStore;
-      window.rng = rng;
-      window.axios = axios;
-      const parser = new DOMParser();
-      window.nt = parser.parseFromString(ColorScheme.nextTheme, "text/xml");
-      window.EditColorScheme = ColorScheme.randomize;
-      window.ColorSchemeToObject = ColorScheme.toObject;
-    }
-    this.touchCallback = makeTouchCallback("#t-logo", (event, e) => {
-      const zIndex = maxZIndex() + 1;
-      if(e) Element.setCSS(e, { zIndex });
-      if(e && e.style) {
-        moveImage(event, e);
-      }
-    });
-    this.touchListener = TouchListener(
-      event => {
-        const { nativeEvent, index, x, y, start, end, type } = event;
-        const { target, currentTarget } = nativeEvent || event;
-        if(!type.endsWith("move")) {
-          this.animateLogo(animation => {
-            console.log("animation end");
-          });
-          console.log("Touch ", index, { x, y }, type, target);
-        }
-      },
-      { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
-    );
-
-    console.log("this.touchListener", Object.keys(this.touchListener));
-    console.log("this.touchListener.listener", Object.keys(this.touchListener.listener));
-    this.getHash();
   }
-
-  readHash() {
-    if(global.window) {
-      const hash = /#/.test(window.location.href) ? window.location.href.replace(/.*#/, "") : "1";
-      const subpage = parseInt(hash);
-      return subpage;
-    }
-    return 1;
-  }
-
-  getHash() {
-    const { rootStore, router } = this.props;
-    if(global.window) {
-      const subpage = this.readHash();
-      if(!isNaN(subpage)) {
-        if(subpage != rootStore.state.subpage) {
-          rootStore.setState({ subpage });
-          this.forceUpdate();
-        }
-      }
-    } else {
-    }
-  }
-
-  componentDidMount() {
-    const { rootStore, router } = this.props;
-    this.getHash();
-    var counter = 0;
-  }
-
-  componentDidUpdate(prevProps) {
-    const { pathname, query } = this.props.router;
-  }
-
-  handleNext = () => {
-    const { rootStore } = this.props;
-    const subpage = rootStore.state.subpage;
-    rootStore.setState({ subpage: subpage + 1 });
-    if(global.window) window.location.hash = `#${subpage + 1}`;
-  };
-
-  handlePrev = () => {
-    const { rootStore } = this.props;
-    const subpage = rootStore.state.subpage;
-    rootStore.setState({ subpage: subpage - 1 });
-    if(global.window) window.location.hash = `#${subpage - 1}`;
-  };
-
-  animateLogo = endFn => {
-    if(!this.anim) {
-      this.anim = {
-        initialized: false,
-        run: false,
-        interval: 2000,
-        tLogo: null,
-        angle: 0,
-        step: 0,
-        angles: { x: 0, y: 0, z: 0 },
-        vector: {
-          x: 0,
-          y: 0,
-          z: 0,
-          get magnitude() {
-            return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-          },
-          clear() {
-            this.x = 0;
-            this.y = 0;
-            this.z = 0;
-          },
-          normalize() {
-            const mag = this.magnitude;
-            this.x /= mag;
-            this.y /= mag;
-            this.z /= mag;
-          }
-        },
-        init() {
-          if(!this.initialized) {
-            const e = Element.find("#t-logo");
-            if(e) {
-              this.tLogo = e;
-              this.initialized = Date.now();
-              console.log(" anim initialized");
-              this.tick(0);
-            }
-          }
-        },
-        get time() {
-          return Date.now() - this.initialized;
-        },
-        get delta() {
-          let prev = this.prev || this.initialized;
-          let now = Date.now();
-          let delta = now - prev;
-          this.prev = now;
-          return `+${delta}ms`;
-        },
-        makeRandAngles(scale = 180) {
-          this.setAngles(Math.floor((Math.random() * 2 - 1) * scale), Math.floor((Math.random() * 2 - 1) * scale), Math.floor((Math.random() * 2 - 1) * scale));
-          this.angle = Math.floor((Math.random() * 2 - 1) * scale);
-        },
-        makeRandDirection() {
-          this.vector.x = Math.random() * 2 - 1;
-          this.vector.y = Math.random() * 2 - 1;
-          this.vector.z = Math.random() * 2 - 1;
-          this.vector.normalize();
-        },
-        setAngles(x, y, z) {
-          this.angles.x = x;
-          this.angles.y = y;
-          this.angles.z = z;
-        },
-        updateAngles() {
-          let oldT = this.tLogo.style.transition;
-          this.tLogo.style.transition = "";
-          Element.setCSS(this.tLogo, {
-            transform: `perspective(300px) translateZ(-150px) scale(-1,1) rotate3d(${this.vector.x.toFixed(3)}, ${this.vector.y.toFixed(3)}, ${this.vector.z.toFixed(3)}, ${this.angle}deg)`
-          });
-          this.tLogo.style.transition = oldT;
-        },
-        transitionAngles(endfn = () => {}) {
-          const transform = `perspective(300px) translateZ(-150px) scale(-1,1)  rotate3d(${this.vector.x.toFixed(3)}, ${this.vector.y.toFixed(3)}, ${this.vector.z.toFixed(3)}, ${this.angle}deg) `;
-          Element.transition(this.tLogo, { transform }, 1000).then(t => {
-            console.log("Transition END ", this.time, transform);
-            Timer.promise(1000).then(() => endfn());
-          });
-          console.log("Transition START", this.time);
-        },
-        setTransition(enable = true) {
-          Element.setCSS(this.tLogo, { transition: enable ? `transform ${this.interva}ms linear` : "" });
-        },
-        tick(i) {
-          this.run = true;
-
-          console.log(`Anim tick(${i % 3}) ${this.delta}`);
-          switch (i % 3) {
-            case 0: {
-              this.makeRandDirection();
-
-              this.angle = Math.floor((Math.random() * 2 - 1) * 180);
-              this.angle += Math.sign(this.angle) * 180;
-
-              this.transitionAngles(() => this.tick(i + 1));
-              break;
-            }
-            case 1: {
-              this.angle = Math.sign(this.angle) * 360;
-
-              this.transitionAngles(() => this.tick(i + 1));
-              break;
-            }
-            case 2: {
-              this.angle = 0;
-
-              this.updateAngles();
-
-              if(endFn) endFn(this);
-              //  else Timer.promise(1000).then(() => this.tick(i + 1));
-              this.run = false;
-
-              break;
-            }
-          }
-        }
-      };
-    }
-
-    this.anim.init();
-
-    if(!this.run) this.anim.tick(0);
-  };
 
   render() {
-    const { rootStore, router, size } = this.props;
-    let swipeEvents = {};
-    var e = null;
-    if(global.window !== undefined) window.page = this;
-    const t = ` perspective(300px) translateZ(-150px) rotateY(${rootStore.state.mirrored ? 180 : 0}deg) `;
-    const endDate = new Date("01.01.2035");
-    const now = new Date();
-    const seconds = (endDate.getTime() - now.getTime()) / 1000;
-    const timespan = Util.timeSpan(Math.floor(seconds));
-    const subpage = this.readHash();
-    /*
-    const events = this.touchListener ? { ...TouchEvents(this.touchListener), ...MouseEvents(this.touchListener) } : {};
-
-    console.log("Home.render ", this.touchListener.events);*/
-
-    var angle = 0;
-
+    const { rootStore } = this.props;
+    let subpage = 1,
+      timespan = Date.now();
     return (
-      <Layout hideNav={true} {...this.touchListener.events}>
+      <Layout hideNav={true}>
         <Head>
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
@@ -274,16 +31,15 @@ class Home extends React.Component {
             style={{
               transformStyle: "preserve-3d",
               transition: "transform 1s  cubic-bezier(.53,.38,.94,.32)",
-              transform: t
+              transform: ""
             }}
           >
             <img src={"/static/img/logo-transparent.png"} style={{ width: "100%", maxWidth: "1280px" }} />
           </div>
-          {}
         </div>
         <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? "auto" : "none", display: subpage == 2 ? "block" : "block" }}>
           <div>
-            {({ size }) => {
+            {(size => {
               const fontSize = Math.round(size.width / 60);
               const charWidth = fontSize - 1;
               const maxLineLength = Math.floor(size.width / charWidth);
@@ -307,18 +63,22 @@ class Home extends React.Component {
                   </span>
                 </div>
               );
-            }}
+            })({ width: global.window ? window.innerWidth : undefined, height: global.window ? window.innerHeight : undefined })}
           </div>
         </div>
         <div className={"subpage flex-vertical"} style={{ opacity: subpage == 3 ? 1 : 0, pointerEvents: subpage == 3 ? "auto" : "none", display: subpage == 3 ? "flex" : "flex" }}>
-          <div className={"time-counter"}>{timespan}</div>
+          <div className={"time-counter"}>{timespan || ""}</div>
         </div>
-        {}
-        <Link href={"/show"}>
-          <a className={"button-next"} onClick={this.handleNext}>
-            <img src={"/static/img/arrow-next.svg"} />
-          </a>
-        </Link>
+        {/*onClick={this.handleNext}*/}
+        <div className={"button-next"}>
+          <Link href={"/show"}>
+            <a>
+              <img className={"fill-parent"} src={"/static/img/arrow-next.svg"} style={{ opacity: rootStore.state.loading ? 0 : 1 }} />
+            </a>
+          </Link>
+          <CubeSpinner className={"fill-parent"} width={"3.165em"} height={"3.165em"} loading={rootStore.state.loading} />
+        </div>
+
         <SvgOverlay svgRef={this.svgLayer} />
 
         <style jsx global>{`
@@ -350,6 +110,12 @@ class Home extends React.Component {
           .button-next:active,
           .button-prev:active {
             transform: translate(2px, 2px);
+          }
+
+          .abs {
+            position: absolute;
+            left: 0;
+            top: 0;
           }
           .flex-vertical {
             display: flex;
