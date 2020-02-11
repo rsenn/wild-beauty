@@ -54,10 +54,6 @@ const makeItemToOption = selected => item => {
   else obj.children = [];
   if(label.startsWith("null(")) return null;
   if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
-  /*
-  if(obj.children && obj.children.length == 0) {
-    return null;
-  }*/
 
   return obj;
 };
@@ -112,7 +108,16 @@ class Show extends React.Component {
     props.items.forEach(item => {
       rootStore.newItem(item);
     });
-    this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption(), null);
+    let tempTree = rootStore.getItem(rootStore.rootItemId, makeItemToOption(), null);
+
+    function removeLeafs(tree) {
+      let { children, ...node } = tree;
+      if(children && children.length !== undefined) children = children.filter(child => !(!child.children || !child.children.length)).map(removeLeafs);
+      return { children, ...node };
+    }
+
+    this.tree = removeLeafs(tempTree);
+
     if(this.props.params && this.props.params.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
@@ -338,7 +343,16 @@ class Show extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <Tree tree={tree} minWidth={1024} active={this.state.active} /> {}
+        <Tree
+          tree={tree}
+          _treeVerify={node => {
+            console.log("treeVerify: ", node);
+            return typeof node == "object" && node !== null && (!node.children || node.children.length == 0);
+          }}
+          minWidth={1024}
+          active={this.state.active}
+        />{" "}
+        {}
         <br />
         <br />
         <br />

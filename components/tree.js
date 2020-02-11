@@ -185,7 +185,9 @@ export const Tree = ({ tree, minWidth, minHeight, treeVerify = node => true, act
           (i, px, py) => {
             //console.log("circ", {px,py});
             //console.log("item", item);
-            getItem(item.children[i].index).pos = new Point(px + pos.x - vec.x, py + pos.y - vec.y);
+            let childItem = getItem(item.children[i].index);
+
+            if(childItem) childItem.pos = new Point(px + pos.x - vec.x, py + pos.y - vec.y);
           },
           ang
         );
