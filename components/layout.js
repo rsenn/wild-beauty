@@ -4,15 +4,14 @@ import Nav from "../components/nav.js";
 import ToastsContainer from "./views/toastsContainer.js";
 import classNames from "classnames";
 
-export const Layout = ({ toastsClick, className, ...props }) => (
+export const Layout = ({ toastsClick, className, hideNav, ...props }) => (
   <React.Fragment>
     <div className={classNames("page-layout", className)} {...props}>
       <Head>
         <title>New</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Nav>{/*  {global.window ? window.site.label(props) : undefined} -{" "}
-      {global.window ? window.site.description(props) : undefined}*/}</Nav>
+      {hideNav ? undefined : <Nav />}
       <div className={"content-layout"}>{props.children}</div>
     </div>
     <ToastsContainer onClick={toastsClick} />

@@ -1,7 +1,6 @@
 import React from "react";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../utils/alea.js";
-import { Element, Point, Line, Rect } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { action } from "mobx";
@@ -11,8 +10,7 @@ import { ItemEditor } from "../components/views/itemEditor.js";
 import { trkl } from "../utils/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
-import { maxZIndex } from "../stores/functions.js";
-import { MovementListener, TouchListener, SelectionListener } from "../lib/touchHandler.js";
+import { SelectionListener } from "../lib/touchHandler.js";
 
 import "../static/css/react-upload-gallery.css";
 import "../static/style.css";

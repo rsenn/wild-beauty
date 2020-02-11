@@ -12,6 +12,9 @@ import { trkl } from "../utils/trkl.js";
 import axios from "../utils/axios.js";
 import { ColorScheme } from "../utils/colorscheme.js";
 import { withSize, SizeMe } from "react-sizeme";
+import { TouchListener, TouchHandler, TouchEvents, MouseEvents, MultitouchListener, MovementListener } from "../lib/touchHandler.js";
+import { TouchCallback, makeTouchCallback } from "../components/TouchCallback.js";
+import Layout from "../components/layout.js";
 
 import "../static/style.css";
 
@@ -26,6 +29,7 @@ class Home extends React.Component {
     angle: 0
   };
   svgLayer = trkl();
+  touchListener = null;
 
   constructor(props) {
     super(props);
@@ -41,6 +45,29 @@ class Home extends React.Component {
       window.EditColorScheme = ColorScheme.randomize;
       window.ColorSchemeToObject = ColorScheme.toObject;
     }
+    this.touchCallback = makeTouchCallback("#t-logo", (event, e) => {
+      const zIndex = maxZIndex() + 1;
+      if(e) Element.setCSS(e, { zIndex });
+      if(e && e.style) {
+        moveImage(event, e);
+      }
+    });
+    this.touchListener = TouchListener(
+      event => {
+        const { nativeEvent, index, x, y, start, end, type } = event;
+        const { target, currentTarget } = nativeEvent || event;
+        if(!type.endsWith("move")) {
+          this.animateLogo(animation => {
+            console.log("animation end");
+          });
+          console.log("Touch ", index, { x, y }, type, target);
+        }
+      },
+      { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
+    );
+
+    console.log("this.touchListener", Object.keys(this.touchListener));
+    console.log("this.touchListener.listener", Object.keys(this.touchListener.listener));
     this.getHash();
   }
 
@@ -64,24 +91,13 @@ class Home extends React.Component {
         }
       }
     } else {
-      //console.log("query: ", router.query);
     }
   }
 
   componentDidMount() {
     const { rootStore, router } = this.props;
-    //console.log("Home.componentDidMount ");
     this.getHash();
     var counter = 0;
-    /*  Timer.interval(1000, () => {
-      counter++;
-      if(counter % 3 == 0) {
-        rootStore.setState({
-          mirrored: !rootStore.state.mirrored
-        });
-      }
-      this.forceUpdate();
-    });*/
   }
 
   componentDidUpdate(prevProps) {
@@ -102,11 +118,11 @@ class Home extends React.Component {
     if(global.window) window.location.hash = `#${subpage - 1}`;
   };
 
-  animateLogo = () => {
-    //console.log("Home.animateLo$go", this.anim);
+  animateLogo = endFn => {
     if(!this.anim) {
       this.anim = {
         initialized: false,
+        run: false,
         interval: 2000,
         tLogo: null,
         angle: 0,
@@ -166,14 +182,11 @@ class Home extends React.Component {
           this.angles.x = x;
           this.angles.y = y;
           this.angles.z = z;
-
-          // console.log("setAngles: ", { x, y, z });
         },
         updateAngles() {
           let oldT = this.tLogo.style.transition;
           this.tLogo.style.transition = "";
           Element.setCSS(this.tLogo, {
-            //  transform: `perspective(300px) translateZ(-150px) rotateX(${this.angles.x}deg)  rotateY(${this.angles.y}deg) rotateZ(${this.angles.z}deg) `
             transform: `perspective(300px) translateZ(-150px) scale(-1,1) rotate3d(${this.vector.x.toFixed(3)}, ${this.vector.y.toFixed(3)}, ${this.vector.z.toFixed(3)}, ${this.angle}deg)`
           });
           this.tLogo.style.transition = oldT;
@@ -190,11 +203,13 @@ class Home extends React.Component {
           Element.setCSS(this.tLogo, { transition: enable ? `transform ${this.interva}ms linear` : "" });
         },
         tick(i) {
+          this.run = true;
+
           console.log(`Anim tick(${i % 3}) ${this.delta}`);
           switch (i % 3) {
             case 0: {
               this.makeRandDirection();
-              //this.makeRandAngles(360);
+
               this.angle = Math.floor((Math.random() * 2 - 1) * 180);
               this.angle += Math.sign(this.angle) * 180;
 
@@ -203,24 +218,29 @@ class Home extends React.Component {
             }
             case 1: {
               this.angle = Math.sign(this.angle) * 360;
-              //              this.setAngles(Math.sign(this.angles.x) * 360, Math.sign(this.angles.y) * 360, Math.sign(this.angles.z) * 360);
+
               this.transitionAngles(() => this.tick(i + 1));
               break;
             }
             case 2: {
               this.angle = 0;
 
-              //              this.setAngles(0, 0, 0);
               this.updateAngles();
-              Timer.promise(1000).then(() => this.tick(i + 1));
+
+              if(endFn) endFn(this);
+              //  else Timer.promise(1000).then(() => this.tick(i + 1));
+              this.run = false;
+
               break;
             }
           }
-          //  console.log("anim tick ", this.step % 3, this.angles);
         }
       };
     }
+
     this.anim.init();
+
+    if(!this.run) this.anim.tick(0);
   };
 
   render() {
@@ -228,29 +248,29 @@ class Home extends React.Component {
     let swipeEvents = {};
     var e = null;
     if(global.window !== undefined) window.page = this;
-    const t =
-      //` perspective(100vw) scaleX(${rootStore.state.mirrored ? -1 : 1})`;
-      ` perspective(300px) translateZ(-150px) rotateY(${rootStore.state.mirrored ? 180 : 0}deg) `;
+    const t = ` perspective(300px) translateZ(-150px) rotateY(${rootStore.state.mirrored ? 180 : 0}deg) `;
     const endDate = new Date("01.01.2035");
     const now = new Date();
     const seconds = (endDate.getTime() - now.getTime()) / 1000;
     const timespan = Util.timeSpan(Math.floor(seconds));
     const subpage = this.readHash();
-    //console.log("Home.render ", { size });
+    /*
+    const events = this.touchListener ? { ...TouchEvents(this.touchListener), ...MouseEvents(this.touchListener) } : {};
+
+    console.log("Home.render ", this.touchListener.events);*/
+
     var angle = 0;
-    if(Util.isBrowser()) {
-      Timer.once(3000, () => this.animateLogo());
-    }
 
     return (
-      <div className={"main-layout"}>
+      <Layout hideNav={true} {...this.touchListener.events}>
         <Head>
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <div className={"subpage flex-vertical"} style={{ opacity: /*subpage == 1 ?*/ 1 /*: 0*/, display: /* subpage == 1 ? "flex" :*/ "flex" }}>
+        <div className={"subpage flex-vertical"} style={{ opacity: 1, display: "flex" }}>
           <div
             id="t-logo"
+            className="t-logo"
             style={{
               transformStyle: "preserve-3d",
               transition: "transform 1s  cubic-bezier(.53,.38,.94,.32)",
@@ -261,7 +281,7 @@ class Home extends React.Component {
           </div>
           {}
         </div>
-        <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, display: subpage == 2 ? "block" : "block" }}>
+        <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? "auto" : "none", display: subpage == 2 ? "block" : "block" }}>
           <div>
             {({ size }) => {
               const fontSize = Math.round(size.width / 60);
@@ -271,8 +291,6 @@ class Home extends React.Component {
               const padding = Math.round((size.width - fontSize * 45) / 3 + 80);
               const paragraphWidth = Math.floor(size.width - padding * 2);
               const lineLength = Math.floor((paragraphWidth + 2) / charWidth);
-
-              // console.log("SizeMe: ", size, { fontSize, maxLineLength, paragraphWidth, lineLength, padding });
 
               return (
                 <div
@@ -292,16 +310,10 @@ class Home extends React.Component {
             }}
           </div>
         </div>
-        <div className={"subpage flex-vertical"} style={{ opacity: subpage == 3 ? 1 : 0, display: subpage == 3 ? "flex" : "flex" }}>
+        <div className={"subpage flex-vertical"} style={{ opacity: subpage == 3 ? 1 : 0, pointerEvents: subpage == 3 ? "auto" : "none", display: subpage == 3 ? "flex" : "flex" }}>
           <div className={"time-counter"}>{timespan}</div>
         </div>
-        {/*subpage > 1 ? (
-          <a className={"button-prev"} href={"#" + (subpage - 1)} onClick={this.handlePrev}>
-            <img src={"/static/img/arrow-next.svg"} style={{ transform: "scaleX(-1)" }} />
-          </a>
-        ) : (
-          undefined
-        )*/}
+        {}
         <Link href={"/show"}>
           <a className={"button-next"} onClick={this.handleNext}>
             <img src={"/static/img/arrow-next.svg"} />
@@ -381,9 +393,9 @@ class Home extends React.Component {
             margin: 0px;
           }
         `}</style>
-      </div>
+      </Layout>
     );
   }
 }
 
-export default /* withSize()*/ Home;
+export default Home;
