@@ -41,6 +41,18 @@ function bufferToStream(buffer) {
   return stream;
 }
 
+async function getImagePalette(data) {
+  // prettier-ignore
+  const getImageColors = data => new Promise((resolve, reject) => {let img = sharp(data); 
+    img /*.resize(newDimensions.width * 0.3515625, newDimensions.height * 0.3515625)*/ .raw() .toBuffer((_err, buffer, info) => {if(!_err) {let colorCount = 16; cquant .paletteAsync(buffer, info.channels, colorCount) .then(resolve) .catch(reject); } }); });
+  let ret = await getImageColors(data);
+  return Object.fromEntries(
+    [...ret].map(c => {
+      let color = new RGBA(c.R, c.B, c.G, 255);
+      return [color.hex(), c.count];
+    })
+  );
+}
 var secret = fs.readFileSync("secret.key");
 var etc_hostname = fs.readFileSync("/etc/hostname");
 
@@ -416,28 +428,8 @@ if (!dev && cluster.isMaster) {
           let data = file.data.toString("base64");
           let word = (file.data[0] << 8) + file.data[1];
 
-          // prettier-ignore
-          const getImagePalette = data =>
-            new Promise((resolve, reject) => {
-              let img = sharp(data);
-              console.log("sharp", Object.keys(img));
-              img
-                .resize(newDimensions.width * 0.3515625, newDimensions.height * 0.3515625)
-                .raw()
-                .toBuffer((_err, buffer, info) => {
-                  if(!_err) {
-                    let colorCount = 16;
-                    cquant .paletteAsync(buffer, info.channels, colorCount) .then(resolve) .catch(reject);
-                 }
-                });
-            });
-
           let palette = await getImagePalette(file.data);
-
-          palette = Object.fromEntries([...palette].map(c => {
-            let color = new RGBA(c.R, c.B, c.G, 255);
-            return [color.hex(),c.count];
-          }));
+          console.log("palette:", palette);
           let colors = JSON.stringify(palette).replace(/"/g, '\\"');
 
           let { depth, channels } = props;
