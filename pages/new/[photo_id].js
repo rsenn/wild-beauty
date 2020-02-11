@@ -138,7 +138,9 @@ export class NewItem extends React.Component {
 
     if(global.window) {
       Timer.once(500, () => {
-        colors(Object.keys(page.props.images[0].colors));
+let img  = page.props.images && page.props.images[0];
+if(img)
+        colors(Object.keys(img.colors));
       });
     }
   }
