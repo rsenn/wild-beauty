@@ -412,9 +412,9 @@ if (!dev && cluster.isMaster) {
               .on("info", function(info) {
                 //console.log("Image height is " + info.height);
               });
-            var inputStream = bufferToStream(Buffer.from(file.data));
+            var inputStream = bufferToStream(file.data);
             var outputStream = new MemoryStream();
-            let finished = util.promisify(stream.finished);
+            const finished = util.promisify(stream.finished);
             outputStream.on("finish", () => {
               //console.log("outputStream: ", outputStream.buffer);
             });
@@ -422,35 +422,6 @@ if (!dev && cluster.isMaster) {
             inputStream.pipe(transformer).pipe(outputStream);
             await finished(outputStream);
             let newData = outputStream.buffer[0];
-            let inBuf = Buffer.from(outputStream.buffer);
-
-            //    inputStream = bufferToStream(inBuf);
-            transformer = sharp()
-              .png({ palette: true, colours: 256, force: true })
-              .resize(newDimensions)
-              .on("info", function(info) {
-                console.log("Image height is " + info.height);
-              });
-            outputStream = new MemoryStream();
-
-            let fileStream = fs.createWriteStream("temp.png");
-
-            inputStream = bufferToStream(Buffer.from(inBuf));
-            try {
-              inputStream.pipe(transformer).pipe(fileStream);
-              /*
-            inputStream = bufferToStream(Buffer.from(inBuf));
-            inputStream.pipe(transformer).pipe(fileStream);
-*/
-            } catch(err) {
-              console.error("ERROR:", err);
-            }
-
-            /*  getColors("temp.png", "image/png").then(colors => {
-              console.log("image colors: ", colors);
-              // `colors` is an array of color objects
-            });
-*/
             //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
             //console.log("newData.length: ", newData.length);
             file.data = newData;
