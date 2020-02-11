@@ -4,6 +4,14 @@
 		"selected_items":
 		[
 			[
+				"ani",
+				"animateLogo"
+			],
+			[
+				"M",
+				"MultitouchListener"
+			],
+			[
 				"init",
 				"initialized"
 			]
@@ -12,82 +20,84 @@
 	"buffers":
 	[
 		{
-			"contents": "function bufferToStream(buffer)\nasync function getImagePalette(data)\ngetImageColors\n(resolve, reject) =>\n(_err, buffer, info) =>\nc =>\n(worker, code, signal) =>\n() =>\nfunction(req, res, next)\nfunction(req, res, next)\nasync function(req, res)\nkey =>\ngetVar\ngetUser\nneedAuth\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nitem =>\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\nimage =>\nim =>\nasync function(req, res)\nasync function(req, res)\nasync function(req, res)\ncalcDimensions\ncompareDimensions\nfunction(info)\n() =>\n({ original_name, filesize, colors, width, height, id }) =>\n(req, res) =>\n(req, res) =>\nerr =>",
+			"contents": "Home\nconstructor\nrender\nsize =>",
 			"settings":
 			{
-				"buffer_size": 718,
+				"buffer_size": 31,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "pages/_document.js",
+			"file": "lib/touchHandler.js",
 			"settings":
 			{
-				"buffer_size": 606,
+				"buffer_size": 13390,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "pages/new.js",
+			"contents": "import React from \"react\";\nimport Head from \"next/head\";\nimport Router from \"next/router\";\nimport Link from \"next/link\";\nimport Gallery, { randomImagePaths } from \"../components/gallery.js\";\nimport Alea from \"../utils/alea.js\";\nimport { Timer, Element } from \"../utils/dom.js\";\nimport { lazyInitializer } from \"../utils/lazyInitializer.js\";\nimport { SvgOverlay } from \"../utils/svg-overlay.js\";\nimport Util from \"../utils/util.js\";\nimport { inject, observer } from \"mobx-react\";\nimport { trkl } from \"../utils/trkl.js\";\nimport axios from \"../utils/axios.js\";\nimport { ColorScheme } from \"../utils/colorscheme.js\";\nimport { withSize, SizeMe } from \"react-sizeme\";\nimport { TouchListener, TouchHandler, TouchEvents, MouseEvents, MultitouchListener, MovementListener } from \"../lib/touchHandler.js\";\nimport { TouchCallback, makeTouchCallback } from \"../components/TouchCallback.js\";\nimport Layout from \"../components/layout.js\";\nimport { CubeSpinner } from \"../components/simple/cubeSpinner.js\";\n\nimport \"../static/style.css\";\n\nconst rng = Alea.singleton(Date.now());\nconst imagePaths = lazyInitializer(() => randomImagePaths());\n\n@inject(\"rootStore\")\n@observer\nclass Home extends React.Component {\n  state = {\n    mirrored: false,\n    angle: 0,\n    loading: false,\n    pageLoading: \"\"\n  };\n  svgLayer = trkl();\n  touchListener = null;\n\n  constructor(props) {\n    super(props);\n    const { rootStore } = this.props;\n    rootStore.setState({ subpage: 1 });\n    if(global.window) {\n      window.page = this;\n      window.rs = rootStore;\n      window.rng = rng;\n      window.axios = axios;\n      const parser = new DOMParser();\n      window.nt = parser.parseFromString(ColorScheme.nextTheme, \"text/xml\");\n      window.EditColorScheme = ColorScheme.randomize;\n      window.ColorSchemeToObject = ColorScheme.toObject;\n    }\n    this.touchCallback = makeTouchCallback(\"#t-logo\", (event, e) => {\n      const zIndex = maxZIndex() + 1;\n      if(e) Element.setCSS(e, { zIndex });\n      if(e && e.style) {\n        moveImage(event, e);\n      }\n    });\n\n    false &&\n      (this.touchListener = TouchListener(\n        event => {\n          const { nativeEvent, index, x, y, start, end, type } = event;\n          const target = nativeEvent && nativeEvent.target ? nativeEvent.target : event.target;\n          if(!type.endsWith(\"move\")) {\n            let parent;\n            if(target && target.tagName && target.tagName.toLowerCase() == \"img\") {\n              parent = target.parentElement;\n              //console.log(\"Touch \", index, { x, y }, type, target);\n\n              this.animateLogo(animation => {\n                //console.log(\"animation end\");\n              });\n            }\n          }\n        },\n        { /*element: global.window, */ step: 1, round: true, listener: MovementListener, noscroll: true }\n      ));\n\n    //console.log(\"this.touchListener\", Object.keys(this.touchListener));\n    //console.log(\"this.touchListener.listener\", Object.keys(this.touchListener.listener));\n    this.getHash();\n  }\n\n  readHash() {\n    if(global.window) {\n      const hash = /#/.test(window.location.href) ? window.location.href.replace(/.*#/, \"\") : \"1\";\n      const subpage = parseInt(hash);\n      return subpage;\n    }\n    return 1;\n  }\n\n  getHash() {\n    const { rootStore, router } = this.props;\n    if(global.window) {\n      const subpage = this.readHash();\n      if(!isNaN(subpage)) {\n        if(subpage != rootStore.state.subpage) {\n          rootStore.setState({ subpage });\n          this.forceUpdate();\n        }\n      }\n    } else {\n    }\n  }\n\n  componentDidMount() {\n    const { rootStore, router } = this.props;\n    this.getHash();\n    this.setState({\n      loading: false,\n      pageLoading: \"\"\n    });\n    var counter = 0;\n  }\n\n  componentDidUpdate(prevProps) {\n    const { rootStore, router } = this.props;\n    const { pathname, query } = this.props.router;\n    Router.events.on(\"routeChangeStart\", path => {\n      /* returns the last part of the new url so that we know which page to make active in the loading component */\n      let url = Util.parseURL(path);\n      this.setLoading(url);\n    });\n  }\n  setLoading = newPage => {\n    const { rootStore } = this.props;\n\n    console.log(\"set loading state: \", newPage);\n    rootStore.setState({ loading: true });\n\n    // this.setState({ loading: true, pageLoading: newPage });\n  };\n\n  handleNext = () => {\n    const { rootStore } = this.props;\n    const subpage = rootStore.state.subpage;\n    console.log(\"handleNext: \", subpage);\n\n    rootStore.setState({ loading: true, subpage: subpage + 1 });\n    if(global.window) window.location.hash = `#${subpage + 1}`;\n  };\n\n  handlePrev = () => {\n    const { rootStore } = this.props;\n    const subpage = rootStore.state.subpage;\n    console.log(\"handlePrev: \", subpage);\n\n    rootStore.setState({ loading: true, subpage: subpage - 1 });\n    if(global.window) window.location.hash = `#${subpage - 1}`;\n  };\n\n  animateLogo = endFn => {\n    if(!this.anim) {\n      this.anim = {\n        initialized: false,\n        run: false,\n        interval: 2000,\n        tLogo: null,\n        angle: 0,\n        step: 0,\n        angles: { x: 0, y: 0, z: 0 },\n        vector: {\n          x: 0,\n          y: 0,\n          z: 0,\n          get magnitude() {\n            return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);\n          },\n          clear() {\n            this.x = 0;\n            this.y = 0;\n            this.z = 0;\n          },\n          normalize() {\n            const mag = this.magnitude;\n            this.x /= mag;\n            this.y /= mag;\n            this.z /= mag;\n          }\n        },\n        init() {\n          if(!this.initialized) {\n            const e = Element.find(\"#t-logo\");\n            if(e) {\n              this.tLogo = e;\n              this.initialized = Date.now();\n              //console.log(\" anim initialized\");\n              this.tick(0);\n            }\n          }\n        },\n        get time() {\n          return Date.now() - this.initialized;\n        },\n        get delta() {\n          let prev = this.prev || this.initialized;\n          let now = Date.now();\n          let delta = now - prev;\n          this.prev = now;\n          return `+${delta}ms`;\n        },\n        makeRandAngles(scale = 180) {\n          this.setAngles(Math.floor((Math.random() * 2 - 1) * scale), Math.floor((Math.random() * 2 - 1) * scale), Math.floor((Math.random() * 2 - 1) * scale));\n          this.angle = Math.floor((Math.random() * 2 - 1) * scale);\n        },\n        makeRandDirection() {\n          this.vector.x = Math.random() * 2 - 1;\n          this.vector.y = Math.random() * 2 - 1;\n          this.vector.z = Math.random() * 2 - 1;\n          this.vector.normalize();\n        },\n        setAngles(x, y, z) {\n          this.angles.x = x;\n          this.angles.y = y;\n          this.angles.z = z;\n        },\n        updateAngles() {\n          let oldT = this.tLogo.style.transition;\n          this.tLogo.style.transition = \"\";\n          Element.setCSS(this.tLogo, {\n            transform: `perspective(300px) translateZ(-150px) scale(-1,1) rotate3d(${this.vector.x.toFixed(3)}, ${this.vector.y.toFixed(3)}, ${this.vector.z.toFixed(3)}, ${this.angle}deg)`\n          });\n          this.tLogo.style.transition = oldT;\n        },\n        transitionAngles(endfn = () => {}) {\n          const transform = `perspective(300px) translateZ(-150px) scale(-1,1)  rotate3d(${this.vector.x.toFixed(3)}, ${this.vector.y.toFixed(3)}, ${this.vector.z.toFixed(3)}, ${this.angle}deg) `;\n          Element.transition(this.tLogo, { transform }, 1000).then(t => {\n            //console.log(\"Transition END \", this.time, transform);\n            Timer.promise(1000).then(() => endfn());\n          });\n          //console.log(\"Transition START\", this.time);\n        },\n        setTransition(enable = true) {\n          Element.setCSS(this.tLogo, { transition: enable ? `transform ${this.interva}ms linear` : \"\" });\n        },\n        tick(i) {\n          this.run = true;\n          //console.log(`Anim tick(${i % 3}) ${this.delta}`);\n          switch (i % 3) {\n            case 0: {\n              this.makeRandDirection();\n              this.angle = Math.floor((Math.random() * 2 - 1) * 180);\n              this.angle += Math.sign(this.angle) * 180;\n              this.transitionAngles(() => this.tick(i + 1));\n              break;\n            }\n            case 1: {\n              this.angle = Math.sign(this.angle) * 360;\n              this.transitionAngles(() => this.tick(i + 1));\n              break;\n            }\n            case 2: {\n              this.angle = 0;\n              this.updateAngles();\n              if(endFn) endFn(this);\n              //  else Timer.promise(1000).then(() => this.tick(i + 1));\n              this.run = false;\n              break;\n            }\n          }\n        }\n      };\n    }\n\n    this.anim.init();\n\n    if(!this.run) this.anim.tick(0);\n  };\n\n  render() {\n    const { rootStore, router, size } = this.props;\n    let swipeEvents = {};\n    var e = null;\n    if(global.window !== undefined) window.page = this;\n    const t = ` perspective(300px) translateZ(-150px) rotateY(${rootStore.state.mirrored ? 180 : 0}deg) `;\n    const endDate = new Date(\"01.01.2035\");\n    const now = new Date();\n    const seconds = (endDate.getTime() - now.getTime()) / 1000;\n    const timespan = Util.timeSpan(Math.floor(seconds));\n    const subpage = this.readHash();\n    /*\n    const events = this.touchListener ? { ...TouchEvents(this.touchListener), ...MouseEvents(this.touchListener) } : {};\n\n    console.log(\"Home.render \", this.touchListener.events);\n*/\n    const events = {}; //this.touchListener.events;\n    var angle = 0;\n\n    return (\n      <Layout hideNav={true} {...events}>\n        <Head>\n          <title>Home</title>\n          <link rel=\"icon\" href=\"/favicon.ico\" />\n        </Head>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: 1, display: \"flex\" }}>\n          <div\n            id=\"t-logo\"\n            className=\"t-logo\"\n            style={{\n              transformStyle: \"preserve-3d\",\n              transition: \"transform 1s  cubic-bezier(.53,.38,.94,.32)\",\n              transform: t\n            }}\n          >\n            <img src={\"/static/img/logo-transparent.png\"} style={{ width: \"100%\", maxWidth: \"1280px\" }} />\n          </div>\n          {}\n        </div>\n        <div className={\"subpage\"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? \"auto\" : \"none\", display: subpage == 2 ? \"block\" : \"block\" }}>\n          <div>\n            {(size => {\n              const fontSize = Math.round(size.width / 60);\n              const charWidth = fontSize - 1;\n              const maxLineLength = Math.floor(size.width / charWidth);\n\n              const padding = Math.round((size.width - fontSize * 45) / 3 + 80);\n              const paragraphWidth = Math.floor(size.width - padding * 2);\n              const lineLength = Math.floor((paragraphWidth + 2) / charWidth);\n\n              return (\n                <div\n                  style={{\n                    fontSize: `${fontSize}px`,\n                    padding: `${padding >= 19 ? Math.round((padding - 19) / 2) : 0}px ${padding}px 0 ${padding}px`\n                  }}\n                >\n                  <h1>Title</h1>\n                  <span className={\"paragraph\"}>\n                    The earliest known appearance of the phrase is from The Boston Journal. In an article titled \"Current Notes\" in the February 9, 1885, edition, the phrase is mentioned as a good practice sentence for writing students: \"A favorite copy set by writing teachers for their pupils is the following, because it contains every letter of the alphabet: 'A quick brown fox jumps over the lazy dog.'\" Dozens of other newspapers published the phrase over the next few months, all using the\n                    version of the sentence starting with \"A\" rather than \"The\". The earliest known use of the phrase in its modern form (starting with \"The\") is from the 1888 book Illustrative Shorthand by Linda Bronson. The modern form (starting with \"The\") became more common despite the fact that it is slightly longer than the original (starting with \"A\"). As the use of typewriters grew in the late 19th century, the phrase began appearing in typing lesson books as a practice sentence. Early\n                    examples include How to Become Expert in Typewriting: A Complete Instructor Designed Especially for the Remington Typewriter (1890), and Typewriting Instructor and Stenographer's Hand-book (1892). By the turn of the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic Journal, it is referred to as \"the well known memorized typing line embracing all the letters of the alphabet\". {}\n                  </span>\n                </div>\n              );\n            })({ width: global.window ? window.innerWidth : undefined, height: global.window ? window.innerHeight : undefined })}\n          </div>\n        </div>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: subpage == 3 ? 1 : 0, pointerEvents: subpage == 3 ? \"auto\" : \"none\", display: subpage == 3 ? \"flex\" : \"flex\" }}>\n          <div className={\"time-counter\"}>{timespan}</div>\n        </div>\n        {/*onClick={this.handleNext}*/}\n        <Link href={\"/show\"}>\n          <a>\n            <div className={\"button-next\"}>\n              <img className={\"fill-parent\"} src={\"/static/img/arrow-next.svg\"} style={{ display: rootStore.state.loading ? \"none\" : \"block\" }} />\n\n              <CubeSpinner className={\"fill-parent\"} width={\"3.165em\"} height={\"3.165em\"} loading={true} style={{ display: rootStore.state.loading ? \"block\" : \"none\" }} />\n            </div>\n          </a>\n        </Link>\n        <SvgOverlay svgRef={this.svgLayer} />\n\n        <style jsx global>{`\n          h1 {\n            text-align: left;\n          }\n          span.paragraph {\n            font-size: 2em;\n          }\n          .article-list {\n            display: flex;\n            flex-direction: row;\n            flex-wrap: wrap;\n          }\n          .button-next {\n            position: fixed;\n            right: 10px;\n            bottom: 10px;\n          }\n          .button-prev {\n            position: fixed;\n            left: 10px;\n            bottom: 10px;\n          }\n          .button-next,\n          .button-prev {\n            filter: drop-shadow(-2px 2px 4px #00000080);\n          }\n          .button-next:active,\n          .button-prev:active {\n            transform: translate(2px, 2px);\n          }\n\n          .xfill-parent {\n            position: absolute;\n            width: 100%;\n            height: 100%;\n          }\n          .flex-vertical {\n            display: flex;\n            flex-flow: column nowrap;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n          }\n          .subpage {\n            position: absolute;\n            top: 0;\n            left: 0;\n            width: 100vw;\n            font-size: 13px;\n\n            transition: opacity 0.5s;\n            overflow: auto;\n          }\n\n          .main-layout {\n            display: block;\n            padding: 0;\n            margin: 0;\n            overflow: ĥidden;\n          }\n          .time-counter {\n            margin: 10px;\n            font-size: 2em;\n          }\n          .gallery-image {\n            height: auto;\n          }\n          .panels {\n            margin: 100px;\n            overflow: visible;\n          }\n          img {\n            border: 0px;\n            outline: 0px;\n            padding: 0px;\n            margin: 0px;\n          }\n        `}</style>\n      </Layout>\n    );\n  }\n}\n\nexport default Home;\n",
+			"file": "pages/index.js",
+			"file_size": 15657,
+			"file_write_time": 132259323719707604,
 			"settings":
 			{
-				"buffer_size": 3833,
+				"buffer_size": 15656,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "pages/new/[photo_id].js",
+			"file": "/home/roman/wild-beauty/pages/_app.js",
 			"settings":
 			{
-				"buffer_size": 7550,
+				"buffer_size": 6267,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "import React from \"react\";\nimport Head from \"next/head\";\nimport Link from \"next/link\";\nimport Gallery from \"../components/gallery.js\";\nimport { SvgOverlay } from \"../utils/svg-overlay.js\";\nimport { inject, observer } from \"mobx-react\";\nimport Layout from \"../components/layout.js\";\nimport { CubeSpinner } from \"../components/simple/cubeSpinner.js\";\n\n@inject(\"rootStore\")\n@observer\nclass Home extends React.Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    const { rootStore } = this.props;\n    let subpage = 1,\n      timespan = Date.now();\n    return (\n      <Layout hideNav={true}>\n        <Head>\n          <title>Home</title>\n          <link rel=\"icon\" href=\"/favicon.ico\" />\n        </Head>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: 1, display: \"flex\" }}>\n          <div\n            id=\"t-logo\"\n            className=\"t-logo\"\n            style={{\n              transformStyle: \"preserve-3d\",\n              transition: \"transform 1s  cubic-bezier(.53,.38,.94,.32)\",\n              transform: \"\"\n            }}\n          >\n            <img src={\"/static/img/logo-transparent.png\"} style={{ width: \"100%\", maxWidth: \"1280px\" }} />\n          </div>\n        </div>\n        <div className={\"subpage\"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? \"auto\" : \"none\", display: subpage == 2 ? \"block\" : \"block\" }}>\n          <div>\n            {(size => {\n              const fontSize = Math.round(size.width / 60);\n              const charWidth = fontSize - 1;\n              const maxLineLength = Math.floor(size.width / charWidth);\n\n              const padding = Math.round((size.width - fontSize * 45) / 3 + 80);\n              const paragraphWidth = Math.floor(size.width - padding * 2);\n              const lineLength = Math.floor((paragraphWidth + 2) / charWidth);\n\n              return (\n                <div\n                  style={{\n                    fontSize: `${fontSize}px`,\n                    padding: `${padding >= 19 ? Math.round((padding - 19) / 2) : 0}px ${padding}px 0 ${padding}px`\n                  }}\n                >\n                  <h1>Title</h1>\n                  <span className={\"paragraph\"}>\n                    The earliest known appearance of the phrase is from The Boston Journal. In an article titled \"Current Notes\" in the February 9, 1885, edition, the phrase is mentioned as a good practice sentence for writing students: \"A favorite copy set by writing teachers for their pupils is the following, because it contains every letter of the alphabet: 'A quick brown fox jumps over the lazy dog.'\" Dozens of other newspapers published the phrase over the next few months, all using the\n                    version of the sentence starting with \"A\" rather than \"The\". The earliest known use of the phrase in its modern form (starting with \"The\") is from the 1888 book Illustrative Shorthand by Linda Bronson. The modern form (starting with \"The\") became more common despite the fact that it is slightly longer than the original (starting with \"A\"). As the use of typewriters grew in the late 19th century, the phrase began appearing in typing lesson books as a practice sentence. Early\n                    examples include How to Become Expert in Typewriting: A Complete Instructor Designed Especially for the Remington Typewriter (1890), and Typewriting Instructor and Stenographer's Hand-book (1892). By the turn of the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic Journal, it is referred to as \"the well known memorized typing line embracing all the letters of the alphabet\". {}\n                  </span>\n                </div>\n              );\n            })({ width: global.window ? window.innerWidth : undefined, height: global.window ? window.innerHeight : undefined })}\n          </div>\n        </div>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: subpage == 3 ? 1 : 0, pointerEvents: subpage == 3 ? \"auto\" : \"none\", display: subpage == 3 ? \"flex\" : \"flex\" }}>\n          <div className={\"time-counter\"}>{timespan || \"\"}</div>\n        </div>\n        {/*onClick={this.handleNext}*/}\n        <div className={\"button-next\"}>\n          <Link href={\"/show\"}>\n            <a>\n              <img className={\"fill-parent\"} src={\"/static/img/arrow-next.svg\"} style={{ opacity: rootStore.state.loading ? 0 : 1 }} />\n            </a>\n          </Link>\n          <CubeSpinner className={\"fill-parent\"} width={\"3.165em\"} height={\"3.165em\"} loading={rootStore.state.loading} />\n        </div>\n\n        <SvgOverlay svgRef={this.svgLayer} />\n\n        <style jsx global>{`\n          h1 {\n            text-align: left;\n          }\n          span.paragraph {\n            font-size: 2em;\n          }\n          .article-list {\n            display: flex;\n            flex-direction: row;\n            flex-wrap: wrap;\n          }\n          .button-next {\n            position: fixed;\n            right: 10px;\n            bottom: 10px;\n          }\n          .button-prev {\n            position: fixed;\n            left: 10px;\n            bottom: 10px;\n          }\n          .button-next,\n          .button-prev {\n            filter: drop-shadow(-2px 2px 4px #00000080);\n          }\n          .button-next:active,\n          .button-prev:active {\n            transform: translate(2px, 2px);\n          }\n\n          .abs {\n            position: absolute;\n            left: 0;\n            top: 0;\n          }\n          .flex-vertical {\n            display: flex;\n            flex-flow: column nowrap;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n          }\n          .subpage {\n            position: absolute;\n            top: 0;\n            left: 0;\n            width: 100vw;\n            font-size: 13px;\n\n            transition: opacity 0.5s;\n            overflow: auto;\n          }\n\n          .main-layout {\n            display: block;\n            padding: 0;\n            margin: 0;\n            overflow: ĥidden;\n          }\n          .time-counter {\n            margin: 10px;\n            font-size: 2em;\n          }\n          .gallery-image {\n            height: auto;\n          }\n          .panels {\n            margin: 100px;\n            overflow: visible;\n          }\n          img {\n            border: 0px;\n            outline: 0px;\n            padding: 0px;\n            margin: 0px;\n          }\n        `}</style>\n      </Layout>\n    );\n  }\n}\n\nexport default Home;\n",
+			"file": "pages/home.js",
+			"file_size": 6484,
+			"file_write_time": 132259327617849607,
+			"settings":
+			{
+				"buffer_size": 6483,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "server.js",
+			"file": "components/layout.js",
 			"settings":
 			{
-				"buffer_size": 18803,
-				"encoding": "UTF-8",
+				"buffer_size": 800,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "pages/show.js",
+			"file": "pages/show/[id].js",
 			"settings":
 			{
-				"buffer_size": 18776,
+				"buffer_size": 955,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "lib/devtools.js",
+			"file": "components/views/toastsContainer.js",
 			"settings":
 			{
-				"buffer_size": 30695,
-				"encoding": "UTF-8",
+				"buffer_size": 3542,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "stores/api.js",
+			"file": "pages/_app.js",
 			"settings":
 			{
-				"buffer_size": 4838,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/i18nStore.js",
-			"settings":
-			{
-				"buffer_size": 3571,
-				"encoding": "UTF-8",
+				"buffer_size": 6267,
 				"line_ending": "Unix"
 			}
 		},
@@ -97,14 +107,6 @@
 			{
 				"buffer_size": 47988,
 				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "components/tree.js",
-			"settings":
-			{
-				"buffer_size": 10105,
 				"line_ending": "Unix"
 			}
 		}
@@ -120,6 +122,22 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"packag",
+				"Package Control: List Unmanaged Packages"
+			],
+			[
+				"list pa",
+				"Package Control: List Packages"
+			],
+			[
+				"packa",
+				"PackageResourceViewer: Extract All Packages"
+			],
+			[
+				"extra",
+				"PackageResourceViewer: Extract Package"
+			],
 			[
 				"schemeed",
 				"SchemeEditor: Edit Current Scheme"
@@ -184,57 +202,61 @@
 		"/home/roman/the-wild-beauty-company",
 		"/home/roman/the-wild-beauty-company/components",
 		"/home/roman/the-wild-beauty-company/pages",
-		"/home/roman/the-wild-beauty-company/pages/new",
-		"/home/roman/the-wild-beauty-company/public",
-		"/home/roman/the-wild-beauty-company/stores"
+		"/home/roman/the-wild-beauty-company/pages/show"
 	],
 	"file_history":
 	[
+		"/home/roman/the-wild-beauty-company/pages/_app.js",
+		"/home/roman/the-wild-beauty-company/pages/index.js",
+		"/home/roman/the-wild-beauty-company/pages/browse.js",
+		"/home/roman/the-wild-beauty-company/pages/_document.js",
+		"/home/roman/the-wild-beauty-company/components/login.js",
+		"/home/roman/the-wild-beauty-company/components/simple/cubeSpinner.js",
+		"/home/roman/wild-beauty/components/login.js",
+		"/home/roman/the-wild-beauty-company/components/cubeSpinner.js",
 		"/home/roman/the-wild-beauty-company/server.js",
+		"/home/roman/the-wild-beauty-company/pages/show.js",
+		"/home/roman/the-wild-beauty-company/pages/new.js",
+		"/home/roman/wild-beauty/pages/panes.js",
+		"/home/roman/wild-beauty/lib/touchHandler.js",
+		"/home/roman/the-wild-beauty-company/pages/list.js",
+		"/home/roman/the-wild-beauty-company/components/TouchCallback.js",
+		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
+		"/home/roman/lotto/pages/picks.js",
+		"/home/roman/the-wild-beauty-company/components/layout.js",
+		"/home/roman/wild-beauty/pages/new/[photo_id].js",
+		"/home/roman/the-wild-beauty-company/lib/devtools.js",
+		"/home/roman/the-wild-beauty-company/stores/api.js",
+		"/home/roman/the-wild-beauty-company/stores/i18nStore.js",
+		"/home/roman/the-wild-beauty-company/lib/util.js",
+		"/home/roman/the-wild-beauty-company/components/tree.js",
 		"/home/roman/the-wild-beauty-company/stores/queries.js",
 		"/home/roman/the-wild-beauty-company/components/withQueryParam.js",
-		"/home/roman/the-wild-beauty-company/lib/devtools.js",
-		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
 		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
-		"/home/roman/the-wild-beauty-company/stores/api.js",
 		"/home/roman/wild-beauty/pages/list.js",
 		"/home/roman/wild-beauty/pages/show.js",
-		"/home/roman/the-wild-beauty-company/pages/new.js",
 		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
-		"/home/roman/the-wild-beauty-company/pages/_document.js",
-		"/home/roman/the-wild-beauty-company/components/layout.js",
-		"/home/roman/the-wild-beauty-company/components/login.js",
 		"/home/roman/the-wild-beauty-company/lib/touchHandler.js",
-		"/home/roman/the-wild-beauty-company/components/TouchCallback.js",
 		"/home/roman/the-wild-beauty-company/static/style.css",
 		"/home/roman/the-wild-beauty-company/pages/tree.js",
 		"/home/roman/the-wild-beauty-company/lib/dom.js",
 		"/home/roman/the-wild-beauty-company/lib/dom.es5.js",
 		"/home/roman/the-wild-beauty-company/node_modules/@babel/node/node_modules/core-js/modules/web.queue-microtask.js",
-		"/home/roman/wild-beauty/lib/touchHandler.js",
 		"/home/roman/the-wild-beauty-company/components/views/itemEditor.js",
 		"/home/roman/the-wild-beauty-company/stores/functions.js",
-		"/home/roman/the-wild-beauty-company/lib/util.js",
 		"/home/roman/the-wild-beauty-company/lib/fd-graph.js",
 		"/home/roman/wild-beauty/pages/tree.js",
-		"/home/roman/the-wild-beauty-company/pages/show.js",
 		"/home/roman/wild-beauty/stores/functions.js",
-		"/home/roman/the-wild-beauty-company/pages/index.js",
-		"/home/roman/the-wild-beauty-company/pages/browse.js",
 		"/home/roman/the-wild-beauty-company/lib/jpeg.js",
-		"/home/roman/the-wild-beauty-company/components/tree.js",
-		"/home/roman/the-wild-beauty-company/pages/list.js",
-		"/home/roman/the-wild-beauty-company/pages/_app.js",
 		"/home/roman/the-wild-beauty-company/lib/devpane.js",
 		"/home/roman/wild-beauty/components/graphContainer.js",
 		"/home/roman/the-wild-beauty-company/components/forceGraph.js",
-		"/home/roman/the-wild-beauty-company/stores/i18nStore.js",
 		"/home/roman/wild-beauty/components/nav.js",
 		"/home/roman/.config/sublime-text-3-20200125/Packages/User/Default (Linux).sublime-keymap"
 	],
 	"find":
 	{
-		"height": 39.0
+		"height": 41.0
 	},
 	"find_in_files":
 	{
@@ -250,6 +272,44 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"page-lay",
+			"setLoad",
+			"URL =",
+			"events",
+			"handleNext",
+			"sk-cube",
+			"animateLogo",
+			"Timer\\.",
+			"opacity",
+			"Timer\\.",
+			"Timer.on",
+			"animateLo",
+			"t-logo",
+			"containsClass",
+			"className",
+			"inner",
+			"makeTouchCallback",
+			"console.lo",
+			"Touch",
+			"TouchHandler\\(",
+			"TouchHandler",
+			"touchListener",
+			"MouseEvents",
+			"TouchEvents",
+			"animateLogo",
+			"Timer",
+			"MultitouchListener",
+			"TouchEvents",
+			"touchLi",
+			"TouchListener",
+			"router",
+			"handleClick",
+			"fs\\.",
+			"getExif",
+			"exif",
+			"file.data",
+			"fileUpload",
+			"upload",
 			"colors",
 			"makeItemTo",
 			"\\.pos",
@@ -339,33 +399,7 @@
 			"Tree[^A-Za-z]\\.",
 			"Tree[^A-Za-z]",
 			"Tree[^A-Za-z]$",
-			"graph-svg",
-			"api/tree",
-			"loadItems",
-			"fields",
-			"route.*change",
-			"<svg",
-			"svg",
-			"SVG",
-			"show",
-			"transition",
-			"this.delta",
-			"tihs.delta",
-			"\"transition ",
-			"Timer",
-			"Timer.default",
-			"on Tran",
-			"tick\\(",
-			"deca",
-			"cubic.*bez",
-			"transform",
-			"rect(",
-			"rect\\(",
-			"outset",
-			"outset =",
-			"static rect",
-			"withSize",
-			"paragraph"
+			"graph-svg"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -397,7 +431,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 718,
+						"buffer_size": 31,
 						"regions":
 						{
 						},
@@ -407,198 +441,33 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/server.js",
+							"current_file": "/home/roman/the-wild-beauty-company/pages/home.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									1309,
-									1340
+									387,
+									391
 								],
 								[
-									1438,
-									1474
+									420,
+									431
 								],
 								[
-									1506,
-									1530
+									466,
+									472
 								],
 								[
-									1543,
-									1563
-								],
-								[
-									1703,
-									1726
-								],
-								[
-									1962,
-									1966
-								],
-								[
-									2756,
-									2781
-								],
-								[
-									3021,
-									3026
-								],
-								[
-									3133,
-									3157
-								],
-								[
-									4734,
-									4758
-								],
-								[
-									5084,
-									5108
-								],
-								[
-									6301,
-									6307
-								],
-								[
-									6540,
-									6563
-								],
-								[
-									6649,
-									6686
-								],
-								[
-									7020,
-									7036
-								],
-								[
-									7043,
-									7067
-								],
-								[
-									7667,
-									7691
-								],
-								[
-									8636,
-									8660
-								],
-								[
-									8932,
-									8956
-								],
-								[
-									9648,
-									9672
-								],
-								[
-									9899,
-									9906
-								],
-								[
-									10292,
-									10316
-								],
-								[
-									10951,
-									10975
-								],
-								[
-									12244,
-									12268
-								],
-								[
-									12680,
-									12688
-								],
-								[
-									12785,
-									12790
-								],
-								[
-									12947,
-									12971
-								],
-								[
-									13255,
-									13279
-								],
-								[
-									14554,
-									14578
-								],
-								[
-									14980,
-									15012
-								],
-								[
-									15542,
-									15571
-								],
-								[
-									16113,
-									16127
-								],
-								[
-									16341,
-									16346
-								],
-								[
-									17472,
-									17531
-								],
-								[
-									17833,
-									17846
-								],
-								[
-									18492,
-									18505
-								],
-								[
-									18690,
-									18696
+									1410,
+									1417
 								]
 							],
 							"symlist":
 							[
-								"function bufferToStream(buffer)",
-								"async function getImagePalette(data)",
-								"getImageColors",
-								"(resolve, reject) =>",
-								"(_err, buffer, info) =>",
-								"c =>",
-								"(worker, code, signal) =>",
-								"() =>",
-								"function(req, res, next)",
-								"function(req, res, next)",
-								"async function(req, res)",
-								"key =>",
-								"getVar",
-								"getUser",
-								"needAuth",
-								"async function(req, res)",
-								"async function(req, res)",
-								"async function(req, res)",
-								"async function(req, res)",
-								"async function(req, res)",
-								"item =>",
-								"async function(req, res)",
-								"async function(req, res)",
-								"async function(req, res)",
-								"image =>",
-								"im =>",
-								"async function(req, res)",
-								"async function(req, res)",
-								"async function(req, res)",
-								"calcDimensions",
-								"compareDimensions",
-								"function(info)",
-								"() =>",
-								"({ original_name, filesize, colors, width, height, id }) =>",
-								"(req, res) =>",
-								"(req, res) =>",
-								"err =>"
+								"Home",
+								"constructor",
+								"render",
+								"size =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -606,7 +475,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 9,
 					"type": "text"
 				}
 			]
@@ -617,24 +486,148 @@
 			[
 				{
 					"buffer": 1,
-					"file": "pages/_document.js",
+					"file": "lib/touchHandler.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 606,
+						"buffer_size": 13390,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								606,
-								606
+								5062,
+								5062
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
+							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3080.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "pages/index.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15656,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								14149,
+								14149
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6946.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/home/roman/wild-beauty/pages/_app.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6267,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4293,
+								4293
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1583.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "pages/home.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6483,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1500.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "components/layout.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 800,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								318,
+								318
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
@@ -647,152 +640,31 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "pages/new.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3833,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1772,
-								1772
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 459.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "pages/new/[photo_id].js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7550,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3548,
-								3548
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1173.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "server.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 18803,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1945,
-								1969
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 816.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "pages/show.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 18776,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1203,
-								1207
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Color Scheme - Chromodynamics/Chromodynamics.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 71.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
 					"buffer": 6,
-					"file": "lib/devtools.js",
+					"file": "pages/show/[id].js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 30695,
+						"buffer_size": 955,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3028,
-								3028
+								0,
+								0
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1280.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 4,
@@ -800,62 +672,64 @@
 				},
 				{
 					"buffer": 7,
-					"file": "stores/api.js",
+					"file": "components/views/toastsContainer.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4838,
+						"buffer_size": 3542,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								967,
-								967
+								2871,
+								2871
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 5.0,
+						"translation.y": 1680.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
 					"buffer": 8,
-					"file": "stores/i18nStore.js",
+					"file": "pages/_app.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3571,
+						"buffer_size": 6267,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2559,
-								2559
+								2557,
+								2557
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 816.0,
+						"translation.y": 1320.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
@@ -871,51 +745,22 @@
 						"selection":
 						[
 							[
-								43916,
-								43916
+								27869,
+								27869
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 25902.0,
+						"translation.y": 20640.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "components/tree.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 10105,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1160,
-								1160
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
 					"type": "text"
 				}
 			]
@@ -923,7 +768,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 32.0
+		"height": 29.0
 	},
 	"input":
 	{
@@ -969,7 +814,7 @@
 	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
-		"height": 80.0
+		"height": 54.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -978,6 +823,22 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"toast",
+				"components/views/toastsContainer.js"
+			],
+			[
+				"util.js",
+				"lib/util.js"
+			],
+			[
+				"cubes",
+				"components/simple/cubeSpinner.js"
+			],
+			[
+				"server",
+				"server.js"
+			],
 			[
 				"devtools",
 				"lib/devtools.js"
@@ -1047,10 +908,6 @@
 				"lib/fd-graph.js"
 			],
 			[
-				"util.js",
-				"lib/util.js"
-			],
-			[
 				"function",
 				"stores/functions.js"
 			],
@@ -1069,10 +926,6 @@
 			[
 				"how.js",
 				"pages/show.js"
-			],
-			[
-				"server",
-				"server.js"
 			],
 			[
 				"imag",
