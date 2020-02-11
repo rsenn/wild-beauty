@@ -1,6 +1,6 @@
 import React from "react";
 import { ItemEditor } from "../../components/views/itemEditor.js";
-import { Element } from "../../utils/dom.js";
+import { Element, Timer } from "../../utils/dom.js";
 import { toJS, action } from "mobx";
 import { inject, observer } from "mobx-react";
 import NeedAuth from "../../components/simple/needAuth.js";
@@ -56,7 +56,7 @@ export class NewItem extends React.Component {
       images = await rootStore.fetchImages(`{ id: { _eq: ${imageId} } }`);
 
       images = images.filter(ph => ph.items.length == 0);
-      
+
       images.forEach(item => rootStore.newImage(item));
     }
     let image = images && images.length ? images[0] : null;
@@ -135,6 +135,12 @@ export class NewItem extends React.Component {
         { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
       );
     }
+
+if(global.window) {
+    Timer.once(500, () => {
+colors(Object.keys(page.props.images[0].colors));
+    });
+  }
   }
 
   componentDidMount() {
@@ -182,6 +188,7 @@ export class NewItem extends React.Component {
     // res.end(`Post: req:`, query.photo_id);
     console.log("New {:id}.render ", this.touchListener, this.touchCallback);
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
+
     return (
       <Layout>
         <NeedAuth>
