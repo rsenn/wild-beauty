@@ -12,10 +12,10 @@
 	"buffers":
 	[
 		{
-			"contents": "function behaveTextarea(element)\nfunction(data)\nNewItem\ngetInitialProps\nph =>\nitem =>\nconstructor\nmoveImage\n(event, e) =>\nevent =>\ncomponentDidMount\nresponse =>\ne =>\ntreeSelEvent\nrender\nmakeTreeSelEvent\nevent =>",
+			"contents": "insertParent\nremoveParent\nfunction createGraph(svg)\nonRenderGraph: graph\nonUpdateNode: (node, i)\nonUpdateEdge: (edge, i)\nTreePage\n() =>\ngetInitialProps\n(a, b) =>\nitem =>\n({ photos, children, users, key, ...item }) =>\nid =>\nit =>\nitem =>\nconstructor\ni =>\ncheckTagRemove\ne =>\n() =>\nnode =>\ncomponentDidMount\ncomponentDidUpdate\nevent =>\nevent =>\nrect =>\nfunction getNum(elem, name)\nfunction getId(elem)\nselectNode\nchild =>\ntreeSelEvent\nitem =>\nevent =>\ne =>\nevent =>\ne =>\np =>\np =>\ntend\nrender\nonError\nonImage\nevent =>\nmakeTreeSelEvent\nevent =>\nitem =>\nch =>\n([key, value]) =>",
 			"settings":
 			{
-				"buffer_size": 211,
+				"buffer_size": 573,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
@@ -26,14 +26,6 @@
 			"settings":
 			{
 				"buffer_size": 24650,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pages/new/[photo_id].js",
-			"settings":
-			{
-				"buffer_size": 7357,
 				"line_ending": "Unix"
 			}
 		},
@@ -180,6 +172,7 @@
 	],
 	"file_history":
 	[
+		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
 		"/home/roman/the-wild-beauty-company/lib/dom.js",
 		"/home/roman/the-wild-beauty-company/lib/dom.es5.js",
 		"/home/roman/the-wild-beauty-company/node_modules/@babel/node/node_modules/core-js/modules/web.queue-microtask.js",
@@ -205,7 +198,6 @@
 		"/home/roman/the-wild-beauty-company/stores/api.js",
 		"/home/roman/the-wild-beauty-company/lib/jpeg.js",
 		"/home/roman/the-wild-beauty-company/components/tree.js",
-		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
 		"/home/roman/the-wild-beauty-company/pages/list.js",
 		"/home/roman/the-wild-beauty-company/pages/_app.js",
 		"/home/roman/wild-beauty/pages/show.js",
@@ -366,7 +358,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 211,
+						"buffer_size": 573,
 						"regions":
 						{
 						},
@@ -376,98 +368,253 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
+							"current_file": "/home/roman/the-wild-beauty-company/pages/tree.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									617,
-									649
+									2755,
+									2793
 								],
 								[
-									796,
-									810
+									2929,
+									2974
 								],
 								[
-									1350,
-									1357
+									3125,
+									3150
 								],
 								[
-									1583,
-									1598
+									3662,
+									3685
 								],
 								[
-									1870,
-									1875
+									4678,
+									4704
 								],
 								[
-									1920,
-									1927
+									5324,
+									5350
 								],
 								[
-									2156,
-									2167
+									5671,
+									5679
 								],
 								[
-									2527,
-									2552
+									6103,
+									6108
 								],
 								[
-									3287,
-									3300
+									6391,
+									6406
 								],
 								[
-									3516,
-									3524
+									7183,
+									7192
 								],
 								[
-									5580,
-									5597
+									7303,
+									7310
 								],
 								[
-									5704,
-									5715
+									7621,
+									7667
 								],
 								[
-									6020,
-									6024
+									8201,
+									8206
 								],
 								[
-									6117,
-									6129
+									8355,
+									8360
 								],
 								[
-									6613,
-									6619
+									8451,
+									8458
 								],
 								[
-									6928,
-									6954
+									9634,
+									9645
 								],
 								[
-									6955,
-									6963
+									10386,
+									10390
+								],
+								[
+									11036,
+									11050
+								],
+								[
+									11202,
+									11206
+								],
+								[
+									11265,
+									11270
+								],
+								[
+									11314,
+									11321
+								],
+								[
+									11479,
+									11496
+								],
+								[
+									11581,
+									11599
+								],
+								[
+									11651,
+									11659
+								],
+								[
+									11680,
+									11688
+								],
+								[
+									11908,
+									11915
+								],
+								[
+									11964,
+									11991
+								],
+								[
+									12054,
+									12074
+								],
+								[
+									12948,
+									12958
+								],
+								[
+									13034,
+									13042
+								],
+								[
+									13101,
+									13113
+								],
+								[
+									13246,
+									13253
+								],
+								[
+									13586,
+									13594
+								],
+								[
+									13858,
+									13862
+								],
+								[
+									13924,
+									13932
+								],
+								[
+									14558,
+									14562
+								],
+								[
+									15031,
+									15035
+								],
+								[
+									15179,
+									15183
+								],
+								[
+									16412,
+									16423
+								],
+								[
+									16884,
+									16890
+								],
+								[
+									17043,
+									17061
+								],
+								[
+									17076,
+									17094
+								],
+								[
+									17252,
+									17260
+								],
+								[
+									17338,
+									17364
+								],
+								[
+									17365,
+									17373
+								],
+								[
+									18472,
+									18479
+								],
+								[
+									21221,
+									21226
+								],
+								[
+									22011,
+									22028
 								]
 							],
 							"symlist":
 							[
-								"function behaveTextarea(element)",
-								"function(data)",
-								"NewItem",
+								"insertParent",
+								"removeParent",
+								"function createGraph(svg)",
+								"onRenderGraph: graph",
+								"onUpdateNode: (node, i)",
+								"onUpdateEdge: (edge, i)",
+								"TreePage",
+								"() =>",
 								"getInitialProps",
-								"ph =>",
+								"(a, b) =>",
+								"item =>",
+								"({ photos, children, users, key, ...item }) =>",
+								"id =>",
+								"it =>",
 								"item =>",
 								"constructor",
-								"moveImage",
-								"(event, e) =>",
-								"event =>",
-								"componentDidMount",
-								"response =>",
+								"i =>",
+								"checkTagRemove",
 								"e =>",
+								"() =>",
+								"node =>",
+								"componentDidMount",
+								"componentDidUpdate",
+								"event =>",
+								"event =>",
+								"rect =>",
+								"function getNum(elem, name)",
+								"function getId(elem)",
+								"selectNode",
+								"child =>",
 								"treeSelEvent",
+								"item =>",
+								"event =>",
+								"e =>",
+								"event =>",
+								"e =>",
+								"p =>",
+								"p =>",
+								"tend",
 								"render",
+								"onError",
+								"onImage",
+								"event =>",
 								"makeTreeSelEvent",
-								"event =>"
+								"event =>",
+								"item =>",
+								"ch =>",
+								"([key, value]) =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -475,13 +622,13 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 8,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 1,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -512,42 +659,11 @@
 						"translation.y": 2059.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "pages/new/[photo_id].js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7357,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6981,
-								6981
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Babel/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 3614.0,
-						"zoom_level": 1.0
-					},
 					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 2,
 					"file": "pages/new.js",
 					"semi_transient": false,
 					"settings":
@@ -578,7 +694,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 3,
 					"file": "static/style.css",
 					"semi_transient": false,
 					"settings":
@@ -609,7 +725,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 4,
 					"file": "components/TouchCallback.js",
 					"semi_transient": false,
 					"settings":
@@ -640,7 +756,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 5,
 					"file": "lib/touchHandler.js",
 					"semi_transient": false,
 					"settings":
@@ -671,7 +787,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 6,
 					"file": "components/login.js",
 					"semi_transient": false,
 					"settings":
@@ -702,7 +818,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 7,
 					"file": "components/layout.js",
 					"semi_transient": false,
 					"settings":
@@ -733,7 +849,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 8,
 					"file": "pages/_document.js",
 					"semi_transient": false,
 					"settings":
