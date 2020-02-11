@@ -11,6 +11,8 @@ const bodyParser = require("body-parser");
 const API = require("./stores/api.js")();
 const jpeg = require("./utils/jpeg.js");
 const Util = require("./utils/util.js");
+const dom = require("./utils/dom.es5.js");
+const { RGBA, HSLA } = dom;
 //const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -347,6 +349,7 @@ if (!dev && cluster.isMaster) {
 
       const photo = response.photos[0];
       if(typeof photo == "object") {
+        1;
         //console.log(`Image get id: `, id, "photo.data:", typeof photo.data);
         if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
         let data = Buffer.from(photo.data, "base64");
@@ -424,20 +427,21 @@ if (!dev && cluster.isMaster) {
                 .toBuffer((_err, buffer, info) => {
                   if(!_err) {
                     let colorCount = 16;
-                    cquant
-                      .paletteAsync(buffer, info.channels, colorCount)
-                      .then(res => {console.log("result: ", res); resolve(res); })
-                      .catch(err => {console.log(err); reject(err); });
-                  }
+                    cquant .paletteAsync(buffer, info.channels, colorCount) .then(resolve) .catch(reject);
+                 }
                 });
             });
 
           let palette = await getImagePalette(file.data);
 
-          console.error("image palette: ", palette);
+          palette = Object.fromEntries([...palette].map(c => {
+            let color = new RGBA(c.R, c.B, c.G, 255);
+            return [color.hex(),c.count];
+          }));
+          let colors = JSON.stringify(palette).replace(/"/g, '\\"');
 
           let { depth, channels } = props;
-          let reply = await API.insert("photos", { original_name: `"${file.name}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
+          let reply = await API.insert("photos", { original_name: `"${file.name}"`, colors: `"${colors}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
           let { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
           if(returning && returning.forEach) returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
         }
