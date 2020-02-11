@@ -412,26 +412,29 @@ if (!dev && cluster.isMaster) {
           }
           let data = file.data.toString("base64");
           let word = (file.data[0] << 8) + file.data[1];
-          console.log("sharp");
 
-        let buf =   sharp(file.data)
-            .resize(newDimensions.width * .3515625, newDimensions.height *.3515625)
-            .raw()
-            .toBuffer((_err, buffer, info) => {
-              if(!_err) {
-                let colorCount = 16;
-                cquant
-                  .paletteAsync(buffer, info.channels, colorCount)
-                  .then(res => {
-                    console.log(res);
-                  })
-                  .catch(err => {
-                    console.log(err);
-                  });
-              }
-            })
-            .toFile('output.png', (err, info) => console.log("sharp.toFile", {err,info}));
-            console.error("sharp output buf: ",buf);
+          // prettier-ignore
+          const getImagePalette = data =>
+            new Promise((resolve, reject) => {
+              let img = sharp(data);
+              console.log("sharp", Object.keys(img));
+              img
+                .resize(newDimensions.width * 0.3515625, newDimensions.height * 0.3515625)
+                .raw()
+                .toBuffer((_err, buffer, info) => {
+                  if(!_err) {
+                    let colorCount = 16;
+                    cquant
+                      .paletteAsync(buffer, info.channels, colorCount)
+                      .then(res => {console.log("result: ", res); resolve(res); })
+                      .catch(err => {console.log(err); reject(err); });
+                  }
+                });
+            });
+
+          let palette = await getImagePalette(file.data);
+
+          console.error("image palette: ", palette);
 
           let { depth, channels } = props;
           let reply = await API.insert("photos", { original_name: `"${file.name}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
