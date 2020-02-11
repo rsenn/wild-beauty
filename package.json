@@ -31,12 +31,18 @@
     "dotenv": "^8.2.0",
     "dotenv-webpack": "^1.7.0",
     "eslint": "^6.8.0",
+    "exif": "^0.6.0",
+    "exifr": "^2.1.4",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
     "express-session": "^1.17.0",
+    "fast-exif": "^1.0.1",
+    "get-exif": "^1.0.3",
     "get-image-colors": "^2.0.0",
     "graphql": "^14.5.8",
     "img-to-palette": "^1.0.1",
+    "jpeg-autorotate": "^5.0.2",
+    "jpegquality": "^0.1.7",
     "jsonwebtoken": "^8.5.1",
     "memory-stream": "^1.0.0",
     "mobx": "^5.15.0",
@@ -78,6 +84,7 @@
     "@babel/plugin-proposal-decorators": "^7.7.4",
     "@babel/plugin-proposal-export-default-from": "^7.7.4",
     "babel-eslint": "^10.0.3",
-    "eslint-plugin-legacy-decorators": "^1.0.0"
+    "eslint-plugin-legacy-decorators": "^1.0.0",
+    "exif-cli": "^0.0.2"
   }
 }

@@ -299,8 +299,16 @@ class Show extends React.Component {
     this.grid.style.setProperty("transform", "");
     this.grid.style.setProperty("transition", `transform 0.5s linear`);
     var tend = e => {
-      //console.log("transition end: ", e.target);
-      //console.log("transformOrigin: ", e.target.style.transformOrigin);
+      const { rootStore, router } = this.props;
+
+      console.log("transition end: ", this.element);
+      let itemId;
+      if(this.element) {
+        itemId = parseInt(this.element.getAttribute("id").replace(/item-/, ""));
+        router.push(`/show/${itemId}`);
+      }
+
+      console.log("transformOrigin: ", e.target.style.transformOrigin);
       //console.log("dm: ", dm);
       e.target.style.transition = `transform 0.5s ease-out`;
       e.target.style.transform = dm.toString();

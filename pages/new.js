@@ -45,11 +45,11 @@ class New extends React.Component {
     }
     if(!global.window) {
       if(user_id) {
-      images = await RootStore.fetchImages({ user_id });
-      images = images.filter(ph => ph.items.length == 0);
-      images.forEach(item => RootStore.newImage(item));
-}
-          const { url, query, body, route } = req || {};
+        images = await RootStore.fetchImages({ user_id });
+        images = images.filter(ph => ph.items.length == 0);
+        images.forEach(item => RootStore.newImage(item));
+      }
+      const { url, query, body, route } = req || {};
       console.log("New.getInitialProps", { url });
     }
     return { images };
