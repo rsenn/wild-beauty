@@ -81,7 +81,7 @@ export class Queries {
 
   async loadItem(where = {}) {
     if(typeof where == "number") where = { id: where };
-    let response = Util.isServer() ? await this.api.select("items", where, ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id original_name width height filesize } }", "users { user { id } }"]) : await this.apiRequest("/api/item", where);
+    let response = Util.isServer() ? await this.api.select("items", where, ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id original_name width height filesize colors } }", "users { user { id } }"]) : await this.apiRequest("/api/item", where);
     let items = response ? await response.items : null;
     let item = (await items) ? await items[0] : null;
     const id = "" + (item && item.id !== undefined ? item.id : where.id);

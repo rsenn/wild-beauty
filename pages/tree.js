@@ -174,7 +174,7 @@ class TreePage extends React.Component {
     currentItem: null
   };
   static API = getAPI();
-  static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize original_name } }", "users { user { id username last_seen } }"];
+  static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize colors original_name } }", "users { user { id username last_seen } }"];
 
   svgRef = trkl();
 
@@ -200,7 +200,7 @@ class TreePage extends React.Component {
       let id = parseInt(params.id);
       const name = params.id;
       if(isNaN(id) || typeof id != "number") id = -1;
-      const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize height width id offset uploaded original_name } } parent_id } }`;
+      const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize colors height width id offset uploaded original_name } } parent_id } }`;
       let response = await TreePage.API(q);
       items = response.items || [];
       console.log("item: ", items[0]);

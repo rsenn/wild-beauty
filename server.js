@@ -62,7 +62,7 @@ const port = process.env.PORT || (/hostwinds/.test(etc_hostname) ? 8040 : 5555);
 const itemFields = ["id", "type", "name", "parent { id }", 
 "children { id }", 
 "data", 
-`photos { photo { id filesize height id offset width original_name } }`,
+`photos { photo { id filesize colors height id offset width original_name } }`,
 "users { user { id } }"
 ];
 
@@ -336,7 +336,7 @@ if (!dev && cluster.isMaster) {
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
       //console.log("params: ", params);
-      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }", ...fields], params);
+      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize","colors","user_id", "items { item_id }", ...fields], params);
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
       if(images.length !== undefined) images = images.filter(im => im.items.length == 0);
       res.json({ success: true, count: images.length, images });
@@ -355,7 +355,7 @@ if (!dev && cluster.isMaster) {
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
       // prettier-ignores
-      let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize data } }`);
+      let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize colors data } }`);
 
       //console.log(`/api/image/get/${id}`, Util.filterKeys(response, k => k!="data"));
 
@@ -435,7 +435,7 @@ if (!dev && cluster.isMaster) {
           let { depth, channels } = props;
           let reply = await API.insert("photos", { original_name: `"${file.name}"`, colors: `"${colors}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
           let { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
-          if(returning && returning.forEach) returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
+          if(returning && returning.forEach) returning.forEach(({ original_name, filesize, colors, width, height, id }) => response.push({ original_name, filesize, colors, width, height, id }));
         }
         res.json(response);
       })

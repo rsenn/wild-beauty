@@ -54,7 +54,9 @@ export class NewItem extends React.Component {
     let images = [];
     if(!global.window) {
       images = await rootStore.fetchImages(`{ id: { _eq: ${imageId} } }`);
+
       images = images.filter(ph => ph.items.length == 0);
+      
       images.forEach(item => rootStore.newImage(item));
     }
     let image = images && images.length ? images[0] : null;
