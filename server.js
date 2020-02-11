@@ -11,6 +11,8 @@ const bodyParser = require("body-parser");
 const API = require("./stores/api.js")();
 const jpeg = require("./utils/jpeg.js");
 const Util = require("./utils/util.js");
+const dom = require("./utils/dom.es5.js");
+const { RGBA, HSLA } = dom;
 //const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -27,6 +29,7 @@ const Alea = require("./utils/alea.js");
 const Readable = stream.Readable;
 const getColors = require("get-image-colors");
 const tempfile = require("tempfile");
+const cquant = require("cquant");
 
 util.inspect.defaultOptions.colors = true;
 util.inspect.defaultOptions.depth = 10;
@@ -38,6 +41,18 @@ function bufferToStream(buffer) {
   return stream;
 }
 
+async function getImagePalette(data) {
+  // prettier-ignore
+  const getImageColors = data => new Promise((resolve, reject) => {let img = sharp(data); 
+    img /*.resize(newDimensions.width * 0.3515625, newDimensions.height * 0.3515625)*/ .raw() .toBuffer((_err, buffer, info) => {if(!_err) {let colorCount = 16; cquant .paletteAsync(buffer, info.channels, colorCount) .then(resolve) .catch(reject); } }); });
+  let ret = await getImageColors(data);
+  return Object.fromEntries(
+    [...ret].map(c => {
+      let color = new RGBA(c.R, c.B, c.G, 255);
+      return [color.hex(), c.count];
+    })
+  );
+}
 var secret = fs.readFileSync("secret.key");
 var etc_hostname = fs.readFileSync("/etc/hostname");
 
@@ -47,7 +62,7 @@ const port = process.env.PORT || (/hostwinds/.test(etc_hostname) ? 8040 : 5555);
 const itemFields = ["id", "type", "name", "parent { id }", 
 "children { id }", 
 "data", 
-`photos { photo { id filesize height id offset width original_name } }`,
+`photos { photo { id filesize colors height id offset width original_name } }`,
 "users { user { id } }"
 ];
 
@@ -321,7 +336,7 @@ if (!dev && cluster.isMaster) {
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
       //console.log("params: ", params);
-      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }", ...fields], params);
+      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "colors", "user_id", "items { item_id }", ...fields], params);
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
       if(images.length !== undefined) images = images.filter(im => im.items.length == 0);
       res.json({ success: true, count: images.length, images });
@@ -340,12 +355,13 @@ if (!dev && cluster.isMaster) {
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
       // prettier-ignores
-      let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize data } }`);
+      let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize colors data } }`);
 
       //console.log(`/api/image/get/${id}`, Util.filterKeys(response, k => k!="data"));
 
       const photo = response.photos[0];
       if(typeof photo == "object") {
+        1;
         //console.log(`Image get id: `, id, "photo.data:", typeof photo.data);
         if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
         let data = Buffer.from(photo.data, "base64");
@@ -364,22 +380,13 @@ if (!dev && cluster.isMaster) {
     server.post(
       "/api/image/upload",
       needAuth(async function(req, res) {
-        /*   if(!req.files || Object.keys(req.files).length === 0)
-        return res.status(400).send("No files were uploaded.");*/
-
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
         let response = [];
         for(let item of Object.entries(req.files)) {
           const file = item[1];
-          //console.log(`item: `, item);
-          //const data = ;
-
-          let props = await sharp(file.data).metadata(); // jpeg.jpegProps(file.data);
-          //console.log(`props: `, props);
+          let props = await sharp(file.data).metadata();
           let { width, height, aspect } = props || {};
           if(!aspect && width > 0 && height > 0) aspect = width / height;
-          //console.log(`Image width: ${width} height: ${height}`);
-          //console.log(`Image aspect: ${aspect}`);
           const calcDimensions = (max, props) => {
             if(typeof props != "object" || props === null) props = {};
             let { width, height, ...restOfProps } = props;
@@ -397,51 +404,39 @@ if (!dev && cluster.isMaster) {
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
           if(typeof props != "object" || props === null) props = {};
           let newDimensions = calcDimensions(maxWidthOrHeight, props);
-          //console.log(`New Image width: ${newDimensions.width} height: ${newDimensions.height}`);
           if(!compareDimensions(props, newDimensions)) {
-            //console.log(`new Image aspect: ${aspect}`);
             if(!newDimensions.width) delete newDimensions.width;
             if(!newDimensions.height) delete newDimensions.height;
-            //console.log(`newDimensions `, newDimensions);
             let transformer = sharp()
               .jpeg({
-                quality: 95 /*,
-              chromaSubsampling: "4:4:4"*/
+                quality: 95
               })
               .resize(newDimensions)
-              .on("info", function(info) {
-                //console.log("Image height is " + info.height);
-              });
+              .on("info", function(info) {});
             var inputStream = bufferToStream(file.data);
             var outputStream = new MemoryStream();
             const finished = util.promisify(stream.finished);
-            outputStream.on("finish", () => {
-              //console.log("outputStream: ", outputStream.buffer);
-            });
-            //console.log("inputStream: ", inputStream);
+            outputStream.on("finish", () => {});
             inputStream.pipe(transformer).pipe(outputStream);
             await finished(outputStream);
             let newData = outputStream.buffer[0];
-            //let img = await sharp(file.data).resize(newDimensions.width, newDimensions.height).toBuffer();
-            //console.log("newData.length: ", newData.length);
             file.data = newData;
             props = jpeg.jpegProps(file.data);
             width = newDimensions.width ? newDimensions.width : props.width;
             height = newDimensions.height ? newDimensions.height : props.height;
-
-            //console.log(`new Image props: `, props);
           }
-          /*.resize*/
           let data = file.data.toString("base64");
           let word = (file.data[0] << 8) + file.data[1];
+
+          let palette = await getImagePalette(file.data);
+          console.log("palette:", palette);
+          let colors = JSON.stringify(palette).replace(/"/g, '\\"');
+
           let { depth, channels } = props;
-          let reply = await API.insert("photos", { original_name: `"${file.name}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
-          //console.log("API upload photo: ", reply && reply.returning ? reply.returning : reply);
+          let reply = await API.insert("photos", { original_name: `"${file.name}"`, colors: `"${colors}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
           let { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
-          //console.log("API upload photo: ", word.toString(16), { affected_rows, props });
-          if(returning && returning.forEach) returning.forEach(({ original_name, filesize, width, height, id }) => response.push({ original_name, filesize, width, height, id }));
+          if(returning && returning.forEach) returning.forEach(({ original_name, filesize, colors, width, height, id }) => response.push({ original_name, filesize, colors, width, height, id }));
         }
-        //console.log("Send response: ", response);
         res.json(response);
       })
     );

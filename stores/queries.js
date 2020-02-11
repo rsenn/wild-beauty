@@ -1,14 +1,25 @@
 import getAPI from "./api.js";
 import Util from "../utils/util.js";
 
+function getImageColors(colorstr) {
+  let obj = {};
+  try {
+    obj = JSON.parse(colorstr);
+  } catch(e) {}
+  return Object.fromEntries(Object.entries(obj).sort((a, b) => b[1] - a[1]));
+}
 export class Queries {
   api = getAPI();
 
   async fetchImages(where = {}) {
     //console.log("⇒ images ", { where });
-    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "user_id", "items { item_id }"], { where });
+    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "colors", "user_id", "items { item_id }"], { where });
     //console.log("⇐ images =", response);
-    return response;
+
+    return response.map(image => {
+      if(typeof image.colors == "string") image.colors = getImageColors(image.colors);
+      return image;
+    });
   }
   /*
   async fetchItems(where = {}) {
@@ -70,7 +81,7 @@ export class Queries {
 
   async loadItem(where = {}) {
     if(typeof where == "number") where = { id: where };
-    let response = Util.isServer() ? await this.api.select("items", where, ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id original_name width height filesize } }", "users { user { id } }"]) : await this.apiRequest("/api/item", where);
+    let response = Util.isServer() ? await this.api.select("items", where, ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id original_name width height filesize colors } }", "users { user { id } }"]) : await this.apiRequest("/api/item", where);
     let items = response ? await response.items : null;
     let item = (await items) ? await items[0] : null;
     const id = "" + (item && item.id !== undefined ? item.id : where.id);
