@@ -74,6 +74,7 @@ export const ImageUpload = inject("rootStore")(
                 <button
                   className={"image-delete"}
                   onClick={() => {
+                    console.log("delete clicked");
                     onDelete(id);
                   }}
                 >
