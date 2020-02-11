@@ -12,10 +12,10 @@
 	"buffers":
 	[
 		{
-			"contents": ".accumulateClasses\n(e, acc) =>\ne =>\ni =>\n() =>\n() =>\n.prototype.last\nfunction stylesheets()\n(s, i) =>\nr =>\n() =>\nfunction colors(map)\narg =>\nasync function getStars()\ns =>\ngr =>\nfunction getRect(e)\ne =>\ne =>\ne =>\ne =>\n.putStars\nname =>\nname =>\ne =>\nc =>\nfunction gradient(element)\ne =>\ns =>\n() =>\nGradientIterator\nnext\ngetColors()\n(acc, step) =>\nfunction starAnim()\nMakePointList\nfunction stores(stores)\nfunction gettext(elem, done)\nelem =>\ngetNodeText\nfunction(resolve, reject)\n(node, root) =>\ntag =>\nfunction select()\nfunction(resolve, reject)\nabortsel\nclick\nonkey\nfunction boxes(state)\nfunction(elem, accu, root)\nfunction res(width, height)\nb64toText\nfunction arrayBuffer2String(b)\nfunction ws(cmd = \"send\", filename, data)\n(resolve, reject) =>\nfunction decodeBase64(b)\n.onclose\n.onerror\n.onopen\n.onmessage\nfunction settext(en, fa)\nx =>\nasync function img(name, arg = {})\nobj =>\nfunction(arg)\nasync (resolve, reject) =>\ngetID\n() =>\n() =>\nfunction createsvg(wh, fixed = false)\nfunction setpos(element)\n.onmousemove\n.onclick\nfunction dump(element)\nfunction walk(element)\ne =>\nobj =>\nobj =>\nelement =>\ne =>\ntxt =>\ntxt =>\nkey =>\n(a, b) =>\ntext =>\ntext =>\nfunction measure(element)\nfunction trackElements()\ne =>\n() =>\nfunction polyline(points, closed = false)\nfunction circle(point, radius = 10)\nfunction rect(arg)\nfunction __rect(rect)\nfunction borders(element)\n(o, name) =>\nfunction storage(name)\nnewValue =>\n() =>\n() =>\nvalue =>\n.get\n.set\n.has\n.assign\nfunction assign_to(obj)",
+			"contents": "DefaultDocument\nrender",
 			"settings":
 			{
-				"buffer_size": 1476,
+				"buffer_size": 22,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
@@ -26,89 +26,6 @@
 			"settings":
 			{
 				"buffer_size": 606,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "server.js",
-			"settings":
-			{
-				"buffer_size": 18772,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/queries.js",
-			"settings":
-			{
-				"buffer_size": 5078,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "components/withQueryParam.js",
-			"settings":
-			{
-				"buffer_size": 920,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/devtools.js",
-			"settings":
-			{
-				"buffer_size": 30655,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pages/new/[photo_id].js",
-			"settings":
-			{
-				"buffer_size": 7496,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/RootStore.js",
-			"settings":
-			{
-				"buffer_size": 10905,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/api.js",
-			"settings":
-			{
-				"buffer_size": 4842,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/roman/wild-beauty/pages/list.js",
-			"settings":
-			{
-				"buffer_size": 15565,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/roman/wild-beauty/pages/show.js",
-			"settings":
-			{
-				"buffer_size": 18287,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pages/new.js",
-			"settings":
-			{
-				"buffer_size": 4299,
 				"line_ending": "Unix"
 			}
 		}
@@ -187,7 +104,8 @@
 	[
 		"/home/roman/the-wild-beauty-company",
 		"/home/roman/the-wild-beauty-company/components",
-		"/home/roman/the-wild-beauty-company/lib",
+		"/home/roman/the-wild-beauty-company/components/simple",
+		"/home/roman/the-wild-beauty-company/components/views",
 		"/home/roman/the-wild-beauty-company/pages",
 		"/home/roman/the-wild-beauty-company/pages/new",
 		"/home/roman/the-wild-beauty-company/public",
@@ -195,39 +113,41 @@
 	],
 	"file_history":
 	[
+		"/home/roman/the-wild-beauty-company/server.js",
+		"/home/roman/the-wild-beauty-company/stores/queries.js",
+		"/home/roman/the-wild-beauty-company/components/withQueryParam.js",
+		"/home/roman/the-wild-beauty-company/lib/devtools.js",
+		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
+		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
+		"/home/roman/the-wild-beauty-company/stores/api.js",
+		"/home/roman/wild-beauty/pages/list.js",
+		"/home/roman/wild-beauty/pages/show.js",
+		"/home/roman/the-wild-beauty-company/pages/new.js",
+		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
 		"/home/roman/the-wild-beauty-company/pages/_document.js",
 		"/home/roman/the-wild-beauty-company/components/layout.js",
 		"/home/roman/the-wild-beauty-company/components/login.js",
 		"/home/roman/the-wild-beauty-company/lib/touchHandler.js",
 		"/home/roman/the-wild-beauty-company/components/TouchCallback.js",
 		"/home/roman/the-wild-beauty-company/static/style.css",
-		"/home/roman/the-wild-beauty-company/pages/new.js",
 		"/home/roman/the-wild-beauty-company/pages/tree.js",
-		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
 		"/home/roman/the-wild-beauty-company/lib/dom.js",
 		"/home/roman/the-wild-beauty-company/lib/dom.es5.js",
 		"/home/roman/the-wild-beauty-company/node_modules/@babel/node/node_modules/core-js/modules/web.queue-microtask.js",
 		"/home/roman/wild-beauty/lib/touchHandler.js",
 		"/home/roman/the-wild-beauty-company/components/views/itemEditor.js",
-		"/home/roman/the-wild-beauty-company/stores/queries.js",
-		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
 		"/home/roman/the-wild-beauty-company/stores/functions.js",
 		"/home/roman/the-wild-beauty-company/lib/util.js",
 		"/home/roman/the-wild-beauty-company/lib/fd-graph.js",
-		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
-		"/home/roman/the-wild-beauty-company/lib/devtools.js",
 		"/home/roman/wild-beauty/pages/tree.js",
-		"/home/roman/the-wild-beauty-company/server.js",
 		"/home/roman/the-wild-beauty-company/pages/show.js",
 		"/home/roman/wild-beauty/stores/functions.js",
 		"/home/roman/the-wild-beauty-company/pages/index.js",
 		"/home/roman/the-wild-beauty-company/pages/browse.js",
-		"/home/roman/the-wild-beauty-company/stores/api.js",
 		"/home/roman/the-wild-beauty-company/lib/jpeg.js",
 		"/home/roman/the-wild-beauty-company/components/tree.js",
 		"/home/roman/the-wild-beauty-company/pages/list.js",
 		"/home/roman/the-wild-beauty-company/pages/_app.js",
-		"/home/roman/wild-beauty/pages/show.js",
 		"/home/roman/the-wild-beauty-company/lib/devpane.js",
 		"/home/roman/wild-beauty/components/graphContainer.js",
 		"/home/roman/the-wild-beauty-company/components/forceGraph.js",
@@ -394,557 +314,37 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1476,
+						"buffer_size": 22,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								296,
-								296
+								0,
+								0
 							]
 						],
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/lib/devtools.js",
+							"current_file": "/home/roman/the-wild-beauty-company/pages/_document.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									822,
-									848
+									154,
+									169
 								],
 								[
-									989,
-									1000
-								],
-								[
-									1214,
-									1218
-								],
-								[
-									1303,
-									1307
-								],
-								[
-									1557,
-									1562
-								],
-								[
-									1586,
-									1591
-								],
-								[
-									1729,
-									1757
-								],
-								[
-									1809,
-									1831
-								],
-								[
-									1875,
-									1884
-								],
-								[
-									1950,
-									1954
-								],
-								[
-									2052,
-									2057
-								],
-								[
-									2108,
-									2128
-								],
-								[
-									2181,
-									2187
-								],
-								[
-									3734,
-									3759
-								],
-								[
-									3953,
-									3957
-								],
-								[
-									4021,
-									4026
-								],
-								[
-									4093,
-									4112
-								],
-								[
-									4408,
-									4412
-								],
-								[
-									4463,
-									4467
-								],
-								[
-									4573,
-									4577
-								],
-								[
-									4623,
-									4627
-								],
-								[
-									4654,
-									4676
-								],
-								[
-									4760,
-									4767
-								],
-								[
-									4797,
-									4804
-								],
-								[
-									4855,
-									4859
-								],
-								[
-									4936,
-									4940
-								],
-								[
-									5833,
-									5859
-								],
-								[
-									6117,
-									6121
-								],
-								[
-									6535,
-									6539
-								],
-								[
-									6603,
-									6608
-								],
-								[
-									6626,
-									6642
-								],
-								[
-									6672,
-									6676
-								],
-								[
-									6857,
-									6868
-								],
-								[
-									6908,
-									6922
-								],
-								[
-									7099,
-									7118
-								],
-								[
-									7658,
-									7678
-								],
-								[
-									8726,
-									8749
-								],
-								[
-									9251,
-									9279
-								],
-								[
-									9321,
-									9328
-								],
-								[
-									9373,
-									9394
-								],
-								[
-									9713,
-									9738
-								],
-								[
-									9854,
-									9869
-								],
-								[
-									10133,
-									10139
-								],
-								[
-									10732,
-									10749
-								],
-								[
-									10807,
-									10832
-								],
-								[
-									10953,
-									10969
-								],
-								[
-									11162,
-									11178
-								],
-								[
-									11380,
-									11396
-								],
-								[
-									11582,
-									11603
-								],
-								[
-									12012,
-									12038
-								],
-								[
-									12796,
-									12823
-								],
-								[
-									13122,
-									13194
-								],
-								[
-									13378,
-									13408
-								],
-								[
-									13559,
-									13600
-								],
-								[
-									13624,
-									13644
-								],
-								[
-									14129,
-									14153
-								],
-								[
-									14225,
-									14251
-								],
-								[
-									14331,
-									14357
-								],
-								[
-									14578,
-									14603
-								],
-								[
-									14917,
-									14936
-								],
-								[
-									15422,
-									15446
-								],
-								[
-									15724,
-									15728
-								],
-								[
-									16019,
-									16053
-								],
-								[
-									16229,
-									16235
-								],
-								[
-									16351,
-									16364
-								],
-								[
-									17050,
-									17076
-								],
-								[
-									17294,
-									17307
-								],
-								[
-									18731,
-									18736
-								],
-								[
-									18879,
-									18884
-								],
-								[
-									19400,
-									19437
-								],
-								[
-									20585,
-									20609
-								],
-								[
-									20706,
-									20736
-								],
-								[
-									21008,
-									21034
-								],
-								[
-									21136,
-									21158
-								],
-								[
-									21238,
-									21260
-								],
-								[
-									21320,
-									21324
-								],
-								[
-									21521,
-									21527
-								],
-								[
-									21944,
-									21950
-								],
-								[
-									22560,
-									22570
-								],
-								[
-									22597,
-									22601
-								],
-								[
-									23532,
-									23538
-								],
-								[
-									23587,
-									23593
-								],
-								[
-									23659,
-									23665
-								],
-								[
-									23709,
-									23718
-								],
-								[
-									23816,
-									23823
-								],
-								[
-									23870,
-									23877
-								],
-								[
-									24682,
-									24707
-								],
-								[
-									24906,
-									24930
-								],
-								[
-									25021,
-									25025
-								],
-								[
-									25161,
-									25166
-								],
-								[
-									25312,
-									25353
-								],
-								[
-									25837,
-									25872
-								],
-								[
-									26262,
-									26280
-								],
-								[
-									26493,
-									26514
-								],
-								[
-									28395,
-									28420
-								],
-								[
-									28540,
-									28552
-								],
-								[
-									29215,
-									29237
-								],
-								[
-									29414,
-									29425
-								],
-								[
-									29548,
-									29553
-								],
-								[
-									29615,
-									29620
-								],
-								[
-									29633,
-									29641
-								],
-								[
-									29665,
-									29685
-								],
-								[
-									29746,
-									29763
-								],
-								[
-									29946,
-									29966
-								],
-								[
-									30023,
-									30048
-								],
-								[
-									30201,
-									30224
+									191,
+									197
 								]
 							],
 							"symlist":
 							[
-								".accumulateClasses",
-								"(e, acc) =>",
-								"e =>",
-								"i =>",
-								"() =>",
-								"() =>",
-								".prototype.last",
-								"function stylesheets()",
-								"(s, i) =>",
-								"r =>",
-								"() =>",
-								"function colors(map)",
-								"arg =>",
-								"async function getStars()",
-								"s =>",
-								"gr =>",
-								"function getRect(e)",
-								"e =>",
-								"e =>",
-								"e =>",
-								"e =>",
-								".putStars",
-								"name =>",
-								"name =>",
-								"e =>",
-								"c =>",
-								"function gradient(element)",
-								"e =>",
-								"s =>",
-								"() =>",
-								"GradientIterator",
-								"next",
-								"getColors()",
-								"(acc, step) =>",
-								"function starAnim()",
-								"MakePointList",
-								"function stores(stores)",
-								"function gettext(elem, done)",
-								"elem =>",
-								"getNodeText",
-								"function(resolve, reject)",
-								"(node, root) =>",
-								"tag =>",
-								"function select()",
-								"function(resolve, reject)",
-								"abortsel",
-								"click",
-								"onkey",
-								"function boxes(state)",
-								"function(elem, accu, root)",
-								"function res(width, height)",
-								"b64toText",
-								"function arrayBuffer2String(b)",
-								"function ws(cmd = \"send\", filename, data)",
-								"(resolve, reject) =>",
-								"function decodeBase64(b)",
-								".onclose",
-								".onerror",
-								".onopen",
-								".onmessage",
-								"function settext(en, fa)",
-								"x =>",
-								"async function img(name, arg = {})",
-								"obj =>",
-								"function(arg)",
-								"async (resolve, reject) =>",
-								"getID",
-								"() =>",
-								"() =>",
-								"function createsvg(wh, fixed = false)",
-								"function setpos(element)",
-								".onmousemove",
-								".onclick",
-								"function dump(element)",
-								"function walk(element)",
-								"e =>",
-								"obj =>",
-								"obj =>",
-								"element =>",
-								"e =>",
-								"txt =>",
-								"txt =>",
-								"key =>",
-								"(a, b) =>",
-								"text =>",
-								"text =>",
-								"function measure(element)",
-								"function trackElements()",
-								"e =>",
-								"() =>",
-								"function polyline(points, closed = false)",
-								"function circle(point, radius = 10)",
-								"function rect(arg)",
-								"function __rect(rect)",
-								"function borders(element)",
-								"(o, name) =>",
-								"function storage(name)",
-								"newValue =>",
-								"() =>",
-								"() =>",
-								"value =>",
-								".get",
-								".set",
-								".has",
-								".assign",
-								"function assign_to(obj)"
+								"DefaultDocument",
+								"render"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -952,13 +352,13 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 4,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -974,8 +374,8 @@
 						"selection":
 						[
 							[
-								205,
-								205
+								606,
+								606
 							]
 						],
 						"settings":
@@ -987,317 +387,9 @@
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "server.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 18772,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2406,
-								2406
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 168.0,
-						"translation.y": 668.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "stores/queries.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5078,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								778,
-								778
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "components/withQueryParam.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 920,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "lib/devtools.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 30655,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6603,
-								6608
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 3167.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "pages/new/[photo_id].js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7496,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								117,
-								117
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "stores/RootStore.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 10905,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3834,
-								3834
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1989.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "stores/api.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4842,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2123,
-								2123
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 850.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "/home/roman/wild-beauty/pages/list.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 15565,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1208,
-								1208
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 137.0,
-						"translation.y": 90.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "/home/roman/wild-beauty/pages/show.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 18287,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3097,
-								3097
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 622.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
-					"file": "pages/new.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4299,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1804,
-								1804
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/JavaScriptNext - ES6 Syntax/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 663.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
 					"type": "text"
 				}
 			]

@@ -48,7 +48,6 @@ class New extends React.Component {
       images = images.filter(ph => ph.items.length == 0);
       images.forEach(item => RootStore.newImage(item));
       const { url, query, body, route } = req || {};
-
       console.log("New.getInitialProps", { url });
     }
     return { images };
@@ -68,21 +67,13 @@ class New extends React.Component {
       window.page = this;
       window.rs = rootStore;
     }
-
-    this.touchListener = SelectionListener(
-      event => {
-        //  console.log("client: ", new Point(event.client ? event.client : event).toString());
-      },
-      { color: "#40ff00", shadow: "#000000" }
-    );
-
+    this.touchListener = SelectionListener(event => {}, { color: "#40ff00", shadow: "#000000" });
     rootStore.state.step = 1;
   }
 
   @action.bound
   addContent(event) {
     const { rootStore } = this.props;
-    //console.log("addContent: ", event);
     rootStore.fields.push({ type: null, value: "" });
   }
 
@@ -95,27 +86,18 @@ class New extends React.Component {
     const { rootStore, router } = this.props;
     const { target, currentTarget } = event;
     let photo_id = parseInt(target.getAttribute("id").replace(/.*-/g, ""));
-    //console.log("New.chooseImage ", { photo_id, target, currentTarget });
-    /*    rootStore.state.image = photo_id;
-    rootStore.state.step = 2;*/
     router.push(`/new/${photo_id}`);
   }
 
-  handleClick = event => {
-    //console.log("New handleClick ", event);
-  };
+  handleClick = event => {};
 
   render() {
     const { rootStore } = this.props;
     const onError = event => {};
     const onImage = event => {
       const { value } = event.nativeEvent.target;
-      //  document.forms[0].submit();
-      //console.log("onChange: ", value);
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
-    //console.log("New.render", this.tree);
-
     return (
       <Layout toastsClick={this.handleClick} className={"noselect"} {...this.touchListener.events}>
         <NeedAuth>{rootStore.state.image === null ? <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}</NeedAuth>
