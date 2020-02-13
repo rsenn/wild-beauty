@@ -68,14 +68,14 @@ class MyApp extends App {
     const { router } = this.props;
 
     const rootStore = this.mobxStore.RootStore;
-    /*
+    
     const handleRouteChange = url => {
       console.log("App is changing to: ", url);
 
       rootStore.setState({ loading: true });
     };
 
-    Router.events.on("routeChangeStart", handleRouteChange);*/
+    Router.events.on("routeChangeStart", handleRouteChange);
 
     //console.log("App.componentDidMount ", router.query);
     const obj = ["step", "image", "selected"].reduce((acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc), {});

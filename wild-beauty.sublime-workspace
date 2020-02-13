@@ -20,48 +20,17 @@
 	"buffers":
 	[
 		{
-			"contents": "Home\nconstructor\nrender\nsize =>",
+			"contents": "function: cfg\nexpansion: ${build:=`gcc -dumpmachine`}\nexpansion: $host\nvariable: host\nexpansion: $build\nexpansion: $host\nvariable: host\nexpansion: $host\nvariable: builddir\nexpansion: $host\nvariable: prefix\nvariable: host\nexpansion: $host\nvariable: builddir\nexpansion: $host\nvariable: prefix\nvariable: host\nexpansion: $host\nvariable: builddir\nexpansion: ${host}\nvariable: prefix\nvariable: host\nexpansion: $host\nvariable: builddir\nexpansion: ${host}\nvariable: prefix\nexpansion: ${prefix:=/usr}\nexpansion: ${libdir:=$prefix/lib}\nexpansion: $libdir\nexpansion: $host\nvariable: libdir\nexpansion: $libdir\nexpansion: $host\nexpansion: $TOOLCHAIN\nvariable: cmakebuild\nexpansion: $(basename \"$TOOLCHAIN\" .cmake)\nvariable: cmakebuild\nexpansion: ${cmakebuild%.toolchain}\nvariable: cmakebuild\nexpansion: ${cmakebuild#toolchain-}\nexpansion: ${builddir=build/$cmakebuild}\nexpansion: ${builddir=build/$host}\nexpansion: $(uname -o)\nvariable: SYSTEM\nexpansion: $STATIC\nexpansion: $TYPE\nexpansion: $@\nexpansion: ${generator:=\"Unix Makefiles\"}\nexpansion: $builddir\nexpansion: ${relsrcdir=`realpath --relative-to \"$builddir\" .`}\nexpansion: $builddir\nexpansion: ${CMAKE:-cmake}\nexpansion: $generator\nexpansion: ${VERBOSE+:-DCMAKE_VERBOSE_MAKEFILE=TRUE}\nexpansion: ${TYPE:-Debug}\nexpansion: ${CC:+-DCMAKE_C_COMPILER=\"$CC\"}\nexpansion: ${CXX:+-DCMAKE_CXX_COMPILER=\"$CXX\"}\nexpansion: ${PKG_CONFIG:+-DPKG_CONFIG_EXECUTABLE=\"$PKG_CONFIG\"}\nexpansion: ${TOOLCHAIN:+-DCMAKE_TOOLCHAIN_FILE=\"$TOOLCHAIN\"}\nexpansion: ${CC:+-DCMAKE_C_COMPILER=\"$CC\"}\nexpansion: ${CXX:+-DCMAKE_CXX_COMPILER=\"$CXX\"}\nexpansion: {C,CXX}\nexpansion: {C,CXX}\nexpansion: ${MAKE:+-DCMAKE_MAKE_PROGRAM=\"$MAKE\"}\nexpansion: $@\nexpansion: $relsrcdir\nexpansion: ${builddir##*/}\nfunction: cfg-android\nexpansion: ${builddir=build/android}\nexpansion: ${TOOLCHAIN:-/opt/android-cmake/android.cmake}\nexpansion: $@\nfunction: cfg-diet\nvariable: build\nexpansion: $(${CC:-gcc} -dumpmachine)\nvariable: host\nexpansion: ${build/-gnu/-dietlibc}\nexpansion: ${builddir=build/${host%-*}-diet}\nexpansion: ${prefix=/opt/diet}\nexpansion: ${libdir=/opt/diet/lib-${host%%-*}}\nexpansion: ${bindir=/opt/diet/bin-${host%%-*}}\nexpansion: ${CC=\"diet-gcc\"}\nvariable: CC\nvariable: PKG_CONFIG\nexpansion: $libdir\nexpansion: $prefix\nexpansion: $@\nfunction: cfg-emscripten\nvariable: build\nexpansion: $(${CC:-emcc} -dumpmachine)\nvariable: host\nexpansion: ${build/-gnu/-emscriptenlibc}\nexpansion: ${builddir=build/${host%-*}-emscripten}\nexpansion: ${prefix=/opt/emsdk/emscripten/incoming/system}\nexpansion: ${libdir=/opt/emsdk/emscripten/incoming/system/lib}\nexpansion: ${bindir=/opt/emsdk/emscripten/incoming/system/bin}\nvariable: CC\nvariable: PKG_CONFIG\nexpansion: $libdir\nexpansion: $prefix\nexpansion: $@\nfunction: cfg-musl\nvariable: build\nexpansion: $(${CC:-gcc} -dumpmachine)\nvariable: host\nexpansion: ${build/-gnu/-musl}\nvariable: builddir\nexpansion: $host\nvariable: prefix\nvariable: includedir\nexpansion: $host\nvariable: libdir\nexpansion: $host\nvariable: bindir\nexpansion: $host\nvariable: CC\nvariable: PKG_CONFIG\nexpansion: $@\nfunction: cfg-mingw\nvariable: build\nexpansion: $(gcc -dumpmachine)\nexpansion: ${host=${build%%-*}-w64-mingw32}\nexpansion: ${prefix=/usr/$host/sys-root/mingw}\nvariable: TOOLCHAIN\nvariable: builddir\nexpansion: $host\nvariable: bindir\nexpansion: $prefix\nvariable: libdir\nexpansion: $prefix\nexpansion: $@\nfunction: cfg-mingw32\nvariable: build\nexpansion: $(gcc -dumpmachine)\nvariable: host\nexpansion: ${build%%-*}\nvariable: host\nexpansion: ${host#*-}\nexpansion: $@\nfunction: cfg-msys\nvariable: build\nexpansion: $(gcc -dumpmachine)\nexpansion: ${host=${build%%-*}-pc-msys}\nexpansion: ${prefix=/usr/$host/sys-root/msys}\nvariable: builddir\nexpansion: $host\nvariable: bindir\nexpansion: $prefix\nvariable: libdir\nexpansion: $prefix\nvariable: CC\nexpansion: $host\nexpansion: $@\nfunction: cfg-msys32\nvariable: build\nexpansion: $(gcc -dumpmachine)\nvariable: host\nexpansion: ${build%%-*}\nvariable: host\nexpansion: ${host#*-}\nexpansion: $@\nfunction: cfg-termux\nvariable: builddir\nexpansion: ${TOOLCHAIN:-/opt/android-cmake/android.cmake}\nexpansion: $@\nfunction: cfg-wasm\nvariable: VERBOSE\nvariable: EMCC\nexpansion: $(which emcc)\nvariable: EM_CONFIG\nexpansion: $(which em-config)\nvariable: EMSCRIPTEN\nexpansion: $(dirname \"$EM_CONFIG\")\nvariable: EMSCRIPTEN\nexpansion: ${EMSCRIPTEN%%/bin*}\nvariable: TOOLCHAIN\nexpansion: $TOOLCHAIN\nvariable: TOOLCHAIN\nexpansion: $(find \"$EMSCRIPTEN\" -iname emscripten.cmake)\nexpansion: $TOOLCHAIN\nvariable: TOOLCHAIN\nexpansion: ${prefix:=\"$EMSCRIPTEN\"}\nvariable: builddir\nvariable: CC\nexpansion: $EMCC\nexpansion: $prefix\nexpansion: $TOOLCHAIN\nexpansion: {ZLIB,BZIP,LZMA,SSL}\nexpansion: $@",
 			"settings":
 			{
-				"buffer_size": 31,
+				"buffer_size": 4634,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "lib/touchHandler.js",
-			"settings":
-			{
-				"buffer_size": 13390,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "import React from \"react\";\nimport Head from \"next/head\";\nimport Router from \"next/router\";\nimport Link from \"next/link\";\nimport Gallery, { randomImagePaths } from \"../components/gallery.js\";\nimport Alea from \"../utils/alea.js\";\nimport { Timer, Element } from \"../utils/dom.js\";\nimport { lazyInitializer } from \"../utils/lazyInitializer.js\";\nimport { SvgOverlay } from \"../utils/svg-overlay.js\";\nimport Util from \"../utils/util.js\";\nimport { inject, observer } from \"mobx-react\";\nimport { trkl } from \"../utils/trkl.js\";\nimport axios from \"../utils/axios.js\";\nimport { ColorScheme } from \"../utils/colorscheme.js\";\nimport { withSize, SizeMe } from \"react-sizeme\";\nimport { TouchListener, TouchHandler, TouchEvents, MouseEvents, MultitouchListener, MovementListener } from \"../lib/touchHandler.js\";\nimport { TouchCallback, makeTouchCallback } from \"../components/TouchCallback.js\";\nimport Layout from \"../components/layout.js\";\nimport { CubeSpinner } from \"../components/simple/cubeSpinner.js\";\n\nimport \"../static/style.css\";\n\nconst rng = Alea.singleton(Date.now());\nconst imagePaths = lazyInitializer(() => randomImagePaths());\n\n@inject(\"rootStore\")\n@observer\nclass Home extends React.Component {\n  state = {\n    mirrored: false,\n    angle: 0,\n    loading: false,\n    pageLoading: \"\"\n  };\n  svgLayer = trkl();\n  touchListener = null;\n\n  constructor(props) {\n    super(props);\n    const { rootStore } = this.props;\n    rootStore.setState({ subpage: 1 });\n    if(global.window) {\n      window.page = this;\n      window.rs = rootStore;\n      window.rng = rng;\n      window.axios = axios;\n      const parser = new DOMParser();\n      window.nt = parser.parseFromString(ColorScheme.nextTheme, \"text/xml\");\n      window.EditColorScheme = ColorScheme.randomize;\n      window.ColorSchemeToObject = ColorScheme.toObject;\n    }\n    this.touchCallback = makeTouchCallback(\"#t-logo\", (event, e) => {\n      const zIndex = maxZIndex() + 1;\n      if(e) Element.setCSS(e, { zIndex });\n      if(e && e.style) {\n        moveImage(event, e);\n      }\n    });\n\n    false &&\n      (this.touchListener = TouchListener(\n        event => {\n          const { nativeEvent, index, x, y, start, end, type } = event;\n          const target = nativeEvent && nativeEvent.target ? nativeEvent.target : event.target;\n          if(!type.endsWith(\"move\")) {\n            let parent;\n            if(target && target.tagName && target.tagName.toLowerCase() == \"img\") {\n              parent = target.parentElement;\n              //console.log(\"Touch \", index, { x, y }, type, target);\n\n              this.animateLogo(animation => {\n                //console.log(\"animation end\");\n              });\n            }\n          }\n        },\n        { /*element: global.window, */ step: 1, round: true, listener: MovementListener, noscroll: true }\n      ));\n\n    //console.log(\"this.touchListener\", Object.keys(this.touchListener));\n    //console.log(\"this.touchListener.listener\", Object.keys(this.touchListener.listener));\n    this.getHash();\n  }\n\n  readHash() {\n    if(global.window) {\n      const hash = /#/.test(window.location.href) ? window.location.href.replace(/.*#/, \"\") : \"1\";\n      const subpage = parseInt(hash);\n      return subpage;\n    }\n    return 1;\n  }\n\n  getHash() {\n    const { rootStore, router } = this.props;\n    if(global.window) {\n      const subpage = this.readHash();\n      if(!isNaN(subpage)) {\n        if(subpage != rootStore.state.subpage) {\n          rootStore.setState({ subpage });\n          this.forceUpdate();\n        }\n      }\n    } else {\n    }\n  }\n\n  componentDidMount() {\n    const { rootStore, router } = this.props;\n    this.getHash();\n    this.setState({\n      loading: false,\n      pageLoading: \"\"\n    });\n    var counter = 0;\n  }\n\n  componentDidUpdate(prevProps) {\n    const { rootStore, router } = this.props;\n    const { pathname, query } = this.props.router;\n    Router.events.on(\"routeChangeStart\", path => {\n      /* returns the last part of the new url so that we know which page to make active in the loading component */\n      let url = Util.parseURL(path);\n      this.setLoading(url);\n    });\n  }\n  setLoading = newPage => {\n    const { rootStore } = this.props;\n\n    console.log(\"set loading state: \", newPage);\n    rootStore.setState({ loading: true });\n\n    // this.setState({ loading: true, pageLoading: newPage });\n  };\n\n  handleNext = () => {\n    const { rootStore } = this.props;\n    const subpage = rootStore.state.subpage;\n    console.log(\"handleNext: \", subpage);\n\n    rootStore.setState({ loading: true, subpage: subpage + 1 });\n    if(global.window) window.location.hash = `#${subpage + 1}`;\n  };\n\n  handlePrev = () => {\n    const { rootStore } = this.props;\n    const subpage = rootStore.state.subpage;\n    console.log(\"handlePrev: \", subpage);\n\n    rootStore.setState({ loading: true, subpage: subpage - 1 });\n    if(global.window) window.location.hash = `#${subpage - 1}`;\n  };\n\n  animateLogo = endFn => {\n    if(!this.anim) {\n      this.anim = {\n        initialized: false,\n        run: false,\n        interval: 2000,\n        tLogo: null,\n        angle: 0,\n        step: 0,\n        angles: { x: 0, y: 0, z: 0 },\n        vector: {\n          x: 0,\n          y: 0,\n          z: 0,\n          get magnitude() {\n            return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);\n          },\n          clear() {\n            this.x = 0;\n            this.y = 0;\n            this.z = 0;\n          },\n          normalize() {\n            const mag = this.magnitude;\n            this.x /= mag;\n            this.y /= mag;\n            this.z /= mag;\n          }\n        },\n        init() {\n          if(!this.initialized) {\n            const e = Element.find(\"#t-logo\");\n            if(e) {\n              this.tLogo = e;\n              this.initialized = Date.now();\n              //console.log(\" anim initialized\");\n              this.tick(0);\n            }\n          }\n        },\n        get time() {\n          return Date.now() - this.initialized;\n        },\n        get delta() {\n          let prev = this.prev || this.initialized;\n          let now = Date.now();\n          let delta = now - prev;\n          this.prev = now;\n          return `+${delta}ms`;\n        },\n        makeRandAngles(scale = 180) {\n          this.setAngles(Math.floor((Math.random() * 2 - 1) * scale), Math.floor((Math.random() * 2 - 1) * scale), Math.floor((Math.random() * 2 - 1) * scale));\n          this.angle = Math.floor((Math.random() * 2 - 1) * scale);\n        },\n        makeRandDirection() {\n          this.vector.x = Math.random() * 2 - 1;\n          this.vector.y = Math.random() * 2 - 1;\n          this.vector.z = Math.random() * 2 - 1;\n          this.vector.normalize();\n        },\n        setAngles(x, y, z) {\n          this.angles.x = x;\n          this.angles.y = y;\n          this.angles.z = z;\n        },\n        updateAngles() {\n          let oldT = this.tLogo.style.transition;\n          this.tLogo.style.transition = \"\";\n          Element.setCSS(this.tLogo, {\n            transform: `perspective(300px) translateZ(-150px) scale(-1,1) rotate3d(${this.vector.x.toFixed(3)}, ${this.vector.y.toFixed(3)}, ${this.vector.z.toFixed(3)}, ${this.angle}deg)`\n          });\n          this.tLogo.style.transition = oldT;\n        },\n        transitionAngles(endfn = () => {}) {\n          const transform = `perspective(300px) translateZ(-150px) scale(-1,1)  rotate3d(${this.vector.x.toFixed(3)}, ${this.vector.y.toFixed(3)}, ${this.vector.z.toFixed(3)}, ${this.angle}deg) `;\n          Element.transition(this.tLogo, { transform }, 1000).then(t => {\n            //console.log(\"Transition END \", this.time, transform);\n            Timer.promise(1000).then(() => endfn());\n          });\n          //console.log(\"Transition START\", this.time);\n        },\n        setTransition(enable = true) {\n          Element.setCSS(this.tLogo, { transition: enable ? `transform ${this.interva}ms linear` : \"\" });\n        },\n        tick(i) {\n          this.run = true;\n          //console.log(`Anim tick(${i % 3}) ${this.delta}`);\n          switch (i % 3) {\n            case 0: {\n              this.makeRandDirection();\n              this.angle = Math.floor((Math.random() * 2 - 1) * 180);\n              this.angle += Math.sign(this.angle) * 180;\n              this.transitionAngles(() => this.tick(i + 1));\n              break;\n            }\n            case 1: {\n              this.angle = Math.sign(this.angle) * 360;\n              this.transitionAngles(() => this.tick(i + 1));\n              break;\n            }\n            case 2: {\n              this.angle = 0;\n              this.updateAngles();\n              if(endFn) endFn(this);\n              //  else Timer.promise(1000).then(() => this.tick(i + 1));\n              this.run = false;\n              break;\n            }\n          }\n        }\n      };\n    }\n\n    this.anim.init();\n\n    if(!this.run) this.anim.tick(0);\n  };\n\n  render() {\n    const { rootStore, router, size } = this.props;\n    let swipeEvents = {};\n    var e = null;\n    if(global.window !== undefined) window.page = this;\n    const t = ` perspective(300px) translateZ(-150px) rotateY(${rootStore.state.mirrored ? 180 : 0}deg) `;\n    const endDate = new Date(\"01.01.2035\");\n    const now = new Date();\n    const seconds = (endDate.getTime() - now.getTime()) / 1000;\n    const timespan = Util.timeSpan(Math.floor(seconds));\n    const subpage = this.readHash();\n    /*\n    const events = this.touchListener ? { ...TouchEvents(this.touchListener), ...MouseEvents(this.touchListener) } : {};\n\n    console.log(\"Home.render \", this.touchListener.events);\n*/\n    const events = {}; //this.touchListener.events;\n    var angle = 0;\n\n    return (\n      <Layout hideNav={true} {...events}>\n        <Head>\n          <title>Home</title>\n          <link rel=\"icon\" href=\"/favicon.ico\" />\n        </Head>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: 1, display: \"flex\" }}>\n          <div\n            id=\"t-logo\"\n            className=\"t-logo\"\n            style={{\n              transformStyle: \"preserve-3d\",\n              transition: \"transform 1s  cubic-bezier(.53,.38,.94,.32)\",\n              transform: t\n            }}\n          >\n            <img src={\"/static/img/logo-transparent.png\"} style={{ width: \"100%\", maxWidth: \"1280px\" }} />\n          </div>\n          {}\n        </div>\n        <div className={\"subpage\"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? \"auto\" : \"none\", display: subpage == 2 ? \"block\" : \"block\" }}>\n          <div>\n            {(size => {\n              const fontSize = Math.round(size.width / 60);\n              const charWidth = fontSize - 1;\n              const maxLineLength = Math.floor(size.width / charWidth);\n\n              const padding = Math.round((size.width - fontSize * 45) / 3 + 80);\n              const paragraphWidth = Math.floor(size.width - padding * 2);\n              const lineLength = Math.floor((paragraphWidth + 2) / charWidth);\n\n              return (\n                <div\n                  style={{\n                    fontSize: `${fontSize}px`,\n                    padding: `${padding >= 19 ? Math.round((padding - 19) / 2) : 0}px ${padding}px 0 ${padding}px`\n                  }}\n                >\n                  <h1>Title</h1>\n                  <span className={\"paragraph\"}>\n                    The earliest known appearance of the phrase is from The Boston Journal. In an article titled \"Current Notes\" in the February 9, 1885, edition, the phrase is mentioned as a good practice sentence for writing students: \"A favorite copy set by writing teachers for their pupils is the following, because it contains every letter of the alphabet: 'A quick brown fox jumps over the lazy dog.'\" Dozens of other newspapers published the phrase over the next few months, all using the\n                    version of the sentence starting with \"A\" rather than \"The\". The earliest known use of the phrase in its modern form (starting with \"The\") is from the 1888 book Illustrative Shorthand by Linda Bronson. The modern form (starting with \"The\") became more common despite the fact that it is slightly longer than the original (starting with \"A\"). As the use of typewriters grew in the late 19th century, the phrase began appearing in typing lesson books as a practice sentence. Early\n                    examples include How to Become Expert in Typewriting: A Complete Instructor Designed Especially for the Remington Typewriter (1890), and Typewriting Instructor and Stenographer's Hand-book (1892). By the turn of the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic Journal, it is referred to as \"the well known memorized typing line embracing all the letters of the alphabet\". {}\n                  </span>\n                </div>\n              );\n            })({ width: global.window ? window.innerWidth : undefined, height: global.window ? window.innerHeight : undefined })}\n          </div>\n        </div>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: subpage == 3 ? 1 : 0, pointerEvents: subpage == 3 ? \"auto\" : \"none\", display: subpage == 3 ? \"flex\" : \"flex\" }}>\n          <div className={\"time-counter\"}>{timespan}</div>\n        </div>\n        {/*onClick={this.handleNext}*/}\n        <Link href={\"/show\"}>\n          <a>\n            <div className={\"button-next\"}>\n              <img className={\"fill-parent\"} src={\"/static/img/arrow-next.svg\"} style={{ display: rootStore.state.loading ? \"none\" : \"block\" }} />\n\n              <CubeSpinner className={\"fill-parent\"} width={\"3.165em\"} height={\"3.165em\"} loading={true} style={{ display: rootStore.state.loading ? \"block\" : \"none\" }} />\n            </div>\n          </a>\n        </Link>\n        <SvgOverlay svgRef={this.svgLayer} />\n\n        <style jsx global>{`\n          h1 {\n            text-align: left;\n          }\n          span.paragraph {\n            font-size: 2em;\n          }\n          .article-list {\n            display: flex;\n            flex-direction: row;\n            flex-wrap: wrap;\n          }\n          .button-next {\n            position: fixed;\n            right: 10px;\n            bottom: 10px;\n          }\n          .button-prev {\n            position: fixed;\n            left: 10px;\n            bottom: 10px;\n          }\n          .button-next,\n          .button-prev {\n            filter: drop-shadow(-2px 2px 4px #00000080);\n          }\n          .button-next:active,\n          .button-prev:active {\n            transform: translate(2px, 2px);\n          }\n\n          .xfill-parent {\n            position: absolute;\n            width: 100%;\n            height: 100%;\n          }\n          .flex-vertical {\n            display: flex;\n            flex-flow: column nowrap;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n          }\n          .subpage {\n            position: absolute;\n            top: 0;\n            left: 0;\n            width: 100vw;\n            font-size: 13px;\n\n            transition: opacity 0.5s;\n            overflow: auto;\n          }\n\n          .main-layout {\n            display: block;\n            padding: 0;\n            margin: 0;\n            overflow: ĥidden;\n          }\n          .time-counter {\n            margin: 10px;\n            font-size: 2em;\n          }\n          .gallery-image {\n            height: auto;\n          }\n          .panels {\n            margin: 100px;\n            overflow: visible;\n          }\n          img {\n            border: 0px;\n            outline: 0px;\n            padding: 0px;\n            margin: 0px;\n          }\n        `}</style>\n      </Layout>\n    );\n  }\n}\n\nexport default Home;\n",
 			"file": "pages/index.js",
-			"file_size": 15657,
-			"file_write_time": 132259323719707604,
-			"settings":
-			{
-				"buffer_size": 15656,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/roman/wild-beauty/pages/_app.js",
-			"settings":
-			{
-				"buffer_size": 6267,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "import React from \"react\";\nimport Head from \"next/head\";\nimport Link from \"next/link\";\nimport Gallery from \"../components/gallery.js\";\nimport { SvgOverlay } from \"../utils/svg-overlay.js\";\nimport { inject, observer } from \"mobx-react\";\nimport Layout from \"../components/layout.js\";\nimport { CubeSpinner } from \"../components/simple/cubeSpinner.js\";\n\n@inject(\"rootStore\")\n@observer\nclass Home extends React.Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    const { rootStore } = this.props;\n    let subpage = 1,\n      timespan = Date.now();\n    return (\n      <Layout hideNav={true}>\n        <Head>\n          <title>Home</title>\n          <link rel=\"icon\" href=\"/favicon.ico\" />\n        </Head>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: 1, display: \"flex\" }}>\n          <div\n            id=\"t-logo\"\n            className=\"t-logo\"\n            style={{\n              transformStyle: \"preserve-3d\",\n              transition: \"transform 1s  cubic-bezier(.53,.38,.94,.32)\",\n              transform: \"\"\n            }}\n          >\n            <img src={\"/static/img/logo-transparent.png\"} style={{ width: \"100%\", maxWidth: \"1280px\" }} />\n          </div>\n        </div>\n        <div className={\"subpage\"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? \"auto\" : \"none\", display: subpage == 2 ? \"block\" : \"block\" }}>\n          <div>\n            {(size => {\n              const fontSize = Math.round(size.width / 60);\n              const charWidth = fontSize - 1;\n              const maxLineLength = Math.floor(size.width / charWidth);\n\n              const padding = Math.round((size.width - fontSize * 45) / 3 + 80);\n              const paragraphWidth = Math.floor(size.width - padding * 2);\n              const lineLength = Math.floor((paragraphWidth + 2) / charWidth);\n\n              return (\n                <div\n                  style={{\n                    fontSize: `${fontSize}px`,\n                    padding: `${padding >= 19 ? Math.round((padding - 19) / 2) : 0}px ${padding}px 0 ${padding}px`\n                  }}\n                >\n                  <h1>Title</h1>\n                  <span className={\"paragraph\"}>\n                    The earliest known appearance of the phrase is from The Boston Journal. In an article titled \"Current Notes\" in the February 9, 1885, edition, the phrase is mentioned as a good practice sentence for writing students: \"A favorite copy set by writing teachers for their pupils is the following, because it contains every letter of the alphabet: 'A quick brown fox jumps over the lazy dog.'\" Dozens of other newspapers published the phrase over the next few months, all using the\n                    version of the sentence starting with \"A\" rather than \"The\". The earliest known use of the phrase in its modern form (starting with \"The\") is from the 1888 book Illustrative Shorthand by Linda Bronson. The modern form (starting with \"The\") became more common despite the fact that it is slightly longer than the original (starting with \"A\"). As the use of typewriters grew in the late 19th century, the phrase began appearing in typing lesson books as a practice sentence. Early\n                    examples include How to Become Expert in Typewriting: A Complete Instructor Designed Especially for the Remington Typewriter (1890), and Typewriting Instructor and Stenographer's Hand-book (1892). By the turn of the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic Journal, it is referred to as \"the well known memorized typing line embracing all the letters of the alphabet\". {}\n                  </span>\n                </div>\n              );\n            })({ width: global.window ? window.innerWidth : undefined, height: global.window ? window.innerHeight : undefined })}\n          </div>\n        </div>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: subpage == 3 ? 1 : 0, pointerEvents: subpage == 3 ? \"auto\" : \"none\", display: subpage == 3 ? \"flex\" : \"flex\" }}>\n          <div className={\"time-counter\"}>{timespan || \"\"}</div>\n        </div>\n        {/*onClick={this.handleNext}*/}\n        <div className={\"button-next\"}>\n          <Link href={\"/show\"}>\n            <a>\n              <img className={\"fill-parent\"} src={\"/static/img/arrow-next.svg\"} style={{ opacity: rootStore.state.loading ? 0 : 1 }} />\n            </a>\n          </Link>\n          <CubeSpinner className={\"fill-parent\"} width={\"3.165em\"} height={\"3.165em\"} loading={rootStore.state.loading} />\n        </div>\n\n        <SvgOverlay svgRef={this.svgLayer} />\n\n        <style jsx global>{`\n          h1 {\n            text-align: left;\n          }\n          span.paragraph {\n            font-size: 2em;\n          }\n          .article-list {\n            display: flex;\n            flex-direction: row;\n            flex-wrap: wrap;\n          }\n          .button-next {\n            position: fixed;\n            right: 10px;\n            bottom: 10px;\n          }\n          .button-prev {\n            position: fixed;\n            left: 10px;\n            bottom: 10px;\n          }\n          .button-next,\n          .button-prev {\n            filter: drop-shadow(-2px 2px 4px #00000080);\n          }\n          .button-next:active,\n          .button-prev:active {\n            transform: translate(2px, 2px);\n          }\n\n          .abs {\n            position: absolute;\n            left: 0;\n            top: 0;\n          }\n          .flex-vertical {\n            display: flex;\n            flex-flow: column nowrap;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n          }\n          .subpage {\n            position: absolute;\n            top: 0;\n            left: 0;\n            width: 100vw;\n            font-size: 13px;\n\n            transition: opacity 0.5s;\n            overflow: auto;\n          }\n\n          .main-layout {\n            display: block;\n            padding: 0;\n            margin: 0;\n            overflow: ĥidden;\n          }\n          .time-counter {\n            margin: 10px;\n            font-size: 2em;\n          }\n          .gallery-image {\n            height: auto;\n          }\n          .panels {\n            margin: 100px;\n            overflow: visible;\n          }\n          img {\n            border: 0px;\n            outline: 0px;\n            padding: 0px;\n            margin: 0px;\n          }\n        `}</style>\n      </Layout>\n    );\n  }\n}\n\nexport default Home;\n",
-			"file": "pages/home.js",
-			"file_size": 6484,
-			"file_write_time": 132259327617849607,
 			"settings":
 			{
 				"buffer_size": 6483,
@@ -70,43 +39,19 @@
 			}
 		},
 		{
-			"file": "components/layout.js",
+			"file": "/home/roman/Dokumente/Sources/c-utils/cfg.sh",
 			"settings":
 			{
-				"buffer_size": 800,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pages/show/[id].js",
-			"settings":
-			{
-				"buffer_size": 955,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "components/views/toastsContainer.js",
-			"settings":
-			{
-				"buffer_size": 3542,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pages/_app.js",
-			"settings":
-			{
-				"buffer_size": 6267,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/util.js",
-			"settings":
-			{
-				"buffer_size": 47988,
+				"buffer_size": 6662,
 				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/roman/Dokumente/Sources/shish/cfg-cmake.sh",
+			"settings":
+			{
+				"buffer_size": 6295,
 				"line_ending": "Unix"
 			}
 		}
@@ -122,6 +67,10 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"install",
+				"Package Control: Install Package"
+			],
 			[
 				"packag",
 				"Package Control: List Unmanaged Packages"
@@ -141,10 +90,6 @@
 			[
 				"schemeed",
 				"SchemeEditor: Edit Current Scheme"
-			],
-			[
-				"install",
-				"Package Control: Install Package"
 			],
 			[
 				"install pac",
@@ -206,7 +151,14 @@
 	],
 	"file_history":
 	[
+		"/home/roman/the-wild-beauty-company/lib/touchHandler.js",
+		"/home/roman/wild-beauty/pages/_app.js",
+		"/home/roman/the-wild-beauty-company/pages/home.js",
+		"/home/roman/the-wild-beauty-company/components/layout.js",
+		"/home/roman/the-wild-beauty-company/pages/show/[id].js",
+		"/home/roman/the-wild-beauty-company/components/views/toastsContainer.js",
 		"/home/roman/the-wild-beauty-company/pages/_app.js",
+		"/home/roman/the-wild-beauty-company/lib/util.js",
 		"/home/roman/the-wild-beauty-company/pages/index.js",
 		"/home/roman/the-wild-beauty-company/pages/browse.js",
 		"/home/roman/the-wild-beauty-company/pages/_document.js",
@@ -223,12 +175,10 @@
 		"/home/roman/the-wild-beauty-company/components/TouchCallback.js",
 		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
 		"/home/roman/lotto/pages/picks.js",
-		"/home/roman/the-wild-beauty-company/components/layout.js",
 		"/home/roman/wild-beauty/pages/new/[photo_id].js",
 		"/home/roman/the-wild-beauty-company/lib/devtools.js",
 		"/home/roman/the-wild-beauty-company/stores/api.js",
 		"/home/roman/the-wild-beauty-company/stores/i18nStore.js",
-		"/home/roman/the-wild-beauty-company/lib/util.js",
 		"/home/roman/the-wild-beauty-company/components/tree.js",
 		"/home/roman/the-wild-beauty-company/stores/queries.js",
 		"/home/roman/the-wild-beauty-company/components/withQueryParam.js",
@@ -236,7 +186,6 @@
 		"/home/roman/wild-beauty/pages/list.js",
 		"/home/roman/wild-beauty/pages/show.js",
 		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
-		"/home/roman/the-wild-beauty-company/lib/touchHandler.js",
 		"/home/roman/the-wild-beauty-company/static/style.css",
 		"/home/roman/the-wild-beauty-company/pages/tree.js",
 		"/home/roman/the-wild-beauty-company/lib/dom.js",
@@ -431,7 +380,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 31,
+						"buffer_size": 4634,
 						"regions":
 						{
 						},
@@ -441,33 +390,953 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/pages/home.js",
+							"current_file": "/home/roman/Dokumente/Sources/shish/cfg-cmake.sh",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									387,
-									391
+									0,
+									3
 								],
 								[
-									420,
+									12,
+									40
+								],
+								[
+									53,
+									58
+								],
+								[
+									72,
+									76
+								],
+								[
+									77,
+									83
+								],
+								[
+									94,
+									99
+								],
+								[
+									130,
+									134
+								],
+								[
+									136,
+									141
+								],
+								[
+									143,
+									151
+								],
+								[
+									158,
+									163
+								],
+								[
+									164,
+									170
+								],
+								[
+									207,
+									211
+								],
+								[
+									213,
+									218
+								],
+								[
+									220,
+									228
+								],
+								[
+									235,
+									240
+								],
+								[
+									241,
+									247
+								],
+								[
+									279,
+									283
+								],
+								[
+									285,
+									290
+								],
+								[
+									292,
+									300
+								],
+								[
+									307,
+									314
+								],
+								[
+									315,
+									321
+								],
+								[
+									347,
+									351
+								],
+								[
+									353,
+									358
+								],
+								[
+									360,
+									368
+								],
+								[
+									375,
+									382
+								],
+								[
+									383,
+									389
+								],
+								[
+									416,
 									431
 								],
 								[
-									466,
-									472
+									436,
+									458
 								],
 								[
-									1410,
-									1417
+									467,
+									474
+								],
+								[
+									475,
+									480
+								],
+								[
+									487,
+									493
+								],
+								[
+									494,
+									501
+								],
+								[
+									502,
+									507
+								],
+								[
+									520,
+									530
+								],
+								[
+									544,
+									554
+								],
+								[
+									555,
+									586
+								],
+								[
+									591,
+									601
+								],
+								[
+									602,
+									626
+								],
+								[
+									631,
+									641
+								],
+								[
+									642,
+									666
+								],
+								[
+									673,
+									702
+								],
+								[
+									715,
+									738
+								],
+								[
+									752,
+									763
+								],
+								[
+									812,
+									818
+								],
+								[
+									845,
+									852
+								],
+								[
+									853,
+									858
+								],
+								[
+									922,
+									924
+								],
+								[
+									997,
+									1027
+								],
+								[
+									1040,
+									1049
+								],
+								[
+									1054,
+									1105
+								],
+								[
+									1120,
+									1129
+								],
+								[
+									1132,
+									1147
+								],
+								[
+									1167,
+									1177
+								],
+								[
+									1185,
+									1226
+								],
+								[
+									1253,
+									1267
+								],
+								[
+									1304,
+									1335
+								],
+								[
+									1342,
+									1377
+								],
+								[
+									1384,
+									1436
+								],
+								[
+									1443,
+									1492
+								],
+								[
+									1499,
+									1530
+								],
+								[
+									1537,
+									1572
+								],
+								[
+									1587,
+									1594
+								],
+								[
+									1633,
+									1640
+								],
+								[
+									1693,
+									1730
+								],
+								[
+									1738,
+									1740
+								],
+								[
+									1748,
+									1758
+								],
+								[
+									1772,
+									1787
+								],
+								[
+									1796,
+									1807
+								],
+								[
+									1819,
+									1844
+								],
+								[
+									1980,
+									2026
+								],
+								[
+									2399,
+									2401
+								],
+								[
+									2412,
+									2420
+								],
+								[
+									2427,
+									2432
+								],
+								[
+									2433,
+									2459
+								],
+								[
+									2462,
+									2466
+								],
+								[
+									2467,
+									2490
+								],
+								[
+									2495,
+									2528
+								],
+								[
+									2533,
+									2552
+								],
+								[
+									2557,
+									2592
+								],
+								[
+									2597,
+									2632
+								],
+								[
+									2640,
+									2656
+								],
+								[
+									2666,
+									2668
+								],
+								[
+									2672,
+									2682
+								],
+								[
+									2700,
+									2707
+								],
+								[
+									2768,
+									2775
+								],
+								[
+									2923,
+									2925
+								],
+								[
+									2931,
+									2945
+								],
+								[
+									2952,
+									2957
+								],
+								[
+									2958,
+									2985
+								],
+								[
+									2988,
+									2992
+								],
+								[
+									2993,
+									3022
+								],
+								[
+									3027,
+									3066
+								],
+								[
+									3071,
+									3118
+								],
+								[
+									3123,
+									3174
+								],
+								[
+									3179,
+									3230
+								],
+								[
+									3236,
+									3238
+								],
+								[
+									3250,
+									3260
+								],
+								[
+									3278,
+									3285
+								],
+								[
+									3346,
+									3353
+								],
+								[
+									3501,
+									3503
+								],
+								[
+									3509,
+									3517
+								],
+								[
+									3524,
+									3529
+								],
+								[
+									3530,
+									3556
+								],
+								[
+									3559,
+									3563
+								],
+								[
+									3564,
+									3583
+								],
+								[
+									3586,
+									3594
+								],
+								[
+									3601,
+									3606
+								],
+								[
+									3609,
+									3615
+								],
+								[
+									3623,
+									3633
+								],
+								[
+									3647,
+									3652
+								],
+								[
+									3655,
+									3661
+								],
+								[
+									3671,
+									3676
+								],
+								[
+									3679,
+									3685
+								],
+								[
+									3695,
+									3700
+								],
+								[
+									3706,
+									3708
+								],
+								[
+									3722,
+									3732
+								],
+								[
+									3903,
+									3905
+								],
+								[
+									3911,
+									3920
+								],
+								[
+									3927,
+									3932
+								],
+								[
+									3933,
+									3952
+								],
+								[
+									3957,
+									3989
+								],
+								[
+									3994,
+									4029
+								],
+								[
+									4103,
+									4112
+								],
+								[
+									4175,
+									4183
+								],
+								[
+									4190,
+									4195
+								],
+								[
+									4200,
+									4206
+								],
+								[
+									4207,
+									4214
+								],
+								[
+									4223,
+									4229
+								],
+								[
+									4230,
+									4237
+								],
+								[
+									4257,
+									4259
+								],
+								[
+									4265,
+									4276
+								],
+								[
+									4283,
+									4288
+								],
+								[
+									4289,
+									4308
+								],
+								[
+									4311,
+									4315
+								],
+								[
+									4316,
+									4328
+								],
+								[
+									4343,
+									4347
+								],
+								[
+									4353,
+									4363
+								],
+								[
+									4377,
+									4379
+								],
+								[
+									4385,
+									4393
+								],
+								[
+									4400,
+									4405
+								],
+								[
+									4406,
+									4425
+								],
+								[
+									4430,
+									4458
+								],
+								[
+									4463,
+									4497
+								],
+								[
+									4503,
+									4511
+								],
+								[
+									4518,
+									4523
+								],
+								[
+									4528,
+									4534
+								],
+								[
+									4535,
+									4542
+								],
+								[
+									4551,
+									4557
+								],
+								[
+									4558,
+									4565
+								],
+								[
+									4574,
+									4576
+								],
+								[
+									4578,
+									4583
+								],
+								[
+									4638,
+									4640
+								],
+								[
+									4646,
+									4656
+								],
+								[
+									4663,
+									4668
+								],
+								[
+									4669,
+									4688
+								],
+								[
+									4691,
+									4695
+								],
+								[
+									4696,
+									4708
+								],
+								[
+									4719,
+									4723
+								],
+								[
+									4729,
+									4739
+								],
+								[
+									4752,
+									4754
+								],
+								[
+									4760,
+									4770
+								],
+								[
+									4779,
+									4787
+								],
+								[
+									4929,
+									4975
+								],
+								[
+									5241,
+									5243
+								],
+								[
+									5253,
+									5261
+								],
+								[
+									5276,
+									5283
+								],
+								[
+									5287,
+									5291
+								],
+								[
+									5292,
+									5305
+								],
+								[
+									5308,
+									5317
+								],
+								[
+									5318,
+									5336
+								],
+								[
+									5339,
+									5349
+								],
+								[
+									5350,
+									5373
+								],
+								[
+									5377,
+									5387
+								],
+								[
+									5388,
+									5408
+								],
+								[
+									5475,
+									5484
+								],
+								[
+									5552,
+									5562
+								],
+								[
+									5567,
+									5576
+								],
+								[
+									5577,
+									5622
+								],
+								[
+									5635,
+									5645
+								],
+								[
+									5657,
+									5666
+								],
+								[
+									5691,
+									5715
+								],
+								[
+									5718,
+									5726
+								],
+								[
+									5753,
+									5755
+								],
+								[
+									5757,
+									5762
+								],
+								[
+									5799,
+									5806
+								],
+								[
+									5838,
+									5848
+								],
+								[
+									5990,
+									6010
+								],
+								[
+									6020,
+									6022
 								]
 							],
 							"symlist":
 							[
-								"Home",
-								"constructor",
-								"render",
-								"size =>"
+								"function: cfg",
+								"expansion: ${build:=`gcc -dumpmachine`}",
+								"expansion: $host",
+								"variable: host",
+								"expansion: $build",
+								"expansion: $host",
+								"variable: host",
+								"expansion: $host",
+								"variable: builddir",
+								"expansion: $host",
+								"variable: prefix",
+								"variable: host",
+								"expansion: $host",
+								"variable: builddir",
+								"expansion: $host",
+								"variable: prefix",
+								"variable: host",
+								"expansion: $host",
+								"variable: builddir",
+								"expansion: ${host}",
+								"variable: prefix",
+								"variable: host",
+								"expansion: $host",
+								"variable: builddir",
+								"expansion: ${host}",
+								"variable: prefix",
+								"expansion: ${prefix:=/usr}",
+								"expansion: ${libdir:=$prefix/lib}",
+								"expansion: $libdir",
+								"expansion: $host",
+								"variable: libdir",
+								"expansion: $libdir",
+								"expansion: $host",
+								"expansion: $TOOLCHAIN",
+								"variable: cmakebuild",
+								"expansion: $(basename \"$TOOLCHAIN\" .cmake)",
+								"variable: cmakebuild",
+								"expansion: ${cmakebuild%.toolchain}",
+								"variable: cmakebuild",
+								"expansion: ${cmakebuild#toolchain-}",
+								"expansion: ${builddir=build/$cmakebuild}",
+								"expansion: ${builddir=build/$host}",
+								"expansion: $(uname -o)",
+								"variable: SYSTEM",
+								"expansion: $STATIC",
+								"expansion: $TYPE",
+								"expansion: $@",
+								"expansion: ${generator:=\"Unix Makefiles\"}",
+								"expansion: $builddir",
+								"expansion: ${relsrcdir=`realpath --relative-to \"$builddir\" .`}",
+								"expansion: $builddir",
+								"expansion: ${CMAKE:-cmake}",
+								"expansion: $generator",
+								"expansion: ${VERBOSE+:-DCMAKE_VERBOSE_MAKEFILE=TRUE}",
+								"expansion: ${TYPE:-Debug}",
+								"expansion: ${CC:+-DCMAKE_C_COMPILER=\"$CC\"}",
+								"expansion: ${CXX:+-DCMAKE_CXX_COMPILER=\"$CXX\"}",
+								"expansion: ${PKG_CONFIG:+-DPKG_CONFIG_EXECUTABLE=\"$PKG_CONFIG\"}",
+								"expansion: ${TOOLCHAIN:+-DCMAKE_TOOLCHAIN_FILE=\"$TOOLCHAIN\"}",
+								"expansion: ${CC:+-DCMAKE_C_COMPILER=\"$CC\"}",
+								"expansion: ${CXX:+-DCMAKE_CXX_COMPILER=\"$CXX\"}",
+								"expansion: {C,CXX}",
+								"expansion: {C,CXX}",
+								"expansion: ${MAKE:+-DCMAKE_MAKE_PROGRAM=\"$MAKE\"}",
+								"expansion: $@",
+								"expansion: $relsrcdir",
+								"expansion: ${builddir##*/}",
+								"function: cfg-android",
+								"expansion: ${builddir=build/android}",
+								"expansion: ${TOOLCHAIN:-/opt/android-cmake/android.cmake}",
+								"expansion: $@",
+								"function: cfg-diet",
+								"variable: build",
+								"expansion: $(${CC:-gcc} -dumpmachine)",
+								"variable: host",
+								"expansion: ${build/-gnu/-dietlibc}",
+								"expansion: ${builddir=build/${host%-*}-diet}",
+								"expansion: ${prefix=/opt/diet}",
+								"expansion: ${libdir=/opt/diet/lib-${host%%-*}}",
+								"expansion: ${bindir=/opt/diet/bin-${host%%-*}}",
+								"expansion: ${CC=\"diet-gcc\"}",
+								"variable: CC",
+								"variable: PKG_CONFIG",
+								"expansion: $libdir",
+								"expansion: $prefix",
+								"expansion: $@",
+								"function: cfg-emscripten",
+								"variable: build",
+								"expansion: $(${CC:-emcc} -dumpmachine)",
+								"variable: host",
+								"expansion: ${build/-gnu/-emscriptenlibc}",
+								"expansion: ${builddir=build/${host%-*}-emscripten}",
+								"expansion: ${prefix=/opt/emsdk/emscripten/incoming/system}",
+								"expansion: ${libdir=/opt/emsdk/emscripten/incoming/system/lib}",
+								"expansion: ${bindir=/opt/emsdk/emscripten/incoming/system/bin}",
+								"variable: CC",
+								"variable: PKG_CONFIG",
+								"expansion: $libdir",
+								"expansion: $prefix",
+								"expansion: $@",
+								"function: cfg-musl",
+								"variable: build",
+								"expansion: $(${CC:-gcc} -dumpmachine)",
+								"variable: host",
+								"expansion: ${build/-gnu/-musl}",
+								"variable: builddir",
+								"expansion: $host",
+								"variable: prefix",
+								"variable: includedir",
+								"expansion: $host",
+								"variable: libdir",
+								"expansion: $host",
+								"variable: bindir",
+								"expansion: $host",
+								"variable: CC",
+								"variable: PKG_CONFIG",
+								"expansion: $@",
+								"function: cfg-mingw",
+								"variable: build",
+								"expansion: $(gcc -dumpmachine)",
+								"expansion: ${host=${build%%-*}-w64-mingw32}",
+								"expansion: ${prefix=/usr/$host/sys-root/mingw}",
+								"variable: TOOLCHAIN",
+								"variable: builddir",
+								"expansion: $host",
+								"variable: bindir",
+								"expansion: $prefix",
+								"variable: libdir",
+								"expansion: $prefix",
+								"expansion: $@",
+								"function: cfg-mingw32",
+								"variable: build",
+								"expansion: $(gcc -dumpmachine)",
+								"variable: host",
+								"expansion: ${build%%-*}",
+								"variable: host",
+								"expansion: ${host#*-}",
+								"expansion: $@",
+								"function: cfg-msys",
+								"variable: build",
+								"expansion: $(gcc -dumpmachine)",
+								"expansion: ${host=${build%%-*}-pc-msys}",
+								"expansion: ${prefix=/usr/$host/sys-root/msys}",
+								"variable: builddir",
+								"expansion: $host",
+								"variable: bindir",
+								"expansion: $prefix",
+								"variable: libdir",
+								"expansion: $prefix",
+								"variable: CC",
+								"expansion: $host",
+								"expansion: $@",
+								"function: cfg-msys32",
+								"variable: build",
+								"expansion: $(gcc -dumpmachine)",
+								"variable: host",
+								"expansion: ${build%%-*}",
+								"variable: host",
+								"expansion: ${host#*-}",
+								"expansion: $@",
+								"function: cfg-termux",
+								"variable: builddir",
+								"expansion: ${TOOLCHAIN:-/opt/android-cmake/android.cmake}",
+								"expansion: $@",
+								"function: cfg-wasm",
+								"variable: VERBOSE",
+								"variable: EMCC",
+								"expansion: $(which emcc)",
+								"variable: EM_CONFIG",
+								"expansion: $(which em-config)",
+								"variable: EMSCRIPTEN",
+								"expansion: $(dirname \"$EM_CONFIG\")",
+								"variable: EMSCRIPTEN",
+								"expansion: ${EMSCRIPTEN%%/bin*}",
+								"variable: TOOLCHAIN",
+								"expansion: $TOOLCHAIN",
+								"variable: TOOLCHAIN",
+								"expansion: $(find \"$EMSCRIPTEN\" -iname emscripten.cmake)",
+								"expansion: $TOOLCHAIN",
+								"variable: TOOLCHAIN",
+								"expansion: ${prefix:=\"$EMSCRIPTEN\"}",
+								"variable: builddir",
+								"variable: CC",
+								"expansion: $EMCC",
+								"expansion: $prefix",
+								"expansion: $TOOLCHAIN",
+								"expansion: {ZLIB,BZIP,LZMA,SSL}",
+								"expansion: $@"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -475,111 +1344,18 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 3,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 3,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 1,
-					"file": "lib/touchHandler.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 13390,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5062,
-								5062
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 3080.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
 					"file": "pages/index.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 15656,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								14149,
-								14149
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 6946.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "/home/roman/wild-beauty/pages/_app.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6267,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								4293,
-								4293
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1583.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "pages/home.js",
 					"semi_transient": false,
 					"settings":
 					{
@@ -590,177 +1366,84 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								1599,
+								1599
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
+							"color_scheme": "Packages/Acme Color Scheme/Acme.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1500.0,
+						"translation.y": 693.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/home/roman/Dokumente/Sources/c-utils/cfg.sh",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6662,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6615,
+								6615
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Acme Color Scheme/Acme.tmTheme",
+							"syntax": "Packages/ShellScript/Bash.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4221.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/home/roman/Dokumente/Sources/shish/cfg-cmake.sh",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6295,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5937,
+								5937
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Dayle Rees Color Schemes/sublime/crisp.tmTheme",
+							"syntax": "Packages/ShellScript/Bash.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3969.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "components/layout.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 800,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								318,
-								318
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "pages/show/[id].js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 955,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "components/views/toastsContainer.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3542,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2871,
-								2871
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1680.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "pages/_app.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6267,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2557,
-								2557
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1320.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "lib/util.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 47988,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								27869,
-								27869
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/super.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 20640.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
 					"type": "text"
 				}
 			]
@@ -768,7 +1451,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 29.0
+		"height": 30.0
 	},
 	"input":
 	{
@@ -814,7 +1497,7 @@
 	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
-		"height": 54.0
+		"height": 56.0
 	},
 	"save_all_on_build": true,
 	"select_file":
