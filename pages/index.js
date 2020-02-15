@@ -31,7 +31,7 @@ const Home = inject("rootStore")(
       }
     });
     return (
-      <Layout hideNav={true} scroll={false}>
+      <Layout hideNav={true}>
         <Head>
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
@@ -46,7 +46,7 @@ const Home = inject("rootStore")(
               transform: ""
             }}
           >
-            <img src={"/static/img/logo-transparent.png"} style={{ width: "100%", maxWidth: "1280px" }} />
+            <img src={"/static/img/logo-transparent.png"} style={{ width: "80vw", maxWidth: "1280px" }} />
           </div>
         </div>
         <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? "auto" : "none", display: subpage == 2 ? "block" : "block" }}>
@@ -144,7 +144,6 @@ const Home = inject("rootStore")(
             font-size: 13px;
 
             transition: opacity 0.5s;
-            overflow: auto;
           }
 .noscroll {
               overflow: ĥidden;
