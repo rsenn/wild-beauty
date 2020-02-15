@@ -20,21 +20,23 @@
 	"buffers":
 	[
 		{
-			"contents": "function: cfg\nexpansion: ${build:=`gcc -dumpmachine`}\nexpansion: $host\nvariable: host\nexpansion: $build\nexpansion: $host\nvariable: host\nexpansion: $host\nvariable: builddir\nexpansion: $host\nvariable: prefix\nvariable: host\nexpansion: $host\nvariable: builddir\nexpansion: $host\nvariable: prefix\nvariable: host\nexpansion: $host\nvariable: builddir\nexpansion: ${host}\nvariable: prefix\nvariable: host\nexpansion: $host\nvariable: builddir\nexpansion: ${host}\nvariable: prefix\nexpansion: ${prefix:=/usr}\nexpansion: ${libdir:=$prefix/lib}\nexpansion: $libdir\nexpansion: $host\nvariable: libdir\nexpansion: $libdir\nexpansion: $host\nexpansion: $TOOLCHAIN\nvariable: cmakebuild\nexpansion: $(basename \"$TOOLCHAIN\" .cmake)\nvariable: cmakebuild\nexpansion: ${cmakebuild%.toolchain}\nvariable: cmakebuild\nexpansion: ${cmakebuild#toolchain-}\nexpansion: ${builddir=build/$cmakebuild}\nexpansion: ${builddir=build/$host}\nexpansion: $(uname -o)\nvariable: SYSTEM\nexpansion: $STATIC\nexpansion: $TYPE\nexpansion: $@\nexpansion: ${generator:=\"Unix Makefiles\"}\nexpansion: $builddir\nexpansion: ${relsrcdir=`realpath --relative-to \"$builddir\" .`}\nexpansion: $builddir\nexpansion: ${CMAKE:-cmake}\nexpansion: $generator\nexpansion: ${VERBOSE+:-DCMAKE_VERBOSE_MAKEFILE=TRUE}\nexpansion: ${TYPE:-Debug}\nexpansion: ${CC:+-DCMAKE_C_COMPILER=\"$CC\"}\nexpansion: ${CXX:+-DCMAKE_CXX_COMPILER=\"$CXX\"}\nexpansion: ${PKG_CONFIG:+-DPKG_CONFIG_EXECUTABLE=\"$PKG_CONFIG\"}\nexpansion: ${TOOLCHAIN:+-DCMAKE_TOOLCHAIN_FILE=\"$TOOLCHAIN\"}\nexpansion: ${CC:+-DCMAKE_C_COMPILER=\"$CC\"}\nexpansion: ${CXX:+-DCMAKE_CXX_COMPILER=\"$CXX\"}\nexpansion: {C,CXX}\nexpansion: {C,CXX}\nexpansion: ${MAKE:+-DCMAKE_MAKE_PROGRAM=\"$MAKE\"}\nexpansion: $@\nexpansion: $relsrcdir\nexpansion: ${builddir##*/}\nfunction: cfg-android\nexpansion: ${builddir=build/android}\nexpansion: ${TOOLCHAIN:-/opt/android-cmake/android.cmake}\nexpansion: $@\nfunction: cfg-diet\nvariable: build\nexpansion: $(${CC:-gcc} -dumpmachine)\nvariable: host\nexpansion: ${build/-gnu/-dietlibc}\nexpansion: ${builddir=build/${host%-*}-diet}\nexpansion: ${prefix=/opt/diet}\nexpansion: ${libdir=/opt/diet/lib-${host%%-*}}\nexpansion: ${bindir=/opt/diet/bin-${host%%-*}}\nexpansion: ${CC=\"diet-gcc\"}\nvariable: CC\nvariable: PKG_CONFIG\nexpansion: $libdir\nexpansion: $prefix\nexpansion: $@\nfunction: cfg-emscripten\nvariable: build\nexpansion: $(${CC:-emcc} -dumpmachine)\nvariable: host\nexpansion: ${build/-gnu/-emscriptenlibc}\nexpansion: ${builddir=build/${host%-*}-emscripten}\nexpansion: ${prefix=/opt/emsdk/emscripten/incoming/system}\nexpansion: ${libdir=/opt/emsdk/emscripten/incoming/system/lib}\nexpansion: ${bindir=/opt/emsdk/emscripten/incoming/system/bin}\nvariable: CC\nvariable: PKG_CONFIG\nexpansion: $libdir\nexpansion: $prefix\nexpansion: $@\nfunction: cfg-musl\nvariable: build\nexpansion: $(${CC:-gcc} -dumpmachine)\nvariable: host\nexpansion: ${build/-gnu/-musl}\nvariable: builddir\nexpansion: $host\nvariable: prefix\nvariable: includedir\nexpansion: $host\nvariable: libdir\nexpansion: $host\nvariable: bindir\nexpansion: $host\nvariable: CC\nvariable: PKG_CONFIG\nexpansion: $@\nfunction: cfg-mingw\nvariable: build\nexpansion: $(gcc -dumpmachine)\nexpansion: ${host=${build%%-*}-w64-mingw32}\nexpansion: ${prefix=/usr/$host/sys-root/mingw}\nvariable: TOOLCHAIN\nvariable: builddir\nexpansion: $host\nvariable: bindir\nexpansion: $prefix\nvariable: libdir\nexpansion: $prefix\nexpansion: $@\nfunction: cfg-mingw32\nvariable: build\nexpansion: $(gcc -dumpmachine)\nvariable: host\nexpansion: ${build%%-*}\nvariable: host\nexpansion: ${host#*-}\nexpansion: $@\nfunction: cfg-msys\nvariable: build\nexpansion: $(gcc -dumpmachine)\nexpansion: ${host=${build%%-*}-pc-msys}\nexpansion: ${prefix=/usr/$host/sys-root/msys}\nvariable: builddir\nexpansion: $host\nvariable: bindir\nexpansion: $prefix\nvariable: libdir\nexpansion: $prefix\nvariable: CC\nexpansion: $host\nexpansion: $@\nfunction: cfg-msys32\nvariable: build\nexpansion: $(gcc -dumpmachine)\nvariable: host\nexpansion: ${build%%-*}\nvariable: host\nexpansion: ${host#*-}\nexpansion: $@\nfunction: cfg-termux\nvariable: builddir\nexpansion: ${TOOLCHAIN:-/opt/android-cmake/android.cmake}\nexpansion: $@\nfunction: cfg-wasm\nvariable: VERBOSE\nvariable: EMCC\nexpansion: $(which emcc)\nvariable: EM_CONFIG\nexpansion: $(which em-config)\nvariable: EMSCRIPTEN\nexpansion: $(dirname \"$EM_CONFIG\")\nvariable: EMSCRIPTEN\nexpansion: ${EMSCRIPTEN%%/bin*}\nvariable: TOOLCHAIN\nexpansion: $TOOLCHAIN\nvariable: TOOLCHAIN\nexpansion: $(find \"$EMSCRIPTEN\" -iname emscripten.cmake)\nexpansion: $TOOLCHAIN\nvariable: TOOLCHAIN\nexpansion: ${prefix:=\"$EMSCRIPTEN\"}\nvariable: builddir\nvariable: CC\nexpansion: $EMCC\nexpansion: $prefix\nexpansion: $TOOLCHAIN\nexpansion: {ZLIB,BZIP,LZMA,SSL}\nexpansion: $@",
+			"contents": "Home\nconstructor\nrender\nsize =>",
 			"settings":
 			{
-				"buffer_size": 4634,
+				"buffer_size": 31,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
+			"contents": "import React from \"react\";\nimport Head from \"next/head\";\nimport Link from \"next/link\";\nimport Gallery from \"../components/gallery.js\";\nimport { SvgOverlay } from \"../utils/svg-overlay.js\";\nimport { inject, observer } from \"mobx-react\";\nimport Layout from \"../components/layout.js\";\nimport { CubeSpinner } from \"../components/simple/cubeSpinner.js\";\n\n@inject(\"rootStore\")\n@observer\nclass Home extends React.Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    const { rootStore } = this.props;\n    let subpage = 1,\n      timespan = Date.now();\n    return (\n      <Layout hideNav={true}>\n        <Head>\n          <title>Home</title>\n          <link rel=\"icon\" href=\"/favicon.ico\" />\n        </Head>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: 1, display: \"flex\" }}>\n          <div\n            id=\"t-logo\"\n            className=\"t-logo\"\n            style={{\n              transformStyle: \"preserve-3d\",\n              transition: \"transform 1s  cubic-bezier(.53,.38,.94,.32)\",\n              transform: \"\"\n            }}\n          >\n            <img src={\"/static/img/logo-transparent.png\"} style={{ width: \"100%\", maxWidth: \"1280px\" }} />\n          </div>\n        </div>\n        <div className={\"subpage\"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? \"auto\" : \"none\", display: subpage == 2 ? \"block\" : \"block\" }}>\n          <div>\n            {(size => {\n              const fontSize = Math.round(size.width / 60); \n              const charWidth = fontSize - 1;\n              const maxLineLength = Math.floor(size.width / charWidth);\n\n              const padding = Math.round((size.width - fontSize * 45) / 3 + 80);\n              const paragraphWidth = Math.floor(size.width - padding * 2);\n              const lineLength = Math.floor((paragraphWidth + 2) / charWidth);\n\n              return (\n                <div\n                  style={{\n                    fontSize: `${fontSize}px`,\n                    padding: `${padding >= 19 ? Math.round((padding - 19) / 2) : 0}px ${padding}px 0 ${padding}px`\n                  }}\n                >\n                  <h1>Title</h1>\n                  <span className={\"paragraph\"}>\n                    The earliest known appearance of the phrase is from The Boston Journal. In an article titled \"Current Notes\" in the February 9, 1885, edition, the phrase is mentioned as a good practice sentence for writing students: \"A favorite copy set by writing teachers for their pupils is the following, because it contains every letter of the alphabet: 'A quick brown fox jumps over the lazy dog.'\" Dozens of other newspapers published the phrase over the next few months, all using the\n                    version of the sentence starting with \"A\" rather than \"The\". The earliest known use of the phrase in its modern form (starting with \"The\") is from the 1888 book Illustrative Shorthand by Linda Bronson. The modern form (starting with \"The\") became more common despite the fact that it is slightly longer than the original (starting with \"A\"). As the use of typewriters grew in the late 19th century, the phrase began appearing in typing lesson books as a practice sentence. Early\n                    examples include How to Become Expert in Typewriting: A Complete Instructor Designed Especially for the Remington Typewriter (1890), and Typewriting Instructor and Stenographer's Hand-book (1892). By the turn of the 20th century, the phrase had become widely known. In the January 10, 1903, issue of Pitman's Phonetic Journal, it is referred to as \"the well known memorized typing line embracing all the letters of the alphabet\". {}\n                  </span>\n                </div>\n              );\n            })({ width: global.window ? window.innerWidth : undefined, height: global.window ? window.innerHeight : undefined })}\n          </div>\n        </div>\n        <div className={\"subpage flex-vertical\"} style={{ opacity: subpage == 3 ? 1 : 0, pointerEvents: subpage == 3 ? \"auto\" : \"none\", display: subpage == 3 ? \"flex\" : \"flex\" }}>\n          <div className={\"time-counter\"}>{timespan || \"\"}</div>\n        </div>\n        {/*onClick={this.handleNext}*/}\n        <div className={\"button-next\"}>\n          <Link href={\"/show\"}>\n            <a>\n              <img className={\"fill-parent\"} src={\"/static/img/arrow-next.svg\"} style={{ opacity: rootStore.state.loading ? 0 : 1 }} />\n            </a>\n          </Link>\n          <CubeSpinner className={\"fill-parent\"} width={\"3.165em\"} height={\"3.165em\"} loading={rootStore.state.loading} />\n        </div>\n\n        <SvgOverlay svgRef={this.svgLayer} />\n\n        <style jsx global>{`\n          h1 {\n            text-align: left;\n          }\n          span.paragraph {\n            font-size: 2em;\n          }\n          .article-list {\n            display: flex;\n            flex-direction: row;\n            flex-wrap: wrap;\n          }\n          .button-next {\n            position: fixed;\n            right: 10px;\n            bottom: 10px;\n          }\n          .button-prev {\n            position: fixed;\n            left: 10px;\n            bottom: 10px;\n          }\n          .button-next,\n          .button-prev {\n            filter: drop-shadow(-2px 2px 4px #00000080);\n          }\n          .button-next:active,\n          .button-prev:active {\n            transform: translate(2px, 2px);\n          }\n\n          .abs {\n            position: absolute;\n            left: 0;\n            top: 0;\n          }\n          .flex-vertical {\n            display: flex;\n            flex-flow: column nowrap;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n          }\n          .subpage {\n            position: absolute;\n            top: 0;\n            left: 0;\n            width: 100vw;\n            font-size: 13px;\n\n            transition: opacity 0.5s;\n            overflow: auto;\n          }\n\n          .main-layout {\n            display: block;\n            padding: 0;\n            margin: 0;\n            overflow: ĥidden;\n          }\n          .time-counter {\n            margin: 10px;\n            font-size: 2em;\n          }\n          .gallery-image {\n            height: auto;\n          }\n          .panels {\n            margin: 100px;\n            overflow: visible;\n          }\n          img {\n            border: 0px;\n            outline: 0px;\n            padding: 0px;\n            margin: 0px;\n          }\n        `}</style>\n      </Layout>\n    );\n  }\n}\n\nexport default Home;\n",
 			"file": "pages/index.js",
+			"file_size": 6484,
+			"file_write_time": 132259327617849607,
 			"settings":
 			{
-				"buffer_size": 6483,
-				"encoding": "UTF-8",
+				"buffer_size": 6484,
 				"line_ending": "Unix"
 			}
 		},
@@ -42,7 +44,7 @@
 			"file": "/home/roman/Dokumente/Sources/c-utils/cfg.sh",
 			"settings":
 			{
-				"buffer_size": 6662,
+				"buffer_size": 6625,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -51,7 +53,7 @@
 			"file": "/home/roman/Dokumente/Sources/shish/cfg-cmake.sh",
 			"settings":
 			{
-				"buffer_size": 6295,
+				"buffer_size": 6257,
 				"line_ending": "Unix"
 			}
 		}
@@ -380,963 +382,47 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4634,
+						"buffer_size": 31,
 						"regions":
 						{
 						},
 						"selection":
 						[
+							[
+								0,
+								0
+							]
 						],
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/Dokumente/Sources/shish/cfg-cmake.sh",
+							"current_file": "/home/roman/the-wild-beauty-company/pages/index.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									0,
-									3
+									387,
+									391
 								],
 								[
-									12,
-									40
-								],
-								[
-									53,
-									58
-								],
-								[
-									72,
-									76
-								],
-								[
-									77,
-									83
-								],
-								[
-									94,
-									99
-								],
-								[
-									130,
-									134
-								],
-								[
-									136,
-									141
-								],
-								[
-									143,
-									151
-								],
-								[
-									158,
-									163
-								],
-								[
-									164,
-									170
-								],
-								[
-									207,
-									211
-								],
-								[
-									213,
-									218
-								],
-								[
-									220,
-									228
-								],
-								[
-									235,
-									240
-								],
-								[
-									241,
-									247
-								],
-								[
-									279,
-									283
-								],
-								[
-									285,
-									290
-								],
-								[
-									292,
-									300
-								],
-								[
-									307,
-									314
-								],
-								[
-									315,
-									321
-								],
-								[
-									347,
-									351
-								],
-								[
-									353,
-									358
-								],
-								[
-									360,
-									368
-								],
-								[
-									375,
-									382
-								],
-								[
-									383,
-									389
-								],
-								[
-									416,
+									420,
 									431
 								],
 								[
-									436,
-									458
+									466,
+									472
 								],
 								[
-									467,
-									474
-								],
-								[
-									475,
-									480
-								],
-								[
-									487,
-									493
-								],
-								[
-									494,
-									501
-								],
-								[
-									502,
-									507
-								],
-								[
-									520,
-									530
-								],
-								[
-									544,
-									554
-								],
-								[
-									555,
-									586
-								],
-								[
-									591,
-									601
-								],
-								[
-									602,
-									626
-								],
-								[
-									631,
-									641
-								],
-								[
-									642,
-									666
-								],
-								[
-									673,
-									702
-								],
-								[
-									715,
-									738
-								],
-								[
-									752,
-									763
-								],
-								[
-									812,
-									818
-								],
-								[
-									845,
-									852
-								],
-								[
-									853,
-									858
-								],
-								[
-									922,
-									924
-								],
-								[
-									997,
-									1027
-								],
-								[
-									1040,
-									1049
-								],
-								[
-									1054,
-									1105
-								],
-								[
-									1120,
-									1129
-								],
-								[
-									1132,
-									1147
-								],
-								[
-									1167,
-									1177
-								],
-								[
-									1185,
-									1226
-								],
-								[
-									1253,
-									1267
-								],
-								[
-									1304,
-									1335
-								],
-								[
-									1342,
-									1377
-								],
-								[
-									1384,
-									1436
-								],
-								[
-									1443,
-									1492
-								],
-								[
-									1499,
-									1530
-								],
-								[
-									1537,
-									1572
-								],
-								[
-									1587,
-									1594
-								],
-								[
-									1633,
-									1640
-								],
-								[
-									1693,
-									1730
-								],
-								[
-									1738,
-									1740
-								],
-								[
-									1748,
-									1758
-								],
-								[
-									1772,
-									1787
-								],
-								[
-									1796,
-									1807
-								],
-								[
-									1819,
-									1844
-								],
-								[
-									1980,
-									2026
-								],
-								[
-									2399,
-									2401
-								],
-								[
-									2412,
-									2420
-								],
-								[
-									2427,
-									2432
-								],
-								[
-									2433,
-									2459
-								],
-								[
-									2462,
-									2466
-								],
-								[
-									2467,
-									2490
-								],
-								[
-									2495,
-									2528
-								],
-								[
-									2533,
-									2552
-								],
-								[
-									2557,
-									2592
-								],
-								[
-									2597,
-									2632
-								],
-								[
-									2640,
-									2656
-								],
-								[
-									2666,
-									2668
-								],
-								[
-									2672,
-									2682
-								],
-								[
-									2700,
-									2707
-								],
-								[
-									2768,
-									2775
-								],
-								[
-									2923,
-									2925
-								],
-								[
-									2931,
-									2945
-								],
-								[
-									2952,
-									2957
-								],
-								[
-									2958,
-									2985
-								],
-								[
-									2988,
-									2992
-								],
-								[
-									2993,
-									3022
-								],
-								[
-									3027,
-									3066
-								],
-								[
-									3071,
-									3118
-								],
-								[
-									3123,
-									3174
-								],
-								[
-									3179,
-									3230
-								],
-								[
-									3236,
-									3238
-								],
-								[
-									3250,
-									3260
-								],
-								[
-									3278,
-									3285
-								],
-								[
-									3346,
-									3353
-								],
-								[
-									3501,
-									3503
-								],
-								[
-									3509,
-									3517
-								],
-								[
-									3524,
-									3529
-								],
-								[
-									3530,
-									3556
-								],
-								[
-									3559,
-									3563
-								],
-								[
-									3564,
-									3583
-								],
-								[
-									3586,
-									3594
-								],
-								[
-									3601,
-									3606
-								],
-								[
-									3609,
-									3615
-								],
-								[
-									3623,
-									3633
-								],
-								[
-									3647,
-									3652
-								],
-								[
-									3655,
-									3661
-								],
-								[
-									3671,
-									3676
-								],
-								[
-									3679,
-									3685
-								],
-								[
-									3695,
-									3700
-								],
-								[
-									3706,
-									3708
-								],
-								[
-									3722,
-									3732
-								],
-								[
-									3903,
-									3905
-								],
-								[
-									3911,
-									3920
-								],
-								[
-									3927,
-									3932
-								],
-								[
-									3933,
-									3952
-								],
-								[
-									3957,
-									3989
-								],
-								[
-									3994,
-									4029
-								],
-								[
-									4103,
-									4112
-								],
-								[
-									4175,
-									4183
-								],
-								[
-									4190,
-									4195
-								],
-								[
-									4200,
-									4206
-								],
-								[
-									4207,
-									4214
-								],
-								[
-									4223,
-									4229
-								],
-								[
-									4230,
-									4237
-								],
-								[
-									4257,
-									4259
-								],
-								[
-									4265,
-									4276
-								],
-								[
-									4283,
-									4288
-								],
-								[
-									4289,
-									4308
-								],
-								[
-									4311,
-									4315
-								],
-								[
-									4316,
-									4328
-								],
-								[
-									4343,
-									4347
-								],
-								[
-									4353,
-									4363
-								],
-								[
-									4377,
-									4379
-								],
-								[
-									4385,
-									4393
-								],
-								[
-									4400,
-									4405
-								],
-								[
-									4406,
-									4425
-								],
-								[
-									4430,
-									4458
-								],
-								[
-									4463,
-									4497
-								],
-								[
-									4503,
-									4511
-								],
-								[
-									4518,
-									4523
-								],
-								[
-									4528,
-									4534
-								],
-								[
-									4535,
-									4542
-								],
-								[
-									4551,
-									4557
-								],
-								[
-									4558,
-									4565
-								],
-								[
-									4574,
-									4576
-								],
-								[
-									4578,
-									4583
-								],
-								[
-									4638,
-									4640
-								],
-								[
-									4646,
-									4656
-								],
-								[
-									4663,
-									4668
-								],
-								[
-									4669,
-									4688
-								],
-								[
-									4691,
-									4695
-								],
-								[
-									4696,
-									4708
-								],
-								[
-									4719,
-									4723
-								],
-								[
-									4729,
-									4739
-								],
-								[
-									4752,
-									4754
-								],
-								[
-									4760,
-									4770
-								],
-								[
-									4779,
-									4787
-								],
-								[
-									4929,
-									4975
-								],
-								[
-									5241,
-									5243
-								],
-								[
-									5253,
-									5261
-								],
-								[
-									5276,
-									5283
-								],
-								[
-									5287,
-									5291
-								],
-								[
-									5292,
-									5305
-								],
-								[
-									5308,
-									5317
-								],
-								[
-									5318,
-									5336
-								],
-								[
-									5339,
-									5349
-								],
-								[
-									5350,
-									5373
-								],
-								[
-									5377,
-									5387
-								],
-								[
-									5388,
-									5408
-								],
-								[
-									5475,
-									5484
-								],
-								[
-									5552,
-									5562
-								],
-								[
-									5567,
-									5576
-								],
-								[
-									5577,
-									5622
-								],
-								[
-									5635,
-									5645
-								],
-								[
-									5657,
-									5666
-								],
-								[
-									5691,
-									5715
-								],
-								[
-									5718,
-									5726
-								],
-								[
-									5753,
-									5755
-								],
-								[
-									5757,
-									5762
-								],
-								[
-									5799,
-									5806
-								],
-								[
-									5838,
-									5848
-								],
-								[
-									5990,
-									6010
-								],
-								[
-									6020,
-									6022
+									1410,
+									1417
 								]
 							],
 							"symlist":
 							[
-								"function: cfg",
-								"expansion: ${build:=`gcc -dumpmachine`}",
-								"expansion: $host",
-								"variable: host",
-								"expansion: $build",
-								"expansion: $host",
-								"variable: host",
-								"expansion: $host",
-								"variable: builddir",
-								"expansion: $host",
-								"variable: prefix",
-								"variable: host",
-								"expansion: $host",
-								"variable: builddir",
-								"expansion: $host",
-								"variable: prefix",
-								"variable: host",
-								"expansion: $host",
-								"variable: builddir",
-								"expansion: ${host}",
-								"variable: prefix",
-								"variable: host",
-								"expansion: $host",
-								"variable: builddir",
-								"expansion: ${host}",
-								"variable: prefix",
-								"expansion: ${prefix:=/usr}",
-								"expansion: ${libdir:=$prefix/lib}",
-								"expansion: $libdir",
-								"expansion: $host",
-								"variable: libdir",
-								"expansion: $libdir",
-								"expansion: $host",
-								"expansion: $TOOLCHAIN",
-								"variable: cmakebuild",
-								"expansion: $(basename \"$TOOLCHAIN\" .cmake)",
-								"variable: cmakebuild",
-								"expansion: ${cmakebuild%.toolchain}",
-								"variable: cmakebuild",
-								"expansion: ${cmakebuild#toolchain-}",
-								"expansion: ${builddir=build/$cmakebuild}",
-								"expansion: ${builddir=build/$host}",
-								"expansion: $(uname -o)",
-								"variable: SYSTEM",
-								"expansion: $STATIC",
-								"expansion: $TYPE",
-								"expansion: $@",
-								"expansion: ${generator:=\"Unix Makefiles\"}",
-								"expansion: $builddir",
-								"expansion: ${relsrcdir=`realpath --relative-to \"$builddir\" .`}",
-								"expansion: $builddir",
-								"expansion: ${CMAKE:-cmake}",
-								"expansion: $generator",
-								"expansion: ${VERBOSE+:-DCMAKE_VERBOSE_MAKEFILE=TRUE}",
-								"expansion: ${TYPE:-Debug}",
-								"expansion: ${CC:+-DCMAKE_C_COMPILER=\"$CC\"}",
-								"expansion: ${CXX:+-DCMAKE_CXX_COMPILER=\"$CXX\"}",
-								"expansion: ${PKG_CONFIG:+-DPKG_CONFIG_EXECUTABLE=\"$PKG_CONFIG\"}",
-								"expansion: ${TOOLCHAIN:+-DCMAKE_TOOLCHAIN_FILE=\"$TOOLCHAIN\"}",
-								"expansion: ${CC:+-DCMAKE_C_COMPILER=\"$CC\"}",
-								"expansion: ${CXX:+-DCMAKE_CXX_COMPILER=\"$CXX\"}",
-								"expansion: {C,CXX}",
-								"expansion: {C,CXX}",
-								"expansion: ${MAKE:+-DCMAKE_MAKE_PROGRAM=\"$MAKE\"}",
-								"expansion: $@",
-								"expansion: $relsrcdir",
-								"expansion: ${builddir##*/}",
-								"function: cfg-android",
-								"expansion: ${builddir=build/android}",
-								"expansion: ${TOOLCHAIN:-/opt/android-cmake/android.cmake}",
-								"expansion: $@",
-								"function: cfg-diet",
-								"variable: build",
-								"expansion: $(${CC:-gcc} -dumpmachine)",
-								"variable: host",
-								"expansion: ${build/-gnu/-dietlibc}",
-								"expansion: ${builddir=build/${host%-*}-diet}",
-								"expansion: ${prefix=/opt/diet}",
-								"expansion: ${libdir=/opt/diet/lib-${host%%-*}}",
-								"expansion: ${bindir=/opt/diet/bin-${host%%-*}}",
-								"expansion: ${CC=\"diet-gcc\"}",
-								"variable: CC",
-								"variable: PKG_CONFIG",
-								"expansion: $libdir",
-								"expansion: $prefix",
-								"expansion: $@",
-								"function: cfg-emscripten",
-								"variable: build",
-								"expansion: $(${CC:-emcc} -dumpmachine)",
-								"variable: host",
-								"expansion: ${build/-gnu/-emscriptenlibc}",
-								"expansion: ${builddir=build/${host%-*}-emscripten}",
-								"expansion: ${prefix=/opt/emsdk/emscripten/incoming/system}",
-								"expansion: ${libdir=/opt/emsdk/emscripten/incoming/system/lib}",
-								"expansion: ${bindir=/opt/emsdk/emscripten/incoming/system/bin}",
-								"variable: CC",
-								"variable: PKG_CONFIG",
-								"expansion: $libdir",
-								"expansion: $prefix",
-								"expansion: $@",
-								"function: cfg-musl",
-								"variable: build",
-								"expansion: $(${CC:-gcc} -dumpmachine)",
-								"variable: host",
-								"expansion: ${build/-gnu/-musl}",
-								"variable: builddir",
-								"expansion: $host",
-								"variable: prefix",
-								"variable: includedir",
-								"expansion: $host",
-								"variable: libdir",
-								"expansion: $host",
-								"variable: bindir",
-								"expansion: $host",
-								"variable: CC",
-								"variable: PKG_CONFIG",
-								"expansion: $@",
-								"function: cfg-mingw",
-								"variable: build",
-								"expansion: $(gcc -dumpmachine)",
-								"expansion: ${host=${build%%-*}-w64-mingw32}",
-								"expansion: ${prefix=/usr/$host/sys-root/mingw}",
-								"variable: TOOLCHAIN",
-								"variable: builddir",
-								"expansion: $host",
-								"variable: bindir",
-								"expansion: $prefix",
-								"variable: libdir",
-								"expansion: $prefix",
-								"expansion: $@",
-								"function: cfg-mingw32",
-								"variable: build",
-								"expansion: $(gcc -dumpmachine)",
-								"variable: host",
-								"expansion: ${build%%-*}",
-								"variable: host",
-								"expansion: ${host#*-}",
-								"expansion: $@",
-								"function: cfg-msys",
-								"variable: build",
-								"expansion: $(gcc -dumpmachine)",
-								"expansion: ${host=${build%%-*}-pc-msys}",
-								"expansion: ${prefix=/usr/$host/sys-root/msys}",
-								"variable: builddir",
-								"expansion: $host",
-								"variable: bindir",
-								"expansion: $prefix",
-								"variable: libdir",
-								"expansion: $prefix",
-								"variable: CC",
-								"expansion: $host",
-								"expansion: $@",
-								"function: cfg-msys32",
-								"variable: build",
-								"expansion: $(gcc -dumpmachine)",
-								"variable: host",
-								"expansion: ${build%%-*}",
-								"variable: host",
-								"expansion: ${host#*-}",
-								"expansion: $@",
-								"function: cfg-termux",
-								"variable: builddir",
-								"expansion: ${TOOLCHAIN:-/opt/android-cmake/android.cmake}",
-								"expansion: $@",
-								"function: cfg-wasm",
-								"variable: VERBOSE",
-								"variable: EMCC",
-								"expansion: $(which emcc)",
-								"variable: EM_CONFIG",
-								"expansion: $(which em-config)",
-								"variable: EMSCRIPTEN",
-								"expansion: $(dirname \"$EM_CONFIG\")",
-								"variable: EMSCRIPTEN",
-								"expansion: ${EMSCRIPTEN%%/bin*}",
-								"variable: TOOLCHAIN",
-								"expansion: $TOOLCHAIN",
-								"variable: TOOLCHAIN",
-								"expansion: $(find \"$EMSCRIPTEN\" -iname emscripten.cmake)",
-								"expansion: $TOOLCHAIN",
-								"variable: TOOLCHAIN",
-								"expansion: ${prefix:=\"$EMSCRIPTEN\"}",
-								"variable: builddir",
-								"variable: CC",
-								"expansion: $EMCC",
-								"expansion: $prefix",
-								"expansion: $TOOLCHAIN",
-								"expansion: {ZLIB,BZIP,LZMA,SSL}",
-								"expansion: $@"
+								"Home",
+								"constructor",
+								"render",
+								"size =>"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -1350,7 +436,7 @@
 			]
 		},
 		{
-			"selected": 2,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -1359,29 +445,29 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6483,
+						"buffer_size": 6484,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1599,
-								1599
+								4206,
+								4206
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/Acme Color Scheme/Acme.tmTheme",
+							"color_scheme": "Packages/Dayle Rees Color Schemes/sublime/contrast/darkside-contrast.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 693.0,
+						"translation.y": 660.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
@@ -1390,29 +476,29 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6662,
+						"buffer_size": 6625,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6615,
-								6615
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/Acme Color Scheme/Acme.tmTheme",
+							"color_scheme": "Packages/Dayle Rees Color Schemes/sublime/contrast/darkside-contrast.tmTheme",
 							"syntax": "Packages/ShellScript/Bash.sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4221.0,
+						"translation.y": 3769.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -1421,29 +507,29 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6295,
+						"buffer_size": 6257,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5937,
-								5937
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/Dayle Rees Color Schemes/sublime/crisp.tmTheme",
+							"color_scheme": "Packages/Dayle Rees Color Schemes/sublime/contrast/darkside-contrast.tmTheme",
 							"syntax": "Packages/ShellScript/Bash.sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3969.0,
+						"translation.y": 3780.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -1451,7 +537,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 30.0
+		"height": 36.0
 	},
 	"input":
 	{
@@ -1497,7 +583,7 @@
 	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
-		"height": 56.0
+		"height": 68.0
 	},
 	"save_all_on_build": true,
 	"select_file":
