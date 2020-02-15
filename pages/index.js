@@ -1,23 +1,35 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Gallery from "../components/gallery.js";
+import { Element } from "../utils/dom.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { inject, observer } from "mobx-react";
 import Layout from "../components/layout.js";
 import { CubeSpinner } from "../components/simple/cubeSpinner.js";
+import { lazyInitializer } from "../lib/lazyInitializer.js";
+import { trkl } from "../lib/trkl.js";
 
-@inject("rootStore")
-@observer
-class Home extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+const Home = inject("rootStore")(
+  observer(props => {
+    const { rootStore } = props;
+    var svgLayer = trkl();
 
-  render() {
-    const { rootStore } = this.props;
     let subpage = 1,
       timespan = Date.now();
+
+    useEffect(() => {
+      if(global.window) {
+        let l = Element.find("a");
+        let href = l.getAttribute("href");
+
+        l.addEventListener("click", e => {
+          window.location.replace(href);
+        });
+
+        console.log("Browser initialization", l, href);
+      }
+    });
     return (
       <Layout hideNav={true}>
         <Head>
@@ -73,13 +85,13 @@ class Home extends React.Component {
         <div className={"button-next"}>
           <Link href={"/show"}>
             <a>
-              <img className={"fill-parent"} src={"/static/img/arrow-next.svg"} style={{ opacity: rootStore.state.loading ? 0 : 1 }} />
+              <img className={"fill-parent"} width={64} height={64} src={"/static/img/arrow-next.svg"} style={{ opacity: rootStore.state.loading ? 0 : 1 }} />
             </a>
           </Link>
           <CubeSpinner className={"fill-parent"} width={"3.165em"} height={"3.165em"} loading={rootStore.state.loading} />
         </div>
 
-        <SvgOverlay svgRef={this.svgLayer} />
+        <SvgOverlay svgRef={svgLayer} />
 
         <style jsx global>{`
           h1 {
@@ -161,7 +173,7 @@ class Home extends React.Component {
         `}</style>
       </Layout>
     );
-  }
-}
+  })
+);
 
 export default Home;
