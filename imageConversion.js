@@ -71,7 +71,7 @@ const imageImporter = maxWidthOrHeight =>
     let output, size, quality, props;
     let metadata = await exifr
       .parse("tmp.jpg")
-      .then(exif => console.log("Camera:", exif.Make, exif.Model))
+      .then(exif => console.log("Camera:", exif))
       .catch(console.error);
     quality = jpegQuality(dataBuf);
     props = await sharp(inputBuf).metadata();
@@ -112,7 +112,7 @@ const imageImporter = maxWidthOrHeight =>
     let colors = JSON.stringify(palette).replace(/"/g, '\\"');
     console.log("ret:", { word, palette, colors });
     let { depth, channels } = props;
-    return { data, palette, colors };
+    return { data,size,  palette, colors };
   };
 
 const imageImport = imageImporter(maxWidthOrHeight);
