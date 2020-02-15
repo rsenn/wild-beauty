@@ -15,28 +15,23 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const cookieParser = require("cookie-parser");
-const sharp = require("sharp");
+//const sharp = require("sharp");
 const util = require("util");
-const maxWidthOrHeight = 1024;
-const MemoryStream = require("memory-stream");
+//const maxWidthOrHeight = 1024;
+//const MemoryStream = require("memory-stream");
 const stream = require("stream");
 const Alea = require("./utils/alea.js");
 const Readable = stream.Readable;
-const getColors = require("get-image-colors");
+//const getColors = require("get-image-colors");
 const tempfile = require("tempfile");
-const cquant = require("cquant");
+/*const cquant = require("cquant");
 const jpegAutorotate = require("jpeg-autorotate");
 const jpegQuality = require("jpegquality");
-const exifr = require("exifr");
+const exifr = require("exifr");*/
 const fsPromises = require("fs").promises;
+const { loadFile, getImagePalette, imageImport } = require("./imageConversion.js");
 
-export async function loadFile(path) {
-  let data = await fs.readFile(path);
-
-  return data;
-}
-
-export async function bufferToStream(buffer) {
+function bufferToStream(buffer) {
   let stream = new Readable();
   stream.push(buffer);
   stream.push(null);
