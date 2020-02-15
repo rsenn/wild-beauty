@@ -29,36 +29,20 @@ const jpegAutorotate = require("jpeg-autorotate");
 const jpegQuality = require("jpegquality");
 const exifr = require("exifr");
 const fsPromises = require("fs").promises;
-util.inspect.defaultOptions.colors = true;
-util.inspect.defaultOptions.depth = 10;
-function bufferToStream(buffer) {
+
+export async function loadFile(path) {
+  let data = await fs.readFile(path);
+
+  return data;
+}
+
+export async function bufferToStream(buffer) {
   let stream = new Readable();
   stream.push(buffer);
   stream.push(null);
   return stream;
 }
-async function getImagePalette(data) {
-  const getImageColors = data =>
-    new Promise((resolve, reject) => {
-      let img = sharp(data);
-      img.raw().toBuffer((_err, buffer, info) => {
-        if(!_err) {
-          let colorCount = 16;
-          cquant
-            .paletteAsync(buffer, info.channels, colorCount)
-            .then(resolve)
-            .catch(reject);
-        }
-      });
-    });
-  let ret = await getImageColors(data);
-  return Object.fromEntries(
-    [...ret].map(c => {
-      let color = new RGBA(c.R, c.G, c.B, 255);
-      return [color.hex(), c.count];
-    })
-  );
-}
+
 var secret = fs.readFileSync("secret.key");
 var etc_hostname = fs.readFileSync("/etc/hostname");
 const dev = process.env.NODE_ENV !== "production";
@@ -320,6 +304,7 @@ if (!dev && cluster.isMaster) {
         let response = [];
         for(let item of Object.entries(req.files)) {
           const file = item[1];
+
           const dataBuf = Buffer.from(file.data);
           let w = await fsPromises.writeFile("tmp.jpg", dataBuf);
           let metadata = await exifr
@@ -347,15 +332,15 @@ if (!dev && cluster.isMaster) {
           };
           const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
           if(typeof props != "object" || props === null) props = {};
-          let newDimensions = calcDimensions(maxWidthOrHeight, props);
-          if(!compareDimensions(props, newDimensions)) {
-            if(!newDimensions.width) delete newDimensions.width;
-            if(!newDimensions.height) delete newDimensions.height;
+          let size = calcDimensions(maxWidthOrHeight, props);
+          if(!compareDimensions(props, size)) {
+            if(!size.width) delete size.width;
+            if(!size.height) delete size.height;
             let transformer = sharp()
               .jpeg({
                 quality: 95
               })
-              .resize(newDimensions)
+              .resize(size)
               .on("info", function(info) {});
             var inputStream = bufferToStream(file.data);
             var outputStream = new MemoryStream();
@@ -366,8 +351,8 @@ if (!dev && cluster.isMaster) {
             let newData = outputStream.buffer[0];
             file.data = newData;
             props = jpeg.jpegProps(file.data);
-            width = newDimensions.width ? newDimensions.width : props.width;
-            height = newDimensions.height ? newDimensions.height : props.height;
+            width = size.width ? size.width : props.width;
+            height = size.height ? size.height : props.height;
           }
           let data = file.data.toString("base64");
           let word = (file.data[0] << 8) + file.data[1];
