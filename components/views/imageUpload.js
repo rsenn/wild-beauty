@@ -55,7 +55,7 @@ export const ImageUpload = inject("rootStore")(
             const landscape = width > height;
 
             return (
-              <div className={"image-entry"}>
+              <div key={index} className={"image-entry"}>
                 <SizedAspectRatioBox className={"item-box"}>
                   <img
                     id={`image-${id}`}

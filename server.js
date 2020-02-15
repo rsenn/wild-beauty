@@ -15,50 +15,21 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const cookieParser = require("cookie-parser");
-const sharp = require("sharp");
 const util = require("util");
-const maxWidthOrHeight = 1024;
-const MemoryStream = require("memory-stream");
 const stream = require("stream");
 const Alea = require("./utils/alea.js");
 const Readable = stream.Readable;
-const getColors = require("get-image-colors");
 const tempfile = require("tempfile");
-const cquant = require("cquant");
-const jpegAutorotate = require("jpeg-autorotate");
-const jpegQuality = require("jpegquality");
-const exifr = require("exifr");
 const fsPromises = require("fs").promises;
-util.inspect.defaultOptions.colors = true;
-util.inspect.defaultOptions.depth = 10;
+const { loadFile, getImagePalette, imageImport } = require("./imageConversion.js");
+
 function bufferToStream(buffer) {
   let stream = new Readable();
   stream.push(buffer);
   stream.push(null);
   return stream;
 }
-async function getImagePalette(data) {
-  const getImageColors = data =>
-    new Promise((resolve, reject) => {
-      let img = sharp(data);
-      img.raw().toBuffer((_err, buffer, info) => {
-        if(!_err) {
-          let colorCount = 16;
-          cquant
-            .paletteAsync(buffer, info.channels, colorCount)
-            .then(resolve)
-            .catch(reject);
-        }
-      });
-    });
-  let ret = await getImageColors(data);
-  return Object.fromEntries(
-    [...ret].map(c => {
-      let color = new RGBA(c.R, c.G, c.B, 255);
-      return [color.hex(), c.count];
-    })
-  );
-}
+
 var secret = fs.readFileSync("secret.key");
 var etc_hostname = fs.readFileSync("/etc/hostname");
 const dev = process.env.NODE_ENV !== "production";
@@ -320,61 +291,24 @@ if (!dev && cluster.isMaster) {
         let response = [];
         for(let item of Object.entries(req.files)) {
           const file = item[1];
-          const dataBuf = Buffer.from(file.data);
-          let w = await fsPromises.writeFile("tmp.jpg", dataBuf);
-          let metadata = await exifr
-            .parse("tmp.jpg")
-            .then(exif => console.log("Camera:", exif.Make, exif.Model))
-            .catch(console.error);
-          let quality = jpegQuality(dataBuf);
-          let props = await sharp(file.data).metadata();
-          console.error("upload image ", { quality, metadata, props });
-          let { width, height, aspect } = props || {};
-          if(!aspect && width > 0 && height > 0) aspect = width / height;
-          const calcDimensions = (max, props) => {
-            if(typeof props != "object" || props === null) props = {};
-            let { width, height, ...restOfProps } = props;
-            if(width > max || height > max) {
-              if(width > height) {
-                height = Math.floor((max * height) / width);
-                width = max;
-              } else {
-                width = Math.floor((max * width) / height);
-                height = max;
-              }
-            }
-            return { ...restOfProps, width, height };
-          };
-          const compareDimensions = (a, b) => a.width == b.width && a.height == b.height;
-          if(typeof props != "object" || props === null) props = {};
-          let newDimensions = calcDimensions(maxWidthOrHeight, props);
-          if(!compareDimensions(props, newDimensions)) {
-            if(!newDimensions.width) delete newDimensions.width;
-            if(!newDimensions.height) delete newDimensions.height;
-            let transformer = sharp()
-              .jpeg({
-                quality: 95
-              })
-              .resize(newDimensions)
-              .on("info", function(info) {});
-            var inputStream = bufferToStream(file.data);
-            var outputStream = new MemoryStream();
-            const finished = util.promisify(stream.finished);
-            outputStream.on("finish", () => {});
-            inputStream.pipe(transformer).pipe(outputStream);
-            await finished(outputStream);
-            let newData = outputStream.buffer[0];
-            file.data = newData;
-            props = jpeg.jpegProps(file.data);
-            width = newDimensions.width ? newDimensions.width : props.width;
-            height = newDimensions.height ? newDimensions.height : props.height;
-          }
-          let data = file.data.toString("base64");
-          let word = (file.data[0] << 8) + file.data[1];
-          let palette = await getImagePalette(file.data);
-          let colors = JSON.stringify(palette).replace(/"/g, '\\"');
-          let { depth, channels } = props;
-          let reply = await API.insert("photos", { original_name: `"${file.name}"`, colors: `"${colors}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
+          const image = await imageImport(file.data);
+
+          const { colors, palette, data, size, props, exif } = image;
+          const { width, height } = size;
+
+          let reply = await API.insert(
+            "photos",
+            {
+              original_name: `"${file.name}"`,
+              colors: `"${colors}"`,
+              filesize: file.data.length,
+              width,
+              height,
+              user_id,
+              data: `"${data}"`
+            },
+            ["id"]
+          );
           let { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
           if(returning && returning.forEach) returning.forEach(({ original_name, filesize, colors, width, height, id }) => response.push({ original_name, filesize, colors, width, height, id }));
         }
