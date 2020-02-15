@@ -31,7 +31,7 @@ const Home = inject("rootStore")(
       }
     });
     return (
-      <Layout hideNav={true}>
+      <Layout hideNav={true} scroll={false}>
         <Head>
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
@@ -146,7 +146,10 @@ const Home = inject("rootStore")(
             transition: opacity 0.5s;
             overflow: auto;
           }
+.noscroll {
+              overflow: ĥidden;
 
+}
           .main-layout {
             display: block;
             padding: 0;
