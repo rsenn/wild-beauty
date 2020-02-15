@@ -19,6 +19,8 @@ export const defaultTouchAction = (event, e) => {
 };
 
 export const makeTouchCallback = (className = "layer", action = null) => {
+  const hasLayerClass = className.startsWith("#") ? e => `#${e.getAttribute("id")}` == className : e => containsClass(className)(e);
+
   if(action === null) action = defaultTouchAction;
 
   return event => {
@@ -39,7 +41,6 @@ export const makeTouchCallback = (className = "layer", action = null) => {
 
     //console.log("TouchCallback event: ", { depth, event, cancel });
 
-    const hasLayerClass = containsClass(className)(e);
     if(hasLayerClass) {
       let element = e;
       while(element && element.parentElement && element.classList) {

@@ -4,16 +4,17 @@ import Nav from "../components/nav.js";
 import ToastsContainer from "./views/toastsContainer.js";
 import classNames from "classnames";
 
-export const Layout = ({ toastsClick, className, ...props }) => (
+export const Layout = ({ toastsClick, className, scroll = true, hideNav, ...props }) => (
   <React.Fragment>
-    <div className={classNames("page-layout", className)} {...props}>
+    <div className={classNames("page-layout", className)} style={{ overflow: scroll ? "auto" : "hidden" }} {...props}>
       <Head>
         <title>New</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Nav>{/*  {global.window ? window.site.label(props) : undefined} -{" "}
-      {global.window ? window.site.description(props) : undefined}*/}</Nav>
-      <div className={"content-layout"}>{props.children}</div>
+      {hideNav ? undefined : <Nav />}
+      <div className={"content-layout"} style={scroll ? {} : { overflow: "hidden" }}>
+        {props.children}
+      </div>
     </div>
     <ToastsContainer onClick={toastsClick} />
     <style jsx global>{`

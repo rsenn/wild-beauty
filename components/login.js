@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import classNames from "classnames";
 import { action } from "mobx";
 import { autofillEvent } from "../utils/autofillEvent.js";
+import { CubeSpinner } from "../components/simple/cubeSpinner.js";
 import { inject, observer } from "mobx-react";
 import { Translate } from "react-i18nify-mobx";
 
@@ -98,17 +99,7 @@ const LoginForm = inject("rootStore")(
             </div>
             {loading ? (
               <div className={"form-field form-buttonfield form-row form-spinner"}>
-                <div className="sk-cube-grid" style={{ opacity: loading ? 1 : 0 }}>
-                  <div className="sk-cube sk-cube1"></div>
-                  <div className="sk-cube sk-cube2"></div>
-                  <div className="sk-cube sk-cube3"></div>
-                  <div className="sk-cube sk-cube4"></div>
-                  <div className="sk-cube sk-cube5"></div>
-                  <div className="sk-cube sk-cube6"></div>
-                  <div className="sk-cube sk-cube7"></div>
-                  <div className="sk-cube sk-cube8"></div>
-                  <div className="sk-cube sk-cube9"></div>
-                </div>
+                <CubeSpinner loading={loading} style={{ margin: `10px auto 0 auto` }} />
               </div>
             ) : rootStore.authenticated || rootStore.state.error ? (
               <div className={"form-status"}>{rootStore.state.error || <Translate value="login.logged" />}</div>
@@ -229,83 +220,6 @@ const LoginForm = inject("rootStore")(
             }
             .form-spinner {
               top: -4px;
-            }
-
-            .sk-cube-grid {
-              width: 40px;
-              height: 40px;
-              margin: 10px auto 0 auto;
-            }
-
-            .sk-cube-grid .sk-cube {
-              width: 33%;
-              height: 33%;
-              background-color: #333;
-              float: left;
-              -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
-              animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
-            }
-            .sk-cube-grid .sk-cube1 {
-              -webkit-animation-delay: 0.2s;
-              animation-delay: 0.2s;
-            }
-            .sk-cube-grid .sk-cube2 {
-              -webkit-animation-delay: 0.3s;
-              animation-delay: 0.3s;
-            }
-            .sk-cube-grid .sk-cube3 {
-              -webkit-animation-delay: 0.4s;
-              animation-delay: 0.4s;
-            }
-            .sk-cube-grid .sk-cube4 {
-              -webkit-animation-delay: 0.1s;
-              animation-delay: 0.1s;
-            }
-            .sk-cube-grid .sk-cube5 {
-              -webkit-animation-delay: 0.2s;
-              animation-delay: 0.2s;
-            }
-            .sk-cube-grid .sk-cube6 {
-              -webkit-animation-delay: 0.3s;
-              animation-delay: 0.3s;
-            }
-            .sk-cube-grid .sk-cube7 {
-              -webkit-animation-delay: 0s;
-              animation-delay: 0s;
-            }
-            .sk-cube-grid .sk-cube8 {
-              -webkit-animation-delay: 0.1s;
-              animation-delay: 0.1s;
-            }
-            .sk-cube-grid .sk-cube9 {
-              -webkit-animation-delay: 0.2s;
-              animation-delay: 0.2s;
-            }
-
-            @-webkit-keyframes sk-cubeGridScaleDelay {
-              0%,
-              70%,
-              100% {
-                -webkit-transform: scale3D(1, 1, 1);
-                transform: scale3D(1, 1, 1);
-              }
-              35% {
-                -webkit-transform: scale3D(0, 0, 1);
-                transform: scale3D(0, 0, 1);
-              }
-            }
-
-            @keyframes sk-cubeGridScaleDelay {
-              0%,
-              70%,
-              100% {
-                -webkit-transform: scale3D(1, 1, 1);
-                transform: scale3D(1, 1, 1);
-              }
-              35% {
-                -webkit-transform: scale3D(0, 0, 1);
-                transform: scale3D(0, 0, 1);
-              }
             }
           `}</style>
         </div>

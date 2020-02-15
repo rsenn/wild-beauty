@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import { Element, Point, PointList, Rect, Matrix, Timer, SVG, TRBL, Align } from "../utils/dom.js";
+import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align } from "../utils/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../utils/util.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
@@ -13,8 +13,8 @@ import { action } from "mobx";
 import Nav from "../components/nav.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 import { trkl } from "../utils/trkl.js";
-import { Graph, Node, Edge } from "../utils/fd-graph.js";
-import { makeItemToOption, findInTree, walkTree, treeToGraph } from "../stores/functions.js";
+import { Graph } from "../utils/fd-graph.js";
+import { makeItemToOption, findInTree, treeToGraph } from "../stores/functions.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
 import "../static/css/grid.css";
 import DropdownTreeSelect from "react-dropdown-tree-select";

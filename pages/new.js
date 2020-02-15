@@ -1,7 +1,6 @@
 import React from "react";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../utils/alea.js";
-import { Element, Point, Line, Rect } from "../utils/dom.js";
 import { lazyInitializer } from "../utils/lazyInitializer.js";
 import { SvgOverlay } from "../utils/svg-overlay.js";
 import { action } from "mobx";
@@ -11,8 +10,7 @@ import { ItemEditor } from "../components/views/itemEditor.js";
 import { trkl } from "../utils/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
-import { maxZIndex } from "../stores/functions.js";
-import { MovementListener, TouchListener, SelectionListener } from "../lib/touchHandler.js";
+import { SelectionListener } from "../lib/touchHandler.js";
 
 import "../static/css/react-upload-gallery.css";
 import "../static/style.css";
@@ -44,9 +42,11 @@ class New extends React.Component {
       RootStore.auth.user_id = user_id;
     }
     if(!global.window) {
-      images = await RootStore.fetchImages({ user_id });
-      images = images.filter(ph => ph.items.length == 0);
-      images.forEach(item => RootStore.newImage(item));
+      if(user_id) {
+        images = await RootStore.fetchImages({ user_id });
+        images = images.filter(ph => ph.items.length == 0);
+        images.forEach(item => RootStore.newImage(item));
+      }
       const { url, query, body, route } = req || {};
       console.log("New.getInitialProps", { url });
     }

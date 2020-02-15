@@ -69,15 +69,13 @@ class MyApp extends App {
 
     const rootStore = this.mobxStore.RootStore;
 
-    Router.events.on("routeChangeStart", () => {
-      //console.log("routeChangeStart ", router.query);
-      rootStore.setState({ loading: true });
-    });
+    const handleRouteChange = url => {
+      console.log("App is changing to: ", url);
 
-    Router.events.on("routeChangeComplete", () => {
-      //console.log("routeChangeComplete ", router.query);
-      rootStore.setState({ loading: false });
-    });
+      rootStore.setState({ loading: true });
+    };
+
+    // Router.events.on("routeChangeStart", handleRouteChange);
 
     //console.log("App.componentDidMount ", router.query);
     const obj = ["step", "image", "selected"].reduce((acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc), {});
@@ -125,12 +123,16 @@ class MyApp extends App {
             padding: 0px;
             overflow-x: hidden;
           }
-
           .page-layout {
+            position: absolute;
+            display: block;
+            width: 100%;
+            height: 100%;
+          }
+          .content-layout {
             padding: 0 0 0 0;
             margin: 0 0 0 0;
             width: 100vw;
-            min-height: 100vh;
             text-align: center;
             display: flex;
             flex-flow: column nowrap;

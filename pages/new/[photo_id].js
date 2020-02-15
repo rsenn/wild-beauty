@@ -97,7 +97,7 @@ export class NewItem extends React.Component {
       });
       this.touchListener = TouchListener(
         event => {
-          console.log("Touch ", event);
+          //console.log("Touch ", event);
           const elem = event.target;
           if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
             this.currentImage = event.target;
@@ -197,6 +197,15 @@ export class NewItem extends React.Component {
             <a href={`/new/${query.photo_id}`}>New item {query.photo_id}</a>
             {this.state.tree ? <ItemEditor tree={this.state.tree} makeTreeSelEvent={makeTreeSelEvent} image={img} /> : undefined}
           </div>
+          <style jsx global>{`
+            .colors-text {
+              transition: opacity 1s linear;
+              opacity: 0.2;
+            }
+            .colors-text:hover {
+              opacity: 1;
+            }
+          `}</style>
         </NeedAuth>
       </Layout>
     );
