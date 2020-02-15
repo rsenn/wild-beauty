@@ -145,10 +145,9 @@ const Home = inject("rootStore")(
 
             transition: opacity 0.5s;
           }
-.noscroll {
-              overflow: ĥidden;
-
-}
+          .noscroll {
+            overflow: ĥidden;
+          }
           .main-layout {
             display: block;
             padding: 0;

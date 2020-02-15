@@ -58,3 +58,11 @@ a:hover {
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Opera and Firefox */
 }
+
+.colors-text {
+  transition: opacity 1s linear;
+  opacity: 0.2;
+}
+ .colors-text:hover {
+  opacity: 1;
+} 
