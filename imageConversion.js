@@ -70,7 +70,7 @@ const imageImporter = maxWidthOrHeight =>
     let w = await fsPromises.writeFile("tmp.jpg", dataBuf);
     let output, size, quality, props;
     let exif = await exifr.parse("tmp.jpg");
-    console.log("exif: ", exif);
+    //console.log("exif: ", exif);
     quality = jpegQuality(dataBuf);
     props = await sharp(inputBuf).metadata();
     console.error("upload image ", { quality, exif, props });
@@ -89,7 +89,7 @@ const imageImporter = maxWidthOrHeight =>
         .resize(size)
         .on("info", function(info) {});
       var inputStream = bufferToStream(Buffer.from(inputBuf));
-      console.log("inputBuf:", inputBuf.length);
+      //console.log("inputBuf:", inputBuf.length);
       //  console.log("inputStream:",inputStream, Util.members(inputStream));
       var outputStream = new MemoryStream();
       const finished = util.promisify(stream.finished);
@@ -97,18 +97,18 @@ const imageImporter = maxWidthOrHeight =>
       inputStream.pipe(transformer).pipe(outputStream);
       await finished(outputStream);
       output = outputStream.buffer[0];
-      console.log("output:", output.length);
+      //console.log("output:", output.length);
       props = jpeg.jpegProps(output);
       width = size.width ? size.width : props.width;
       height = size.height ? size.height : props.height;
-      console.log("output:", output);
+      //console.log("output:", output);
     }
     let data = output.toString("base64");
-    console.log("data:", data.substring(0, 100));
+    //console.log("data:", data.substring(0, 100));
     let word = (output[0] << 8) + output[1];
     let palette = await getImagePalette(output);
     let colors = JSON.stringify(palette).replace(/"/g, '\\"');
-    console.log("ret:", { word, palette, colors });
+    //console.log("ret:", { word, palette, colors });
     let { depth, channels } = props;
     return { data, size, palette, colors, exif, props };
   };
