@@ -76,6 +76,12 @@
 				"*.xz",
 				"*.yml",
 				"*.1",
+				"*.orig",
+				"*.jpg",
+				"*.tmp??",
+				"*.0",
+				"*.list"
+
 			],
 			"folder_exclude_patterns":
 			[
