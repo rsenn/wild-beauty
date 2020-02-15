@@ -301,9 +301,9 @@ if (!dev && cluster.isMaster) {
           const file = item[1];
           const image = await imageImport(file.data);
 
-          console.log("image: ", image);
 
-          const { colors, data, size }  = image;
+          const { colors, palette, data, size, props, exif } = image;
+          const { width, height } = size;
 
           let reply = await API.insert("photos", { original_name: `"${file.name}"`, colors: `"${colors}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
           let { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};

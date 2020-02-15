@@ -69,13 +69,11 @@ const imageImporter = maxWidthOrHeight =>
     const dataBuf = Buffer.from(inputBuf);
     let w = await fsPromises.writeFile("tmp.jpg", dataBuf);
     let output, size, quality, props;
-    let metadata = await exifr
-      .parse("tmp.jpg")
-      .then(exif => console.log("Camera:", exif))
-      .catch(console.error);
+    let exif = await exifr.parse("tmp.jpg");
+    console.log("exif: ", exif);
     quality = jpegQuality(dataBuf);
     props = await sharp(inputBuf).metadata();
-    console.error("upload image ", { quality, metadata, props });
+    console.error("upload image ", { quality, exif, props });
     let { width, height, aspect } = props || {};
     if(!aspect && width > 0 && height > 0) aspect = width / height;
 
@@ -112,7 +110,7 @@ const imageImporter = maxWidthOrHeight =>
     let colors = JSON.stringify(palette).replace(/"/g, '\\"');
     console.log("ret:", { word, palette, colors });
     let { depth, channels } = props;
-    return { data,size,  palette, colors };
+    return { data, size, palette, colors, exif, props };
   };
 
 const imageImport = imageImporter(maxWidthOrHeight);
