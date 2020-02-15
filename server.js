@@ -15,19 +15,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const cookieParser = require("cookie-parser");
-//const sharp = require("sharp");
 const util = require("util");
-//const maxWidthOrHeight = 1024;
-//const MemoryStream = require("memory-stream");
 const stream = require("stream");
 const Alea = require("./utils/alea.js");
 const Readable = stream.Readable;
-//const getColors = require("get-image-colors");
 const tempfile = require("tempfile");
-/*const cquant = require("cquant");
-const jpegAutorotate = require("jpeg-autorotate");
-const jpegQuality = require("jpegquality");
-const exifr = require("exifr");*/
 const fsPromises = require("fs").promises;
 const { loadFile, getImagePalette, imageImport } = require("./imageConversion.js");
 
@@ -42,13 +34,24 @@ var secret = fs.readFileSync("secret.key");
 var etc_hostname = fs.readFileSync("/etc/hostname");
 const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || (/hostwinds/.test(etc_hostname) ? 8040 : 5555);
-const itemFields = ["id", "type", "name", "parent { id }", "children { id }", "data", `photos { photo { id filesize colors height id offset width original_name } }`, "users { user { id } }"];
+const itemFields = [
+  "id",
+  "type",
+  "name",
+  "parent { id }",
+  "children { id }",
+  "data",
+  `photos { photo { id filesize colors height id offset width original_name } }`,
+  "users { user { id } }"
+];
 if (!dev && cluster.isMaster) {
   for(let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
   cluster.on("exit", (worker, code, signal) => {
-    console.error(`Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`);
+    console.error(
+      `Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`
+    );
   });
 } else {
   const nextApp = next({ dir: ".", dev });
@@ -104,7 +107,11 @@ if (!dev && cluster.isMaster) {
     server.post("/api/login", async function(req, res) {
       const { username, password } = req.body;
       try {
-        let response = await API.select("users", { username: `"${username}"` }, ["id", "username", "password"]);
+        let response = await API.select("users", { username: `"${username}"` }, [
+          "id",
+          "username",
+          "password"
+        ]);
         let user = response.users[0];
         let success = user ? bcrypt.compareSync(password, user.password) : false;
         let token,
@@ -134,9 +141,14 @@ if (!dev && cluster.isMaster) {
         console.error("Login error: ", err);
       }
     });
-    const getVar = (req, name) => (req.cookies && req.cookies[name]) || (req.session && req.session[name]);
+    const getVar = (req, name) =>
+      (req.cookies && req.cookies[name]) || (req.session && req.session[name]);
     const getUser = async function(token, prop) {
-      let response = await API.select("users", { token: `"${token}"` }, ["id", "username", "token"]);
+      let response = await API.select("users", { token: `"${token}"` }, [
+        "id",
+        "username",
+        "token"
+      ]);
       const user = await response.users[0];
       if(user) {
         if(prop) return await user[prop];
@@ -148,7 +160,11 @@ if (!dev && cluster.isMaster) {
       async function(req, res) {
         let token = getVar(req, "token");
         if(token) {
-          let response = await API.select("users", { token: `"${token}"` }, ["id", "username", "token"]);
+          let response = await API.select("users", { token: `"${token}"` }, [
+            "id",
+            "username",
+            "token"
+          ]);
           const user = response.users[0];
           if(user) {
             if(token == user.token) return fn(req, res);
@@ -161,7 +177,11 @@ if (!dev && cluster.isMaster) {
       let token = getVar(req, "token");
       try {
         if(token) {
-          let response = await API.select("users", { token: `"${token}"` }, ["id", "username", "token"]);
+          let response = await API.select("users", { token: `"${token}"` }, [
+            "id",
+            "username",
+            "token"
+          ]);
           const user = response.users[0];
           if(user && token == user.token) {
             response = await API.update("users", { id: user.id }, { token: "NULL" });
@@ -257,7 +277,22 @@ if (!dev && cluster.isMaster) {
       let { fields, format, ...params } = req.body;
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
-      let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "colors", "user_id", "items { item_id }", ...fields], params);
+      let images = await API.list(
+        "photos",
+        [
+          "id",
+          "original_name",
+          "width",
+          "height",
+          "uploaded",
+          "filesize",
+          "colors",
+          "user_id",
+          "items { item_id }",
+          ...fields
+        ],
+        params
+      );
       if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
       if(images.length !== undefined) images = images.filter(im => im.items.length == 0);
       res.json({ success: true, count: images.length, images });
@@ -275,7 +310,9 @@ if (!dev && cluster.isMaster) {
 
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
-      let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize colors data } }`);
+      let response = await API(
+        `query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize colors data } }`
+      );
       const photo = response.photos[0];
       if(typeof photo == "object") {
         1;
@@ -286,7 +323,8 @@ if (!dev && cluster.isMaster) {
         const { width, height, aspect } = photo;
         let props = { ...(jpeg.jpegProps(data) || {}), width, height, aspect };
         if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
-        for(let key of ["original_name", "uploaded", "user_id"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
+        for(let key of ["original_name", "uploaded", "user_id"])
+          if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
         for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
         res.send(data);
       }
@@ -301,13 +339,30 @@ if (!dev && cluster.isMaster) {
           const file = item[1];
           const image = await imageImport(file.data);
 
-
           const { colors, palette, data, size, props, exif } = image;
           const { width, height } = size;
 
-          let reply = await API.insert("photos", { original_name: `"${file.name}"`, colors: `"${colors}"`, filesize: file.data.length, width, height, user_id, data: `"${data}"` }, ["id"]);
-          let { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
-          if(returning && returning.forEach) returning.forEach(({ original_name, filesize, colors, width, height, id }) => response.push({ original_name, filesize, colors, width, height, id }));
+          let reply = await API.insert(
+            "photos",
+            {
+              original_name: `"${file.name}"`,
+              colors: `"${colors}"`,
+              filesize: file.data.length,
+              width,
+              height,
+              user_id,
+              data: `"${data}"`
+            },
+            ["id"]
+          );
+          let { affected_rows, returning } =
+            typeof reply == "object" && typeof reply.insert_photos == "object"
+              ? reply.insert_photos
+              : {};
+          if(returning && returning.forEach)
+            returning.forEach(({ original_name, filesize, colors, width, height, id }) =>
+              response.push({ original_name, filesize, colors, width, height, id })
+            );
         }
         res.json(response);
       })

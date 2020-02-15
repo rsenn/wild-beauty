@@ -73,9 +73,10 @@ const imageImporter = maxWidthOrHeight =>
     //console.log("exif: ", exif);
     quality = jpegQuality(dataBuf);
     props = await sharp(inputBuf).metadata();
-    console.error("upload image ", { quality, exif, props });
     let { width, height, aspect } = props || {};
     if(!aspect && width > 0 && height > 0) aspect = width / height;
+
+    console.error("upload image ", { quality, width, height, aspect });
 
     if(typeof props != "object" || props === null) props = {};
     size = calcDimensions(maxWidthOrHeight, props);
