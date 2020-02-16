@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <script src="/static/wasm/bpgdec.js"></script>
+    <script>
+      
+      var Module = {
+        // Don't run main() on page load
+        noInitialRun: true, // When Wasm module is ready, ask user for a string
+        onRuntimeInitialized: () => {
+
+
+          let myString = prompt("Enter a string:");
+          Module.callMain([myString]);
+        }, // Redirect stdout to alert()
+        print: txt => alert(`The MD5 hash is: ${txt}`)
+      };
+    </script>
+  </head>
+</html>
