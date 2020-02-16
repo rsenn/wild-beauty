@@ -24,10 +24,10 @@
 	"buffers":
 	[
 		{
-			"contents": "props =>\n() =>\ne =>\nsize =>",
+			"contents": "onRuntimeInitialized: ()\nprint: txt",
 			"settings":
 			{
-				"buffer_size": 27,
+				"buffer_size": 35,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
@@ -60,10 +60,31 @@
 			}
 		},
 		{
+			"file": "/home/roman/wild-beauty/pages/show.js",
+			"settings":
+			{
+				"buffer_size": 18864,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
 			"file": "lib/svg-overlay.js",
 			"settings":
 			{
 				"buffer_size": 3372,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "<html>\n  <head>\n    <script src=\"/static/wasm/bpgdec.js\"></script>\n    <script>\n      \n      var Module = {\n        // Don't run main() on page load\n        noInitialRun: true, // When Wasm module is ready, ask user for a string\n        onRuntimeInitialized: () => {\n\n\n          let myString = prompt(\"Enter a string:\");\n          Module.callMain([myString]);\n        }, // Redirect stdout to alert()\n        print: txt => alert(`The MD5 hash is: ${txt}`)\n      };\n    </script>\n  </head>\n</html>\n",
+			"file": "static/wasm.html",
+			"file_size": 496,
+			"file_write_time": 132262934270506340,
+			"settings":
+			{
+				"buffer_size": 497,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -165,6 +186,7 @@
 	],
 	"file_history":
 	[
+		"/home/roman/the-wild-beauty-company/static/wasm.html",
 		"/home/roman/the-wild-beauty-company/node_modules/arity-n/1.js",
 		"/home/roman/the-wild-beauty-company/wild-beauty.sublime-project",
 		"/home/roman/the-wild-beauty-company/lib/devtools.js",
@@ -244,6 +266,9 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"\"items:",
+			"\"items:£",
+			"items:",
 			"svgRef",
 			"svgRef\n",
 			"this.svg",
@@ -368,10 +393,7 @@
 			"addEdge",
 			"applyAttractiveForce",
 			"Point.prototype.move",
-			"applyAttractiveForce",
-			"addNode",
-			"filterOut",
-			"round ="
+			"applyAttractiveForce"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -406,7 +428,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 27,
+						"buffer_size": 35,
 						"regions":
 						{
 						},
@@ -416,33 +438,23 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/pages/index.js",
+							"current_file": "/home/roman/the-wild-beauty-company/static/wasm.html",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									553,
-									561
+									230,
+									257
 								],
 								[
-									690,
-									695
-								],
-								[
-									839,
-									843
-								],
-								[
-									1817,
-									1824
+									408,
+									421
 								]
 							],
 							"symlist":
 							[
-								"props =>",
-								"() =>",
-								"e =>",
-								"size =>"
+								"onRuntimeInitialized: ()",
+								"print: txt"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -450,13 +462,13 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 6,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 1,
+			"selected": 5,
 			"sheets":
 			[
 				{
@@ -483,10 +495,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4941.0,
+						"translation.y": 6311.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
@@ -513,10 +525,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1080.0,
+						"translation.y": 966.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
@@ -543,14 +555,44 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 36463.0,
+						"translation.y": 46588.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
 					"buffer": 4,
+					"file": "/home/roman/wild-beauty/pages/show.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 18864,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3500,
+								3500
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1689.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
 					"file": "lib/svg-overlay.js",
 					"semi_transient": false,
 					"settings":
@@ -562,8 +604,8 @@
 						"selection":
 						[
 							[
-								2593,
-								2593
+								1678,
+								1678
 							]
 						],
 						"settings":
@@ -573,10 +615,40 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1103.0,
+						"translation.y": 1380.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "static/wasm.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 497,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								269,
+								269
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -584,7 +656,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 27.0
+		"height": 32.0
 	},
 	"input":
 	{
@@ -639,6 +711,14 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"wasm.h",
+				"static/wasm.html"
+			],
+			[
+				"wasm.html",
+				"static/wasm.html"
+			],
 			[
 				"1",
 				"node_modules/arity-n/1.js"
