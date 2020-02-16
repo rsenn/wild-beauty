@@ -91,8 +91,8 @@ const Home = inject("rootStore")(
           <CubeSpinner className={"fill-parent"} width={"3.165em"} height={"3.165em"} loading={rootStore.state.loading} />
         </div>
 
-        <SvgOverlay svgRef={svgLayer} />
-
+       {/* <SvgOverlay svgRef={svgLayer} />
+*/} 
         <style jsx global>{`
           h1 {
             text-align: left;
