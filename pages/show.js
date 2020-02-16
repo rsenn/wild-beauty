@@ -87,7 +87,7 @@ class Show extends React.Component {
       items = await Show.API.list("items", Show.fields);
     }
     items = items.sort((a, b) => a.id - b.id);
-   // console.log("items: ", items);
+    // console.log("items: ", items);
     if(typeof RootStore.items == "object" && RootStore.items.clear) RootStore.items.clear();
     return { items, params };
   }

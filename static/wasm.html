@@ -2,12 +2,13 @@
   <head>
     <script src="/static/wasm/bpgdec.js"></script>
     <script>
-      
+      console.log("running");
+
       var Module = {
         // Don't run main() on page load
         noInitialRun: true, // When Wasm module is ready, ask user for a string
         onRuntimeInitialized: () => {
-
+console.log("initiaized");
 
           let myString = prompt("Enter a string:");
           Module.callMain([myString]);
