@@ -207,6 +207,7 @@
 	],
 	"file_history":
 	[
+		"/home/roman/Dokumente/Sources/libbpg/post.js",
 		"/home/roman/the-wild-beauty-company/static/wasm.html",
 		"/home/roman/Dokumente/Sources/libbpg-git/README",
 		"/home/roman/the-wild-beauty-company/node_modules/arity-n/1.js",
@@ -767,8 +768,8 @@
 						"selection":
 						[
 							[
-								7130,
-								7130
+								6513,
+								6513
 							]
 						],
 						"settings":
@@ -778,7 +779,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4531.0,
+						"translation.y": 4235.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
