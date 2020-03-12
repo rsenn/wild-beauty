@@ -370,7 +370,7 @@ class Show extends React.Component {
             {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
-                {items.map(item => {
+                {items.map((item, i) => {
                   const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                   const haveImage = photo_id >= 0;
                   let photo = haveImage ? item.photos[0].photo : null;
@@ -387,7 +387,7 @@ class Show extends React.Component {
                   if(typeof data != "object" || data === null) data = {};
 
                   return (
-                    <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
+                    <div key={i} className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                       <SizedAspectRatioBox
                         style={{
                           position: "relative",

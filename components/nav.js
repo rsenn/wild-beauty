@@ -78,12 +78,10 @@ const NavLink = inject("rootStore")(
           position: relative;
           transition: width 1s;
           text-align: left;
-
           width: 48px;
           height: 48px;
           max-width: 48px;
           max-height: 51px;
-
           display: flex;
           flex-flow: column nowrap;
           transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-width 1s cubic-bezier(0.165, 0.84, 0.44, 1), height 1s cubic-bezier(0.165, 0.84, 0.44, 1), max-height 1s cubic-bezier(0.165, 0.84, 0.44, 1);

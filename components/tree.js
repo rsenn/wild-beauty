@@ -272,7 +272,7 @@ if(height  < minHeight)
         </filter>
       </defs>
       <g id={"tree"} transform={`translate(${offs_x * scale_x}, ${offs_y * scale_y})`}>
-        {[...Table2DIterator(table)].map(item => {
+        {[...Table2DIterator(table)].map((item, i) => {
           if(!item.parentIndex) return undefined;
           const [py, px] = item.parentIndex;
           const [iy, ix] = item.index;
@@ -289,7 +289,7 @@ if(height  < minHeight)
           //if(item.depth == 2)
 
           return (
-            <React.Fragment>
+            <React.Fragment key={i}>
               <path d={`M${a} C ${ca}, ${cb}, ${b}`} stroke={"black"} strokeWidth={W} fill={"none"} />
               {item.branch && <circle cx={item.branch.a.x} cy={item.branch.a.y} r={10} fill={"none"} stroke={item.color.toHSL()} />}
               {0 && item.vector && <line x1={item.vector.x1} y1={item.vector.y1} x2={item.vector.x2} y2={item.vector.y2} stroke={item.color.toHSL()} />}
@@ -298,11 +298,11 @@ if(height  < minHeight)
             </React.Fragment>
           );
         })}
-        {[...Table2DIterator(table)].map(item => (
-          <g transform={`translate(${item.pos.x},${item.pos.y})`}>
+        {[...Table2DIterator(table)].map((item, i) => (
+          <g key={i} transform={`translate(${item.pos.x},${item.pos.y})`}>
             <g id={"item." + item.id}>
               <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={8} ry={8} vectorEffect={"non-scaling-stroke"} stroke={item.id == active ? "white" : "none"} strokeDasharray={item.id == active ? "4" : ""} fill={item.color} strokeWidth={item.id == active ? W * 3 : W} style={{ filter: "url(#shadow)" }} />
-              <SVGText lines={item.title} x={0} y={0} />
+              <SVGText key={i} lines={item.title} x={0} y={0} />
             </g>
           </g>
         ))}
