@@ -188,10 +188,9 @@ export class RootStore extends Queries {
     return this;
   }
 
-  @action.bound 
-  addField(name, type = 'string') {
-    this.fields.push('New');
-    
+  @action.bound
+  addField(name, type = "string") {
+    this.fields.push("New");
   }
 
   get currentImage() {
