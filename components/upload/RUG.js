@@ -47,7 +47,7 @@ class RUG extends React.Component {
     onChange(this.state.images);
 
     // ssrSupport
-    if (ssrSupport) {
+    if(ssrSupport) {
       this.setState({ renderComponent: true });
     }
   }
@@ -91,7 +91,7 @@ class RUG extends React.Component {
     let changes = {};
 
     try {
-      if (file instanceof Blob) {
+      if(file instanceof Blob) {
         const source = await this.getImageURLToBlob(file);
 
         changes = {
@@ -110,19 +110,19 @@ class RUG extends React.Component {
         },
         image => this.upload(image)
       );
-    } catch (e) {}
+    } catch(e) {}
   }
 
   async remove(uid) {
     const { images } = this.state;
     let deletedImage;
 
-    for (const key in images) {
+    for(const key in images) {
       const image = images[key];
 
-      if (image.uid === uid) {
-        if (await this.props.onConfirmDelete(image, images)) {
-          if (typeof image.abort === "function") {
+      if(image.uid === uid) {
+        if(await this.props.onConfirmDelete(image, images)) {
+          if(typeof image.abort === "function") {
             image.abort();
           }
 
@@ -135,7 +135,7 @@ class RUG extends React.Component {
     this.setState({ images }, () => {
       this.props.onChange(this.state.images);
 
-      if (deletedImage) {
+      if(deletedImage) {
         this.props.onDeleted(deletedImage, this.state.images);
       }
     });
@@ -159,8 +159,7 @@ class RUG extends React.Component {
         uploading: false,
         progress: 100
       },
-      () =>
-        this.props.onSuccess(this.state.images.find(item => item.uid === uid))
+      () => this.props.onSuccess(this.state.images.find(item => item.uid === uid))
     );
   }
 
@@ -196,7 +195,7 @@ class RUG extends React.Component {
       { images } = this.state;
 
     images = images.map(item => {
-      if (item.uid === uid) {
+      if(item.uid === uid) {
         return (image = { ...item, ...append });
       }
 
@@ -204,7 +203,7 @@ class RUG extends React.Component {
     });
 
     this.setState({ images }, () => {
-      if (finish) finish(image);
+      if(finish) finish(image);
 
       this.props.onChange(images);
     });
@@ -230,7 +229,7 @@ class RUG extends React.Component {
   async uploadFiles(files) {
     const images = [];
 
-    for (const file of files) {
+    for(const file of files) {
       try {
         const source = await this.getImageURLToBlob(file, images);
 
@@ -242,7 +241,7 @@ class RUG extends React.Component {
         });
 
         images.push(image);
-      } catch (e) {
+      } catch(e) {
         // nothing
       }
     }
@@ -252,7 +251,7 @@ class RUG extends React.Component {
         images: images.concat(this.state.images)
       },
       () => {
-        if (this.props.autoUpload) {
+        if(this.props.autoUpload) {
           images.forEach(image => this.upload(image));
         }
 
@@ -276,7 +275,7 @@ class RUG extends React.Component {
       throw new Error();
     };
 
-    if (
+    if(
       !isAccepted(
         file.type,
         accept.map(type => `${acceptType}/${type}`)
@@ -288,14 +287,14 @@ class RUG extends React.Component {
     const ImageURL = URL.createObjectURL(file);
 
     // if not available rules
-    if (rules !== null) {
+    if(rules !== null) {
       const { size, limit, width, height } = rules;
 
       /**
        * limit
        *
        */
-      if (limit && images.length >= limit) {
+      if(limit && images.length >= limit) {
         warning("limit");
       }
 
@@ -303,29 +302,29 @@ class RUG extends React.Component {
        * size
        *
        */
-      if (size * 1024 < file.size) {
+      if(size * 1024 < file.size) {
         warning("size");
       }
 
-      if (acceptType === "image") {
+      if(acceptType === "image") {
         /**
          * dimensions
          *
          */
         const image = await getImageDimensions(ImageURL);
 
-        if (width) {
-          if (image.width < width.min) {
+        if(width) {
+          if(image.width < width.min) {
             warning("minWidth");
-          } else if (image.width > width.max) {
+          } else if(image.width > width.max) {
             warning("maxWidth");
           }
         }
 
-        if (height) {
-          if (image.height < height.min) {
+        if(height) {
+          if(image.height < height.min) {
             warning("minHeight");
-          } else if (image.height > height.max) {
+          } else if(image.height > height.max) {
             warning("maxHeight");
           }
         }
@@ -402,33 +401,20 @@ class RUG extends React.Component {
       options = contextValue;
 
     // hide server side rendering
-    if (!renderComponent) {
+    if(!renderComponent) {
       return null;
     }
 
     return (
       <Context.Provider value={contextValue}>
         <div className={`rug ${className}`} style={style}>
-          {header &&
-            (typeof header === "function"
-              ? header(options)
-              : Handle(options, header))}
+          {header && (typeof header === "function" ? header(options) : Handle(options, header))}
 
           {this.showChildren(options)}
 
-          {footer &&
-            (typeof footer === "function"
-              ? footer(options)
-              : Handle(options, footer))}
+          {footer && (typeof footer === "function" ? footer(options) : Handle(options, footer))}
 
-          <input
-            multiple
-            type="file"
-            ref={this.fileInput}
-            className="rug-file-input"
-            accept={accept.map(type => `${acceptType}/${type}`)}
-            onChange={event => this.uploadFiles(event.target.files)}
-          />
+          <input multiple type="file" ref={this.fileInput} className="rug-file-input" accept={accept.map(type => `${acceptType}/${type}`)} onChange={event => this.uploadFiles(event.target.files)} />
         </div>
       </Context.Provider>
     );

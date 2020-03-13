@@ -1,11 +1,11 @@
 export const getBody = xhr => {
   const text = xhr.responseText || xhr.response;
 
-  if (!text) return text;
+  if(!text) return text;
 
   try {
     return JSON.parse(text);
-  } catch (e) {
+  } catch(e) {
     return text;
   }
 };
@@ -13,7 +13,7 @@ export const getBody = xhr => {
 export const bytesToSize = bytes => {
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
 
-  if (bytes === 0) return "0 Byte";
+  if(bytes === 0) return "0 Byte";
 
   const log = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
 
@@ -21,7 +21,7 @@ export const bytesToSize = bytes => {
 };
 
 export const getEventFiles = event => {
-  if (!event.dataTransfer) {
+  if(!event.dataTransfer) {
     return [];
   }
 
@@ -29,14 +29,14 @@ export const getEventFiles = event => {
 };
 
 export const isAccepted = (fileType, acceptedFiles) => {
-  if (fileType && acceptedFiles) {
+  if(fileType && acceptedFiles) {
     const mimeType = fileType || "";
     const baseMimeType = mimeType.replace(/\/.*$/, "");
 
     return acceptedFiles.some(type => {
       const validType = type.trim();
 
-      if (validType.endsWith("/*")) {
+      if(validType.endsWith("/*")) {
         return baseMimeType === validType.replace(/\/.*$/, "");
       }
 

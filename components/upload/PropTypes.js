@@ -54,17 +54,9 @@ export const propTypes = {
 
   sorting: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
 
-  header: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.object,
-    PropTypes.func
-  ]),
+  header: PropTypes.oneOfType([PropTypes.bool, PropTypes.object, PropTypes.func]),
 
-  footer: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.object,
-    PropTypes.func
-  ]),
+  footer: PropTypes.oneOfType([PropTypes.bool, PropTypes.object, PropTypes.func]),
 
   rules: PropTypes.shape({
     size: PropTypes.number,

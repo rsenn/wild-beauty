@@ -55,7 +55,7 @@ class DropArea extends React.Component {
 
     this.dragCounter--;
 
-    if (this.dragCounter === 0) {
+    if(this.dragCounter === 0) {
       this.setState({ isDrag: false });
     }
 
@@ -67,12 +67,7 @@ class DropArea extends React.Component {
       { isDrag } = this.state;
 
     return (
-      <div
-        onDrop={this.onDrop}
-        onDragOver={this.onDragOver}
-        onDragEnter={this.onDragEnter}
-        onDragLeave={this.onDragLeave}
-      >
+      <div onDrop={this.onDrop} onDragOver={this.onDragOver} onDragEnter={this.onDragEnter} onDragLeave={this.onDragLeave}>
         {children(isDrag)}
       </div>
     );
@@ -95,8 +90,4 @@ DropArea.propTypes = {
   onDragLeave: PropTypes.func
 };
 
-export default props => (
-  <Context.Consumer>
-    {values => <DropArea {...props} {...values} />}
-  </Context.Consumer>
-);
+export default props => <Context.Consumer>{values => <DropArea {...props} {...values} />}</Context.Consumer>;

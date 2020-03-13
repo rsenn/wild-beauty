@@ -17,7 +17,7 @@ const Request = ({
    * Progress Percentage
    *
    */
-  if (xhr.upload) {
+  if(xhr.upload) {
     xhr.upload.onprogress = ({ loaded, total }) => {
       onProgress(uid, parseInt(Math.round((loaded / total) * 100).toFixed(2)));
     };
@@ -32,7 +32,7 @@ const Request = ({
     const response = getBody(xhr),
       status = xhr.status;
 
-    if (status < 200 || status >= 300) {
+    if(status < 200 || status >= 300) {
       return onError(uid, { action, status });
     }
 
@@ -57,7 +57,7 @@ const Request = ({
   xhr.open("POST", action, true);
 
   // if the value is null by default, the request will not be executed
-  if (headers["X-Requested-With"] !== null) {
+  if(headers["X-Requested-With"] !== null) {
     xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
   }
 
@@ -65,8 +65,8 @@ const Request = ({
    * Custom Headers
    *
    */
-  for (const h in headers) {
-    if (headers.hasOwnProperty(h) && headers[h] !== null) {
+  for(const h in headers) {
+    if(headers.hasOwnProperty(h) && headers[h] !== null) {
       xhr.setRequestHeader(h, headers[h]);
     }
   }

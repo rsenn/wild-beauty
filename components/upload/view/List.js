@@ -11,21 +11,7 @@ export default class List extends React.Component {
 
   render() {
     const {
-        image: {
-          uid,
-          name,
-          size,
-          done,
-          abort,
-          click,
-          error,
-          remove,
-          source,
-          upload,
-          refresh,
-          progress,
-          uploading
-        },
+        image: { uid, name, size, done, abort, click, error, remove, source, upload, refresh, progress, uploading },
         ...props
       } = this.props,
       { spin } = this.state,
@@ -33,18 +19,9 @@ export default class List extends React.Component {
 
     return (
       <div {...props} key={uid} className="rug-list">
-        {uploading && (
-          <div
-            className={`rug-list-progress ${showProgress}`}
-            style={{ width: `${progress}%` }}
-          />
-        )}
+        {uploading && <div className={`rug-list-progress ${showProgress}`} style={{ width: `${progress}%` }} />}
 
-        {uploading && (
-          <span className={`rug-list-progress-count ${showProgress}`}>
-            {progress || 0}%
-          </span>
-        )}
+        {uploading && <span className={`rug-list-progress-count ${showProgress}`}>{progress || 0}%</span>}
 
         {!(done || error || uploading) && (
           <div onClick={upload} className="rug-list-upload-button">
@@ -55,7 +32,7 @@ export default class List extends React.Component {
         {error && typeof refresh === "function" && (
           <div
             onClick={() => {
-              if (spin) return;
+              if(spin) return;
 
               this.setState({ spin: true });
 
@@ -84,12 +61,7 @@ export default class List extends React.Component {
 
         <div className="rug-list-remove" onClick={remove}>
           <svg viewBox="0 0 40 40">
-            <path
-              stroke="current"
-              strokeLinecap="round"
-              strokeWidth="4"
-              d="M 10,10 L 30,30 M 30,10 L 10,30"
-            />
+            <path stroke="current" strokeLinecap="round" strokeWidth="4" d="M 10,10 L 30,30 M 30,10 L 10,30" />
           </svg>
         </div>
       </div>

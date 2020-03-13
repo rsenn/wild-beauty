@@ -18,9 +18,7 @@ export default (options, { handle }) => (
             handle(options)
           ) : (
             <React.Fragment>
-              <div className="rug-handle-drop-text">
-                Drag and drop Images Here to Upload
-              </div>
+              <div className="rug-handle-drop-text">Drag and drop Images Here to Upload</div>
 
               <span>Or</span>
 
