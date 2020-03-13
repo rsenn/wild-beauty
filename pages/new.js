@@ -31,6 +31,7 @@ class New extends React.Component {
     options: {}
   };
   svgLayer = trkl();
+  shiftState = trkl(false);
 
   static async getInitialProps({ res, req, err, mobxStore, ...ctx }) {
     const { RootStore } = mobxStore;
@@ -67,9 +68,15 @@ class New extends React.Component {
     if(global.window !== undefined) {
       window.page = this;
       window.rs = rootStore;
+
+      window.addEventListener("keydown", event => (event.key == "Shift" ? this.shiftState(true) : undefined));
+      window.addEventListener("keyup", event => (event.key == "Shift" ? this.shiftState(false) : undefined));
+      window.addEventListener("click", this.handleClick);
     }
     this.touchListener = SelectionListener(event => {}, { color: "#40ff00", shadow: "#000000" });
     rootStore.state.step = 1;
+
+    //  this.shiftState.subscribe(this.handleShiftState);
   }
 
   @action.bound
@@ -90,7 +97,25 @@ class New extends React.Component {
     router.push(`/new/${photo_id}`);
   }
 
-  handleClick = event => {};
+  handleClick = event => {
+    const nativeEvent = event.nativeEvent || event;
+    const shiftState = this.shiftState();
+    console.log("New.ĥandleClick", { shiftState });
+  };
+  /*
+  handleKeyDown = event => {
+    const nativeEvent = event.nativeEvent || event;
+    if(nativeEvent.key == "Shift") this.shiftState(true);
+  };
+
+  handleKeyUp = event => {
+    const nativeEvent = event.nativeEvent || event;
+    if(nativeEvent.key == "Shift") this.shiftState(false);
+  };
+*/
+  handleShiftState = state => {
+    console.log("New.handleShiftState", state);
+  };
 
   render() {
     const { rootStore } = this.props;
@@ -101,46 +126,49 @@ class New extends React.Component {
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     return (
       <Layout toastsClick={this.handleClick} className={"noselect"} {...this.touchListener.events}>
-        <NeedAuth>
-          {rootStore.state.image === null ? (
-            <ImageUpload
-              images={this.props.images}
-              onChoose={this.chooseImage}
-              onDelete={id => {
-                let e = Element.find(`#image-${id}`);
-                do {
-                  e = e.parentElement;
-                } while(!e.classList.contains("image-entry"));
-                rootStore.deleteImage(id, result => {
-                  Element.remove(e);
-                });
-              }}
-              onRotate={id => {
-                let img = Element.find(`#image-${id}`);
-                console.log("onRotate: ", { id, img });
-                let e = img;
-                do {
-                  e = e.parentElement;
-                } while(!e.classList.contains("image-entry"));
+        <div onKeyDown={this.handleKeyDown} onKeyUp={this.handleKeyUp}>
+          <NeedAuth>
+            {rootStore.state.image === null ? (
+              <ImageUpload
+                shiftState={this.shiftState}
+                images={this.props.images}
+                onChoose={this.chooseImage}
+                onDelete={id => {
+                  let e = Element.find(`#image-${id}`);
+                  do {
+                    e = e.parentElement;
+                  } while(!e.classList.contains("image-entry"));
+                  rootStore.deleteImage(id, result => {
+                    Element.remove(e);
+                  });
+                }}
+                onRotate={id => {
+                  let img = Element.find(`#image-${id}`);
+                  console.log("onRotate: ", { id, img });
+                  let e = img;
+                  do {
+                    e = e.parentElement;
+                  } while(!e.classList.contains("image-entry"));
 
-                let src = img.getAttribute("src");
+                  let src = img.getAttribute("src");
 
-                Element.attr(img, { src: "" });
+                  Element.attr(img, { src: "" });
 
-                rootStore.rotateImage(id, 90, ({ success, width, height }) => {
-                  const orientation = width > height ? "landscape" : "portrait";
+                  rootStore.rotateImage(id, 90, ({ success, width, height }) => {
+                    const orientation = width > height ? "landscape" : "portrait";
 
-                  console.log("rotateImage result:", { success, width, height });
-                  src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
-                  Element.attr(img, { src, width, height });
-                  Element.attr(e, { ["data-tooltip"]: `${width}x${height} ${orientation}` });
-                });
-              }}
-            />
-          ) : (
-            <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
-          )}
-        </NeedAuth>
+                    console.log("rotateImage result:", { success, width, height });
+                    src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
+                    Element.attr(img, { src, width, height });
+                    Element.attr(e, { ["data-tooltip"]: `${width}x${height} ${orientation}` });
+                  });
+                }}
+              />
+            ) : (
+              <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
+            )}
+          </NeedAuth>
+        </div>
         <SvgOverlay svgRef={this.svgLayer} />
         <style jsx global>{`
           button.tag-remove {

@@ -75,6 +75,7 @@
     "react-transition-group": "^4.3.0",
     "react-upload-gallery": "^0.0.4",
     "sharp": "^0.24.0",
+    "svg-path-parser": "^1.1.0",
     "tempfile": "^3.0.0",
     "time-span-format": "^1.0.1",
     "tims": "^1.0.4",

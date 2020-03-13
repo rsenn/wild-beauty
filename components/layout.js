@@ -6,11 +6,11 @@ import classNames from "classnames";
 
 export const Layout = ({ toastsClick, className, scroll = true, hideNav, ...props }) => (
   <React.Fragment>
+    <Head>
+      <title>New</title>
+      <link rel="icon" href="/favicon.ico" />
+    </Head>
     <div className={classNames("page-layout", className)} style={{ overflow: scroll ? "auto" : "hidden" }} {...props}>
-      <Head>
-        <title>New</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       {hideNav ? undefined : <Nav />}
       <div className={"content-layout"} style={scroll ? {} : { overflow: "hidden" }}>
         {props.children}
