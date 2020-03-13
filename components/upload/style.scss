@@ -79,14 +79,14 @@
 			
 
 			&:before {
-				border: 4px dashed #007aff;
+				border: 4px dashed rgba(138,0,16,0.8);
 				background-color: rgba(0, 122, 255, 0.15);
 			}
 
 			svg {
 
 				polyline, line {
-					stroke: #007aff;
+					stroke: rgba(138,0,16,0.8);
 				}
 			}
 
@@ -103,7 +103,7 @@
 			}
 
 			.rug-handle-button {
-				background-color: #007aff;
+				background-color: rgba(138,0,16,0.8);
 				border-radius: 3px;
 				padding: 7px 12px;
 				font-size: 16px;
@@ -218,7 +218,7 @@
 		display: block;
 
 		.__progress-cricle {
-			stroke: #007aff;
+			stroke: rgba(138,0,16,0.8);
 			fill: none;
 			stroke-width: 5;
 			stroke-linecap: round;
@@ -260,10 +260,10 @@
 
 		&.__spin {
 			animation: __spin 1000ms linear infinite;
-			border: 2px solid #007aff !important;
+			border: 2px solid rgba(138,0,16,0.8) !important;
 
 			.__refresh-icon g {
-				fill: #007aff;
+				fill: rgba(138,0,16,0.8);
 			}
 		}
 	}
@@ -296,7 +296,7 @@
 		}
 
 		&:hover {
-			border: 2px solid #007aff;
+			border: 2px solid rgba(138,0,16,0.8);
 			background-color: rgba(255, 255, 255, 0.9);
 
 			svg {
@@ -376,7 +376,7 @@
 		left: 0;
 		width: 0;
 		height: 5px;
-		background: #007aff;
+		background: rgba(138,0,16,0.8);
 		border: 3px;
 		opacity: 0;
 		transition: all 200ms ease;
@@ -423,7 +423,7 @@
 			animation: __spin 1000ms linear infinite;
 
 			.__refresh-icon g {
-				fill: #007aff;
+				fill: rgba(138,0,16,0.8);
 			}
 		}
 	}

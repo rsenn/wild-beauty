@@ -55,10 +55,10 @@
         stroke-width: 2px;
         stroke-linecap: round; }
     .rug .rug-handle.__dragging:before {
-      border: 4px dashed #007aff;
+      border: 4px dashed rgba(138,0,16,0.8);
       background-color: rgba(0, 122, 255, 0.15); }
     .rug .rug-handle.__dragging svg polyline, .rug .rug-handle.__dragging svg line {
-      stroke: #007aff; }
+      stroke: rgba(138,0,16,0.8); }
     .rug .rug-handle.__dragging .__arrow {
       animation: 1s up-arrow forwards infinite; }
     .rug .rug-handle .rug-handle-info {
@@ -66,7 +66,7 @@
       .rug .rug-handle .rug-handle-info .rug-handle-drop-text {
         font-size: 22px; }
       .rug .rug-handle .rug-handle-info .rug-handle-button {
-        background-color: #007aff;
+        background-color: rgba(138,0,16,0.8);
         border-radius: 3px;
         padding: 7px 12px;
         font-size: 16px;
@@ -149,7 +149,7 @@
     height: 50px;
     display: block; }
     .rug-card .rug-card-progress .__progress-cricle {
-      stroke: #007aff;
+      stroke: rgba(138,0,16,0.8);
       fill: none;
       stroke-width: 5;
       stroke-linecap: round;
@@ -181,9 +181,9 @@
       fill: #3d4852; }
     .rug-card .rug-card-refresh.__spin {
       animation: __spin 1000ms linear infinite;
-      border: 2px solid #007aff !important; }
+      border: 2px solid rgba(138,0,16,0.8) !important; }
       .rug-card .rug-card-refresh.__spin .__refresh-icon g {
-        fill: #007aff; }
+        fill: rgba(138,0,16,0.8); }
   .rug-card .rug-card-upload-button {
     position: absolute;
     top: calc(50% - 25px);
@@ -205,10 +205,10 @@
         stroke-width: 3px;
         stroke-linecap: round; }
     .rug-card .rug-card-upload-button:hover {
-      border: 2px solid #007aff;
+      border: 2px solid rgba(138,0,16,0.8);
       background-color: rgba(255, 255, 255, 0.9); }
       .rug-card .rug-card-upload-button:hover svg polyline, .rug-card .rug-card-upload-button:hover svg line {
-        stroke: #007aff; }
+        stroke: rgba(138,0,16,0.8); }
       .rug-card .rug-card-upload-button:hover svg .__arrow {
         animation: 1s up-arrow forwards infinite; }
   .rug-card .rug-card-remove {
@@ -261,7 +261,7 @@
     left: 0;
     width: 0;
     height: 5px;
-    background: #007aff;
+    background: rgba(138,0,16,0.8);
     border: 3px;
     opacity: 0;
     transition: all 200ms ease; }
@@ -295,7 +295,7 @@
     .rug-list .rug-list-refresh.__spin {
       animation: __spin 1000ms linear infinite; }
       .rug-list .rug-list-refresh.__spin .__refresh-icon g {
-        fill: #007aff; }
+        fill: rgba(138,0,16,0.8); }
   .rug-list .rug-list-upload-button {
     position: absolute;
     bottom: 5px;
@@ -320,7 +320,7 @@
     .rug-list .rug-list-upload-button:hover {
       background-color: rgba(255, 255, 255, 0.9); }
       .rug-list .rug-list-upload-button:hover svg polyline, .rug-list .rug-list-upload-button:hover svg line {
-        stroke: #007aff; }
+        stroke: rgba(138,0,16,0.8); }
       .rug-list .rug-list-upload-button:hover svg .__arrow {
         animation: 1s up-arrow forwards infinite; }
   .rug-list .rug-list-image {
