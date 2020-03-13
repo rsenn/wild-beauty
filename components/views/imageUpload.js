@@ -5,7 +5,7 @@ import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 import classNames from "classnames";
 import axios from "../../lib/axios.js";
 import Util from "../../lib/util.js";
-import UploadImages from "react-upload-gallery";
+import { RUG } from "../upload.js";
 
 import "../../static/css/grid.css";
 
@@ -33,11 +33,11 @@ export const ImageUpload = inject("rootStore")(
 
     return (
       <div className={"upload-area"}>
-        <UploadImages
+        <RUG
           action="/api/image/upload" // upload route
           source={response => {
             return response.map(photo => {
-              console.log("UploadImages response:", { photo, url });
+              console.log("RUG response:", { photo, url });
               const { id } = photo;
               const url = `/api/image/get/${id}.jpg`;
               let entry = rootStore.newImage(photo);
@@ -53,12 +53,12 @@ export const ImageUpload = inject("rootStore")(
           }}
           onSuccess={arg => {
             const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
-            console.log("UploadImages success:", { id, arg });
+            console.log("RUG success:", { id, arg });
             let entry = rootStore.newImage({ id });
-            console.log("UploadImages success:", toJS(entry));
+            console.log("RUG success:", toJS(entry));
             // arg.remove();
           }}
-        ></UploadImages>
+        ></RUG>
         <div className={"rug"}>
           <div className={"rug-items __card __sorting" /*"image-list grid-col grid-gap-10"*/}>
             {images.map((image, index) => {
