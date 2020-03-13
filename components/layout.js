@@ -10,7 +10,7 @@ export const Layout = ({ title, toastsClick, className, scroll = true, hideNav, 
       <title>{title}</title>
       <link rel="icon" href="/favicon.ico" />
     </Head>
-    <div className={classNames("page-layout", className)} style={{ overflowY: scroll ? "auto" : "hidden", overflowX: 'hidden' }} {...props}>
+    <div className={classNames("page-layout", className)} style={{ overflowY: scroll ? "auto" : "hidden", overflowX: "hidden" }} {...props}>
       {hideNav ? undefined : <Nav />}
       <div className={"content-layout"} style={scroll ? {} : { overflow: "hidden" }}>
         {props.children}

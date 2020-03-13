@@ -1,17 +1,15 @@
 @font-face {
   font-family: "Jewel Hill";
   src: url("/static/fonts/hinted-JewelHill.eot");
-  src: local("Jewel Hill"), local("JewelHill"), url("/static/fonts/hinted-JewelHill.eot?#iefix") format("embedded-opentype"), url("/static/fonts/hinted-JewelHill.woff2") format("woff2"),
-    url("/static/fonts/hinted-JewelHill.woff") format("woff"), url("/static/fonts/hinted-JewelHill.ttf") format("truetype"), url("/static/fonts/hinted-JewelHill.svg#JewelHill") format("svg");
+  src: local("Jewel Hill"), local("JewelHill"), url("/static/fonts/hinted-JewelHill.eot?#iefix") format("embedded-opentype"), url("/static/fonts/hinted-JewelHill.woff2") format("woff2"), url("/static/fonts/hinted-JewelHill.woff") format("woff"), url("/static/fonts/hinted-JewelHill.ttf") format("truetype"), url("/static/fonts/hinted-JewelHill.svg#JewelHill") format("svg");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: "Manjari Regular";
   src: url("/static/fonts/hinted-Manjari-Regular.eot");
-  src: local("Manjari Regular"), local("Manjari-Regular"), url("/static/fonts/hinted-Manjari-Regular.eot?#iefix") format("embedded-opentype"),
-    url("/static/fonts/hinted-Manjari-Regular.woff2") format("woff2"), url("/static/fonts/hinted-Manjari-Regular.woff") format("woff"),
-    url("/static/fonts/hinted-Manjari-Regular.ttf") format("truetype"), url("/static/fonts/hinted-Manjari-Regular.svg#Manjari-Regular") format("svg");
+  src: local("Manjari Regular"), local("Manjari-Regular"), url("/static/fonts/hinted-Manjari-Regular.eot?#iefix") format("embedded-opentype"), url("/static/fonts/hinted-Manjari-Regular.woff2") format("woff2"), url("/static/fonts/hinted-Manjari-Regular.woff") format("woff"), url("/static/fonts/hinted-Manjari-Regular.ttf") format("truetype"),
+    url("/static/fonts/hinted-Manjari-Regular.svg#Manjari-Regular") format("svg");
   font-weight: normal;
   font-style: normal;
 }
@@ -38,24 +36,24 @@ li.menu-item > a {
   }
 }
 .toast-button:hover {
-    color: white;
-    text-decoration: underline;
-    -webkit-filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-  }
+  color: white;
+  text-decoration: underline;
+  -webkit-filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
 
 a:hover {
-      -webkit-filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  -webkit-filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 
-   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Opera and Firefox */
 }
 
@@ -63,18 +61,15 @@ a:hover {
   transition: opacity 1s linear;
   opacity: 0.2;
 }
- .colors-text:hover {
+.colors-text:hover {
   opacity: 1;
-} 
-
+}
 
 .center-flex {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
-
 
 .tooltip {
   position: relative;
@@ -96,7 +91,7 @@ a:hover {
   transition: all 0.4s ease;
 }
 .tooltip:before {
-  content: '';
+  content: "";
   position: absolute;
   width: 0;
   height: 0;
@@ -151,6 +146,6 @@ a:hover:before {
 }
 
 .rug-item {
-  cursor: -webkit-grab; 
+  cursor: -webkit-grab;
   cursor: grab;
 }

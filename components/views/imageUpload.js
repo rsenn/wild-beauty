@@ -122,7 +122,7 @@ export const ImageUpload = inject("rootStore")(
         </div>
         <style jsx global>{`
           .rug-item {
-            cursor: -webkit-grab; 
+            cursor: -webkit-grab;
             cursor: grab;
           }
           .upload-area {

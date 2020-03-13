@@ -140,7 +140,7 @@ export class NewItem extends React.Component {
       Timer.once(500, () => {
         let img = page.props.images && page.props.images[0];
         if(img && !this.colors) {
-          this.colors = colors(Object.keys(img.colors), { width: 11*3, height: 11.5925*16 });
+          this.colors = colors(Object.keys(img.colors), { width: 11 * 3, height: 11.5925 * 16 });
         }
       });
     }

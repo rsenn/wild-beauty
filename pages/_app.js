@@ -127,7 +127,7 @@ class MyApp extends App {
             position: absolute;
             display: block;
             width: 100vw;
-overflow: hidden;
+            overflow: hidden;
           }
           .content-layout {
             padding: 0 0 0 0;
