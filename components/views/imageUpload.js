@@ -74,7 +74,7 @@ export const ImageUpload = inject("rootStore")(
 
               return (
                 <div key={index}>
-                  <div className={" rug-item"}>
+                  <div className={"rug-item"}>
                     <div className={"rug-card"}>
                       <SizedAspectRatioBox className={"item-box"} insideClassName={"tooltip"} sizeClassName={"rug-image"} insideProps={{ ["data-tooltip"]: `${width}x${height} ${orientation}` }}>
                         <img
@@ -121,6 +121,10 @@ export const ImageUpload = inject("rootStore")(
           </div>
         </div>
         <style jsx global>{`
+          .rug-item {
+            cursor: -webkit-grab; 
+            cursor: grab;
+          }
           .upload-area {
             position: relative;
             padding: 0px 10px;

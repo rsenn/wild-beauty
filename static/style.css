@@ -149,3 +149,8 @@ a:hover:before {
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
 }
+
+.rug-item {
+  cursor: -webkit-grab; 
+  cursor: grab;
+}
