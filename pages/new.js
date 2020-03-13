@@ -5,7 +5,7 @@ import { lazyInitializer } from "../lib/lazyInitializer.js";
 import { SvgOverlay } from "../lib/svg-overlay.js";
 import { action } from "mobx";
 import { inject, observer } from "mobx-react";
-import { ImageUpload } from "../components/views/imageUpload.js";
+import { ImageUpload, hvOffset } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
 import { trkl } from "../lib/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
@@ -156,11 +156,15 @@ class New extends React.Component {
 
                   rootStore.rotateImage(id, angle, ({ success, width, height }) => {
                     const landscape = width > height;
+                    const aspect = width / height;
                     const orientation = landscape ? "landscape" : "portrait";
 
-                    console.log("rotateImage result:", { success, width, height });
+                    let { w, h, hr, vr } = hvOffset(width, height);
+
+                    console.log("rotateImage result:", { success, width, height, w, h, hr, vr });
                     src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
-                    Element.attr(img, { src, width, height, style: `width: ${landscape ? (width * 100) / height : 100}%; height: ${landscape ? "100%" : "auto"};` });
+
+                    Element.attr(img, { src, width, height, style: `position: relative; width: ${w}%; height: ${h}%; margin-top: ${-vr / 2}%; margin-left: ${-hr / 2}%;` });
                     Element.attr(e, { ["data-tooltip"]: `${width}x${height} ${orientation}` });
                   });
                 }}

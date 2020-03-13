@@ -12,10 +12,10 @@ export const WrapInAspectBox = (enable, { width = "100%", aspect = 1, className 
     </div>
   );
 
-export const AspectRatioBox = ({ aspect = 1.0, children, insideClassName, outsideClassName, style, ...props }) => {
+export const AspectRatioBox = ({ aspect = 1.0, children, insideClassName, outsideClassName, outsideProps = {}, style, ...props }) => {
   /* console.log('AspectRatioBox ', { props, aspect, children, insideClassName, outsideClassName, style });*/
   return (
-    <div className={classNames("aspect-ratio-box", outsideClassName)} style={{ height: 0, paddingBottom: (1.0 / aspect) * 100 + "%", ...style }}>
+    <div className={classNames("aspect-ratio-box", outsideClassName)} style={{ height: 0, paddingBottom: (1.0 / aspect) * 100 + "%", ...style }} {...outsideProps}>
       <div className={classNames("aspect-ratio-box-inside", insideClassName)} {...props}>
         {children}
       </div>
@@ -23,9 +23,9 @@ export const AspectRatioBox = ({ aspect = 1.0, children, insideClassName, outsid
   );
 };
 
-export const SizedAspectRatioBox = ({ width = undefined, height = undefined, style, className, children, onClick, ...props }) => (
-  <div className={className + "-size"} style={{ position: "relative", width, height, ...style }} onClick={onClick}>
-    <AspectRatioBox outsideClassName={className + "-outside"} insideClassName={className} onClick={onClick} {...props}>
+export const SizedAspectRatioBox = ({ width = undefined, height = undefined, style, className, children,outsideClassName,insideClassName,insideProps, outsideProps = {}, sizeClassName, sizeProps = {}, onClick,  ...props }) => (
+  <div className={classNames(className + "-size", sizeClassName)} style={{ position: "relative", width, height, ...style }} {...sizeProps} onClick={onClick}>
+    <AspectRatioBox outsideClassName={classNames(className + "-outside", outsideClassName)} outsideProps={outsideProps} insideClassName={insideClassName || className} onClick={onClick} {...(insideProps || props)}>
       {children}
     </AspectRatioBox>
   </div>

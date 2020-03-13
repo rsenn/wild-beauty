@@ -9,6 +9,20 @@ import UploadImages from "react-upload-gallery";
 
 import "../../static/css/grid.css";
 
+export const hvOffset = (width, height) => {
+  let w = width > height ? (width * 100) / height : 100;
+  let h = width > height ? 100 : (height * 100) / width;
+  let hr, vr;
+  if(h > 100) {
+    hr = 0;
+    vr = h - 100;
+  } else if(w > 100) {
+    hr = w - 100;
+    vr = 0;
+  }
+  return { w, h, hr, vr };
+};
+
 export const ImageUpload = inject("rootStore")(
   observer(({ images, rootStore, onChoose, onDelete, onRotate, shiftState, ...props }) => {
     const [shift, setShift] = React.useState(false);
@@ -42,7 +56,7 @@ export const ImageUpload = inject("rootStore")(
             console.log("UploadImages success:", { id, arg });
             let entry = rootStore.newImage({ id });
             console.log("UploadImages success:", toJS(entry));
-            arg.remove();
+           // arg.remove();
           }}
         ></UploadImages>
         <div className={"image-list grid-col grid-gap-10"}>
@@ -55,9 +69,11 @@ export const ImageUpload = inject("rootStore")(
             const landscape = width > height;
             const orientation = landscape ? "landscape" : "portrait";
 
+            let { w, h, hr, vr } = hvOffset(width, height);
+
             return (
-              <div key={index} className={"image-entry tooltip "} data-tooltip={`${width}x${height} ${orientation}`}>
-                <SizedAspectRatioBox className={"item-box"}>
+              <div key={index} className={"image-entry"}>
+                <SizedAspectRatioBox className={"item-box"} insideClassName={'tooltip'} insideProps={{ ['data-tooltip']: `${width}x${height} ${orientation}` }} >
                   <img
                     id={`image-${id}`}
                     className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
@@ -66,6 +82,9 @@ export const ImageUpload = inject("rootStore")(
                     height={height}
                     orientation={orientation}
                     style={{
+                      position: "relative",
+                      marginTop: `${-vr / 2}%`,
+                      marginLeft: `${-hr / 2}%`,
                       width: landscape ? `${(width * 100) / height}%` : "100%",
                       height: landscape ? "100%" : "auto"
                     }}
@@ -107,6 +126,10 @@ export const ImageUpload = inject("rootStore")(
             display: block;
             width: 100%;
             height: 100%;
+          }
+          .item-box {
+            box-sizing: content-box;
+            overflow: hidden;
           }
           .item-box-size {
             border: 1px solid black;
