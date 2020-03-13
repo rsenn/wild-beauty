@@ -65,7 +65,7 @@ export const ItemEditor = inject("rootStore")(
         {/*       <SortableTree treeData={tree} />*/}
         <div className={"item-fields"}>
           {fields.map(field => {
-            let { name, title, type = "string", value = "", multiline = false } = field;
+            let { name, title, type = "string",  multiline = false } = field;
             console.log("field: ", field);
 
             return (
@@ -75,15 +75,15 @@ export const ItemEditor = inject("rootStore")(
                 hasDraft={false}
                 className={"editable-field"}
                 name={name}
-                value={value}
+                value={rootStore.values.get(name)   }
                 onNameChanged={newName => {
                   multiline = String(newName).toLowerCase() == "text";
                   type = newName;
                 }}
                 onValueChanged={newVal => {
-                                    console.log(`value of ${name} changed: ${newVal}`);
+                  console.log(`value of ${name} changed: ${newVal}`);
 
-                  value = newVal;
+                  rootStore.setValue(name, newVal);
                 }}
                 onCreateName={name => {
                   console.log("onCreateName: ", name);

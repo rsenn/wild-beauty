@@ -105,10 +105,11 @@ export class Queries {
   saveItem(event, doneHandler = result => {}) {
     const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
     const parent_id = rs.state.parent_id;
+    const entries = [...this.values.entries()];
 
-    const { name = null, ...dataObj } = (Util.isArray(this.entries) ? this.entries : []).reduce((acc, entry) => ({ ...acc, [Util.decamelize(entry.type)]: entry.value }), {});
+    const { name = null, ...dataObj } = Object.fromEntries(entries);
 
-    console.log("saveItem", { photo_id, parent_id, name, dataObj });
+    console.log("saveItem", { entries, photo_id, parent_id, name, dataObj });
 
     return this.apiRequest("/api/item/new", { photo_id, parent_id, name, data: dataObj }).then(response => {
       console.log("saveitem API response:", response);

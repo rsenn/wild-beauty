@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useEditableState } from "react-editable-hooks";
 import classNames from "classnames";
 import { trkl } from "../../lib/trkl.js";
+import { WrapIf } from "./wrapIf.js";
 
 export const EditableText = ({ className, style, multiline = false, wrapFlex = true, value, onValueChanged }) => {
   const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
@@ -14,6 +15,7 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
   const lineStyle = multiline ? { height: `${lines}em`, whiteSpace: "pre" } : {};
   const ref = trkl();
   const [focus, setFocus] = React.useState(false);
+console.log("EditableText.render ", {multiline,value});
 
   let content = isEditing ? (
     <React.Fragment>
@@ -64,7 +66,9 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
   ) : (
     <React.Fragment>
       <div className={classNames("content", className + "-content")} ref={ref} style={lineStyle}>
+      <WrapIf cond={multiline} container={'pre'}>
         {value}
+      </WrapIf>
       </div>
       <button onClick={onEditBegin}>
         <img src={"/static/img/icon-edit.svg"} />
@@ -79,7 +83,6 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
       </div>
     );
   }
-
   return (
     <React.Fragment>
       {content}

@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { useEditableState } from "react-editable-hooks";
 import { trkl } from "../../lib/trkl.js";
 import Util from "../../lib/util.js";
+import { WrapIf } from "./wrapIf.js";
 
 export const EditableField = ({ options, key, className, style, multiline = false, wrapFlex = true, onCreateName, onNameChanged, value, onValueChanged, ...props }) => {
   const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
@@ -10,6 +11,9 @@ export const EditableField = ({ options, key, className, style, multiline = fals
     onValueChanged,
     localStorageKey: key || "editable"
   });
+
+  if(/\n/.test(value))
+    multiline = true;
 
   const lines = 10; //value.split(/\n/g).length;
   const lineStyle = multiline ? { height: `${lines}em`, whiteSpace: "pre" } : {};
@@ -80,7 +84,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
   ) : (
     <React.Fragment>
       <div className={classNames("content", className + "-content")} ref={ref} style={lineStyle}>
-        {value}
+            <WrapIf cond={multiline} container={'pre'}>{value}</WrapIf>
       </div>
       <button onClick={onEditBegin} className={"icon"}>
         <img src={"/static/img/icon-edit.svg"} />
@@ -96,7 +100,7 @@ export const EditableField = ({ options, key, className, style, multiline = fals
     );*/
   const selection = Util.find(options, name, "name");
 
-  console.log("EditableField.render ", { name, value, options });
+  console.log("EditableField.render ", { name,  multiline, value, options });
   return (
     <div className={classNames(className, "editable-field")} style={style}>
       {isEditing ? (
@@ -148,6 +152,8 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         textarea.content:focus {
           border: 2px solid #2684ff;
         }
+                textarea { margin: 0; }
+
         div.content,
         span.content,
         input.content,
@@ -178,6 +184,9 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         }
         .content.editable-field-content {
           flex: 1 1 auto;
+          margin: 0 2px;
+        }    
+            .content.editable-field-content > pre {
           margin: 0 2px;
         }
         .editable-field-content {

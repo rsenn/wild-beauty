@@ -46,6 +46,7 @@ export class RootStore extends Queries {
   entries = observable.array([], { deep: true });
   users = observable.map();
   fields = observable.array(["Name", "Title", "Text"]);
+  values = observable.map();
 
   items = observable.map();
 
@@ -179,6 +180,12 @@ export class RootStore extends Queries {
 
       return { name: field.toLowerCase(), value: "", title, label: title };
     });
+  }
+
+  @action.bound
+  setValue(name, value) {
+    this.values.set(name, value);
+    return this;
   }
 
   get currentImage() {
