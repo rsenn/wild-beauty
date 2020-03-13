@@ -137,7 +137,7 @@ class New extends React.Component {
                   let e = Element.find(`#image-${id}`);
                   do {
                     e = e.parentElement;
-                  } while(!e.classList.contains("image-entry") && !e.classList.contains("rug-item"));
+                  } while(e.parentElement.classList  && !e.classList.contains("image-entry") && !e.classList.contains("rug-item"));
                   rootStore.deleteImage(id, result => {
 
 
@@ -150,7 +150,7 @@ class New extends React.Component {
                   let e = img;
                   do {
                     e = e.parentElement;
-                  } while(!e.classList.contains("image-entry"));
+                  } while(e.parentElement.classList  && !e.classList.contains("image-entry"));
 
                   let src = img.getAttribute("src");
 
