@@ -25,8 +25,8 @@ const RGBA = require("./lib/dom.es5.js").RGBA;
 (async () => {
   // prettier-ignore
   const fields = {
-    items: ['id', 'name', 'parent_id', 'type', 'data', 'visible', 'children { id }', 'photos { id }', 'users { user_id user { id } }'],
-    photos: ['id', 'colors', 'filesize', 'width', 'height', /*'items { id }',*/ 'offset', 'original_name', 'uploaded', 'user { id }' ],
+    items: ['id', 'name', 'parent_id', 'type', 'data', 'visible', 'children { id }', 'photos { photo_id }', 'users { user_id }'],
+    photos: ['id', 'colors', 'filesize', 'width', 'height', /*'items { id }',*/ 'offset', 'original_name', 'uploaded', 'user_id', 'items { item_id }' ],
     users: ['id', 'username', 'email', 'last_seen', 'password', 'token']
   };
 

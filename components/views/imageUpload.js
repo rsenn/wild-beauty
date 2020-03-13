@@ -59,7 +59,8 @@ export const ImageUpload = inject("rootStore")(
            // arg.remove();
           }}
         ></UploadImages>
-        <div className={"image-list grid-col grid-gap-10"}>
+        <div className={'rug'}>
+        <div className={"rug-items __card __sorting" /*"image-list grid-col grid-gap-10"*/}>
           {images.map((image, index) => {
             let id = image.id;
 
@@ -72,8 +73,10 @@ export const ImageUpload = inject("rootStore")(
             let { w, h, hr, vr } = hvOffset(width, height);
 
             return (
-              <div key={index} className={"image-entry"}>
-                <SizedAspectRatioBox className={"item-box"} insideClassName={'tooltip'} insideProps={{ ['data-tooltip']: `${width}x${height} ${orientation}` }} >
+              <div key={index}><div className={" rug-item"}>
+                            <div className={"rug-card"}>
+
+                <SizedAspectRatioBox className={"item-box"} insideClassName={'tooltip'} sizeClassName={'rug-image'} insideProps={{ ['data-tooltip']: `${width}x${height} ${orientation}` }} >
                   <img
                     id={`image-${id}`}
                     className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
@@ -83,7 +86,7 @@ export const ImageUpload = inject("rootStore")(
                     orientation={orientation}
                     style={{
                       position: "relative",
-                      marginTop: `${-vr / 2}%`,
+                    marginTop: `${-vr / 2}%`,
                       marginLeft: `${-hr / 2}%`,
                       width: landscape ? `${(width * 100) / height}%` : "100%",
                       height: landscape ? "100%" : "auto"
@@ -111,8 +114,11 @@ export const ImageUpload = inject("rootStore")(
                   </svg>
                 </button>
               </div>
+              </div>
+              </div>
             );
           })}
+        </div>
         </div>
         <style jsx global>{`
           .upload-area {
@@ -124,8 +130,6 @@ export const ImageUpload = inject("rootStore")(
           div.upload-area > div > div > div {
             position: relative;
             display: block;
-            width: 100%;
-            height: 100%;
           }
           .item-box {
             box-sizing: content-box;
@@ -134,7 +138,9 @@ export const ImageUpload = inject("rootStore")(
           .item-box-size {
             border: 1px solid black;
             box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
-            box-sizing: border-box;
+                   width: 100%;
+            height: 100%;
+
           }
           .aspect-ratio-box {
             overflow: hidden;
@@ -177,7 +183,7 @@ export const ImageUpload = inject("rootStore")(
           .auth-fail {
             position: relative;
           }
-          .image-list {
+      /*    .image-list {
             width: 100%;
             margin: 20px -20px 0 0;
           }
@@ -191,7 +197,7 @@ export const ImageUpload = inject("rootStore")(
           .image-entry {
             margin: 0 10px 0 0;
             flex: 1 1 auto;
-          }
+          }*/
         `}</style>
       </div>
     );

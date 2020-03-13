@@ -17,15 +17,15 @@
   cursor: grab;
 }
 .rug .rug-items.__card {
-  display: -ms-grid;
+/*  display: -ms-grid;
   display: grid;
   grid-gap: 10px;
-/*  grid-template-columns: 220px;*/
-/*  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-*/  grid-template-columns:  repeat(5, 1fr);;
-  margin: 0 -9px;
-  padding: 10px;
-  /*   min-height: 220px; */
+  grid-template-columns:  repeat(5, 18%);
+  padding: 10px;*/
+  display: flex;
+  flex-flow: row wrap;
+  margin: 0 -10px 0 -10px;
+
 }
 @media (max-width: 450px) {
   .rug .rug-items.__card {
@@ -138,28 +138,29 @@
 }
 
 .rug-card {
-  min-width: 20vw;
-  min-height: 20vw;
-  background-color: black;
+  flex: 1 1 20%;
+  width: 18vw;
+
+    background-color: black;
   /*   border-radius: 5px; */
   position: relative;
   font-family: Fixed;
-  overflow: hidden;
+  overflow: auto;
   cursor: pointer;
-  margin: 0px ;
+  margin: 10px ;
 }
-@media (max-width: 450px) {
+/*@media (max-width: 450px) {
   .rug-card {
     width: 160px;
     height: 160px;
   }
-}
+}*/
 .rug-card.__error {
   border: 3px solid rgba(160, 0, 16, 1);
 }
 .rug-card .rug-card-image {
   width: 100%;
-  height: 100%;
+  padding-top: 100%;
   background-position: 50%;
   background-size: contain;
   background-repeat: no-repeat;
