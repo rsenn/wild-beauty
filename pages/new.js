@@ -136,13 +136,10 @@ class New extends React.Component {
                 onDelete={id => {
                   let e = Element.find(`#image-${id}`);
                   do {
-                    if(e.parentElement == null)
-                      break;
+                    if(e.parentElement == null) break;
                     e = e.parentElement;
-                  } while(!e.classList || !(e.classList.contains("image-entry")  || e.classList.contains("rug-item")));
+                  } while(!e.classList || !(e.classList.contains("image-entry") || e.classList.contains("rug-item")));
                   rootStore.deleteImage(id, result => {
-
-
                     Element.remove(e.parentElement);
                   });
                 }}
@@ -151,8 +148,7 @@ class New extends React.Component {
                   console.log("onRotate: ", { id, img });
                   let e = img;
                   do {
-                         if(e.parentElement == null)
-                      break;
+                    if(e.parentElement == null) break;
                     e = e.parentElement;
                   } while(!e.classList || !e.classList.contains("image-entry"));
 

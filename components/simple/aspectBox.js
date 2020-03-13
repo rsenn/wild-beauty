@@ -23,7 +23,7 @@ export const AspectRatioBox = ({ aspect = 1.0, children, insideClassName, outsid
   );
 };
 
-export const SizedAspectRatioBox = ({ width = undefined, height = undefined, style, className, children,outsideClassName,insideClassName,insideProps, outsideProps = {}, sizeClassName, sizeProps = {}, onClick,  ...props }) => (
+export const SizedAspectRatioBox = ({ width = undefined, height = undefined, style, className, children, outsideClassName, insideClassName, insideProps, outsideProps = {}, sizeClassName, sizeProps = {}, onClick, ...props }) => (
   <div className={classNames(className + "-size", sizeClassName)} style={{ position: "relative", width, height, ...style }} {...sizeProps} onClick={onClick}>
     <AspectRatioBox outsideClassName={classNames(className + "-outside", outsideClassName)} outsideProps={outsideProps} insideClassName={insideClassName || className} onClick={onClick} {...(insideProps || props)}>
       {children}
