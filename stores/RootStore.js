@@ -1,12 +1,12 @@
 import React from "react";
 import { action, autorun, observable, set, get, values, toJS } from "mobx";
 import { Queries } from "./queries.js";
-import dom, { Element, Timer } from "../utils/dom.js";
-import axios from "../utils/axios.js";
+import dom, { Element, Timer } from "../lib/dom.js";
+import axios from "../lib/axios.js";
 import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoStore.js";
-import Util from "../utils/util.js";
-import { assign_to } from "../utils/devtools.js";
-import devpane from "../utils/devpane.js";
+import Util from "../lib/util.js";
+import { assign_to } from "../lib/devtools.js";
+import devpane from "../lib/devpane.js";
 import Iterator from "../lib/iterator.js";
 
 const isServer = !global.window;

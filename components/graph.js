@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
-import { HSLA, Element } from "../utils/dom.js";
+import { HSLA, Element } from "../lib/dom.js";
 import withSizes from "react-sizes";
 
 export const collapsibleForceLayout = data => {

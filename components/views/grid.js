@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import React from "react";
-import Util from "../../utils/util.js";
+import Util from "../../lib/util.js";
 
 export const Grid = ({ rows, cols, style, children, className, ...props }) => (
   <React.Fragment>

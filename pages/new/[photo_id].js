@@ -1,11 +1,11 @@
 import React from "react";
 import { ItemEditor } from "../../components/views/itemEditor.js";
-import { Element, Timer } from "../../utils/dom.js";
+import { Element, Timer } from "../../lib/dom.js";
 import { toJS, action } from "mobx";
 import { inject, observer } from "mobx-react";
 import NeedAuth from "../../components/simple/needAuth.js";
 import Layout from "../../components/layout.js";
-import { BehaveHooks, Behave } from "../../utils/behave.js";
+import { BehaveHooks, Behave } from "../../lib/behave.js";
 import { makeItemToOption, findInTree } from "../../stores/functions.js";
 import { makeTouchCallback } from "../../components/TouchCallback.js";
 import { MovementListener, TouchListener } from "../../lib/touchHandler.js";

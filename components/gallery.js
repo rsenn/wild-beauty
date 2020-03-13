@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { Flipper, Flipped } from "react-flip-toolkit";
-import Util from "../utils/util.js";
-import Alea from "../utils/alea.js";
+import Util from "../lib/util.js";
+import Alea from "../lib/alea.js";
 import anime from "animejs";
-import { RandomColor } from "../utils/dom.js";
+import { RandomColor } from "../lib/dom.js";
 import Layer from "../components/layer.js";
 import { SizedAspectRatioBox } from "./simple/aspectBox.js";
 

@@ -4,7 +4,7 @@ import { observable } from "mobx";
 import { inject, observer } from "mobx-react";
 import { AddItemBar } from "../views/addItemBar.js";
 import { EditableField } from "../simple/editableField.js";
-import { Element, Timer } from "../../utils/dom.js";
+import { Element, Timer } from "../../lib/dom.js";
 
 //import SortableTree from "react-sortable-tree";
 

@@ -7,9 +7,9 @@ import SiteMap from "./siteMap.js";
 import Modal from "react-modal";
 import { inject, observer } from "mobx-react";
 import { set } from "mobx";
-import { HSLA, Timer } from "../utils/dom.js";
-import Util from "../utils/util.js";
-import Alea from "../utils/alea.js";
+import { HSLA, Timer } from "../lib/dom.js";
+import Util from "../lib/util.js";
+import Alea from "../lib/alea.js";
 
 const LoginIcon = ({ style }) => (
   <svg style={style} height="56" width="34" viewBox="0 0 8.996 14.817" xmlns="http://www.w3.org/2000/svg">

@@ -1,6 +1,6 @@
 import React from "react";
 import { withRouter, useRouter } from "next/router";
-import Util from "../utils/util.js";
+import Util from "../lib/util.js";
 
 export const WithQueryParam = withRouter(({ children, router, ...props }) => Object.keys(props).every(propName => (props[propName] === true ? router.query[propName] !== undefined : props[propName] ? router.query[propName] == props[propName] : !router.query[propName])) && children);
 

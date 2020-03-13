@@ -1,5 +1,5 @@
 import { RootStore } from "./RootStore.js";
-import Util from "../utils/util.js";
+import Util from "../lib/util.js";
 import { useStaticRendering } from "mobx-react";
 
 const isServer = typeof global.window === "undefined";

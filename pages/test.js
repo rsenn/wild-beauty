@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import Layer from "../components/layer.js";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
-import { ScrollController } from "../utils/scrollController.js";
-import Alea from "../utils/alea.js";
-import { SwipeTracker } from "../utils/swipeTracker.js";
-import { MultitouchListener, MovementListener } from "../utils/touchHandler.js";
-import { lazyInitializer } from "../utils/lazyInitializer.js";
-import { SvgOverlay } from "../utils/svg-overlay.js";
+import { ScrollController } from "../lib/scrollController.js";
+import Alea from "../lib/alea.js";
+import { SwipeTracker } from "../lib/swipeTracker.js";
+import { MultitouchListener, MovementListener } from "../lib/touchHandler.js";
+import { lazyInitializer } from "../lib/lazyInitializer.js";
+import { SvgOverlay } from "../lib/svg-overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
 import Layout from "../components/layout.js";
 import { RandomColor } from "../stores/functions.js";

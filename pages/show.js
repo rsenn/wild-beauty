@@ -1,9 +1,9 @@
 import React from "react";
 import Head from "next/head";
-import { Element, HSLA, Point, Rect, Matrix, Timer } from "../utils/dom.js";
+import { Element, HSLA, Point, Rect, Matrix, Timer } from "../lib/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../lib/util.js";
-import { SvgOverlay } from "../utils/svg-overlay.js";
+import { SvgOverlay } from "../lib/svg-overlay.js";
 import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";

@@ -1,6 +1,6 @@
 import React from "react";
-import Util from "../utils/util.js";
-import { HSLA, Point, isPoint, Line } from "../utils/dom.js";
+import Util from "../lib/util.js";
+import { HSLA, Point, isPoint, Line } from "../lib/dom.js";
 
 function* Table2DIterator(table) {
   for(var y = 0; y < table.length; y++) for (var x = 0; x < table[y].length; x++) yield table[y][x];

@@ -2,7 +2,7 @@ import React from "react";
 import App from "next/app";
 import { Router } from "next/router";
 import { Provider } from "mobx-react";
-import Util from "../utils/util.js";
+import Util from "../lib/util.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 import { withRouter } from "next/router";
 import i18nStore from "../stores/i18nStore.js";

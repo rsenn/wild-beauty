@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import classNames from "classnames";
 import { action } from "mobx";
-import { autofillEvent } from "../utils/autofillEvent.js";
+import { autofillEvent } from "../lib/autofillEvent.js";
 import { CubeSpinner } from "../components/simple/cubeSpinner.js";
 import { inject, observer } from "mobx-react";
 import { Translate } from "react-i18nify-mobx";

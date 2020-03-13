@@ -4,7 +4,7 @@ import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 import classNames from "classnames";
-import axios from "../../utils/axios.js";
+import axios from "../../lib/axios.js";
 
 import UploadImages from "react-upload-gallery";
 import "../../static/css/grid.css";

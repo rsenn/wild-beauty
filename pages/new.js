@@ -1,13 +1,13 @@
 import React from "react";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
-import Alea from "../utils/alea.js";
-import { lazyInitializer } from "../utils/lazyInitializer.js";
-import { SvgOverlay } from "../utils/svg-overlay.js";
+import Alea from "../lib/alea.js";
+import { lazyInitializer } from "../lib/lazyInitializer.js";
+import { SvgOverlay } from "../lib/svg-overlay.js";
 import { action } from "mobx";
 import { inject, observer } from "mobx-react";
 import { ImageUpload } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
-import { trkl } from "../utils/trkl.js";
+import { trkl } from "../lib/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
 import { SelectionListener } from "../lib/touchHandler.js";

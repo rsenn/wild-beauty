@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Node, Element } from "../utils/dom.js";
+import { Node, Element } from "../lib/dom.js";
 
 export const maxZIndex = () => {
   let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));

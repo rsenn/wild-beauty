@@ -1,8 +1,8 @@
 import CreatableSelect from "react-select/creatable";
 import classNames from "classnames";
 import { useEditableState } from "react-editable-hooks";
-import { trkl } from "../../utils/trkl.js";
-import Util from "../../utils/util.js";
+import { trkl } from "../../lib/trkl.js";
+import Util from "../../lib/util.js";
 
 export const EditableField = ({ options, key, className, style, multiline = false, wrapFlex = true, mame, onCreateName, onNameChanged, value, onValueChanged }) => {
   const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({

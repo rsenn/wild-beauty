@@ -1,5 +1,5 @@
 import getAPI from "./api.js";
-import Util from "../utils/util.js";
+import Util from "../lib/util.js";
 
 function getImageColors(colorstr) {
   let obj = {};

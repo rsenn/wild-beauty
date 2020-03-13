@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
-import { assign_to } from "../utils/devtools.js";
-import { trkl } from "../utils/trkl.js";
-import { Size, Rect, Element } from "../utils/dom.js";
-import { lazyInitializer } from "../utils/lazyInitializer.js";
-import { SvgOverlay } from "../utils/svg-overlay.js";
+import { assign_to } from "../lib/devtools.js";
+import { trkl } from "../lib/trkl.js";
+import { Size, Rect, Element } from "../lib/dom.js";
+import { lazyInitializer } from "../lib/lazyInitializer.js";
+import { SvgOverlay } from "../lib/svg-overlay.js";
 
 if ("window" in global) {
   assign_to(window);

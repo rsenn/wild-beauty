@@ -2,7 +2,7 @@ import React from "react";
 import { inject, observer } from "mobx-react";
 import { useTransition } from "react-spring";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
-import Util from "../../utils/util.js";
+import Util from "../../lib/util.js";
 
 const duration = 300;
 

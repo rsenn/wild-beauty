@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useEditableState } from "react-editable-hooks";
 import classNames from "classnames";
-import { trkl } from "../../utils/trkl.js";
+import { trkl } from "../../lib/trkl.js";
 
 export const EditableText = ({ className, style, multiline = false, wrapFlex = true, value, onValueChanged }) => {
   const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
