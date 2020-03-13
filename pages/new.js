@@ -155,11 +155,12 @@ class New extends React.Component {
                   Element.attr(img, { src: "" });
 
                   rootStore.rotateImage(id, angle, ({ success, width, height }) => {
-                    const orientation = width > height ? "landscape" : "portrait";
+                    const landscape = width > height;
+                    const orientation = landscape ? "landscape" : "portrait";
 
                     console.log("rotateImage result:", { success, width, height });
                     src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
-                    Element.attr(img, { src, width, height });
+                    Element.attr(img, { src, width, height, style: `width: ${landscape ? (width * 100) / height : 100}%; height: ${landscape ? "100%" : "auto"};` });
                     Element.attr(e, { ["data-tooltip"]: `${width}x${height} ${orientation}` });
                   });
                 }}

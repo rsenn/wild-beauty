@@ -45,7 +45,7 @@ export const ImageUpload = inject("rootStore")(
             arg.remove();
           }}
         ></UploadImages>
-        <div className={"image-list grid-col grid-gap-5"}>
+        <div className={"image-list grid-col grid-gap-10"}>
           {images.map((image, index) => {
             let id = image.id;
 
@@ -56,7 +56,7 @@ export const ImageUpload = inject("rootStore")(
             const orientation = landscape ? "landscape" : "portrait";
 
             return (
-              <div key={index} className={"image-entry tooltip"} data-tooltip={`${width}x${height} ${orientation}`}>
+              <div key={index} className={"image-entry tooltip "} data-tooltip={`${width}x${height} ${orientation}`}>
                 <SizedAspectRatioBox className={"item-box"}>
                   <img
                     id={`image-${id}`}

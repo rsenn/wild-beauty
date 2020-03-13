@@ -13,6 +13,7 @@ import { getOrCreateStore } from "../stores/createStore.js";
 import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
 import { trkl } from "../lib/trkl.js";
+import { TreeView } from "../components/views/treeView.js";
 
 import "../static/css/grid.css";
 
@@ -349,7 +350,7 @@ class Show extends React.Component {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Nav loading={rootStore.state.loading} />
-        <Tree
+        <TreeView
           tree={tree}
           _treeVerify={node => {
             console.log("treeVerify: ", node);
