@@ -13,7 +13,7 @@
   color: #a0a0a0;
   font-size: 75%;
   line-height: 100%;
-  cursor: pointer;
+  /*cursor: pointer;*/
   background-color: rgba(192, 192, 192, 0.8);
   outline: none;
   border: 2px outset rgba(85, 85, 85, 0.5);
@@ -26,7 +26,7 @@
   color: #3c3c3c;
 }
 .node > label {
-  cursor: pointer;
+  /*cursor: pointer;*/
   margin-left: 2px;
 }
 .tag-list {
@@ -80,7 +80,7 @@
   margin-right: 2px;
 }
 .react-dropdown-tree-select .dropdown .dropdown-trigger.arrow.disabled {
-  cursor: not-allowed;
+  /*cursor: not-allowed;*/
 }
 .react-dropdown-tree-select .dropdown .dropdown-trigger.arrow.disabled.bottom:after {
   color: #b9b9b9;
