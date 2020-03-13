@@ -73,13 +73,13 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     const camelCase = Util.ucfirst(name);
     let objStr = obj;
 
-    if(typeof(obj) == 'object')  objStr   = "{" + Util.map(obj, (key, value) => `${key}: {_eq:${value}}`).join(", ") + "}";
-    let setStr = typeof(set) == 'string' ? set : typeof(fields) == 'object' ? fields : set;
+    if(typeof obj == "object") objStr = "{" + Util.map(obj, (key, value) => `${key}: {_eq:${value}}`).join(", ") + "}";
+    let setStr = typeof set == "string" ? set : typeof fields == "object" ? fields : set;
 
-    if(typeof(setStr) == 'object') setStr =  "{" + Util.map(setStr, (key, value) => `${key}: "${value}"`).join(", ") + "}";
+    if(typeof setStr == "object") setStr = "{" + Util.map(setStr, (key, value) => `${key}: "${value}"`).join(", ") + "}";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
-  console.log("setStr = ", setStr);
-  const queryName = `update_${name.replace(/s*$/, "s")}`;
+    console.log("setStr = ", setStr);
+    const queryName = `update_${name.replace(/s*$/, "s")}`;
     const queryStr = `mutation ${queryName}{ ${queryName}(where: ${objStr}, _set: ${setStr}) { affected_rows } }`;
     if(debug) console.log("query: ", queryStr);
 

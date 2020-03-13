@@ -12,7 +12,6 @@
 
  */
 
-
 const prettyoutput = require("prettyoutput");
 var Blob = require("blob");
 const API = require("./stores/api.js");
@@ -76,7 +75,7 @@ const RGBA = require("./lib/dom.es5.js").RGBA;
 if(debug)
   console.log("result:", util.inspect(result, false, 10, true));
 */
-const { affected_rows } = result;
+  const { affected_rows } = result;
 
   let records = await result[entity];
 
@@ -92,29 +91,29 @@ const { affected_rows } = result;
 
       for(let key in rec) {
         const val = rec[key];
-       if(/^....-..-..T..:..:../.test(val)) {
-         rec[key] = Util.toUnixTime(Util.parseDate(val));
-       } else if(typeof(val) == 'string' && val.length > 50) {
-        rec[key] = val.substring(0, 10)+"...";
-       }
+        if(/^....-..-..T..:..:../.test(val)) {
+          rec[key] = Util.toUnixTime(Util.parseDate(val));
+        } else if(typeof val == "string" && val.length > 50) {
+          rec[key] = val.substring(0, 10) + "...";
+        }
       }
       return rec;
     });
 
-    let biggest = Util.map((key, value) => [key,  typeof(value) == 'number' ? value.toString() : ''+value]);
+    let biggest = Util.map((key, value) => [key, typeof value == "number" ? value.toString() : "" + value]);
 
     for(let record of records) {
       for(let key in record) {
-        let value = typeof(record[key]) ==  'number' ? record[key].toString() : (''+record[key]);
-    
-       biggest[key] += "";
-        if((''+biggest[key]).length < value.length) biggest[key] = typeof(value) == 'number' ? value.toString() : ''+value;
+        let value = typeof record[key] == "number" ? record[key].toString() : "" + record[key];
+
+        biggest[key] += "";
+        if(("" + biggest[key]).length < value.length) biggest[key] = typeof value == "number" ? value.toString() : "" + value;
       }
     }
 
     //console.log("biggest:", biggest);
 
-    biggest = Object.entries(biggest).map(([key, value]) => [key, (''+value).length]);
+    biggest = Object.entries(biggest).map(([key, value]) => [key, ("" + value).length]);
     biggest = biggest.sort((a, b) => a[1] - b[1]).filter(f => f[0] !== "toObject" && f[0] !== "match" && f[0] !== "children");
     let fields = biggest.map(f => f[0]);
     let sizes = Object.fromEntries(biggest.map((f, i) => [f[0], Math.max(f[0].length + 1, f[1] + 1)]));
@@ -124,7 +123,7 @@ const { affected_rows } = result;
     console.log("fields:", fields);
     console.log("sizes:", sizes);*/
 
-    let header = "\n"+fields.map(field => field + Util.pad(field, sizes[field])).join("");
+    let header = "\n" + fields.map(field => field + Util.pad(field, sizes[field])).join("");
 
     header += "\n" + fields.map(field => "‾".repeat(sizes[field] - 1)).join(" ");
 
@@ -156,7 +155,5 @@ const { affected_rows } = result;
       console.log(row); //"record:", value);
     }
   }
-  if(affected_rows > 0)
-  console.log(`Affected rows in '${entity}': ${affected_rows}`);
-
+  if(affected_rows > 0) console.log(`Affected rows in '${entity}': ${affected_rows}`);
 })();
