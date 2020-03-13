@@ -23,6 +23,9 @@ const tempfile = require("tempfile");
 const fsPromises = require("fs").promises;
 const { loadFile, getImagePalette, imageImport, rotateImage } = require("./imageConversion.js");
 const { isJpeg, jpegProps } = require("./lib/jpeg.js");
+const { Console } = require("console");
+const { stdout, stderr } = process;
+global.console = new Console({ stdout, stderr, inspectOptions: { depth: 10 } });
 
 function bufferToStream(buffer) {
   let stream = new Readable();

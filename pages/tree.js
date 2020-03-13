@@ -8,7 +8,8 @@ import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
-import { Tree } from "../components/tree.js";
+import { TreeView } from "../components/treeView.js";
+import { Layout } from "../components/layout.js";
 import { action } from "mobx";
 import Nav from "../components/nav.js";
 import { getOrCreateStore } from "../stores/createStore.js";
@@ -19,6 +20,7 @@ import { lazyInitializer } from "../lib/lazyInitializer.js";
 import "../static/css/grid.css";
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
+import { Queries } from "../stores/queries.js";
 
 var hier = {
   name: "[1]",
@@ -146,8 +148,32 @@ export function createGraph(svg) {
     },
     onUpdateNode: (node, i) => {
       if(!node.element) {
-        node.element = SVG.create("g", { id: `node-${i}`, transform: `translate(${node.x},${node.y})`, fill: "#00f", stroke: "#000", strokeWidth: 1 }, svg);
-        SVG.create("rect", { x: -16, y: -17, width: 32, height: 32, rx: 1.5, ry: 1.5, fill: "#ffdd00", stroke: "#000", strokeWidth }, node.element);
+        node.element = SVG.create(
+          "g",
+          {
+            id: `node-${i}`,
+            transform: `translate(${node.x},${node.y})`,
+            fill: "#00f",
+            stroke: "#000",
+            strokeWidth: 1
+          },
+          svg
+        );
+        SVG.create(
+          "rect",
+          {
+            x: -16,
+            y: -17,
+            width: 32,
+            height: 32,
+            rx: 1.5,
+            ry: 1.5,
+            fill: "#ffdd00",
+            stroke: "#000",
+            strokeWidth
+          },
+          node.element
+        );
         SVG.create("tspan", { alignmentBaseline: "middle", text: node.label }, SVG.create("text", { fontSize: 10, fill: "#000", stroke: "none", textAnchor: "middle" }, node.element));
       } else Element.attr(node.element, { transform: `translate(${node.x},${node.y})` });
     },
@@ -173,7 +199,9 @@ class TreePage extends React.Component {
     view: "list",
     currentItem: null
   };
-  static API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
+  static API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", {
+    secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H"
+  });
 
   static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize colors original_name } }", "users { user { id username last_seen } }"];
 
@@ -195,8 +223,11 @@ class TreePage extends React.Component {
   static async getInitialProps(ctx) {
     const { query, params } = (ctx && ctx.req) || {};
     console.log("TreePage.getInitialProps ", { query, params });
-    const { RootStore } = ctx.mobxStore;
-    let items;
+    const rootStore = ctx.mobxStore["RootStore"];
+
+    let items = await rootStore.fetchItems();
+    console.log("Tree.getInitialProps items=", items.length);
+    /*      let items;
     if(params && params.id !== undefined) {
       let id = parseInt(params.id);
       const name = params.id;
@@ -208,11 +239,14 @@ class TreePage extends React.Component {
     } else {
       items = await TreePage.API.list("items", TreePage.fields);
     }
+*/
     items = items.sort((a, b) => a.id - b.id);
-    if(RootStore.items && RootStore.items.clear) RootStore.items.clear();
-    items = items.map(item => RootStore.newItem(item));
-    let rootItem = RootStore.rootItem;
-    let tree = RootStore.getItem(rootItem.id);
+    if(rootStore.items && rootStore.items.clear) rootStore.items.clear();
+    items = items.map(item => rootStore.newItem(item));
+
+    let rootItem = rootStore.rootItem;
+
+    //  let root = rootStore.getItem(rootItem.id);
     let g = new Graph({
       origin: new Point(0, 0),
       gravitate_to_origin: true,
@@ -220,7 +254,7 @@ class TreePage extends React.Component {
       timestep: 300
     });
     let iter = Object.fromEntries([
-      ...RootStore.entries(({ photos, children, users, key, ...item }) => {
+      ...rootStore.entries(({ photos, children, users, key, ...item }) => {
         item = toJS(item);
         if(!item.type) delete item.type;
         if(!Util.isEmpty(item.data)) delete item.data;
@@ -241,7 +275,7 @@ class TreePage extends React.Component {
       if(item.data === null || Util.isEmpty(item.data)) delete item.data;
     }
 
-    let root = RootStore.getItem(RootStore.rootItemId, it => Util.filterOutKeys(toJS(it), ["childIds", "photos", "users"]));
+    let root = rootStore.getItem(rootItem.id, it => Util.filterOutKeys(toJS(it), ["childIds", "photos", "users"]));
 
     treeToGraph(g, root, item => {
       let { children, parent, users, photos, parent_id, ...restOfItem } = item;
@@ -279,9 +313,15 @@ class TreePage extends React.Component {
     let pl = g.points;
     let center = g.rect.center;
     g.translate(-center.x, -center.y);
+
     console.log("g.points: ", g.points);
     console.log("g.rect: ", g.rect);
-    return { params };
+    console.log("rootItem: ", toJS(rootItem));
+
+    let tree = Tree({ tree: root }, false);
+    console.log("Tree.constructor tree: ", tree);
+
+    return { params, items, tree: root, g };
   }
 
   constructor(props) {
@@ -543,15 +583,8 @@ class TreePage extends React.Component {
     const items = [];
     console.log("TreePage.render");
     return (
-      <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
-        <Head>
-          <title>Tree</title>
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <Nav loading={rootStore.state.loading} />
-        {}
-        <br />
-        <br />
+      <Layout title={"Tree"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
+        <Tree tree={tree} />
         <br />
         {this.state.view == "item" ? (
           <ItemView id={this.state.itemId} />
@@ -736,7 +769,7 @@ class TreePage extends React.Component {
             font-size: 15px;
           }
         `}</style>
-      </div>
+      </Layout>
     );
   }
 }

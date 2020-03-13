@@ -4,10 +4,10 @@ import Nav from "../components/nav.js";
 import ToastsContainer from "./views/toastsContainer.js";
 import classNames from "classnames";
 
-export const Layout = ({ toastsClick, className, scroll = true, hideNav, ...props }) => (
+export const Layout = ({ title, toastsClick, className, scroll = true, hideNav, ...props }) => (
   <React.Fragment>
     <Head>
-      <title>New</title>
+      <title>{title}</title>
       <link rel="icon" href="/favicon.ico" />
     </Head>
     <div className={classNames("page-layout", className)} style={{ overflow: scroll ? "auto" : "hidden" }} {...props}>

@@ -8,6 +8,7 @@ function getImageColors(colorstr) {
   } catch(e) {}
   return Object.fromEntries(Object.entries(obj).sort((a, b) => b[1] - a[1]));
 }
+
 export class Queries {
   api = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
 
@@ -21,22 +22,14 @@ export class Queries {
       return image;
     });
   }
-  /*
+
   async fetchItems(where = {}) {
     console.log("⇒ items:", where);
-    let response = await this.api.list("items", [
-      "id",
-      "type",
-      "parent { id }",
-      "children { id }",
-      "data",
-      "photos { photo { id } }",
-      "users { user { id } }"
-    ]);
-    console.log("⇐ items =", response);
+    let response = await this.api.list("items", ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }"]);
+    //console.log("⇐ items =", response);
     return response;
   }
-*/
+
   async refreshItem(id, props) {
     let response = await this.apiRequest("/api/item", { id, update: props });
     let { data } = await response;

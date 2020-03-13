@@ -76,7 +76,7 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
     tree.set(key, node);
   }
 
-  console.log("tree: ", tree);
+  //console.log("tree: ", tree);
   for(let [key, node] of tree.entries()) {
     // let node = tree.get(key);
     let depth = 0;
