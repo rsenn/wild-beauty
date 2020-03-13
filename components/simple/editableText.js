@@ -15,7 +15,7 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
   const lineStyle = multiline ? { height: `${lines}em`, whiteSpace: "pre" } : {};
   const ref = trkl();
   const [focus, setFocus] = React.useState(false);
-console.log("EditableText.render ", {multiline,value});
+  console.log("EditableText.render ", { multiline, value });
 
   let content = isEditing ? (
     <React.Fragment>
@@ -66,9 +66,9 @@ console.log("EditableText.render ", {multiline,value});
   ) : (
     <React.Fragment>
       <div className={classNames("content", className + "-content")} ref={ref} style={lineStyle}>
-      <WrapIf cond={multiline} container={'pre'}>
-        {value}
-      </WrapIf>
+        <WrapIf cond={multiline} container={"pre"}>
+          {value}
+        </WrapIf>
       </div>
       <button onClick={onEditBegin}>
         <img src={"/static/img/icon-edit.svg"} />

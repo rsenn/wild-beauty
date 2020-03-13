@@ -65,7 +65,7 @@ export const ItemEditor = inject("rootStore")(
         {/*       <SortableTree treeData={tree} />*/}
         <div className={"item-fields"}>
           {fields.map(field => {
-            let { name, title, type = "string",  multiline = false } = field;
+            let { name, title, type = "string", multiline = false } = field;
             console.log("field: ", field);
 
             return (
@@ -75,7 +75,7 @@ export const ItemEditor = inject("rootStore")(
                 hasDraft={false}
                 className={"editable-field"}
                 name={name}
-                value={rootStore.values.get(name)   }
+                value={rootStore.values.get(name)}
                 onNameChanged={newName => {
                   multiline = String(newName).toLowerCase() == "text";
                   type = newName;
@@ -92,6 +92,12 @@ export const ItemEditor = inject("rootStore")(
                     rootStore.fields.push(name);
                     type = name;
                   }
+                }}
+                onFocus={e => {
+                  console.log("got focus: ", e.target);
+                }}
+                onBlur={e => {
+                  console.log("lost  focus: ", e.target);
                 }}
               />
             );
