@@ -35,7 +35,7 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
         />
       ) : (
         <input
-          className={classNames("content", className + "-content")}
+          className={classNames("content", className + "-content", "vcenter")}
           value={editValue}
           onChange={e => setEditValue(e.target.value)}
           ref={input => {

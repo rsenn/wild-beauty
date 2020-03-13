@@ -3,7 +3,7 @@ import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 import { observable } from "mobx";
 import { inject, observer } from "mobx-react";
 import { AddItemBar } from "../views/addItemBar.js";
-import { EditableField } from "../simple/editableField.js";
+import { EditableField , FieldLabel } from "../simple/editableField.js";
 import { Element, Timer } from "../../lib/dom.js";
 
 //import SortableTree from "react-sortable-tree";
@@ -48,6 +48,9 @@ export const ItemEditor = inject("rootStore")(
             </SizedAspectRatioBox>
           </div>
         </div>
+         <div className={"item-fields"}>
+                <div className={"editable-field"}>
+        <FieldLabel>Parent item</FieldLabel>
         <DropdownTreeSelect
           data={[tree]}
           onChange={obj => {
@@ -60,10 +63,10 @@ export const ItemEditor = inject("rootStore")(
           onBlur={makeTreeSelEvent("blur")}
           className={"dropdown-tree"}
           mode={"radioSelect"}
-          texts={{ placeholder: "parent item" }}
+          texts={{ placeholder: "Select" }}
         />
-        {/*       <SortableTree treeData={tree} />*/}
-        <div className={"item-fields"}>
+        </div>
+
           {fields.map(field => {
             let { name, title, type = "string", multiline = false } = field;
             console.log("field: ", field);
@@ -108,7 +111,9 @@ export const ItemEditor = inject("rootStore")(
               let obj = observable({ type: null, value: "" });
               if(typeof entries == "object" && entries && entries.push !== undefined) entries.push(obj);
               const add = () => {
-                let editor = Element.find(".content-edit");
+
+                
+            /*    let editor = Element.find(".content-edit");
                 let a = [...Element.findAll("button", editor)].filter(b => !b.classList.contains("save"));
                 let button = a[a.length - 1] ? a[a.length - 1] : null;
                 console.log("Button: ", button);
@@ -117,7 +122,7 @@ export const ItemEditor = inject("rootStore")(
                   let inputs = Util.array([...Element.findAll("input", editor)]);
                   console.log("inputs:", inputs);
                   inputs[0].focus();
-                }
+                }*/
               };
               add();
             }}

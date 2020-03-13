@@ -1,7 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16">
-  <defs>
-    <style id="current-color-scheme" type="text/css">
-    </style>
-  </defs>
-  <path fill="currentColor" d="M13.139 3.03a.768.768 0 00-.3.001 1.01 1.01 0 00-.562.344l-6.28 7.188-2.25-2.25c-.377-.377-1.062-.377-1.438 0-.377.376-.377 1.06 0 1.437l3 3 .78.75.688-.813 7-8c.497-.54.035-1.531-.638-1.658z" color="#40ff00"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style id="current-color-scheme" type="text/css"/>
+  <filter id="filter1705" color-interpolation-filters="sRGB">
+   <feFlood flood-color="rgb(0,0,0)" flood-opacity=".49804" result="flood"/>
+   <feComposite in="flood" in2="SourceGraphic" operator="in" result="composite1"/>
+   <feGaussianBlur in="composite1" result="blur" stdDeviation="1.5"/>
+   <feOffset dx="0" dy="0" result="offset"/>
+   <feComposite in="offset" in2="SourceGraphic" operator="out" result="composite2"/>
+  </filter>
+  <mask id="mask1737" maskUnits="userSpaceOnUse">
+   <path d="m0.13559 0.27119h15.458v15.932h-15.458z" fill="#fff" stroke="#f00" stroke-linecap="round" stroke-linejoin="round" stroke-width=".1665" style="paint-order:stroke fill markers"/>
+  </mask>
+  <linearGradient id="linearGradient1747" x1="12.265" x2="-1.1468" y1="1.1754" y2="3.4805" gradientUnits="userSpaceOnUse">
+   <stop stop-color="#95ff00" offset="0"/>
+   <stop stop-color="#68d400" stop-opacity=".61569" offset="1"/>
+  </linearGradient>
+ </defs>
+ <g fill="url(#linearGradient1747)" mask="url(#mask1737)" stroke="#170000" stroke-width=".125">
+  <g fill="url(#linearGradient1747)" stroke="#170000" stroke-width=".125">
+   <path d="m13.133 2.7721a0.768 0.768 0 0 0-0.3 1e-3 1.01 1.01 0 0 0-0.562 0.344l-6.28 7.188-2.25-2.25c-0.377-0.377-1.062-0.377-1.438 0-0.377 0.376-0.377 1.06 0 1.437l3 3 0.78 0.75 0.688-0.813 7-8c0.497-0.54 0.035-1.531-0.638-1.658zm-18.184 16.46h24.813v-0.5h-1.1719v-23.5h1.1719v-0.5h-1.1719v-0.35938h-0.5v0.35938h-21.5v-0.35938h-0.5v0.35938h-1.1406v0.5h1.1406v23.5h-1.1406zm1.6406-0.5v-23.5h21.5v23.5z" color="#40ff00" filter="url(#filter1705)"/>
+   <path d="m13.133 2.7721a0.768 0.768 0 0 0-0.3 1e-3 1.01 1.01 0 0 0-0.562 0.344l-6.28 7.188-2.25-2.25c-0.377-0.377-1.062-0.377-1.438 0-0.377 0.376-0.377 1.06 0 1.437l3 3 0.78 0.75 0.688-0.813 7-8c0.497-0.54 0.035-1.531-0.638-1.658zm-18.184 16.46h24.812v-0.5h-1.1719v-23.5h1.1719v-0.5h-1.1719v-0.35938h-0.5v0.35938h-21.5v-0.35938h-0.5v0.35938h-1.1406v0.5h1.1406v23.5h-1.1406zm1.6406-0.5v-23.5h21.5v23.5z" color="#40ff00"/>
+  </g>
+ </g>
 </svg>
