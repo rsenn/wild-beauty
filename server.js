@@ -247,28 +247,32 @@ if (!dev && cluster.isMaster) {
       }
     });
 
-    server.post("/api/image/rotate", async function(req, res) {
-      let { id, angle } = req.body;
+    server.post(
+      "/api/image/rotate",
+      needAuth(async function(req, res) {
+        let { id, angle } = req.body;
+        let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
 
-      angle = angle ? parseFloat(angle) : 90;
+        angle = angle ? parseFloat(angle) : 90;
 
-      let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize colors data } }`);
-      const photo = response.photos[0];
-      if(typeof photo == "object") {
-        if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
-        let input = Buffer.from(photo.data, "base64");
-        delete photo.data;
+        let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { id width height offset filesize data user_id } }`);
+        const photo = response.photos[0];
 
-        let rotated = await rotateImage(input, angle);
-
-        let { data, width, height } = await rotated;
-
-        console.log("rotate", { width, height });
-        let result = await API.update("photos", { id }, { data, width, height });
-
-        res.send(result);
-      }
-    });
+        if(typeof photo == "object") {
+          if(user_id == photo.user_id) {
+            let input = Buffer.from(photo.data, "base64");
+            delete photo.data;
+            let rotated = await rotateImage(input, angle);
+            let { data, width, height } = await rotated;
+            console.log("rotate", { width, height });
+            let result = await API.update("photos", { id }, { data, width, height });
+            res.json({ success: true, width, height });
+          } else {
+            res.json({ success: false, error: `Photo is not owned by user (id: ${user_id})` });
+          }
+        }
+      })
+    );
 
     server.post("/api/image/list", async function(req, res) {
       let { fields, format, ...params } = req.body;
@@ -292,7 +296,7 @@ if (!dev && cluster.isMaster) {
 
     server.get("/api/image/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
-      let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize colors data } }`);
+      let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { offset uploaded id filesize colors data } }`);
       const photo = response.photos[0];
       if(typeof photo == "object") {
         1;
@@ -300,9 +304,11 @@ if (!dev && cluster.isMaster) {
         let data = Buffer.from(photo.data, "base64");
         delete photo.data;
         res.set("Content-Type", "image/jpeg");
-        const { width, height, aspect } = photo;
-        let props = { ...(jpeg.jpegProps(data) || {}), width, height, aspect };
-        if(props.aspect === undefined) props.aspect = (props.width / props.height).toFixed(3);
+        // const { aspect } = photo;
+        let { width, height } = jpeg.jpegProps(data);
+        let aspect = width / height;
+        let props = { width, height, aspect };
+
         for(let key of ["original_name", "uploaded", "user_id"]) if(photo[key]) props[Util.camelize(key, "-")] = photo[key];
         for(let prop in props) res.set(Util.ucfirst(prop), props[prop]);
         res.send(data);

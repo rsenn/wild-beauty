@@ -189,6 +189,18 @@ class MyApp extends App {
           button:active {
             border: 1px inset #555555;
           }
+
+          .tooltip:after {
+            background: linear-gradient(to bottom, #ffda15ff 0%, #f3c500ff 100%);
+            color: #000;
+            margin: 10px 3px;
+            padding: 8px;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+
+            border-radius: 4px;
+            box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.62);
+          }
         `}</style>
       </React.Fragment>
     );

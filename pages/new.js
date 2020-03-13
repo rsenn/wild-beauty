@@ -106,18 +106,28 @@ class New extends React.Component {
             <ImageUpload
               images={this.props.images}
               onChoose={this.chooseImage}
-              onDelete={rootStore.deleteImage}
+              onDelete={id => {
+                let e = Element.find(`#image-${id}`);
+                do {
+                  e = e.parentElement;
+                } while(!e.classList.contains("image-entry"));
+                rootStore.deleteImage(id, result => {
+                  Element.remove(e);
+                });
+              }}
               onRotate={id => {
                 let img = Element.find(`#image-${id}`);
                 console.log("onRotate: ", { id, img });
 
                 let src = img.getAttribute("src");
+                let width = img.getAttribute("height");
+                let height = img.getAttribute("width");
 
                 Element.attr(img, { src: "" });
 
                 rootStore.rotateImage(id, 90, result => {
                   src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
-                  Element.attr(img, { src });
+                  Element.attr(img, { src, width, height });
                 });
               }}
             />

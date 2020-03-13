@@ -145,7 +145,7 @@ export class RootStore extends Queries {
   }
 
   @action.bound
-  deleteImage(id) {
+  deleteImage(id, completed = () => {}) {
     let image = this.getImage(id);
 
     this.apiRequest("/api/image/delete", { id }).then(response => {
@@ -156,6 +156,7 @@ export class RootStore extends Queries {
       console.log("result: ", result);
       if(result && result.affected_rows) {
         this.images.delete(id);
+        completed(result);
       }
     });
   }
@@ -164,13 +165,10 @@ export class RootStore extends Queries {
   rotateImage(id, angle = 90, completed = () => {}) {
     let image = this.getImage(id);
     this.apiRequest(`/api/image/rotate`, { id, angle }).then(response => {
-      let data, result;
-      if(response && response.data) data = response.data;
-      if(data && data.result) result = data.result;
+      const { data } = response;
+      const { success, width, height } = data;
       console.log("data: ", data);
-      if(data && data.affected_rows) {
-        completed(result);
-      }
+      completed(data);
     });
   }
 

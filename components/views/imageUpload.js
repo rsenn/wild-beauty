@@ -11,12 +11,7 @@ import "../../static/css/grid.css";
 
 export const ImageUpload = inject("rootStore")(
   observer(({ images, rootStore, onChoose, onDelete, onRotate }) => (
-    <div
-      className={"upload-area"}
-      style={{
-        minWidth: "80vmin"
-      }}
-    >
+    <div className={"upload-area"}>
       <UploadImages
         action="/api/image/upload" // upload route
         source={response => {
@@ -43,7 +38,7 @@ export const ImageUpload = inject("rootStore")(
           arg.remove();
         }}
       ></UploadImages>
-      <div className={"image-list grid-col grid-gap-20"}>
+      <div className={"image-list grid-col grid-gap-5"}>
         {images.map((image, index) => {
           let id = image.id;
 
@@ -53,7 +48,7 @@ export const ImageUpload = inject("rootStore")(
           const landscape = width > height;
 
           return (
-            <div key={index} className={"image-entry"}>
+            <div key={index} className={"image-entry tooltip"} data-tooltip={`width: ${width} height: ${height} landscape: ${landscape}`}>
               <SizedAspectRatioBox className={"item-box"}>
                 <img
                   id={`image-${id}`}
@@ -95,6 +90,7 @@ export const ImageUpload = inject("rootStore")(
         .upload-area {
           position: relative;
           padding: 0px 10px;
+          min-width: 80vmin;
         }
         div.upload-area > div > div,
         div.upload-area > div > div > div {
@@ -114,6 +110,8 @@ export const ImageUpload = inject("rootStore")(
         .image-entry {
           position: relative;
         }
+        .image-buttonlist {
+        }
         .image-button {
           position: absolute;
           padding: 0;
@@ -122,12 +120,17 @@ export const ImageUpload = inject("rootStore")(
           background: #ffffff60;
           filter: drop-shadow(1px 1px 10px #ffffffff);
         }
+        .image-button > img {
+          position: relative;
+          width: 24px;
+          height: 24px;
+        }
         .image-delete {
           top: 2px;
           right: 2px;
         }
         .image-rotate {
-          top: 42px;
+          top: 30px;
           right: 2px;
         }
         .image-delete:active > img {
