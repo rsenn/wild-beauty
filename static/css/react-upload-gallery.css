@@ -195,7 +195,7 @@
   display: block;
 }
 .rug-card .rug-card-progress .__progress-cricle {
-  stroke: #007aff;
+  stroke: rgba(138,0,16,0.8);
   fill: none;
   stroke-width: 5;
   stroke-linecap: round;
@@ -232,10 +232,10 @@
 }
 .rug-card .rug-card-refresh.__spin {
   animation: __spin 1000ms linear infinite;
-  border: 2px solid #007aff !important;
+  border: 2px solid rgba(138,0,16,0.8) !important;
 }
 .rug-card .rug-card-refresh.__spin .__refresh-icon g {
-  fill: #007aff;
+  fill: rgba(138,0,16,0.8);
 }
 .rug-card .rug-card-upload-button {
   position: absolute;
