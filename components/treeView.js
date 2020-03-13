@@ -115,7 +115,7 @@ export const TreeView = ({ tree, minWidth, minHeight, treeVerify = node => true,
 
   var max_chars = Math.round(radius / 3.03);
 
-  console.log("TreeView.render ", tree);
+//  console.log("TreeView.render ", tree);
 
   Util.traverseTree(tree, (item, depth, parent) => {
     while(table[depth] === undefined) table.push([]);
@@ -245,7 +245,7 @@ if(height  < minHeight)
 
   const entries = [...Table2DIterator(table)];
 
-  console.log(`TreeView.render `, { entries });
+ // console.log(`TreeView.render `, { entries });
 
   for(var it of Table2DIterator(table)) {
     const { pos } = it;
@@ -300,18 +300,15 @@ if(height  < minHeight)
     return (
       <React.Fragment key={i}>
         <path d={data} stroke={"black"} strokeWidth={W} fill={"none"} />
-        {item.branch && <circle cx={item.branch.a.x} cy={item.branch.a.y} r={10} fill={"none"} stroke={item.color.toHSL()} />}
-        {0 && item.vector && <line x1={item.vector.x1} y1={item.vector.y1} x2={item.vector.x2} y2={item.vector.y2} stroke={item.color.toHSL()} />}
+        {item.branch && <circle cx={item.branch.a.x} cy={item.branch.a.y} r={10} fill={"none"} stroke={item.color.toHSL().toString()} />}
+        {0 && item.vector && <line x1={item.vector.x1} y1={item.vector.y1} x2={item.vector.x2} y2={item.vector.y2} stroke={item.color.toHSL().toString()} />}
         {/*        <circle cx={ca.x} cy={ca.y} r={4} fill={item.color.toHSL()} />
             <circle cx={cb.x} cy={cb.y} r={4} fill={item.color.toHSL()} />*/}
       </React.Fragment>
     );
   });
 
-  console.log(
-    "TreeView items ",
-    items.map(item => typeof item)
-  );
+ // console.log("TreeView items ", items.map(item => typeof item) );
 
   /*  let obj = {
     tagName: "svg",
@@ -344,7 +341,7 @@ if(height  < minHeight)
         {[...Table2DIterator(table)].map((item, i) => (
           <g key={i} transform={`translate(${item.pos.x},${item.pos.y})`}>
             <g id={"item." + item.id}>
-              <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={8} ry={8} vectorEffect={"non-scaling-stroke"} stroke={item.id == active ? "white" : "none"} strokeDasharray={item.id == active ? "4" : ""} fill={item.color} strokeWidth={item.id == active ? W * 3 : W} style={{ filter: "url(#shadow)" }} />
+              <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={8} ry={8} vectorEffect={"non-scaling-stroke"} stroke={item.id == active ? "white" : "none"} strokeDasharray={item.id == active ? "4" : ""} fill={item.color.toString()} strokeWidth={item.id == active ? W * 3 : W} style={{ filter: "url(#shadow)" }} />
               <SVGText key={i} lines={item.title} x={0} y={0} />
             </g>
           </g>
@@ -358,9 +355,11 @@ if(height  < minHeight)
 
   let obj = ReactComponent.toObject(o);
 
-  console.log("TreeView.render obj:", obj);
+ // console.log("TreeView.render obj:", obj);
 
   if(reactComponent) return o;
+
+
   return obj;
 };
 

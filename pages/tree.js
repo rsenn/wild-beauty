@@ -316,10 +316,14 @@ class TreePage extends React.Component {
 
     console.log("g.points: ", g.points);
     console.log("g.rect: ", g.rect);
-    console.log("rootItem: ", toJS(rootItem));
+  //  console.log("rootItem: ", toJS(rootItem));
 
-    let tree = TreeView({ tree: root }, false);
-    console.log("Tree.constructor tree: ", tree);
+    let nodes = TreeView({ tree: root }, false);
+
+  for(let node of Util.walkTree(nodes[0])) {
+        console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ['children', 'key']), { newline: '', indent: '', spacing: ' ' }).replace(/\s+/g, " "));
+  }
+
 
     return { params, items, tree: root, g };
   }
@@ -328,6 +332,10 @@ class TreePage extends React.Component {
     super(props);
     this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
     const { rootStore } = this.props;
+
+
+/*    this.tree = this.props.tree;
+*/    
     if(global.window) {
       window.api = this.api;
       window.page = this;
@@ -584,7 +592,7 @@ class TreePage extends React.Component {
     console.log("TreePage.render");
     return (
       <Layout title={"Tree"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
-        <TreeView tree={tree} />
+        <TreeView tree={this.props.tree} />
         <br />
         {this.state.view == "item" ? (
           <ItemView id={this.state.itemId} />
