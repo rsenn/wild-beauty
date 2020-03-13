@@ -142,7 +142,7 @@ class New extends React.Component {
                     Element.remove(e);
                   });
                 }}
-                onRotate={id => {
+                onRotate={(id, angle = 90) => {
                   let img = Element.find(`#image-${id}`);
                   console.log("onRotate: ", { id, img });
                   let e = img;
@@ -154,7 +154,7 @@ class New extends React.Component {
 
                   Element.attr(img, { src: "" });
 
-                  rootStore.rotateImage(id, 90, ({ success, width, height }) => {
+                  rootStore.rotateImage(id, angle, ({ success, width, height }) => {
                     const orientation = width > height ? "landscape" : "portrait";
 
                     console.log("rotateImage result:", { success, width, height });
