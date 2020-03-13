@@ -442,7 +442,7 @@ class Show extends React.Component {
           .show-layout {
             padding: 0px 20px;
             box-sizing: border-box;
-            overflow: visible;
+            overflow: hidden;
             min-height: 60vh;
           }
           .show-layout2 {

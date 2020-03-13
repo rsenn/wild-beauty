@@ -13,8 +13,8 @@ import Layout from "../components/layout.js";
 import { SelectionListener } from "../lib/touchHandler.js";
 import { Element } from "../lib/dom.js";
 
-import "../static/css/react-upload-gallery.css";
-import "../static/style.css";
+/*import "../static/css/react-upload-gallery.css";
+import "../static/style.css";*/
 
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
@@ -125,7 +125,7 @@ class New extends React.Component {
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     return (
-      <Layout toastsClick={this.handleClick} className={"noselect"} {...this.touchListener.events}>
+      <Layout scroll={false} toastsClick={this.handleClick} className={"noselect"} {...this.touchListener.events}>
         <div onKeyDown={this.handleKeyDown} onKeyUp={this.handleKeyUp}>
           <NeedAuth>
             {rootStore.state.image === null ? (

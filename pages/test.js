@@ -124,7 +124,7 @@ const Test = () => {
         .layout {
           margin: 0px;
           padding: 0px;
-          overflow: visible;
+          overflow: hidden;
         }
 
         .panels > div {
