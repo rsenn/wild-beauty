@@ -1,3 +1,18 @@
+/* 
+
+    node query.js select items
+    node query.js select photos
+    node query.js select users
+
+  node query.js update items 149 '{parent_id:1}'
+  node query.js update items 149 '{visible:true,parent_id:1}'
+  node query.js update items '{id: {_in: [149,150,151,152] }}' '{visible:true,parent_id:1,type:"subcategory"}'
+
+  node query.js delete items '{id: {_in: [149,150,151,152] }}' 
+
+ */
+
+
 const prettyoutput = require("prettyoutput");
 var Blob = require("blob");
 const API = require("./stores/api.js");
@@ -97,7 +112,7 @@ const { affected_rows } = result;
       }
     }
 
-    console.log("biggest:", biggest);
+    //console.log("biggest:", biggest);
 
     biggest = Object.entries(biggest).map(([key, value]) => [key, (''+value).length]);
     biggest = biggest.sort((a, b) => a[1] - b[1]).filter(f => f[0] !== "toObject" && f[0] !== "match" && f[0] !== "children");
