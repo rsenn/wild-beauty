@@ -169,7 +169,7 @@ export class RootStore extends Queries {
       if(data && data.result) result = data.result;
       console.log("data: ", data);
       if(data && data.affected_rows) {
-              completed(result);
+        completed(result);
       }
     });
   }

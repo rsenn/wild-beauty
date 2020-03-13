@@ -113,13 +113,11 @@ class New extends React.Component {
 
                 let src = img.getAttribute("src");
 
-
-                Element.attr(img, { src: '' });
+                Element.attr(img, { src: "" });
 
                 rootStore.rotateImage(id, 90, result => {
-                                  src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
-                Element.attr(img, { src });
-
+                  src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
+                  Element.attr(img, { src });
                 });
               }}
             />
