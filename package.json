@@ -12,6 +12,7 @@
     "@babel/node": "^7.7.4",
     "@babel/preset-env": "^7.7.6",
     "@babel/preset-react": "^7.7.4",
+    "@babel/runtime-corejs2": "^7.8.7",
     "@render-props/image-props": "^0.1.18",
     "@zeit/next-css": "^1.0.1",
     "affinefit": "^1.0.5",
