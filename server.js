@@ -41,7 +41,7 @@ var etc_hostname = fs.readFileSync("/etc/hostname");
 const dev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || (/hostwinds/.test(etc_hostname) ? 8040 : 5555);
 const itemFields = ["id", "type", "name", "parent { id }", "children { id }", "data", `photos { photo { id filesize colors height id offset width original_name } }`, "users { user { id } }"];
-if (!dev && cluster.isMaster) {
+if(!dev && cluster.isMaster) {
   for(let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }

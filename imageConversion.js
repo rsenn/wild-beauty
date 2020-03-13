@@ -140,7 +140,7 @@ const rotateImage = async (inputBuf, angle) => {
   return { data, width, height };
 };
 
-if (module) {
+if(module) {
   module.exports = {
     loadFile,
     getImagePalette,

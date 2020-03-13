@@ -80,7 +80,8 @@
 				"*.jpg",
 				"*.tmp??",
 				"*.0",
-				"*.list"
+				"*.list",
+				"*.es5.js"
 
 			],
 			"folder_exclude_patterns":

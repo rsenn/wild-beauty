@@ -86,7 +86,7 @@ export const SVGText = ({ x, y, yinc = 12, lines }) => {
   ));
 };
 
-if (global.window) {
+if(global.window) {
   Object.assign(window, {
     direction,
     directionVertical,

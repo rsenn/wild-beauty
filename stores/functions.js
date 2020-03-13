@@ -67,7 +67,7 @@ export const reduceTree = (tree, fn = (acc, node) => {}, acc) => {
 export const treeToGraph = (graph, tree, pred = item => true) => {
   // if(!(typeof tree == "object" && tree && tree.length !== undefined))
 
-  tree = new Map([...Util.walkTree(tree, 1000, null, pred)].map(it => [it.id, it]));
+  tree = new Map([...Util.walkTree(tree, pred, item => item, 1000, null)].map(it => [it.id, it]));
   //tree = Object.fromEntries([...tree].map(it => ([ it.id, it ] )));
 
   for(let key of tree.keys()) {
@@ -88,7 +88,10 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
     /* let { children, parent, ...restOfNode } = node;*/
     //  console.log("treeToGraph", { depth, pred });
     let n = new Node(node.title || node.label || node.name || node.id, 60, 100);
-    // console.log("node: ", Util.filterOutKeys(node, ['children','parent','photos','users']));
+    let parent_id = node.parent && node.parent !== null && node.parent.id;
+    if(parent_id !== undefined && parent_id !== null) node.parent_id = parent_id;
+
+    console.log("node: ", Util.filterOutKeys(node, ["children", "photos", "users"]));
 
     graph.addNode(n).node = node;
 

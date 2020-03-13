@@ -100,7 +100,7 @@ i18nStore.setTranslations({
 
 i18nStore.user = observable.object({ lang: "" });
 
-if (global.navigator) {
+if(global.navigator) {
   makeAutoStoreHandler("language")(i18nStore.user, "lang");
 
   autorun(() => {

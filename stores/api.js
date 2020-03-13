@@ -69,13 +69,18 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     return result;
   };
 
-  api.update = async function(name, obj, fields = {}) {
+  api.update = async function(name, obj, fields = {}, set) {
     const camelCase = Util.ucfirst(name);
-    const objStr = "where: {" + Util.map(obj, (key, value) => `${key}: {_eq:${value}}`).join(", ") + "}";
-    const setStr = "_set: {" + Util.map(fields, (key, value) => `${key}: "${value}"`).join(", ") + "}";
+    let objStr = obj;
+
+    if(typeof(obj) == 'object')  objStr   = "{" + Util.map(obj, (key, value) => `${key}: {_eq:${value}}`).join(", ") + "}";
+    let setStr = typeof(set) == 'string' ? set : typeof(fields) == 'object' ? fields : set;
+
+    if(typeof(setStr) == 'object') setStr =  "{" + Util.map(setStr, (key, value) => `${key}: "${value}"`).join(", ") + "}";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
-    const queryName = `update_${name.replace(/s*$/, "s")}`;
-    const queryStr = `mutation ${queryName}{ ${queryName}(${objStr}, ${setStr}) { affected_rows } }`;
+  console.log("setStr = ", setStr);
+  const queryName = `update_${name.replace(/s*$/, "s")}`;
+    const queryStr = `mutation ${queryName}{ ${queryName}(where: ${objStr}, _set: ${setStr}) { affected_rows } }`;
     if(debug) console.log("query: ", queryStr);
 
     let response = await this(queryStr);
@@ -84,25 +89,42 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
   };
 
   api.delete = async function(name, obj) {
+    if(name == "items") {
+      let r = await api.delete("items_users", `{item:${obj}}`);
+      console.log("r: ", r);
+    }
     const camelCase = Util.ucfirst(name);
-    const objStr = "where: {" + Util.map(obj, (key, value) => `${key}: {_eq:"${value}"}`).join(", ") + "}";
+    let objStr;
+
+    if(typeof obj == "string") objStr = obj;
+    else objStr = "{" + Util.map(obj, (key, value) => `${key}: {_eq: ${value}}`).join(", ") + "}";
+
+    console.log("objStr:", objStr);
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryName = `delete_${name.replace(/s?$/, "s")}`;
-    const queryStr = `mutation ${queryName}{ ${queryName}(${objStr}) { affected_rows } }`;
+    const queryStr = `mutation ${Util.camelize(queryName)}{ ${queryName}(where: ${objStr}) { affected_rows returning { id } } }`;
     if(debug) console.log("query: ", queryStr);
 
     let response = await this(queryStr);
-    //console.log("response: ", response[queryName]);
+    console.log("response: ", response[queryName]);
     return response[queryName];
   };
 
   api.insert = async function(name, obj, fields = []) {
     const camelCase = Util.ucfirst(name);
     // prettier-ignore
-    const objStr = Object.keys(obj) .map(key => typeof obj[key] == "string" && key == "name" /* && !/^".*"$/.test(obj[key])*/ ? `${key}: "${obj[key]}"` : `${key}: ${obj[key]}` ) .join(", ");
+    let objStr;
+    if(typeof obj == "string") objStr = obj;
+    else
+      objStr =
+        "{" +
+        Object.keys(obj)
+          .map(key => (typeof obj[key] == "string" && key == "name" /* && !/^".*"$/.test(obj[key])*/ ? `${key}: "${obj[key]}"` : `${key}: ${obj[key]}`))
+          .join(", ") +
+        "}";
     const queryStr = `mutation Insert${camelCase} {
     __typename
-    insert_${name}(objects: { ${objStr} }) {
+    insert_${name}(objects: ${objStr}) {
       affected_rows
       returning { ${typeof fields == "string" ? fields : fields.join(" ")} }
     }

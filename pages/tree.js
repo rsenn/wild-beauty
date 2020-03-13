@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align } from "../lib/dom.js";
+import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align, PointList } from "../lib/dom.js";
 import getAPI from "../stores/api.js";
 import Util from "../lib/util.js";
 import { SvgOverlay } from "../lib/svg-overlay.js";
@@ -102,13 +102,13 @@ const removeParent = (element, pred = e => true) => {
   }
 };
 
-export function createGraph(svg) {
-  let d = Element.create("defs", {}, svg);
-  let lg = Element.create("linearGradient", { id: "lg1", x1: 0, y1: 0, x2: 0, y2: 100, spreadMethod: "pad" }, d);
-  Element.create("stop", { offset: 0, stopColor: "#00cc00", stopOpacity: 1 }, lg);
-  Element.create("stop", { offset: 100, stopColor: "#006600", stopOpacity: 1 }, lg);
+export function createGraph(svg, nodeType = SVG) {
+  let d = nodeType.create("defs", {}, svg);
+  let lg = nodeType.create("linearGradient", { id: "lg1", x1: 0, y1: 0, x2: 0, y2: 100, spreadMethod: "pad" }, d);
+  nodeType.create("stop", { offset: 0, stopColor: "#00cc00", stopOpacity: 1 }, lg);
+  nodeType.create("stop", { offset: 100, stopColor: "#006600", stopOpacity: 1 }, lg);
 
-  svg = SVG.create("g", {}, svg);
+  svg = nodeType.create("g", {}, svg);
 
   let strokeWidth = 1.1;
 
@@ -119,7 +119,7 @@ export function createGraph(svg) {
     timestep: 300,
     onRenderGraph: graph => {
       let bb = new Rect(svg.getBBox()).round();
-      let client = Element.rect(svg.parentElement);
+      let client = nodeType.rect(svg.parentElement);
       let trbl = new TRBL(50, 20, 50, 20);
       let aspect = bb.aspect();
 
@@ -129,13 +129,13 @@ export function createGraph(svg) {
 
       if(m.xx > m.yy) m.scale(m.yy / m.xx, 1);
       let t = m.toSVG();
-      Element.attr(svg, { transform: t });
+      nodeType.attr(svg, { transform: t });
       bb = new Rect(svg.getBBox());
       let gcenter = bb.center;
-      let move = Point.diff(Element.rect(svg.parentElement).center, gcenter);
+      let move = Point.diff(nodeType.rect(svg.parentElement).center, gcenter);
 
       m.translate(move.x / m.xx, 0);
-      Element.attr(svg, { transform: m.toSVG() });
+      nodeType.attr(svg, { transform: m.toSVG() });
       t = ` translate(${move.x},${move.y}) ` + t;
 
       let gbb = graph.getBBox();
@@ -144,11 +144,11 @@ export function createGraph(svg) {
 
       Rect.align(nbb, client, Align.CENTER | Align.MIDDLE);
       console.log("nbb:", nbb);
-      SVG.create("circle", { cx: rbb.center.x, cy: rbb.center.y, r: 30, stroke: "#f00", strokeWidth: 2, fill: "none" }, svg);
+      nodeType.create("circle", { cx: rbb.center.x, cy: rbb.center.y, r: 30, stroke: "#f00", strokeWidth: 2, fill: "none" }, svg);
     },
     onUpdateNode: (node, i) => {
       if(!node.element) {
-        node.element = SVG.create(
+        node.element = nodeType.create(
           "g",
           {
             id: `node-${i}`,
@@ -159,7 +159,7 @@ export function createGraph(svg) {
           },
           svg
         );
-        SVG.create(
+        nodeType.create(
           "rect",
           {
             x: -16,
@@ -174,13 +174,13 @@ export function createGraph(svg) {
           },
           node.element
         );
-        SVG.create("tspan", { alignmentBaseline: "middle", text: node.label }, SVG.create("text", { fontSize: 10, fill: "#000", stroke: "none", textAnchor: "middle" }, node.element));
-      } else Element.attr(node.element, { transform: `translate(${node.x},${node.y})` });
+        nodeType.create("tspan", { alignmentBaseline: "middle", text: node.label }, nodeType.create("text", { fontSize: 10, fill: "#000", stroke: "none", textAnchor: "middle" }, node.element));
+      } else nodeType.attr(node.element, { transform: `translate(${node.x},${node.y})` });
     },
     onUpdateEdge: (edge, i) => {
       const { x1, y1, x2, y2 } = edge;
-      if(!edge.element) edge.element = SVG.create("line", { id: `edge-${i}`, x1, y1, x2, y2, stroke: "#000", strokeWidth }, svg);
-      else Element.attr(edge.element, { x1, y1, x2, y2 });
+      if(!edge.element) edge.element = nodeType.create("line", { id: `edge-${i}`, x1, y1, x2, y2, stroke: "#000", strokeWidth }, svg);
+      else nodeType.attr(edge.element, { x1, y1, x2, y2 });
     }
   });
 
@@ -262,7 +262,8 @@ class TreePage extends React.Component {
       })
     ]);
     for(let key in iter) {
-      let { parent, parent_id, childIds, children, ...item } = iter[key];
+      let { parent, childIds, children, ...item } = iter[key];
+      let parent_id = parent && parent.id;
       let depth = ((iter[parent_id] && iter[parent_id].depth) || 0) + 1;
       let p;
       if(parent_id > 0) {
@@ -278,15 +279,17 @@ class TreePage extends React.Component {
     let root = rootStore.getItem(rootItem.id, it => Util.filterOutKeys(toJS(it), ["childIds", "photos", "users"]));
 
     treeToGraph(g, root, item => {
-      let { children, parent, users, photos, parent_id, ...restOfItem } = item;
+      let { children, parent, users, photos, ...restOfItem } = item;
+      let parent_id = parent && parent.id;
+      if(parent_id !== undefined) item.parent_id = parent_id;
       let numChildren = children ? children.length : 0;
       let output = { itemKeys: Object.keys(item), parent_id, restOfItem };
       if(numChildren) item.num_children = numChildren;
       if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
-      console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
+      console.log("item: ", Util.filterOutKeys(item, ["children" /*, "num_children", "parent"*/]));
       return true;
     });
-
+    /*
     for(let i in g.nodes) {
       let n = g.nodes[i];
       n.x = n.x ? parseFloat(n.x.toFixed(3)) : 0;
@@ -306,25 +309,53 @@ class TreePage extends React.Component {
         delete e.b.parent;
         delete e.b.children;
       }
-    }
+    }*/
     g.checkRedraw();
     g.checkRedraw();
     g.roundAll(0.003);
-    let pl = g.points;
-    let center = g.rect.center;
+
+    let bbox = PointList.bbox(g.nodes);
+    let rect = new Rect(bbox);
+    let center = rect.center;
+
     g.translate(-center.x, -center.y);
 
-    console.log("g.points: ", g.points);
-    console.log("g.rect: ", g.rect);
-    //  console.log("rootItem: ", toJS(rootItem));
+    console.log("g.bbox: ", bbox);
+    console.log("g.rect: ", rect);
+    console.log("center: ", center);
+    console.log("g: ", g.serialize());
 
-    let nodes = TreeView({ tree: root }, false);
+    /* let pl = g.points;
 
-    for(let node of Util.walkTree(nodes[0])) {
-      console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ["children", "key"]), { newline: "", indent: "", spacing: " " }));
+
+
+
+*/
+    // console.log("root: ", root);
+
+    let nodes = [
+      ...Util.walkTree(
+        root,
+        item => true,
+        item => {
+          delete item.parent;
+          return item;
+        }
+      )
+    ];
+
+    for(let n of nodes) {
+      let node = Util.filterOutKeys(n, ["children", "parent"]);
+      console.log("walkTree node=", Util.inspect(node, { newline: "", indent: "", spacing: " " }));
     }
 
-    return { params, items, tree: root, g };
+    //  let nodes = TreeView({ tree: root }, false);
+    /*
+    for(let node of Util.walkTree(nodes[0])) {
+      console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ["children", "key"]), { newline: "", indent: "", spacing: " " }));
+    }*/
+
+    return { params, items, tree: root, nodes, g };
   }
 
   constructor(props) {
@@ -591,7 +622,7 @@ class TreePage extends React.Component {
     console.log("TreePage.render");
     return (
       <Layout title={"Tree"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
-        <TreeView tree={this.props.tree} />
+        {/* <TreeView tree={this.props.tree} />*/}
         <br />
         {this.state.view == "item" ? (
           <ItemView id={this.state.itemId} />

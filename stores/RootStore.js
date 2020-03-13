@@ -11,7 +11,7 @@ import Iterator from "../lib/iterator.js";
 
 const isServer = !global.window;
 
-if (global.window) {
+if(global.window) {
   window.dev = { dom, Iterator };
   window.fns = {};
   window.dom = dom;
@@ -237,6 +237,10 @@ export class RootStore extends Queries {
         if(depth > 0 && item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap, depth - 1) : null)).filter(c => c !== null);
         else item.children = [];
         item.children = item.children.filter(i => i !== null);
+        item.children = item.children.map(child => {
+          child.parent_id = id;
+          return child;
+        });
       }
     }
     return item ? tr(item) : null;
