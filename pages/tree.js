@@ -328,7 +328,7 @@ class TreePage extends React.Component {
     let c = new Rect(b);
     let c2 = c.toPoints();
     c = c.toPoints();
-    c.transform(r);
+    r.transform_points(c);
     this.b = b;
     this.c = c;
     this.a = a;

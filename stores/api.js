@@ -1,9 +1,9 @@
 const Blob = require("blob");
 
-const axios = require("../utils/axios.js").httpClient;
-const Util = require("../utils/util.js");
+const axios = require("../lib/axios.js").httpClient;
+const Util = require("../lib/util.js");
 
-function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
+function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { debug: false }) {
   var api = async function(query) {
     let res = await axios({
       url,
@@ -28,6 +28,8 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     return res;
   };
 
+  api.options = options;
+
   api.list = async function(name, fields = [], opts = {}) {
     const camelCase = Util.ucfirst(name);
     //if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
@@ -42,7 +44,8 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
 
     if(objStr.length) objStr = `(${objStr})`;
     const queryStr = `query List${camelCase} { ${name}${objStr} { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
-    //console.log("query: ", queryStr);
+    if(options.debug)
+    console.log("query: ", queryStr);
     let ret = await this(queryStr);
     if(typeof ret == "object" && ret[name] !== undefined) ret = ret[name];
     return ret;
@@ -51,10 +54,10 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
   api.select = function(name, obj, fields = "") {
     const camelCase = Util.ucfirst(name);
     // prettier-ignore
-    const objStr =    (typeof obj == "string"? `where: ${obj}` : "where: { " + Object.entries(obj) .map(([key, value]) => `${key}: {_eq: ${value}}`) .join(", ") + "}");
+    const objStr = !obj ? '' :  (typeof obj == "string"? `(where: ${obj})` : "(where: { " + Object.entries(obj) .map(([key, value]) => `${key}: {_eq: ${value}}`) .join(", ") + "})");
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
-    const queryStr = `query Select${camelCase} { ${name}(${objStr}) { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
-    //console.log(`query: ${queryStr}`);
+    const queryStr = `query Select${camelCase} { ${name}${objStr} { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
+       if(options.debug)console.log(`query: ${queryStr}`);
 
     let result = this(queryStr);
     //console.log(`result: ${result}`);
@@ -68,7 +71,8 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryName = `update_${name.replace(/s*$/, "s")}`;
     const queryStr = `mutation ${queryName}{ ${queryName}(${objStr}, ${setStr}) { affected_rows } }`;
-    //console.log("query: ", queryStr);
+        if(options.debug)
+console.log("query: ", queryStr);
 
     let response = await this(queryStr);
     //console.log("response: ", response[queryName]);
@@ -81,7 +85,8 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryName = `delete_${name.replace(/s?$/, "s")}`;
     const queryStr = `mutation ${queryName}{ ${queryName}(${objStr}) { affected_rows } }`;
-    //console.log("query: ", queryStr);
+        if(options.debug)
+console.log("query: ", queryStr);
 
     let response = await this(queryStr);
     //console.log("response: ", response[queryName]);
@@ -101,7 +106,8 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql") {
   }`;
 
     let response = await this(queryStr);
-    //console.log("response: ", response, "query: ", queryStr);
+        if(options.debug)
+console.log("response: ", response, "query: ", queryStr);
     return response;
   };
 

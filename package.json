@@ -89,6 +89,7 @@
     "@babel/plugin-proposal-export-default-from": "^7.7.4",
     "babel-eslint": "^10.0.3",
     "eslint-plugin-legacy-decorators": "^1.0.0",
-    "exif-cli": "^0.0.2"
+    "exif-cli": "^0.0.2",
+    "prettyoutput": "^1.2.0"
   }
 }

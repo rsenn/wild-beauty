@@ -287,10 +287,13 @@ if(height  < minHeight)
           const cb = iy > 1 ? parent.vector.pointAt(0.8) : new Point(b.x - d.x * 2, b.y - d.y);
 
           //if(item.depth == 2)
+          const data = `M${a.toString(true)} C ${ca.toString(true)}, ${cb.toString(true)}, ${b.toString(true)}`;
+
+          console.log(`Tree.render `, data);
 
           return (
             <React.Fragment key={i}>
-              <path d={`M${a} C ${ca}, ${cb}, ${b}`} stroke={"black"} strokeWidth={W} fill={"none"} />
+              <path d={data} stroke={"black"} strokeWidth={W} fill={"none"} />
               {item.branch && <circle cx={item.branch.a.x} cy={item.branch.a.y} r={10} fill={"none"} stroke={item.color.toHSL()} />}
               {0 && item.vector && <line x1={item.vector.x1} y1={item.vector.y1} x2={item.vector.x2} y2={item.vector.y2} stroke={item.color.toHSL()} />}
               {/*        <circle cx={ca.x} cy={ca.y} r={4} fill={item.color.toHSL()} />

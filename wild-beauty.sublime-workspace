@@ -24,89 +24,93 @@
 	"buffers":
 	[
 		{
-			"contents": "function(ctx)\nload: function(url)\n.onload\n_onload: function(request, event)\n.onload\nfunction(canvas, ctx)\nfunction next_frame()",
+			"contents": "function Point(arg)\np\np\nPoint\nPoint\nPoint.prototype.move = function(x, y)\nPoint.prototype.move_to = function(x, y)\nPoint.prototype.clear = function(x, y)\nPoint.prototype.move = function(x, y)\nPoint.prototype.set = function(fn)\nPoint.prototype.clone = function()\nPoint.prototype.sum = function(other)\nPoint.prototype.add = function(other)\nPoint.prototype.diff = function(other)\nPoint.prototype.sub = function(other)\nPoint.prototype.prod = function(f)\nPoint.prototype.mul = function(f)\nPoint.prototype.quot = function(other)\nPoint.prototype.div = function(f)\nPoint.prototype.comp = function()\nPoint.prototype.neg = function()\nPoint.prototype.distance = function( other = { x: 0, y: 0 } )\nPoint.prototype.equal = function(other)\nPoint.prototype.round = function(precision = 1.0)\nPoint.prototype.sides = function()\nPoint.prototype.dot = function(other)\nPoint.prototype.fromAngle = function(angle, dist = 1.0)\nPoint.prototype.toAngle = function(deg = false)\nPoint.prototype.angle = function( p2 = { x: 0, y: 0 } )\nPoint\nPoint.prototype.dimension = function()\nPoint.prototype.toString = function(prec = 3)\nPoint.prototype.toSource = function(asArray = false)\nPoint.prototype.toSource = function()\nPoint.prototype.toCSS = function()\nPoint.prototype.inside = function(rect)\nPoint.prototype.normalize = function(minmax)\nPoint.distance = point =>\nPoint\nPoint.move = point =>\nPoint\nPoint.sum = (a, b) =>\nPoint\nPoint.diff = (a, b) =>\nPoint\nPoint.prod = (a, b) =>\nPoint\nPoint.quot = (a, b) =>\nPoint\nPoint.equal = (a, b) =>\nPoint\nPoint.round = (a, b) =>\nPoint\nisPoint",
 			"settings":
 			{
-				"buffer_size": 127,
+				"buffer_size": 1553,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "server.js",
+			"file": "/home/roman/Dokumente/Sources/plot-cv/lib/dom.js",
 			"settings":
 			{
-				"buffer_size": 12339,
+				"buffer_size": 114462,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "pages/index.js",
+			"file": "lib/dom/matrix.js",
 			"settings":
 			{
-				"buffer_size": 6961,
+				"buffer_size": 11153,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/dom/matrix.js",
+			"settings":
+			{
+				"buffer_size": 11153,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/tree.js",
+			"settings":
+			{
+				"buffer_size": 24628,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/dom/rect.js",
+			"settings":
+			{
+				"buffer_size": 6176,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/dom/point.js",
+			"settings":
+			{
+				"buffer_size": 5661,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "lib/dom.js",
+			"file": "lib/dom/pointList.js",
 			"settings":
 			{
-				"buffer_size": 113616,
-				"encoding": "UTF-8",
+				"buffer_size": 7694,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "/home/roman/wild-beauty/pages/show.js",
+			"file": "pages/tree.js",
 			"settings":
 			{
-				"buffer_size": 18865,
-				"encoding": "UTF-8",
+				"buffer_size": 24628,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "lib/svg-overlay.js",
+			"file": "components/TouchCallback.js",
 			"settings":
 			{
-				"buffer_size": 3372,
-				"encoding": "UTF-8",
+				"buffer_size": 3500,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "static/wasm.html",
+			"file": "components/tree.js",
 			"settings":
 			{
-				"buffer_size": 547,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "test-wasm.js",
-			"settings":
-			{
-				"buffer_size": 1792,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "static/wasm/pre.js",
-			"settings":
-			{
-				"buffer_size": 1185,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "static/wasm/post.js",
-			"settings":
-			{
-				"buffer_size": 7145,
+				"buffer_size": 10270,
 				"line_ending": "Unix"
 			}
 		}
@@ -199,14 +203,33 @@
 	},
 	"expanded_folders":
 	[
-		"/home/roman/the-wild-beauty-company",
-		"/home/roman/the-wild-beauty-company/components",
-		"/home/roman/the-wild-beauty-company/lib",
-		"/home/roman/the-wild-beauty-company/pages",
-		"/home/roman/the-wild-beauty-company/stores"
+		"/home/roman/the-wild-beauty-company"
 	],
 	"file_history":
 	[
+		"/home/roman/wild-beauty/pages/show.js",
+		"/home/roman/wild-beauty/lib/dom.js",
+		"/home/roman/wild-beauty/lib/dom/rect.js",
+		"/home/roman/the-wild-beauty-company/pages/tree.js",
+		"/home/roman/wild-beauty/lib/dom/point.js",
+		"/home/roman/wild-beauty/lib/dom/line.js",
+		"/home/roman/wild-beauty/lib/dom/trbl.js",
+		"/home/roman/wild-beauty/lib/dom/matrix.js",
+		"/home/roman/wild-beauty/lib/dom/hsla.js",
+		"/home/roman/wild-beauty/components/siteMap.js",
+		"/home/roman/wild-beauty/pages/tree.js",
+		"/home/roman/wild-beauty/components/tree.js",
+		"/home/roman/wild-beauty/components/nav.js",
+		"/home/roman/wild-beauty/lib/dom/size.js",
+		"/home/roman/wild-beauty/lib/dom/rgba.js",
+		"/home/roman/wild-beauty/lib/dom.es5.js",
+		"/home/roman/wild-beauty/server.js",
+		"/home/roman/wild-beauty/pages/index.js",
+		"/home/roman/wild-beauty/lib/svg-overlay.js",
+		"/home/roman/wild-beauty/static/wasm.html",
+		"/home/roman/wild-beauty/test-wasm.js",
+		"/home/roman/wild-beauty/static/wasm/pre.js",
+		"/home/roman/wild-beauty/static/wasm/post.js",
 		"/home/roman/Dokumente/Sources/libbpg/post.js",
 		"/home/roman/the-wild-beauty-company/static/wasm.html",
 		"/home/roman/Dokumente/Sources/libbpg-git/README",
@@ -254,26 +277,22 @@
 		"/home/roman/the-wild-beauty-company/components/withQueryParam.js",
 		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
 		"/home/roman/wild-beauty/pages/list.js",
-		"/home/roman/wild-beauty/pages/show.js",
 		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
-		"/home/roman/the-wild-beauty-company/pages/tree.js",
 		"/home/roman/the-wild-beauty-company/lib/dom.js",
 		"/home/roman/the-wild-beauty-company/lib/dom.es5.js",
 		"/home/roman/the-wild-beauty-company/node_modules/@babel/node/node_modules/core-js/modules/web.queue-microtask.js",
 		"/home/roman/the-wild-beauty-company/components/views/itemEditor.js",
 		"/home/roman/the-wild-beauty-company/stores/functions.js",
 		"/home/roman/the-wild-beauty-company/lib/fd-graph.js",
-		"/home/roman/wild-beauty/pages/tree.js",
 		"/home/roman/wild-beauty/stores/functions.js",
 		"/home/roman/the-wild-beauty-company/lib/jpeg.js",
 		"/home/roman/wild-beauty/components/graphContainer.js",
 		"/home/roman/the-wild-beauty-company/components/forceGraph.js",
-		"/home/roman/wild-beauty/components/nav.js",
 		"/home/roman/.config/sublime-text-3-20200125/Packages/User/Default (Linux).sublime-keymap"
 	],
 	"find":
 	{
-		"height": 44.0
+		"height": 43.0
 	},
 	"find_in_files":
 	{
@@ -289,6 +308,44 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"toString",
+			"path",
+			"path=",
+			"path",
+			"\\.transform\\(",
+			"\\.transform",
+			"transform",
+			"toPoints =",
+			"toPoints",
+			"getAffine",
+			"center",
+			"quot =",
+			"diff =",
+			"sum =",
+			"distance",
+			"toCSS =",
+			"MatrixProps",
+			"matrix.js",
+			"isMatrix",
+			"isRGBA",
+			"isLine",
+			"isPoint",
+			"setcss",
+			"Timer",
+			"export.*Timer",
+			"menu-item",
+			"overflow:",
+			"<NavLink",
+			"active",
+			"active=",
+			"active",
+			"menu-active",
+			"hover",
+			"\\.name",
+			"SVGText",
+			"Tree",
+			"Fragment",
+			"\\.map",
 			"emscripten",
 			"emscripten_",
 			"HEAPu8",
@@ -378,45 +435,7 @@
 			"exif",
 			"file.data",
 			"fileUpload",
-			"upload",
-			"colors",
-			"makeItemTo",
-			"\\.pos",
-			"treeVerify",
-			"makeItemToOption",
-			"handleCli",
-			"colors",
-			"filesize",
-			"colors",
-			"filesize",
-			"colors",
-			"filesize",
-			"colors",
-			"sharp",
-			" transformer = sharp()\n              .png({ palette: true, colours: 256, force: true })\n              .resize(newDimensions)\n              .on(\"info\", function(info) {\n                console.log(\"Image height is \" + info.height);\n              });\n            outputStream = new MemoryStream();\n\n            let fileStream = fs.createWriteStream(\"temp.png\");\n\n            inputStream = bufferToStream(Buffer.from(inBuf));\n            try {\n              inputStream.pipe(transformer).pipe(fileStream);\n  \n            } catch(err) {\n              console.error(\"ERROR:\", err);\n            }",
-			"BBox upda",
-			"client",
-			" Element\\(",
-			"Element\\(",
-			"class BBox",
-			"new BBox",
-			"Line.prototype.bbox",
-			"resize =",
-			"class BBox",
-			"rect =",
-			"BBox\\(",
-			"Line.prototype.toStrin",
-			"Line.prototype\\.",
-			"Line.prototype..",
-			"noscroll",
-			"MovementList",
-			"isArray",
-			"PointList.*round",
-			"PointList.*center",
-			"Point.round",
-			"points\\(",
-			"PointList\\(",
-			"dom.js"
+			"upload"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -451,58 +470,297 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 127,
+						"buffer_size": 1553,
 						"regions":
 						{
 						},
 						"selection":
 						[
+							[
+								0,
+								0
+							]
 						],
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/static/wasm/post.js",
+							"current_file": "/home/roman/the-wild-beauty-company/lib/dom/point.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									1172,
-									1185
+									7,
+									26
 								],
 								[
-									2142,
-									2161
+									1042,
+									1043
 								],
 								[
-									2317,
-									2342
+									1065,
+									1066
 								],
 								[
-									2415,
-									2448
+									1079,
+									1084
 								],
 								[
-									4448,
-									4468
+									1122,
+									1127
 								],
 								[
-									5587,
-									5608
+									1160,
+									1197
 								],
 								[
-									5738,
-									5759
+									1248,
+									1288
+								],
+								[
+									1337,
+									1375
+								],
+								[
+									1424,
+									1461
+								],
+								[
+									1512,
+									1546
+								],
+								[
+									1673,
+									1707
+								],
+								[
+									1759,
+									1796
+								],
+								[
+									1858,
+									1895
+								],
+								[
+									1958,
+									1996
+								],
+								[
+									2058,
+									2095
+								],
+								[
+									2158,
+									2192
+								],
+								[
+									2291,
+									2324
+								],
+								[
+									2424,
+									2462
+								],
+								[
+									2524,
+									2557
+								],
+								[
+									2608,
+									2641
+								],
+								[
+									2695,
+									2727
+								],
+								[
+									2780,
+									2853
+								],
+								[
+									2962,
+									3001
+								],
+								[
+									3056,
+									3105
+								],
+								[
+									3236,
+									3270
+								],
+								[
+									3393,
+									3430
+								],
+								[
+									3482,
+									3537
+								],
+								[
+									3628,
+									3675
+								],
+								[
+									3746,
+									3813
+								],
+								[
+									3825,
+									3830
+								],
+								[
+									3873,
+									3911
+								],
+								[
+									3953,
+									3998
+								],
+								[
+									4065,
+									4117
+								],
+								[
+									4330,
+									4367
+								],
+								[
+									4443,
+									4477
+								],
+								[
+									4537,
+									4576
+								],
+								[
+									4808,
+									4852
+								],
+								[
+									4995,
+									5020
+								],
+								[
+									5021,
+									5026
+								],
+								[
+									5059,
+									5080
+								],
+								[
+									5081,
+									5086
+								],
+								[
+									5115,
+									5136
+								],
+								[
+									5137,
+									5142
+								],
+								[
+									5169,
+									5191
+								],
+								[
+									5192,
+									5197
+								],
+								[
+									5225,
+									5247
+								],
+								[
+									5248,
+									5253
+								],
+								[
+									5281,
+									5303
+								],
+								[
+									5304,
+									5309
+								],
+								[
+									5337,
+									5360
+								],
+								[
+									5361,
+									5366
+								],
+								[
+									5395,
+									5418
+								],
+								[
+									5419,
+									5424
+								],
+								[
+									5467,
+									5481
 								]
 							],
 							"symlist":
 							[
-								"function(ctx)",
-								"load: function(url)",
-								".onload",
-								"_onload: function(request, event)",
-								".onload",
-								"function(canvas, ctx)",
-								"function next_frame()"
+								"function Point(arg)",
+								"p",
+								"p",
+								"Point",
+								"Point",
+								"Point.prototype.move = function(x, y)",
+								"Point.prototype.move_to = function(x, y)",
+								"Point.prototype.clear = function(x, y)",
+								"Point.prototype.move = function(x, y)",
+								"Point.prototype.set = function(fn)",
+								"Point.prototype.clone = function()",
+								"Point.prototype.sum = function(other)",
+								"Point.prototype.add = function(other)",
+								"Point.prototype.diff = function(other)",
+								"Point.prototype.sub = function(other)",
+								"Point.prototype.prod = function(f)",
+								"Point.prototype.mul = function(f)",
+								"Point.prototype.quot = function(other)",
+								"Point.prototype.div = function(f)",
+								"Point.prototype.comp = function()",
+								"Point.prototype.neg = function()",
+								"Point.prototype.distance = function( other = { x: 0, y: 0 } )",
+								"Point.prototype.equal = function(other)",
+								"Point.prototype.round = function(precision = 1.0)",
+								"Point.prototype.sides = function()",
+								"Point.prototype.dot = function(other)",
+								"Point.prototype.fromAngle = function(angle, dist = 1.0)",
+								"Point.prototype.toAngle = function(deg = false)",
+								"Point.prototype.angle = function( p2 = { x: 0, y: 0 } )",
+								"Point",
+								"Point.prototype.dimension = function()",
+								"Point.prototype.toString = function(prec = 3)",
+								"Point.prototype.toSource = function(asArray = false)",
+								"Point.prototype.toSource = function()",
+								"Point.prototype.toCSS = function()",
+								"Point.prototype.inside = function(rect)",
+								"Point.prototype.normalize = function(minmax)",
+								"Point.distance = point =>",
+								"Point",
+								"Point.move = point =>",
+								"Point",
+								"Point.sum = (a, b) =>",
+								"Point",
+								"Point.diff = (a, b) =>",
+								"Point",
+								"Point.prod = (a, b) =>",
+								"Point",
+								"Point.quot = (a, b) =>",
+								"Point",
+								"Point.equal = (a, b) =>",
+								"Point",
+								"Point.round = (a, b) =>",
+								"Point",
+								"isPoint"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -510,30 +768,30 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 10,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 8,
+			"selected": 5,
 			"sheets":
 			[
 				{
 					"buffer": 1,
-					"file": "server.js",
+					"file": "/home/roman/Dokumente/Sources/plot-cv/lib/dom.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 12339,
+						"buffer_size": 114462,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								10268,
-								10268
+								32339,
+								32339
 							]
 						],
 						"settings":
@@ -543,7 +801,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 6311.0,
+						"translation.y": 24665.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 8,
@@ -551,19 +809,19 @@
 				},
 				{
 					"buffer": 2,
-					"file": "pages/index.js",
+					"file": "lib/dom/matrix.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6961,
+						"buffer_size": 11153,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4273,
-								4273
+								10642,
+								10642
 							]
 						],
 						"settings":
@@ -573,122 +831,92 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 966.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "lib/dom.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 113616,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								56261,
-								56261
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 46588.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "/home/roman/wild-beauty/pages/show.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 18865,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3500,
-								3500
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1689.0,
+						"translation.y": 6050.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "lib/svg-overlay.js",
+					"buffer": 3,
+					"file": "lib/dom/matrix.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3372,
+						"buffer_size": 11153,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1678,
-								1678
+								6996,
+								6996
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1380.0,
+						"translation.y": 4349.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
-					"file": "static/wasm.html",
+					"buffer": 4,
+					"file": "pages/tree.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 547,
+						"buffer_size": 24628,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								281,
-								281
+								10813,
+								10813
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML/HTML.sublime-syntax",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6206.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "lib/dom/rect.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6176,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								63,
+								63
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
@@ -696,29 +924,122 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
-					"file": "test-wasm.js",
+					"buffer": 6,
+					"file": "lib/dom/point.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1792,
+						"buffer_size": 5661,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								882,
-								882
+								5661,
+								5661
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax"
+							"color_scheme": "Packages/User/SchemeEditorTemp/Abdal Black Hackers.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3573.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "lib/dom/pointList.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7694,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5766,
+								5766
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3560.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "pages/tree.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 24628,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								20465,
+								20465
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 11952.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "components/TouchCallback.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3500,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								759,
+								759
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -728,61 +1049,33 @@
 					"type": "text"
 				},
 				{
-					"buffer": 8,
-					"file": "static/wasm/pre.js",
+					"buffer": 10,
+					"file": "components/tree.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1185,
+						"buffer_size": 10270,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1185,
-								1185
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "static/wasm/post.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7145,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6513,
-								6513
+								8727,
+								8727
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 4,
+							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4235.0,
+						"translation.y": 5715.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -790,7 +1083,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 32.0
+		"height": 30.0
 	},
 	"input":
 	{
@@ -836,7 +1129,7 @@
 	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
-		"height": 70.0
+		"height": 56.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -845,6 +1138,78 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"rect.j",
+				"lib/dom/rect.js"
+			],
+			[
+				"matrix",
+				"lib/dom/matrix.js"
+			],
+			[
+				"lin",
+				"lib/dom/line.js"
+			],
+			[
+				"point",
+				"lib/dom/point.js"
+			],
+			[
+				"trbl",
+				"lib/dom/trbl.js"
+			],
+			[
+				"rect",
+				"lib/dom/rect.js"
+			],
+			[
+				"dom.",
+				"lib/dom.js"
+			],
+			[
+				"rgba",
+				"lib/dom/rgba.js"
+			],
+			[
+				"line.js",
+				"lib/dom/line.js"
+			],
+			[
+				"size",
+				"lib/dom/size.js"
+			],
+			[
+				"rect.js",
+				"lib/dom/rect.js"
+			],
+			[
+				"point.js",
+				"lib/dom/point.js"
+			],
+			[
+				"dom.js",
+				"lib/dom.js"
+			],
+			[
+				"line",
+				"lib/dom/line.js"
+			],
+			[
+				"hsla",
+				"lib/dom/hsla.js"
+			],
+			[
+				"show.j",
+				"pages/show.js"
+			],
+			[
+				"show.js",
+				"pages/show.js"
+			],
+			[
+				"tree.js",
+				"pages/tree.js"
+			],
 			[
 				"post.j",
 				"static/wasm/post.js"
@@ -958,20 +1323,12 @@
 				"stores/functions.js"
 			],
 			[
-				"dom.js",
-				"lib/dom.js"
-			],
-			[
 				"fd-gra",
 				"lib/fd-graph.js"
 			],
 			[
 				"util.j",
 				"lib/util.js"
-			],
-			[
-				"tree.js",
-				"pages/tree.js"
 			],
 			[
 				"fd-gr",
