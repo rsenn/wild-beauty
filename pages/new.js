@@ -13,8 +13,6 @@ import Layout from "../components/layout.js";
 import { SelectionListener } from "../lib/touchHandler.js";
 import { Element } from "../lib/dom.js";
 
-/*import "../static/css/react-upload-gallery.css";
-import "../static/style.css";*/
 
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());

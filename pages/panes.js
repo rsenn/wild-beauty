@@ -14,8 +14,6 @@ import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchEvents } from "../lib/touchHandler.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 
-import RUG from "react-upload-gallery";
-import "react-upload-gallery/dist/style.css";
 
 import "../static/style.css";
 
