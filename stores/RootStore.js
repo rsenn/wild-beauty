@@ -45,7 +45,8 @@ export class RootStore extends Queries {
   images = observable.map();
   entries = observable.array([], { deep: true });
   users = observable.map();
-  fields = observable.array(["name", "title", "text"]);
+  fields = observable.array(["Name", "Title", "Text"]);
+
   items = observable.map();
 
   toasts = observable.array([]);
@@ -173,7 +174,11 @@ export class RootStore extends Queries {
   }
 
   get fieldNames() {
-    return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
+    return this.fields.map(field => {
+      const title = Util.ucfirst(field);
+
+      return { name: field.toLowerCase(), value: "", title, label: title };
+    });
   }
 
   get currentImage() {
@@ -245,11 +250,11 @@ export class RootStore extends Queries {
     }
     return item ? tr(item) : null;
   }
-
+  /*
   entries = function*(map = null) {
     if(map === null) map = item => item;
     for(let [key, item] of this.items.entries()) yield [key, map(item)];
-  };
+  };*/
 
   notLoadedChildren() {
     let arr = Object.values(this.items.toObject());

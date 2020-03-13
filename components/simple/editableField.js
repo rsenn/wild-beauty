@@ -4,24 +4,24 @@ import { useEditableState } from "react-editable-hooks";
 import { trkl } from "../../lib/trkl.js";
 import Util from "../../lib/util.js";
 
-export const EditableField = ({ options, key, className, style, multiline = false, wrapFlex = true, mame, onCreateName, onNameChanged, value, onValueChanged }) => {
+export const EditableField = ({ options, key, className, style, multiline = false, wrapFlex = true, onCreateName, onNameChanged, value, onValueChanged, ...props }) => {
   const { onEditBegin, onEditConfirm, onEditCancel, isEditing, editValue, setEditValue, useDraft, hasDraft } = useEditableState({
     value,
     onValueChanged,
     localStorageKey: key || "editable"
   });
 
-  const changeName = name => {
-    setName(name);
-    multiline = String(name).toLowerCase() == "text";
-    onNameChanged(name.label);
-  };
-
   const lines = 10; //value.split(/\n/g).length;
   const lineStyle = multiline ? { height: `${lines}em`, whiteSpace: "pre" } : {};
   const ref = trkl();
   const [focus, setFocus] = React.useState(false);
-  const [name, setName] = React.useState("");
+  const [name, setName] = React.useState(props.name);
+
+  const changeName = opt => {
+    setName(opt.name);
+    multiline = String(opt.type).toLowerCase() == "text";
+    onNameChanged(opt.label);
+  };
 
   const changeValue = value => {
     setEditValue(value);
@@ -35,7 +35,9 @@ export const EditableField = ({ options, key, className, style, multiline = fals
           rows={lines}
           style={lineStyle}
           value={editValue}
-          onChange={e => changeValue(e.target.value)}
+          onChange={e => {
+            changeValue(e.target.value);
+          }}
           ref={input => {
             if(!focus) {
               if(input) input.focus();
@@ -92,7 +94,9 @@ export const EditableField = ({ options, key, className, style, multiline = fals
         {content}
       </div>
     );*/
+  const selection = Util.find(options, name, "name");
 
+  console.log("EditableField.render ", { name, value, options });
   return (
     <div className={classNames(className, "editable-field")} style={style}>
       {isEditing ? (
@@ -106,16 +110,16 @@ export const EditableField = ({ options, key, className, style, multiline = fals
             return typeof value == "string" ? Util.ucfirst(value) : "";
           }}
           className={classNames("editable-field-name", className + "-name")}
-          value={name}
+          value={selection}
           onChange={choice => {
-            console.log("name change: ", choice);
+            console.log("name change: ", choice.name || choice.title);
             changeName(choice);
           }}
           options={options}
         />
       ) : (
         <div className={classNames("editable-field-name", "editable-field-name-noedit", className + "-name")}>
-          <div className={classNames("editable-field-name-inner", "editable-field-name-noedit-inner")}> {name.label}</div>
+          <div className={classNames("editable-field-name-inner", "editable-field-name-noedit-inner")}>{selection.label}</div>
         </div>
       )}
 

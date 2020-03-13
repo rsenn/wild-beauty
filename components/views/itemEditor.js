@@ -16,12 +16,13 @@ import "../../static/css/react-dropdown-tree-select.css";
 export const ItemEditor = inject("rootStore")(
   observer(({ rootStore, image, tree, makeTreeSelEvent }) => {
     let img = image || rootStore.currentImage;
-    console.log("ItemEditor.render ", { tree, img });
 
     if(img === null) return undefined;
 
     if(img && img.landscape === undefined) img.landscape = img.width >= img.height;
-
+    let entries = toJS(rootStore.fields);
+    console.log("ItemEditor.render ", { tree, img, entries });
+    let fields = rootStore.fieldNames;
     return (
       <div className={"content-edit"}>
         <div className={"item-photo"}>
@@ -63,50 +64,56 @@ export const ItemEditor = inject("rootStore")(
         />
         {/*       <SortableTree treeData={tree} />*/}
         <div className={"item-fields"}>
-          {typeof rootStore.entries == "object" &&
-            rootStore.entries &&
-            typeof rootStore.entries.map == "function" &&
-            rootStore.entries.map(field => (
+          {fields.map(field => {
+            let { name, title, type = "string", value = "", multiline = false } = field;
+            console.log("field: ", field);
+
+            return (
               <EditableField
-                options={rootStore.fieldNames}
-                multiline={!!field.multiline}
+                options={toJS(rootStore.fieldNames)}
+                multiline={!!multiline}
                 hasDraft={false}
                 className={"editable-field"}
-                name={field.type}
-                value={field.value}
+                name={name}
+                value={value}
                 onNameChanged={newName => {
-                  field.multiline = String(newName).toLowerCase() == "text";
-                  field.type = newName;
+                  multiline = String(newName).toLowerCase() == "text";
+                  type = newName;
                 }}
                 onValueChanged={newVal => {
-                  field.value = newVal;
+                                    console.log(`value of ${name} changed: ${newVal}`);
+
+                  value = newVal;
                 }}
                 onCreateName={name => {
                   console.log("onCreateName: ", name);
                   if(typeof name == "string" && name.length > 0) {
                     name = name.toLowerCase();
                     rootStore.fields.push(name);
-                    field.type = name;
+                    type = name;
                   }
                 }}
               />
-            ))}
+            );
+          })}
           <AddItemBar
-            onAdd={() => {
+            onAdd={event => {
+              console.log("Add item:", event);
               let obj = observable({ type: null, value: "" });
-              if(typeof rootStore.entries == "object" && rootStore.entries && rootStore.entries.push !== undefined) rootStore.entries.push(obj);
-              Timer.once(100, () => {
-                let a = [...Element.findAll("img").filter(i => /edit/.test(i.src))];
-                let button = a[a.length - 1] ? a[a.length - 1].parentElement : null;
+              if(typeof entries == "object" && entries && entries.push !== undefined) entries.push(obj);
+              const add = () => {
+                let editor = Element.find(".content-edit");
+                let a = [...Element.findAll("button", editor)].filter(b => !b.classList.contains("save"));
+                let button = a[a.length - 1] ? a[a.length - 1] : null;
                 console.log("Button: ", button);
                 if(button) {
                   if(button.click) button.click();
-
-                  let inputs = Util.array([...Element.findAll("input", button.parentElement)]);
+                  let inputs = Util.array([...Element.findAll("input", editor)]);
                   console.log("inputs:", inputs);
                   inputs[0].focus();
                 }
-              });
+              };
+              add();
             }}
           >
             <button
