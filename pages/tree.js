@@ -318,7 +318,7 @@ class TreePage extends React.Component {
     console.log("g.rect: ", g.rect);
     console.log("rootItem: ", toJS(rootItem));
 
-    let tree = Tree({ tree: root }, false);
+    let tree = TreeView({ tree: root }, false);
     console.log("Tree.constructor tree: ", tree);
 
     return { params, items, tree: root, g };
@@ -584,7 +584,7 @@ class TreePage extends React.Component {
     console.log("TreePage.render");
     return (
       <Layout title={"Tree"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
-        <Tree tree={tree} />
+        <TreeView tree={tree} />
         <br />
         {this.state.view == "item" ? (
           <ItemView id={this.state.itemId} />
