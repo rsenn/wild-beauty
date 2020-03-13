@@ -139,7 +139,9 @@ class New extends React.Component {
                     e = e.parentElement;
                   } while(!e.classList.contains("image-entry") && !e.classList.contains("rug-item"));
                   rootStore.deleteImage(id, result => {
-                    Element.remove(e);
+
+
+                    Element.remove(e.parentElement);
                   });
                 }}
                 onRotate={(id, angle = 90) => {
