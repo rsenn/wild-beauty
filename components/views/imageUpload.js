@@ -59,8 +59,8 @@ export const ImageUpload = inject("rootStore")(
             // arg.remove();
           }}
         ></RUG>
-        <div className={"rug"}>
-          <div className={"rug-items __card __sorting" /*"image-list grid-col grid-gap-10"*/}>
+        <div className={"upload"}>
+          <div className={"upload-items __card __sorting" /*"image-list grid-col grid-gap-10"*/}>
             {images.map((image, index) => {
               let id = image.id;
 
@@ -74,9 +74,9 @@ export const ImageUpload = inject("rootStore")(
 
               return (
                 <div key={index}>
-                  <div className={"rug-item"}>
-                    <div className={"rug-card"}>
-                      <SizedAspectRatioBox className={"item-box"} insideClassName={"tooltip"} sizeClassName={"rug-image"} insideProps={{ ["data-tooltip"]: `${width}x${height} ${orientation}` }}>
+                  <div className={"upload-item"}>
+                    <div className={"upload-card"}>
+                      <SizedAspectRatioBox className={"item-box"} insideClassName={"tooltip"} sizeClassName={"upload-image"} insideProps={{ ["data-tooltip"]: `${width}x${height} ${orientation}` }}>
                         <img
                           id={`image-${id}`}
                           className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
@@ -121,7 +121,7 @@ export const ImageUpload = inject("rootStore")(
           </div>
         </div>
         <style jsx global>{`
-          .rug-item {
+          .upload-item {
             cursor: -webkit-grab;
             cursor: grab;
           }
@@ -187,44 +187,44 @@ export const ImageUpload = inject("rootStore")(
             position: relative;
           }
 
-          .rug-dragging-item > div:not(.rug-list) {
+          .upload-dragging-item > div:not(.upload-list) {
             transform: scale(1.1);
           }
 
-          .rug {
+          .upload {
             font-size: 14px;
             color: #000;
             min-width: 80vw;
           }
 
-          .rug .rug-file-input {
+          .upload .upload-file-input {
             display: none !important;
           }
 
-          .rug .rug-item {
+          .upload .upload-item {
             justify-content: center;
             user-select: none;
             cursor: default;
           }
 
-          .rug .rug-items.__card {
+          .upload .upload-items.__card {
             display: flex;
             flex-flow: row wrap;
             margin: 0 -10px;
           }
 
-          .rug .rug-items.__card .rug-item {
+          .upload .upload-items.__card .upload-item {
             display: flex;
             justify-content: center;
             align-items: center;
           }
 
-          .rug .rug-items.__list {
+          .upload .upload-items.__list {
             padding-top: 30px;
             min-height: 220px;
           }
 
-          .rug .rug-handle {
+          .upload .upload-handle {
             width: 100%;
             height: 290px;
             overflow: hidden;
@@ -235,7 +235,7 @@ export const ImageUpload = inject("rootStore")(
             flex-direction: column;
           }
 
-          .rug .rug-handle:before {
+          .upload .upload-handle:before {
             content: "";
             position: absolute;
             top: 0;
@@ -245,17 +245,17 @@ export const ImageUpload = inject("rootStore")(
             border: 4px solid #000;
           }
 
-          .rug .rug-handle .rug-handle-info,
-          .rug-card {
+          .upload .upload-handle .upload-handle-info,
+          .upload-card {
             position: relative;
           }
 
-          .rug .rug-handle svg.rug-handle-icon {
+          .upload .upload-handle svg.upload-handle-icon {
             width: 70px;
           }
 
-          .rug .rug-handle svg.rug-handle-icon line,
-          .rug .rug-handle svg.rug-handle-icon polyline {
+          .upload .upload-handle svg.upload-handle-icon line,
+          .upload .upload-handle svg.upload-handle-icon polyline {
             fill: none;
             stroke: #000;
             stroke-linejoin: round;
@@ -263,25 +263,25 @@ export const ImageUpload = inject("rootStore")(
             stroke-linecap: round;
           }
 
-          .rug .rug-handle.__dragging:before {
+          .upload .upload-handle.__dragging:before {
             border: 4px dashed rgba(138, 0, 16, 0.8);
             background-color: rgba(0, 122, 255, 0.15);
           }
 
-          .rug .rug-handle.__dragging svg line,
-          .rug .rug-handle.__dragging svg polyline {
+          .upload .upload-handle.__dragging svg line,
+          .upload .upload-handle.__dragging svg polyline {
             stroke: rgba(138, 0, 16, 0.8);
           }
 
-          .rug .rug-handle.__dragging .__arrow {
+          .upload .upload-handle.__dragging .__arrow {
             animation: 1s up-arrow forwards infinite;
           }
 
-          .rug .rug-handle .rug-handle-info .rug-handle-drop-text {
+          .upload .upload-handle .upload-handle-info .upload-handle-drop-text {
             font-size: 22px;
           }
 
-          .rug .rug-handle .rug-handle-info .rug-handle-button {
+          .upload .upload-handle .upload-handle-info .upload-handle-button {
             background-color: rgba(138, 0, 16, 0.8);
             padding: 7px 12px;
             font-size: 16px;
@@ -292,18 +292,18 @@ export const ImageUpload = inject("rootStore")(
             margin: 0 auto;
           }
 
-          .rug .rug-handle .rug-handle-info .rug-handle-button:hover {
+          .upload .upload-handle .upload-handle-info .upload-handle-button:hover {
             background-color: rgba(192, 8, 32, 0.8);
           }
 
-          .rug .rug-handle .rug-handle-info span {
+          .upload .upload-handle .upload-handle-info span {
             text-align: center;
             padding: 10px 0;
             font-size: 17px;
             display: block;
           }
 
-          .rug-card {
+          .upload-card {
             flex: 1 1 20%;
             width: 18vw;
             background-color: #000;
@@ -312,11 +312,11 @@ export const ImageUpload = inject("rootStore")(
             margin: 10px;
           }
 
-          .rug-card.__error {
+          .upload-card.__error {
             border: 3px solid rgba(160, 0, 16, 1);
           }
 
-          .rug-card .rug-card-image {
+          .upload-card .upload-card-image {
             width: 100%;
             padding-top: 100%;
             background-position: 50%;
@@ -324,7 +324,7 @@ export const ImageUpload = inject("rootStore")(
             background-repeat: no-repeat;
           }
 
-          .rug-card .rug-card-name {
+          .upload-card .upload-card-name {
             position: absolute;
             z-index: 15;
             height: 100px;
@@ -337,10 +337,10 @@ export const ImageUpload = inject("rootStore")(
             color: #f5f5f5;
           }
 
-          .rug-card .rug-card-progress,
-          .rug-card .rug-card-progress-count,
-          .rug-card .rug-card-refresh,
-          .rug-card .rug-card-upload-button {
+          .upload-card .upload-card-progress,
+          .upload-card .upload-card-progress-count,
+          .upload-card .upload-card-refresh,
+          .upload-card .upload-card-upload-button {
             top: calc(50% - 25px);
             left: calc(50% - 25px);
             width: 50px;
@@ -348,22 +348,22 @@ export const ImageUpload = inject("rootStore")(
             position: absolute;
           }
 
-          .rug-card .rug-card-name > div {
+          .upload-card .upload-card-name > div {
             margin: 10px;
             overflow: hidden;
             text-overflow: ellipsis;
           }
 
-          .rug-card .rug-card-size {
+          .upload-card .upload-card-size {
             color: #c3c3c3;
             font-size: 11px;
           }
 
-          .rug-card .rug-card-progress {
+          .upload-card .upload-card-progress {
             display: block;
           }
 
-          .rug-card .rug-card-progress .__progress-cricle {
+          .upload-card .upload-card-progress .__progress-cricle {
             stroke: rgba(138, 0, 16, 0.8);
             fill: none;
             stroke-width: 5;
@@ -371,51 +371,51 @@ export const ImageUpload = inject("rootStore")(
             transition: stroke-dasharray 0.2s ease;
           }
 
-          .rug-card .rug-card-progress-count {
+          .upload-card .upload-card-progress-count {
             text-align: center;
             line-height: 50px;
             color: #fff;
             font-weight: 700;
           }
 
-          .rug-card .rug-card-refresh {
+          .upload-card .upload-card-refresh {
             background-color: rgba(255, 255, 255, 0.7);
             z-index: 20;
             border: 2px solid transparent;
           }
 
-          .rug-card .rug-card-refresh:hover {
+          .upload-card .upload-card-refresh:hover {
             background-color: rgba(255, 255, 255, 0.9);
             border: 2px solid #000;
           }
 
-          .rug-card .rug-card-refresh .__refresh-icon g {
+          .upload-card .upload-card-refresh .__refresh-icon g {
             fill: #3d4852;
           }
 
-          .rug-card .rug-card-refresh.__spin {
+          .upload-card .upload-card-refresh.__spin {
             animation: __spin 1s linear infinite;
             border: 2px solid rgba(138, 0, 16, 0.8) !important;
           }
 
-          .rug-card .rug-card-refresh.__spin .__refresh-icon g {
+          .upload-card .upload-card-refresh.__spin .__refresh-icon g {
             fill: rgba(138, 0, 16, 0.8);
           }
 
-          .rug-card .rug-card-upload-button {
+          .upload-card .upload-card-upload-button {
             background-color: rgba(255, 255, 255, 0.7);
             z-index: 20;
             text-align: center;
             border: 2px solid transparent;
           }
 
-          .rug-card .rug-card-upload-button svg {
+          .upload-card .upload-card-upload-button svg {
             width: 25px;
             margin-top: 6px;
           }
 
-          .rug-card .rug-card-upload-button svg line,
-          .rug-card .rug-card-upload-button svg polyline {
+          .upload-card .upload-card-upload-button svg line,
+          .upload-card .upload-card-upload-button svg polyline {
             fill: none;
             stroke: #000;
             stroke-linejoin: round;
@@ -423,21 +423,21 @@ export const ImageUpload = inject("rootStore")(
             stroke-linecap: round;
           }
 
-          .rug-card .rug-card-upload-button:hover {
+          .upload-card .upload-card-upload-button:hover {
             border: 2px solid rgba(138, 0, 16, 0.8);
             background-color: rgba(255, 255, 255, 0.9);
           }
 
-          .rug-card .rug-card-upload-button:hover svg line,
-          .rug-card .rug-card-upload-button:hover svg polyline {
+          .upload-card .upload-card-upload-button:hover svg line,
+          .upload-card .upload-card-upload-button:hover svg polyline {
             stroke: rgba(138, 0, 16, 0.8);
           }
 
-          .rug-card .rug-card-upload-button:hover svg .__arrow {
+          .upload-card .upload-card-upload-button:hover svg .__arrow {
             animation: 1s up-arrow forwards infinite;
           }
 
-          .rug-card .rug-card-remove {
+          .upload-card .upload-card-remove {
             position: absolute;
             z-index: 40;
             bottom: 0;
@@ -457,17 +457,17 @@ export const ImageUpload = inject("rootStore")(
             transition: border 0.2s ease;
           }
 
-          .rug-card .rug-card-remove:hover {
+          .upload-card .upload-card-remove:hover {
             border: 1.5px solid #fff;
           }
 
-          .rug-card .rug-card-remove svg {
+          .upload-card .upload-card-remove svg {
             stroke: currentColor;
             height: 18px;
             width: 18px;
           }
 
-          .rug-list {
+          .upload-list {
             width: 100%;
             background-color: #000;
             border-radius: 3px;
@@ -479,11 +479,11 @@ export const ImageUpload = inject("rootStore")(
             margin-bottom: 10px;
           }
 
-          .rug-list.__error {
+          .upload-list.__error {
             border: 3px solid rgba(160, 0, 16, 1);
           }
 
-          .rug-list .rug-list-progress {
+          .upload-list .upload-list-progress {
             position: absolute;
             top: 0;
             left: 0;
@@ -495,8 +495,8 @@ export const ImageUpload = inject("rootStore")(
             transition: all 0.2s ease;
           }
 
-          .rug-list .rug-list-refresh,
-          .rug-list .rug-list-upload-button {
+          .upload-list .upload-list-refresh,
+          .upload-list .upload-list-upload-button {
             position: absolute;
             bottom: 5px;
             right: 5px;
@@ -505,11 +505,11 @@ export const ImageUpload = inject("rootStore")(
             z-index: 20;
           }
 
-          .rug-list .rug-list-progress.__active {
+          .upload-list .upload-list-progress.__active {
             opacity: 1;
           }
 
-          .rug-list .rug-list-progress-count {
+          .upload-list .upload-list-progress-count {
             position: absolute;
             bottom: 5px;
             right: 5px;
@@ -519,46 +519,46 @@ export const ImageUpload = inject("rootStore")(
             transition: all 0.2s ease;
           }
 
-          .rug-list .rug-list-progress-count.__active {
+          .upload-list .upload-list-progress-count.__active {
             opacity: 1;
           }
 
-          .rug-list .rug-list-refresh {
+          .upload-list .upload-list-refresh {
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.7);
             border: 2px solid transparent;
           }
 
-          .rug-list .rug-list-refresh:hover {
+          .upload-list .upload-list-refresh:hover {
             background-color: rgba(255, 255, 255, 0.9);
           }
 
-          .rug-list .rug-list-refresh .__refresh-icon g {
+          .upload-list .upload-list-refresh .__refresh-icon g {
             fill: #3d4852;
           }
 
-          .rug-list .rug-list-refresh.__spin {
+          .upload-list .upload-list-refresh.__spin {
             animation: __spin 1s linear infinite;
           }
 
-          .rug-list .rug-list-refresh.__spin .__refresh-icon g {
+          .upload-list .upload-list-refresh.__spin .__refresh-icon g {
             fill: rgba(138, 0, 16, 0.8);
           }
 
-          .rug-list .rug-list-upload-button {
+          .upload-list .upload-list-upload-button {
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.7);
             text-align: center;
             border: 2px solid transparent;
           }
 
-          .rug-list .rug-list-upload-button svg {
+          .upload-list .upload-list-upload-button svg {
             width: 15px;
             margin-top: 2px;
           }
 
-          .rug-list .rug-list-upload-button svg line,
-          .rug-list .rug-list-upload-button svg polyline {
+          .upload-list .upload-list-upload-button svg line,
+          .upload-list .upload-list-upload-button svg polyline {
             fill: none;
             stroke: #000;
             stroke-linejoin: round;
@@ -566,36 +566,36 @@ export const ImageUpload = inject("rootStore")(
             stroke-linecap: round;
           }
 
-          .rug-list .rug-list-upload-button:hover {
+          .upload-list .upload-list-upload-button:hover {
             background-color: rgba(255, 255, 255, 0.9);
           }
 
-          .rug-list .rug-list-upload-button:hover svg line,
-          .rug-list .rug-list-upload-button:hover svg polyline {
+          .upload-list .upload-list-upload-button:hover svg line,
+          .upload-list .upload-list-upload-button:hover svg polyline {
             stroke: rgba(138, 0, 16, 0.8);
           }
 
-          .rug-list .rug-list-upload-button:hover svg .__arrow {
+          .upload-list .upload-list-upload-button:hover svg .__arrow {
             animation: 1s up-arrow forwards infinite;
           }
 
-          .rug-list .rug-list-image {
+          .upload-list .upload-list-image {
             width: 100px;
             height: 70px;
             padding: 5px;
           }
 
-          .rug-list .rug-list-image img {
+          .upload-list .upload-list-image img {
             width: 100%;
             height: 100%;
           }
 
-          .rug-list .rug-list-content {
+          .upload-list .upload-list-content {
             padding: 5px;
             width: calc(100% - 120px);
           }
 
-          .rug-list .rug-list-content .rug-list-name {
+          .upload-list .upload-list-content .upload-list-name {
             color: #f5f5f5;
             white-space: nowrap;
             font-size: 14px;
@@ -605,13 +605,13 @@ export const ImageUpload = inject("rootStore")(
             width: calc(100% - 40px);
           }
 
-          .rug-list .rug-list-content .rug-list-size {
+          .upload-list .upload-list-content .upload-list-size {
             color: #ddd;
             font-size: 12px;
             margin-top: 3px;
           }
 
-          .rug-list .rug-list-remove {
+          .upload-list .upload-list-remove {
             position: absolute;
             z-index: 40;
             top: 0;
@@ -625,13 +625,13 @@ export const ImageUpload = inject("rootStore")(
             align-items: center;
           }
 
-          .rug-list .rug-list-remove svg {
+          .upload-list .upload-list-remove svg {
             stroke: currentColor;
             height: 22px;
             width: 22px;
           }
 
-          .rug-list .rug-list-remove:hover {
+          .upload-list .upload-list-remove:hover {
             color: #fff;
           }
         `}</style>

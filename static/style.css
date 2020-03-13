@@ -145,7 +145,7 @@ a:hover:before {
   transform: translateY(-50%);
 }
 
-.rug-item {
+.upload-item {
   cursor: -webkit-grab;
   cursor: grab;
 }

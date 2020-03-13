@@ -1,4 +1,4 @@
-import { getBody } from "./Utils";
+import { getBody } from "./Utils.js";
 
 const Request = ({
   uid,

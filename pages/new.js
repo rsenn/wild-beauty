@@ -138,7 +138,7 @@ class New extends React.Component {
                   do {
                     if(e.parentElement == null) break;
                     e = e.parentElement;
-                  } while(!e.classList || !(e.classList.contains("image-entry") || e.classList.contains("rug-item")));
+                  } while(!e.classList || !(e.classList.contains("image-entry") || e.classList.contains("upload-item")));
                   rootStore.deleteImage(id, result => {
                     Element.remove(e.parentElement);
                   });

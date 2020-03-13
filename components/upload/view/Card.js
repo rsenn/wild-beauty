@@ -1,5 +1,5 @@
 import React from "react";
-import RefreshIcon from "./RefreshIcon";
+import RefreshIcon from "./RefreshIcon.js";
 
 export default class Card extends React.Component {
   constructor() {
@@ -16,20 +16,20 @@ export default class Card extends React.Component {
       { spin } = this.state;
 
     return (
-      <div {...props} key={uid} className={`rug-card ${error ? "__error" : ""}`}>
-        <div className="rug-card-name" onClick={click}>
+      <div {...props} key={uid} className={`upload-card ${error ? "__error" : ""}`}>
+        <div className="upload-card-name" onClick={click}>
           <div>
             {name}
 
-            <div className="rug-card-size">{size}</div>
+            <div className="upload-card-size">{size}</div>
           </div>
         </div>
 
-        <div style={{ backgroundImage: `url(${source})` }} onClick={click} className="rug-card-image" />
+        <div style={{ backgroundImage: `url(${source})` }} onClick={click} className="upload-card-image" />
 
         {!done && !error && uploading && (
           <>
-            <svg viewBox="0 0 36 38" className="rug-card-progress">
+            <svg viewBox="0 0 36 38" className="upload-card-progress">
               <path
                 className="__progress-cricle"
                 style={{ strokeDasharray: `${progress}, 100` }}
@@ -39,12 +39,12 @@ export default class Card extends React.Component {
               />
             </svg>
 
-            <div className="rug-card-progress-count">{progress}</div>
+            <div className="upload-card-progress-count">{progress}</div>
           </>
         )}
 
         {!(done || error || uploading) && (
-          <div onClick={upload} className="rug-card-upload-button">
+          <div onClick={upload} className="upload-card-upload-button">
             <svg viewBox="0 -5 32 52">
               <g>
                 <polyline points="1 19 1 31 31 31 31 19" />
@@ -68,7 +68,7 @@ export default class Card extends React.Component {
                 refresh();
               }, 700);
             }}
-            className={`rug-card-refresh ${spin ? "__spin" : ""}`}
+            className={`upload-card-refresh ${spin ? "__spin" : ""}`}
           >
             <div style={{ padding: 7 }}>
               <RefreshIcon />
@@ -76,7 +76,7 @@ export default class Card extends React.Component {
           </div>
         )}
 
-        <div className="rug-card-remove" onClick={remove}>
+        <div className="upload-card-remove" onClick={remove}>
           <svg viewBox="0 0 40 40">
             <path stroke="current" strokeLinecap="round" strokeWidth="4" d="M 10,10 L 30,30 M 30,10 L 10,30" />
           </svg>

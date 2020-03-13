@@ -1,12 +1,12 @@
 import React from "react";
-import { defaultProps, propTypes } from "./PropTypes";
+import { defaultProps, propTypes } from "./PropTypes.js";
 
-import Handle from "./Handle";
-import Context from "./Context";
-import Request from "./Request";
+import Handle from "./Handle.js";
+import Context from "./Context.js";
+import Request from "./Request.js";
 import View from "./view";
 
-import { bytesToSize, isAccepted, getImageDimensions } from "./Utils";
+import { bytesToSize, isAccepted, getImageDimensions } from "./Utils.js";
 
 class RUG extends React.Component {
   constructor({ initialState, ssrSupport }) {
@@ -53,7 +53,7 @@ class RUG extends React.Component {
   }
 
   create(item) {
-    const uid = `rug-${Date.now()}-${this.increment++}`;
+    const uid = `upload-${Date.now()}-${this.increment++}`;
 
     item = {
       uid,
@@ -407,14 +407,14 @@ class RUG extends React.Component {
 
     return (
       <Context.Provider value={contextValue}>
-        <div className={`rug ${className}`} style={style}>
+        <div className={`upload ${className}`} style={style}>
           {header && (typeof header === "function" ? header(options) : Handle(options, header))}
 
           {this.showChildren(options)}
 
           {footer && (typeof footer === "function" ? footer(options) : Handle(options, footer))}
 
-          <input multiple type="file" ref={this.fileInput} className="rug-file-input" accept={accept.map(type => `${acceptType}/${type}`)} onChange={event => this.uploadFiles(event.target.files)} />
+          <input multiple type="file" ref={this.fileInput} className="upload-file-input" accept={accept.map(type => `${acceptType}/${type}`)} onChange={event => this.uploadFiles(event.target.files)} />
         </div>
       </Context.Provider>
     );

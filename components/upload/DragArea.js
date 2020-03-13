@@ -1,8 +1,8 @@
 import React from "react";
 import { SortableContainer, SortableElement } from "react-sortable-hoc";
 
-import Context from "./Context";
-import { arrayMove } from "./Utils";
+import Context from "./Context.js";
+import { arrayMove } from "./Utils.js";
 
 const DragItem = SortableElement(({ children }) => <div>{children}</div>);
 const SortableList = SortableContainer(({ children }) => children);
@@ -15,7 +15,7 @@ const DragArea = props => {
       {({ images, setSort }) => (
         <SortableList
           {...props}
-          helperClass="rug-dragging-item"
+          helperClass="upload-dragging-item"
           onSortEnd={({ oldIndex, newIndex }) => {
             setSort(arrayMove(images, oldIndex, newIndex));
           }}

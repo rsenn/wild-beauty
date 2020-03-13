@@ -1,11 +1,11 @@
 import React from "react";
-import DropArea from "./DropArea";
+import DropArea from "./DropArea.js";
 
 export default (options, { handle }) => (
   <DropArea>
     {isDrag => (
-      <div className={`rug-handle ${isDrag ? "__dragging" : ""}`}>
-        <svg viewBox="0 -5 32 52" className="rug-handle-icon">
+      <div className={`upload-handle ${isDrag ? "__dragging" : ""}`}>
+        <svg viewBox="0 -5 32 52" className="upload-handle-icon">
           <g>
             <polyline points="1 19 1 31 31 31 31 19" />
             <polyline className="__arrow" points="8 9 16 1 24 9" />
@@ -13,16 +13,16 @@ export default (options, { handle }) => (
           </g>
         </svg>
 
-        <div className="rug-handle-info">
+        <div className="upload-handle-info">
           {typeof handle === "function" ? (
             handle(options)
           ) : (
             <React.Fragment>
-              <div className="rug-handle-drop-text">Drag and drop Images Here to Upload</div>
+              <div className="upload-handle-drop-text">Drag and drop Images Here to Upload</div>
 
               <span>Or</span>
 
-              <div onClick={options.openDialogue} className="rug-handle-button">
+              <div onClick={options.openDialogue} className="upload-handle-button">
                 Select Images to Upload
               </div>
             </React.Fragment>

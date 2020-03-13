@@ -1,8 +1,8 @@
 import React from "react";
 
-import List from "./List";
-import Card from "./Card";
-import DragArea from "../DragArea";
+import List from "./List.js";
+import Card from "./Card.js";
+import DragArea from "../DragArea.js";
 
 const Item = (type, image) => {
   switch (type) {
@@ -17,18 +17,18 @@ const Item = (type, image) => {
 };
 
 export default ({ type, sorting }, images) => {
-  const className = `rug-items __${type} ${sorting ? "__sorting" : ""}`;
+  const className = `upload-items __${type} ${sorting ? "__sorting" : ""}`;
 
   const options = typeof sorting === "object" ? sorting : {};
 
   return sorting ? (
     <DragArea {...options} className={className}>
-      {image => <div className="rug-item">{Item(type, image)}</div>}
+      {image => <div className="upload-item">{Item(type, image)}</div>}
     </DragArea>
   ) : (
     <div className={className}>
       {images.map((image, key) => (
-        <div className="rug-item" key={key}>
+        <div className="upload-item" key={key}>
           {Item(type, image)}
         </div>
       ))}
