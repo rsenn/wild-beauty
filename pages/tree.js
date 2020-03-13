@@ -8,7 +8,7 @@ import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
 import { ItemView } from "../components/views/itemView.js";
-import { TreeView } from "../components/treeView.js";
+import { TreeView } from "../components/views/treeView.js";
 import { Layout } from "../components/layout.js";
 import { action } from "mobx";
 import Nav from "../components/nav.js";
@@ -316,14 +316,13 @@ class TreePage extends React.Component {
 
     console.log("g.points: ", g.points);
     console.log("g.rect: ", g.rect);
-  //  console.log("rootItem: ", toJS(rootItem));
+    //  console.log("rootItem: ", toJS(rootItem));
 
     let nodes = TreeView({ tree: root }, false);
 
-  for(let node of Util.walkTree(nodes[0])) {
-        console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ['children', 'key']), { newline: '', indent: '', spacing: ' ' }).replace(/\s+/g, " "));
-  }
-
+    for(let node of Util.walkTree(nodes[0])) {
+      console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ["children", "key"]), { newline: "", indent: "", spacing: " " }));
+    }
 
     return { params, items, tree: root, g };
   }
@@ -333,9 +332,9 @@ class TreePage extends React.Component {
     this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
     const { rootStore } = this.props;
 
+    /*    this.tree = this.props.tree;
+     */
 
-/*    this.tree = this.props.tree;
-*/    
     if(global.window) {
       window.api = this.api;
       window.page = this;

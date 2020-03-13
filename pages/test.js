@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Layer from "../components/layer.js";
+import Layer from "../components/simple/layer.js";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import { ScrollController } from "../lib/scrollController.js";
 import Alea from "../lib/alea.js";

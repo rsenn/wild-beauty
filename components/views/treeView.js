@@ -1,6 +1,6 @@
 import React from "react";
-import Util from "../lib/util.js";
-import { HSLA, Point, isPoint, Line, ReactComponent } from "../lib/dom.js";
+import Util from "../../lib/util.js";
+import { HSLA, Point, isPoint, Line, ReactComponent } from "../../lib/dom.js";
 
 function* Table2DIterator(table) {
   for(var y = 0; y < table.length; y++) for (var x = 0; x < table[y].length; x++) yield table[y][x];
@@ -115,7 +115,7 @@ export const TreeView = ({ tree, minWidth, minHeight, treeVerify = node => true,
 
   var max_chars = Math.round(radius / 3.03);
 
-//  console.log("TreeView.render ", tree);
+  //  console.log("TreeView.render ", tree);
 
   Util.traverseTree(tree, (item, depth, parent) => {
     while(table[depth] === undefined) table.push([]);
@@ -245,7 +245,7 @@ if(height  < minHeight)
 
   const entries = [...Table2DIterator(table)];
 
- // console.log(`TreeView.render `, { entries });
+  // console.log(`TreeView.render `, { entries });
 
   for(var it of Table2DIterator(table)) {
     const { pos } = it;
@@ -308,7 +308,7 @@ if(height  < minHeight)
     );
   });
 
- // console.log("TreeView items ", items.map(item => typeof item) );
+  // console.log("TreeView items ", items.map(item => typeof item) );
 
   /*  let obj = {
     tagName: "svg",
@@ -355,10 +355,9 @@ if(height  < minHeight)
 
   let obj = ReactComponent.toObject(o);
 
- // console.log("TreeView.render obj:", obj);
+  // console.log("TreeView.render obj:", obj);
 
   if(reactComponent) return o;
-
 
   return obj;
 };

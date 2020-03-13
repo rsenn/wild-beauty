@@ -4,7 +4,7 @@ import Util from "../lib/util.js";
 import Alea from "../lib/alea.js";
 import anime from "animejs";
 import { RandomColor } from "../lib/dom.js";
-import Layer from "../components/layer.js";
+import Layer from "../components/simple/layer.js";
 import { SizedAspectRatioBox } from "./simple/aspectBox.js";
 
 const imageNames = [
