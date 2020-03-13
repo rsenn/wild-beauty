@@ -14,7 +14,7 @@
 .rug .rug-item {
   justify-content: center;
   user-select: none;
- /* cursor: grab;*/
+  cursor: default;
 }
 .rug .rug-items.__card {
 /*  display: -ms-grid;
