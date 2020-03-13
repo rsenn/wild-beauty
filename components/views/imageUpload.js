@@ -46,9 +46,10 @@ export const ImageUpload = inject("rootStore")(
           //console.log("image-list entry", {id,image});
           const { width, height } = image;
           const landscape = width > height;
+          const orientation = landscape ? "landscape" : "portrait";
 
           return (
-            <div key={index} className={"image-entry tooltip"} data-tooltip={`width: ${width} height: ${height} landscape: ${landscape}`}>
+            <div key={index} className={"image-entry tooltip"} data-tooltip={`${width}x${height} ${orientation}`}>
               <SizedAspectRatioBox className={"item-box"}>
                 <img
                   id={`image-${id}`}
@@ -56,7 +57,7 @@ export const ImageUpload = inject("rootStore")(
                   src={`/api/image/get/${id}.jpg`}
                   width={width}
                   height={height}
-                  orientation={landscape ? "landscape" : "portrait"}
+                  orientation={orientation}
                   style={{
                     width: landscape ? `${(width * 100) / height}%` : "100%",
                     height: landscape ? "100%" : "auto"

@@ -22,6 +22,7 @@ const Readable = stream.Readable;
 const tempfile = require("tempfile");
 const fsPromises = require("fs").promises;
 const { loadFile, getImagePalette, imageImport, rotateImage } = require("./imageConversion.js");
+const { isJpeg, jpegProps } = require("./lib/jpeg.js");
 
 function bufferToStream(buffer) {
   let stream = new Readable();
@@ -305,7 +306,7 @@ if (!dev && cluster.isMaster) {
         delete photo.data;
         res.set("Content-Type", "image/jpeg");
         // const { aspect } = photo;
-        let { width, height } = jpeg.jpegProps(data);
+        let { width, height } = jpegProps(data);
         let aspect = width / height;
         let props = { width, height, aspect };
 

@@ -118,16 +118,22 @@ class New extends React.Component {
               onRotate={id => {
                 let img = Element.find(`#image-${id}`);
                 console.log("onRotate: ", { id, img });
+                let e = img;
+                do {
+                  e = e.parentElement;
+                } while(!e.classList.contains("image-entry"));
 
                 let src = img.getAttribute("src");
-                let width = img.getAttribute("height");
-                let height = img.getAttribute("width");
 
                 Element.attr(img, { src: "" });
 
-                rootStore.rotateImage(id, 90, result => {
+                rootStore.rotateImage(id, 90, ({ success, width, height }) => {
+                  const orientation = width > height ? "landscape" : "portrait";
+
+                  console.log("rotateImage result:", { success, width, height });
                   src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
                   Element.attr(img, { src, width, height });
+                  Element.attr(e, { ["data-tooltip"]: `${width}x${height} ${orientation}` });
                 });
               }}
             />
