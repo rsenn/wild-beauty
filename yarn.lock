@@ -3342,6 +3342,11 @@ data-uri-to-buffer@0.0.3:
   resolved "https://registry.yarnpkg.com/data-uri-to-buffer/-/data-uri-to-buffer-0.0.3.tgz#18ae979a6a0ca994b0625853916d2662bbae0b1a"
   integrity sha1-GK6XmmoMqZSwYlhTkW0mYruuCxo=
 
+date-fns@^2.5.1:
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.10.0.tgz#abd10604d8bafb0bcbd2ba2e9b0563b922ae4b6b"
+  integrity sha512-EhfEKevYGWhWlZbNeplfhIU/+N+x0iCIx7VzKlXma2EdQyznVlZhCptXUY+BegNpPW2kjdx15Rvq503YcXXrcA==
+
 debug@2.6.9, debug@^2.2, debug@^2.2.0, debug@^2.3.3:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
@@ -5009,6 +5014,11 @@ inspect-with-kind@^1.0.5:
   dependencies:
     kind-of "^6.0.2"
 
+intl@^1.2:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/intl/-/intl-1.2.5.tgz#82244a2190c4e419f8371f5aa34daa3420e2abde"
+  integrity sha1-giRKIZDE5Bn4Nx9ao02qNCDiq94=
+
 invariant@^2.0.0, invariant@^2.1.0, invariant@^2.2.2, invariant@^2.2.4:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
@@ -6045,6 +6055,11 @@ mobx-react@^6.1.4:
   integrity sha512-NCMJn/hrWoeyeNbzCsBDtftWSy6VlFgw1VzhogrciPFvJIl2xs+8rJJdPlRHQTiNirwNoHNKJgUE4WhPZPvKDw==
   dependencies:
     mobx-react-lite "^1.4.2"
+
+mobx@^4.2.0:
+  version "4.15.4"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-4.15.4.tgz#644eac80bdd15793855194e764c475041101b406"
+  integrity sha512-nyuHPqmKnVOnbvkjR8OrijBtovxAHYC+JU8/qBqvBw4Dez/n+zzxqNHbZNFy7/07+wwc/Qz7JS9WSfy1LcYISA==
 
 mobx@^5.15.0:
   version "5.15.4"
@@ -7670,10 +7685,22 @@ react-graph-network@^1.0.5:
     d3-selection "^1.4.0"
     d3-zoom "^1.8.3"
 
-react-i18nify-mobx@^0.0.1-security:
-  version "0.0.1-security"
-  resolved "https://registry.yarnpkg.com/react-i18nify-mobx/-/react-i18nify-mobx-0.0.1-security.tgz#2c2d6ae4a4479c3cd8d44c84939635ef7d9b8f93"
-  integrity sha512-5aPq5hH92DCW9s2MonFl8bNrxbCbt0iA03tHeCW5lHLiTwD5DobXt70e8JJMCbkj+NR8VpRq38tywLQRrSb5vA==
+react-i18nify-mobx@^1.0.0-1:
+  version "1.0.0-1"
+  resolved "https://registry.yarnpkg.com/react-i18nify-mobx/-/react-i18nify-mobx-1.0.0-1.tgz#4bfb9dceb712b8f0e0f56ba913999b9bdb444f04"
+  integrity sha512-kK7g2ml7j7sYxb1nQh09/58K53A004YTaQb3FvKY//JSoOjkGxP5SuKFwxxVZBk9yAkIq6R5kUUGPDeYb32z1w==
+  dependencies:
+    mobx "^4.2.0"
+    react-i18nify "^2.0.0-7"
+
+react-i18nify@^2.0.0-7:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/react-i18nify/-/react-i18nify-2.1.2.tgz#c2b39586248de5881cf9c5e5663bca967690158a"
+  integrity sha512-/g106cWwu2qRO1ndN8mxyZainSFdTYyb7idUd2RLvWBCirIBtZADmMCfmDZCmQPHXY7X8OO0m1PInMTx9gz8qA==
+  dependencies:
+    date-fns "^2.5.1"
+    intl "^1.2"
+    prop-types "^15.7.2"
 
 react-infinite-scroll-component@^4.0.2:
   version "4.5.3"
