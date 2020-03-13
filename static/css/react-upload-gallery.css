@@ -4,17 +4,17 @@
   color: black;
   min-width: 80vw;
 }
-.rug img {
+/*.rug img {
   pointer-events: none;
   user-select: none;
-}
+}*/
 .rug .rug-file-input {
   display: none !important;
 }
 .rug .rug-item {
   justify-content: center;
   user-select: none;
-  cursor: grab;
+ /* cursor: grab;*/
 }
 .rug .rug-items.__card {
 /*  display: -ms-grid;
@@ -96,7 +96,7 @@
   font-size: 16px;
   color: white;
   text-align: center;
-  cursor: pointer;
+  /*cursor: pointer;*/
   max-width: 250px;
   display: block;
   margin: 0 auto;
@@ -146,7 +146,7 @@
   position: relative;
   font-family: Fixed;
   overflow: auto;
-  cursor: pointer;
+  /*cursor: pointer;*/
   margin: 10px ;
 }
 /*@media (max-width: 450px) {
@@ -291,7 +291,7 @@
   align-items: center;
   border: 1.5px solid transparent;
   transition: border 200ms ease;
-  cursor: pointer;
+  /*cursor: pointer;*/
 }
 .rug-card .rug-card-remove:hover {
   border: 1.5px solid #fff;
@@ -361,7 +361,7 @@
   background-color: rgba(255, 255, 255, 0.7);
   z-index: 20;
   border: 2px solid transparent;
-  cursor: pointer;
+  /*cursor: pointer;*/
 }
 .rug-list .rug-list-refresh:hover {
   background-color: rgba(255, 255, 255, 0.9);
@@ -386,7 +386,7 @@
   z-index: 20;
   text-align: center;
   border: 2px solid transparent;
-  cursor: pointer;
+  /*cursor: pointer;*/
 }
 .rug-list .rug-list-upload-button svg {
   width: 15px;
@@ -468,14 +468,14 @@
   }
 }
 
-.__sorting .rug-list,
+/*.__sorting .rug-list,
 .__sorting .rug-card {
   cursor: grab;
-}
+}*/
 
-.rug-dragging-item {
+/*.rug-dragging-item {
   cursor: grabbing;
-}
+}*/
 .rug-dragging-item > div:not(.rug-list) {
   transform: scale(1.1);
 }
