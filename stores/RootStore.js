@@ -160,6 +160,20 @@ export class RootStore extends Queries {
     });
   }
 
+  @action.bound
+  rotateImage(id, angle = 90, completed = () => {}) {
+    let image = this.getImage(id);
+    this.apiRequest(`/api/image/rotate`, { id, angle }).then(response => {
+      let data, result;
+      if(response && response.data) data = response.data;
+      if(data && data.result) result = data.result;
+      console.log("data: ", data);
+      if(data && data.affected_rows) {
+              completed(result);
+      }
+    });
+  }
+
   get fieldNames() {
     return this.fields.map(field => ({ value: field.toLowerCase(), label: Util.ucfirst(field) }));
   }

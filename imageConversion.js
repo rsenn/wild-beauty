@@ -116,11 +116,36 @@ const imageImporter = maxWidthOrHeight =>
 
 const imageImport = imageImporter(maxWidthOrHeight);
 
+const rotateImage = async (inputBuf, angle) => {
+  var inputStream = bufferToStream(Buffer.from(inputBuf));
+  var outputStream = new MemoryStream();
+  const finished = util.promisify(stream.finished);
+  outputStream.on("finish", () => {});
+
+  let transformer = sharp()
+    .jpeg({
+      quality: 100
+    })
+    .rotate(angle);
+
+  inputStream.pipe(transformer).pipe(outputStream);
+  await finished(outputStream);
+  var output = outputStream.buffer[0];
+
+  var props = jpeg.jpegProps(output);
+  const { width, height } = props;
+
+  let data = output.toString("base64");
+
+  return { data, width, height };
+};
+
 if (module) {
   module.exports = {
     loadFile,
     getImagePalette,
     imageImporter,
-    imageImport
+    imageImport,
+    rotateImage
   };
 }

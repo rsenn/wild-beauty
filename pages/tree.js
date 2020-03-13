@@ -173,7 +173,8 @@ class TreePage extends React.Component {
     view: "list",
     currentItem: null
   };
-  static API = getAPI();
+  static API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
+
   static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize colors original_name } }", "users { user { id username last_seen } }"];
 
   svgRef = trkl();
@@ -285,7 +286,7 @@ class TreePage extends React.Component {
 
   constructor(props) {
     super(props);
-    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
+    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
     const { rootStore } = this.props;
     if(global.window) {
       window.api = this.api;

@@ -9,7 +9,7 @@ function getImageColors(colorstr) {
   return Object.fromEntries(Object.entries(obj).sort((a, b) => b[1] - a[1]));
 }
 export class Queries {
-  api = getAPI();
+  api = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
 
   async fetchImages(where = {}) {
     //console.log("⇒ images ", { where });

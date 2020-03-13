@@ -11,6 +11,7 @@ import { trkl } from "../lib/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
 import { SelectionListener } from "../lib/touchHandler.js";
+import { Element } from "../lib/dom.js";
 
 import "../static/css/react-upload-gallery.css";
 import "../static/style.css";
@@ -100,7 +101,32 @@ class New extends React.Component {
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     return (
       <Layout toastsClick={this.handleClick} className={"noselect"} {...this.touchListener.events}>
-        <NeedAuth>{rootStore.state.image === null ? <ImageUpload images={this.props.images} onChoose={this.chooseImage} onDelete={rootStore.deleteImage} /> : <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />}</NeedAuth>
+        <NeedAuth>
+          {rootStore.state.image === null ? (
+            <ImageUpload
+              images={this.props.images}
+              onChoose={this.chooseImage}
+              onDelete={rootStore.deleteImage}
+              onRotate={id => {
+                let img = Element.find(`#image-${id}`);
+                console.log("onRotate: ", { id, img });
+
+                let src = img.getAttribute("src");
+
+
+                Element.attr(img, { src: '' });
+
+                rootStore.rotateImage(id, 90, result => {
+                                  src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
+                Element.attr(img, { src });
+
+                });
+              }}
+            />
+          ) : (
+            <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
+          )}
+        </NeedAuth>
         <SvgOverlay svgRef={this.svgLayer} />
         <style jsx global>{`
           button.tag-remove {

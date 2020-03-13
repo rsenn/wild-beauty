@@ -6,7 +6,7 @@ const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
 const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
-const API = require("./stores/api.js")();
+const getAPI = require("./stores/api.js");
 const jpeg = require("./lib/jpeg.js");
 const Util = require("./lib/util.js");
 const dom = require("./lib/dom.es5.js");
@@ -21,7 +21,7 @@ const Alea = require("./lib/alea.js");
 const Readable = stream.Readable;
 const tempfile = require("tempfile");
 const fsPromises = require("fs").promises;
-const { loadFile, getImagePalette, imageImport } = require("./imageConversion.js");
+const { loadFile, getImagePalette, imageImport, rotateImage } = require("./imageConversion.js");
 
 function bufferToStream(buffer) {
   let stream = new Readable();
@@ -29,6 +29,8 @@ function bufferToStream(buffer) {
   stream.push(null);
   return stream;
 }
+
+const API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
 
 var secret = fs.readFileSync("secret.key");
 var etc_hostname = fs.readFileSync("/etc/hostname");
@@ -242,6 +244,29 @@ if (!dev && cluster.isMaster) {
         let item = itemList && itemList.length > 0 ? itemList[0] : null;
         console.log("/api/item <= " + util.inspect(result, { depth: 1 }));
         res.json({ success: true, item });
+      }
+    });
+
+    server.post("/api/image/rotate", async function(req, res) {
+      let { id, angle } = req.body;
+
+      angle = angle ? parseFloat(angle) : 90;
+
+      let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { width height offset uploaded id filesize colors data } }`);
+      const photo = response.photos[0];
+      if(typeof photo == "object") {
+        if(photo.uploaded !== undefined) photo.uploaded = new Date(photo.uploaded).toString();
+        let input = Buffer.from(photo.data, "base64");
+        delete photo.data;
+
+        let rotated = await rotateImage(input, angle);
+
+        let { data, width, height } = await rotated;
+
+        console.log("rotate", { width, height });
+        let result = await API.update("photos", { id }, { data, width, height });
+
+        res.send(result);
       }
     });
 

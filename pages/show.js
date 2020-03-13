@@ -65,7 +65,8 @@ class Show extends React.Component {
     parentIds: [],
     view: "list"
   };
-  static API = getAPI();
+  static API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
+
   static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize colors original_name } }", "users { user { id username last_seen } }"];
 
   svgRef = trkl();

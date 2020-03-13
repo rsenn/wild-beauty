@@ -164,13 +164,58 @@ const items = (await r.items).map(i => i);
   let r2 = await api.select("items", { id: 102 }, fields);
   console.log("r2   = ",  util.inspect(await r2.items, { depth: 10 }));
 })();*/
-
 (async () => {
-  var api = new API("http://wild-beauty.herokuapp.com/v1/graphql", { debug: true });
+  const fields = {
+    items: ["id", "name", "parent_id", "type", "data", "visible", "children { id }", "photos { id }"],
+    photos: ["id", "colors", "filesize", "width", "height", /*'items { id }',*/ "offset", "original_name", "uploaded"],
+    users: ["id", "username", "email", "last_seen", "password", "token"]
+  };
+
+  const api = new API("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H", debug: true });
+
+  let args = process.argv;
+
+  let arg;
+
+  do {
+    arg = args.shift();
+  } while(!/test\.js/.test(arg));
+
+  let command = args.shift();
+  let entity = args.shift();
+  let where = args.shift();
+
+  console.log("test ", { command, entity, where });
+
+  const f = fields[entity];
+  const fn = api[command];
+
+  if(f === undefined) throw new Error(`No such entity: ${entity}`);
+
+  if(fn === undefined) throw new Error(`No such command: ${command}`);
+
+  if(/^[0-9]+$/.test(where)) {
+    where = { id: parseInt(where) };
+  } else if(typeof where == "string" && where[0] == "{") {
+    where = "where = " + where;
+    let fn = new Function(where + "; return where;");
+    where = fn();
+    console.log("where:", where);
+  } else {
+    where = undefined;
+  }
+
+  let result = await fn.call(api, entity, where, f);
+  let records = await result[entity];
+
+  console.log("records:", util.inspect(records, false, 4, true));
+})();
+
+/*
+(async () => {
   console.log("test");
-  let items = await api.select("items", { parent_id: 1 }, ["photos { photo { id width height filesize } }", "users { user { id email last_seen } }"]);
-  console.log("items = ", util.inspect(items, { depth: 4 }));
-  let result = await api.select("photos", undefined, ["id", "width", "height", "filesize", "user_id", "colors", "offset", "original_name", "uploaded"]);
+
+  let result = await api.select("photos", undefined, fields.photos);
   let photos = await result.photos;
 
   photos = photos.map(photo => {
@@ -189,4 +234,14 @@ const items = (await r.items).map(i => i);
     return photo;
   });
   console.log("photos = ", util.inspect(photos, { depth: 4 }));
+
+  result = await api.select("items", { parent_id: 1 }, fields.items);
+
+  let items = (await result.items).map(item => {
+    if(item.data) item.data = JSON.parse(item.data);
+    return item;
+  });
+
+  console.log("items = ", util.inspect(items, { depth: 4 }));
 })();
+*/
