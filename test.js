@@ -8,7 +8,6 @@ const jpeg = require("./lib/jpeg.js");
 const RGBA = require("./lib/dom.es5.js").RGBA;
 //const RGBA = require("./lib/dom/rgba.es5.js").RGBA;
 
-
 /*var fileBuffer = fs.readFileSync("static/img/63a5110bf12b0acef2f68e0e1a023502.jpg");*/
 /*
 console.log(fileBuffer);
@@ -154,7 +153,6 @@ console.log("result: ", result);
   // items.forEach(console.log);
 });*/
 
-
 /*false &&
 (async () => {
   var api = new API();
@@ -167,29 +165,28 @@ const items = (await r.items).map(i => i);
   console.log("r2   = ",  util.inspect(await r2.items, { depth: 10 }));
 })();*/
 
-
 (async () => {
-  var api = new API('http://wild-beauty.herokuapp.com/v1/graphql', { debug: true });
-console.log("test");
-  let items = await api.select("items", { parent_id: 1 },  ["photos { photo { id width height filesize } }", "users { user { id email last_seen } }"]);
+  var api = new API("http://wild-beauty.herokuapp.com/v1/graphql", { debug: true });
+  console.log("test");
+  let items = await api.select("items", { parent_id: 1 }, ["photos { photo { id width height filesize } }", "users { user { id email last_seen } }"]);
   console.log("items = ", util.inspect(items, { depth: 4 }));
-  let result = await api.select("photos", undefined, ['id','width','height','filesize','user_id','colors','offset','original_name','uploaded']);
-let photos = await result.photos;
+  let result = await api.select("photos", undefined, ["id", "width", "height", "filesize", "user_id", "colors", "offset", "original_name", "uploaded"]);
+  let photos = await result.photos;
 
   photos = photos.map(photo => {
     photo.uploaded = Util.toUnixTime(Util.parseDate(photo.uploaded));
 
     photo.colors = JSON.parse(photo.colors);
     if(photo.colors) {
-    photo.colors = Object.fromEntries(Object.entries(photo.colors).map(([key,value]) => {
-      const color = new RGBA(key);
-      key = color.toString(',');
-      return [key,value];
-    }));
-
-  }
+      photo.colors = Object.fromEntries(
+        Object.entries(photo.colors).map(([key, value]) => {
+          const color = new RGBA(key);
+          key = color.toString(",");
+          return [key, value];
+        })
+      );
+    }
     return photo;
   });
   console.log("photos = ", util.inspect(photos, { depth: 4 }));
-
 })();

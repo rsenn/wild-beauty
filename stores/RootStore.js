@@ -152,7 +152,9 @@ export class RootStore extends Queries {
       let data, result;
       if(response && response.data) data = response.data;
       if(data && data.result) result = data.result;
-      if(result.affected_rows) {
+      console.log("data: ", data);
+      console.log("result: ", result);
+      if(result && result.affected_rows) {
         this.images.delete(id);
       }
     });

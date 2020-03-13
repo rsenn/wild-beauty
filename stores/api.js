@@ -44,8 +44,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
 
     if(objStr.length) objStr = `(${objStr})`;
     const queryStr = `query List${camelCase} { ${name}${objStr} { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
-    if(options.debug)
-    console.log("query: ", queryStr);
+    if(options.debug) console.log("query: ", queryStr);
     let ret = await this(queryStr);
     if(typeof ret == "object" && ret[name] !== undefined) ret = ret[name];
     return ret;
@@ -57,7 +56,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     const objStr = !obj ? '' :  (typeof obj == "string"? `(where: ${obj})` : "(where: { " + Object.entries(obj) .map(([key, value]) => `${key}: {_eq: ${value}}`) .join(", ") + "})");
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryStr = `query Select${camelCase} { ${name}${objStr} { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
-       if(options.debug)console.log(`query: ${queryStr}`);
+    if(options.debug) console.log(`query: ${queryStr}`);
 
     let result = this(queryStr);
     //console.log(`result: ${result}`);
@@ -71,8 +70,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryName = `update_${name.replace(/s*$/, "s")}`;
     const queryStr = `mutation ${queryName}{ ${queryName}(${objStr}, ${setStr}) { affected_rows } }`;
-        if(options.debug)
-console.log("query: ", queryStr);
+    if(options.debug) console.log("query: ", queryStr);
 
     let response = await this(queryStr);
     //console.log("response: ", response[queryName]);
@@ -85,8 +83,7 @@ console.log("query: ", queryStr);
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryName = `delete_${name.replace(/s?$/, "s")}`;
     const queryStr = `mutation ${queryName}{ ${queryName}(${objStr}) { affected_rows } }`;
-        if(options.debug)
-console.log("query: ", queryStr);
+    if(options.debug) console.log("query: ", queryStr);
 
     let response = await this(queryStr);
     //console.log("response: ", response[queryName]);
@@ -106,8 +103,7 @@ console.log("query: ", queryStr);
   }`;
 
     let response = await this(queryStr);
-        if(options.debug)
-console.log("response: ", response, "query: ", queryStr);
+    if(options.debug) console.log("response: ", response, "query: ", queryStr);
     return response;
   };
 
