@@ -187,7 +187,6 @@ class New extends React.Component {
             width: 100vw;
             text-align: left;
           }
-         
         `}</style>
       </Layout>
     );
