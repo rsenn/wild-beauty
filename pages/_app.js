@@ -54,7 +54,7 @@ class MyApp extends App {
     super(props);
     const { router, pageProps } = props;
     this.mobxStore = getOrCreateStore(!global.window, props.pageProps.initialMobxState, props.pageProps);
-    console.log("App.constructor", { pageProps: Object.keys(pageProps) });
+    //console.log("App.constructor", { pageProps: Object.keys(pageProps) });
 
     const rootStore = this.mobxStore.RootStore;
     const editorStore = this.mobxStore.EditorStore;
@@ -82,7 +82,7 @@ class MyApp extends App {
     if(pageProps) {
       const { initialMobxState } = pageProps;
       const items = initialMobxState["RootStore"].items, photos = initialMobxState["RootStore"].photos;
-      console.log("App.constructor", Object.keys(initialMobxState));
+      //console.log("App.constructor", Object.keys(initialMobxState));
 
       if(items && items.size > 0)
       rootStore.items.replace(items);

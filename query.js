@@ -70,7 +70,7 @@ const RGBA = require("./lib/dom.es5.js").RGBA;
     where = undefined;
   }
 
- console.log("args:", {api, entity, where, f, set});
+  console.log("args:", { api, entity, where, f, set });
   let result = await fn.call(api, entity, where, f, set);
   /*
 if(debug)
@@ -123,7 +123,7 @@ if(debug)
     console.log("biggest:", biggest);
     console.log("fields:", fields);
     console.log("sizes:", sizes);*/
-    sizes['exif'] = 100;
+    sizes["exif"] = 100;
 
     let header = "\n" + fields.map(field => field + Util.pad(field, sizes[field])).join("");
 

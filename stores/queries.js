@@ -25,9 +25,11 @@ export class Queries {
     });
   }
 
-  async fetchItems(where = {}, t = transformItemData) {
-    console.log("⇒ items:", where);
-    let fields = ["id", "type", "parent { id }", "order", "children { id }", "data", "photos { photo { id } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
+  async fetchItems(where, fields, t = transformItemData) {
+    where = where || {};
+    fields = fields || ["id", "name", "type", "parent { id }", "order", "children(order_by: {order: asc}) { id name type }", "data", "photos { photo { id } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
+    //console.log("⇒ items:", where);
+
     let response = await this.api.select("items", where, fields);
     let items = response && response.items ? await response.items : null;
 

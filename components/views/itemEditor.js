@@ -26,18 +26,15 @@ export const ItemEditor = inject(
     if(img && img.landscape === undefined) img.landscape = img.width >= img.height;
     let entries = toJS(editorStore.fields);
     let fields = editorStore.getFields();
-
     const [parentId, setParentId] = useState(-1);
-
     const rootId = rootStore.rootItemId;
+    const items = toJS(rootStore.items);
 
-    const items = rootStore.items;
-
-    let tree = rootStore.getItem(rootId, makeItemToOption(parentId));
+    let tree = rootStore.getTree(rootId, makeItemToOption(parentId));
     tree = toJS(tree);
     tree = tree || [];
 
-    console.log("ItemEditor.render ", { /*items, */ tree, rootId, img, entries });
+    console.log("ItemEditor.render ", { /*items,*/ tree, rootId, img, entries });
 
     return (
       <div className={"content-edit"} {...props}>

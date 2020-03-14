@@ -13,22 +13,8 @@ export const maxZIndex = () => {
   return arr[0];
 };
 
-export const makeItemToOption = selected => item => {
-  let data = (item && item.data) || {};
-  let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
-  let value = item.id;
-  let children = toJS(item.children);
-  let obj = { label, title: label, value, expanded: true, checked: selected === value };
-
-  if(children && children.length) obj.children = children;
-  if(label.startsWith("null(")) return null;
-  if(!data.name) if (!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
-
-  return obj;
-};
-
 export const findInTree = (tree, value) => {
-  console.log("findInTree", {tree,value});
+  console.log("findInTree", { tree, value });
   if(tree.value === value || tree.label === value) return tree;
   if(tree.children) {
     for(let child of tree.children) {
@@ -141,8 +127,10 @@ export const transformItemData = it => {
     } catch(err) {
       dataObj = null;
     }
-    if(dataObj !== null) it.data = dataObj;
+    if(dataObj !== null) Object.assign(it, dataObj);
   }
+  /*  if(it.title === undefined)
+    it.title = it.name;*/
   return it;
 };
 
@@ -154,4 +142,19 @@ export const transformItemIds = it => {
   return it;
 };
 
-export const transformItem = it => transformItemIds(transformItemData(it));
+export const transformItem = it => /*transformItemIds*/ transformItemData(it);
+
+export const makeItemToOption = selected => item => {
+  item = transformItemData(item);
+  // let data = (item && item.data) || {};
+  let label = item.title || item.name || `${item.type}(${item.id})`;
+  let value = item.id;
+  let children = toJS(item.children);
+  let obj = { label/*, title: label*/, value, expanded: true, checked: selected === value };
+
+  if(children && children.length) obj.children = children;
+  if(label.startsWith("null(")) return null;
+  // if(!data.name) if (!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
+
+  return obj;
+};

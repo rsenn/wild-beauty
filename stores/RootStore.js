@@ -7,7 +7,7 @@ import Util from "../lib/util.js";
 import { assign_to } from "../lib/devtools.js";
 import devpane from "../lib/devpane.js";
 import Iterator from "../lib/iterator.js";
-import { transformItem, transformItemIds, transformItemData } from "./functions.js";
+import { transformItem, transformItemIds, transformItemData, makeItemToOption } from "./functions.js";
 
 const isServer = !global.window;
 
@@ -16,7 +16,7 @@ if(global.window) {
   window.fns = {};
   window.dom = dom;
   window.Iterator = Iterator;
-  Object.assign(window, { transformItem, transformItemIds, transformItemData });
+  Object.assign(window, { transformItem, transformItemIds, transformItemData, makeItemToOption });
 
   assign_to(window);
 }
@@ -57,7 +57,7 @@ export class RootStore extends Queries {
     super();
     //       console.log("RootStore.constructor.callers", Util.getCallers(1, 3));
 
-    console.log("RootStore.constructor ", { initialData, pageProps });
+    //console.log("RootStore.constructor ", { initialData, pageProps });
 
     if(initialData && initialData.RootStore) {
       const { RootStore } = initialData;
@@ -272,42 +272,19 @@ export class RootStore extends Queries {
     tr = tr || transformItem;
 
     let item = this.items.get("" + (!id ? this.rootItemId : id));
-    /* if(item && idMap.indexOf(item.id) == -1) {
-      idMap.push(item.id);
-      if(typeof item == "object") {
-        let { parent_id } = item;
-        item.child_ids = observable.array([]);
-      if(item.children) {
-        if(item.children.length > 0)
-          item.child_ids.replace(item.children.map(i => typeof(i)=='object' ? i.id : i));
-          delete item.children;
-        } 
-
-      }
-    }*/
     return item ? tr(item) : null;
   }
+
   getTree(id, tr, idMap = null, depth = 1000) {
     if(idMap === null) idMap = [];
-    if(!tr)
-      tr = it => {
-        if(typeof it.data == "string") {
-          let dataObj = {};
-          try {
-            dataObj = JSON.parse(it.data);
-          } catch(err) {
-            dataObj = null;
-          }
-          if(dataObj !== null) it.data = dataObj;
-        }
-        return it;
-      };
-    let item = this.items.get("" + (!id ? this.rootItemId : id));
+    tr = tr || transformItem;
+
+    let item = toJS(this.getItem(id, it => it, idMap, depth));
     if(item && idMap.indexOf(item.id) == -1) {
       idMap.push(item.id);
       if(typeof item == "object") {
         let { parent_id } = item;
-        if(depth > 0 && item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getItem(parseInt(i.id), tr, idMap, depth - 1) : null)).filter(c => c !== null);
+        if(depth > 0 && item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getTree(parseInt(i.id), tr, idMap, depth - 1) : null)).filter(c => c !== null);
         else item.children = [];
         item.children = item.children.filter(i => i !== null);
         item.children = item.children.map(child => {

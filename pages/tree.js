@@ -352,7 +352,7 @@ class TreePage extends React.Component {
     //  let nodes = TreeView({ tree: root }, false);
     /*
     for(let node of Util.walkTree(nodes[0])) {
-      console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ["children", "key"]), { newline: "", indent: "", spacing: " " }));
+      //console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ["children", "key"]), { newline: "", indent: "", spacing: " " }));
     }*/
 
     return { params, items, tree: root, nodes, g };

@@ -4,7 +4,7 @@ export class EditorStore {
   constructor(initialData, pageProps) {
     // super(props);
 
-    console.log("EditorStore.constructor", { initialData, pageProps });
+    //console.log("EditorStore.constructor", { initialData, pageProps });
 
     if(global.window) {
       window.es = this;
