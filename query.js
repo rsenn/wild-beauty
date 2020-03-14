@@ -26,7 +26,7 @@ const RGBA = require("./lib/dom.es5.js").RGBA;
   // prettier-ignore
   const fields = {
     items: ['id', 'name', 'parent_id', 'type', 'data', 'visible', 'children { id }', 'photos { photo_id }', 'users { user_id }'],
-    photos: ['id', 'colors', 'filesize', 'width', 'height', /*'items { id }',*/ 'offset', 'original_name', 'uploaded', 'user_id', 'items { item_id }' ],
+    photos: ['id', 'colors', 'filesize', 'width', 'height', /*'items { id }',*/ , 'exif','offset', 'original_name', 'uploaded', 'user_id', 'items { item_id }' ],
     users: ['id', 'username', 'email', 'last_seen', 'password', 'token']
   };
 
@@ -70,6 +70,7 @@ const RGBA = require("./lib/dom.es5.js").RGBA;
     where = undefined;
   }
 
+ console.log("args:", {api, entity, where, f, set});
   let result = await fn.call(api, entity, where, f, set);
   /*
 if(debug)
@@ -94,7 +95,7 @@ if(debug)
         if(/^....-..-..T..:..:../.test(val)) {
           rec[key] = Util.toUnixTime(Util.parseDate(val));
         } else if(typeof val == "string" && val.length > 50) {
-          rec[key] = val.substring(0, 10) + "...";
+          rec[key] = val.substring(0, 100) + "...";
         }
       }
       return rec;
@@ -122,6 +123,7 @@ if(debug)
     console.log("biggest:", biggest);
     console.log("fields:", fields);
     console.log("sizes:", sizes);*/
+    sizes['exif'] = 100;
 
     let header = "\n" + fields.map(field => field + Util.pad(field, sizes[field])).join("");
 

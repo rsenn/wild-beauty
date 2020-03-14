@@ -1,7 +1,7 @@
 import getAPI from "./api.js";
 import Util from "../lib/util.js";
 import axios from "../lib/axios.js";
-import { transformItem,transformItemData,transformItemIds } from "./functions.js";
+import { transformItem, transformItemData, transformItemIds } from "./functions.js";
 
 function getImageColors(colorstr) {
   let obj = {};
@@ -27,12 +27,11 @@ export class Queries {
 
   async fetchItems(where = {}, t = transformItemData) {
     console.log("⇒ items:", where);
-    let fields = ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
+    let fields = ["id", "type", "parent { id }", "order", "children { id }", "data", "photos { photo { id } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
     let response = await this.api.select("items", where, fields);
     let items = response && response.items ? await response.items : null;
 
-    if(items !== null)
-      items = items.map(t);
+    if(items !== null) items = items.map(t);
     //console.log("⇐ items =", items);
     return items;
   }

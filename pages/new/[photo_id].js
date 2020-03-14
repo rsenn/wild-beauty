@@ -174,9 +174,12 @@ export class NewItem extends React.Component {
   @action.bound
   treeSelEvent(type, arg) {
     const { rootStore } = this.props;
+            console.log("treeSelEvent: ", {type,type,arg});
+
     switch (type) {
       case "change": {
-        //console.log("treeSelEvent: ", this.state.tree, arg.value);
+            const { checked, id, hide } = arg;
+
         const item = findInTree(this.state.tree, arg.value);
         item.checked = true;
         //rootStore.setState({ selected: arg.value });

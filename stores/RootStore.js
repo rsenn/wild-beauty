@@ -7,7 +7,7 @@ import Util from "../lib/util.js";
 import { assign_to } from "../lib/devtools.js";
 import devpane from "../lib/devpane.js";
 import Iterator from "../lib/iterator.js";
-import { transformItem, transformItemIds,transformItemData } from "./functions.js";
+import { transformItem, transformItemIds, transformItemData } from "./functions.js";
 
 const isServer = !global.window;
 
@@ -16,7 +16,7 @@ if(global.window) {
   window.fns = {};
   window.dom = dom;
   window.Iterator = Iterator;
-  Object.assign(window, { transformItem, transformItemIds,transformItemData });
+  Object.assign(window, { transformItem, transformItemIds, transformItemData });
 
   assign_to(window);
 }

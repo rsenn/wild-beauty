@@ -7,6 +7,11 @@ import Layout from "../components/layout.js";
 class Browse extends React.Component {
   static async getInitialProps({ res, req, query, asPath, mobxStore }) {
     const rootStore = mobxStore.RootStore;
+
+
+    let items = await rootStore.fetchItems('{children: {id: {_gte: 1}}},order_by: {order: asc}');
+console.log("Browse.getInitialProps", {items});
+
     return {};
   }
 

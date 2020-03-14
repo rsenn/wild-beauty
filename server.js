@@ -332,10 +332,11 @@ if(!dev && cluster.isMaster) {
           const original_sha1 = sha1(file.data);
           let { colors, palette, data, size, props, exif } = image;
           let { width, height } = size;
+          if(typeof(exif) == 'object' && exif !== null)
           exif = Object.fromEntries(
             Object.entries(exif)
               .filter(([key, value]) => !(value instanceof Buffer))
-              .map(([key, value]) => [key, Util.parseDate(value)])
+              .map(([key, value]) => [key, Util.isDate(value) ? Util.toUnixTime(Util.parseDate(value)) : value])
           );
           let exifData = JSON.stringify(exif);
           // console.log("file upload: ", { item, exifData });

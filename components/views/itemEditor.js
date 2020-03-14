@@ -37,7 +37,7 @@ export const ItemEditor = inject(
     tree = toJS(tree);
     tree = tree || [];
 
-    console.log("ItemEditor.render ", { /*items, */tree, rootId, img, entries });
+    console.log("ItemEditor.render ", { /*items, */ tree, rootId, img, entries });
 
     return (
       <div className={"content-edit"} {...props}>

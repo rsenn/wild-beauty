@@ -28,6 +28,7 @@ export const makeItemToOption = selected => item => {
 };
 
 export const findInTree = (tree, value) => {
+  console.log("findInTree", {tree,value});
   if(tree.value === value || tree.label === value) return tree;
   if(tree.children) {
     for(let child of tree.children) {
@@ -130,8 +131,7 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
   console.log("graph: ", { nodes, edges });*/
 };
 
-export const idOf = obj => (typeof(obj) == 'object' && obj !== null && obj.id !== undefined) ? obj.id : null;
-
+export const idOf = obj => (typeof obj == "object" && obj !== null && obj.id !== undefined ? obj.id : null);
 
 export const transformItemData = it => {
   if(typeof it.data == "string") {
@@ -147,15 +147,11 @@ export const transformItemData = it => {
 };
 
 export const transformItemIds = it => {
-    if(it.children !== undefined)
-      it.children = it.children.map(idOf);
-     if(it.photos !== undefined)
-      it.photos = it.photos.map(m => idOf(m.photo));
-    if(it.parent !== undefined)
-      it.parent = idOf(it.parent);
+  if(it.children !== undefined) it.children = it.children.map(idOf);
+  if(it.photos !== undefined) it.photos = it.photos.map(m => idOf(m.photo));
+  if(it.parent !== undefined) it.parent = idOf(it.parent);
 
   return it;
 };
 
 export const transformItem = it => transformItemIds(transformItemData(it));
-
