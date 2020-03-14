@@ -26,7 +26,12 @@ class RUG extends React.Component {
     this.increment = 0;
 
     this.state = {
-      images: initialState .reverse() .map(item => {return this.create({done: true, ...item }); }) .reverse(),
+      images: initialState
+        .reverse()
+        .map(item => {
+          return this.create({ done: true, ...item });
+        })
+        .reverse(),
       renderComponent: !ssrSupport
     };
   }
@@ -63,7 +68,9 @@ class RUG extends React.Component {
   }
 
   refresh(uid, data) {
-    this.setImage(uid, {error: false, done: false, progress: 0 }, image => {this.upload(image); } );
+    this.setImage(uid, { error: false, done: false, progress: 0 }, image => {
+      this.upload(image);
+    });
   }
 
   async tryUpload(uid, file) {
@@ -71,9 +78,9 @@ class RUG extends React.Component {
     try {
       if(file instanceof Blob) {
         const source = await this.getImageURLToBlob(file);
-        changes = {file, source };
+        changes = { file, source };
       }
-      this.setImage(uid, {...changes, error: false, done: false, progress: 0 }, image => this.upload(image) );
+      this.setImage(uid, { ...changes, error: false, done: false, progress: 0 }, image => this.upload(image));
     } catch(e) {}
   }
 
@@ -106,18 +113,17 @@ class RUG extends React.Component {
 
   onSuccess(uid, response) {
     let { source } = this.props;
-    if(response && response.photo  && response.photo.src)
-      response.url = response.photo.src;
-    console.log("RUG.onSuccess ", { uid,source,response });
-    let { url,error } = typeof source === "function" ? source(response) : response;
-    console.log("RUG.onSuccess ", { url,error });
-    this.setImage(uid, {source: url, done: !error, error: !!error, uploading: false, progress: 100 }, () => this.props.onSuccess(this.state.images.find(item => item.uid === uid)) );
+    if(response && response.photo && response.photo.src) response.url = response.photo.src;
+    console.log("RUG.onSuccess ", { uid, source, response });
+    let { url, error } = typeof source === "function" ? source(response) : response;
+    console.log("RUG.onSuccess ", { url, error });
+    this.setImage(uid, { source: url, done: !error, error: !!error, uploading: false, progress: 100 }, () => this.props.onSuccess(this.state.images.find(item => item.uid === uid)));
   }
 
   onError(uid, { status, response }) {
-    this.setImage(uid, {status, error: true, uploading: false, refresh: data => this.refresh(uid, data) },
-      image => {this.props.onError({status, response, image }); }
-    );
+    this.setImage(uid, { status, error: true, uploading: false, refresh: data => this.refresh(uid, data) }, image => {
+      this.props.onError({ status, response, image });
+    });
   }
 
   onClick(uid) {
@@ -129,16 +135,22 @@ class RUG extends React.Component {
   }
 
   setImage(uid, append, finish) {
-    let image, { images } = this.state;
-    images = images.map(item => {
-      if(item.uid === uid) return (image = { ...item, ...append });
-      return item;
-    }).filter(item => !!item.source);
-    this.setState({ images }, () => {if(finish) finish(image); this.props.onChange(images); });
+    let image,
+      { images } = this.state;
+    images = images
+      .map(item => {
+        if(item.uid === uid) return (image = { ...item, ...append });
+        return item;
+      })
+      .filter(item => !!item.source);
+    this.setState({ images }, () => {
+      if(finish) finish(image);
+      this.props.onChange(images);
+    });
   }
 
   onSelected(uid) {
-    this.setState({images: this.state.images.map(item => Object.assign({}, item, {selected: item.uid === uid }) ) }, () => this.props.onChange(this.state.images) );
+    this.setState({ images: this.state.images.map(item => Object.assign({}, item, { selected: item.uid === uid })) }, () => this.props.onChange(this.state.images));
   }
 
   openDialogue() {
@@ -150,23 +162,24 @@ class RUG extends React.Component {
     for(const file of files) {
       try {
         const source = await this.getImageURLToBlob(file, images);
-        const image = this.create({file, source, name: file.name, size: bytesToSize(file.size) });
+        const image = this.create({ file, source, name: file.name, size: bytesToSize(file.size) });
         images.push(image);
       } catch(e) {
         // nothing
       }
     }
-    this.setState({images: images.concat(this.state.images) }, () => {if(this.props.autoUpload) {images.forEach(image => this.upload(image)); } this.props.onChange(this.state.images); }
-    );
+    this.setState({ images: images.concat(this.state.images) }, () => {
+      if(this.props.autoUpload) {
+        images.forEach(image => this.upload(image));
+      }
+      this.props.onChange(this.state.images);
+    });
   }
 
   async getImageURLToBlob(file, images = []) {
     const { rules, accept, acceptType } = this.props;
     images = images.concat(this.state.images);
-    /*
-     * stop and send message
-     *
-     */
+    /* stop and send message  */
     const warning = key => {
       this.onWarning(key, { ...rules, accept, file });
       throw new Error();
@@ -183,25 +196,16 @@ class RUG extends React.Component {
     // if not available rules
     if(rules !== null) {
       const { size, limit, width, height } = rules;
-      /**
-       * limit
-       *
-       */
+      /* limit  */
       if(limit && images.length >= limit) {
         warning("limit");
       }
-      /**
-       * size
-       *
-       */
+      /* size */
       if(size * 1024 < file.size) {
         warning("size");
       }
       if(acceptType === "image") {
-        /**
-         * dimensions
-         *
-         */
+        /* dimensions */
         const image = await getImageDimensions(ImageURL);
         if(width) {
           if(image.width < width.min) {
@@ -226,17 +230,7 @@ class RUG extends React.Component {
   upload({ uid, file, data }) {
     const { send, action, headers, customRequest } = this.props;
     const request = customRequest || Request;
-    const { abort } = request({
-      uid,
-      file,
-      data,
-      send,
-      action,
-      headers,
-      onError: this.onError,
-      onSuccess: this.onSuccess,
-      onProgress: this.onProgress
-    });
+    const { abort } = request({ uid, file, data, send, action, headers, onError: this.onError, onSuccess: this.onSuccess, onProgress: this.onProgress });
 
     this.setImage(uid, { abort, uploading: true });
   }
@@ -262,24 +256,9 @@ class RUG extends React.Component {
     // states
     const { images, renderComponent } = this.state;
     // props
-    const {
-      className,
-      style,
-      accept,
-      acceptType,
-      header,
-      footer
-    } = this.props;
-    const contextValue = {
-        images,
-        accept,
-        autoUpload: this.props.autoUpload,
-        setSort: this.setSort,
-        uploadFiles: this.uploadFiles,
-        openDialogue: this.openDialogue
-      },
-      options = contextValue;
-    // hide server side rendering
+    const { className, style, accept, acceptType, header, footer } = this.props;
+    const contextValue = { images, accept, autoUpload: this.props.autoUpload, setSort: this.setSort, uploadFiles: this.uploadFiles, openDialogue: this.openDialogue },
+      options = contextValue; // hide server side rendering
     if(!renderComponent) {
       return null;
     }

@@ -13,10 +13,10 @@ export const hvOffset = (width, height) => {
   let w = width > height ? (width * 100) / height : 100;
   let h = width > height ? 100 : (height * 100) / width;
   let hr, vr;
-  if (h > 100) {
+  if(h > 100) {
     hr = 0;
     vr = h - 100;
-  } else if (w > 100) {
+  } else if(w > 100) {
     hr = w - 100;
     vr = 0;
   }
@@ -38,7 +38,7 @@ export const ImageUpload = inject("rootStore")(
           source={response => {
             let { affected_rows, returning, error, photo, original_name } = response;
             console.log("RUG response:", { error, photo, affected_rows, returning, original_name });
-            if (error) returning = [photo];
+            if(error) returning = [photo];
 
             let url = returning.map(photo => {
               const { id } = photo;
@@ -47,7 +47,7 @@ export const ImageUpload = inject("rootStore")(
 
               let entry = rootStore.newPhoto(photo);
               axios.head(url).then(res => {
-                if (res.status == 200) {
+                if(res.status == 200) {
                   const { width, height, aspect, channels, depth } = res.headers;
                   console.log("HEAD: ", res);
                   Object.assign(entry, { width, height, aspect, channels, depth, ...entry });
@@ -55,15 +55,15 @@ export const ImageUpload = inject("rootStore")(
               });
               return url;
             })[0];
-                        console.log("RUG source=", { url, error });
+            console.log("RUG source=", { url, error });
 
             return { url, error };
           }}
           onSuccess={arg => {
-            let status = (arg && arg.error) ? 'error' : 'success';
-          console.log(`RUG ${status}`,   arg  );
+            let status = arg && arg.error ? "error" : "success";
+            console.log(`RUG ${status}`, arg);
 
-            if (arg && arg.source) {
+            if(arg && arg.source) {
               const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
               let entry = rootStore.newPhoto({ id });
               console.log("RUG onSuccess", toJS(entry));

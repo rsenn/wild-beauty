@@ -363,13 +363,12 @@ if(!dev && cluster.isMaster) {
             if(typeof error == "string") error = error.replace(/^([^\n]*)\n.*/g, "$1");
             console.log("ERROR:", error);
             API.options.debug = true;
-            response = await API.select("photos", { original_sha1: `"${original_sha1}"` }, ['id','width','height','original_name','original_sha1','colors','filesize','exif']);
+            response = await API.select("photos", { original_sha1: `"${original_sha1}"` }, ["id", "width", "height", "original_name", "original_sha1", "colors", "filesize", "exif"]);
             API.options.debug = false;
 
             let photo;
 
-            if(response && response.photos && response.photos.length)
-              photo = response.photos[0];
+            if(response && response.photos && response.photos.length) photo = response.photos[0];
 
             console.log("response:", response);
 
