@@ -21,6 +21,8 @@
     "@zeit/next-css": "^1.0.2-canary.2",
     "affinefit": "^1.0.5",
     "animejs": "^3.1.0",
+    "apollo-client": "^2.6.8",
+    "apollo-mobx": "^1.1.11",
     "axios": "^0.19.0",
     "bcryptjs": "^2.4.3",
     "blob": "^0.0.5",
@@ -44,7 +46,7 @@
     "fast-exif": "^1.0.1",
     "get-exif": "^1.0.3",
     "get-image-colors": "^2.0.0",
-    "graphql": "^14.5.8",
+    "graphql": "^14.6.0",
     "img-to-palette": "^1.0.1",
     "jpeg-autorotate": "^5.0.2",
     "jpegquality": "^0.1.7",
@@ -89,9 +91,14 @@
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/plugin-proposal-decorators": "^7.7.4",
     "@babel/plugin-proposal-export-default-from": "^7.7.4",
+    "@graphql-codegen/cli": "^1.13.0",
+    "@graphql-codegen/typescript-operations": "^1.13.0",
+    "apollox": "^0.2.12",
     "babel-eslint": "^10.0.3",
     "eslint-plugin-legacy-decorators": "^1.0.0",
     "exif-cli": "^0.0.2",
-    "prettyoutput": "^1.2.0"
+    "graphql-codegen-typescript-operations": "^0.19.0-alpha.80bb6e0c",
+    "prettyoutput": "^1.2.0",
+    "typescript": "^3.8.3"
   }
 }
