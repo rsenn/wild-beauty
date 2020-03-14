@@ -48,7 +48,7 @@
     "fast-exif": "^1.0.1",
     "get-exif": "^1.0.3",
     "get-image-colors": "^2.0.0",
-    "graphql": "^14.6.0",
+    "graphql": "^14.1.1",
     "img-to-palette": "^1.0.1",
     "jpeg-autorotate": "^5.0.2",
     "jpegquality": "^0.1.7",
