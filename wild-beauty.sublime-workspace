@@ -24,46 +24,36 @@
 	"buffers":
 	[
 		{
-			"contents": "hvOffset\n({ images, rootStore, onChoose, onDelete, onRotate, shiftState, ...props }) =>\nnewValue =>\nresponse =>\nphoto =>\nres =>\narg =>\n(image, index) =>\n() =>\n() =>",
+			"contents": "Graph\nconstructor\nnode =>\nedge =>\ngraph =>\naddNode\nfindNode\naddEdge\nadd\npush\nresetNodes\ngetConnections\nisLeafNode\nbranchNodes\ngetBBox\ncheckRedraw\nfunction findBiggestGap(angles)\ndistributeLeafNodes\nc =>\nc =>\nc =>\nl =>\nupdateAll\nroundAll\nserialize\nnode =>\nNode\nedge =>\nEdge\nrect\ncenter\ntranslate\nNode\nconstructor\nreset\napplyAttractiveForce\napplyRepulsiveForce\ntoJS\nkey =>\nEdge\nconstructor\nx1\ny1\nx2\ny2\nx1\ny1\nx2\ny2\ntoJS\nNode\nNode\ntoIdx\ndraw",
 			"settings":
 			{
-				"buffer_size": 164,
+				"buffer_size": 437,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "components/views/imageUpload.js",
+			"file": "pages/_document.js",
 			"settings":
 			{
-				"buffer_size": 7426,
-				"encoding": "UTF-8",
+				"buffer_size": 661,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "/home/roman/the-wild-beauty-company/pages/new.js",
+			"file": "components/forceGraph.js",
 			"settings":
 			{
-				"buffer_size": 6476,
-				"encoding": "UTF-8",
+				"buffer_size": 5975,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "static/css/react-upload-gallery.css",
+			"file": "lib/fd-graph.js",
 			"settings":
 			{
-				"buffer_size": 9975,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
-			"settings":
-			{
-				"buffer_size": 7426,
+				"buffer_size": 13092,
 				"line_ending": "Unix"
 			}
 		},
@@ -71,8 +61,97 @@
 			"file": "pages/new.js",
 			"settings":
 			{
-				"buffer_size": 6476,
+				"buffer_size": 6518,
 				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/_app.js",
+			"settings":
+			{
+				"buffer_size": 6264,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "components/layout.js",
+			"settings":
+			{
+				"buffer_size": 1592,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server.js",
+			"settings":
+			{
+				"buffer_size": 15145,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/browse.js",
+			"settings":
+			{
+				"buffer_size": 654,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "components/views/imageUpload.js",
+			"settings":
+			{
+				"buffer_size": 20782,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "components/login.js",
+			"settings":
+			{
+				"buffer_size": 7754,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "components/nav.js",
+			"settings":
+			{
+				"buffer_size": 22291,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "static/style.css",
+			"settings":
+			{
+				"buffer_size": 3602,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "components/simple/logo.js",
+			"settings":
+			{
+				"buffer_size": 244,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "components/upload/style.css",
+			"settings":
+			{
+				"buffer_size": 10435,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pages/panes.js",
+			"settings":
+			{
+				"buffer_size": 7211,
 				"line_ending": "Unix"
 			}
 		}
@@ -89,16 +168,16 @@
 		"selected_items":
 		[
 			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
 				"sche",
 				"SchemeEditor: Edit Current Scheme"
 			],
 			[
 				"schemeed",
 				"SchemeEditor: Edit installed scheme"
-			],
-			[
-				"install",
-				"Package Control: Install Package"
 			],
 			[
 				"packag",
@@ -170,15 +249,74 @@
 	"expanded_folders":
 	[
 		"/home/roman/wild-beauty",
-		"/home/roman/wild-beauty/lib",
-		"/home/roman/wild-beauty/lib/dom"
+		"/home/roman/wild-beauty/components",
+		"/home/roman/wild-beauty/components/simple",
+		"/home/roman/wild-beauty/components/upload",
+		"/home/roman/wild-beauty/components/upload/view",
+		"/home/roman/wild-beauty/pages",
+		"/home/roman/wild-beauty/pages/new",
+		"/home/roman/wild-beauty/stores"
 	],
 	"file_history":
 	[
+		"/home/roman/wild-beauty/components/layout.js",
+		"/home/roman/wild-beauty/server.js",
+		"/home/roman/wild-beauty/stores/api.js",
 		"/home/roman/wild-beauty/components/views/imageUpload.js",
-		"/home/roman/wild-beauty/static/style.css",
-		"/home/roman/wild-beauty/pages/show.js",
+		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
+		"/home/roman/wild-beauty/components/upload/RUG.js",
+		"/home/roman/wild-beauty/pages/new.js",
+		"/home/roman/wild-beauty/pages/browse.js",
+		"/home/roman/wild-beauty/stores/RootStore.js",
+		"/home/roman/wild-beauty/components/upload/view/Card.js",
+		"/home/roman/wild-beauty/components/upload/view/index.js",
+		"/home/roman/wild-beauty/components/upload/Request.js",
+		"/home/roman/wild-beauty/stores/queries.js",
+		"/home/roman/wild-beauty/components/siteMap.js",
+		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
+		"/home/roman/the-wild-beauty-company/components/upload/RUG.js",
+		"/home/roman/the-wild-beauty-company/components/upload/Request.js",
 		"/home/roman/wild-beauty/lib/util.js",
+		"/home/roman/wild-beauty/components/views/itemEditor.js",
+		"/home/roman/wild-beauty/components/simple/wrapIf.js",
+		"/home/roman/wild-beauty/pages/tree.js",
+		"/home/roman/wild-beauty/static/css/react-dropdown-tree-select.css",
+		"/home/roman/wild-beauty/pages/_document.js",
+		"/home/roman/wild-beauty/node_modules/@render-props/image-props/cjs/utils/loadImages.js",
+		"/home/roman/wild-beauty/components/upload.js",
+		"/home/roman/wild-beauty/components/upload/DragArea.js",
+		"/home/roman/wild-beauty/components/upload/DropArea.js",
+		"/home/roman/wild-beauty/lib/devtools.js",
+		"/home/roman/wild-beauty/pages/new/[photo_id].js",
+		"/home/roman/wild-beauty/static/style.css",
+		"/home/roman/the-wild-beauty-company/components/upload/DragArea.js",
+		"/home/roman/the-wild-beauty-company/components/upload.js",
+		"/home/roman/wild-beauty/components/upload/view/UploadIcon.js",
+		"/home/roman/wild-beauty/components/upload/view/RefreshIcon.js",
+		"/home/roman/wild-beauty/components/upload/style.css",
+		"/home/roman/the-wild-beauty-company/pages/new.js",
+		"/home/roman/wild-beauty/components/upload/PropTypes.js",
+		"/home/roman/wild-beauty/pages/_app.js",
+		"/home/roman/wild-beauty/pages/list.js",
+		"/home/roman/wild-beauty/pages/oldindex.js",
+		"/home/roman/wild-beauty/pages/show.js",
+		"/home/roman/wild-beauty/pages/test.js",
+		"/home/roman/wild-beauty/query.js",
+		"/home/roman/wild-beauty/imageConversion.js",
+		"/home/roman/wild-beauty/static/css/react-upload-gallery.css",
+		"/home/roman/the-wild-beauty-company/components/views/itemEditor.js",
+		"/home/roman/wild-beauty/components/simple/editableField.js",
+		"/home/roman/the-wild-beauty-company/components/simple/editableField.js",
+		"/home/roman/wild-beauty/node_modules/inquirer/lib/prompts/editor.js",
+		"/home/roman/wild-beauty/components/simple/editableText.js",
+		"/home/roman/wild-beauty/lib/dom/timer.js",
+		"/home/roman/wild-beauty/lib/devpane.js",
+		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
+		"/home/roman/wild-beauty/components/TouchCallback.js",
+		"/home/roman/wild-beauty/components/views/addItemBar.js",
+		"/home/roman/wild-beauty/components/simple/aspectBox.js",
+		"/home/roman/wild-beauty/lib/dom/element.js",
+		"/home/roman/wild-beauty/package.json",
 		"/home/roman/the-wild-beauty-company/stores/functions.js",
 		"/home/roman/wild-beauty/stores/functions.js",
 		"/home/roman/wild-beauty/components/simple/layer.js",
@@ -186,14 +324,8 @@
 		"/home/roman/wild-beauty/lib/fd-graph.js",
 		"/home/roman/wild-beauty/lib/dom/pointList.js",
 		"/home/roman/the-wild-beauty-company/lib/util.js",
-		"/home/roman/wild-beauty/pages/tree.js",
-		"/home/roman/wild-beauty/query.js",
-		"/home/roman/wild-beauty/pages/new.js",
-		"/home/roman/the-wild-beauty-company/pages/new.js",
 		"/home/roman/Downloads/UnicodeData.txt",
-		"/home/roman/wild-beauty/stores/api.js",
 		"/home/roman/wild-beauty/test.js",
-		"/home/roman/wild-beauty/stores/RootStore.js",
 		"/home/roman/wild-beauty/lib/dom/point.js",
 		"/home/roman/wild-beauty/lib/dom/rect.js",
 		"/home/roman/wild-beauty/lib/dom/rgba.js",
@@ -207,37 +339,26 @@
 		"/home/roman/wild-beauty/components/treeView.js",
 		"/home/roman/wild-beauty/components/layer.js",
 		"/home/roman/wild-beauty/lib/dom/reactComponent.js",
-		"/home/roman/wild-beauty/lib/dom/element.js",
-		"/home/roman/wild-beauty/lib/devtools.js",
 		"/home/roman/the-wild-beauty-company/components/tree.js",
 		"/home/roman/the-wild-beauty-company/pages/tree.js",
-		"/home/roman/wild-beauty/stores/queries.js",
 		"/home/roman/the-wild-beauty-company/lib/scripts/convert-to-es5.sh",
-		"/home/roman/wild-beauty/server.js",
 		"/home/roman/the-wild-beauty-company/lib/dom/reactComponent.js",
 		"/home/roman/the-wild-beauty-company/pages/_app.js",
-		"/home/roman/wild-beauty/components/layout.js",
 		"/home/roman/the-wild-beauty-company/test-path.js",
 		"/home/roman/wild-beauty/lib/svg-path.js",
 		"/home/roman/wild-beauty/lib/dom/svg.js",
 		"/home/roman/wild-beauty/components/login.js",
 		"/home/roman/wild-beauty/components/tree.js",
-		"/home/roman/wild-beauty/imageConversion.js",
 		"/home/roman/wild-beauty/lib/dom.js",
 		"/home/roman/wild-beauty/test-jpeg.js",
-		"/home/roman/wild-beauty/pages/_app.js",
 		"/home/roman/wild-beauty/static/css/grid.css",
 		"/home/roman/wild-beauty/lib/jpeg.js",
 		"/home/roman/wild-beauty/lib/colorscheme.js",
 		"/home/roman/the-wild-beauty-company/lib/dom/element.js",
-		"/home/roman/wild-beauty/lib/devpane.js",
 		"/home/roman/wild-beauty/lib/svg-load.js",
-		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
 		"/home/roman/wild-beauty/lib/util.es5.js",
 		"/home/roman/the-wild-beauty-company/stores/api.js",
-		"/home/roman/wild-beauty/pages/list.js",
 		"/home/roman/the-wild-beauty-company/lib/dom/rect.js",
-		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
 		"/home/roman/the-wild-beauty-company/lib/dom/point.js",
 		"/home/roman/wild-beauty/lib/dom/elementRect.js",
 		"/home/roman/wild-beauty/lib/dom/select.js",
@@ -252,13 +373,10 @@
 		"/home/roman/the-wild-beauty-company/lib/dom/svg.js",
 		"/home/roman/wild-beauty/lib/dom/tree.js",
 		"/home/roman/the-wild-beauty-company/test.js",
-		"/home/roman/wild-beauty/lib/dom/timer.js",
 		"/home/roman/.config/sublime-text-3/Packages/Babel/Next.tmTheme",
 		"/home/roman/the-wild-beauty-company/lib/dom/pointList.js",
-		"/home/roman/wild-beauty/components/TouchCallback.js",
 		"/home/roman/Dokumente/Sources/plot-cv/lib/dom.js",
 		"/home/roman/the-wild-beauty-company/lib/dom/matrix.js",
-		"/home/roman/wild-beauty/components/siteMap.js",
 		"/home/roman/wild-beauty/components/nav.js",
 		"/home/roman/wild-beauty/pages/index.js",
 		"/home/roman/wild-beauty/lib/svg-overlay.js",
@@ -268,45 +386,11 @@
 		"/home/roman/wild-beauty/static/wasm/post.js",
 		"/home/roman/Dokumente/Sources/libbpg/post.js",
 		"/home/roman/the-wild-beauty-company/static/wasm.html",
-		"/home/roman/Dokumente/Sources/libbpg-git/README",
-		"/home/roman/the-wild-beauty-company/node_modules/arity-n/1.js",
-		"/home/roman/the-wild-beauty-company/wild-beauty.sublime-project",
-		"/home/roman/the-wild-beauty-company/lib/devtools.js",
-		"/home/roman/the-wild-beauty-company/pages/index.js",
-		"/home/roman/wild-beauty/lib/lua.js",
-		"/home/roman/the-wild-beauty-company/imageTest.js",
-		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
-		"/home/roman/the-wild-beauty-company/imageConversion.js",
-		"/home/roman/the-wild-beauty-company/static/style.css",
-		"/home/roman/the-wild-beauty-company/server.js",
-		"/home/roman/the-wild-beauty-company/lib/devpane.js",
-		"/home/roman/the-wild-beauty-company/components/layout.js",
-		"/home/roman/Dokumente/Sources/c-utils/cfg.sh",
-		"/home/roman/Dokumente/Sources/shish/cfg-cmake.sh",
-		"/home/roman/the-wild-beauty-company/lib/touchHandler.js",
-		"/home/roman/the-wild-beauty-company/pages/home.js",
-		"/home/roman/the-wild-beauty-company/pages/show/[id].js",
-		"/home/roman/the-wild-beauty-company/components/views/toastsContainer.js",
-		"/home/roman/the-wild-beauty-company/pages/browse.js",
-		"/home/roman/the-wild-beauty-company/pages/_document.js",
-		"/home/roman/the-wild-beauty-company/components/login.js",
-		"/home/roman/the-wild-beauty-company/components/simple/cubeSpinner.js",
-		"/home/roman/the-wild-beauty-company/components/cubeSpinner.js",
-		"/home/roman/the-wild-beauty-company/pages/show.js",
-		"/home/roman/wild-beauty/pages/panes.js",
-		"/home/roman/wild-beauty/lib/touchHandler.js",
-		"/home/roman/the-wild-beauty-company/pages/list.js",
-		"/home/roman/the-wild-beauty-company/components/TouchCallback.js",
-		"/home/roman/lotto/pages/picks.js",
-		"/home/roman/wild-beauty/pages/new/[photo_id].js",
-		"/home/roman/the-wild-beauty-company/stores/i18nStore.js",
-		"/home/roman/the-wild-beauty-company/stores/queries.js",
-		"/home/roman/the-wild-beauty-company/components/withQueryParam.js",
-		"/home/roman/the-wild-beauty-company/lib/dom.js"
+		"/home/roman/Dokumente/Sources/libbpg-git/README"
 	],
 	"find":
 	{
-		"height": 42.0
+		"height": 40.0
 	},
 	"find_in_files":
 	{
@@ -323,137 +407,137 @@
 	},
 	"find_state":
 	{
-		"case_sensitive": true,
+		"case_sensitive": false,
 		"find_history":
 		[
-			"width:",
-			"rug",
-			"margin-top",
-			"border-box",
-			"data-tool",
-			"tooltip",
-			"biggest:",
-			"fn.call",
-			"fn\\(",
-			"debug",
-			"fn\\(",
-			"api\\[",
-			"update\\(",
-			"users",
-			"Math.max",
-			"api",
-			"test",
-			"query:",
-			"result:",
-			"pad =",
-			"isEmpty",
-			"Util.inspect",
-			"_eq",
-			"delete =",
-			"prettier.*ign",
-			"delete =",
-			"Util.inspect",
-			"util.inspect",
-			"walkTre",
-			"getItem",
-			"parent =",
-			"newItem",
-			"getItem",
-			"walkTree =",
-			"treeToGraph",
-			"log.*node:",
-			"node:",
-			"treeToGraph",
-			"createGraph",
-			"treeToGraph",
-			"parent_id",
-			"treeToGraph",
-			"getInitialProp",
-			"bbox =",
-			"\\.bbox =",
-			"points",
-			"length =",
-			"point_trans",
-			"length =",
-			"inspect",
-			"log.*Node\\(",
-			"\".*Node\\(",
-			"Node\\(",
-			"bbox",
-			"new Graph",
-			"\"svg\"",
-			"Graph",
-			"import.*graph",
-			"components.*tree",
-			"TreeView items",
-			"fill=",
-			"spacing",
-			"inspect =",
-			"filterOutKey",
-			"node:",
-			"yield",
-			"'unknown'",
-			"render",
-			"entries:",
-			"rootItem:",
-			"TreeView",
-			"item.title.length",
-			"Tree\\(",
-			"util.inspect",
-			"traverseTree",
-			"getInit",
-			"\"tree:",
-			"⇐",
-			"rootItem =",
-			"setItem",
-			"getInit",
-			"\"items = ",
-			"items = ",
-			"getInit",
-			"import.*querie",
-			"fetchItems",
-			"getItem",
-			"getItems",
-			"params ",
-			"params =",
-			"params ",
-			"<Tree",
-			"table",
-			"table =",
-			"render_to",
-			"\\.index ",
-			"\\.index",
-			"traverseTree",
-			"<Tree",
-			"toString",
-			"z",
-			"Z",
-			"Z =",
-			"close =",
-			"Rotate",
-			"close =",
-			"line =",
-			"relative",
-			"arc",
-			"horiz",
-			"arc",
-			"bbox",
-			"useState",
-			"makeComponentReactive",
-			"makeClassComponentObserver",
-			"observer",
-			"jpegProps",
-			"ARFG",
-			"remove\\(",
-			"deleteImage",
-			"jpegProps",
+			"active=",
+			" 80px",
+			"80px",
+			" 80",
+			"80",
+			"hover",
+			"NavLink",
+			"-active",
+			"hover",
+			"reply:",
+			"upload.*handle",
+			"upload-area",
+			"padding.*10px",
+			"   display: flex;\n            flex-flow: column nowrap;\n            justify-content: flex-start;\n            align-items: center;",
+			"\\.content-lay",
+			"<Lay",
+			"apiReq",
+			"New.*handleClick",
+			"New.*handle",
+			"handleClick",
+			"onSuccess\\(",
+			"onSuccess(",
+			"onSuccess\\(",
+			"onSuccess",
+			"setImage",
+			"image",
+			"Card",
+			"upload-card-imag",
+			"source\\(",
+			"source",
+			"file upload",
+			"/upload",
+			"axios",
+			"^\\s*\\+",
+			"reply",
+			"/upload",
+			"returning",
+			"\"response:",
+			"api/image/upload",
+			"api/photo/upload",
+			"photo/upload",
+			"image/upload",
+			"/upload",
+			"response.map",
+			"res.errors",
+			"/upload",
+			"parseDa",
+			"unixTim",
+			"require.*util",
+			"isDa",
+			"parseDa",
+			"unix",
+			"stringify",
+			"photo",
+			"user_id",
+			"exif",
+			"exi[vf]",
+			"console.log",
+			"/upload",
+			"quality",
 			"aspect",
-			"/api/image",
-			"-20",
-			"grid-gap-20",
-			"grid-gap",
-			"403",
-			"404"
+			"quality",
+			"upload image",
+			"upload.image",
+			"upload_image",
+			"/upload",
+			"sha1",
+			"upload",
+			"secret:",
+			"react-sortable-hoc.js",
+			"prop-types.js",
+			"prop-types",
+			"rug",
+			"PropTypes",
+			"UploadImages",
+			"import.*RUG",
+			".rug",
+			"\\.rug",
+			"gallery.css",
+			"colors\\(",
+			"function colors\\(",
+			"colors\\(",
+			"colors-palette",
+			"overflow:",
+			"page-layout",
+			"page-lay",
+			"overflow.*auto",
+			"overflow",
+			"page-lay",
+			"page-layout",
+			"rug-item",
+			"rug-iten",
+			"rug-item",
+			"cursor.*grab",
+			"grab;",
+			"grab",
+			"grab;",
+			": grab",
+			"cursor:",
+			"pointer.*event",
+			"add =",
+			"editable-field",
+			"editable-fied",
+			"field-name",
+			"parent item",
+			"label",
+			"vcenter",
+			"center-fle",
+			"flex-cen",
+			"field-name",
+			"editable-field-name",
+			"input\\.",
+			"1745",
+			"linearGradient174",
+			"Gradient",
+			"defs3",
+			"defs3\n",
+			" xmlns=\"http://www.w3.org/2000/svg\"",
+			"IconEdit",
+			"icon-edit_svg__",
+			"Editing",
+			"form.sign",
+			"title=",
+			"title",
+			"saveIte",
+			"response.da",
+			"saveItem",
+			"dataObj"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -461,6 +545,13 @@
 		"regex": true,
 		"replace_history":
 		[
+			"",
+			"api/photo/upload",
+			"react-sortable-hoc",
+			"prop-types",
+			"",
+			"icon-edit-",
+			"entries",
 			"",
 			"sep",
 			"newData",
@@ -490,7 +581,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 164,
+						"buffer_size": 437,
 						"regions":
 						{
 						},
@@ -500,63 +591,283 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/wild-beauty/components/views/imageUpload.js",
+							"current_file": "/home/roman/wild-beauty/lib/fd-graph.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									405,
-									434
+									966,
+									971
 								],
 								[
-									758,
-									836
+									976,
+									987
 								],
 								[
-									917,
-									928
+									1152,
+									1159
 								],
 								[
-									1155,
-									1166
+									1179,
+									1186
 								],
 								[
-									1201,
-									1209
+									1207,
+									1215
 								],
 								[
-									1459,
-									1465
+									1991,
+									1998
 								],
 								[
-									1845,
-									1851
+									2221,
+									2229
 								],
 								[
-									2259,
-									2276
+									2307,
+									2314
 								],
 								[
-									3684,
-									3689
+									2522,
+									2525
 								],
 								[
-									4316,
-									4321
+									2629,
+									2633
+								],
+								[
+									2693,
+									2703
+								],
+								[
+									2817,
+									2831
+								],
+								[
+									3202,
+									3212
+								],
+								[
+									3299,
+									3310
+								],
+								[
+									3440,
+									3447
+								],
+								[
+									3493,
+									3504
+								],
+								[
+									6134,
+									6165
+								],
+								[
+									6525,
+									6552
+								],
+								[
+									6703,
+									6707
+								],
+								[
+									6773,
+									6777
+								],
+								[
+									6837,
+									6841
+								],
+								[
+									6893,
+									6897
+								],
+								[
+									8762,
+									8771
+								],
+								[
+									8949,
+									8957
+								],
+								[
+									9166,
+									9175
+								],
+								[
+									9225,
+									9232
+								],
+								[
+									9233,
+									9237
+								],
+								[
+									9295,
+									9302
+								],
+								[
+									9303,
+									9307
+								],
+								[
+									9378,
+									9382
+								],
+								[
+									9462,
+									9468
+								],
+								[
+									9509,
+									9518
+								],
+								[
+									9868,
+									9872
+								],
+								[
+									10127,
+									10138
+								],
+								[
+									10554,
+									10559
+								],
+								[
+									10625,
+									10645
+								],
+								[
+									10949,
+									10968
+								],
+								[
+									11275,
+									11279
+								],
+								[
+									11317,
+									11323
+								],
+								[
+									11426,
+									11430
+								],
+								[
+									11605,
+									11616
+								],
+								[
+									12052,
+									12054
+								],
+								[
+									12117,
+									12119
+								],
+								[
+									12182,
+									12184
+								],
+								[
+									12247,
+									12249
+								],
+								[
+									12314,
+									12316
+								],
+								[
+									12376,
+									12378
+								],
+								[
+									12438,
+									12440
+								],
+								[
+									12500,
+									12502
+								],
+								[
+									12538,
+									12542
+								],
+								[
+									12569,
+									12573
+								],
+								[
+									12612,
+									12616
+								],
+								[
+									12658,
+									12663
+								],
+								[
+									12817,
+									12821
 								]
 							],
 							"symlist":
 							[
-								"hvOffset",
-								"({ images, rootStore, onChoose, onDelete, onRotate, shiftState, ...props }) =>",
-								"newValue =>",
-								"response =>",
-								"photo =>",
-								"res =>",
-								"arg =>",
-								"(image, index) =>",
-								"() =>",
-								"() =>"
+								"Graph",
+								"constructor",
+								"node =>",
+								"edge =>",
+								"graph =>",
+								"addNode",
+								"findNode",
+								"addEdge",
+								"add",
+								"push",
+								"resetNodes",
+								"getConnections",
+								"isLeafNode",
+								"branchNodes",
+								"getBBox",
+								"checkRedraw",
+								"function findBiggestGap(angles)",
+								"distributeLeafNodes",
+								"c =>",
+								"c =>",
+								"c =>",
+								"l =>",
+								"updateAll",
+								"roundAll",
+								"serialize",
+								"node =>",
+								"Node",
+								"edge =>",
+								"Edge",
+								"rect",
+								"center",
+								"translate",
+								"Node",
+								"constructor",
+								"reset",
+								"applyAttractiveForce",
+								"applyRepulsiveForce",
+								"toJS",
+								"key =>",
+								"Edge",
+								"constructor",
+								"x1",
+								"y1",
+								"x2",
+								"y2",
+								"x1",
+								"y1",
+								"x2",
+								"y2",
+								"toJS",
+								"Node",
+								"Node",
+								"toIdx",
+								"draw"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -564,66 +875,34 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 15,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 0,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 1,
-					"file": "components/views/imageUpload.js",
+					"file": "pages/_document.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7426,
+						"buffer_size": 661,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2447,
-								2447
+								268,
+								268
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 602.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "/home/roman/the-wild-beauty-company/pages/new.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6476,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								944,
-								944
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
@@ -636,96 +915,422 @@
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "static/css/react-upload-gallery.css",
+					"buffer": 2,
+					"file": "components/forceGraph.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 9975,
+						"buffer_size": 5975,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3308,
-								3308
+								619,
+								619
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
-							"syntax": "Packages/CSS/CSS.sublime-syntax",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2595.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
+					"buffer": 3,
+					"file": "lib/fd-graph.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7426,
+						"buffer_size": 13092,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								564,
-								564
+								1714,
+								1714
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"use_tab_stops": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "pages/new.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6518,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6449,
+								6449
+							]
+						],
+						"settings":
+						{
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1140.0,
+						"translation.y": 2691.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "pages/_app.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6264,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4413,
+								4413
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2087.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "components/layout.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1592,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								981,
+								981
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 288.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "server.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15145,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								14690,
+								14690
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5079.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "pages/browse.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 654,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "components/views/imageUpload.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 20782,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8913,
+								8913
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3463.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "components/login.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7754,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6472,
+								6472
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2796.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 14,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "components/nav.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 22291,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								14788,
+								14788
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3072.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "static/style.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3602,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1174,
+								1174
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 163.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "pages/new.js",
+					"buffer": 13,
+					"file": "components/simple/logo.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6476,
+						"buffer_size": 244,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6114,
-								6114
+								129,
+								129
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 13,
+					"type": "text"
+				},
+				{
+					"buffer": 14,
+					"file": "components/upload/style.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10435,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2731,
+								2731
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1436.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "pages/panes.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7211,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6870,
+								6870
+							]
+						],
+						"settings":
+						{
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
-						"translation.x": 189.0,
-						"translation.y": 2880.0,
+						"translation.x": 0.0,
+						"translation.y": 3075.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 11,
 					"type": "text"
 				}
 			]
@@ -733,7 +1338,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 44.0
+		"height": 39.0
 	},
 	"input":
 	{
@@ -771,6 +1376,10 @@
 		]
 	},
 	"menu_visible": true,
+	"output.doc":
+	{
+		"height": 0.0
+	},
 	"output.find_results":
 	{
 		"height": 321.0
@@ -779,7 +1388,7 @@
 	"project": "wild-beauty.sublime-project",
 	"replace":
 	{
-		"height": 105.0
+		"height": 71.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -789,40 +1398,152 @@
 		"selected_items":
 		[
 			[
-				"new",
-				"pages/new.js"
+				"fd-gra",
+				"lib/fd-graph.js"
 			],
 			[
-				"imageUp",
-				"components/views/imageUpload.js"
+				"server.j",
+				"server.js"
 			],
 			[
-				"style.css",
-				"static/style.css"
-			],
-			[
-				"show",
-				"pages/show.js"
+				"nav",
+				"components/nav.js"
 			],
 			[
 				"new.js",
 				"pages/new.js"
 			],
 			[
-				"query",
-				"query.js"
+				"lay",
+				"components/layout.js"
 			],
 			[
-				"query.js",
-				"query.js"
+				"imageUp",
+				"components/views/imageUpload.js"
+			],
+			[
+				"layout",
+				"components/layout.js"
+			],
+			[
+				"siteMap",
+				"components/siteMap.js"
+			],
+			[
+				"api",
+				"stores/api.js"
+			],
+			[
+				"server",
+				"server.js"
+			],
+			[
+				"util",
+				"lib/util.js"
 			],
 			[
 				"util.js",
 				"lib/util.js"
 			],
 			[
-				"util",
-				"lib/util.js"
+				"query",
+				"query.js"
+			],
+			[
+				"api.js",
+				"stores/api.js"
+			],
+			[
+				"imageCon",
+				"imageConversion.js"
+			],
+			[
+				"imageC",
+				"imageConversion.js"
+			],
+			[
+				"react-up",
+				"static/css/react-upload-gallery.css"
+			],
+			[
+				"upload.js",
+				"components/upload.js"
+			],
+			[
+				"upload",
+				"components/views/imageUpload.js"
+			],
+			[
+				"imageup",
+				"components/views/imageUpload.js"
+			],
+			[
+				"style",
+				"static/style.css"
+			],
+			[
+				"docume",
+				"pages/_document.js"
+			],
+			[
+				"new",
+				"pages/new.js"
+			],
+			[
+				"uploadim",
+				"node_modules/@render-props/image-props/cjs/utils/loadImages.js"
+			],
+			[
+				"devtoo",
+				"lib/devtools.js"
+			],
+			[
+				"style.css",
+				"static/style.css"
+			],
+			[
+				"wrapif",
+				"components/simple/wrapIf.js"
+			],
+			[
+				"rootStore",
+				"stores/RootStore.js"
+			],
+			[
+				"style.cs",
+				"static/style.css"
+			],
+			[
+				"editor",
+				"components/views/itemEditor.js"
+			],
+			[
+				"editablef",
+				"components/simple/editableField.js"
+			],
+			[
+				"rootSt",
+				"stores/RootStore.js"
+			],
+			[
+				"eleme",
+				"lib/dom/element.js"
+			],
+			[
+				"sitemap",
+				"components/siteMap.js"
+			],
+			[
+				"aspect",
+				"components/simple/aspectBox.js"
+			],
+			[
+				"show",
+				"pages/show.js"
+			],
+			[
+				"query.js",
+				"query.js"
 			],
 			[
 				"test.js",
@@ -830,10 +1551,6 @@
 			],
 			[
 				"api.",
-				"stores/api.js"
-			],
-			[
-				"api.js",
 				"stores/api.js"
 			],
 			[
@@ -845,16 +1562,8 @@
 				"pages/tree.js"
 			],
 			[
-				"rootStore",
-				"stores/RootStore.js"
-			],
-			[
 				"layer.js",
 				"components/simple/layer.js"
-			],
-			[
-				"fd-gra",
-				"lib/fd-graph.js"
 			],
 			[
 				"line.js",
@@ -873,10 +1582,6 @@
 				"pages/tree.js"
 			],
 			[
-				"server",
-				"server.js"
-			],
-			[
 				"elemen",
 				"lib/dom/element.js"
 			],
@@ -885,20 +1590,12 @@
 				"lib/dom/reactComponent.js"
 			],
 			[
-				"devtoo",
-				"lib/devtools.js"
-			],
-			[
 				"reactC",
 				"lib/dom/reactComponent.js"
 			],
 			[
 				"quer",
 				"stores/queries.js"
-			],
-			[
-				"rootSt",
-				"stores/RootStore.js"
 			],
 			[
 				"tree.j",
@@ -911,10 +1608,6 @@
 			[
 				"svg.js",
 				"lib/dom/svg.js"
-			],
-			[
-				"layout",
-				"components/layout.js"
 			],
 			[
 				"test-jp",
@@ -933,10 +1626,6 @@
 				"pages/_app.js"
 			],
 			[
-				"style.cs",
-				"static/style.css"
-			],
-			[
 				"element",
 				"lib/dom/element.js"
 			],
@@ -947,10 +1636,6 @@
 			[
 				"devtool",
 				"lib/devtools.js"
-			],
-			[
-				"api",
-				"stores/api.js"
 			],
 			[
 				"test",
@@ -983,10 +1668,6 @@
 			[
 				"dom.es",
 				"lib/dom.es5.js"
-			],
-			[
-				"eleme",
-				"lib/dom/element.js"
 			],
 			[
 				"bbox",
@@ -1143,10 +1824,6 @@
 			[
 				"devtools",
 				"lib/devtools.js"
-			],
-			[
-				"server.j",
-				"server.js"
 			],
 			[
 				"touchHa",
