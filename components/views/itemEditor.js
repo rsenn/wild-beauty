@@ -144,7 +144,7 @@ export const ItemEditor = inject(
               }}
               className={"save"}
             >
-              <img src={"/static/img/icon-save.svg"} />
+              <img src={"/static/img/action-save-new.svg"} />
             </button>
           </AddItemBar>
         </div>
