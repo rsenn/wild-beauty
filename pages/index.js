@@ -84,7 +84,7 @@ const Home = inject("rootStore")(
         </div>
         {/*onClick={this.handleNext}*/}
         <div className={"button-next"}>
-          <Link href={"/show"}>
+          <Link href={"/browse"}>
             <a>
               <img className={"fill-parent"} width={64} height={64} src={"/static/img/arrow-next.svg"} style={{ opacity: rootStore.state.loading ? 0 : 1 }} />
             </a>

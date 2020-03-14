@@ -22,7 +22,7 @@ export const SiteMap = [
     description: () => <Translate value="nav.gallery_description" />
   },*/
   {
-    href: "/show",
+    href: "/browse",
     name: "show",
     label: () => (
       <span>
