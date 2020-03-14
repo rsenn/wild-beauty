@@ -5,10 +5,9 @@ import Layout from "../components/layout.js";
 @inject("rootStore")
 @observer
 class Browse extends React.Component {
-
   static async getInitialProps({ res, req, query, asPath, mobxStore }) {
     const rootStore = mobxStore.RootStore;
-    return {  };
+    return {};
   }
 
   constructor(props) {
@@ -23,10 +22,8 @@ class Browse extends React.Component {
     console.log("Browse.render");
     return (
       <Layout>
-        <div>
-        </div>
-        <style jsx global>{`
-        `}</style>
+        <div></div>
+        <style jsx global>{``}</style>
       </Layout>
     );
   }

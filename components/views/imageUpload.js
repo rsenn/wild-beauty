@@ -142,8 +142,6 @@ export const ImageUpload = inject("rootStore")(
           }
           .upload-area {
             position: relative;
-            padding: 0px 10px;
-            min-width: 80vmin;
           }
           div.upload-area > div > div,
           div.upload-area > div > div > div {
@@ -240,7 +238,6 @@ export const ImageUpload = inject("rootStore")(
           }
 
           .upload .upload-handle {
-            width: 100%;
             height: 290px;
             overflow: hidden;
             position: relative;

@@ -352,7 +352,6 @@ if(!dev && cluster.isMaster) {
             data: `"${data}"`
           };
           reply = { ...reply, original_name: file.name };
-
           try {
             response = await API.insert("photos", photo, ["id"]);
             console.log("photo/upload ", Util.filterOutKeys(photo, ["data"]), " response=", response);
@@ -365,17 +364,12 @@ if(!dev && cluster.isMaster) {
             API.options.debug = true;
             response = await API.select("photos", { original_sha1: `"${original_sha1}"` }, ["id", "width", "height", "original_name", "original_sha1", "colors", "filesize", "exif"]);
             API.options.debug = false;
-
             let photo;
-
             if(response && response.photos && response.photos.length) photo = response.photos[0];
-
-            console.log("response:", response);
-
+            //console.log("response:", response);
             reply = { ...reply, error, photo };
           }
-          console.log("reply:", reply);
-
+          //   console.log("reply:", reply);
           res.json(reply);
         }
       })

@@ -97,7 +97,7 @@ class New extends React.Component {
   handleClick = event => {
     const nativeEvent = event.nativeEvent || event;
     const shiftState = this.shiftState();
-//    console.log("New.ĥandleClick", { shiftState });
+    //    console.log("New.ĥandleClick", { shiftState });
   };
   /*
   handleKeyDown = event => {
@@ -179,10 +179,6 @@ class New extends React.Component {
             border: 1px outset #55555580;
           }
           .dropdown-tree {
-          }
-          .content-layout {
-            width: 100vw;
-            text-align: left;
           }
         `}</style>
       </Layout>

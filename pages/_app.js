@@ -123,24 +123,13 @@ class MyApp extends App {
             padding: 0px;
             overflow-x: hidden;
           }
-          .page-layout {
-            position: absolute;
-            display: block;
-            width: 100vw;
-            overflow: hidden;
-          }
+          html,
+          body,
+          .page-layout,
           .content-layout {
-            padding: 0 0 0 0;
-            margin: 0 0 0 0;
-            width: 100vw;
-            text-align: center;
-            display: flex;
-            flex-flow: column nowrap;
-            justify-content: flex-start;
-            align-items: center;
-            z-index: 1;
-            position: relative;
+            overflow-x: hidden;
           }
+
           button,
           textarea,
           input,

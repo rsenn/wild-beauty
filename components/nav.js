@@ -112,8 +112,9 @@ const NavLink = inject("rootStore")(
         }
         li.menu-item > a > div.desc {
           position: absolute;
-          top: 48px;
-          font-size: 15px;
+          top: 56px;
+          font-style: italic;
+          font-size: 14px;
         }
         li.menu-item {
           background-color: rgba(138, 0, 16, 0.8);
@@ -207,7 +208,9 @@ const Nav = inject(
     entry = Util.find(SiteMap, "login", "name");
     entry.disabled = authenticated;
 
-    console.log("Nav.render", { angle, authenticated });
+    const path = router.asPath;
+
+    //console.log("Nav.render", { path, angle, authenticated });
 
     return (
       <div className="menu">
@@ -268,6 +271,7 @@ const Nav = inject(
             if(item.disabled) return undefined;
             return (
               <NavLink
+              active={false && path == item.href}
                 href={item.href}
                 key={item.key}
                 path={item.href}
@@ -359,9 +363,10 @@ const Nav = inject(
             width: 100vw;
             direction: rtl;
             min-height: 112px;
-            padding: 0 0 0 0;
             position: relative;
             left: 0px;
+
+            padding: 0 20px 0 10px;
           }
           ul {
             direction: ltr;

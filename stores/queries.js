@@ -151,6 +151,22 @@ export class Queries {
     result.shift();
     return result;
   }
+
+  async apiRequest(endpoint, data) {
+    let res;
+    //console.log("RootStore.apiRequest", { endpoint, data });
+    if(!data) res = await axios.get(endpoint);
+    else res = await axios.post(endpoint, data);
+
+    if((await res) && ((await res.status) != 200 || !(await res.data))) {
+      console.error("RootStore.apiRequest " + endpoint, data, " ERROR ", res);
+      throw new Error(`apiRequest status=${res.status} data=${res.data}`);
+    } else {
+    }
+    //console.log("RootStore.apiRequest " + endpoint, res);
+
+    return res;
+  }
 }
 
 export default Queries;
