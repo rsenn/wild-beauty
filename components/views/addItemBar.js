@@ -19,6 +19,7 @@ export const AddItemBar = ({ onAdd, ...props }) => {
           display: flex;
           flex-flow: row wrap;
           justify-content: flex-start;
+          margin: 20px 0;
         }
       `}</style>
     </div>

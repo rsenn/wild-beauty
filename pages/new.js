@@ -3,7 +3,7 @@ import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../lib/alea.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
 import { SvgOverlay } from "../lib/svg-overlay.js";
-import { action } from "mobx";
+import { action, toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { ImageUpload, hvOffset } from "../components/views/imageUpload.js";
 import { ItemEditor } from "../components/views/itemEditor.js";
@@ -16,7 +16,7 @@ import { Element } from "../lib/dom.js";
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
-@inject("rootStore")
+@inject("rootStore", "editorStore")
 @observer
 class New extends React.Component {
   currentPhoto = null;
@@ -31,24 +31,26 @@ class New extends React.Component {
   shiftState = trkl(false);
 
   static async getInitialProps({ res, req, err, mobxStore, ...ctx }) {
-    const { RootStore } = mobxStore;
-    let token, user_id;
+    const rootStore = mobxStore["RootStore"];
+    const editorStore = mobxStore["EditorStore"];
+
+    let user_id;
     let images = [];
-    if(ctx && req && req.cookies) {
-      token = req.cookies.token;
-      user_id = req.cookies.user_id;
-      RootStore.auth.token = token;
-      RootStore.auth.user_id = user_id;
-    }
+
+    if(req) user_id = rootStore.setAuthentication(req.cookies);
+
     if(!global.window) {
       if(user_id) {
-        images = await RootStore.fetchImages({ user_id });
+        images = await rootStore.fetchImages({ user_id });
         images = images.filter(ph => ph.items.length == 0);
-        images.forEach(item => RootStore.newPhoto(item));
+        images.forEach(item => rootStore.newPhoto(item));
       }
       const { url, query, body, route } = req || {};
       console.log("New.getInitialProps", { url });
     }
+
+    editorStore.addField("Parent", "number", -1);
+
     return { images };
   }
 
@@ -121,56 +123,55 @@ class New extends React.Component {
       const { value } = event.nativeEvent.target;
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
+
+    //console.log("New.render", {  });
+
     return (
       <Layout scroll={false} toastsClick={this.handleClick} className={"noselect"} {...this.touchListener.events}>
         <div onKeyDown={this.handleKeyDown} onKeyUp={this.handleKeyUp}>
           <NeedAuth>
-            {rootStore.state.image === null ? (
-              <ImageUpload
-                shiftState={this.shiftState}
-                images={this.props.images}
-                onChoose={this.chooseImage}
-                onDelete={id => {
-                  let e = Element.find(`#image-${id}`);
-                  do {
-                    if(e.parentElement == null) break;
-                    e = e.parentElement;
-                  } while(!e.classList || !(e.classList.contains("image-entry") || e.classList.contains("upload-item")));
-                  rootStore.deletePhoto(id, result => {
-                    Element.remove(e.parentElement);
-                  });
-                }}
-                onRotate={(id, angle = 90) => {
-                  let img = Element.find(`#image-${id}`);
-                  console.log("onRotate: ", { id, img });
-                  let e = img;
-                  do {
-                    if(e.parentElement == null) break;
-                    e = e.parentElement;
-                  } while(!e.classList || !e.classList.contains("image-entry"));
+            <ImageUpload
+              shiftState={this.shiftState}
+              images={this.props.images}
+              onChoose={this.chooseImage}
+              onDelete={id => {
+                let e = Element.find(`#image-${id}`);
+                do {
+                  if(e.parentElement == null) break;
+                  e = e.parentElement;
+                } while(!e.classList || !(e.classList.contains("image-entry") || e.classList.contains("upload-item")));
+                rootStore.deletePhoto(id, result => {
+                  Element.remove(e.parentElement);
+                });
+              }}
+              onRotate={(id, angle = 90) => {
+                let img = Element.find(`#image-${id}`);
+                console.log("onRotate: ", { id, img });
+                let e = img;
+                do {
+                  if(e.parentElement == null) break;
+                  e = e.parentElement;
+                } while(!e.classList || !e.classList.contains("image-entry"));
 
-                  let src = img.getAttribute("src");
+                let src = img.getAttribute("src");
 
-                  Element.attr(img, { src: "" });
+                Element.attr(img, { src: "" });
 
-                  rootStore.rotatePhoto(id, angle, ({ success, width, height }) => {
-                    const landscape = width > height;
-                    const aspect = width / height;
-                    const orientation = landscape ? "landscape" : "portrait";
+                rootStore.rotatePhoto(id, angle, ({ success, width, height }) => {
+                  const landscape = width > height;
+                  const aspect = width / height;
+                  const orientation = landscape ? "landscape" : "portrait";
 
-                    let { w, h, hr, vr } = hvOffset(width, height);
+                  let { w, h, hr, vr } = hvOffset(width, height);
 
-                    console.log("rotatePhoto result:", { success, width, height, w, h, hr, vr });
-                    src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
+                  console.log("rotatePhoto result:", { success, width, height, w, h, hr, vr });
+                  src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
 
-                    Element.attr(img, { src, width, height, style: `position: relative; width: ${w}%; height: ${h}%; margin-top: ${-vr / 2}%; margin-left: ${-hr / 2}%;` });
-                    Element.attr(e, { ["data-tooltip"]: `${width}x${height} ${orientation}` });
-                  });
-                }}
-              />
-            ) : (
-              <ItemEditor tree={this.tree} makeTreeSelEvent={makeTreeSelEvent} />
-            )}
+                  Element.attr(img, { src, width, height, style: `position: relative; width: ${w}%; height: ${h}%; margin-top: ${-vr / 2}%; margin-left: ${-hr / 2}%;` });
+                  Element.attr(e, { ["data-tooltip"]: `${width}x${height} ${orientation}` });
+                });
+              }}
+            />
           </NeedAuth>
         </div>
         <SvgOverlay svgRef={this.svgLayer} />

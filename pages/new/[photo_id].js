@@ -35,7 +35,7 @@ function behaveTextarea(element) {
   return editor;
 }
 
-@inject("rootStore")
+@inject("rootStore", "editorStore")
 @observer
 export class NewItem extends React.Component {
   state = {
@@ -49,20 +49,27 @@ export class NewItem extends React.Component {
    * @return     {Promise}  The initial properties.
    */
   static async getInitialProps({ res, req, query, asPath, mobxStore }) {
-    const rootStore = mobxStore.RootStore;
-    const imageId = query.photo_id;
-    let images = [];
+    const rootStore = mobxStore["RootStore"];
+    const editorStore = mobxStore["EditorStore"];
+
+    let images = [],
+      items = [];
+
+    if(req) rootStore.setAuthentication(req.cookies);
+
     if(!global.window) {
-      images = await rootStore.fetchImages(`{ id: { _eq: ${imageId} } }`);
-
+      const imageId = query.photo_id;
+      images = toJS(await rootStore.fetchImages(`{ id: { _eq: ${imageId} } }`));
       images = images.filter(ph => ph.items.length == 0);
-
       images.forEach(item => rootStore.newPhoto(item));
+      let image = images && images.length ? images[0] : null;
+      if(image) rootStore.setState({ image: imageId });
+      items = await rootStore.fetchItems();
     }
-    let image = images && images.length ? images[0] : null;
-    if(image) rootStore.setState({ image: imageId });
-    console.log("New.getInitialProps", { query });
-    return { images };
+
+    //console.log("New[photo_id].getInitialProps", { images, items });
+
+    return { photos: images, items };
   }
 
   constructor(props) {
@@ -149,14 +156,14 @@ export class NewItem extends React.Component {
   componentDidMount() {
     const { rootStore, router } = this.props;
     //this.checkQuery();
-    rootStore.loadItems().then(response => {
+    /*  rootStore.loadItems().then(response => {
       if(response) {
         console.log("Items: ", response.items);
-        let tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
+          let tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
         console.log("this.state.tree", toJS(this.state.tree));
         this.setState({ tree });
       }
-    });
+    });*/
 
     Element.findAll("textarea").forEach(e => {
       console.log("behave: ", e);
@@ -169,27 +176,26 @@ export class NewItem extends React.Component {
     const { rootStore } = this.props;
     switch (type) {
       case "change": {
-        console.log("treeSelEvent: ", this.state.tree, arg.value);
+        //console.log("treeSelEvent: ", this.state.tree, arg.value);
         const item = findInTree(this.state.tree, arg.value);
         item.checked = true;
         //rootStore.setState({ selected: arg.value });
-        console.log("treeSelEvent: ", type, item);
+        //console.log("treeSelEvent: ", type, item);
         break;
       }
       default: {
-        console.log("treeSelEvent: ", type, arg);
+        //console.log("treeSelEvent: ", type, arg);
         break;
       }
     }
   }
 
   render() {
-    const { rootStore, router, className, images } = this.props;
+    const { rootStore, router, className, photos } = this.props;
     const { query } = router;
-    let img = images[0];
-    console.log(`/new/${query.photo_id}`, query);
-    // res.end(`Post: req:`, query.photo_id);
-    console.log("New {:id}.render ", this.touchListener, this.touchCallback);
+    let img = photos[0];
+    //console.log(`/new/${query.photo_id}`, query);
+    //console.log("New {:id}.render ");
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
 
     return (
@@ -197,7 +203,8 @@ export class NewItem extends React.Component {
         <NeedAuth>
           <div>
             <a href={`/new/${query.photo_id}`}>New item {query.photo_id}</a>
-            {this.state.tree ? <ItemEditor tree={this.state.tree} makeTreeSelEvent={makeTreeSelEvent} image={img} /> : undefined}
+
+            <ItemEditor /*tree={this.state.tree}*/ makeTreeSelEvent={makeTreeSelEvent} image={img} />
           </div>
           <style jsx global>{`
             .colors-text {

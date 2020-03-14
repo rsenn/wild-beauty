@@ -129,3 +129,33 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
   const { nodes, edges } = graph;
   console.log("graph: ", { nodes, edges });*/
 };
+
+export const idOf = obj => (typeof(obj) == 'object' && obj !== null && obj.id !== undefined) ? obj.id : null;
+
+
+export const transformItemData = it => {
+  if(typeof it.data == "string") {
+    let dataObj = {};
+    try {
+      dataObj = JSON.parse(it.data);
+    } catch(err) {
+      dataObj = null;
+    }
+    if(dataObj !== null) it.data = dataObj;
+  }
+  return it;
+};
+
+export const transformItemIds = it => {
+    if(it.children !== undefined)
+      it.children = it.children.map(idOf);
+     if(it.photos !== undefined)
+      it.photos = it.photos.map(m => idOf(m.photo));
+    if(it.parent !== undefined)
+      it.parent = idOf(it.parent);
+
+  return it;
+};
+
+export const transformItem = it => transformItemIds(transformItemData(it));
+

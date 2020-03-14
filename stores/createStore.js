@@ -1,4 +1,5 @@
 import { RootStore } from "./RootStore.js";
+import { EditorStore } from "./EditorStore.js";
 import Util from "../lib/util.js";
 import { useStaticRendering } from "mobx-react";
 
@@ -6,13 +7,15 @@ const isServer = typeof global.window === "undefined";
 
 useStaticRendering(isServer);
 
-let appStores = {
-  RootStore
+var appStores = {
+  RootStore,
+  EditorStore
 };
 
-let stores = null;
-let store = null;
-let root = null;
+var count = 0;
+var stores = null;
+var store = null;
+var root = null;
 
 export function createStore(isServer = false, preFetchObj = {}, pageProps = {}) {
   root = null;
@@ -26,7 +29,10 @@ export function createStore(isServer = false, preFetchObj = {}, pageProps = {}) 
 }
 
 export function getOrCreateStore(isServer = false, preFetchObj = {}, pageProps = {}) {
-  if(stores == null) {
+  if(stores == null || count == 0) {
+    ///  console.log("getOrCreateStore.callers", Util.getCallers());
+    console.log("getOrCreateStore", { count: count++, isServer, preFetchObj: Object.keys(preFetchObj), pageProps: Object.keys(pageProps) });
+
     stores = createStore(isServer, preFetchObj, pageProps);
     //CommonStoreFunctions.getStore = name => appStores[name].singleton;
   }
