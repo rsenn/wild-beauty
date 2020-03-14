@@ -35,38 +35,41 @@ export const ImageUpload = inject("rootStore")(
       <div className={"upload-area"}>
         <RUG
           action="/api/photo/upload" // upload route
-          source={response => {
+          source={async response => {
             let { affected_rows, returning, error, photo, original_name } = response;
-            console.log("RUG response:", { error, photo, affected_rows, returning, original_name });
+            //console.log("RUG response:", { error, photo, affected_rows, returning, original_name });
             if(error) returning = [photo];
 
-            let url = returning.map(photo => {
+            let reply = {};
+
+            reply.photo = await (async photo => {
               const { id } = photo;
               const url = `/api/photo/get/${id}.jpg`;
-              console.log("RUG response:", { photo, url });
+              //console.log("RUG response:", { photo, url });
+              let entry = toJS(rootStore.newPhoto(photo));
+              reply.url = url;
+              let res = await axios.head(url);
+              if(res.status == 200) {
+                const { width, height, aspect, channels, depth } = res.headers;
+                console.log("HEAD: ", res);
+                Object.assign(entry, { width, height, aspect, channels, depth });
+              }
+              return entry;
+            })(returning[0]);
 
-              let entry = rootStore.newPhoto(photo);
-              axios.head(url).then(res => {
-                if(res.status == 200) {
-                  const { width, height, aspect, channels, depth } = res.headers;
-                  console.log("HEAD: ", res);
-                  Object.assign(entry, { width, height, aspect, channels, depth, ...entry });
-                }
-              });
-              return url;
-            })[0];
-            console.log("RUG source=", { url, error });
+            reply = { ...reply, error };
+            //console.log("RUG reply=", reply);
 
-            return { url, error };
+            return reply;
           }}
           onSuccess={arg => {
             let status = arg && arg.error ? "error" : "success";
-            console.log(`RUG ${status}`, arg);
+            //console.log(`RUG ${status}`, arg);
 
             if(arg && arg.source) {
               const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
               let entry = rootStore.newPhoto({ id });
-              console.log("RUG onSuccess", toJS(entry));
+              //console.log("RUG onSuccess", toJS(entry));
             }
             // arg.remove();
           }}

@@ -142,7 +142,7 @@ class Panes extends React.Component {
                 return response.map(item => {
                   const { id } = item;
                   const url = `/api/photo/get/${id}.jpg`;
-                  console.log("RUG response:", { item, url });
+                  //console.log("RUG response:", { item, url });
                   return url;
                 })[0];
               }}

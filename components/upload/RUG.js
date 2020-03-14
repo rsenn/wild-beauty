@@ -112,12 +112,15 @@ class RUG extends React.Component {
   }
 
   onSuccess(uid, response) {
-    let { source } = this.props;
-    if(response && response.photo && response.photo.src) response.url = response.photo.src;
-    console.log("RUG.onSuccess ", { uid, source, response });
-    let { url, error } = typeof source === "function" ? source(response) : response;
-    console.log("RUG.onSuccess ", { url, error });
-    this.setImage(uid, { source: url, done: !error, error: !!error, uploading: false, progress: 100 }, () => this.props.onSuccess(this.state.images.find(item => item.uid === uid)));
+    (async () => {
+      let { source } = this.props;
+      if(response && response.photo) response.url = response.photo.src;
+      let { url, error, photo } = typeof source === "function" ? await source(response) : response;
+      if(!url && photo && photo.src) url = photo.src;
+      console.log("RUG.onSuccess ", { uid, url, error, photo });
+
+      this.setImage(uid, { source: url, done: !error, error: !!error, uploading: false, progress: 100 }, () => this.props.onSuccess(this.state.images.find(item => item.uid === uid)));
+    })();
   }
 
   onError(uid, { status, response }) {
