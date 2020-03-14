@@ -42,7 +42,7 @@ const findInTree = (tree, value) => {
   return null;
 };
 
-const makeItemToOption = selected => item => {
+/*const makeItemToOption = selected => item => {
   let data = item && typeof item.data == "string" && item.data.length > 0 ? JSON.parse(item.data) : item && item.data != null && typeof item.data == "object" ? item.data : {};
   let label = data.title || data.name || data.text || `${item.type}(${item.id})`;
   let value = item.id;
@@ -54,7 +54,7 @@ const makeItemToOption = selected => item => {
   if(!(label.charCodeAt(0) >= 65 && label.charCodeAt(0) <= 90)) return null;
 
   return obj;
-};
+};*/
 
 @inject("rootStore")
 @observer

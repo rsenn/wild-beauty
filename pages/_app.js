@@ -1,6 +1,7 @@
 import React from "react";
 import App from "next/app";
 import { Router } from "next/router";
+import { toJS } from "mobx";
 import { Provider } from "mobx-react";
 import Util from "../lib/util.js";
 import { getOrCreateStore } from "../stores/createStore.js";
@@ -12,11 +13,13 @@ class MyApp extends App {
   static async getInitialProps({ Component, router, ctx }) {
     // create a store with the initial state
     const mobxStore = getOrCreateStore(!Util.isBrowser());
+    console.log("mobxStore:", Object.keys(mobxStore));
     ctx.mobxStore = mobxStore;
     const basePageProps = {
       initialMobxState: mobxStore // store that will be serialized for ssr (see constructor)
     };
     const rootStore = basePageProps.initialMobxState["RootStore"];
+    const editorStore = basePageProps.initialMobxState["EditorStore"];
     var pageProps = { ...basePageProps };
     const getInit =
       Component.getInitialProps ||
@@ -24,9 +27,11 @@ class MyApp extends App {
         return {};
       });
     if(typeof getInit == "function") {
-      let pageCtx = { ...ctx, ...basePageProps };
+      let pageCtx = { ...ctx, ...basePageProps, mobxStore };
       // inject the basePageProps in the parameters of getInitialProps
-      pageProps = await getInit(ctx);
+      pageProps = await getInit(pageCtx);
+
+      console.log("App pageProps=", Object.fromEntries(Object.entries(pageProps).map(([key, value]) => [key, Util.isArray(value) || (typeof value == "object" && value.length !== undefined) ? `Array(${value.length})` : typeof value])));
 
       if(pageProps.items) {
         pageProps.items.forEach(item => {
@@ -41,33 +46,61 @@ class MyApp extends App {
     } else {
       //console.log(`App.getInitialProps ${componentName} has no getInitialProps!`);
     }
-    //console.log("App pageProps=", pageProps);
 
     return { pageProps };
   }
 
   constructor(props) {
     super(props);
-    const { router } = props;
-    this.mobxStore = getOrCreateStore(!global.window, props.pageProps.initialMobxState);
+    const { router, pageProps } = props;
+    this.mobxStore = getOrCreateStore(!global.window, props.pageProps.initialMobxState, props.pageProps);
+    console.log("App.constructor", { pageProps: Object.keys(pageProps) });
+
+    const rootStore = this.mobxStore.RootStore;
+    const editorStore = this.mobxStore.EditorStore;
+
+    if(pageProps.items !== undefined) {
+      let items = pageProps.items.map(item => ["" + item.id, item]);
+      rootStore.items.clear();
+      rootStore.items.merge(items);
+      console.log(`items.length=`, items.length, ` rootStore.items.size=${rootStore.items.size}`);
+    }
+    if(pageProps.photos !== undefined) {
+      let photos = pageProps.photos.map(photo => ["" + photo.id, photo]);
+      rootStore.photos.clear();
+      rootStore.photos.merge(photos);
+      console.log(`photos.length=`, photos.length, ` rootStore.photos.size=${rootStore.photos.size}`);
+    }
+
     const pageName = router.pathname.replace(/^\//, "");
     if(global.window) {
       window.Util = Util;
       window.stores = this.mobxStore;
       window.site = Util.find(SiteMap, pageName, "name");
     }
+    /*
+    if(pageProps) {
+      const { initialMobxState } = pageProps;
+      const items = initialMobxState["RootStore"].items, photos = initialMobxState["RootStore"].photos;
+      console.log("App.constructor", Object.keys(initialMobxState));
+
+      if(items && items.size > 0)
+      rootStore.items.replace(items);
+          if(photos && photos.size  > 0)
+
+      rootStore.photos.replace(photos);
+    }*/
 
     Router.events.on("routeChangeStart", url => {
       console.log("App is changing to: " + url);
     });
-
-    //console.log("App.constructor", pageName /*, props.pageProps*/);
   }
 
   componentDidMount(props) {
-    const { router } = this.props;
+    const { router, pageProps } = this.props;
 
     const rootStore = this.mobxStore.RootStore;
+    const editorStore = this.mobxStore.EditorStore;
 
     const handleRouteChange = url => {
       console.log("App is changing to: ", url);
@@ -77,7 +110,7 @@ class MyApp extends App {
 
     // Router.events.on("routeChangeStart", handleRouteChange);
 
-    //console.log("App.componentDidMount ", router.query);
+    console.log("App.componentDidMount ", router.query);
     const obj = ["step", "image", "selected"].reduce((acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc), {});
     //console.log("newState: ", obj);
 
@@ -92,7 +125,7 @@ class MyApp extends App {
     //console.log("App.render");
     return (
       <React.Fragment>
-        <Provider rootStore={this.mobxStore.RootStore} i18nStore={i18nStore} store={this.mobxStore}>
+        <Provider rootStore={this.mobxStore.RootStore} editorStore={this.mobxStore.EditorStore} i18nStore={i18nStore} store={this.mobxStore}>
           <Component {...pageProps} router={router} key={Router.route} />
         </Provider>
 

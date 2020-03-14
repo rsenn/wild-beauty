@@ -34,7 +34,7 @@ export const ToastsContainer = inject("rootStore")(
         <div className={"toasts-container"} onClick={onClick}>
           <TransitionGroup component="div">
             {toasts.map((toast, key) => (
-              <CSSTransition timeout={500} classNames="toast-move" key={toast.deadline}>
+              <CSSTransition timeout={500} className="toast-move" key={toast.deadline}>
                 <div key={toast.deadline} className={"toast-item toast-layout"}>
                   {toast.title ? <h4 className={"toast-title"}>{toast.title}</h4> : undefined}
                   <span className={"toast-message"}>{toast.message}</span>

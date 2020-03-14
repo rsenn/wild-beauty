@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { SizedAspectRatioBox } from "../simple/aspectBox.js";
-import { observable } from "mobx";
+import { observable, toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { AddItemBar } from "../views/addItemBar.js";
 import { EditableField, FieldLabel } from "../simple/editableField.js";
 import { Element, Timer } from "../../lib/dom.js";
+import { makeItemToOption, findInTree } from "../../stores/functions.js";
 
 //import SortableTree from "react-sortable-tree";
 
@@ -13,38 +14,52 @@ import "../../static/css/react-dropdown-tree-select.css";
 
 //import "react-sortable-tree/style.css"; // once app
 
-export const ItemEditor = inject("rootStore")(
-  observer(({ rootStore, image, tree, makeTreeSelEvent }) => {
+export const ItemEditor = inject(
+  "rootStore",
+  "editorStore"
+)(
+  observer(({ rootStore, editorStore, image, makeTreeSelEvent, ...props }) => {
     let img = image || rootStore.currentPhoto;
 
-    if(img === null) return undefined;
+    //if(img === null) return undefined;
 
     if(img && img.landscape === undefined) img.landscape = img.width >= img.height;
-    let entries = toJS(rootStore.fields);
-    console.log("ItemEditor.render ", { tree, img, entries });
-    let fields = rootStore.fieldNames;
+    let entries = toJS(editorStore.fields);
+    let fields = editorStore.getFields();
+
+    const [parentId, setParentId] = useState(-1);
+
+    const rootId = rootStore.rootItemId;
+
+    const items = rootStore.items;
+
+    let tree = rootStore.getItem(rootId, makeItemToOption(parentId));
+    tree = toJS(tree);
+    tree = tree || [];
+
+    console.log("ItemEditor.render ", { /*items, */tree, rootId, img, entries });
+
     return (
-      <div className={"content-edit"}>
+      <div className={"content-edit"} {...props}>
         <div className={"item-photo"}>
-          <div
-            className={"item-entry"}
-            style={{
-              width: img.landscape ? `${(img.height * 100) / img.width}%` : "100%"
-            }}
-          >
+          <div className={"item-entry"} style={img ? { width: img.width > img.height ? `${(img.height * 100) / img.width}%` : "100%" } : {}}>
             <SizedAspectRatioBox className={"item-box"}>
-              <img
-                id={`image-${img.id}`}
-                className={"inner-image"}
-                src={`/api/photo/get/${img.id}.jpg`}
-                width={img.width}
-                height={img.height}
-                orientation={img.landscape ? "landscape" : "portrait"}
-                style={{
-                  width: img.landscape ? `${(img.width * 100) / img.height}%` : "100%",
-                  height: img.landscape ? "100%" : "auto"
-                }}
-              />
+              {img ? (
+                <img
+                  id={`image-${img.id}`}
+                  className={"inner-image"}
+                  src={`/api/photo/get/${img.id}.jpg`}
+                  width={img.width}
+                  height={img.height}
+                  orientation={img.landscape ? "landscape" : "portrait"}
+                  style={{
+                    width: img.landscape ? `${(img.width * 100) / img.height}%` : "100%",
+                    height: img.landscape ? "100%" : "auto"
+                  }}
+                />
+              ) : (
+                <span>No image!</span>
+              )}
             </SizedAspectRatioBox>
           </div>
         </div>
@@ -67,41 +82,36 @@ export const ItemEditor = inject("rootStore")(
             />
           </div>
 
-          {fields.map(field => {
-            let { name, title, type = "string", multiline = false } = field;
-            console.log("field: ", field);
+          {fields.map((field, i) => {
+            let { name, label, type = "string", multiline = false } = field;
+            // console.log("field: ", {i,field});
 
             return (
               <EditableField
-                options={toJS(rootStore.fieldNames)}
+                key={i}
+                options={editorStore.getFields()}
                 multiline={!!multiline}
-                hasDraft={false}
                 className={"editable-field"}
                 name={name}
-                value={rootStore.values.get(name)}
+                value={editorStore.getValue(name)}
                 onNameChanged={newName => {
                   multiline = String(newName).toLowerCase() == "text";
                   type = newName;
                 }}
                 onValueChanged={newVal => {
                   console.log(`value of ${name} changed: ${newVal}`);
-
-                  rootStore.setValue(name, newVal);
+                  editorStore.setField(name, newVal);
                 }}
                 onCreateName={name => {
                   console.log("onCreateName: ", name);
                   if(typeof name == "string" && name.length > 0) {
                     name = name.toLowerCase();
-                    rootStore.fields.push(name);
+                    editorStore.addField(name, "string");
                     type = name;
                   }
                 }}
-                onFocus={e => {
-                  console.log("got focus: ", e.target);
-                }}
-                onBlur={e => {
-                  console.log("lost  focus: ", e.target);
-                }}
+                onFocus={e => console.log("got focus: ", e.target)}
+                onBlur={e => console.log("lost  focus: ", e.target)}
               />
             );
           })}
@@ -147,9 +157,7 @@ export const ItemEditor = inject("rootStore")(
             margin: 10px;
             max-width: 50vw;
           }
-          .item-fields {
-            width: 96vw;
-          }
+
           .item-photo {
             display: flex;
             justify-content: center;

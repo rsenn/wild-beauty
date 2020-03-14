@@ -2,12 +2,12 @@ import React from "react";
 import { action, autorun, observable, set, get, values, toJS } from "mobx";
 import { Queries } from "./queries.js";
 import dom, { Element, Timer } from "../lib/dom.js";
-import axios from "../lib/axios.js";
 import { makeAutoStoreHandler, getLocalStorage, logStoreAdapter } from "./autoStore.js";
 import Util from "../lib/util.js";
 import { assign_to } from "../lib/devtools.js";
 import devpane from "../lib/devpane.js";
 import Iterator from "../lib/iterator.js";
+import { transformItem, transformItemIds,transformItemData } from "./functions.js";
 
 const isServer = !global.window;
 
@@ -16,6 +16,7 @@ if(global.window) {
   window.fns = {};
   window.dom = dom;
   window.Iterator = Iterator;
+  Object.assign(window, { transformItem, transformItemIds,transformItemData });
 
   assign_to(window);
 }
@@ -42,7 +43,7 @@ export class RootStore extends Queries {
     token: ""
   });
 
-  images = observable.map();
+  photos = observable.map();
   entries = observable.array([], { deep: true });
   users = observable.map();
   fields = observable.array(["Name", "Title", "Text"]);
@@ -54,6 +55,9 @@ export class RootStore extends Queries {
 
   constructor(initialData, pageProps) {
     super();
+    //       console.log("RootStore.constructor.callers", Util.getCallers(1, 3));
+
+    console.log("RootStore.constructor ", { initialData, pageProps });
 
     if(initialData && initialData.RootStore) {
       const { RootStore } = initialData;
@@ -62,7 +66,6 @@ export class RootStore extends Queries {
         this.items.delete("" + itemId);
         this.items.set("" + itemId, RootStore.items[itemId]);
       }
-      //console.log("RootStore.constructor ", { initialData, pageProps });
     }
     if(global.window) {
       if(!window.devp) window.devp = new devpane();
@@ -99,6 +102,26 @@ export class RootStore extends Queries {
     return !!(this.auth.token && this.auth.token.length > 0);
   }
 
+  /**
+   * Sets the authentication id & token.
+   *
+   * @param      {Object}  cookies  Cookie values from request
+   * @return     {Number}  User ID or -1 of not authenticated
+   */
+  @action
+  setAuthentication(cookies) {
+    let token = "",
+      user_id = -1;
+    if(cookies) {
+      token = cookies.token;
+      user_id = cookies.user_id;
+      this.auth.token = token;
+      this.auth.user_id = user_id;
+    }
+    console.log("RootStore.setAuthentication", this.authenticated);
+    return user_id;
+  }
+
   @action.bound
   updateState(obj) {
     set(this.state, obj);
@@ -118,8 +141,8 @@ export class RootStore extends Queries {
     //console.log("rootStore.newPhoto ", photoObj);
     if(photoObj.src === undefined) photoObj.src = `/api/photo/get/${id}.jpg`;
 
-    this.images.set(id, observable.object(photoObj));
-    let image = this.images.get(id);
+    this.photos.set(id, observable.object(photoObj));
+    let image = this.photos.get(id);
 
     if(image.width === undefined || image.height === undefined) {
       var tm = Timer.interval(500, () => {
@@ -138,12 +161,12 @@ export class RootStore extends Queries {
 
   getPhoto(id) {
     id = "" + id;
-    return this.images.has(id) ? this.images.get(id) : null;
+    return this.photos.has(id) ? this.photos.get(id) : null;
   }
 
   photoExists(id) {
     id = parseInt(id);
-    return this.images.has(id);
+    return this.photos.has(id);
   }
 
   @action.bound
@@ -157,7 +180,7 @@ export class RootStore extends Queries {
       console.log("data: ", data);
       console.log("result: ", result);
       if(result && result.affected_rows) {
-        this.images.delete(id);
+        this.photos.delete(id);
         completed(result);
       }
     });
@@ -173,7 +196,7 @@ export class RootStore extends Queries {
       completed(data);
     });
   }
-
+  /*
   get fieldNames() {
     return this.fields.map(field => {
       const title = Util.ucfirst(field);
@@ -192,7 +215,7 @@ export class RootStore extends Queries {
   addField(name, type = "string") {
     this.fields.push("New");
   }
-
+*/
   get currentPhoto() {
     const id = this.state.image;
     let image = this.getPhoto(id);
@@ -244,8 +267,41 @@ export class RootStore extends Queries {
     return item;
   }
 
-  getItem(id, tr = it => it, idMap = null, depth = 1000) {
+  getItem(id, tr, idMap = null, depth = 1000) {
     if(idMap === null) idMap = [];
+    tr = tr || transformItem;
+
+    let item = this.items.get("" + (!id ? this.rootItemId : id));
+    /* if(item && idMap.indexOf(item.id) == -1) {
+      idMap.push(item.id);
+      if(typeof item == "object") {
+        let { parent_id } = item;
+        item.child_ids = observable.array([]);
+      if(item.children) {
+        if(item.children.length > 0)
+          item.child_ids.replace(item.children.map(i => typeof(i)=='object' ? i.id : i));
+          delete item.children;
+        } 
+
+      }
+    }*/
+    return item ? tr(item) : null;
+  }
+  getTree(id, tr, idMap = null, depth = 1000) {
+    if(idMap === null) idMap = [];
+    if(!tr)
+      tr = it => {
+        if(typeof it.data == "string") {
+          let dataObj = {};
+          try {
+            dataObj = JSON.parse(it.data);
+          } catch(err) {
+            dataObj = null;
+          }
+          if(dataObj !== null) it.data = dataObj;
+        }
+        return it;
+      };
     let item = this.items.get("" + (!id ? this.rootItemId : id));
     if(item && idMap.indexOf(item.id) == -1) {
       idMap.push(item.id);
