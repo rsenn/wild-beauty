@@ -27,9 +27,9 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     while((await res.data) !== undefined) res = await res.data;
     //console.log("res: ", res);
     if(res.errors && typeof res.errors == "object" && res.errors[0]) {
-      console.error("res.errors: ", res.errors, query.substring(0, 100) + "...");
-      console.error("query: ", query);
-      throw Error(res.errors[0].message);
+      // console.error("res.errors: ", res.errors); /*, query.substring(0, 100) + "...");
+      //console.error("query: ", query);
+      throw res.errors[0].message;
     }
     return res;
   };
@@ -62,7 +62,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     const objStr = !obj ? '' :  (typeof obj == "string"? `(where: ${obj})` : "(where: { " + Object.entries(obj) .map(([key, value]) => `${key}: {_eq: ${value}}`) .join(", ") + "})");
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const queryStr = `query Select${camelCase} { ${name}${objStr} { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
-    if(debug) console.log(`query: ${queryStr}`);
+    if(this.options.debug) console.log(`query: ${queryStr}`);
 
     let result = this(queryStr);
     //console.log(`result: ${result}`);
@@ -131,7 +131,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
   }`;
 
     let response = await this(queryStr);
-    if(debug) console.log("response: ", response, "query: ", queryStr);
+    if(debug) console.log("insert response: ", response, "query: ", queryStr);
     return response;
   };
 

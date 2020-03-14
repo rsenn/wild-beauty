@@ -14,7 +14,6 @@ import { inject, observer } from "mobx-react";
 import { MultitouchListener, MovementListener, TouchEvents } from "../lib/touchHandler.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 
-
 import "../static/style.css";
 
 const getPrng = () => Alea;
@@ -138,11 +137,11 @@ class Panes extends React.Component {
             }}
           >
             <RUG
-              action="/api/image/upload" // upload route
+              action="/api/photo/upload" // upload route
               source={response => {
                 return response.map(item => {
                   const { id } = item;
-                  const url = `/api/image/get/${id}.jpg`;
+                  const url = `/api/photo/get/${id}.jpg`;
                   console.log("RUG response:", { item, url });
                   return url;
                 })[0];

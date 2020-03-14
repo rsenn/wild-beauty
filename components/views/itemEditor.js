@@ -15,7 +15,7 @@ import "../../static/css/react-dropdown-tree-select.css";
 
 export const ItemEditor = inject("rootStore")(
   observer(({ rootStore, image, tree, makeTreeSelEvent }) => {
-    let img = image || rootStore.currentImage;
+    let img = image || rootStore.currentPhoto;
 
     if(img === null) return undefined;
 
@@ -36,7 +36,7 @@ export const ItemEditor = inject("rootStore")(
               <img
                 id={`image-${img.id}`}
                 className={"inner-image"}
-                src={`/api/image/get/${img.id}.jpg`}
+                src={`/api/photo/get/${img.id}.jpg`}
                 width={img.width}
                 height={img.height}
                 orientation={img.landscape ? "landscape" : "portrait"}

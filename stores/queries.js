@@ -13,13 +13,13 @@ export class Queries {
   api = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
 
   async fetchImages(where = {}) {
-    //console.log("⇒ images ", { where });
+    //console.log("⇒ photos ", { where });
     let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "colors", "user_id", "items { item_id }"], { where });
-    //console.log("⇐ images =", response);
+    //console.log("⇐ photos =", response);
 
-    return response.map(image => {
-      if(typeof image.colors == "string") image.colors = getImageColors(image.colors);
-      return image;
+    return response.map(photo => {
+      if(typeof photo.colors == "string") photo.colors = getImageColors(photo.colors);
+      return photo;
     });
   }
 
@@ -79,7 +79,7 @@ export class Queries {
     let item = (await items) ? await items[0] : null;
     const id = "" + (item && item.id !== undefined ? item.id : where.id);
     if(item.photos && item.photos.length) {
-      for(let i = 0; i < item.photos.length; i++) item.photos[i] = this.newImage(item.photos[i].photo);
+      for(let i = 0; i < item.photos.length; i++) item.photos[i] = this.newPhoto(item.photos[i].photo);
     }
     if(item.data) {
       let obj = {};
@@ -103,7 +103,7 @@ export class Queries {
    */
 
   saveItem(event, doneHandler = result => {}) {
-    const photo_id = (rs.currentImage && rs.currentImage.id) || rs.state.image;
+    const photo_id = (rs.currentPhoto && rs.currentPhoto.id) || rs.state.image;
     const parent_id = rs.state.parent_id;
     const entries = [...this.values.entries()];
 

@@ -57,7 +57,7 @@ export class NewItem extends React.Component {
 
       images = images.filter(ph => ph.items.length == 0);
 
-      images.forEach(item => rootStore.newImage(item));
+      images.forEach(item => rootStore.newPhoto(item));
     }
     let image = images && images.length ? images[0] : null;
     if(image) rootStore.setState({ image: imageId });
@@ -100,11 +100,11 @@ export class NewItem extends React.Component {
           //console.log("Touch ", event);
           const elem = event.target;
           if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
-            this.currentImage = event.target;
-            let obj = Element.toObject(this.currentImage);
-            const orientation = this.currentImage.getAttribute("orientation");
-            let rect = Element.rect(this.currentImage);
-            let prect = Element.rect(this.currentImage.parentElement.parentElement);
+            this.currentPhoto = event.target;
+            let obj = Element.toObject(this.currentPhoto);
+            const orientation = this.currentPhoto.getAttribute("orientation");
+            let rect = Element.rect(this.currentPhoto);
+            let prect = Element.rect(this.currentPhoto.parentElement.parentElement);
             let range = orientation == "landscape" ? rect.width - prect.width : rect.height - prect.height;
             this.offsetRange = range;
             //console.log("rect: ", { orientation, range, rect, prect });
@@ -116,17 +116,17 @@ export class NewItem extends React.Component {
             this.clonedImage.style.opacity = 0.3;
           }
           if(event.type.endsWith("move")) {
-            if(this.clonedImage && this.currentImage) {
-              let zIndex = parseInt(Element.getCSS(this.currentImage, "z-index")) - 1;
-              let irect = Element.rect(this.currentImage);
-              moveImage(event, this.currentImage);
+            if(this.clonedImage && this.currentPhoto) {
+              let zIndex = parseInt(Element.getCSS(this.currentPhoto, "z-index")) - 1;
+              let irect = Element.rect(this.currentPhoto);
+              moveImage(event, this.currentPhoto);
             }
           }
           if(event.type.endsWith("end")) {
-            if(this.clonedImage && this.currentImage) {
-              this.currentImage.style.position = "relative";
+            if(this.clonedImage && this.currentPhoto) {
+              this.currentPhoto.style.position = "relative";
               //console.log("currentOffset: ", this.currentOffset);
-              //console.log("currentImage: ", this.currentImage);
+              //console.log("currentPhoto: ", this.currentPhoto);
               Element.remove(this.clonedImage);
               this.clonedImage = null;
             }

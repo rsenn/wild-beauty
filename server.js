@@ -21,10 +21,12 @@ const Alea = require("./lib/alea.js");
 const Readable = stream.Readable;
 const tempfile = require("tempfile");
 const fsPromises = require("fs").promises;
-const { loadFile, getImagePalette, imageImport, rotateImage } = require("./imageConversion.js");
+const { loadFile, getImagePalette, imageImport, rotatePhoto } = require("./imageConversion.js");
 const { isJpeg, jpegProps } = require("./lib/jpeg.js");
 const { Console } = require("console");
 const { stdout, stderr } = process;
+const sha1 = require("node-sha1");
+
 global.console = new Console({ stdout, stderr, inspectOptions: { depth: 10 } });
 
 function bufferToStream(buffer) {
@@ -252,7 +254,7 @@ if(!dev && cluster.isMaster) {
     });
 
     server.post(
-      "/api/image/rotate",
+      "/api/photo/rotate",
       needAuth(async function(req, res) {
         let { id, angle } = req.body;
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
@@ -266,7 +268,7 @@ if(!dev && cluster.isMaster) {
           if(user_id == photo.user_id) {
             let input = Buffer.from(photo.data, "base64");
             delete photo.data;
-            let rotated = await rotateImage(input, angle);
+            let rotated = await rotatePhoto(input, angle);
             let { data, width, height } = await rotated;
             console.log("rotate", { width, height });
             let result = await API.update("photos", { id }, { data, width, height });
@@ -278,18 +280,18 @@ if(!dev && cluster.isMaster) {
       })
     );
 
-    server.post("/api/image/list", async function(req, res) {
+    server.post("/api/photo/list", async function(req, res) {
       let { fields, format, ...params } = req.body;
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
       let images = await API.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "colors", "user_id", "items { item_id }", ...fields], params);
-      if(format == "short") images = images.map(image => `/api/image/get/${image.id}.jpg`);
+      if(format == "short") images = images.map(image => `/api/photo/get/${image.id}.jpg`);
       if(images.length !== undefined) images = images.filter(im => im.items.length == 0);
       res.json({ success: true, count: images.length, images });
     });
 
     server.post(
-      "/api/image/delete",
+      "/api/photo/delete",
       needAuth(async function(req, res) {
         let { id } = req.body;
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
@@ -298,7 +300,7 @@ if(!dev && cluster.isMaster) {
       })
     );
 
-    server.get("/api/image/get/:id", async function(req, res) {
+    server.get("/api/photo/get/:id", async function(req, res) {
       const id = req.params.id.replace(/[^0-9].*/, "");
       let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { offset uploaded id filesize colors data } }`);
       const photo = response.photos[0];
@@ -320,34 +322,63 @@ if(!dev && cluster.isMaster) {
     });
 
     server.post(
-      "/api/image/upload",
+      "/api/photo/upload",
       needAuth(async function(req, res) {
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
         let response = [];
         for(let item of Object.entries(req.files)) {
           const file = item[1];
           const image = await imageImport(file.data);
-
-          const { colors, palette, data, size, props, exif } = image;
-          const { width, height } = size;
-
-          let reply = await API.insert(
-            "photos",
-            {
-              original_name: `"${file.name}"`,
-              colors: `"${colors}"`,
-              filesize: file.data.length,
-              width,
-              height,
-              user_id,
-              data: `"${data}"`
-            },
-            ["id"]
+          const original_sha1 = sha1(file.data);
+          let { colors, palette, data, size, props, exif } = image;
+          let { width, height } = size;
+          exif = Object.fromEntries(
+            Object.entries(exif)
+              .filter(([key, value]) => !(value instanceof Buffer))
+              .map(([key, value]) => [key, Util.parseDate(value)])
           );
-          let { affected_rows, returning } = typeof reply == "object" && typeof reply.insert_photos == "object" ? reply.insert_photos : {};
-          if(returning && returning.forEach) returning.forEach(({ original_name, filesize, colors, width, height, id }) => response.push({ original_name, filesize, colors, width, height, id }));
+          let exifData = JSON.stringify(exif);
+          // console.log("file upload: ", { item, exifData });
+          let reply = {};
+          const photo = {
+            exif: `"${exifData.replace(/[\\"]/g, "\\$&")}"`,
+            original_sha1: `"${original_sha1}"`,
+            original_name: `"${file.name}"`,
+            colors: `"${colors}"`,
+            filesize: file.data.length,
+            width,
+            height,
+            user_id,
+            data: `"${data}"`
+          };
+          reply = { ...reply, original_name: file.name };
+
+          try {
+            response = await API.insert("photos", photo, ["id"]);
+            console.log("photo/upload ", Util.filterOutKeys(photo, ["data"]), " response=", response);
+            let { affected_rows, returning } = typeof response == "object" && typeof response.insert_photos == "object" ? response.insert_photos : {};
+            //if(returning && returning.forEach) returning.forEach(({ original_name, filesize, colors, width, height, exif, id }) => response.push({ original_name, filesize, colors, width, height, id }));
+            reply = { ...reply, affected_rows, returning };
+          } catch(error) {
+            if(typeof error == "string") error = error.replace(/^([^\n]*)\n.*/g, "$1");
+            console.log("ERROR:", error);
+            API.options.debug = true;
+            response = await API.select("photos", { original_sha1: `"${original_sha1}"` }, ['id','width','height','original_name','original_sha1','colors','filesize','exif']);
+            API.options.debug = false;
+
+            let photo;
+
+            if(response && response.photos && response.photos.length)
+              photo = response.photos[0];
+
+            console.log("response:", response);
+
+            reply = { ...reply, error, photo };
+          }
+          console.log("reply:", reply);
+
+          res.json(reply);
         }
-        res.json(response);
       })
     );
 

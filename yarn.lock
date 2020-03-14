@@ -6571,6 +6571,11 @@ node-releases@^1.1.44, node-releases@^1.1.50:
   dependencies:
     semver "^6.3.0"
 
+node-sha1@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/node-sha1/-/node-sha1-1.0.1.tgz#32ed847d8513157b96dec6b79e8c47bcaeb78e1c"
+  integrity sha1-Mu2EfYUTFXuW3sa3noxHvK63jhw=
+
 node-walker@*:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/node-walker/-/node-walker-0.1.0.tgz#df2522fb34b1e1cf7e976462deec36016d327432"

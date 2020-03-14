@@ -13,10 +13,10 @@ export const hvOffset = (width, height) => {
   let w = width > height ? (width * 100) / height : 100;
   let h = width > height ? 100 : (height * 100) / width;
   let hr, vr;
-  if(h > 100) {
+  if (h > 100) {
     hr = 0;
     vr = h - 100;
-  } else if(w > 100) {
+  } else if (w > 100) {
     hr = w - 100;
     vr = 0;
   }
@@ -34,15 +34,20 @@ export const ImageUpload = inject("rootStore")(
     return (
       <div className={"upload-area"}>
         <RUG
-          action="/api/image/upload" // upload route
+          action="/api/photo/upload" // upload route
           source={response => {
-            return response.map(photo => {
-              console.log("RUG response:", { photo, url });
+            let { affected_rows, returning, error, photo, original_name } = response;
+            console.log("RUG response:", { error, photo, affected_rows, returning, original_name });
+            if (error) returning = [photo];
+
+            let url = returning.map(photo => {
               const { id } = photo;
-              const url = `/api/image/get/${id}.jpg`;
-              let entry = rootStore.newImage(photo);
+              const url = `/api/photo/get/${id}.jpg`;
+              console.log("RUG response:", { photo, url });
+
+              let entry = rootStore.newPhoto(photo);
               axios.head(url).then(res => {
-                if(res.status == 200) {
+                if (res.status == 200) {
                   const { width, height, aspect, channels, depth } = res.headers;
                   console.log("HEAD: ", res);
                   Object.assign(entry, { width, height, aspect, channels, depth, ...entry });
@@ -50,12 +55,19 @@ export const ImageUpload = inject("rootStore")(
               });
               return url;
             })[0];
+                        console.log("RUG source=", { url, error });
+
+            return { url, error };
           }}
           onSuccess={arg => {
-            const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
-            console.log("RUG success:", { id, arg });
-            let entry = rootStore.newImage({ id });
-            console.log("RUG success:", toJS(entry));
+            let status = (arg && arg.error) ? 'error' : 'success';
+          console.log(`RUG ${status}`,   arg  );
+
+            if (arg && arg.source) {
+              const id = parseInt(arg.source.replace(/.*\/([0-9]+).jpg/, "$1"));
+              let entry = rootStore.newPhoto({ id });
+              console.log("RUG onSuccess", toJS(entry));
+            }
             // arg.remove();
           }}
         ></RUG>
@@ -80,7 +92,7 @@ export const ImageUpload = inject("rootStore")(
                         <img
                           id={`image-${id}`}
                           className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
-                          src={`/api/image/get/${id}.jpg`}
+                          src={`/api/photo/get/${id}.jpg`}
                           width={width}
                           height={height}
                           orientation={orientation}

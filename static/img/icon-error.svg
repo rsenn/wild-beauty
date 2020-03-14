@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs/>
+  <defs>
+    <linearGradient id="icon-error_svg__a" x1="9.611" x2="24.232" y1="27.932" y2="3.932" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d40000"/>
+      <stop offset="1" stop-color="#ff2a2a"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#icon-error_svg__a)" stroke-width=".25" d="M25.86 6.136a13.966 13.966 0 100 19.727 13.966 13.966 0 000-19.727zM23.59 20.54l-3.055 3.055-4.539-4.539-4.539 4.54-3.055-3.056L12.942 16l-4.54-4.539 3.055-3.055 4.54 4.54 4.538-4.54 3.055 3.055-4.539 4.54z"/>
+</svg>

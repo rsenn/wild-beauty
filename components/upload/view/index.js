@@ -5,6 +5,8 @@ import Card from "./Card.js";
 import DragArea from "../DragArea.js";
 
 const Item = (type, image) => {
+
+  console.log("UploadItem.render ", {type,image});
   switch (type) {
     case "card":
       return <Card image={image} />;
@@ -20,6 +22,7 @@ export default ({ type, sorting }, images) => {
   const className = `upload-items __${type} ${sorting ? "__sorting" : ""}`;
 
   const options = typeof sorting === "object" ? sorting : {};
+  console.log("UploadView.render ", {type,sorting,images});
 
   return sorting ? (
     <DragArea {...options} className={className}>

@@ -111,14 +111,14 @@ export class RootStore extends Queries {
   }
 
   @action.bound
-  newImage(imageObj) {
-    let { id, ...photo } = imageObj;
+  newPhoto(photoObj) {
+    let { id, ...photo } = photoObj;
     id = parseInt(id);
 
-    //console.log("rootStore.newImage ", imageObj);
-    if(imageObj.src === undefined) imageObj.src = `/api/image/get/${id}.jpg`;
+    //console.log("rootStore.newPhoto ", photoObj);
+    if(photoObj.src === undefined) photoObj.src = `/api/photo/get/${id}.jpg`;
 
-    this.images.set(id, observable.object(imageObj));
+    this.images.set(id, observable.object(photoObj));
     let image = this.images.get(id);
 
     if(image.width === undefined || image.height === undefined) {
@@ -136,21 +136,21 @@ export class RootStore extends Queries {
     return image;
   }
 
-  getImage(id) {
+  getPhoto(id) {
     id = "" + id;
     return this.images.has(id) ? this.images.get(id) : null;
   }
 
-  imageExists(id) {
+  photoExists(id) {
     id = parseInt(id);
     return this.images.has(id);
   }
 
   @action.bound
-  deleteImage(id, completed = () => {}) {
-    let image = this.getImage(id);
+  deletePhoto(id, completed = () => {}) {
+    let image = this.getPhoto(id);
 
-    this.apiRequest("/api/image/delete", { id }).then(response => {
+    this.apiRequest("/api/photo/delete", { id }).then(response => {
       let data, result;
       if(response && response.data) data = response.data;
       if(data && data.result) result = data.result;
@@ -164,9 +164,9 @@ export class RootStore extends Queries {
   }
 
   @action.bound
-  rotateImage(id, angle = 90, completed = () => {}) {
-    let image = this.getImage(id);
-    this.apiRequest(`/api/image/rotate`, { id, angle }).then(response => {
+  rotatePhoto(id, angle = 90, completed = () => {}) {
+    let image = this.getPhoto(id);
+    this.apiRequest(`/api/photo/rotate`, { id, angle }).then(response => {
       const { data } = response;
       const { success, width, height } = data;
       console.log("data: ", data);
@@ -193,9 +193,9 @@ export class RootStore extends Queries {
     this.fields.push("New");
   }
 
-  get currentImage() {
+  get currentPhoto() {
     const id = this.state.image;
-    let image = this.getImage(id);
+    let image = this.getPhoto(id);
     if(image !== null) {
       image.id = parseInt(id);
       image.landscape = image.width > image.height;

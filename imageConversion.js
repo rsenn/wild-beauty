@@ -116,7 +116,7 @@ const imageImporter = maxWidthOrHeight =>
 
 const imageImport = imageImporter(maxWidthOrHeight);
 
-const rotateImage = async (inputBuf, angle) => {
+const rotatePhoto = async (inputBuf, angle) => {
   var inputStream = bufferToStream(Buffer.from(inputBuf));
   var outputStream = new MemoryStream();
   const finished = util.promisify(stream.finished);
@@ -146,6 +146,6 @@ if(module) {
     getImagePalette,
     imageImporter,
     imageImport,
-    rotateImage
+    rotatePhoto
   };
 }

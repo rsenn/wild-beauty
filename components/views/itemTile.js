@@ -40,7 +40,7 @@ export const ItemTile = inject("rootStore")(
         return (
           <div key={i} className={"item-image"}>
           <img
-          src={photo.href || `/api/image/get/${photo.id}`}
+          src={photo.href || `/api/photo/get/${photo.id}`}
           width={photo.width}
           height={photo.height}
           style={{

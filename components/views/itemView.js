@@ -62,7 +62,7 @@ export const ItemView = inject("rootStore")(
             ? item.photos.map(photo => (
                 <SizedAspectRatioBox className={"item-box"}>
                   <img
-                    src={photo.href || `/api/image/get/${photo.id}`}
+                    src={photo.href || `/api/photo/get/${photo.id}`}
                     width={photo.width}
                     height={photo.height}
                     style={{

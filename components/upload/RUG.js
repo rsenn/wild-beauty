@@ -148,14 +148,20 @@ class RUG extends React.Component {
   onSuccess(uid, response) {
     let { source } = this.props;
 
-    source = typeof source === "function" ? source(response) : response.source;
+
+    if(response && response.photo  && response.photo.src)
+      response.url = response.photo.src;
+    console.log("RUG.onSuccess ", { uid,source,response });
+
+    let { url,error } = typeof source === "function" ? source(response) : response;
+    console.log("RUG.onSuccess ", { url,error });
 
     this.setImage(
       uid,
       {
-        source,
-        done: true,
-        error: false,
+        source: url,
+        done: !error,
+        error: !!error,
         uploading: false,
         progress: 100
       },
@@ -191,22 +197,12 @@ class RUG extends React.Component {
   }
 
   setImage(uid, append, finish) {
-    let image,
-      { images } = this.state;
-
+    let image, { images } = this.state;
     images = images.map(item => {
-      if(item.uid === uid) {
-        return (image = { ...item, ...append });
-      }
-
+      if(item.uid === uid) return (image = { ...item, ...append });
       return item;
-    });
-
-    this.setState({ images }, () => {
-      if(finish) finish(image);
-
-      this.props.onChange(images);
-    });
+    }).filter(item => !!item.source);
+    this.setState({ images }, () => {if(finish) finish(image); this.props.onChange(images); });
   }
 
   onSelected(uid) {

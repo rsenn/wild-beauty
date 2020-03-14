@@ -13,14 +13,13 @@ import Layout from "../components/layout.js";
 import { SelectionListener } from "../lib/touchHandler.js";
 import { Element } from "../lib/dom.js";
 
-
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
 
 @inject("rootStore")
 @observer
 class New extends React.Component {
-  currentImage = null;
+  currentPhoto = null;
   clonedImage = null;
   currentOffset = { x: 0, y: 0 };
   offsetRange = 0;
@@ -45,7 +44,7 @@ class New extends React.Component {
       if(user_id) {
         images = await RootStore.fetchImages({ user_id });
         images = images.filter(ph => ph.items.length == 0);
-        images.forEach(item => RootStore.newImage(item));
+        images.forEach(item => RootStore.newPhoto(item));
       }
       const { url, query, body, route } = req || {};
       console.log("New.getInitialProps", { url });
@@ -137,7 +136,7 @@ class New extends React.Component {
                     if(e.parentElement == null) break;
                     e = e.parentElement;
                   } while(!e.classList || !(e.classList.contains("image-entry") || e.classList.contains("upload-item")));
-                  rootStore.deleteImage(id, result => {
+                  rootStore.deletePhoto(id, result => {
                     Element.remove(e.parentElement);
                   });
                 }}
@@ -154,14 +153,14 @@ class New extends React.Component {
 
                   Element.attr(img, { src: "" });
 
-                  rootStore.rotateImage(id, angle, ({ success, width, height }) => {
+                  rootStore.rotatePhoto(id, angle, ({ success, width, height }) => {
                     const landscape = width > height;
                     const aspect = width / height;
                     const orientation = landscape ? "landscape" : "portrait";
 
                     let { w, h, hr, vr } = hvOffset(width, height);
 
-                    console.log("rotateImage result:", { success, width, height, w, h, hr, vr });
+                    console.log("rotatePhoto result:", { success, width, height, w, h, hr, vr });
                     src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
 
                     Element.attr(img, { src, width, height, style: `position: relative; width: ${w}%; height: ${h}%; margin-top: ${-vr / 2}%; margin-left: ${-hr / 2}%;` });
