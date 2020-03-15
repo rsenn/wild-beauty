@@ -25,7 +25,6 @@ export class EditorStore {
     this.addField("Text");
   }
 
-
   @action
   setTree(root) {
     this.tree = root;

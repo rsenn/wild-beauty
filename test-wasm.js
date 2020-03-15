@@ -21,8 +21,13 @@ module: {},
  }*/
   module: {},
   env: {
-    memory: new WebAssembly.Memory({ initial: 256 }),
-    table: new WebAssembly.Table({ initial: 0, element: "anyfunc" }),
+    memory: new WebAssembly.Memory({
+      initial: 256
+    }),
+    table: new WebAssembly.Table({
+      initial: 0,
+      element: "anyfunc"
+    }),
     abort(_msg, _file, line, column) {
       console.error("abort called at main.ts:" + line + ":" + column);
     },

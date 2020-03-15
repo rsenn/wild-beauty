@@ -36,14 +36,14 @@ const Home = inject("rootStore")(
           <title>Home</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <div className={"subpage flex-vertical"} style={{ opacity: 1, display: "flex" }}>
+        <div className={"flex-vertical"} style={{ opacity: 1, display: "flex" }}>
           <div
             id="t-logo"
             className="t-logo"
             style={{
               transformStyle: "preserve-3d",
-              transition: "transform 1s  cubic-bezier(.53,.38,.94,.32)",
-              transform: ""
+              transition: "transform 1s  cubic-bezier(.53,.38,.94,.32)"
+              /*transform: ``*/
             }}
           >
             <img src={"/static/img/logo-transparent.png"} style={{ width: "80vw", maxWidth: "1280px" }} />
@@ -144,7 +144,7 @@ const Home = inject("rootStore")(
             width: 100vw;
             font-size: 13px;
 
-            transition: opacity 0.5s;
+            /*transition: opacity 0.5s;*/
           }
           .noscroll {
             overflow: ĥidden;

@@ -57,7 +57,7 @@ const NavLink = inject("rootStore")(
       <Link href={href} /*label={typeof label == "function" ? label(props) : label}*/ prefetch={false} passHref>
         <a href={href} name={path} className={classNames(path == href ? "menu-active" : "menu-inactive", "menu-link")} onClick={onClick}>
           {typeof label == "function" ? label(props) : label}
-          <div className={"desc"}> {typeof description == "function" ? description(props) : description}</div>
+          <div className={"desc vcenter2"}> {typeof description == "function" ? description(props) : description}</div>
         </a>
       </Link>
       <style jsx global>{`
@@ -101,6 +101,7 @@ const NavLink = inject("rootStore")(
         li.menu-item > a {
           position: absolute;
           margin: 8px 0px 1px 2px;
+          height: 90px;
         }
         li.menu-item:hover > a,
         li.menu-active > a {
@@ -112,8 +113,9 @@ const NavLink = inject("rootStore")(
         }
         li.menu-item > a > div.desc {
           position: absolute;
-          top: 56px;
-          font-style: italic;
+          bottom: 0px;
+          height: 50px;
+          font-style: normal;
           font-size: 14px;
         }
         li.menu-item {

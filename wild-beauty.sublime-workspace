@@ -28,107 +28,20 @@
 	"buffers":
 	[
 		{
-			"contents": "function behaveTextarea(element)\nfunction(data)\nNewItem\ngetInitialProps\nph =>\nitem =>\nconstructor\nmoveImage\n(event, e) =>\nevent =>\n() =>\ncomponentDidMount\ne =>\ntreeSelEvent\nrender\nmakeTreeSelEvent\nevent =>",
+			"contents": "hvOffset\n({ images, rootStore, onChoose, onDelete, onRotate, shiftState, ...props }) =>\nnewValue =>\nasync response =>\nasync photo =>\narg =>\n(image, index) =>\n() =>\n() =>",
 			"settings":
 			{
-				"buffer_size": 205,
+				"buffer_size": 169,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
 			}
 		},
 		{
-			"file": "pages/browse.js",
+			"file": "components/views/imageUpload.js",
 			"settings":
 			{
-				"buffer_size": 808,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pages/new/[photo_id].js",
-			"settings":
-			{
-				"buffer_size": 8172,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
-			"settings":
-			{
-				"buffer_size": 8172,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/EditorStore.js",
-			"settings":
-			{
-				"buffer_size": 1351,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/roman/the-wild-beauty-company/node_modules/mobx/lib/index.js",
-			"settings":
-			{
-				"buffer_size": 189,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "components/views/itemEditor.js",
-			"settings":
-			{
-				"buffer_size": 7719,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/queries.js",
-			"settings":
-			{
-				"buffer_size": 6028,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/functions.js",
-			"settings":
-			{
-				"buffer_size": 4636,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "stores/RootStore.js",
-			"settings":
-			{
-				"buffer_size": 12223,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/roman/the-wild-beauty-company/stores/RootStore.js",
-			"settings":
-			{
-				"buffer_size": 12223,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "query.js",
-			"settings":
-			{
-				"buffer_size": 5413,
-				"encoding": "UTF-8",
+				"buffer_size": 20636,
 				"line_ending": "Unix"
 			}
 		}
@@ -145,16 +58,20 @@
 		"selected_items":
 		[
 			[
+				"repo",
+				"Package Control: Add Repository"
+			],
+			[
+				"schemeed",
+				"SchemeEditor: Edit Current Scheme"
+			],
+			[
 				"install",
 				"Package Control: Install Package"
 			],
 			[
 				"sche",
 				"SchemeEditor: Edit Current Scheme"
-			],
-			[
-				"schemeed",
-				"SchemeEditor: Edit installed scheme"
 			],
 			[
 				"packag",
@@ -227,8 +144,9 @@
 	[
 		"/home/roman/wild-beauty",
 		"/home/roman/wild-beauty/components",
+		"/home/roman/wild-beauty/components/simple",
+		"/home/roman/wild-beauty/components/upload",
 		"/home/roman/wild-beauty/components/views",
-		"/home/roman/wild-beauty/lib",
 		"/home/roman/wild-beauty/pages",
 		"/home/roman/wild-beauty/pages/new",
 		"/home/roman/wild-beauty/src",
@@ -237,27 +155,36 @@
 	],
 	"file_history":
 	[
+		"/home/roman/wild-beauty/pages/browse.js",
+		"/home/roman/wild-beauty/pages/new/[photo_id].js",
+		"/home/roman/wild-beauty/lib/util.js",
+		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
+		"/home/roman/wild-beauty/stores/EditorStore.js",
+		"/home/roman/the-wild-beauty-company/node_modules/mobx/lib/index.js",
+		"/home/roman/wild-beauty/components/views/itemEditor.js",
+		"/home/roman/wild-beauty/pages/index.js",
+		"/home/roman/wild-beauty/components/nav.js",
+		"/home/roman/wild-beauty/components/upload/Request.js",
+		"/home/roman/wild-beauty/components/upload/view/index.js",
+		"/home/roman/wild-beauty/components/upload/view/Card.js",
+		"/home/roman/wild-beauty/stores/queries.js",
+		"/home/roman/wild-beauty/stores/functions.js",
+		"/home/roman/wild-beauty/stores/RootStore.js",
+		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
+		"/home/roman/wild-beauty/query.js",
 		"/home/roman/the-wild-beauty-company/node_modules/mobx/lib/mobx.js",
 		"/home/roman/the-wild-beauty-company/node_modules/mobx/lib/mobx.es6.js",
 		"/home/roman/the-wild-beauty-company/node_modules/mobx/lib/mobx.j",
 		"/home/roman/wild-beauty/server.js",
-		"/home/roman/wild-beauty/pages/new/[photo_id].js",
 		"/home/roman/the-wild-beauty-company/stores/functions.js",
 		"/home/roman/wild-beauty/pages/new.js",
-		"/home/roman/wild-beauty/components/views/itemEditor.js",
 		"/home/roman/wild-beauty/lib/axios.js",
-		"/home/roman/wild-beauty/query.js",
-		"/home/roman/wild-beauty/stores/queries.js",
 		"/home/roman/wild-beauty/lib/devtools.js",
-		"/home/roman/wild-beauty/components/nav.js",
 		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
 		"/home/roman/wild-beauty/lib/util.es5.js",
 		"/home/roman/wild-beauty/components/views/addItemBar.js",
 		"/home/roman/the-wild-beauty-company/components/views/itemEditor.js",
 		"/home/roman/wild-beauty/components/simple/editableText.js",
-		"/home/roman/wild-beauty/stores/RootStore.js",
-		"/home/roman/wild-beauty/stores/functions.js",
-		"/home/roman/wild-beauty/lib/util.js",
 		"/home/roman/the-wild-beauty-company/stores/queries.js",
 		"/home/roman/wild-beauty/stores/queries.js.rej",
 		"/home/roman/wild-beauty/lib/auth.js",
@@ -266,11 +193,9 @@
 		"/home/roman/wild-beauty/pages/oldindex.js",
 		"/home/roman/wild-beauty/stores/createStore.js",
 		"/home/roman/wild-beauty/pages/_app.js",
-		"/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
 		"/home/roman/the-wild-beauty-company/pages/_app.js",
 		"/home/roman/wild-beauty/pages/show.js",
 		"/home/roman/the-wild-beauty-company/components/simple/editableField.js",
-		"/home/roman/wild-beauty/stores/EditorStore.js",
 		"/home/roman/the-wild-beauty-company/pages/new.js",
 		"/home/roman/wild-beauty/static/css/react-dropdown-tree-select.css",
 		"/home/roman/wild-beauty/lib/bundle.js",
@@ -282,7 +207,6 @@
 		"/home/roman/the-wild-beauty-company/lib/util.js",
 		"/home/roman/wild-beauty/lib/fd-graph.js",
 		"/home/roman/wild-beauty/components/layout.js",
-		"/home/roman/wild-beauty/pages/browse.js",
 		"/home/roman/wild-beauty/components/views/imageUpload.js",
 		"/home/roman/wild-beauty/components/login.js",
 		"/home/roman/wild-beauty/static/style.css",
@@ -291,11 +215,7 @@
 		"/home/roman/wild-beauty/pages/panes.js",
 		"/home/roman/wild-beauty/stores/api.js",
 		"/home/roman/wild-beauty/components/upload/RUG.js",
-		"/home/roman/wild-beauty/components/upload/view/Card.js",
-		"/home/roman/wild-beauty/components/upload/view/index.js",
-		"/home/roman/wild-beauty/components/upload/Request.js",
 		"/home/roman/wild-beauty/components/siteMap.js",
-		"/home/roman/the-wild-beauty-company/stores/RootStore.js",
 		"/home/roman/the-wild-beauty-company/components/upload/RUG.js",
 		"/home/roman/the-wild-beauty-company/components/upload/Request.js",
 		"/home/roman/wild-beauty/components/simple/wrapIf.js",
@@ -362,9 +282,7 @@
 		"/home/roman/wild-beauty/lib/dom/layer.js",
 		"/home/roman/wild-beauty/lib/dom/bbox.js",
 		"/home/roman/wild-beauty/lib/dom.es5.js",
-		"/home/roman/wild-beauty/lib/svg-path.es5.js",
-		"/home/roman/wild-beauty/lib/dom/point.es5.js",
-		"/home/roman/wild-beauty/lib/dom/rgba.es5.js"
+		"/home/roman/wild-beauty/lib/svg-path.es5.js"
 	],
 	"find":
 	{
@@ -388,6 +306,12 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"Item\\(",
+			"View",
+			"upload-items",
+			"\\.vcenter",
+			": italic",
+			"\\.subpage",
 			"treeSel",
 			"getComputedStyle",
 			"findInTree",
@@ -509,13 +433,7 @@
 			"options",
 			"fields}",
 			"fields",
-			"setValue",
-			"options=",
-			"options",
-			"fieldNames",
-			"setValue",
-			"addField",
-			"onCreateName"
+			"setValue"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -560,274 +478,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 205,
-						"regions":
-						{
-						},
-						"selection":
-						[
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/wild-beauty/pages/new/[photo_id].js",
-							"outline_rename_mode": false,
-							"symkeys":
-							[
-								[
-									620,
-									652
-								],
-								[
-									799,
-									813
-								],
-								[
-									1368,
-									1375
-								],
-								[
-									1601,
-									1616
-								],
-								[
-									2024,
-									2029
-								],
-								[
-									2074,
-									2081
-								],
-								[
-									2395,
-									2406
-								],
-								[
-									2875,
-									2900
-								],
-								[
-									3635,
-									3648
-								],
-								[
-									3864,
-									3872
-								],
-								[
-									5970,
-									5975
-								],
-								[
-									6204,
-									6221
-								],
-								[
-									6652,
-									6656
-								],
-								[
-									6749,
-									6761
-								],
-								[
-									7297,
-									7303
-								],
-								[
-									7530,
-									7556
-								],
-								[
-									7557,
-									7565
-								]
-							],
-							"symlist":
-							[
-								"function behaveTextarea(element)",
-								"function(data)",
-								"NewItem",
-								"getInitialProps",
-								"ph =>",
-								"item =>",
-								"constructor",
-								"moveImage",
-								"(event, e) =>",
-								"event =>",
-								"() =>",
-								"componentDidMount",
-								"e =>",
-								"treeSelEvent",
-								"render",
-								"makeTreeSelEvent",
-								"event =>"
-							],
-							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 1,
-			"sheets":
-			[
-				{
-					"buffer": 1,
-					"file": "pages/browse.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 808,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								404,
-								404
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/SchemeEditorTemp/Next.tmTheme",
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "pages/new/[photo_id].js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8172,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								7307,
-								7307
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 4008.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "/home/roman/the-wild-beauty-company/pages/new/[photo_id].js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8172,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								895,
-								895
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 567.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "stores/EditorStore.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1351,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								280,
-								280
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "/home/roman/the-wild-beauty-company/node_modules/mobx/lib/index.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 189,
+						"buffer_size": 169,
 						"regions":
 						{
 						},
@@ -840,35 +491,95 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"use_tab_stops": false
+							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
+							"current_file": "/home/roman/wild-beauty/components/views/imageUpload.js",
+							"outline_rename_mode": false,
+							"symkeys":
+							[
+								[
+									392,
+									421
+								],
+								[
+									745,
+									823
+								],
+								[
+									904,
+									915
+								],
+								[
+									1133,
+									1150
+								],
+								[
+									1448,
+									1462
+								],
+								[
+									2223,
+									2229
+								],
+								[
+									2774,
+									2791
+								],
+								[
+									4478,
+									4483
+								],
+								[
+									5146,
+									5151
+								]
+							],
+							"symlist":
+							[
+								"hvOffset",
+								"({ images, rootStore, onChoose, onDelete, onRotate, shiftState, ...props }) =>",
+								"newValue =>",
+								"async response =>",
+								"async photo =>",
+								"arg =>",
+								"(image, index) =>",
+								"() =>",
+								"() =>"
+							],
+							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 1,
 					"type": "text"
-				},
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
 				{
-					"buffer": 6,
-					"file": "components/views/itemEditor.js",
+					"buffer": 1,
+					"file": "components/views/imageUpload.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7719,
+						"buffer_size": 20636,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1291,
-								1291
+								6174,
+								6174
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Babel/Next Roman.tmTheme",
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true,
@@ -881,183 +592,10 @@
 							"use_tab_stops": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 504.0,
+						"translation.y": 2331.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "stores/queries.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6028,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1105,
-								1105
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 40.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "stores/functions.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4636,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								4359,
-								4359
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 3046.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "stores/RootStore.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 12223,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								807,
-								807
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "/home/roman/the-wild-beauty-company/stores/RootStore.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 12223,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								8400,
-								8400
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 50.0,
-						"translation.y": 5684.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
-					"file": "query.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5413,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2060,
-								2060
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 466.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -1124,6 +662,10 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"util.js",
+				"lib/util.js"
+			],
 			[
 				"editorSt",
 				"stores/EditorStore.js"
@@ -1194,10 +736,6 @@
 			],
 			[
 				"util.j",
-				"lib/util.js"
-			],
-			[
-				"util.js",
 				"lib/util.js"
 			],
 			[

@@ -150,7 +150,7 @@ export const makeItemToOption = selected => item => {
   let label = item.title || item.name || `${item.type}(${item.id})`;
   let value = item.id;
   let children = toJS(item.children);
-  let obj = { label/*, title: label*/, value, expanded: true, checked: selected === value };
+  let obj = { label /*, title: label*/, value, expanded: true, checked: selected === value };
 
   if(children && children.length) obj.children = children;
   if(label.startsWith("null(")) return null;

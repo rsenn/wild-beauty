@@ -26,8 +26,7 @@ const { isJpeg, jpegProps } = require("./lib/jpeg.js");
 const { Console } = require("console");
 const { stdout, stderr } = process;
 const sha1 = require("node-sha1");
-
-global.console = new Console({ stdout, stderr, inspectOptions: { depth: 10 } });
+const { PassThrough, Writable } = require("stream");
 
 function bufferToStream(buffer) {
   let stream = new Readable();
@@ -35,6 +34,26 @@ function bufferToStream(buffer) {
   stream.push(null);
   return stream;
 }
+
+function logStream(file) {
+  var output = [process.stdout];
+  if(file) {
+    let s = fs.createWriteStream(file, { flags: "a" });
+    output.push(s);
+  }
+  let ret = new Writable({
+    objectMode: true,
+    write: (data, encoding, callback) => {
+      output.forEach(o => o.write(data));
+      callback();
+    }
+  });
+  return ret;
+}
+
+var log = logStream("server.log");
+
+global.console = new Console({ stdout: log, stderr: log, inspectOptions: { depth: 10 } });
 
 const API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
 
