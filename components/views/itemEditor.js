@@ -30,11 +30,9 @@ export const ItemEditor = inject(
     const rootId = rootStore.rootItemId;
     const items = toJS(rootStore.items);
 
-    let tree = rootStore.getTree(rootId, makeItemToOption(parentId));
-    tree = toJS(tree);
-    tree = tree || [];
+    let tree = editorStore.tree;
 
-    console.log("ItemEditor.render ", { /*items,*/ tree, rootId, img, entries });
+    console.log("ItemEditor.render ", { /*tree, */rootId, img, entries });
 
     return (
       <div className={"content-edit"} {...props}>
@@ -212,6 +210,11 @@ export const ItemEditor = inject(
           ul.tag-list > li.tag-item {
             transform: translateY(-7px);
           }
+          .inputHoverFocus:-webkit-autofill:hover,
+.inputHoverFocus:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 100px white inset;
+    -webkit-text-fill-color: #f90;
+}
         `}</style>
       </div>
     );

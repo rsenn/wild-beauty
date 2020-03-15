@@ -76,12 +76,15 @@ export class NewItem extends React.Component {
     super(props);
     if(global.window) window.page = this;
     console.error({ Behave, BehaveHooks });
-    const { rootStore, router } = this.props;
+    const { rootStore, editorStore, router } = this.props;
     let image = router.query.photo_id;
     if(image) {
       image = parseInt(image);
       if(rootStore.state.image != image) rootStore.setState({ image });
     }
+
+    editorStore.setTree(toJS(rootStore.getTree(rootStore.rootItemId, makeItemToOption(-1))));
+
     if(global.window) {
       const moveImage = (event, e) => {
         const orientation = e.getAttribute("orientation");
@@ -173,14 +176,14 @@ export class NewItem extends React.Component {
 
   @action.bound
   treeSelEvent(type, arg) {
-    const { rootStore } = this.props;
+    const { rootStore, editorStore } = this.props;
     console.log("treeSelEvent: ", { type, type, arg });
 
     switch (type) {
       case "change": {
         const { checked, id, hide } = arg;
 
-        const item = findInTree(this.state.tree, arg.value);
+        const item = findInTree(editorStore.tree, arg.value);
         item.checked = true;
         //rootStore.setState({ selected: arg.value });
         //console.log("treeSelEvent: ", type, item);

@@ -25,6 +25,12 @@ export class EditorStore {
     this.addField("Text");
   }
 
+
+  @action
+  setTree(root) {
+    this.tree = root;
+  }
+
   @action
   loadItem(item) {
     this.editing = true;
