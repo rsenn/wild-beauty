@@ -147,7 +147,10 @@ class MyApp extends App {
           }
           @media (max-width: 375px) {
             body {
-              font-size: 10px;
+              font-size: 14px;
+            }
+            .content-layout {
+              padding: 0px 10px;
             }
           }
 
@@ -205,13 +208,25 @@ class MyApp extends App {
             border: 1px outset #555555;
             border-radius: 5px;
             -webkit-border-radius: 5px;
+            box-sizing: border-box;
             background: linear-gradient(top, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
             background: -webkit-linear-gradient(top, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
           }
           button:active {
-            border: 1px inset #555555;
+            border: 1px inset #aaa;
+            background: linear-gradient(bottom, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
+            background: -webkit-linear-gradient(bottom, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
           }
-
+          button:active > svg,
+          button:active > img {
+            transform: translate(1px, 1px);
+          }
+          button:hover {
+            box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.6);
+          }
+          button:active {
+            box-shadow: none;
+          }
           .tooltip:after {
             background: linear-gradient(to bottom, #ffda15ff 0%, #f3c500ff 100%);
             color: #000;

@@ -80,7 +80,7 @@ function DistributeCircular(arr, dist, set = (i, x, y) => (item.pos = new Point(
 export const SVGText = ({ x, y, yinc = 12, lines }) => {
   const ystart = (-(lines.length - 1) / 2) * yinc;
   return lines.map((line, i) => (
-    <text textAnchor="middle" alignmentBaseline="middle" fontFamily={"Fixed"} fontSize={13} y={y + ystart + i * yinc} x={x}>
+    <text textAnchor='middle' alignmentBaseline='middle' fontFamily={"Fixed"} fontSize={13} y={y + ystart + i * yinc} x={x}>
       {line}
     </text>
   ));
@@ -332,8 +332,8 @@ if(height  < minHeight)
   let o = (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} {...props}>
       <defs>
-        <filter id="shadow">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" />
+        <filter id='shadow'>
+          <feDropShadow dx='1' dy='1' stdDeviation='2' />
         </filter>
       </defs>
       <g id={"tree"} transform={`translate(${offs_x * scale_x}, ${offs_y * scale_y})`}>

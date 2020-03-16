@@ -23,7 +23,7 @@ export class ShowItem extends React.Component {
       <div className={"page-layout"}>
         <Head>
           <title>Show</title>
-          <link rel="icon" href="/favicon.ico" />
+          <link rel='icon' href='/favicon.ico' />
         </Head>
         <Nav />
         Id: {query.id}

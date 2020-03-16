@@ -61,8 +61,8 @@ export function Layer({ style, inline, flex, children, border, margin, padding, 
 
   return (
     <React.Fragment>
-      <div ref={ref} className="layer" style={st}>
-        <div className="layout">{children}</div>
+      <div ref={ref} className='layer' style={st}>
+        <div className='layout'>{children}</div>
         <SvgOverlay className={"svg"} />
       </div>
       <style jsx>

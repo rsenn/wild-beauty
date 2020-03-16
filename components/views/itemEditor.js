@@ -60,7 +60,7 @@ export const ItemEditor = inject(
         </div>
         <div className={"item-fields"}>
           <div className={"editable-field"}>
-            <FieldLabel>Parent item</FieldLabel>
+            <FieldLabel>Parent</FieldLabel>
             <DropdownTreeSelect
               data={[tree]}
               onChange={obj => {
@@ -152,7 +152,6 @@ export const ItemEditor = inject(
             margin: 10px;
             max-width: 50vw;
           }
-
           .item-photo {
             display: flex;
             justify-content: center;

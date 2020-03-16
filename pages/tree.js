@@ -667,7 +667,7 @@ class TreePage extends React.Component {
                               height: "auto",
                               opacity
                             }}
-                            className="gallery-image"
+                            className='gallery-image'
                           />
                         ) : (
                           undefined
@@ -716,7 +716,7 @@ class TreePage extends React.Component {
           </div>
         )}
         <SvgOverlay svgRef={this.svgRef}>
-          <use href="#tree" />
+          <use href='#tree' />
         </SvgOverlay>
         <style jsx global>{`
           .show-layout {

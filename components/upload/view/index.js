@@ -25,12 +25,12 @@ export const View = ({ type, sorting }, images) => {
 
   return sorting ? (
     <DragArea {...options} className={classNames(className, "upload-dragarea")}>
-      {image => <div className="upload-item">{Item(type, image)}</div>}
+      {image => <div className='upload-item'>{Item(type, image)}</div>}
     </DragArea>
   ) : (
     <div className={className}>
       {images.map((image, key) => (
-        <div className="upload-item" key={key}>
+        <div className='upload-item' key={key}>
           {Item(type, image)}
         </div>
       ))}

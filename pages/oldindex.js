@@ -292,12 +292,12 @@ class Home extends React.Component {
       <Layout hideNav={true} {...events}>
         <Head>
           <title>Home</title>
-          <link rel="icon" href="/favicon.ico" />
+          <link rel='icon' href='/favicon.ico' />
         </Head>
         <div className={"subpage flex-vertical"} style={{ opacity: 1, display: "flex" }}>
           <div
-            id="t-logo"
-            className="t-logo"
+            id='t-logo'
+            className='t-logo'
             style={{
               transformStyle: "preserve-3d",
               transition: "transform 1s  cubic-bezier(.53,.38,.94,.32)",

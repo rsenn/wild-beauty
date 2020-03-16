@@ -271,7 +271,7 @@ class RUG extends React.Component {
           {header && (typeof header === "function" ? header(options) : Handle(options, header))}
           {this.showChildren(options)}
           {footer && (typeof footer === "function" ? footer(options) : Handle(options, footer))}
-          <input multiple type="file" ref={this.fileInput} className="upload-file-input" accept={accept.map(type => `${acceptType}/${type}`)} onChange={event => this.uploadFiles(event.target.files)} />
+          <input multiple type='file' ref={this.fileInput} className='upload-file-input' accept={accept.map(type => `${acceptType}/${type}`)} onChange={event => this.uploadFiles(event.target.files)} />
         </div>
       </Context.Provider>
     );

@@ -87,7 +87,7 @@ export const ImageLayer = ({ path, bgcolor = RandomColor() }) => {
     <SizedAspectRatioBox width={"20vw"} height={"20vw"} className={"gallery-aspect-box"}>
       {/*    <Layer inline style={{ flex: "1 0 auto", backgroundColor: bgcolor }}>
        */}{" "}
-      <img src={path} className="gallery-image" />
+      <img src={path} className='gallery-image' />
       <style jsx global>{`
         .gallery-list > div {
           display: inline-block;
@@ -171,15 +171,15 @@ export class Gallery extends Component {
 
   render() {
     return (
-      <div className="gallery-container">
+      <div className='gallery-container'>
         <div>
           <h2>Enter/update/delete animation order</h2>
           {Object.keys(transitions).map((transition, i) => {
             return (
-              <label key={i} className="gallery-label">
+              <label key={i} className='gallery-label'>
                 <input
-                  type="radio"
-                  name="transition"
+                  type='radio'
+                  name='transition'
                   value={transition}
                   checked={transition === this.state.transitionType}
                   onChange={ev =>
@@ -194,7 +194,7 @@ export class Gallery extends Component {
             );
           })}
         </div>
-        <Flipper flipKey={this.state.list.join(", ")} element="ul" className="gallery-list" handleEnterUpdateDelete={transitions[this.state.transitionType]}>
+        <Flipper flipKey={this.state.list.join(", ")} element='ul' className='gallery-list' handleEnterUpdateDelete={transitions[this.state.transitionType]}>
           {this.state.list.map(d => (
             <Flipped key={d} flipId={d.toString()} onAppear={animateElementIn} onExit={animateElementOut}>
               <div className={"centered"}>

@@ -6,10 +6,10 @@ export const SiteMap = [
     name: "home",
     label: () => (
       <span>
-        <Translate value="nav.home_name" />
+        <Translate value='nav.home_name' />
       </span>
     ),
-    description: () => <Translate value="nav.home_description" />
+    description: () => <Translate value='nav.home_description' />
   },
   /*{
     href: "/test",
@@ -26,30 +26,30 @@ export const SiteMap = [
     name: "show",
     label: () => (
       <span>
-        <Translate value="nav.show_name" />
+        <Translate value='nav.show_name' />
       </span>
     ),
-    description: () => <Translate value="nav.show_description" />
+    description: () => <Translate value='nav.show_description' />
   },
   {
     href: "/tree",
     name: "tree",
     label: () => (
       <span>
-        <Translate value="nav.tree_name" />
+        <Translate value='nav.tree_name' />
       </span>
     ),
-    description: () => <Translate value="nav.tree_description" />
+    description: () => <Translate value='nav.tree_description' />
   },
   {
     href: "/new",
     name: "new",
     label: () => (
       <span>
-        <Translate value="nav.new_name" />
+        <Translate value='nav.new_name' />
       </span>
     ),
-    description: () => <Translate value="nav.new_description" />
+    description: () => <Translate value='nav.new_description' />
   },
   {
     href: "#",
@@ -57,12 +57,12 @@ export const SiteMap = [
     disabled: true,
     label: () => (
       <span>
-        <Translate value="nav.logout_name" />
+        <Translate value='nav.logout_name' />
       </span>
     ),
     description: props => (
       <React.Fragment>
-        <Translate value="nav.logout_description" />: {props.rootStore.auth.user && props.rootStore.auth.user.username}
+        <Translate value='nav.logout_description' />: {props.rootStore.auth.user && props.rootStore.auth.user.username}
       </React.Fragment>
     )
   },
@@ -71,20 +71,20 @@ export const SiteMap = [
     name: "login",
     label: () => (
       <span>
-        <Translate value="nav.login_name" />
+        <Translate value='nav.login_name' />
       </span>
     ),
-    description: () => <Translate value="nav.login_description" />
+    description: () => <Translate value='nav.login_description' />
   },
   {
     href: "#",
     name: "lang",
     label: () => (
       <span>
-        <Translate value="nav.lang_name" />
+        <Translate value='nav.lang_name' />
       </span>
     ),
-    description: () => <Translate value="nav.lang_description" />
+    description: () => <Translate value='nav.lang_description' />
   }
 ];
 

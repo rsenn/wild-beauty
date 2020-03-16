@@ -7,7 +7,7 @@ export  Checkbox = props => (
 
 export const HiddenCheckbox = props => (
   <input
-    type="checkbox"
+    type='checkbox'
     {...props}
     style={{
       border: "0",

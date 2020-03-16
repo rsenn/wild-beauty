@@ -107,7 +107,7 @@ export class NewItem extends React.Component {
       });
       this.touchListener = TouchListener(
         event => {
-          //console.log("Touch ", event);
+          console.log("Touch ", event);
           const elem = event.target;
           if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
             this.currentPhoto = event.target;
@@ -201,11 +201,13 @@ export class NewItem extends React.Component {
     const { query } = router;
     let img = photos[0];
     //console.log(`/new/${query.photo_id}`, query);
-    //console.log("New {:id}.render ");
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
 
+    const { events } = this.touchListener || {};
+    console.log("New {:id}.render", { events });
+
     return (
-      <Layout>
+      <Layout {...events}>
         <NeedAuth>
           <div>
             <a href={`/new/${query.photo_id}`}>New item {query.photo_id}</a>

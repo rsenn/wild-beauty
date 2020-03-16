@@ -3,16 +3,16 @@ import classNames from "classnames";
 
 export const CubeSpinner = ({ className, style, width = 40, height = 40, loading }) => (
   <div className={classNames("sk-cube-spinner", className)} style={{ width: `${width + (typeof width == "number" ? "px" : "")}`, height: `${height + (typeof height == "number" ? "px" : "")}`, ...style }}>
-    <div className="sk-cube-grid" style={{ opacity: loading ? 1 : 0 }}>
-      <div className="sk-cube sk-cube1"></div>
-      <div className="sk-cube sk-cube2"></div>
-      <div className="sk-cube sk-cube3"></div>
-      <div className="sk-cube sk-cube4"></div>
-      <div className="sk-cube sk-cube5"></div>
-      <div className="sk-cube sk-cube6"></div>
-      <div className="sk-cube sk-cube7"></div>
-      <div className="sk-cube sk-cube8"></div>
-      <div className="sk-cube sk-cube9"></div>
+    <div className='sk-cube-grid' style={{ opacity: loading ? 1 : 0 }}>
+      <div className='sk-cube sk-cube1'></div>
+      <div className='sk-cube sk-cube2'></div>
+      <div className='sk-cube sk-cube3'></div>
+      <div className='sk-cube sk-cube4'></div>
+      <div className='sk-cube sk-cube5'></div>
+      <div className='sk-cube sk-cube6'></div>
+      <div className='sk-cube sk-cube7'></div>
+      <div className='sk-cube sk-cube8'></div>
+      <div className='sk-cube sk-cube9'></div>
     </div>
     <style jsx global>{`
       .sk-cube-spinner,

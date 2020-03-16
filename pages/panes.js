@@ -122,7 +122,7 @@ class Panes extends React.Component {
       <div className={"panes-layout"} {...TouchEvents(touchListener)}>
         <Head>
           <title>Panes</title>
-          <link rel="icon" href="/favicon.ico" />
+          <link rel='icon' href='/favicon.ico' />
         </Head>
         <Nav loading={rootStore.state.loading} />
         <div className={"page-layout"}>
@@ -137,7 +137,7 @@ class Panes extends React.Component {
             }}
           >
             <RUG
-              action="/api/photo/upload" // upload route
+              action='/api/photo/upload' // upload route
               source={response => {
                 return response.map(item => {
                   const { id } = item;

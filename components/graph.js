@@ -356,7 +356,7 @@ export class Graph extends Component {
   render() {
     return (
       <div style={{ position: "absolute", top: 0 }}>
-        <svg id="d3-graph-svg" viewBox={`0 0 200 200`} width={200} height={200} style={{ width: "100vw", height: "auto" }} />
+        <svg id='d3-graph-svg' viewBox={`0 0 200 200`} width={200} height={200} style={{ width: "100vw", height: "auto" }} />
       </div>
     );
   }

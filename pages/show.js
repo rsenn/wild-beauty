@@ -347,7 +347,7 @@ class Show extends React.Component {
       <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent}>
         <Head>
           <title>Show</title>
-          <link rel="icon" href="/favicon.ico" />
+          <link rel='icon' href='/favicon.ico' />
         </Head>
         <Nav loading={rootStore.state.loading} />
         <TreeView
@@ -398,7 +398,7 @@ class Show extends React.Component {
                         }}
                         className={"layer gallery-aspect-box"}
                       >
-                        {haveImage ? <img src={path} width={photo.width} height={photo.height} style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }} className="gallery-image" /> : undefined}
+                        {haveImage ? <img src={path} width={photo.width} height={photo.height} style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }} className='gallery-image' /> : undefined}
                         <div
                           style={{
                             position: "absolute",
@@ -436,7 +436,7 @@ class Show extends React.Component {
           </div>
         )}
         <SvgOverlay svgRef={this.svgRef}>
-          <use href="#tree" />
+          <use href='#tree' />
         </SvgOverlay>
         <style jsx global>{`
           .show-layout {

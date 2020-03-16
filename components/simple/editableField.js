@@ -249,7 +249,7 @@ export const EditableField = ({ options, storageKey, className, style, multiline
           align-items: stretch;
         }
         .editable-field-name {
-          width: 120px;
+          min-width: 60px;
           flex: 0 0 auto;
         }
         .content.editable-field-content {
@@ -308,6 +308,9 @@ export const EditableField = ({ options, storageKey, className, style, multiline
         }
         button.icon:hover {
           box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.6);
+        }
+        button.icon:active {
+          box-shadow: none;
         }
         #rdts1 {
           width: 100%;

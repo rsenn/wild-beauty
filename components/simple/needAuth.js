@@ -9,11 +9,11 @@ const NeedAuth = inject("rootStore")(
         children
       ) : rootStore.state.loading ? (
         <div className={"auth-loading"} style={style}>
-          <Translate value="common.loading" />
+          <Translate value='common.loading' />
         </div>
       ) : (
         <div className={"auth-fail"} style={style}>
-          <Translate value="login.unauthorized" />
+          <Translate value='login.unauthorized' />
         </div>
       )}
       <style jsx global>{`

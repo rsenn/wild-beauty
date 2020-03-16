@@ -15,7 +15,7 @@ const DragArea = props => {
       {({ images, setSort }) => (
         <SortableList
           {...props}
-          helperClass="upload-dragging-item"
+          helperClass='upload-dragging-item'
           onSortEnd={({ oldIndex, newIndex }) => {
             setSort(arrayMove(images, oldIndex, newIndex));
           }}

@@ -20,7 +20,7 @@ const LoginForm = inject("rootStore")(
       <React.Fragment>
         <div className={classNames("login-view", className)} style={style}>
           <div className={"form-title form-row"}>
-            <Translate value="login.title" />
+            <Translate value='login.title' />
           </div>
           <form
             className={"login"}
@@ -39,7 +39,7 @@ const LoginForm = inject("rootStore")(
           >
             <div className={"form-field"}>
               <div className={"form-label"}>
-                <Translate value="login.username" />
+                <Translate value='login.username' />
               </div>
             </div>
             <div className={"form-field form-row"}>
@@ -72,7 +72,7 @@ const LoginForm = inject("rootStore")(
             </div>
             <div className={"form-field"}>
               <div className={"form-label"}>
-                <Translate value="login.password" />
+                <Translate value='login.password' />
               </div>
             </div>
             <div className={"form-field form-row"}>
@@ -94,7 +94,7 @@ const LoginForm = inject("rootStore")(
             </div>
             <div className={"form-field form-buttonfield form-row"}>
               <button className={"form-button"}>
-                <Translate value="login.submit" />
+                <Translate value='login.submit' />
               </button>
             </div>
             {loading ? (
@@ -102,7 +102,7 @@ const LoginForm = inject("rootStore")(
                 <CubeSpinner loading={loading} style={{ margin: `10px auto 0 auto` }} />
               </div>
             ) : rootStore.authenticated || rootStore.state.error ? (
-              <div className={"form-status"}>{rootStore.state.error || <Translate value="login.logged" />}</div>
+              <div className={"form-status"}>{rootStore.state.error || <Translate value='login.logged' />}</div>
             ) : (
               undefined
             )}

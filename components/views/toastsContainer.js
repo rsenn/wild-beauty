@@ -32,14 +32,14 @@ export const ToastsContainer = inject("rootStore")(
     return (
       <React.Fragment>
         <div className={"toasts-container"} onClick={onClick}>
-          <TransitionGroup component="div">
+          <TransitionGroup component='div'>
             {toasts.map((toast, key) => (
-              <CSSTransition timeout={500} className="toast-move" key={toast.deadline}>
+              <CSSTransition timeout={500} className='toast-move' key={toast.deadline}>
                 <div key={toast.deadline} className={"toast-item toast-layout"}>
                   {toast.title ? <h4 className={"toast-title"}>{toast.title}</h4> : undefined}
                   <span className={"toast-message"}>{toast.message}</span>
 
-                  <button className={"toast-button"} href="#" data-deadline={toast.deadline}>
+                  <button className={"toast-button"} href='#' data-deadline={toast.deadline}>
                     &#x274c;
                   </button>
                 </div>

@@ -53,7 +53,7 @@ function logStream(file) {
 
 var log = logStream("server.log");
 
-global.console = new Console({ stdout: log, stderr: log, inspectOptions: { depth: 10 } });
+global.console = new Console({ stdout: log, stderr: log, inspectOptions: { depth: 10, colors: true } });
 
 const API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
 
