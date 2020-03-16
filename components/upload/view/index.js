@@ -1,5 +1,5 @@
 import React from "react";
-
+import classNames from "classnames";
 import List from "./List.js";
 import Card from "./Card.js";
 import DragArea from "../DragArea.js";
@@ -17,14 +17,14 @@ const Item = (type, image) => {
   }
 };
 
-export default ({ type, sorting }, images) => {
+export const View = ({ type, sorting }, images) => {
   const className = `upload-items __${type} ${sorting ? "__sorting" : ""}`;
 
   const options = typeof sorting === "object" ? sorting : {};
   //console.log("UploadView.render ", { type, sorting, images });
 
   return sorting ? (
-    <DragArea {...options} className={className}>
+    <DragArea {...options} className={classNames(className, "upload-dragarea")}>
       {image => <div className="upload-item">{Item(type, image)}</div>}
     </DragArea>
   ) : (
@@ -38,4 +38,5 @@ export default ({ type, sorting }, images) => {
   );
 };
 
+export default View;
 export { List, Card };

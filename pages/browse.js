@@ -2,6 +2,7 @@ import React from "react";
 import { inject, observer } from "mobx-react";
 import Layout from "../components/layout.js";
 import CircleSegment from "../components/simple/circleSegment.js";
+import { RGBA, HSLA } from "../lib/dom.js";
 
 const DEG2RAD = Math.PI / 180;
 
@@ -32,8 +33,8 @@ class Browse extends React.Component {
         <div></div>
         <svg viewBox={`0 0 200 200`} style={{ width: "100%", height: "auto" }}>
           <CircleSegment x={100} y={100} r={50} start={-90 * DEG2RAD} end={-45 * DEG2RAD} fill={"magenta"} />
-          <CircleSegment x={100} y={100} r={50} start={-15 * DEG2RAD} end={120 * DEG2RAD} fill={"none"} stroke={"#0ff"} />
-          <CircleSegment x={100} y={100} r={50} start={135 * DEG2RAD} end={245 * DEG2RAD} fill={"none"} stroke={"#ff0"} />
+          <CircleSegment x={100} y={100} r={50} start={-15 * DEG2RAD} end={120 * DEG2RAD} fill={new RGBA(255, 255, 255, 127)} stroke={"#0ff"} strokeWidth={2} strokeDashArray={`1 0`} close />
+          <CircleSegment x={100} y={100} r={50} start={135 * DEG2RAD} end={245 * DEG2RAD} fill={new RGBA(255, 255, 255, 127)} stroke={"#ff0"} strokeWidth={2} strokeDashArray={`1 0`} close />
         </svg>
         <style jsx global>{``}</style>
       </Layout>

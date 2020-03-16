@@ -93,47 +93,77 @@ export const ImageUpload = inject("rootStore")(
                     let { w, h, hr, vr } = hvOffset(width, height);
 
                     return (
-                      <div key={index}>
-                        <div className={"upload-item"}>
-                          <div className={"upload-card"}>
-                            <SizedAspectRatioBox className={"item-box"} insideClassName={"tooltip"} sizeClassName={"upload-image"} insideProps={{ ["data-tooltip"]: `${width}x${height} ${orientation}` }}>
-                              <img
-                                id={`image-${id}`}
-                                className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
-                                src={`/api/photo/get/${id}.jpg`}
-                                width={width}
-                                height={height}
-                                orientation={orientation}
-                                style={{
-                                  position: "relative",
-                                  marginTop: `${-vr / 2}%`,
-                                  marginLeft: `${-hr / 2}%`,
-                                  width: landscape ? `${(width * 100) / height}%` : "100%",
-                                  height: landscape ? "100%" : "auto"
-                                }}
-                                onClick={onChoose}
+                      <div key={index} className={"upload-item"}>
+                        <div className={"upload-card"}>
+                          <SizedAspectRatioBox
+                            className={"item-box"}
+                            insideClassName={"tooltip"}
+                            sizeClassName={"upload-image"}
+                            insideProps={{ ["data-tooltip"]: `${width}x${height} ${orientation}` }}
+                          >
+                            <img
+                              id={`image-${id}`}
+                              className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
+                              src={`/api/photo/get/${id}.jpg`}
+                              width={width}
+                              height={height}
+                              orientation={orientation}
+                              style={{
+                                position: "relative",
+                                marginTop: `${-vr / 2}%`,
+                                marginLeft: `${-hr / 2}%`,
+                                width: landscape ? `${(width * 100) / height}%` : "100%",
+                                height: landscape ? "100%" : "auto"
+                              }}
+                              onClick={onChoose}
+                            />
+                          </SizedAspectRatioBox>
+                          <button className={"image-button image-delete center-flex"} onClick={() => onDelete(id)}>
+                            <svg height="24" width="24" viewBox="0 0 16 16">
+                              <defs />
+                              <path
+                                fill={"#f00"}
+                                stroke={"#a00"}
+                                d="M11.004 3.982a1 1 0 00-.707.293L8.004 6.568 5.72 4.285a1 1 0 00-.01-.01 1 1 0 00-.701-.289L5 4a1 1 0 00-1 1 1 1 0 00.293.707L6.586 8l-2.293 2.293a1 1 0 00-.29.7 1 1 0 001 1 1 1 0 00.708-.294l2.293-2.293 2.283 2.283a1 1 0 00.717.303 1 1 0 001-1 1 1 0 00-.293-.707l-2.3-2.299 2.282-2.283a1 1 0 00.31-.72 1 1 0 00-1-1z"
                               />
-                            </SizedAspectRatioBox>
-                            <button className={"image-button image-delete center-flex"} onClick={() => onDelete(id)}>
-                              <svg height="24" width="24" viewBox="0 0 16 16">
-                                <defs />
-                                <path fill={"#f00"} stroke={"#a00"} d="M11.004 3.982a1 1 0 00-.707.293L8.004 6.568 5.72 4.285a1 1 0 00-.01-.01 1 1 0 00-.701-.289L5 4a1 1 0 00-1 1 1 1 0 00.293.707L6.586 8l-2.293 2.293a1 1 0 00-.29.7 1 1 0 001 1 1 1 0 00.708-.294l2.293-2.293 2.283 2.283a1 1 0 00.717.303 1 1 0 001-1 1 1 0 00-.293-.707l-2.3-2.299 2.282-2.283a1 1 0 00.31-.72 1 1 0 00-1-1z" />
-                              </svg>
-                            </button>
-                            <button className={"image-button image-rotate center-flex"} onClick={() => onRotate(id, shift ? -90 : 90)}>
-                              <svg height="24" width="24" viewBox="0 0 16 16">
-                                <defs />
-                                <g transform={`translate(7.483179807662964, 0)`}>
-                                  <g transform={` scale(${shift ? -1 : 1}, 1)`}>
-                                    <g>
-                                      <path d=" m 4.509820430755616 10.754 a 5.059 5.059 0 0 1 -3.176 2.27 a 5.056 5.056 0 0 1 -3.84 -0.708 a 5.051 5.051 0 0 1 -2.105 -3.006 a 5.051 5.051 0 0 1 0.517 -3.634 h 0 a 4.969 4.969 0 0 1 2.939 -2.586 a 4.97 4.97 0 0 1 3.895 0.39 a 4.94 4.94 0 0 1 2.005 2.11" fill="none" stroke="#00f" strokeWidth="1.66983039" />
-                                      <path d="m 1.9508197154998772 5.852 l 4.516 2.14 l -0.405 -4.981 l -4.11 2.84 Z " fill="#00f" />
-                                    </g>
+                            </svg>
+                          </button>
+                          <button className={"image-button image-rotate center-flex"} onClick={() => onRotate(id, shift ? -90 : 90)}>
+                            <svg className="rotate_svg__jsx-72949195" height="24" width="24" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                              <defs />
+                              <defs className="rotate_svg__jsx-72949195">
+                                <linearGradient id="rotate_svg__a" gradientUnits="userSpaceOnUse" x1="4.458" x2="13.709" y1="11.035" y2="3.757">
+                                  <stop offset="0" stopColor="#3b85ff" />
+                                  <stop offset="1" stopColor="#e0edff" />
+                                </linearGradient>
+                              </defs>
+                              <path
+                                style={{
+                               
+                                  isolation: "auto",
+                                  mixBlendMode: "normal",
+                                  shapePadding: "0",
+                                }}
+                                d="M-0.073 -6.647 C-2.720 -6.653 -5.130 -4.763 -6.030 -2.317 C-7.210 0.453 -6.122 3.955 -3.564 5.552 C-1.074 7.194 2.546 6.833 4.587 4.627 A7.398 7.398 0 0 0 5.682 3.159 L3.516 1.819 C2.580 3.856 -0.228 4.711 -2.122 3.461 C-3.893 2.389 -4.511 -0.136 -3.436 -1.909 C-2.640 -3.535 -0.676 -4.516 1.086 -3.969 C1.586 -3.830 2.061 -3.592 2.464 -3.263 L0.930 -2.203 L6.880 0.617 L6.347 -5.947 L4.595 -4.737 C3.399 -5.994 1.656 -6.687 -0.074 -6.647 Z"
+                                fill={'hsl(210,100%,70%)'}
+                                stroke="#00f"
+                                strokeWidth=".347"
+                                transform={`translate(7.5, 7.8) scale(0.8, 0.8)`}
+                              />
+                            </svg>
+
+                            {/*    <svg height="24" width="24" viewBox="0 0 16 16">
+                              <defs />
+                              <g transform={`translate(7.48318, 0)`}>
+                                <g transform={` scale(${shift ? -1 : 1}, 1)`}>
+                                  <g>
+                                    <path d=" m 4.50982 10.754 a 5.059 5.059 0 0 1 -3.176 2.27 a 5.056 5.056 0 0 1 -3.84 -0.708 a 5.051 5.051 0 0 1 -2.105 -3.006 a 5.051 5.051 0 0 1 0.517 -3.634 h 0 a 4.969 4.969 0 0 1 2.939 -2.586 a 4.97 4.97 0 0 1 3.895 0.39 a 4.94 4.94 0 0 1 2.005 2.11" fill="none" stroke={'hsl(240,100%,50%)'} strokeWidth="1.66983039" />
+                                    <path d="m 1.95082 5.852 l 4.516 2.14 l -0.405 -4.981 l -4.11 2.84 Z " stroke={'hsl(240,100%,50%)'} strokeWidth={0.2} fill={'hsl(240,100%,60%)'} />
                                   </g>
                                 </g>
-                              </svg>
-                            </button>
-                          </div>
+                              </g>
+                            </svg>*/}
+                          </button>
                         </div>
                       </div>
                     );
@@ -231,7 +261,6 @@ export const ImageUpload = inject("rootStore")(
           .upload .upload-items.__card {
             display: flex;
             flex-flow: row wrap;
-            margin: 0 -10px;
           }
 
           .upload .upload-items.__card .upload-item {
@@ -322,13 +351,36 @@ export const ImageUpload = inject("rootStore")(
             font-size: 17px;
             display: block;
           }
+          .upload-item {
+            position: relative;
+          }
 
           .upload-card {
             flex: 1 1 20%;
-            width: 18vw;
             font-family: Fixed;
             overflow: auto;
-            margin: 10px;
+          }
+          @media (max-width: 376px) {
+            .upload-item {
+              width: 33%;
+            }
+            .upload-card {
+              margin: 5px;
+            }
+            .upload .upload-items.__card {
+              margin: 0 -5px;
+            }
+          }
+          @media (min-width: 376px) {
+            .upload-item {
+              width: 20%;
+            }
+            .upload-card {
+              margin: 10px;
+            }
+            .upload .upload-items.__card {
+              margin: 0 -10px;
+            }
           }
 
           .upload-card.__error {

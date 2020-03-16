@@ -3,6 +3,7 @@ const { Point, Matrix } = require("./lib/dom.es5.js");
 
 const { parseSVG, makeAbsolute } = require("svg-path-parser");
 const { Console } = require("console");
+const PointAtLength = require("point-at-length");
 
 global.console = new Console({
   stdout: process.stdout,
@@ -66,6 +67,7 @@ for(let i = 0; i < path.length; i++) {
   points.push(new Point(rx, ry));
 
   relative ? newPath.rel() : newPath.abs();
+  points = points.map(p => (p.x !== undefined ? { x: p.x.toFixed(3), y: p.y.toFixed(3) } : p));
 
   switch (code) {
     case "M": {
@@ -85,10 +87,12 @@ for(let i = 0; i < path.length; i++) {
       newPath.hline(points[0].y);
       break;
     }
-    case "L": {
-      newPath.line(points[0].x, points[0].y);
-      break;
-    }
+    case "L":
+      {
+        newPath.line(points[0].x, points[0].y);
+        break;
+      }
+      "";
     case "C": {
       newPath.bezier3(points[1].x, points[1].y, points[2].x, points[2].y, points[0].x, points[0].y);
       break;
@@ -107,3 +111,13 @@ const data = newPath.str().trim();
 
 console.log(`<path d="${data}" />`);
 process.stdout.write("\n" + data + "\n");
+
+function dataToPoints(d) {
+  const pointData = PointAtLength(d);
+  var len = pts.length();
+
+  for(var i = 0; i <= 10; i++) {
+    console.log(i / 10, pointData.at((i / 10) * len));
+  }
+}
+dataToPoints(data);

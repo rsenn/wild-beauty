@@ -165,7 +165,7 @@ class RUG extends React.Component {
     for(const file of files) {
       try {
         const source = await this.getImageURLToBlob(file, images);
-        const image = this.create({ file, source, name: file.name, size: bytesToSize(file.size) });
+        const image = this.create({ file, source, original_name: file.name, size: bytesToSize(file.size) });
         images.push(image);
       } catch(e) {
         // nothing
