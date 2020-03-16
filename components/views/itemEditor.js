@@ -205,7 +205,6 @@ export const ItemEditor = inject(
           button.save {
             position: absolute;
             right: 0px;
-            bottom: 0px;
           }
           ul.tag-list > li.tag-item {
             transform: translateY(-7px);
