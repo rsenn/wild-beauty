@@ -112,12 +112,16 @@ const data = newPath.str().trim();
 console.log(`<path d="${data}" />`);
 process.stdout.write("\n" + data + "\n");
 
-function dataToPoints(d) {
+function *dataToPoints(d, steps = 10) {
   const pointData = PointAtLength(d);
-  var len = pts.length();
+  var len = pointData.length();
 
-  for(var i = 0; i <= 10; i++) {
-    console.log(i / 10, pointData.at((i / 10) * len));
+  for(var i = 0; i <= steps; i++) {
+      const point = new Point(pointData.at((i / steps) * len));
+
+    yield point.round(0.001);
   }
 }
-dataToPoints(data);
+
+
+console.log([...dataToPoints(data)]);
