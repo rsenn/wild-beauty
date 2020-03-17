@@ -66,7 +66,6 @@
 				"Makefile",
 				"*.moon",
 				"*.pem",
-				"*.sh",
 				"*.sql",
 				"t",
 				"*.tmp",
@@ -81,11 +80,14 @@
 				"*.tmp??",
 				"*.0",
 				"*.list",
-				"*.es5.js"
+				"*.es5.js",
+								".git",
+
 
 			],
 			"folder_exclude_patterns":
 			[
+				".git",
 				 "nextjs-*",
 				 "react-*",
 				 "wild-beauty",

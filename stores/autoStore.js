@@ -3,9 +3,9 @@ import { autorun, toJS } from "mobx";
 export const makeLocalStorage = () => {
   if(global.window && window.localStorage)
     return {
-      get: name => JSON.parse(localStorage.getItem(name)),
-      set: (name, data) => localStorage.setItem(name, JSON.stringify(data)),
-      remove: name => localStorage.removeItem(name)
+      get: name => JSON.parse(window.localStorage.getItem(name)),
+      set: (name, data) => window.localStorage.setItem(name, JSON.stringify(data)),
+      remove: name => window.localStorage.removeItem(name)
     };
   return {
     get: name => ({}),
@@ -17,18 +17,9 @@ export const makeLocalStorage = () => {
 export const logStoreAdapter = store => {
   return {
     store,
-    get: function(name) {
-      //console.log(`logStoreAdapter.get(${name}`);
-      return this.store.get(name);
-    },
-    set: function(name, data) {
-      //console.log(`logStoreAdapter.set(${name},`, data, ")");
-      return this.store && this.store.set ? this.store.set(name, data) : null;
-    },
-    remove: function(name) {
-      //console.log(`logStoreAdapter.remove(${name}`);
-      return this.store && this.store.remove ? this.store.remove(name) : null;
-    }
+    get: function(name) {return this.store.get(name); },
+    set: function(name, data) {return this.store && this.store.set ? this.store.set(name, data) : null; },
+    remove: function(name) {return this.store && this.store.remove ? this.store.remove(name) : null; }
   };
 };
 

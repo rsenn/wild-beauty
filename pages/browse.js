@@ -2,13 +2,15 @@ import React from "react";
 import { inject, observer } from "mobx-react";
 import Layout from "../components/layout.js";
 import CircleSegment from "../components/simple/circleSegment.js";
-import { RGBA, HSLA } from "../lib/dom.js";
+import { RGBA, HSLA, Line } from "../lib/dom.js";
 
 const DEG2RAD = Math.PI / 180;
 
 @inject("rootStore")
 @observer
 class Browse extends React.Component {
+  state = {};
+
   static async getInitialProps({ res, req, query, asPath, mobxStore }) {
     const rootStore = mobxStore.RootStore;
 
@@ -23,19 +25,30 @@ class Browse extends React.Component {
     if(global.window) {
       window.page = this;
     }
+
+    this.setState({ progress: 0 });
   }
 
   render() {
     const { rootStore } = this.props;
+    const { progress } = this.state;
     console.log("Browse.render");
+
+    let line = new Line(1, 0, progress <= 50 ? -1 : 0, progress <= 25 ? 2 : 1);
+
     return (
       <Layout>
         <div></div>
-{/*        <svg viewBox={`0 0 200 200`} style={{ width: "100%", height: "auto" }}>
-          <CircleSegment x={100} y={100} r={50} start={-90 * DEG2RAD} end={-45 * DEG2RAD} fill={"magenta"} />
-          <CircleSegment x={100} y={100} r={50} start={-15 * DEG2RAD} end={120 * DEG2RAD} fill={new RGBA(255, 255, 255, 127)} stroke={"#0ff"} strokeWidth={2} strokeDasharray={`5,5`} close />
-          <CircleSegment x={100} y={100} r={50} start={135 * DEG2RAD} end={245 * DEG2RAD} fill={new RGBA(255, 255, 255, 127)} stroke={"#ff0"} strokeWidth={2} strokeDasharray={`5,5`} close />
-        </svg>*/}
+        <svg viewBox={`0 0 100 100`} style={{ width: "50%", height: "auto" }}>
+          <defs>
+            <linearGradient id='MyGradient' {...line.toObject()}>
+              <stop offset='0%' stopColor='rgba(255,255,255,0.25)' />
+              <stop offset='50%' stopColor='rgba(127,127,127,0.5)' />
+              <stop offset='100%' stopColor='rgba(0,0,0,0.75)' />
+            </linearGradient>
+          </defs>
+          <CircleSegment x={50} y={50} r={45} start={-90 * DEG2RAD} end={(-90 + (progress * 360) / 100) * DEG2RAD} fill={"url(#MyGradient)"} stroke={"black"} strokeWidth={0.2} close />
+        </svg>
         <style jsx global>{``}</style>
       </Layout>
     );

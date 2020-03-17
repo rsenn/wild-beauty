@@ -172,7 +172,12 @@ class New extends React.Component {
                   console.log("rotatePhoto result:", { success, width, height, w, h, hr, vr });
                   src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
 
-                  Element.attr(img, { src, width, height, style: `position: relative; width: ${w}%; height: ${h}%; margin-top: ${-vr / 2}%; margin-left: ${-hr / 2}%;` });
+                  Element.attr(img, {
+                    src,
+                    width,
+                    height,
+                    style: `position: relative; width: ${w}%; height: ${h}%; margin-top: ${-vr / 2}%; margin-left: ${-hr / 2}%;`
+                  });
                   Element.attr(e, { ["data-tooltip"]: `${width}x${height} ${orientation}` });
                 });
               }}

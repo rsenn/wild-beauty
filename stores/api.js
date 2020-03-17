@@ -1,7 +1,7 @@
 const Blob = require("blob");
 
-const axios = require("../lib/axios.js").httpClient;
-const Util = require("../lib/util.js");
+const axios = require("../lib/axios.es5.js").httpClient;
+const Util = require("../lib/util.es5.js").Util;
 
 function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { debug: false }) {
   const { debug, secret } = options;

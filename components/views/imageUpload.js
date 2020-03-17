@@ -6,8 +6,11 @@ import classNames from "classnames";
 import axios from "../../lib/axios.js";
 import Util from "../../lib/util.js";
 import { RUG } from "../upload.js";
+import CircleSegment from "../simple/circleSegment.js";
 
 import "../../static/css/grid.css";
+
+const DEG2RAD = Math.PI / 180;
 
 export const hvOffset = (width, height) => {
   let w = width > height ? (width * 100) / height : 100;
@@ -87,6 +90,8 @@ export const ImageUpload = inject("rootStore")(
                 <div className={"upload-items __card __sorting"}>
                   {imageList.map((image, index) => {
                     let id = image.id;
+                    let progress = image.progress;
+                    let startAngle, endAngle;
 
                     image = toJS(image);
                     //console.log("image-list entry", {id,image});
@@ -96,26 +101,39 @@ export const ImageUpload = inject("rootStore")(
 
                     let { w, h, hr, vr } = hvOffset(width, height);
 
+                    if(progress !== undefined) {
+                      startAngle = -90 + (progress * 360) / 100;
+                      endAngle = 270;
+                    }
+
                     return (
                       <div key={index} className={"upload-item"}>
                         <div className={"upload-card"}>
                           <SizedAspectRatioBox className={"item-box"} insideClassName={"tooltip"} sizeClassName={"upload-image"} insideProps={{ ["data-tooltip"]: `${width}x${height} ${orientation}` }}>
-                            <img
-                              id={`image-${id}`}
-                              className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
-                              src={`/api/photo/get/${id}.jpg`}
-                              width={width}
-                              height={height}
-                              orientation={orientation}
-                              style={{
-                                position: "relative",
-                                marginTop: `${-vr / 2}%`,
-                                marginLeft: `${-hr / 2}%`,
-                                width: landscape ? `${(width * 100) / height}%` : "100%",
-                                height: landscape ? "100%" : "auto"
-                              }}
-                              onClick={onChoose}
-                            />
+                            {progress !== undefined ? (
+                              <svg viewBox={`0 0 100 100`} style={{ width: "100%", height: "auto" }}>
+                                <defs />
+
+                                <CircleSegment x={50} y={50} r={100} start={startAngle * DEG2RAD} end={endAngle * DEG2RAD} fill={"rgba(0,0,0,0.5)"} close />
+                              </svg>
+                            ) : (
+                              <img
+                                id={`image-${id}`}
+                                className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
+                                src={`/api/photo/get/${id}.jpg`}
+                                width={width}
+                                height={height}
+                                orientation={orientation}
+                                style={{
+                                  position: "relative",
+                                  marginTop: `${-vr / 2}%`,
+                                  marginLeft: `${-hr / 2}%`,
+                                  width: landscape ? `${(width * 100) / height}%` : "100%",
+                                  height: landscape ? "100%" : "auto"
+                                }}
+                                onClick={onChoose}
+                              />
+                            )}
                           </SizedAspectRatioBox>
                           <button className={"image-button image-delete center-flex"} onClick={() => onDelete(id)}>
                             <svg height='24' width='24' viewBox='0 0 16 16'>

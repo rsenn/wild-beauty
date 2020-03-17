@@ -74,7 +74,12 @@ class Home extends React.Component {
             }
           }
         },
-        { /*element: global.window, */ step: 1, round: true, listener: MovementListener, noscroll: true }
+        {
+          /*element: global.window, */ step: 1,
+          round: true,
+          listener: MovementListener,
+          noscroll: true
+        }
       ));
 
     //console.log("this.touchListener", Object.keys(this.touchListener));
@@ -233,7 +238,9 @@ class Home extends React.Component {
           //console.log("Transition START", this.time);
         },
         setTransition(enable = true) {
-          Element.setCSS(this.tLogo, { transition: enable ? `transform ${this.interva}ms linear` : "" });
+          Element.setCSS(this.tLogo, {
+            transition: enable ? `transform ${this.interva}ms linear` : ""
+          });
         },
         tick(i) {
           this.run = true;
@@ -308,7 +315,14 @@ class Home extends React.Component {
           </div>
           {}
         </div>
-        <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? "auto" : "none", display: subpage == 2 ? "block" : "block" }}>
+        <div
+          className={"subpage"}
+          style={{
+            opacity: subpage == 2 ? 1 : 0,
+            pointerEvents: subpage == 2 ? "auto" : "none",
+            display: subpage == 2 ? "block" : "block"
+          }}
+        >
           <div>
             {(size => {
               const fontSize = Math.round(size.width / 60);
@@ -335,10 +349,20 @@ class Home extends React.Component {
                   </span>
                 </div>
               );
-            })({ width: global.window ? window.innerWidth : undefined, height: global.window ? window.innerHeight : undefined })}
+            })({
+              width: global.window ? window.innerWidth : undefined,
+              height: global.window ? window.innerHeight : undefined
+            })}
           </div>
         </div>
-        <div className={"subpage flex-vertical"} style={{ opacity: subpage == 3 ? 1 : 0, pointerEvents: subpage == 3 ? "auto" : "none", display: subpage == 3 ? "flex" : "flex" }}>
+        <div
+          className={"subpage flex-vertical"}
+          style={{
+            opacity: subpage == 3 ? 1 : 0,
+            pointerEvents: subpage == 3 ? "auto" : "none",
+            display: subpage == 3 ? "flex" : "flex"
+          }}
+        >
           <div className={"time-counter"}>{timespan}</div>
         </div>
         {/*onClick={this.handleNext}*/}

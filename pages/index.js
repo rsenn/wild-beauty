@@ -49,7 +49,14 @@ const Home = inject("rootStore")(
             <img src={"/static/img/logo-transparent.png"} style={{ width: "80vw", maxWidth: "1280px" }} />
           </div>
         </div>
-        <div className={"subpage"} style={{ opacity: subpage == 2 ? 1 : 0, pointerEvents: subpage == 2 ? "auto" : "none", display: subpage == 2 ? "block" : "block" }}>
+        <div
+          className={"subpage"}
+          style={{
+            opacity: subpage == 2 ? 1 : 0,
+            pointerEvents: subpage == 2 ? "auto" : "none",
+            display: subpage == 2 ? "block" : "block"
+          }}
+        >
           <div>
             {(size => {
               const fontSize = Math.round(size.width / 60);
@@ -76,10 +83,20 @@ const Home = inject("rootStore")(
                   </span>
                 </div>
               );
-            })({ width: global.window ? window.innerWidth : undefined, height: global.window ? window.innerHeight : undefined })}
+            })({
+              width: global.window ? window.innerWidth : undefined,
+              height: global.window ? window.innerHeight : undefined
+            })}
           </div>
         </div>
-        <div className={"subpage flex-vertical"} style={{ opacity: subpage == 3 ? 1 : 0, pointerEvents: subpage == 3 ? "auto" : "none", display: subpage == 3 ? "flex" : "flex" }}>
+        <div
+          className={"subpage flex-vertical"}
+          style={{
+            opacity: subpage == 3 ? 1 : 0,
+            pointerEvents: subpage == 3 ? "auto" : "none",
+            display: subpage == 3 ? "flex" : "flex"
+          }}
+        >
           <div className={"time-counter"}>{timespan || ""}</div>
         </div>
         {/*onClick={this.handleNext}*/}

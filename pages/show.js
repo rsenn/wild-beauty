@@ -65,7 +65,9 @@ class Show extends React.Component {
     parentIds: [],
     view: "list"
   };
-  static API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
+  static API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", {
+    secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H"
+  });
 
   static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize colors original_name } }", "users { user { id username last_seen } }"];
 
@@ -398,7 +400,21 @@ class Show extends React.Component {
                         }}
                         className={"layer gallery-aspect-box"}
                       >
-                        {haveImage ? <img src={path} width={photo.width} height={photo.height} style={{ width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%", height: "auto", opacity }} className='gallery-image' /> : undefined}
+                        {haveImage ? (
+                          <img
+                            src={path}
+                            width={photo.width}
+                            height={photo.height}
+                            style={{
+                              width: photo.landscape ? (photo.width * 100) / photo.height + "%" : "100%",
+                              height: "auto",
+                              opacity
+                            }}
+                            className='gallery-image'
+                          />
+                        ) : (
+                          undefined
+                        )}
                         <div
                           style={{
                             position: "absolute",
@@ -425,7 +441,14 @@ class Show extends React.Component {
                           {!!name ? `Name: ${name}` : undefined}
                           <br />
                           <br />
-                          <pre style={{ fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed", fontSize: "16px" }}>{[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}</pre>
+                          <pre
+                            style={{
+                              fontFamily: "Fixedsys,Monospace,'Ubuntu Mono','Courier New',Fixed",
+                              fontSize: "16px"
+                            }}
+                          >
+                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
+                          </pre>
                         </div>
                       </SizedAspectRatioBox>
                     </div>
