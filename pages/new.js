@@ -72,7 +72,12 @@ class New extends React.Component {
       window.addEventListener("keyup", event => (event.key == "Shift" ? this.shiftState(false) : undefined));
       window.addEventListener("click", this.handleClick);
     }
-    this.touchListener = SelectionListener(event => {}, { color: "#40ff00", shadow: "#000000" });
+    this.touchListener = SelectionListener(
+      event => {
+        console.log("SelectionEvent", event);
+      },
+      { color: "#40ff00", shadow: "#000000" }
+    );
     rootStore.state.step = 1;
 
     //  this.shiftState.subscribe(this.handleShiftState);
@@ -124,7 +129,7 @@ class New extends React.Component {
     };
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
 
-    //console.log("New.render", {  });
+    console.log("New.render", Object.keys(this.touchListener.events));
 
     return (
       <Layout scroll={false} toastsClick={this.handleClick} className={"noselect"} {...this.touchListener.events}>

@@ -31,11 +31,11 @@ class Browse extends React.Component {
     return (
       <Layout>
         <div></div>
-        <svg viewBox={`0 0 200 200`} style={{ width: "100%", height: "auto" }}>
+{/*        <svg viewBox={`0 0 200 200`} style={{ width: "100%", height: "auto" }}>
           <CircleSegment x={100} y={100} r={50} start={-90 * DEG2RAD} end={-45 * DEG2RAD} fill={"magenta"} />
-          <CircleSegment x={100} y={100} r={50} start={-15 * DEG2RAD} end={120 * DEG2RAD} fill={new RGBA(255, 255, 255, 127)} stroke={"#0ff"} strokeWidth={2} strokeDashArray={`1 0`} close />
-          <CircleSegment x={100} y={100} r={50} start={135 * DEG2RAD} end={245 * DEG2RAD} fill={new RGBA(255, 255, 255, 127)} stroke={"#ff0"} strokeWidth={2} strokeDashArray={`1 0`} close />
-        </svg>
+          <CircleSegment x={100} y={100} r={50} start={-15 * DEG2RAD} end={120 * DEG2RAD} fill={new RGBA(255, 255, 255, 127)} stroke={"#0ff"} strokeWidth={2} strokeDasharray={`5,5`} close />
+          <CircleSegment x={100} y={100} r={50} start={135 * DEG2RAD} end={245 * DEG2RAD} fill={new RGBA(255, 255, 255, 127)} stroke={"#ff0"} strokeWidth={2} strokeDasharray={`5,5`} close />
+        </svg>*/}
         <style jsx global>{``}</style>
       </Layout>
     );
