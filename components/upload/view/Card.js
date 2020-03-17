@@ -10,7 +10,7 @@ export default class Card extends React.Component {
 
   render() {
     const {
-        image: { uid, name, size, done, abort, click, error, remove, source, upload, refresh, progress, uploading },
+        image: { uid, name, size, done, abort, click, error, remove, src, upload, refresh, progress, uploading },
         ...props
       } = this.props,
       { spin } = this.state;
@@ -25,7 +25,7 @@ export default class Card extends React.Component {
           </div>
         </div>
 
-        <div style={{ backgroundImage: `url(${source})` }} onClick={click} className='upload-card-image' />
+        <div style={{ backgroundImage: `url(${src})` }} onClick={click} className='upload-card-image' />
 
         {!done && !error && uploading && (
           <>

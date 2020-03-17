@@ -1,7 +1,9 @@
 const Blob = require("blob");
 
 const axios = require("../lib/axios.es5.js").httpClient;
-const Util = require("../lib/util.es5.js").Util;
+const Util = require("../lib/util.es5.js").default;
+
+//Util.ucfirst = str => str.substring(0, 1).toUpperCase() + str.substring(1);
 
 function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { debug: false }) {
   const { debug, secret } = options;
@@ -10,14 +12,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     let res = await axios({
       url,
       method: "POST",
-      headers: {
-        "Accept-Encoding": "deflate, br;q=1.0, gzip;q=0.9, *;q=0.5",
-        ...(secret
-          ? {
-              "X-Hasura-Access-Key": secret
-            }
-          : {})
-      },
+      headers: { "Accept-Encoding": "deflate, br;q=1.0, gzip;q=0.9, *;q=0.5", ...(secret ? { "X-Hasura-Access-Key": secret } : {}) },
       data: JSON.stringify({ query }),
       responseType: "blob"
     });
@@ -78,7 +73,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
 
     if(typeof setStr == "object") setStr = "{" + Util.map(setStr, (key, value) => `${key}: "${value}"`).join(", ") + "}";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
-    console.log("setStr = ", setStr);
+    //console.log("setStr = ", setStr);
     const queryName = `update_${name.replace(/s*$/, "s")}`;
     const queryStr = `mutation ${queryName}{ ${queryName}(where: ${objStr}, _set: ${setStr}) { affected_rows } }`;
     if(debug) console.log("query: ", queryStr);
@@ -147,4 +142,4 @@ function getAPI() {
   return apiInstance;
 }
 
-module.exports = getAPI;
+module.exports = { API, getAPI };

@@ -212,19 +212,19 @@ class MyApp extends App {
             background: linear-gradient(top, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
             background: -webkit-linear-gradient(top, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
           }
-          button:active {
+          button:active:enabled {
             border: 1px inset #aaa;
             background: linear-gradient(bottom, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
             background: -webkit-linear-gradient(bottom, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
           }
-          button:active > svg,
-          button:active > img {
+          button:active:enabled > svg,
+          button:active:enabled > img {
             transform: translate(1px, 1px);
           }
-          button:hover {
+          button:hover:enabled {
             box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.6);
           }
-          button:active {
+          button:active:enabled {
             box-shadow: none;
           }
           .tooltip:after {
@@ -237,6 +237,10 @@ class MyApp extends App {
 
             border-radius: 4px;
             box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.62);
+          }
+          button:disabled {
+            filter: grayscale(100%);
+            box-shadow: none;
           }
         `}</style>
       </React.Fragment>

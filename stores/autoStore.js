@@ -17,9 +17,15 @@ export const makeLocalStorage = () => {
 export const logStoreAdapter = store => {
   return {
     store,
-    get: function(name) {return this.store.get(name); },
-    set: function(name, data) {return this.store && this.store.set ? this.store.set(name, data) : null; },
-    remove: function(name) {return this.store && this.store.remove ? this.store.remove(name) : null; }
+    get: function(name) {
+      return this.store.get(name);
+    },
+    set: function(name, data) {
+      return this.store && this.store.set ? this.store.set(name, data) : null;
+    },
+    remove: function(name) {
+      return this.store && this.store.remove ? this.store.remove(name) : null;
+    }
   };
 };
 

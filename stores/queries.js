@@ -1,4 +1,4 @@
-import getAPI from "./api.js";
+import { getAPI } from "./api.js";
 import Util from "../lib/util.js";
 import axios from "../lib/axios.js";
 import { transformItem, transformItemData, transformItemIds } from "./functions.js";

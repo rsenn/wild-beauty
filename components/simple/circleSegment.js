@@ -3,9 +3,8 @@ import { useSpring, animated } from "react-spring";
 import { Point } from "../../lib/dom/point.js";
 import Util from "../../lib/util.js";
 
-
 export const CircleSegmentPath = (x, y, r, start, end, close = false) => {
-    let c = new Point(x, y);
+  let c = new Point(x, y);
 
   let a = Point.fromAngle(start, r).add(c);
   let b = Point.fromAngle(end, r).add(c);
@@ -27,7 +26,7 @@ export const CircleSegmentPath = (x, y, r, start, end, close = false) => {
 };
 
 export const CircleSegment = ({ x, y, r, start, end, relative = false, close = false, fill, ...props }) => {
-  let d = CircleSegmentPath( x, y, r, start, end, close);
+  let d = CircleSegmentPath(x, y, r, start, end, close);
 
   return <path d={d} fill={fill} {...props} />;
 };

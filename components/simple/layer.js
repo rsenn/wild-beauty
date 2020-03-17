@@ -3,7 +3,7 @@ import { assign_to } from "../../lib/devtools.js";
 import { trkl } from "../../lib/trkl.js";
 import { Size, Rect, Element } from "../../lib/dom.js";
 import { lazyInitializer } from "../../lib/lazyInitializer.js";
-import { SvgOverlay } from "../../lib/svg-overlay.js";
+import { SvgOverlay } from "../../lib/svg/overlay.js";
 
 if("window" in global) {
   assign_to(window);

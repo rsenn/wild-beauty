@@ -3,7 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Gallery from "../components/gallery.js";
 import { Element } from "../lib/dom.js";
-import { SvgOverlay } from "../lib/svg-overlay.js";
+import { SvgOverlay } from "../lib/svg/overlay.js";
 import { inject, observer } from "mobx-react";
 import Layout from "../components/layout.js";
 import { CubeSpinner } from "../components/simple/cubeSpinner.js";

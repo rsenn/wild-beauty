@@ -2,7 +2,7 @@ const exifr = require("exifr");
 const fsPromises = require("fs").promises;
 const jpegQuality = require("jpegquality");
 const jpeg = require("./lib/jpeg.js");
-const Util = require("./lib/util.js");
+const Util = require("./lib/util.es5.js");
 const MemoryStream = require("memory-stream");
 const sharp = require("sharp");
 const stream = require("stream");
@@ -19,6 +19,18 @@ function bufferToStream(buffer) {
   stream.push(null);
   return stream;
 }
+
+const createMemoryStream = () => {
+  let memory = new MemoryStream();
+  let stream = new Writable({
+    write(chunk, encoding, callback) {
+      console.log(`writing ${chunk.length} bytes`);
+      memory.write(chunk, encoding);
+      callback();
+    }
+  });
+};
+
 async function loadFile(path) {
   let data = await fsPromises.readFile(path);
 
@@ -92,7 +104,7 @@ const imageImporter = maxWidthOrHeight =>
       var inputStream = bufferToStream(Buffer.from(inputBuf));
       //console.log("inputBuf:", inputBuf.length);
       //  console.log("inputStream:",inputStream, Util.members(inputStream));
-      var outputStream = new MemoryStream();
+      var outputStream = createMemoryStream();
       const finished = util.promisify(stream.finished);
       outputStream.on("finish", () => {});
       inputStream.pipe(transformer).pipe(outputStream);
@@ -123,9 +135,7 @@ const rotatePhoto = async (inputBuf, angle) => {
   outputStream.on("finish", () => {});
 
   let transformer = sharp()
-    .jpeg({
-      quality: 100
-    })
+    .jpeg({ quality: 100 })
     .rotate(angle);
 
   inputStream.pipe(transformer).pipe(outputStream);

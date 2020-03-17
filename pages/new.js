@@ -2,7 +2,7 @@ import React from "react";
 import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../lib/alea.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
-import { SvgOverlay } from "../lib/svg-overlay.js";
+import { SvgOverlay } from "../lib/svg/overlay.js";
 import { action, toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { ImageUpload, hvOffset } from "../components/views/imageUpload.js";
@@ -12,6 +12,7 @@ import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
 import { SelectionListener } from "../lib/touchHandler.js";
 import { Element } from "../lib/dom.js";
+import Util from "../lib/util.js";
 
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
@@ -74,11 +75,16 @@ class New extends React.Component {
     }
     this.touchListener = SelectionListener(
       event => {
-        console.log("SelectionEvent", event);
+        // console.log("SelectionEvent", event);
       },
       { color: "#40ff00", shadow: "#000000" }
     );
     rootStore.state.step = 1;
+
+    let photos = this.props.images.map(image => ["" + image.id, image]);
+    console.log("New.constructor", { photos });
+
+    rootStore.photos.replace(photos);
 
     //  this.shiftState.subscribe(this.handleShiftState);
   }
@@ -137,17 +143,16 @@ class New extends React.Component {
           <NeedAuth>
             <ImageUpload
               shiftState={this.shiftState}
-              images={this.props.images}
+              images={[...rootStore.photos.keys()].sort().map(id => rootStore.photos.get(id))}
               onChoose={this.chooseImage}
-              onDelete={id => {
-                let e = Element.find(`#image-${id}`);
+              onDelete={id_or_element => {
+                let e = typeof id_or_element == "string" ? Element.find(`#image-${id}`) : id_or_element;
                 do {
                   if(e.parentElement == null) break;
                   e = e.parentElement;
                 } while(!e.classList || !(e.classList.contains("image-entry") || e.classList.contains("upload-item")));
-                rootStore.deletePhoto(id, result => {
-                  Element.remove(e);
-                });
+                if(typeof id_or_element == "string" || typeof id_or_element == "number") rootStore.deletePhoto(id_or_element);
+                Element.remove(e);
               }}
               onRotate={(id, angle = 90) => {
                 let img = Element.find(`#image-${id}`);
@@ -160,25 +165,40 @@ class New extends React.Component {
 
                 let src = img.getAttribute("src");
 
-                Element.attr(img, { src: "" });
+                //Element.attr(img, { src: "" });
 
-                rootStore.rotatePhoto(id, angle, ({ success, width, height }) => {
-                  const landscape = width > height;
-                  const aspect = width / height;
+                let a = +("" + img.style.transform).replace(/rotate\(([0-9]+)deg\)/, "$1");
+
+                img.style.transform = `rotate(${a + angle}deg)`;
+                console.log("rotatePhoto result:", a);
+
+                rootStore.rotatePhoto(id, angle, image => {
+                  /* const { success, width, height } = image;*/
+                  const landscape = image.width > image.height;
+                  const aspect = image.width / image.height;
                   const orientation = landscape ? "landscape" : "portrait";
 
-                  let { w, h, hr, vr } = hvOffset(width, height);
+                  let { w, h, hr, vr } = hvOffset(image.width, image.height);
 
-                  console.log("rotatePhoto result:", { success, width, height, w, h, hr, vr });
+                  console.log("rotatePhoto result:", { id, angle, image, img });
                   src = src.replace(/\?.*/g, "") + "?ts=" + Util.unixTime();
 
                   Element.attr(img, {
                     src,
-                    width,
-                    height,
-                    style: `position: relative; width: ${w}%; height: ${h}%; margin-top: ${-vr / 2}%; margin-left: ${-hr / 2}%;`
+                    width: image.width,
+                    height: image.height
                   });
-                  Element.attr(e, { ["data-tooltip"]: `${width}x${height} ${orientation}` });
+                  Element.setCSS(img, {
+                    position: `relative`,
+                    width: `${w.toFixed(0)}%`,
+                    height: `${h.toFixed(0)}%`,
+                    marginTop: `${(-vr / 2).toFixed(0)}%`,
+                    marginLeft: `${(-hr / 2).toFixed(0)}%`,
+                    transform: `rotate(${angle}deg)`
+                  });
+                  Element.attr(e, {
+                    ["data-tooltip"]: `${image.width}x${image.height} ${orientation}`
+                  });
                 });
               }}
             />

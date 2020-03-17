@@ -136,10 +136,14 @@ export class RootStore extends Queries {
   @action.bound
   newPhoto(photoObj) {
     let { id, ...photo } = photoObj;
-    id = parseInt(id);
+    id = "" + id;
 
-    //console.log("rootStore.newPhoto ", photoObj);
+    console.log("rootStore.newPhoto ", photoObj);
     if(photoObj.src === undefined) photoObj.src = `/api/photo/get/${id}.jpg`;
+    if(photoObj.angle === undefined) photoObj.angle = 0;
+
+    if(photoObj.uploaded !== undefined) photoObj.uploaded = Util.parseDate(photoObj.uploaded);
+    else photoObj.uploaded = new Date();
 
     this.photos.set(id, observable.object(photoObj));
     let image = this.photos.get(id);
@@ -165,12 +169,13 @@ export class RootStore extends Queries {
   }
 
   photoExists(id) {
-    id = parseInt(id);
+    id = "" + id;
     return this.photos.has(id);
   }
 
   @action.bound
   deletePhoto(id, completed = () => {}) {
+    id = "" + id;
     let image = this.getPhoto(id);
 
     this.apiRequest("/api/photo/delete", { id }).then(response => {
@@ -193,7 +198,7 @@ export class RootStore extends Queries {
       const { data } = response;
       const { success, width, height } = data;
       console.log("data: ", data);
-      completed(data);
+      completed({ success, width, height, id, angle });
     });
   }
   /*

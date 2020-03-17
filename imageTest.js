@@ -1,6 +1,6 @@
 const fs = require("fs");
 const fsPromises = require("fs").promises;
-const Util = require("./lib/util.js");
+const Util = require("./lib/util.es5.js");
 
 const { loadFile, getImagePalette, imageImport } = require("./imageConversion.js");
 

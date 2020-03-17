@@ -6,9 +6,9 @@ const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
 const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
-const getAPI = require("./stores/api.js");
 const jpeg = require("./lib/jpeg.js");
-const Util = require("./lib/util.js");
+const Util = require("./lib/util.es5.js").default;
+const getAPI = require("./stores/api.js").getAPI;
 const dom = require("./lib/dom.es5.js");
 const { RGBA, HSLA } = dom;
 const bcrypt = require("bcryptjs");
@@ -27,13 +27,6 @@ const { Console } = require("console");
 const { stdout, stderr } = process;
 const sha1 = require("node-sha1");
 const { PassThrough, Writable } = require("stream");
-
-function bufferToStream(buffer) {
-  let stream = new Readable();
-  stream.push(buffer);
-  stream.push(null);
-  return stream;
-}
 
 function logStream(file) {
   var output = [process.stdout];
@@ -120,7 +113,7 @@ if(!dev && cluster.isMaster) {
       return next();
     });
 
-    server.post("/api/login", async function(req, res) {
+    server.post("/api/login", async (req, res) => {
       const { username, password } = req.body;
       try {
         let response = await API.select("users", { username: `"${username}"` }, ["id", "username", "password"]);
@@ -163,20 +156,19 @@ if(!dev && cluster.isMaster) {
       }
       return null;
     };
-    const needAuth = fn =>
-      async function(req, res) {
-        let token = getVar(req, "token");
-        if(token) {
-          let response = await API.select("users", { token: `"${token}"` }, ["id", "username", "token"]);
-          const user = response.users[0];
-          if(user) {
-            if(token == user.token) return fn(req, res);
-          }
+    const needAuth = fn => async (req, res) => {
+      let token = getVar(req, "token");
+      if(token) {
+        let response = await API.select("users", { token: `"${token}"` }, ["id", "username", "token"]);
+        const user = response.users[0];
+        if(user) {
+          if(token == user.token) return fn(req, res);
         }
-        return res.status(401).send("Need authentification");
-      };
+      }
+      return res.status(401).send("Need authentification");
+    };
 
-    server.get("/api/logout", async function(req, res) {
+    server.get("/api/logout", async (req, res) => {
       let token = getVar(req, "token");
       try {
         if(token) {
@@ -200,7 +192,7 @@ if(!dev && cluster.isMaster) {
 
     server.post(
       "/api/put",
-      needAuth(async function(req, res) {
+      needAuth(async (req, res) => {
         const { filename, data } = req.body;
         var file = fs.openSync(filename, "w");
         var written = fs.writeSync(file, Buffer.from(data, "base64"));
@@ -208,7 +200,7 @@ if(!dev && cluster.isMaster) {
       })
     );
 
-    server.post("/api/tree/parents", async function(req, res) {
+    server.post("/api/tree/parents", async (req, res) => {
       let { fields, id, ...params } = req.body;
       fields = fields || ["parent { id }", "parent_id", "id"];
       let result = await API(`
@@ -223,7 +215,7 @@ if(!dev && cluster.isMaster) {
       res.json({ success: true, parents: [], result });
     });
 
-    server.post("/api/tree", async function(req, res) {
+    server.post("/api/tree", async (req, res) => {
       let { fields, ...params } = req.body;
       fields = fields || itemFields;
       let itemList = await API.list("items", fields.join(" "), params);
@@ -239,7 +231,7 @@ if(!dev && cluster.isMaster) {
       res.json({ success: true, count: itemList.length, items: itemList });
     });
 
-    server.post("/api/item/new", async function(req, res) {
+    server.post("/api/item/new", async (req, res) => {
       let { data, photo_id, parent_id, ...params } = req.body;
       let result = await API.insert(
         "items",
@@ -256,7 +248,7 @@ if(!dev && cluster.isMaster) {
       res.json({ success: true, result });
     });
 
-    server.post("/api/item*", async function(req, res) {
+    server.post("/api/item*", async (req, res) => {
       let { fields, update, ...params } = req.body;
       let result;
       fields = fields || itemFields;
@@ -274,7 +266,7 @@ if(!dev && cluster.isMaster) {
 
     server.post(
       "/api/photo/rotate",
-      needAuth(async function(req, res) {
+      needAuth(async (req, res) => {
         let { id, angle } = req.body;
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
 
@@ -291,7 +283,7 @@ if(!dev && cluster.isMaster) {
             let { data, width, height } = await rotated;
             console.log("rotate", { width, height });
             let result = await API.update("photos", { id }, { data, width, height });
-            res.json({ success: true, width, height });
+            res.json({ success: true, width, height, id, angle });
           } else {
             res.json({ success: false, error: `Photo is not owned by user (id: ${user_id})` });
           }
@@ -299,7 +291,7 @@ if(!dev && cluster.isMaster) {
       })
     );
 
-    server.post("/api/photo/list", async function(req, res) {
+    server.post("/api/photo/list", async (req, res) => {
       let { fields, format, ...params } = req.body;
       if(typeof fields == "string") fields = fields.split(/[ ,]\+/g);
       else fields = [];
@@ -311,7 +303,7 @@ if(!dev && cluster.isMaster) {
 
     server.post(
       "/api/photo/delete",
-      needAuth(async function(req, res) {
+      needAuth(async (req, res) => {
         let { id } = req.body;
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
         let result = await API.delete("photos", { user_id, id });
@@ -319,7 +311,7 @@ if(!dev && cluster.isMaster) {
       })
     );
 
-    server.get("/api/photo/get/:id", async function(req, res) {
+    server.get("/api/photo/get/:id", async (req, res) => {
       const id = req.params.id.replace(/[^0-9].*/, "");
       let response = await API(`query PhotoImage { photos(where: {id: {_eq: ${id}}}) { offset uploaded id filesize colors data } }`);
       const photo = response.photos[0];
@@ -342,7 +334,7 @@ if(!dev && cluster.isMaster) {
 
     server.post(
       "/api/photo/upload",
-      needAuth(async function(req, res) {
+      needAuth(async (req, res) => {
         let user_id = getVar(req, "user_id") || getUser(getVar(req, "token"), "id");
         let response = [];
         for(let item of Object.entries(req.files)) {

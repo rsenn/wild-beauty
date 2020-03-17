@@ -77,8 +77,8 @@ class RUG extends React.Component {
     let changes = {};
     try {
       if(file instanceof Blob) {
-        const source = await this.getImageURLToBlob(file);
-        changes = { file, source };
+        const src = await this.getImageURLToBlob(file);
+        changes = { file, src };
       }
       this.setImage(uid, { ...changes, error: false, done: false, progress: 0 }, image => this.upload(image));
     } catch(e) {}
@@ -119,7 +119,7 @@ class RUG extends React.Component {
       if(!url && photo && photo.src) url = photo.src;
       console.log("RUG.onSuccess ", { uid, url, error, photo });
 
-      this.setImage(uid, { source: url, done: !error, error: !!error, uploading: false, progress: 100 }, () => this.props.onSuccess(this.state.images.find(item => item.uid === uid)));
+      this.setImage(uid, { src: url, done: !error, error: !!error, uploading: false, progress: 100 }, () => this.props.onSuccess(this.state.images.find(item => item.uid === uid)));
     })();
   }
 
@@ -145,7 +145,7 @@ class RUG extends React.Component {
         if(item.uid === uid) return (image = { ...item, ...append });
         return item;
       })
-      .filter(item => !!item.source);
+      .filter(item => !!item.src);
     this.setState({ images }, () => {
       if(finish) finish(image);
       this.props.onChange(images);
@@ -164,8 +164,8 @@ class RUG extends React.Component {
     const images = [];
     for(const file of files) {
       try {
-        const source = await this.getImageURLToBlob(file, images);
-        const image = this.create({ file, source, original_name: file.name, size: bytesToSize(file.size) });
+        const src = await this.getImageURLToBlob(file, images);
+        const image = this.create({ file, src, uploaded: new Date(), original_name: file.name, size: bytesToSize(file.size) });
         images.push(image);
       } catch(e) {
         // nothing

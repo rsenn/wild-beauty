@@ -11,7 +11,7 @@ export default class List extends React.Component {
 
   render() {
     const {
-        image: { uid, name, size, done, abort, click, error, remove, source, upload, refresh, progress, uploading },
+        image: { uid, name, size, done, abort, click, error, remove, src, upload, refresh, progress, uploading },
         ...props
       } = this.props,
       { spin } = this.state,
@@ -51,7 +51,7 @@ export default class List extends React.Component {
         )}
 
         <div className='upload-list-image' onClick={click}>
-          <img src={source} alt={name} />
+          <img src={src} alt={name} />
         </div>
 
         <div className='upload-list-content' onClick={click}>

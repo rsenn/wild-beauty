@@ -5,6 +5,7 @@ import { SizedAspectRatioBox } from "../simple/aspectBox.js";
 import classNames from "classnames";
 import axios from "../../lib/axios.js";
 import Util from "../../lib/util.js";
+import { Element } from "../../lib/dom.js";
 import { RUG } from "../upload.js";
 import CircleSegment from "../simple/circleSegment.js";
 
@@ -83,6 +84,8 @@ export const ImageUpload = inject("rootStore")(
           {(uploadedImages, options) => {
             let imageList = [...images, ...uploadedImages];
 
+            imageList.sort((a, b) => a.uploaded - b.uploaded);
+
             console.log("RUG render children=", imageList);
 
             return (
@@ -93,13 +96,17 @@ export const ImageUpload = inject("rootStore")(
                     let progress = image.progress;
                     let startAngle, endAngle;
 
-                    image = toJS(image);
-                    //console.log("image-list entry", {id,image});
-                    const { width, height } = image;
-                    const landscape = width > height;
+                    if(rootStore.photoExists(id)) {
+                      image = rootStore.getPhoto(id);
+                      console.log("image-entry", id, toJS(image));
+                    }
+
+                    /*image = toJS(image);*/
+                    /*const { width, height, src, uid, angle } = image;*/
+                    const landscape = image.width > image.height;
                     const orientation = landscape ? "landscape" : "portrait";
 
-                    let { w, h, hr, vr } = hvOffset(width, height);
+                    let { w, h, hr, vr } = hvOffset(image.width, image.height);
 
                     if(progress !== undefined) {
                       startAngle = -90 + (progress * 360) / 100;
@@ -109,8 +116,8 @@ export const ImageUpload = inject("rootStore")(
                     return (
                       <div key={index} className={"upload-item"}>
                         <div className={"upload-card"}>
-                          <SizedAspectRatioBox className={"item-box"} insideClassName={"tooltip"} sizeClassName={"upload-image"} insideProps={{ ["data-tooltip"]: `${width}x${height} ${orientation}` }}>
-                            {progress !== undefined ? (
+                          <SizedAspectRatioBox className={"item-box"} insideClassName={"tooltip"} sizeClassName={"upload-image"} insideProps={{ ["data-tooltip"]: `${image.width}x${image.height} ${orientation}` }}>
+                            {progress !== undefined && progress !== 100 ? (
                               <svg viewBox={`0 0 100 100`} style={{ width: "100%", height: "auto" }}>
                                 <defs />
 
@@ -118,24 +125,35 @@ export const ImageUpload = inject("rootStore")(
                               </svg>
                             ) : (
                               <img
-                                id={`image-${id}`}
+                                id={`image-${id || uid}`}
                                 className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
-                                src={`/api/photo/get/${id}.jpg`}
-                                width={width}
-                                height={height}
+                                src={image.src}
+                                width={image.width}
+                                height={image.height}
                                 orientation={orientation}
                                 style={{
                                   position: "relative",
-                                  marginTop: `${-vr / 2}%`,
-                                  marginLeft: `${-hr / 2}%`,
-                                  width: landscape ? `${(width * 100) / height}%` : "100%",
-                                  height: landscape ? "100%" : "auto"
+                                  marginTop: `${(-vr / 2).toFixed(0)}%`,
+                                  marginLeft: `${(-hr / 2).toFixed(0)}%`,
+                                  width: landscape ? `${(image.width * 100) / image.height}%` : "100%",
+                                  height: landscape ? "100%" : "auto",
+                                  transform: `rotate(${image.angle}deg)`
+                                }}
+                                onLoad={event => {
+                                  let rect = Element.rect(event.target);
+                                  console.log("img.onLoad", rect);
                                 }}
                                 onClick={onChoose}
                               />
                             )}
                           </SizedAspectRatioBox>
-                          <button className={"image-button image-delete center-flex"} onClick={() => onDelete(id)}>
+                          <button
+                            className={"image-button image-delete center-flex"}
+                            onClick={event => {
+                              //   console.log("onDelete.target:",event.currentTarget.previousSibling);
+                              onDelete(event.currentTarget);
+                            }}
+                          >
                             <svg height='24' width='24' viewBox='0 0 16 16'>
                               <defs />
                               <path fill={"#f00"} stroke={"#a00"} d='M11.004 3.982a1 1 0 00-.707.293L8.004 6.568 5.72 4.285a1 1 0 00-.01-.01 1 1 0 00-.701-.289L5 4a1 1 0 00-1 1 1 1 0 00.293.707L6.586 8l-2.293 2.293a1 1 0 00-.29.7 1 1 0 001 1 1 1 0 00.708-.294l2.293-2.293 2.283 2.283a1 1 0 00.717.303 1 1 0 001-1 1 1 0 00-.293-.707l-2.3-2.299 2.282-2.283a1 1 0 00.31-.72 1 1 0 00-1-1z' />
@@ -214,13 +232,13 @@ export const ImageUpload = inject("rootStore")(
             top: 30px;
             right: 2px;
           }
-          .image-button:active > svg {
+          .image-button:active:enabled > svg {
             transform: translate(1px, 1px);
           }
-          .image-button:active {
+          .image-button:active:enabled {
             border: 1px inset #cdcdcd;
           }
-          .image-button:hover {
+          .image-button:hover:enabled {
             background: #ffdc20c0;
             filter: drop-shadow(0px 0px 10px #ffdc20c0);
           }
