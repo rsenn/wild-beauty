@@ -114,8 +114,9 @@ class Show extends React.Component {
       this.state.itemId = parseInt(this.props.params.id);
     } else if(this.tree) {
       var item = findInTree(this.tree, "Objects");
+      if(item)
       item.checked = true;
-      Util.traverseTree(item, i => this.state.parentIds.push(i.id));
+      Util.traverseTree(item, i => i && this.state.parentIds.push(i.id));
 
       for(let node in Util.walkTree(this.tree)) {
         console.log("walkTree: ", node);

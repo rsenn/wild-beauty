@@ -1,6 +1,7 @@
 import React from "react";
 import Util from "../../lib/util.js";
 import { HSLA, Point, isPoint, Line, ReactComponent } from "../../lib/dom.js";
+import { SVGText } from "../simple/svgText.js";
 
 function* Table2DIterator(table) {
   for(var y = 0; y < table.length; y++) for (var x = 0; x < table[y].length; x++) yield table[y][x];
@@ -67,7 +68,6 @@ if(global.window) {
   Object.assign(window, {
     direction,
     directionVertical,
-    splitLines,
     Table2DIterator,
     FieldIterator
   });
@@ -152,7 +152,7 @@ export const TreeView = ({ tree, minWidth, minHeight, treeVerify = node => true,
       });
       table[y][x].pos = pt; //new Point(Math.sin(pt.x)*xdist, - Math.cos(pt.y));*/
       table[y][x].color = new HSLA((i++ * 360) / n_items, table[y][x].id == active ? 100 : 85, table[y][x].id == active ? 60 : 70, 1);
-      table[y][x].title = splitLines(table[y][x].title || "", max_chars);
+      table[y][x].title = Util.splitLines(table[y][x].title || "", max_chars);
     }
     // xdist *= xdist_mul;
     if(y >= 1) ystart += ydist;
@@ -319,7 +319,7 @@ if(height  < minHeight)
           <g key={i} transform={`translate(${item.pos.x},${item.pos.y})`}>
             <g id={"item." + item.id}>
               <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={8} ry={8} vectorEffect={"non-scaling-stroke"} stroke={item.id == active ? "white" : "none"} strokeDasharray={item.id == active ? "4" : ""} fill={item.color.toString()} strokeWidth={item.id == active ? W * 3 : W} style={{ filter: "url(#shadow)" }} />
-              <SVGText key={i} lines={item.title} x={0} y={0} />
+              <SVGText key={i} x={0} y={0}>{item.label}</SVGText>
             </g>
           </g>
         ))}
