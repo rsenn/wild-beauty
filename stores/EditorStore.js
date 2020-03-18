@@ -27,7 +27,7 @@ export class EditorStore {
 
   @action
   setTree(root) {
-    console.log("editorStore.setTree", {root});
+    console.log("editorStore.setTree", { root });
     this.tree = root;
   }
 
