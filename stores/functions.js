@@ -14,7 +14,7 @@ export const maxZIndex = () => {
 };
 
 export const findInTree = (tree, value) => {
-  console.log("findInTree", { tree, value });
+  //console.log("findInTree", { tree, value });
   if(tree.value === value || tree.label === value) return tree;
   if(tree.children) {
     for(let child of tree.children) {
