@@ -292,11 +292,10 @@ class TreePage extends React.Component {
       if(numChildren) item.num_children = numChildren;
       if(item.photos && item.photos[0] && item.photos[0].photo) {
         let photo = item.photos[0].photo;
-        let colors =   Util.jsonToObject(photo.colors);
+        let colors = Util.jsonToObject(photo.colors);
         let color = Object.keys(colors)[0];
         console.log("color:", color);
-              item.color = color;
-
+        item.color = color;
       }
 
       // if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
@@ -326,9 +325,7 @@ class TreePage extends React.Component {
       }
     }*/
 
-   while(!g.done_rendering)
-    g.checkRedraw();
-
+    while(!g.done_rendering) g.checkRedraw();
 
     g.roundAll(0.003);
 
@@ -375,7 +372,7 @@ class TreePage extends React.Component {
       //console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ["children", "key"]), { newline: "", indent: "", spacing: " " }));
     }*/
 
-    return { params, items, tree: root, nodes, graph: g.serialize() };
+    return { params, /*items, tree: root, nodes,*/ graph: g.serialize() };
   }
 
   constructor(props) {
@@ -503,7 +500,7 @@ class TreePage extends React.Component {
       return parseFloat(elem.getAttribute(name));
     }
     function getId(elem) {
-      return parseInt((''+elem.getAttribute("id")).replace(/.*\./, ""));
+      return parseInt(("" + elem.getAttribute("id")).replace(/.*\./, ""));
     }
   };
 
@@ -646,7 +643,14 @@ class TreePage extends React.Component {
     const isServer = Util.isServer();
     console.log("TreePage.render", { isServer });
     return (
-      <Layout title={"Tree"} onMouseMove={e => { /*this.mouseEvent*/ }} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
+      <Layout
+        title={"Tree"}
+        onMouseMove={e => {
+          /*this.mouseEvent*/
+        }}
+        onMouseDown={this.mouseEvent}
+        onTransitionEnd={this.handleTransitionEnd}
+      >
         <TreeGraph graph={this.props.graph} />
         <br />
         {this.state.view == "item" ? (

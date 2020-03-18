@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import { Align, HSLA, Point, Rect, Line } from "../../lib/dom.js";
+import { Align, HSLA, Point, Size, Rect, Line } from "../../lib/dom.js";
 import { withSize } from "react-sizeme";
+import { SVGText } from "../simple/svgText.js";
 
 export class TreeGraph extends Component {
   svgRef = React.createRef();
@@ -11,14 +12,14 @@ export class TreeGraph extends Component {
 
   render() {
     let { nodes, edges, bbox } = this.props.graph;
+    let size = new Size(30, 30);
     console.log("this.props.graph:", this.props.graph);
     console.log("bbox:", bbox);
     //
     return (
       <div>
-        <svg viewBox={`0 0 ${Math.ceil(bbox.width + 22)} ${Math.ceil(bbox.height + 22)}`} style={{ width: "100%", height: "auto" }}>
-          <g transform={`translate(${(-bbox.x + 11).toFixed(3)}, ${(-bbox.y + 11).toFixed(3)})`}
-          stroke={"#000"} strokeWidth={1} fill={"hsla(50,100%,50%,1)"}>
+        <svg viewBox={`0 0 ${Math.ceil(bbox.width + size.width + 2)} ${Math.ceil(bbox.height + size.height + 2)}`} style={{ width: "100%", height: "auto" }}>
+          <g transform={`translate(${(-bbox.x + size.width / 2 + 1).toFixed(3)}, ${(-bbox.y + size.height / 2 + 1).toFixed(3)})`} stroke={"#000"} strokeWidth={1} fill={"hsla(50,100%,50%,1)"}>
             {edges.map(e => {
               let edge = [nodes[e[0]], nodes[e[1]]];
               let line = new Line(edge[0], edge[1]);
@@ -29,13 +30,18 @@ export class TreeGraph extends Component {
             })}
             {nodes.map(node => {
               let p = new Point(node); /*.move(-bbox.x, -bbox.y)*/
-              let r = new Rect(0, 0, 20, 20);
+              let r = new Rect(0, 0, 30, 30);
 
               r.align(p, Align.CENTER | Align.MIDDLE);
               r.round();
 
               return <rect {...r.toObject()} rx={5} ry={5} data-id={node.id} data-label={node.label} />;
             })}
+            {nodes.map(node => (
+              <SVGText x={node.x} y={node.y} fontSize={8} stroke={"none"} fill={"#000"}>
+                {node.label}
+              </SVGText>
+            ))}
           </g>
         </svg>
       </div>

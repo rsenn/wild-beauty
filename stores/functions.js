@@ -78,7 +78,7 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
     let parent_id = node.parent && node.parent !== null && node.parent.id;
     if(parent_id !== undefined && parent_id !== null) node.parent_id = parent_id;
 
-node =  Util.filterOutKeys(node, ["children", "photos", "users", "parent", "children_aggregate"]);
+    node = Util.filterOutKeys(node, ["children", "photos", "users", "parent", "children_aggregate"]);
 
     console.log("node: ", node);
 
