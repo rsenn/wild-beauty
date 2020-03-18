@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import { Element, HSLA, Point, Rect, Matrix, Timer } from "../lib/dom.js";
-import {getAPI } from "../stores/api.js";
+import { getAPI } from "../stores/api.js";
 import Util from "../lib/util.js";
 import { SvgOverlay } from "../lib/svg/overlay.js";
 import { inject, observer } from "mobx-react";
@@ -14,7 +14,7 @@ import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
 import { trkl } from "../lib/trkl.js";
 import { TreeView } from "../components/views/treeView.js";
- import { makeItemToOption, findInTree } from "../stores/functions.js";
+import { makeItemToOption, findInTree } from "../stores/functions.js";
 import "../static/css/grid.css";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
@@ -30,7 +30,6 @@ const maxZIndex = () => {
   arr.sort((a, b) => a < b);
   return arr[0];
 };
-
 
 /*const makeItemToOption = selected => item => {
   let data = item && typeof item.data == "string" && item.data.length > 0 ? JSON.parse(item.data) : item && item.data != null && typeof item.data == "object" ? item.data : {};
@@ -114,8 +113,7 @@ class Show extends React.Component {
       this.state.itemId = parseInt(this.props.params.id);
     } else if(this.tree) {
       var item = findInTree(this.tree, "Objects");
-      if(item)
-      item.checked = true;
+      if(item) item.checked = true;
       Util.traverseTree(item, i => i && this.state.parentIds.push(i.id));
 
       for(let node in Util.walkTree(this.tree)) {

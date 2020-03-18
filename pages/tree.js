@@ -268,10 +268,12 @@ class TreePage extends React.Component {
       gravitate_to_origin: true,
       spacing: 12,
       timestep: 300,
-      prng: (function() { var rng = new Alea(query.seed|| 1341);
+      prng: (function() {
+        var rng = new Alea(query.seed || 1341);
         console.log("rng:", rng);
         return rng;
-    })()});
+      })()
+    });
     let iter = Object.fromEntries([
       ...rootStore.entries(({ photos, children, users, key, ...item }) => {
         item = toJS(item);
@@ -316,11 +318,9 @@ class TreePage extends React.Component {
 
       // if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
 
-     // console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
+      // console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
       return true;
     });
-
-
 
     while(!g.done_rendering) g.checkRedraw();
 
@@ -648,7 +648,14 @@ class TreePage extends React.Component {
         onMouseDown={this.mouseEvent}
         onTransitionEnd={this.handleTransitionEnd}
       >
-        <TreeGraph  style={{/* width: "100vw", height: "auto"*/ }} graph={this.props.graph} />
+        <TreeGraph
+          style={
+            {
+              /* width: "100vw", height: "auto"*/
+            }
+          }
+          graph={this.props.graph}
+        />
         <br />
         {this.state.view == "item" ? (
           <ItemView id={this.state.itemId} />

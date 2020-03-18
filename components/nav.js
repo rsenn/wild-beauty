@@ -143,7 +143,7 @@ const NavLink = inject("rootStore")(
   ))
 );
 
-const prng =  new Alea(Date.now());
+const prng = new Alea(Date.now());
 
 const randomColor = () => new HSLA(Util.randInt(0, 359), Util.randInt(50, 99), Util.randInt(10, 50), 1);
 

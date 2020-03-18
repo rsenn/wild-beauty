@@ -10,7 +10,6 @@ function* FieldIterator(itemIterator, field) {
   for(var it of itemIterator) yield it[field];
 }
 
-
 function direction(from, to, f = 1) {
   var pt = Point.diff(to, from);
 
@@ -62,7 +61,6 @@ function DistributeCircular(arr, dist, set = (i, x, y) => (item.pos = new Point(
   }
   return arr;
 }
-
 
 if(global.window) {
   Object.assign(window, {
@@ -319,7 +317,9 @@ if(height  < minHeight)
           <g key={i} transform={`translate(${item.pos.x},${item.pos.y})`}>
             <g id={"item." + item.id}>
               <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={8} ry={8} vectorEffect={"non-scaling-stroke"} stroke={item.id == active ? "white" : "none"} strokeDasharray={item.id == active ? "4" : ""} fill={item.color.toString()} strokeWidth={item.id == active ? W * 3 : W} style={{ filter: "url(#shadow)" }} />
-              <SVGText key={i} x={0} y={0}>{item.label}</SVGText>
+              <SVGText key={i} x={0} y={0}>
+                {item.label}
+              </SVGText>
             </g>
           </g>
         ))}
