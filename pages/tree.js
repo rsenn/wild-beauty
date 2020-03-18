@@ -1,5 +1,4 @@
 import React from "react";
-import Head from "next/head";
 import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align, PointList } from "../lib/dom.js";
 import { getAPI } from "../stores/api.js";
 import Util from "../lib/util.js";
@@ -11,7 +10,6 @@ import { ItemView } from "../components/views/itemView.js";
 import { TreeView } from "../components/views/treeView.js";
 import { Layout } from "../components/layout.js";
 import { action } from "mobx";
-import Nav from "../components/nav.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 import { trkl } from "../lib/trkl.js";
 import { Graph } from "../lib/fd-graph.js";
@@ -20,7 +18,6 @@ import { lazyInitializer } from "../lib/lazyInitializer.js";
 import "../static/css/grid.css";
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
-import { Queries } from "../stores/queries.js";
 import { TreeGraph } from "../components/views/treeGraph.js";
 
 var hier = {

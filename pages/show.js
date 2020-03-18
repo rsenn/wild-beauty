@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import { Element, HSLA, Point, Rect, Matrix, Timer } from "../lib/dom.js";
-import getAPI from "../stores/api.js";
+import {getAPI } from "../stores/api.js";
 import Util from "../lib/util.js";
 import { SvgOverlay } from "../lib/svg/overlay.js";
 import { inject, observer } from "mobx-react";
@@ -14,7 +14,7 @@ import affineFit from "affinefit";
 import { fromTriangles } from "transformation-matrix";
 import { trkl } from "../lib/trkl.js";
 import { TreeView } from "../components/views/treeView.js";
-
+ import { makeItemToOption, findInTree } from "../stores/functions.js";
 import "../static/css/grid.css";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
@@ -31,16 +31,6 @@ const maxZIndex = () => {
   return arr[0];
 };
 
-const findInTree = (tree, value) => {
-  if(tree.value === value || tree.label === value) return tree;
-  if(tree.children) {
-    for(let child of tree.children) {
-      let ret = findInTree(child, value);
-      if(ret !== null) return ret;
-    }
-  }
-  return null;
-};
 
 /*const makeItemToOption = selected => item => {
   let data = item && typeof item.data == "string" && item.data.length > 0 ? JSON.parse(item.data) : item && item.data != null && typeof item.data == "object" ? item.data : {};
@@ -109,7 +99,7 @@ class Show extends React.Component {
     props.items.forEach(item => {
       rootStore.newItem(item);
     });
-    let tempTree = rootStore.getItem(rootStore.rootItemId, makeItemToOption(), null);
+    let tempTree = rootStore.getTree(rootStore.rootItemId, makeItemToOption(), null);
 
     function removeLeafs(tree) {
       let { children, ...node } = tree;

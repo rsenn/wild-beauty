@@ -9,21 +9,6 @@ function* FieldIterator(itemIterator, field) {
   for(var it of itemIterator) yield it[field];
 }
 
-function splitLines(str, max_linelen = Number.MAX_SAFE_INTEGER) {
-  const tokens = str.split(/\s/g);
-  let lines = [];
-  let line = tokens.shift();
-  for(; tokens.length; ) {
-    if((line.length ? line.length + 1 : 0) + tokens[0].length > max_linelen) {
-      lines.push(line);
-      line = "";
-    }
-    if(line != "") line += " ";
-    line += tokens.shift();
-  }
-  if(line != "") lines.push(line);
-  return lines;
-}
 
 function direction(from, to, f = 1) {
   var pt = Point.diff(to, from);
@@ -77,14 +62,6 @@ function DistributeCircular(arr, dist, set = (i, x, y) => (item.pos = new Point(
   return arr;
 }
 
-export const SVGText = ({ x, y, yinc = 12, lines }) => {
-  const ystart = (-(lines.length - 1) / 2) * yinc;
-  return lines.map((line, i) => (
-    <text textAnchor='middle' alignmentBaseline='middle' fontFamily={"Fixed"} fontSize={13} y={y + ystart + i * yinc} x={x}>
-      {line}
-    </text>
-  ));
-};
 
 if(global.window) {
   Object.assign(window, {

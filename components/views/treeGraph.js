@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Align, HSLA, Point, Size, Rect, Line } from "../../lib/dom.js";
 import { withSize } from "react-sizeme";
 import { SVGText } from "../simple/svgText.js";
+import Util from "../../lib/util.js";
 
 export class TreeGraph extends Component {
   svgRef = React.createRef();
@@ -13,13 +14,14 @@ export class TreeGraph extends Component {
   render() {
     let { nodes, edges, bbox } = this.props.graph;
     let size = new Size(30, 30);
+    let t = new Point(-bbox.x + size.width / 2 + 1, -bbox.y + size.height / 2 + 1);
     console.log("this.props.graph:", this.props.graph);
     console.log("bbox:", bbox);
     //
     return (
       <div>
         <svg viewBox={`0 0 ${Math.ceil(bbox.width + size.width + 2)} ${Math.ceil(bbox.height + size.height + 2)}`} style={{ width: "100%", height: "auto" }}>
-          <g transform={`translate(${(-bbox.x + size.width / 2 + 1).toFixed(3)}, ${(-bbox.y + size.height / 2 + 1).toFixed(3)})`} stroke={"#000"} strokeWidth={1} fill={"hsla(50,100%,50%,1)"}>
+          <g transform={`translate(${t})`} stroke={"#000"} strokeWidth={1} fill={"hsla(50,100%,50%,1)"}>
             {edges.map(e => {
               let edge = [nodes[e[0]], nodes[e[1]]];
               let line = new Line(edge[0], edge[1]);
@@ -37,9 +39,13 @@ export class TreeGraph extends Component {
 
               return <rect {...r.toObject()} rx={5} ry={5} data-id={node.id} data-label={node.label} />;
             })}
+
+            </g>
+                      <g transform={`translate(${t})`} fill={"#000"}>
+
             {nodes.map(node => (
-              <SVGText x={node.x} y={node.y} fontSize={8} stroke={"none"} fill={"#000"}>
-                {node.label}
+              <SVGText x={node.x} y={node.y} fontSize={8}>
+                {Util.splitLines(node.label, 7)}
               </SVGText>
             ))}
           </g>
