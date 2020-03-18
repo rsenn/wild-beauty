@@ -74,7 +74,7 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
     }
     /* let { children, parent, ...restOfNode } = node;*/
     //  console.log("treeToGraph", { depth, pred });
-    let n = new Node((node.data && node.data.title) || node.name || node.id, 60, 100);
+    let n =  graph.addNode((node.data && node.data.title) || node.name || node.id, 60, 100);
     let parent_id = node.parent && node.parent !== null && node.parent.id;
     if(parent_id !== undefined && parent_id !== null) node.parent_id = parent_id;
 
@@ -82,7 +82,7 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
 
     //console.log("node: ", node);
 
-    graph.addNode(n).node = node;
+   n.node = node;
 
     if(node.parent_id > 0) {
       let parent = Util.find(graph.nodes, n => n.node.id == node.parent_id);

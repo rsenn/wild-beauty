@@ -19,19 +19,22 @@ import "../static/css/grid.css";
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
 import { TreeGraph } from "../components/views/treeGraph.js";
- import Alea from "../lib/alea.js";
+import Alea from "../lib/alea.js";
 
+/*
+const prng = (seed) => function() {
+  var rng = new Alea(seed);
+  var n = 0;
+    console.log(`new Alea(seed):`,rng);
 
-const alea = function() {
-  var rng = new Alea(1337);
-
-  return () => {
+return rng;
+  return function() {
     let r = rng();
-    console.log("alea:",r);
+    console.log(`alea[${n++}]:`,r);
     return r;
   }
-};
-
+}();
+*/
 var hier = {
   name: "[1]",
   children: [
@@ -111,7 +114,7 @@ const removeParent = (element, pred = e => true) => {
     pp.appendChild(element);
   }
 };
-
+/*
 export function createGraph(svg, nodeType = SVG) {
   let d = nodeType.create("defs", {}, svg);
   let lg = nodeType.create("linearGradient", { id: "lg1", x1: 0, y1: 0, x2: 0, y2: 100, spreadMethod: "pad" }, d);
@@ -127,7 +130,7 @@ export function createGraph(svg, nodeType = SVG) {
     gravitate_to_origin: true,
     spacing: 12,
     timestep: 300,
-    prng: alea,
+    prng: prng(1339),
     onRenderGraph: graph => {
       let bb = new Rect(svg.getBBox()).round();
       let client = nodeType.rect(svg.parentElement);
@@ -198,7 +201,7 @@ export function createGraph(svg, nodeType = SVG) {
   treeToGraph(g, hier);
 
   return g;
-}
+}*/
 
 @inject("rootStore")
 @observer
@@ -265,8 +268,10 @@ class TreePage extends React.Component {
       gravitate_to_origin: true,
       spacing: 12,
       timestep: 300,
-      prng: alea
-    });
+      prng: (function() { var rng = new Alea(query.seed|| 1341);
+        console.log("rng:", rng);
+        return rng;
+    })()});
     let iter = Object.fromEntries([
       ...rootStore.entries(({ photos, children, users, key, ...item }) => {
         item = toJS(item);
@@ -315,27 +320,7 @@ class TreePage extends React.Component {
       return true;
     });
 
-    /*
-    for(let i in g.nodes) {
-      let n = g.nodes[i];
-      n.x = n.x ? parseFloat(n.x.toFixed(3)) : 0;
-      n.y = n.y ? parseFloat(n.y.toFixed(3)) : 0;
 
-      delete n.parent;
-      delete n.children;
-    }
-    for(let i in g.edges) {
-      let e = g.edges[i];
-
-      if(e.a) {
-        delete e.a.parent;
-        delete e.a.children;
-      }
-      if(e.b) {
-        delete e.b.parent;
-        delete e.b.children;
-      }
-    }*/
 
     while(!g.done_rendering) g.checkRedraw();
 
@@ -663,7 +648,7 @@ class TreePage extends React.Component {
         onMouseDown={this.mouseEvent}
         onTransitionEnd={this.handleTransitionEnd}
       >
-        <TreeGraph graph={this.props.graph} />
+        <TreeGraph  style={{/* width: "100vw", height: "auto"*/ }} graph={this.props.graph} />
         <br />
         {this.state.view == "item" ? (
           <ItemView id={this.state.itemId} />
