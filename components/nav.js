@@ -143,14 +143,14 @@ const NavLink = inject("rootStore")(
   ))
 );
 
-const prng = Alea.singleton(Date.now());
+const prng =  new Alea(Date.now());
 
 const randomColor = () => new HSLA(Util.randInt(0, 359), Util.randInt(50, 99), Util.randInt(10, 50), 1);
 
 const randomGradient = () => {
-  let hue = 0 - Math.abs(prng.double()) * 200;
+  let hue = 0 - Math.abs(prng.fract53()) * 200;
   if(hue < 0) hue += 360;
-  let baseColor = new HSLA(Math.floor(hue), Math.floor(prng.double() * 50 + 50), Math.floor(prng.double() * 25 + 60), 0.8);
+  let baseColor = new HSLA(Math.floor(hue), Math.floor(prng.fract53() * 50 + 50), Math.floor(prng.fract53() * 25 + 60), 0.8);
 
   //console.log("baseColor ", baseColor.toString());
   let colors = [new HSLA(baseColor.h, baseColor.s, baseColor.l, baseColor.a), new HSLA(baseColor.h, baseColor.s, baseColor.l, baseColor.a)];

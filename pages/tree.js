@@ -19,6 +19,18 @@ import "../static/css/grid.css";
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
 import { TreeGraph } from "../components/views/treeGraph.js";
+ import Alea from "../lib/alea.js";
+
+
+const alea = function() {
+  var rng = new Alea(1337);
+
+  return () => {
+    let r = rng();
+    console.log("alea:",r);
+    return r;
+  }
+};
 
 var hier = {
   name: "[1]",
@@ -115,6 +127,7 @@ export function createGraph(svg, nodeType = SVG) {
     gravitate_to_origin: true,
     spacing: 12,
     timestep: 300,
+    prng: alea,
     onRenderGraph: graph => {
       let bb = new Rect(svg.getBBox()).round();
       let client = nodeType.rect(svg.parentElement);
@@ -251,7 +264,8 @@ class TreePage extends React.Component {
       origin: new Point(0, 0),
       gravitate_to_origin: true,
       spacing: 12,
-      timestep: 300
+      timestep: 300,
+      prng: alea
     });
     let iter = Object.fromEntries([
       ...rootStore.entries(({ photos, children, users, key, ...item }) => {
@@ -296,7 +310,8 @@ class TreePage extends React.Component {
       }
 
       // if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
-      console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
+
+     // console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
       return true;
     });
 
@@ -326,7 +341,7 @@ class TreePage extends React.Component {
 
     g.roundAll(0.003);
 
-    console.log("g:", g);
+    //console.log("g:", g);
 
     let bbox = PointList.bbox(g.nodes);
     let rect = new Rect(bbox);
@@ -337,7 +352,7 @@ class TreePage extends React.Component {
     console.log("g.bbox: ", bbox);
     console.log("g.rect: ", rect);
     console.log("center: ", center);
-    console.log("g: ", g.serialize());
+    //console.log("g: ", g.serialize());
 
     /* let pl = g.points;
 

@@ -80,7 +80,7 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
 
     node = Util.filterOutKeys(node, ["children", "photos", "users", "parent", "children_aggregate"]);
 
-    console.log("node: ", node);
+    //console.log("node: ", node);
 
     graph.addNode(n).node = node;
 
