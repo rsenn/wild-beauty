@@ -6,7 +6,7 @@ import Gallery, { randomImagePaths } from "../components/gallery.js";
 import Alea from "../lib/alea.js";
 import { Timer, Element } from "../lib/dom.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
-import { SvgOverlay } from "../lib/svg-overlay.js";
+import { SvgOverlay } from "../lib/svg/overlay.js";
 import Util from "../lib/util.js";
 import { inject, observer } from "mobx-react";
 import { trkl } from "../lib/trkl.js";

@@ -169,7 +169,7 @@ class New extends React.Component {
 
                 let a = +("" + img.style.transform).replace(/rotate\(([0-9]+)deg\)/, "$1");
 
-                img.style.transform = `rotate(${a + angle}deg)`;
+                img.style.transform = `rotate(${(a + angle) % 360}deg)`;
                 console.log("rotatePhoto result:", a);
 
                 rootStore.rotatePhoto(id, angle, image => {
@@ -192,9 +192,9 @@ class New extends React.Component {
                     position: `relative`,
                     width: `${w.toFixed(0)}%`,
                     height: `${h.toFixed(0)}%`,
-                    marginTop: `${(-vr / 2).toFixed(0)}%`,
-                    marginLeft: `${(-hr / 2).toFixed(0)}%`,
-                    transform: `rotate(${angle}deg)`
+                    /*     marginTop: `${(-vr / 2).toFixed(0)}%`,
+                    marginLeft: `${(-hr / 2).toFixed(0)}%`,*/
+                    transform: `rotate(${angle % 360}deg)`
                   });
                   Element.attr(e, {
                     ["data-tooltip"]: `${image.width}x${image.height} ${orientation}`

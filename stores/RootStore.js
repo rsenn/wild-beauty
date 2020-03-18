@@ -300,11 +300,11 @@ export class RootStore extends Queries {
     }
     return item ? tr(item) : null;
   }
-  /*
+
   entries = function*(map = null) {
     if(map === null) map = item => item;
     for(let [key, item] of this.items.entries()) yield [key, map(item)];
-  };*/
+  };
 
   notLoadedChildren() {
     let arr = Object.values(this.items.toObject());
@@ -390,7 +390,7 @@ export class RootStore extends Queries {
   }
 
   @action.bound
-  addToast(title, message, ttl = 30000) {
+  addToast(title, message, ttl = 5000) {
     const rootStore = this;
     let deadline = Date.now() + ttl;
     let toast = message ? { title, message, deadline } : { message: title, deadline };
@@ -398,7 +398,7 @@ export class RootStore extends Queries {
       deadline,
       function() {
         //console.log("Toast timer:", this);
-        rootStore.removeToasts(this);
+        rootStore.removeToast(deadline);
       }.bind(toast)
     );
     toast.timer = timer;

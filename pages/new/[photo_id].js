@@ -107,7 +107,7 @@ export class NewItem extends React.Component {
       });
       this.touchListener = TouchListener(
         event => {
-          console.log("Touch ", event);
+          //console.log("Touch ", event);
           const elem = event.target;
           if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
             this.currentPhoto = event.target;

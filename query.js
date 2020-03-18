@@ -14,8 +14,8 @@
 
 const prettyoutput = require("prettyoutput");
 var Blob = require("blob");
-const API = require("./stores/api.js");
-const Util = require("./lib/util.es5.js");
+const API = require("./stores/api.js").API;
+const Util = require("./lib/util.es5.js").default;
 const util = require("util");
 const fs = require("fs");
 const path = require("path");
@@ -84,7 +84,7 @@ if(debug)
     records = records.sort((a, b) => a.id - b.id);
     records = records.map(rec => {
       if(rec.data !== undefined) {
-        if(typeof rec.data == "string" && rec.data[0] == "{") rec.data = JSON.parse(rec.data);
+        if(typeof rec.data == "string" && rec.data[0] == "{") rec.data = Util.jsonToObject(rec.data);
       }
       for(let key of ["children", "photos", "users"]) if(Util.isEmpty(rec[key]) /*|| (rec[key] instanceof Array && rec[key].length == 0)*/) delete rec[key];
       delete rec.toObject;
@@ -138,7 +138,7 @@ if(debug)
           if(typeof value == "object") {
             try {
               value = Util.inspect(value, { newline: "", indent: "", spacing: " " })
-                .replace(/\s+/g, "")
+                /*  .replace(/\s+/g, "")*/
                 .replace(/,/g, ", ");
             } catch(err) {
               value = JSON.stringify(value);

@@ -35,13 +35,15 @@ export const ToastsContainer = inject("rootStore")(
           <TransitionGroup component='div'>
             {toasts.map((toast, key) => (
               <CSSTransition timeout={500} className='toast-move' key={toast.deadline}>
-                <div key={toast.deadline} className={"toast-item toast-layout"}>
-                  {toast.title ? <h4 className={"toast-title"}>{toast.title}</h4> : undefined}
-                  <span className={"toast-message"}>{toast.message}</span>
+                <div>
+                  <div key={toast.deadline} className={"toast-item toast-layout center-flex"}>
+                    {toast.title ? <h4 className={"toast-title"}>{toast.title}</h4> : undefined}
+                    <span className={"toast-message"}>{toast.message}</span>
 
-                  <button className={"toast-button"} href='#' data-deadline={toast.deadline}>
-                    &#x274c;
-                  </button>
+                    <button className={"toast-button"} href='#' data-deadline={toast.deadline}>
+                      &#x274c;
+                    </button>
+                  </div>
                 </div>
               </CSSTransition>
             ))}
@@ -74,8 +76,13 @@ export const ToastsContainer = inject("rootStore")(
             padding: 0px;
           }
           .toast-item {
+            margin: auto 0;
+            font-size: 14px;
+            line-height: 1em;
+          }
+          .toast-item {
             margin: 10px;
-            padding: 10px;
+            padding: 10px 10px;
             border: 0px solid red;
             border-radius: 5px;
             background-color: hsl(0, 100%, 55%);
@@ -83,6 +90,8 @@ export const ToastsContainer = inject("rootStore")(
             min-width: 250px;
             height: 42px;
             text-align: left;
+            line-height: 100%;
+            vertical-align: middle;
           }
           .toast-layout {
             display: flex;

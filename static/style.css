@@ -126,6 +126,7 @@ a:hover:before {
   vertical-align: middle;
   line-height: 100%;
   margin: auto;
+  text-align: center;
 }
 .hcenter {
   text-align: center;

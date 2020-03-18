@@ -12,7 +12,7 @@ export const Layout = ({ title = "The wild beauty company", toastsClick, classNa
     </Head>
     <div className={classNames("page-layout", className)} style={{ overflowY: scroll ? "auto" : "hidden", overflowX: "hidden" }} {...props}>
       {hideNav ? undefined : <Nav />}
-      <div className={"content-layout"} style={scroll ? {} : { overflow: "hidden" }}>
+      <div className={"content-layout"} style={/*scroll ? {} : */{ overflow: "hidden" }}>
         {props.children}
       </div>
     </div>

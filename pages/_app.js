@@ -31,7 +31,7 @@ class MyApp extends App {
       // inject the basePageProps in the parameters of getInitialProps
       pageProps = await getInit(pageCtx);
 
-      console.log("App pageProps=", Object.fromEntries(Object.entries(pageProps).map(([key, value]) => [key, Util.isArray(value) || (typeof value == "object" && value.length !== undefined) ? `Array(${value.length})` : typeof value])));
+      console.log("App pageProps=", Object.fromEntries(Object.entries(pageProps).map(([key, value]) => [key, Util.isArray(value) || (typeof value == "object" && value !== null && value.length !== undefined) ? `Array(${value.length})` : typeof value])));
 
       if(pageProps.items) {
         pageProps.items.forEach(item => {
@@ -59,7 +59,8 @@ class MyApp extends App {
     const rootStore = this.mobxStore.RootStore;
     const editorStore = this.mobxStore.EditorStore;
 
-    if(pageProps.items !== undefined) {
+    if(pageProps.items !== undefined && pageProps.items !== null) {
+      // console.log("pageProps.items", pageProps.items);
       let items = pageProps.items.map(item => ["" + item.id, item]);
       rootStore.items.clear();
       rootStore.items.merge(items);

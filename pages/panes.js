@@ -7,7 +7,7 @@ import { ScrollController } from "../lib/scrollController.js";
 import Alea from "../lib/alea.js";
 import { SwipeTracker } from "../lib/swipeTracker.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
-import { SvgOverlay } from "../lib/svg-overlay.js";
+import { SvgOverlay } from "../lib/svg/overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
 import { toJS, autorun } from "mobx";
 import { inject, observer } from "mobx-react";

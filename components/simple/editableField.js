@@ -34,31 +34,14 @@ export const EditableField = ({ options, storageKey, className, style, multiline
   const [background, setBackground] = React.useState("white");
   const handleKeyDown = e => {
     const val = e.target.value;
-    const { nativeEvent } = e;
+    const nativeEvent = e.nativeEvent || e;
 
     console.log("handleKeyDown ", nativeEvent);
 
     if(nativeEvent.key == "Enter") onEditConfirm(e);
     else if(nativeEvent.key.startsWith("Esc")) onEditCancel(e);
   };
-  const handleBlur = e => {
-    const val = e.target.value;
-    setNewValue(val);
-    if(val != value) {
-      setBackground("#ff8");
-    } else {
-      setBackground("#fff");
-      setFocus(false);
-      onEditCancel(e);
-    }
-    onBlur(e);
-  };
-  const handleFocus = e => {
-    const val = e.target.value;
-    setBackground("#fff");
-    setFocus(true);
-    onFocus(e);
-  };
+
   const changeName = opt => {
     setName(opt.name);
     multiline = String(opt.type).toLowerCase() == "text";
@@ -67,6 +50,28 @@ export const EditableField = ({ options, storageKey, className, style, multiline
 
   const changeValue = value => {
     setEditValue(value);
+  };
+
+  const handleBlur = e => {
+    const val = e.target.value;
+    const nativeEvent = e.nativeEvent || e;
+
+    console.log("blur event:", nativeEvent);
+    setNewValue(val);
+    if(val != value) {
+      setBackground("#ff8");
+    } else {
+      setBackground("#fff");
+      //setFocus(false);
+      //onEditCancel(e);
+    }
+    onBlur(e);
+  };
+  const handleFocus = e => {
+    const val = e.target.value;
+    setBackground("#fff");
+    setFocus(true);
+    onFocus(e);
   };
 
   let content = isEditing ? (
@@ -78,8 +83,8 @@ export const EditableField = ({ options, storageKey, className, style, multiline
           rows={lines}
           style={lineStyle}
           value={editValue}
-          onBlur={handleBlur}
           onFocus={handleFocus}
+          onBlur={handleBlur}
           onChange={e => {
             changeValue(e.target.value);
           }}
@@ -96,8 +101,8 @@ export const EditableField = ({ options, storageKey, className, style, multiline
           className={classNames("content", className + "-content", "vcenter")}
           name={name}
           value={editValue}
-          onBlur={handleBlur}
           onFocus={handleFocus}
+          onBlur={handleBlur}
           onChange={e => changeValue(e.target.value)}
           onKeyDown={handleKeyDown}
           ref={input => {
@@ -165,7 +170,7 @@ export const EditableField = ({ options, storageKey, className, style, multiline
             //console.log("formatCreateLabel", value);
             return typeof value == "string" ? Util.ucfirst(value) : "";
           }}
-          className={classNames("editable-field-name", className + "-name")}
+          className={classNames("editable-field-name", "choose-field-name", className + "-name")}
           value={selection}
           onChange={choice => {
             console.log("name change: ", choice.name || choice.label);
@@ -248,8 +253,18 @@ export const EditableField = ({ options, storageKey, className, style, multiline
           justify-content: stretch;
           align-items: stretch;
         }
+        .choose-field-name {
+          position: relative;
+          top: -3px;
+        }
+        .choose-field-name {
+          min-width: 110px;
+          flex: 0 0 auto;
+        }
+        .editable-field-name-noedit {
+          min-width: 64px;
+        }
         .editable-field-name {
-          min-width: 60px;
           flex: 0 0 auto;
         }
         .content.editable-field-content {

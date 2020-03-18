@@ -22,8 +22,8 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     while((await res.data) !== undefined) res = await res.data;
     //console.log("res: ", res);
     if(res.errors && typeof res.errors == "object" && res.errors[0]) {
-      // console.error("res.errors: ", res.errors); /*, query.substring(0, 100) + "...");
-      //console.error("query: ", query);
+      console.error("res.errors: ", res.errors); //, query.substring(0, 100) + "...");
+      console.error("query: ", query);
       throw res.errors[0].message;
     }
     return res;
@@ -35,20 +35,24 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     const camelCase = Util.ucfirst(name);
     //if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     const { where, ...options } = opts;
-    //console.log("api.list ", { name, fields, where, options });
+    console.log("api.list ", { name, fields, where, options });
     let objStr;
     // prettier-ignore
     objStr = where     ? (typeof where == "string"? `where: ${where}` : ("where: {"+Object.entries(where) .map(([key, value]) => `${key}: {` + (value === null ? `_is_null: true` : `_eq:${value}`) + `}`) .join(", ") +" }")) : "";
-    objStr += Object.keys(options)
-      .map(key => `${key}: ${options[key]}`)
-      .join(", ");
+    if(options.length)
+      objStr +=
+        "," +
+        Object.keys(options)
+          .map(key => `${key}: ${options[key]}`)
+          .join(", ");
 
     if(objStr.length) objStr = `(${objStr})`;
     const queryStr = `query List${camelCase} { ${name}${objStr} { ${typeof fields == "string" ? fields : fields.join(" ")} } }`;
     if(debug) console.log("query: ", queryStr);
     let ret = await this(queryStr);
-    if(typeof ret == "object" && ret[name] !== undefined) ret = ret[name];
-    return ret;
+    if(typeof ret == "object" && (await ret[name]) !== undefined) ret = await ret[name];
+    if(debug) console.log("ret: ", ret);
+    return await ret;
   };
 
   api.select = function(name, obj, fields = "") {

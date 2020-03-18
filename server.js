@@ -218,7 +218,7 @@ if(!dev && cluster.isMaster) {
     server.post("/api/tree", async (req, res) => {
       let { fields, ...params } = req.body;
       fields = fields || itemFields;
-      let itemList = await API.list("items", fields.join(" "), params);
+      let itemList = await API.list("items", fields.join(" "), { order_by: "{parent_id: asc, order: asc, created: asc}", ...params });
       itemList = itemList.map(item => {
         let newData;
         try {
@@ -239,7 +239,7 @@ if(!dev && cluster.isMaster) {
           parent_id,
           photos: `{data: {photo_id: ${photo_id}}}`,
           ...params,
-          data: `"${JSON.stringify(data).replace(/"/g, '\\"')}"`
+          data: `"${data.replace(/"/g, '\\"')}"`
         },
         ["id"]
       );

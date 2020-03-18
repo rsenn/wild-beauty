@@ -6,7 +6,7 @@ import Alea from "../lib/alea.js";
 import { SwipeTracker } from "../lib/swipeTracker.js";
 import { MultitouchListener, MovementListener } from "../lib/touchHandler.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
-import { SvgOverlay } from "../lib/svg-overlay.js";
+import { SvgOverlay } from "../lib/svg/overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
 import Layout from "../components/layout.js";
 import { RandomColor } from "../stores/functions.js";

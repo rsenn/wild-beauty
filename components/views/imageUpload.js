@@ -116,7 +116,14 @@ export const ImageUpload = inject("rootStore")(
                     return (
                       <div key={index} className={"upload-item"}>
                         <div className={"upload-card"}>
-                          <SizedAspectRatioBox className={"item-box"} insideClassName={"tooltip"} sizeClassName={"upload-image"} insideProps={{ ["data-tooltip"]: `${image.width}x${image.height} ${orientation}` }}>
+                          <SizedAspectRatioBox
+                            className={"item-box"}
+                            insideClassName={classNames("tooltip", "center-flex")}
+                            sizeClassName={"upload-image"}
+                            insideProps={{
+                              ["data-tooltip"]: `${image.width}x${image.height} ${orientation}`
+                            }}
+                          >
                             {progress !== undefined && progress !== 100 ? (
                               <svg viewBox={`0 0 100 100`} style={{ width: "100%", height: "auto" }}>
                                 <defs />
@@ -133,11 +140,11 @@ export const ImageUpload = inject("rootStore")(
                                 orientation={orientation}
                                 style={{
                                   position: "relative",
-                                  marginTop: `${(-vr / 2).toFixed(0)}%`,
-                                  marginLeft: `${(-hr / 2).toFixed(0)}%`,
-                                  width: landscape ? `${(image.width * 100) / image.height}%` : "100%",
-                                  height: landscape ? "100%" : "auto",
-                                  transform: `rotate(${image.angle}deg)`
+                                  /*    marginTop: `${(-vr / 2).toFixed(0)}%`,
+                                  marginLeft: `${(-hr / 2).toFixed(0)}%`,*/
+                                  width: landscape ? `${(image.width * 100) / image.height}%` : "101%",
+                                  height: landscape ? "101%" : "auto",
+                                  transform: `rotate(${image.angle % 360}deg)`
                                 }}
                                 onLoad={event => {
                                   let rect = Element.rect(event.target);

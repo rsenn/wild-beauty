@@ -30,7 +30,7 @@ export class Queries {
     fields = fields || ["id", "name", "type", "parent { id }", "order", "children(order_by: {order: asc}) { id name type }", "data", "photos { photo { id } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
     //console.log("⇒ items:", where);
 
-    let response = await this.api.select("items", where, fields);
+    let response = await this.api.list("items", fields, { order_by: "{parent_id: asc, order: asc, created: asc}", where });
     let items = response && response.items ? await response.items : null;
 
     if(items !== null) items = items.map(t);
@@ -109,17 +109,17 @@ export class Queries {
    *
    * @param      {<type>}  event   The event
    */
-
-  saveItem(event, doneHandler = result => {}) {
-    const photo_id = (rs.currentPhoto && rs.currentPhoto.id) || rs.state.image;
-    const parent_id = rs.state.parent_id;
-    const entries = [...this.values.entries()];
+  saveItem(values, doneHandler = result => {}) {
+    const photo_id = (this.currentPhoto && this.currentPhoto.id) || this.state.image;
+    const parent_id = this.state.parent_id;
+    const user_id = this.auth.user_id;
+    const entries = [...values.entries()];
 
     const { name = null, ...dataObj } = Object.fromEntries(entries);
 
-    console.log("saveItem", { entries, photo_id, parent_id, name, dataObj });
+    console.log("saveItem", { entries, photo_id, parent_id, user_id, name, dataObj });
 
-    return this.apiRequest("/api/item/new", { photo_id, parent_id, name, data: dataObj }).then(response => {
+    return this.apiRequest("/api/item/new", { photo_id, parent_id, users: `{data: {user_id: ${user_id}}}`, name, data: JSON.stringify(dataObj) }).then(response => {
       console.log("saveitem API response:", response);
       doneHandler(response);
     });

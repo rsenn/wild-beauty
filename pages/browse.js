@@ -9,15 +9,15 @@ const DEG2RAD = Math.PI / 180;
 @inject("rootStore")
 @observer
 class Browse extends React.Component {
-  state = {};
+  state = { progress: 75 };
 
-  static async getInitialProps({ res, req, query, asPath, mobxStore }) {
+  static async getInitialProps({ res, req, query, params, asPath, mobxStore }) {
     const rootStore = mobxStore.RootStore;
 
-    let items = await rootStore.fetchItems("{children: {id: {_gte: 1}}},order_by: {order: asc}");
-    console.log("Browse.getInitialProps", { items });
+    let fields = ["id", "name", "type", "parent { id }", "order", "children(order_by: {order: asc}) { id name type }", "data", "photos { photo { id } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
+    let items = await rootStore.api.list("items", fields, { order_by: "{parent: { id: asc }, order: asc, created: asc}", where: "{parent_id:{_gte:1}}" });
 
-    return {};
+    return { items, query, params };
   }
 
   constructor(props) {
@@ -25,8 +25,6 @@ class Browse extends React.Component {
     if(global.window) {
       window.page = this;
     }
-
-    this.setState({ progress: 0 });
   }
 
   render() {

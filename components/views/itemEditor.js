@@ -32,7 +32,7 @@ export const ItemEditor = inject(
 
     let tree = editorStore.tree;
 
-    console.log("ItemEditor.render ", { /*tree, */ rootId, img, entries });
+    //console.log("ItemEditor.render ", { /*tree, */ rootId, img, entries });
 
     return (
       <div className={"content-edit"} {...props}>
@@ -62,7 +62,7 @@ export const ItemEditor = inject(
           <div className={"editable-field"}>
             <FieldLabel>Parent</FieldLabel>
             <DropdownTreeSelect
-              data={[tree]}
+              data={tree === null ? [] : [tree]}
               onChange={obj => {
                 console.log("Tree value: ", obj);
                 rootStore.state.parent_id = obj.value;
@@ -113,7 +113,7 @@ export const ItemEditor = inject(
           <AddItemBar
             onAdd={event => {
               console.log("Add item:", event);
-              let obj = observable({ type: null, value: "" });
+              let obj = { type: null, value: "" };
               if(typeof entries == "object" && entries && entries.push !== undefined) entries.push(obj);
               const add = () => {
                 /*    let editor = Element.find(".content-edit");
@@ -132,7 +132,7 @@ export const ItemEditor = inject(
           >
             <button
               onClick={e => {
-                rootStore.saveItem(e, response => {
+                rootStore.saveItem(editorStore.values, response => {
                   let insertId = response.data.result[0].id;
                   rootStore.addToast(`Saved item (Id: ${insertId})`);
                 });
@@ -146,7 +146,7 @@ export const ItemEditor = inject(
         <style jsx global>{`
           .content-edit {
             position: relative;
-            padding: 0px 10px 60px 10px;
+            padding: 0px 0px 60px 0px;
           }
           .item-entry {
             margin: 10px;

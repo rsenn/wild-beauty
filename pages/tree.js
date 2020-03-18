@@ -1,9 +1,9 @@
 import React from "react";
 import Head from "next/head";
 import { Element, Point, Rect, Matrix, Timer, SVG, TRBL, Align, PointList } from "../lib/dom.js";
-import getAPI from "../stores/api.js";
+import { getAPI } from "../stores/api.js";
 import Util from "../lib/util.js";
-import { SvgOverlay } from "../lib/svg-overlay.js";
+import { SvgOverlay } from "../lib/svg/overlay.js";
 import { toJS } from "mobx";
 import { inject, observer } from "mobx-react";
 import { SizedAspectRatioBox } from "../components/simple/aspectBox.js";
@@ -21,6 +21,7 @@ import "../static/css/grid.css";
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import "../static/css/react-dropdown-tree-select.css";
 import { Queries } from "../stores/queries.js";
+import { TreeGraph } from "../components/views/treeGraph.js";
 
 var hier = {
   name: "[1]",
@@ -225,8 +226,10 @@ class TreePage extends React.Component {
     console.log("TreePage.getInitialProps ", { query, params });
     const rootStore = ctx.mobxStore["RootStore"];
 
-    let items = await rootStore.fetchItems();
-    console.log("Tree.getInitialProps items=", items.length);
+    let fields = ["id", "name", "type", "parent_id", "parent { id }", "order", "children(order_by: {order: asc}) { id name type }", "data", "photos { photo { id colors } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
+    let items = await rootStore.api.list("items", fields, { where: "{visible: {_eq: true}},order_by:{parent: {id: asc}, order: asc, created: asc}" });
+
+    //   console.log('Tree.getInitialProps items=', items);
     /*      let items;
     if(params && params.id !== undefined) {
       let id = parseInt(params.id);
@@ -244,7 +247,7 @@ class TreePage extends React.Component {
     if(rootStore.items && rootStore.items.clear) rootStore.items.clear();
     items = items.map(item => rootStore.newItem(item));
 
-    let rootItem = rootStore.rootItem;
+    let rootItem = rootStore.getTree(1);
 
     //  let root = rootStore.getItem(rootItem.id);
     let g = new Graph({
@@ -276,7 +279,9 @@ class TreePage extends React.Component {
       if(item.data === null || Util.isEmpty(item.data)) delete item.data;
     }
 
-    let root = rootStore.getItem(rootItem.id, it => Util.filterOutKeys(toJS(it), ["childIds", "photos", "users"]));
+    let root = rootStore.getTree(rootItem.id, it => Util.filterOutKeys(toJS(it), ["childIds", "users"]));
+
+    //console.log("root:", toJS(root));
 
     treeToGraph(g, root, item => {
       let { children, parent, users, photos, ...restOfItem } = item;
@@ -285,10 +290,20 @@ class TreePage extends React.Component {
       let numChildren = children ? children.length : 0;
       let output = { itemKeys: Object.keys(item), parent_id, restOfItem };
       if(numChildren) item.num_children = numChildren;
-      if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
-      console.log("item: ", Util.filterOutKeys(item, ["children" /*, "num_children", "parent"*/]));
+      if(item.photos && item.photos[0] && item.photos[0].photo) {
+        let photo = item.photos[0].photo;
+        let colors =   Util.jsonToObject(photo.colors);
+        let color = Object.keys(colors)[0];
+        console.log("color:", color);
+              item.color = color;
+
+      }
+
+      // if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
+      console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
       return true;
     });
+
     /*
     for(let i in g.nodes) {
       let n = g.nodes[i];
@@ -310,9 +325,14 @@ class TreePage extends React.Component {
         delete e.b.children;
       }
     }*/
+
+   while(!g.done_rendering)
     g.checkRedraw();
-    g.checkRedraw();
+
+
     g.roundAll(0.003);
+
+    console.log("g:", g);
 
     let bbox = PointList.bbox(g.nodes);
     let rect = new Rect(bbox);
@@ -355,7 +375,7 @@ class TreePage extends React.Component {
       //console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ["children", "key"]), { newline: "", indent: "", spacing: " " }));
     }*/
 
-    return { params, items, tree: root, nodes, g };
+    return { params, items, tree: root, nodes, graph: g.serialize() };
   }
 
   constructor(props) {
@@ -449,15 +469,13 @@ class TreePage extends React.Component {
       this.rects = Element.findAll("rect");
     }
     var r = this.rects.filter(rect => Rect.inside(Element.rect(rect), { x, y }));
-    function getNum(elem, name) {
-      return parseFloat(elem.getAttribute(name));
-    }
-    function getId(elem) {
-      return parseInt(elem.getAttribute("id").replace(/.*\./, ""));
-    }
+
     if(type.endsWith("move")) {
       var elem = r[0] && r[0].parentElement;
       var hover = -1;
+
+      if(!elem) return;
+
       if(this.prevElem && this.prevElem.style) {
         if(this.prevElem == elem) return;
         this.prevElem.style.removeProperty("transform");
@@ -480,6 +498,12 @@ class TreePage extends React.Component {
 
         this.setState({ active: id });
       }
+    }
+    function getNum(elem, name) {
+      return parseFloat(elem.getAttribute(name));
+    }
+    function getId(elem) {
+      return parseInt((''+elem.getAttribute("id")).replace(/.*\./, ""));
     }
   };
 
@@ -619,10 +643,11 @@ class TreePage extends React.Component {
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
     let tree = this.tree;
     const items = [];
-    console.log("TreePage.render");
+    const isServer = Util.isServer();
+    console.log("TreePage.render", { isServer });
     return (
-      <Layout title={"Tree"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
-        {/* <TreeView tree={this.props.tree} />*/}
+      <Layout title={"Tree"} onMouseMove={e => { /*this.mouseEvent*/ }} onMouseDown={this.mouseEvent} onTransitionEnd={this.handleTransitionEnd}>
+        <TreeGraph graph={this.props.graph} />
         <br />
         {this.state.view == "item" ? (
           <ItemView id={this.state.itemId} />
