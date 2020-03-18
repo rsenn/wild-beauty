@@ -29,10 +29,8 @@ export const Layout = ({ title = "The wild beauty company", toastsClick, classNa
         margin: 0 0 0 0;
       }
       .page-layout {
-        position: absolute;
         display: block;
         width: 100vw;
-        min-height: 100vh;
         overflow: visible;
       }
       .content-layout {

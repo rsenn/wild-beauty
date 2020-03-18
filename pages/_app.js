@@ -166,6 +166,9 @@ class MyApp extends App {
           .content-layout {
             overflow-x: hidden;
           }
+          .page-layout {
+            min-height: 100vh;
+          }
 
           button,
           textarea,
