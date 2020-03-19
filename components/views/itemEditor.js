@@ -5,6 +5,7 @@ import { inject, observer } from "mobx-react";
 import { AddItemBar } from "../views/addItemBar.js";
 import { EditableField, FieldLabel } from "../simple/editableField.js";
 import { Element, Timer } from "../../lib/dom.js";
+import Util from "../../lib/util.js";
 import { makeItemToOption, findInTree } from "../../stores/functions.js";
 
 //import SortableTree from "react-sortable-tree";
@@ -30,9 +31,11 @@ export const ItemEditor = inject(
     const rootId = rootStore.rootItemId;
     const items = toJS(rootStore.items);
 
-    let tree = editorStore.tree;
+    //  let tree = editorStore.tree;
 
-    //console.log("ItemEditor.render ", { /*tree, */ rootId, img, entries });
+    const checkedItems = [...Util.walkTree(editorStore.tree)].filter(item => item.checked).map(item => toJS(Util.filterOutKeys(item, ["children", "parent"])));
+
+    console.log("ItemEditor.render ", checkedItems);
 
     return (
       <div className={"content-edit"} {...props}>
@@ -62,7 +65,7 @@ export const ItemEditor = inject(
           <div className={"editable-field"}>
             <FieldLabel>Parent</FieldLabel>
             <DropdownTreeSelect
-              data={tree === null ? [] : [tree]}
+              data={editorStore.tree}
               onChange={obj => {
                 console.log("Tree value: ", obj);
                 rootStore.state.parent_id = obj.value;
@@ -74,6 +77,7 @@ export const ItemEditor = inject(
               className={"dropdown-tree"}
               mode={"radioSelect"}
               texts={{ placeholder: "Select" }}
+              value={editorStore.state.parent}
             />
           </div>
 

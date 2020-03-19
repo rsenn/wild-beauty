@@ -57,7 +57,7 @@ export class NewItem extends React.Component {
 
     if(req) rootStore.setAuthentication(req.cookies);
 
-    if(!global.window) {
+    /*    if(!global.window) {
       const imageId = query.photo_id;
       images = toJS(await rootStore.fetchImages(`{ id: { _eq: ${imageId} } }`));
       images = images.filter(ph => ph.items.length == 0);
@@ -65,9 +65,10 @@ export class NewItem extends React.Component {
       let image = images && images.length ? images[0] : null;
       if(image) rootStore.setState({ image: imageId });
       items = await rootStore.fetchItems();
-    }
+    }*/
+    items = await rootStore.loadItems();
 
-    //console.log("New[photo_id].getInitialProps", { images, items });
+    console.log("New[photo_id].getInitialProps", { images, items });
 
     return { photos: images, items };
   }
@@ -105,45 +106,46 @@ export class NewItem extends React.Component {
           moveImage(event, e);
         }
       });
-      this.touchListener = TouchListener(
-        event => {
-          //console.log("Touch ", event);
-          const elem = event.target;
-          if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
-            this.currentPhoto = event.target;
-            let obj = Element.toObject(this.currentPhoto);
-            const orientation = this.currentPhoto.getAttribute("orientation");
-            let rect = Element.rect(this.currentPhoto);
-            let prect = Element.rect(this.currentPhoto.parentElement.parentElement);
-            let range = orientation == "landscape" ? rect.width - prect.width : rect.height - prect.height;
-            this.offsetRange = range;
-            //console.log("rect: ", { orientation, range, rect, prect });
-            obj.style = `position: fixed; top: ${rect.y - window.scrollY}px; left: ${rect.x}px; width: ${rect.width}px; height: ${rect.height}px`;
-            if(this.clonedImage) Element.remove(this.clonedImage);
-            this.clonedImage = Element.create(obj);
-            document.body.appendChild(this.clonedImage);
-            this.clonedImage.style.zIndex = -1;
-            this.clonedImage.style.opacity = 0.3;
-          }
-          if(event.type.endsWith("move")) {
-            if(this.clonedImage && this.currentPhoto) {
-              let zIndex = parseInt(Element.getCSS(this.currentPhoto, "z-index")) - 1;
-              let irect = Element.rect(this.currentPhoto);
-              moveImage(event, this.currentPhoto);
+      if(false)
+        this.touchListener = TouchListener(
+          event => {
+            //console.log("Touch ", event);
+            const elem = event.target;
+            if(event.type.endsWith("start") && event.target.tagName.toLowerCase() == "img" && elem.classList.contains("inner-image")) {
+              this.currentPhoto = event.target;
+              let obj = Element.toObject(this.currentPhoto);
+              const orientation = this.currentPhoto.getAttribute("orientation");
+              let rect = Element.rect(this.currentPhoto);
+              let prect = Element.rect(this.currentPhoto.parentElement.parentElement);
+              let range = orientation == "landscape" ? rect.width - prect.width : rect.height - prect.height;
+              this.offsetRange = range;
+              //console.log("rect: ", { orientation, range, rect, prect });
+              obj.style = `position: fixed; top: ${rect.y - window.scrollY}px; left: ${rect.x}px; width: ${rect.width}px; height: ${rect.height}px`;
+              if(this.clonedImage) Element.remove(this.clonedImage);
+              this.clonedImage = Element.create(obj);
+              document.body.appendChild(this.clonedImage);
+              this.clonedImage.style.zIndex = -1;
+              this.clonedImage.style.opacity = 0.3;
             }
-          }
-          if(event.type.endsWith("end")) {
-            if(this.clonedImage && this.currentPhoto) {
-              this.currentPhoto.style.position = "relative";
-              //console.log("currentOffset: ", this.currentOffset);
-              //console.log("currentPhoto: ", this.currentPhoto);
-              Element.remove(this.clonedImage);
-              this.clonedImage = null;
+            if(event.type.endsWith("move")) {
+              if(this.clonedImage && this.currentPhoto) {
+                let zIndex = parseInt(Element.getCSS(this.currentPhoto, "z-index")) - 1;
+                let irect = Element.rect(this.currentPhoto);
+                moveImage(event, this.currentPhoto);
+              }
             }
-          }
-        },
-        { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
-      );
+            if(event.type.endsWith("end")) {
+              if(this.clonedImage && this.currentPhoto) {
+                this.currentPhoto.style.position = "relative";
+                //console.log("currentOffset: ", this.currentOffset);
+                //console.log("currentPhoto: ", this.currentPhoto);
+                Element.remove(this.clonedImage);
+                this.clonedImage = null;
+              }
+            }
+          },
+          { element: global.window, step: 1, round: true, listener: MovementListener, noscroll: true }
+        );
     }
 
     if(global.window) {
@@ -177,16 +179,22 @@ export class NewItem extends React.Component {
   @action.bound
   treeSelEvent(type, arg) {
     const { rootStore, editorStore } = this.props;
-    console.log("treeSelEvent: ", { type, type, arg });
 
     switch (type) {
       case "change": {
-        const { checked, id, hide } = arg;
+        const { checked, value, hide } = arg;
+        console.log("treeSelEvent: ", { type, checked, value });
 
-        const item = findInTree(editorStore.tree, arg.value);
+        editorStore.changeTree(
+          item => true,
+          item => (item.checked = false)
+        );
+        let item = editorStore.changeTree(value, item => (item.checked = true)); //        editorStore.parent = arg;
+        editorStore.state.parent = arg.value; //        //rootStore.setState({ selected: arg.value });
+
+        /*        const item = findInTree(editorStore.tree, arg.value);
         item.checked = true;
-        //rootStore.setState({ selected: arg.value });
-        //console.log("treeSelEvent: ", type, item);
+*/ console.log("treeSelEvent item=", toJS(item));
         break;
       }
       default: {

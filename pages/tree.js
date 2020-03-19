@@ -35,70 +35,6 @@ return rng;
   }
 }();
 */
-var hier = {
-  name: "[1]",
-  children: [
-    { name: "[41]", size: 10 },
-    { name: "org", size: 10 },
-    { name: "[57]", size: 10 },
-    { name: "[58]", size: 10 },
-    { name: "[59]", size: 10 },
-    { name: "[60]", size: 10 },
-    { name: "[61]", size: 10 },
-    { name: "[62]", size: 10 },
-    {
-      name: "objects",
-      children: [
-        {
-          name: "electronics",
-          children: [
-            { name: "[119]", size: 10 },
-            { name: "[120]", size: 10 },
-            { name: "[121]", size: 10 },
-            { name: "[122]", size: 10 },
-            { name: "[123]", size: 10 },
-            { name: "[124]", size: 10 },
-            {
-              name: "pic",
-              children: [
-                { name: "lc-meter", size: 10 },
-                { name: "rgb-led", size: 10 },
-                { name: "picstick-25k50", size: 10 }
-              ]
-            },
-            { name: "Audio", size: 10 },
-            { name: "RS232", children: [{ name: "jdm2-programmer", size: 10 }] }
-          ]
-        },
-        {
-          name: "boxes",
-          children: [
-            { name: "[99]", size: 10 },
-            { name: "[103]", size: 10 },
-            { name: "[98]", size: 10 },
-            { name: "[86]", size: 10 },
-            { name: "Test", size: 10 }
-          ]
-        },
-        { name: "bags", children: [{ name: "[64]", size: 10 }] }
-      ]
-    },
-    {
-      name: "subjects",
-      children: [
-        {
-          name: "[89]",
-          children: [
-            { name: "[105]", size: 10 },
-            { name: "Roman", size: 10 }
-          ]
-        },
-        { name: "groups", size: 10 }
-      ]
-    }
-  ]
-};
-
 const insertParent = (element, newParent) => {
   const p = element.parentElement;
   p.removeChild(element);
@@ -368,8 +304,9 @@ class TreePage extends React.Component {
     for(let node of Util.walkTree(nodes[0])) {
       //console.log("Tree.constructor node: ", Util.inspect(Util.filterOutKeys(node, ["children", "key"]), { newline: "", indent: "", spacing: " " }));
     }*/
+    items = items.filter(item => item.photos.length > 0);
 
-    return { params, /*items, tree: root, nodes,*/ graph: g.serialize() };
+    return { params, items /*, tree: root, nodes*/, graph: g.serialize() };
   }
 
   constructor(props) {

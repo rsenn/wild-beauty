@@ -1,6 +1,12 @@
 import { observable, action } from "mobx";
 
 export class EditorStore {
+  @observable parent = {};
+  @observable tree = {};
+  @observable state = {
+    parent: -1
+  };
+
   constructor(initialData, pageProps) {
     // super(props);
 
@@ -11,6 +17,13 @@ export class EditorStore {
     }
 
     this.reset();
+  }
+
+  @action
+  setState(state) {
+    for(let prop in state) {
+      this.state[prop] = state[prop];
+    }
   }
 
   @action
@@ -28,7 +41,14 @@ export class EditorStore {
   @action
   setTree(root) {
     console.log("editorStore.setTree", { root });
-    this.tree = root;
+    this.tree = observable(root);
+  }
+
+  @action
+  changeTree(value, fn = item => {}) {
+    let results = [...Util.walkTree(es.tree)].filter(typeof value == "function" ? value : node => node.value == value);
+    results.forEach(fn);
+    return results[0];
   }
 
   @action
