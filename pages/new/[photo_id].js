@@ -48,9 +48,12 @@ export class NewItem extends React.Component {
    * @param      {<type>}   ctx     The context
    * @return     {Promise}  The initial properties.
    */
-  static async getInitialProps({ res, req, query, asPath, mobxStore }) {
+  static async getInitialProps({ res, req, url, query, asPath, mobxStore }) {
     const rootStore = mobxStore["RootStore"];
     const editorStore = mobxStore["EditorStore"];
+    const { photo_id } = query;
+
+    console.log("New.getInitialProps", { url, query });
 
     let images = [],
       items = [];
@@ -66,6 +69,15 @@ export class NewItem extends React.Component {
       if(image) rootStore.setState({ image: imageId });
       items = await rootStore.fetchItems();
     }*/
+
+    if(!global.window) {
+      if(photo_id) {
+        images = await rootStore.fetchImages({ id: photo_id });
+        images = images.filter(ph => ph.items.length == 0);
+        images.forEach(item => rootStore.newPhoto(item));
+      }
+    }
+
     items = await rootStore.loadItems();
 
     console.log("New[photo_id].getInitialProps", { images, items });
