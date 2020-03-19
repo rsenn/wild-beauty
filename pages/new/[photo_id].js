@@ -212,7 +212,7 @@ export class NewItem extends React.Component {
     const makeTreeSelEvent = name => event => this.treeSelEvent(name, event);
 
     const { events } = this.touchListener || {};
-    console.log("New {:id}.render", { events });
+    console.log("New {:id}.render", { events, img });
 
     return (
       <Layout {...events}>
@@ -220,7 +220,7 @@ export class NewItem extends React.Component {
           <div>
             <a href={`/new/${query.photo_id}`}>New item {query.photo_id}</a>
 
-            <ItemEditor /*tree={this.state.tree}*/ makeTreeSelEvent={makeTreeSelEvent} image={img} />
+            <ItemEditor image={img} /*tree={this.state.tree}*/ makeTreeSelEvent={makeTreeSelEvent} image={img} />
           </div>
           <style jsx global>{`
             .colors-text {

@@ -117,8 +117,8 @@ if(debug)
     biggest = Object.entries(biggest).map(([key, value]) => [key, ("" + value).length]);
     biggest = biggest.sort((a, b) => a[1] - b[1]).filter(f => f[0] !== "toObject" && f[0] !== "match" && f[0] !== "children");
     let fields = biggest.map(f => f[0]);
-    let sizes = Object.fromEntries(biggest.map((f, i) => [f[0], Math.max(f[0].length + 1, f[1] + 1)]));
-    biggest = Object.fromEntries(biggest);
+    let sizes = Util.objectFrom(biggest.map((f, i) => [f[0], Math.max(f[0].length + 1, f[1] + 1)]));
+    biggest = Util.objectFrom(biggest);
     /*
     console.log("biggest:", biggest);
     console.log("fields:", fields);
