@@ -52,7 +52,7 @@ async function getImagePalette(data) {
       });
     });
   let ret = await getImageColors(data);
-  return Object.fromEntries(
+  return Util.fromEntries(
     [...ret].map(c => {
       let color = new RGBA(c.R, c.G, c.B, 255);
       return [color.hex(), c.count];

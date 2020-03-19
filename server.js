@@ -344,7 +344,7 @@ if(!dev && cluster.isMaster) {
           let { colors, palette, data, size, props, exif } = image;
           let { width, height } = size;
           if(typeof exif == "object" && exif !== null)
-            exif = Object.fromEntries(
+            exif = Util.fromEntries(
               Object.entries(exif)
                 .filter(([key, value]) => !(value instanceof Buffer))
                 .map(([key, value]) => [key, Util.isDate(value) ? Util.toUnixTime(Util.parseDate(value)) : value])
