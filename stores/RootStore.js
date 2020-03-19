@@ -7,14 +7,26 @@ import Util from "../lib/util.js";
 import { assign_to } from "../lib/devtools.js";
 import devpane from "../lib/devpane.js";
 import Iterator from "../lib/iterator.js";
-import { transformItem, transformItemIds, transformItemData, makeItemToOption } from "./functions.js";
+import {
+  transformItem,
+  transformItemIds,
+  transformItemData,
+  makeItemToOption
+} from "./functions.js";
 
 const isServer = !global.window;
 
 if(global.window) {
   window.dev = { dom, Iterator };
   window.fns = {};
-  window.dom = dom;
+  window.dom = {
+    ...dom,
+   /* Element: { ...Element } *//*{
+      ...Util.getMethods(dom.Element),
+      find: (...args) => dom(dom.Element.find(...args)),
+      findAll: (...args) => dom(dom.Element.findAll(...args)),
+    }*/
+  };
   window.Iterator = Iterator;
   Object.assign(window, { transformItem, transformItemIds, transformItemData, makeItemToOption });
 
@@ -248,7 +260,8 @@ export class RootStore extends Queries {
 
   @action
   newItem(item) {
-    var childIds = item.children && item.children.map ? item.children.map(child => child.id).sort() : [];
+    var childIds =
+      item.children && item.children.map ? item.children.map(child => child.id).sort() : [];
     var id = parseInt(item.id);
     item = { ...item, id, childIds };
 
@@ -262,7 +275,12 @@ export class RootStore extends Queries {
       }
       item.data = data;
     }
-    if(item.photos && typeof item.photos == "object" && item.photos.length > 0 && item.photos.map) {
+    if(
+      item.photos &&
+      typeof item.photos == "object" &&
+      item.photos.length > 0 &&
+      item.photos.map
+    ) {
       //      if(ite && typeof(i) == 'object' && i.photo !== undefined)
       //    item.photos = item.photos.map(i => ({ ...i.photo, landscape: i.photo && i.photo.width !== undefined ? (i.photo.width > i.photo.height) : 0 }));
     }
@@ -289,7 +307,10 @@ export class RootStore extends Queries {
       idMap.push(item.id);
       if(typeof item == "object") {
         let { parent_id } = item;
-        if(depth > 0 && item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getTree(parseInt(i.id), tr, idMap, depth - 1) : null)).filter(c => c !== null);
+        if(depth > 0 && item.children && item.children.length)
+          item.children = item.children
+            .map(i => (i != null ? this.getTree(parseInt(i.id), tr, idMap, depth - 1) : null))
+            .filter(c => c !== null);
         else item.children = [];
         item.children = item.children.filter(i => i !== null);
         item.children = item.children.map(child => {
@@ -326,7 +347,9 @@ export class RootStore extends Queries {
     if(item) {
       let { name, id } = item;
       if(!name) name = `[${id}]`;
-      let children = [...this.items.values()].filter(child => child.parent && child.parent.id == id).map(child => this.getHierarchy(child, fn));
+      let children = [...this.items.values()]
+        .filter(child => child.parent && child.parent.id == id)
+        .map(child => this.getHierarchy(child, fn));
       let ret = { name };
       if(children && children.length > 0) ret.children = children;
 
