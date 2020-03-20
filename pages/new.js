@@ -114,7 +114,7 @@ class New extends React.Component {
     const shiftState = this.shiftState();
     //    console.log("New.ĥandleClick", { shiftState });
   };
-  /*
+
   handleKeyDown = event => {
     const nativeEvent = event.nativeEvent || event;
     if(nativeEvent.key == "Shift") this.shiftState(true);
@@ -124,7 +124,7 @@ class New extends React.Component {
     const nativeEvent = event.nativeEvent || event;
     if(nativeEvent.key == "Shift") this.shiftState(false);
   };
-*/
+
   handleShiftState = state => {
     console.log("New.handleShiftState", state);
   };

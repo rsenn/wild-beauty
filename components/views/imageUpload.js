@@ -34,7 +34,7 @@ const ImageSelection = {
   items: null,
   index: [-1, -1],
   rects: null,
-  range: trkl([-1,-1]),
+  range: trkl([-1, -1]),
   init() {
     this.items = Element.findAll(".upload-item img").map(e => {
       let ret = { card: Element.walkUp(e, e => e.classList.contains("upload-image")), image: e };
@@ -46,7 +46,19 @@ const ImageSelection = {
     if(this.rects) this.rects.forEach(r => Element.remove(r));
     this.rects = this.items.map(item => {
       let r = Element.rect(item.card);
-      return rect(r.move(-4, -4).inset(2), "#ffff0000", "#00800000");
+      let e = rect(r.move(-4, -4).inset(2), "#ffff0000", "#00800000");
+      e.parentElement.removeChild(e);
+      item.card.parentElement.appendChild(e);
+      Element.setCSS(e, {
+        display: "block",
+        left: "-4px",
+        top: "-4px",
+        width: "100%",
+        height: "100%",
+        position: "absolute",
+        boxSizing: "border-box"
+      });
+      return e;
     });
   },
   findIndex(point) {
@@ -93,14 +105,15 @@ const ImageSelection = {
     let indexes = this.index.slice().sort();
     if(indexes[0] == -1) indexes[0] = indexes[1];
 
-    this.rects.forEach((rect, i) => {
-      const inRange = i >= indexes[0] && i <= indexes[1];
-      if(inRange)
-        Element.setCSS(rect, {
-          backgroundColor: "hsla(210,100%,55%,0.0)",
-          border: "4px solid hsl(210,100%,55%)"
-        });
-    });
+    if(this.rects)
+      this.rects.forEach((rect, i) => {
+        const inRange = i >= indexes[0] && i <= indexes[1];
+        if(inRange)
+          Element.setCSS(rect, {
+            backgroundColor: "hsla(210,100%,55%,0.0)",
+            border: "4px solid hsl(210,100%,55%)"
+          });
+      });
 
     /*  this.index = [-1, -1];
         this.items = [];*/
@@ -114,14 +127,11 @@ const TouchHandler = TouchListener(ImageSelection, { listener: SelectionListener
 export const ImageUpload = inject("rootStore")(
   observer(({ images, rootStore, onChoose, onDelete, onRotate, shiftState, ...props }) => {
     const [shift, setShift] = useState(false);
-    const [selection, setSelection] = useState([-1,-1]);
+    const [selection, setSelection] = useState([-1, -1]);
 
     ImageSelection.range.subscribe(setSelection);
 
-    shiftState.subscribe(newValue => {
-      setShift(newValue);
-      //console.log("shiftState: ", newValue);
-    });
+    shiftState.subscribe(setShift);
 
     return (
       <div className={"upload-area"}>
@@ -174,7 +184,7 @@ export const ImageUpload = inject("rootStore")(
 
             imageList.sort((a, b) => a.uploaded - b.uploaded);
 
-            console.log("RUG render children=", imageList);
+            console.log("RUG render children=", uploadedImages.map(toJS));
 
             return (
               <div className={"upload"} {...TouchHandler.events}>
@@ -509,7 +519,7 @@ export const ImageUpload = inject("rootStore")(
           .upload-card {
             flex: 1 1 20%;
             font-family: Fixed;
-            overflow: auto;
+            overflow: visible;
           }
           @media (max-width: 376px) {
             .upload-item {
