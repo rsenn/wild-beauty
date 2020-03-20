@@ -9,6 +9,8 @@ import { Element } from "../../lib/dom.js";
 import { RUG } from "../upload.js";
 import CircleSegment from "../simple/circleSegment.js";
 import { DraggableList } from "../views/draggableList.js";
+import { SelectionListener, SelectionRenderer, TouchListener } from "../../lib/touchHandler.js";
+import { trkl } from "../../lib/trkl.js";
 
 import "../../static/css/grid.css";
 
@@ -28,9 +30,93 @@ export const hvOffset = (width, height) => {
   return { w, h, hr, vr };
 };
 
+const ImageSelection = {
+  items: null,
+  index: [-1, -1],
+  rects: null,
+  range: trkl([-1,-1]),
+  init() {
+    this.items = Element.findAll(".upload-item img").map(e => {
+      let ret = { card: Element.walkUp(e, e => e.classList.contains("upload-image")), image: e };
+      ret.e = Element.walkUp(e, e => e.classList.contains("upload-item"));
+      ret.rect = Element.rect(ret.e);
+      e.ondragstart = e => e.preventDefault();
+      return ret;
+    });
+    if(this.rects) this.rects.forEach(r => Element.remove(r));
+    this.rects = this.items.map(item => {
+      let r = Element.rect(item.card);
+      return rect(r.move(-4, -4).inset(2), "#ffff0000", "#00800000");
+    });
+  },
+  findIndex(point) {
+    let item = this.items.filter(item => item.rect.inside(point));
+    return this.items.indexOf(item[0]);
+  },
+  create(line, event, origin) {
+    if(!this.items) {
+      this.init();
+    }
+    this.index[0] = this.findIndex(line[0]);
+    //console.log("SelectionListener.create", line, this.index);
+  },
+  update(line, event, origin) {
+    const to = this.findIndex(line[1]);
+
+    if(this.index[1] == to) return;
+
+    this.index[1] = to;
+    let indexes = this.index.slice().sort();
+    if(indexes[0] == -1) indexes[0] = indexes[1];
+
+    this.rects.forEach((rect, i) => {
+      const inRange = i >= indexes[0] && i <= indexes[1];
+      Element.setCSS(
+        rect,
+        inRange
+          ? {
+              opacity: 1,
+              backgroundColor: "hsla(210,100%,55%,0.5)",
+              border: "4px solid hsla(210,100%,55%,0.5)",
+              borderRadius: "5%",
+              boxSizing: "content-box",
+              boxShadow: "2px 2px 6px #000000ff"
+            }
+          : { opacity: 0 }
+      );
+    });
+
+    this.range(indexes);
+    //console.log("SelectionListener.update", line, indexes);
+  },
+  destroy(event, origin) {
+    let indexes = this.index.slice().sort();
+    if(indexes[0] == -1) indexes[0] = indexes[1];
+
+    this.rects.forEach((rect, i) => {
+      const inRange = i >= indexes[0] && i <= indexes[1];
+      if(inRange)
+        Element.setCSS(rect, {
+          backgroundColor: "hsla(210,100%,55%,0.0)",
+          border: "4px solid hsl(210,100%,55%)"
+        });
+    });
+
+    /*  this.index = [-1, -1];
+        this.items = [];*/
+  }
+};
+
+const TouchHandler = TouchListener(ImageSelection, { listener: SelectionListener });
+
+//      window.addEventListener("mouseup", this.touchListener.events.onMouseUp);
+
 export const ImageUpload = inject("rootStore")(
   observer(({ images, rootStore, onChoose, onDelete, onRotate, shiftState, ...props }) => {
-    const [shift, setShift] = React.useState(false);
+    const [shift, setShift] = useState(false);
+    const [selection, setSelection] = useState([-1,-1]);
+
+    ImageSelection.range.subscribe(setSelection);
 
     shiftState.subscribe(newValue => {
       setShift(newValue);
@@ -91,7 +177,7 @@ export const ImageUpload = inject("rootStore")(
             console.log("RUG render children=", imageList);
 
             return (
-              <div className={"upload"}>
+              <div className={"upload"} {...TouchHandler.events}>
                 <div className={"upload-items __card __sorting"}>
                   {imageList.map((image, index) => {
                     let id = image.id || image.uid;
@@ -123,32 +209,56 @@ export const ImageUpload = inject("rootStore")(
                             insideClassName={classNames("tooltip", "center-flex")}
                             sizeClassName={"upload-image"}
                             insideProps={{
-                              ["data-tooltip"]: image.width === undefined ? `Uploading... ${progress}%` : `${image.width}x${image.height} ${orientation}`
+                              ["data-tooltip"]:
+                                image.width === undefined
+                                  ? `Uploading... ${progress}%`
+                                  : `${image.width}x${image.height} ${orientation}`
                             }}
                           >
                             {progress !== undefined && progress !== 100 ? (
-                              <svg viewBox={`0 0 100 100`} style={{ width: "100%", height: "auto" }}>
+                              <svg
+                                viewBox={`0 0 100 100`}
+                                style={{ width: "100%", height: "auto" }}
+                              >
                                 <defs />
 
-                                <CircleSegment x={50} y={50} r={100} start={startAngle * DEG2RAD} end={endAngle * DEG2RAD} fill={"rgba(0,0,0,0.5)"} close />
+                                <CircleSegment
+                                  x={50}
+                                  y={50}
+                                  r={100}
+                                  start={startAngle * DEG2RAD}
+                                  end={endAngle * DEG2RAD}
+                                  fill={"rgba(0,0,0,0.5)"}
+                                  close
+                                />
                               </svg>
                             ) : (
                               <img
                                 id={`image-${id}`}
-                                className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
+                                className={classNames(
+                                  /*"inner-image", */ index == rootStore.state.selected &&
+                                    "selected"
+                                )}
                                 src={image.src}
                                 width={image.width}
                                 height={image.height}
                                 orientation={orientation}
                                 style={{
                                   ...(image.width === undefined
-                                    ? { objectFit: "contain", /*minWidth: '100%',*/ maxHeight: "160%", minHeight: "100%", objectPosition: "center center" }
+                                    ? {
+                                        objectFit: "contain",
+                                        /*minWidth: '100%',*/ maxHeight: "160%",
+                                        minHeight: "100%",
+                                        objectPosition: "center center"
+                                      }
                                     : {
                                         /*    marginTop: `${(-vr / 2).toFixed(0)}%`,
                                   marginLeft: `${(-hr / 2).toFixed(0)}%`,*/
                                         position: "relative",
                                         transform: `rotate(${image.angle % 360}deg)`,
-                                        width: landscape ? `${(image.width * 100) / image.height}%` : "101%",
+                                        width: landscape
+                                          ? `${(image.width * 100) / image.height}%`
+                                          : "101%",
                                         height: landscape ? "101%" : "auto"
                                       })
                                 }}
@@ -160,7 +270,12 @@ export const ImageUpload = inject("rootStore")(
                                         let aspect = rect.width / rect.height;
                                         let landscape = aspect > 1;
                                         //console.log("img.onLoad", rect, img, {aspect,landscape});
-                                        Element.setCSS(img, landscape ? { height: `100%`, width: "auto" } : { width: "100%", height: "auto" });
+                                        Element.setCSS(
+                                          img,
+                                          landscape
+                                            ? { height: `100%`, width: "auto" }
+                                            : { width: "100%", height: "auto" }
+                                        );
                                       }
                                     : undefined
                                 }
@@ -177,10 +292,17 @@ export const ImageUpload = inject("rootStore")(
                           >
                             <svg height='24' width='24' viewBox='0 0 16 16'>
                               <defs />
-                              <path fill={"#f00"} stroke={"#a00"} d='M11.004 3.982a1 1 0 00-.707.293L8.004 6.568 5.72 4.285a1 1 0 00-.01-.01 1 1 0 00-.701-.289L5 4a1 1 0 00-1 1 1 1 0 00.293.707L6.586 8l-2.293 2.293a1 1 0 00-.29.7 1 1 0 001 1 1 1 0 00.708-.294l2.293-2.293 2.283 2.283a1 1 0 00.717.303 1 1 0 001-1 1 1 0 00-.293-.707l-2.3-2.299 2.282-2.283a1 1 0 00.31-.72 1 1 0 00-1-1z' />
+                              <path
+                                fill={"#f00"}
+                                stroke={"#a00"}
+                                d='M11.004 3.982a1 1 0 00-.707.293L8.004 6.568 5.72 4.285a1 1 0 00-.01-.01 1 1 0 00-.701-.289L5 4a1 1 0 00-1 1 1 1 0 00.293.707L6.586 8l-2.293 2.293a1 1 0 00-.29.7 1 1 0 001 1 1 1 0 00.708-.294l2.293-2.293 2.283 2.283a1 1 0 00.717.303 1 1 0 001-1 1 1 0 00-.293-.707l-2.3-2.299 2.282-2.283a1 1 0 00.31-.72 1 1 0 00-1-1z'
+                              />
                             </svg>
                           </button>
-                          <button className={"image-button image-rotate center-flex"} onClick={() => onRotate(id, shift ? -90 : 90)}>
+                          <button
+                            className={"image-button image-rotate center-flex"}
+                            onClick={() => onRotate(id, shift ? -90 : 90)}
+                          >
                             <svg height='24' width='24' viewBox='0 0 16 16'>
                               <defs />
                               <path
@@ -432,7 +554,12 @@ export const ImageUpload = inject("rootStore")(
             font-weight: 700;
             font-size: 12px;
             white-space: nowrap;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0.7) 29%, transparent);
+            background: linear-gradient(
+              180deg,
+              rgba(0, 0, 0, 0.8) 0,
+              rgba(0, 0, 0, 0.7) 29%,
+              transparent
+            );
             background-blend-mode: multiply;
             color: #f5f5f5;
           }
