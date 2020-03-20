@@ -10,7 +10,7 @@ import { ItemEditor } from "../components/views/itemEditor.js";
 import { trkl } from "../lib/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
-import { SelectionListener } from "../lib/touchHandler.js";
+import { SelectionListener, TouchListener } from "../lib/touchHandler.js";
 import { Element } from "../lib/dom.js";
 import Util from "../lib/util.js";
 
@@ -65,20 +65,42 @@ class New extends React.Component {
     }
     let swipeEvents = {};
     var e = null;
+    this.touchListener = TouchListener(
+      {
+        element: null,
+        create(rect) {
+          //console.log("SelectionListener.create(", rect, ")");
+          this.element = Element.create("div", { id: `selection-rect` }, global.window ? window.document.body : null);
+          Element.setCSS(this.element, {
+            position: "fixed",
+            border: "3px dashed white",
+            filter: `drop-shadow(1px 1px 1px black)`,
+            zIndex: 999999999
+          });
+          this.update(rect);
+        },
+        update(rect) {
+          //console.log("SelectionListener.update(", rect, ")");
+          Element.rect(this.element, rect, { position: "absolute" });
+        },
+        destroy() {
+          //console.log("SelectionListener.destroy()");
+          Element.remove(this.element);
+        }
+      },
+      { listener: SelectionListener }
+    );
+
     if(global.window !== undefined) {
       window.page = this;
       window.rs = rootStore;
+      window.listener = this.touchListener;
 
       window.addEventListener("keydown", event => (event.key == "Shift" ? this.shiftState(true) : undefined));
       window.addEventListener("keyup", event => (event.key == "Shift" ? this.shiftState(false) : undefined));
       window.addEventListener("click", this.handleClick);
+      window.addEventListener("mouseup", this.touchListener.events.onMouseUp);
     }
-    this.touchListener = SelectionListener(
-      event => {
-        // console.log("SelectionEvent", event);
-      },
-      { color: "#40ff00", shadow: "#000000" }
-    );
     rootStore.state.step = 1;
 
     let photos = this.props.images.map(image => ["" + image.id, image]);

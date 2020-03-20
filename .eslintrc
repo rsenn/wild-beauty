@@ -4,7 +4,7 @@
     "ecmaVersion": 7,
     "sourceType": "module"
   },
-  "plugins": ["babel", "react", "legacy-decorators", "prefer-class-properties", "no-copy-paste-default-export"],
+  "plugins": ["babel", "react","react-hooks","legacy-decorators", "prefer-class-properties", "no-copy-paste-default-export"],
   "extends": ["eslint:recommended", "babel", "react"],
   "rules": {
     "camelcase": 0,
@@ -50,7 +50,9 @@
     "react/prop-types": 0,
     "react/react-in-jsx-scope": 0,
     "react/self-closing-comp": 1,
-    "react/sort-comp": 1
+    "react/sort-comp": 1,
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   },
   "env": {
     "browser": true,

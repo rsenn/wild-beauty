@@ -3592,6 +3592,11 @@ eslint-plugin-legacy-decorators@^1.0.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-legacy-decorators/-/eslint-plugin-legacy-decorators-1.0.0.tgz#5bdecd4778478070105c992e5fa455601c95f8e4"
   integrity sha512-3igdjcoXF5mXVLqdxKyVK1MxoEYGU+mE4DLhFiw5tyBSKDlV0oXo0AfTl4z34Ss010Av0n99gGsJKDAUzU/2hw==
 
+eslint-plugin-react-hooks@^2.5.1:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-2.5.1.tgz#4ef5930592588ce171abeb26f400c7fbcbc23cd0"
+  integrity sha512-Y2c4b55R+6ZzwtTppKwSmK/Kar8AdLiC2f9NADCuxbcTgPPg41Gyqa6b9GppgXSvCtkRw43ZE86CT5sejKC6/g==
+
 eslint-scope@^3.7.1:
   version "3.7.3"
   resolved "https://registry.yarnpkg.com/eslint-scope/-/eslint-scope-3.7.3.tgz#bb507200d3d17f60247636160b4826284b108535"
@@ -7173,6 +7178,11 @@ react-dom@^16.11.0:
     object-assign "^4.1.1"
     prop-types "^15.6.2"
     scheduler "^0.19.0"
+
+react-drag-elements@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/react-drag-elements/-/react-drag-elements-0.1.2.tgz#327a99fdfc7af74aab7e280f59081fdeca268a92"
+  integrity sha512-RpLqidu9tog/xGAf6sVJzDXEX3efAAHyMTt9+4csc4jBUH9HDSFGocRuYDE9AYzygECPgHzpQDjvAU3+pzFQNA==
 
 react-dropdown-tree-select@^2.1.1:
   version "2.3.1"
