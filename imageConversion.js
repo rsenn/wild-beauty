@@ -30,6 +30,8 @@ const createMemoryStream = () => {
       callback();
     }
   });
+  stream.buffer = memory.buffer;
+  return stream;
 };
 
 async function loadFile(path) {
@@ -53,7 +55,7 @@ async function getImagePalette(data) {
       });
     });
   let ret = await getImageColors(data);
-  return Util.fromEntries(
+  return Object.fromEntries(
     [...ret].map(c => {
       let color = new RGBA(c.R, c.G, c.B, 255);
       return [color.hex(), c.count];

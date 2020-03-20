@@ -70,15 +70,17 @@ class New extends React.Component {
       index: [-1, -1],
       rects: null,
       init() {
- this.items = Element.findAll(".upload-item img").map(e => {
-            let ret = { card: Element.walkUp(e, e => e.classList.contains('upload-image')), image: e };
-            ret.e = Element.walkUp(e, e => e.classList.contains("upload-item"));
-            ret.rect = Element.rect(ret.e);
-            return ret;
-          });
- if(this.rects)
-  this.rects.forEach(r => Element.remove(r));
- this.rects = this.items.map(item => { let r = Element.rect(item.card); return rect(r.move(-4, -4).inset(2), "#ffff0000", "#00800000"); });
+        this.items = Element.findAll(".upload-item img").map(e => {
+          let ret = { card: Element.walkUp(e, e => e.classList.contains("upload-image")), image: e };
+          ret.e = Element.walkUp(e, e => e.classList.contains("upload-item"));
+          ret.rect = Element.rect(ret.e);
+          return ret;
+        });
+        if(this.rects) this.rects.forEach(r => Element.remove(r));
+        this.rects = this.items.map(item => {
+          let r = Element.rect(item.card);
+          return rect(r.move(-4, -4).inset(2), "#ffff0000", "#00800000");
+        });
       },
       findIndex(point) {
         let item = this.items.filter(item => item.rect.inside(point));
@@ -86,7 +88,7 @@ class New extends React.Component {
       },
       create(line, event, origin) {
         if(!this.items) {
-         this.init();
+          this.init();
         }
         this.index[0] = this.findIndex(line[0]);
         //console.log("SelectionListener.create", line, this.index);
@@ -97,7 +99,7 @@ class New extends React.Component {
         if(indexes[0] == -1) indexes[0] = indexes[1];
         this.rects.forEach((rect, i) => {
           const inRange = i >= indexes[0] && i <= indexes[1];
-          Element.setCSS(rect, inRange ? { opacity: 1,  backgroundColor: "#ffff0000", border: "4px solid hsl(210,100%,55%)", borderRadius: '5%', boxSizing: 'content-box', boxShadow: '2px 2px 6px #000000ff' } : { opacity: 0 });
+          Element.setCSS(rect, inRange ? { opacity: 1, backgroundColor: "#ffff0000", border: "4px solid hsl(210,100%,55%)", borderRadius: "5%", boxSizing: "content-box", boxShadow: "2px 2px 6px #000000ff" } : { opacity: 0 });
         });
         //console.log("SelectionListener.update", line, indexes);
       },
@@ -141,7 +143,7 @@ class New extends React.Component {
   componentDidUpdate() {
     const { rootStore, router } = this.props;
 
-     this.itemSelection.init();
+    this.itemSelection.init();
   }
 
   @action.bound

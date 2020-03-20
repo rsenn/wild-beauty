@@ -735,10 +735,8 @@ export const ImageUpload = inject("rootStore")(
             color: #fff;
           }
 
-
-
           .upload-card {
-            box-sizing:content-box;
+            box-sizing: content-box;
           }
         `}</style>
       </div>
