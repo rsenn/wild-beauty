@@ -74,6 +74,7 @@ class New extends React.Component {
           let ret = { card: Element.walkUp(e, e => e.classList.contains("upload-image")), image: e };
           ret.e = Element.walkUp(e, e => e.classList.contains("upload-item"));
           ret.rect = Element.rect(ret.e);
+          e.ondragstart = e => e.preventDefault();
           return ret;
         });
         if(this.rects) this.rects.forEach(r => Element.remove(r));
@@ -99,11 +100,19 @@ class New extends React.Component {
         if(indexes[0] == -1) indexes[0] = indexes[1];
         this.rects.forEach((rect, i) => {
           const inRange = i >= indexes[0] && i <= indexes[1];
-          Element.setCSS(rect, inRange ? { opacity: 1, backgroundColor: "#ffff0000", border: "4px solid hsl(210,100%,55%)", borderRadius: "5%", boxSizing: "content-box", boxShadow: "2px 2px 6px #000000ff" } : { opacity: 0 });
+          Element.setCSS(rect, inRange ? { opacity: 1, backgroundColor: "hsla(210,100%,55%,0.5)", border: "4px solid hsla(210,100%,55%,0.5)", borderRadius: "5%", boxSizing: "content-box", boxShadow: "2px 2px 6px #000000ff" } : { opacity: 0 });
         });
         //console.log("SelectionListener.update", line, indexes);
       },
       destroy(event, origin) {
+         let indexes = this.index.slice().sort();
+        if(indexes[0] == -1) indexes[0] = indexes[1];
+
+        this.rects.forEach((rect, i) => {
+          const inRange = i >= indexes[0] && i <= indexes[1];
+          if(inRange) Element.setCSS(rect, { backgroundColor: "hsla(210,100%,55%,0.0)", border: "4px solid hsl(210,100%,55%)" });
+        });
+
         /*  this.index = [-1, -1];
         this.items = [];*/
       }
