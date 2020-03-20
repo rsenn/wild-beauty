@@ -32,7 +32,7 @@
       {
         "loose": true
       }
-    ],
+    ] /*,
     [
       "styled-components",
       {
@@ -40,6 +40,6 @@
         "displayName": true,
         "preprocess": false
       }
-    ]
+    ]*/
   ]
 }

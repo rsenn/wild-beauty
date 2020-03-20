@@ -10,7 +10,7 @@ import { ItemEditor } from "../components/views/itemEditor.js";
 import { trkl } from "../lib/trkl.js";
 import NeedAuth from "../components/simple/needAuth.js";
 import Layout from "../components/layout.js";
-import { SelectionListener, TouchListener } from "../lib/touchHandler.js";
+import { SelectionListener, SelectionRenderer, TouchListener } from "../lib/touchHandler.js";
 import { Element } from "../lib/dom.js";
 import Util from "../lib/util.js";
 
@@ -65,31 +65,48 @@ class New extends React.Component {
     }
     let swipeEvents = {};
     var e = null;
-    this.touchListener = TouchListener(
-      {
-        element: null,
-        create(rect) {
-          //console.log("SelectionListener.create(", rect, ")");
-          this.element = Element.create("div", { id: `selection-rect` }, global.window ? window.document.body : null);
-          Element.setCSS(this.element, {
-            position: "fixed",
-            border: "3px dashed white",
-            filter: `drop-shadow(1px 1px 1px black)`,
-            zIndex: 999999999
+    this.itemSelection = {
+      items: null,
+      index: [-1, -1],
+      rects: null,
+      init() {
+ this.items = Element.findAll(".upload-item img").map(e => {
+            let ret = { card: Element.walkUp(e, e => e.classList.contains('upload-image')), image: e };
+            ret.e = Element.walkUp(e, e => e.classList.contains("upload-item"));
+            ret.rect = Element.rect(ret.e);
+            return ret;
           });
-          this.update(rect);
-        },
-        update(rect) {
-          //console.log("SelectionListener.update(", rect, ")");
-          Element.rect(this.element, rect, { position: "absolute" });
-        },
-        destroy() {
-          //console.log("SelectionListener.destroy()");
-          Element.remove(this.element);
-        }
+ if(this.rects)
+  this.rects.forEach(r => Element.remove(r));
+ this.rects = this.items.map(item => { let r = Element.rect(item.card); return rect(r.move(-4, -4).inset(2), "#ffff0000", "#00800000"); });
       },
-      { listener: SelectionListener }
-    );
+      findIndex(point) {
+        let item = this.items.filter(item => item.rect.inside(point));
+        return this.items.indexOf(item[0]);
+      },
+      create(line, event, origin) {
+        if(!this.items) {
+         this.init();
+        }
+        this.index[0] = this.findIndex(line[0]);
+        //console.log("SelectionListener.create", line, this.index);
+      },
+      update(line, event, origin) {
+        this.index[1] = this.findIndex(line[1]);
+        let indexes = this.index.slice().sort();
+        if(indexes[0] == -1) indexes[0] = indexes[1];
+        this.rects.forEach((rect, i) => {
+          const inRange = i >= indexes[0] && i <= indexes[1];
+          Element.setCSS(rect, inRange ? { opacity: 1,  backgroundColor: "#ffff0000", border: "4px solid hsl(210,100%,55%)", borderRadius: '5%', boxSizing: 'content-box', boxShadow: '2px 2px 6px #000000ff' } : { opacity: 0 });
+        });
+        //console.log("SelectionListener.update", line, indexes);
+      },
+      destroy(event, origin) {
+        /*  this.index = [-1, -1];
+        this.items = [];*/
+      }
+    };
+    this.touchListener = TouchListener(this.itemSelection, { listener: SelectionListener });
 
     if(global.window !== undefined) {
       window.page = this;
@@ -119,6 +136,12 @@ class New extends React.Component {
 
   componentDidMount() {
     const { rootStore, router } = this.props;
+  }
+
+  componentDidUpdate() {
+    const { rootStore, router } = this.props;
+
+     this.itemSelection.init();
   }
 
   @action.bound

@@ -251,6 +251,7 @@ class RUG extends React.Component {
       case "function":
         return children(images, options);
       default:
+        console.log("RUG.showChildren:", children);
         return View({ type, sorting }, images);
     }
   }

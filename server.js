@@ -378,7 +378,8 @@ if(!dev && cluster.isMaster) {
             API.options.debug = false;
             let photo;
             if(response && response.photos && response.photos.length) photo = response.photos[0];
-            //console.log("response:", response);
+            delete response.photos;
+            console.log("photo/upload response:", response);
             reply = { ...reply, error, photo };
           }
           //   console.log("reply:", reply);

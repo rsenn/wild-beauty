@@ -8,6 +8,7 @@ import Util from "../../lib/util.js";
 import { Element } from "../../lib/dom.js";
 import { RUG } from "../upload.js";
 import CircleSegment from "../simple/circleSegment.js";
+import { DraggableList } from "../views/draggableList.js";
 
 import "../../static/css/grid.css";
 
@@ -33,7 +34,7 @@ export const ImageUpload = inject("rootStore")(
 
     shiftState.subscribe(newValue => {
       setShift(newValue);
-      console.log("shiftState: ", newValue);
+      //console.log("shiftState: ", newValue);
     });
 
     return (
@@ -42,7 +43,7 @@ export const ImageUpload = inject("rootStore")(
           action='/api/photo/upload' // upload route
           source={async response => {
             let { affected_rows, returning, error, photo, original_name } = response;
-            console.log("RUG source callback response=", response);
+            //console.log("RUG source callback response=", response);
             if(error) returning = [photo];
 
             let reply = {};
@@ -58,7 +59,7 @@ export const ImageUpload = inject("rootStore")(
               let res = await axios.head(url);
               if(res.status == 200) {
                 const { width, height, aspect, channels, depth } = res.headers;
-                console.log("HEAD: ", res);
+                //console.log("HEAD: ", res);
                 Object.assign(entry, { width, height, aspect, channels, depth });
               }
               return entry;
@@ -71,6 +72,7 @@ export const ImageUpload = inject("rootStore")(
           }}
           onSuccess={arg => {
             let status = arg && arg.error ? "error" : "success";
+
             console.log(`RUG success callback`, { status, arg });
 
             if(arg && arg.source) {
@@ -92,13 +94,13 @@ export const ImageUpload = inject("rootStore")(
               <div className={"upload"}>
                 <div className={"upload-items __card __sorting"}>
                   {imageList.map((image, index) => {
-                    let id = image.id;
+                    let id = image.id || image.uid;
                     let progress = image.progress;
                     let startAngle, endAngle;
 
-                    if(rootStore.photoExists(id)) {
+                    if(image.id && rootStore.photoExists(id)) {
                       image = rootStore.getPhoto(id);
-                      console.log("image-entry", id, toJS(image));
+                      //console.log("image-entry", id, toJS(image));
                     }
 
                     /*image = toJS(image);*/
@@ -121,7 +123,7 @@ export const ImageUpload = inject("rootStore")(
                             insideClassName={classNames("tooltip", "center-flex")}
                             sizeClassName={"upload-image"}
                             insideProps={{
-                              ["data-tooltip"]: `${image.width}x${image.height} ${orientation}`
+                              ["data-tooltip"]: image.width === undefined ? `Uploading... ${progress}%` : `${image.width}x${image.height} ${orientation}`
                             }}
                           >
                             {progress !== undefined && progress !== 100 ? (
@@ -132,24 +134,36 @@ export const ImageUpload = inject("rootStore")(
                               </svg>
                             ) : (
                               <img
-                                id={`image-${id || uid}`}
+                                id={`image-${id}`}
                                 className={classNames(/*"inner-image", */ index == rootStore.state.selected && "selected")}
                                 src={image.src}
                                 width={image.width}
                                 height={image.height}
                                 orientation={orientation}
                                 style={{
-                                  position: "relative",
-                                  /*    marginTop: `${(-vr / 2).toFixed(0)}%`,
+                                  ...(image.width === undefined
+                                    ? { objectFit: "contain", /*minWidth: '100%',*/ maxHeight: "160%", minHeight: "100%", objectPosition: "center center" }
+                                    : {
+                                        /*    marginTop: `${(-vr / 2).toFixed(0)}%`,
                                   marginLeft: `${(-hr / 2).toFixed(0)}%`,*/
-                                  width: landscape ? `${(image.width * 100) / image.height}%` : "101%",
-                                  height: landscape ? "101%" : "auto",
-                                  transform: `rotate(${image.angle % 360}deg)`
+                                        position: "relative",
+                                        transform: `rotate(${image.angle % 360}deg)`,
+                                        width: landscape ? `${(image.width * 100) / image.height}%` : "101%",
+                                        height: landscape ? "101%" : "auto"
+                                      })
                                 }}
-                                onLoad={event => {
-                                  let rect = Element.rect(event.target);
-                                  console.log("img.onLoad", rect);
-                                }}
+                                onLoad={
+                                  image.width === undefined
+                                    ? event => {
+                                        let img = event.target;
+                                        let rect = Element.rect(img);
+                                        let aspect = rect.width / rect.height;
+                                        let landscape = aspect > 1;
+                                        //console.log("img.onLoad", rect, img, {aspect,landscape});
+                                        Element.setCSS(img, landscape ? { height: `100%`, width: "auto" } : { width: "100%", height: "auto" });
+                                      }
+                                    : undefined
+                                }
                                 onClick={onChoose}
                               />
                             )}
@@ -719,6 +733,12 @@ export const ImageUpload = inject("rootStore")(
 
           .upload-list .upload-list-remove:hover {
             color: #fff;
+          }
+
+
+
+          .upload-card {
+            box-sizing:content-box;
           }
         `}</style>
       </div>

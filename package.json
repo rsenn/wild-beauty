@@ -9,9 +9,13 @@
   "scripts": {
     "dev": "env APP_ENV=development NODE_ENV=development PORT=8444 nodemon -w server -w graphql -w package.json server.js",
     "build": "node_modules/.bin/next build",
-    "start": "env APP_ENV=production NODE_ENV=production node server.js"
+    "start": "env APP_ENV=production NODE_ENV=production node server.js",
+    "asbuild:untouched": "asc assembly/index.ts -b build/untouched.wasm -t build/untouched.wat --validate --sourceMap --debug",
+    "asbuild:optimized": "asc assembly/index.ts -b build/optimized.wasm -t build/optimized.wat --validate --sourceMap --optimize",
+    "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized"
   },
   "dependencies": {
+    "@assemblyscript/loader": "^0.9.4",
     "@zeit/next-css": "^1.0.2-canary.2",
     "affinefit": "^1.0.5",
     "animejs": "^3.1.0",
@@ -67,8 +71,8 @@
     "@babel/preset-env": "^7.8.7",
     "@babel/preset-react": "^7.8.3",
     "@babel/runtime-corejs3": "^7.8.7",
+    "assemblyscript": "^0.9.4",
     "babel-eslint": "^10.0.3",
-    "babel-plugin-styled-components": "^1.10.7",
     "eslint": "^4",
     "eslint-plugin-legacy-decorators": "^1.0.0",
     "eslint-plugin-react-hooks": "^2.5.1",

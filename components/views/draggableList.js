@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
-export const DraggableList = ({ data, itemClassName, ...props }) => {
-  const [list, setList] = useState(data);
+export const DraggableList = ({ children, itemClassName, ...props }) => {
+  const [list, setList] = useState(children);
   const [draggedItem, setDraggedItem] = useState(null);
 
   function onDragStartHandle(e, index) {
@@ -27,7 +27,7 @@ export const DraggableList = ({ data, itemClassName, ...props }) => {
         return (
           <li key={index} onDragOver={e => onDragOverHandle(index)} className={itemClassName}>
             <div draggable onDragStart={e => onDragStartHandle(e, index)}>
-              {item}
+              {children}
             </div>
           </li>
         );

@@ -10,6 +10,7 @@ const readableStream = stream.Readable;
 const util = require("util");
 const cquant = require("cquant");
 const dom = require("./lib/dom.es5.js");
+const { PassThrough, Writable } = require("stream");
 const { RGBA, HSLA } = dom;
 const maxWidthOrHeight = 1024;
 
