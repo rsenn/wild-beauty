@@ -31,7 +31,7 @@
     "dotenv-webpack": "^1.7.0",
     "exifr": "^2",
     "express": "^4.17.1",
-    "express-fileupload": "^1.1.6",
+    "express-fileupload": "^1.1.9",
     "jpegquality": "^0.1.7",
     "jsonwebtoken": "^8.5.1",
     "memory-stream": "^1.0.0",
