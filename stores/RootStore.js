@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import { action, autorun, observable, set, get, values, toJS } from "mobx";
 import { Queries } from "./queries.js";
 import dom, { Element, Timer } from "../lib/dom.js";
@@ -68,7 +69,7 @@ export class RootStore extends Queries {
       }
     }
     if(global.window) {
-      if(!window.devp) window.devp = new devpane();
+      if(!window.devp) window.devp = new devpane('root','.pane', ReactDOM);
       window.rs = this;
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
     }

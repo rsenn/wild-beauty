@@ -1,7 +1,10 @@
-const Blob = require("blob");
+//const Blob = require("blob");
+import Blob from 'blob';
 
-const axios = require("../lib/axios.es5.js").httpClient;
-const Util = require("../lib/util.es5.js").default;
+import { httpClient as axios } from 'axios';
+import Util from '../lib/util.js';
+//const axios = require("../lib/axios.es5.js").httpClient;
+//const Util = require("../lib/util.es5.js").default;
 
 //Util.ucfirst = str => str.substring(0, 1).toUpperCase() + str.substring(1);
 
