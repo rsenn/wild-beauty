@@ -79,5 +79,8 @@
     "point-at-length": "^1.1.0",
     "prettyoutput": "^1.2.0",
     "typescript": "^3.8.3"
+  },
+  "browser": {
+    "child_process": false
   }
 }

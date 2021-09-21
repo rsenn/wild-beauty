@@ -11,7 +11,7 @@ export const ItemTile = inject("rootStore")(
       if(!item.photos || !item.photos.length)
         item.photos = [
           {
-            href: "/static/img/no-image.svg",
+            href: "static/img/no-image.svg",
             width: 100,
             height: 100,
             id: -1

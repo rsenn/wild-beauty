@@ -606,7 +606,7 @@ class TreePage extends React.Component {
                   const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                   const haveImage = photo_id >= 0;
                   let photo = haveImage ? item.photos[0].photo : null;
-                  const path = haveImage ? `/api/photo/get/${photo_id}` : "/static/img/no-image.svg";
+                  const path = haveImage ? `/api/photo/get/${photo_id}` : "static/img/no-image.svg";
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
                   let { data, name, parent, type, children, users } = item;

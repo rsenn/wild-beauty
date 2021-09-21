@@ -9,6 +9,7 @@ import Layout from "../components/layout.js";
 import { CubeSpinner } from "../components/simple/cubeSpinner.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
 import { trkl } from "../lib/trkl.js";
+import { basePath } from "../next.config.js";
 
 const Home = inject("rootStore")(
   observer(props => {
@@ -34,11 +35,11 @@ const Home = inject("rootStore")(
       <Layout hideNav={true}>
         <Head>
           <title>Home</title>
-          <link rel='icon' href='/favicon.ico' />
+          <link rel='icon' href='favicon.ico' />
         </Head>
         <div className={"flex-vertical"} style={{ opacity: 1, display: "flex" }}>
           <div
-            id='t-logo'
+            id='t-log'
             className='t-logo'
             style={{
               transformStyle: "preserve-3d",
@@ -46,7 +47,7 @@ const Home = inject("rootStore")(
               /*transform: ``*/
             }}
           >
-            <img src={"/static/img/logo-transparent.png"} style={{ width: "80vw", maxWidth: "1280px" }} />
+            <img src={basePath+`/static/img/logo-transparent.png`} style={{ width: "80vw", maxWidth: "1280px" }} />
           </div>
         </div>
         <div
@@ -101,9 +102,9 @@ const Home = inject("rootStore")(
         </div>
         {/*onClick={this.handleNext}*/}
         <div className={"button-next"}>
-          <Link href={"/browse"}>
+          <Link href={"browse"}>
             <a>
-              <img className={"fill-parent"} width={64} height={64} src={"/static/img/arrow-next.svg"} style={{ opacity: rootStore.state.loading ? 0 : 1 }} />
+              <img className={"fill-parent"} width={64} height={64} src={basePath+"/static/img/arrow-next.svg"} style={{ opacity: rootStore.state.loading ? 0 : 1 }} />
             </a>
           </Link>
           <CubeSpinner className={"fill-parent"} width={"3.165em"} height={"3.165em"} loading={rootStore.state.loading} />

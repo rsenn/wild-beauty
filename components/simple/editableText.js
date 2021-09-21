@@ -52,7 +52,7 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
           onEditConfirm(e);
         }}
       >
-        <img src={"/static/img/icon-apply.svg"} />
+        <img src={"static/img/icon-apply.svg"} />
       </button>
       <button
         onClick={e => {
@@ -60,7 +60,7 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
           onEditCancel(e);
         }}
       >
-        <img src={"/static/img/icon-cancel.svg"} />
+        <img src={"static/img/icon-cancel.svg"} />
       </button>
     </React.Fragment>
   ) : (
@@ -71,7 +71,7 @@ export const EditableText = ({ className, style, multiline = false, wrapFlex = t
         </WrapIf>
       </div>
       <button onClick={onEditBegin}>
-        <img src={"/static/img/icon-edit.svg"} />
+        <img src={"static/img/icon-edit.svg"} />
       </button>
     </React.Fragment>
   );

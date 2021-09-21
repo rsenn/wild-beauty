@@ -11,7 +11,7 @@ import { makeItemToOption, findInTree } from "../../stores/functions.js";
 //import SortableTree from "react-sortable-tree";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
-import "../../static/css/react-dropdown-tree-select.css";
+import "../..static/css/react-dropdown-tree-select.css";
 
 //import "react-sortable-tree/style.css"; // once app
 
@@ -143,7 +143,7 @@ export const ItemEditor = inject(
               }}
               className={"save"}
             >
-              <img src={"/static/img/action-save-new.svg"} />
+              <img src={"static/img/action-save-new.svg"} />
             </button>
           </AddItemBar>
         </div>

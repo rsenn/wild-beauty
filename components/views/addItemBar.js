@@ -5,7 +5,7 @@ export const AddItemBar = ({ onAdd, ...props }) => {
   return (
     <div className={"add-item-bar"}>
       <button className={"button-add"} onClick={onAdd}>
-        <img src={"/static/img/icon-editbox-add.svg"} width={64} height={32} />
+        <img src={"static/img/icon-editbox-add.svg"} width={64} height={32} />
       </button>
       {props.children}
       <style jsx>{`

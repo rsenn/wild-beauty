@@ -8,7 +8,7 @@ export const Layout = ({ title = "The wild beauty company", toastsClick, classNa
   <React.Fragment>
     <Head>
       <title>{title}</title>
-      <link rel='icon' href='/favicon.ico' />
+      <link rel='icon' href='favicon.ico' />
     </Head>
     <div className={classNames("page-layout", className)} style={{ overflowY: scroll ? "auto" : "hidden", overflowX: "hidden" }} {...props}>
       {hideNav ? undefined : <Nav />}

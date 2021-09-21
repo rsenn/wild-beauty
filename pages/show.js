@@ -338,7 +338,7 @@ class Show extends React.Component {
       <div className={"page-layout"} onMouseMove={this.mouseEvent} onMouseDown={this.mouseEvent}>
         <Head>
           <title>Show</title>
-          <link rel='icon' href='/favicon.ico' />
+          <link rel='icon' href='favicon.ico' />
         </Head>
         <Nav loading={rootStore.state.loading} />
         <TreeView
@@ -366,7 +366,7 @@ class Show extends React.Component {
                   const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                   const haveImage = photo_id >= 0;
                   let photo = haveImage ? item.photos[0].photo : null;
-                  const path = haveImage ? `/api/photo/get/${photo_id}` : "/static/img/no-image.svg";
+                  const path = haveImage ? `/api/photo/get/${photo_id}` : "static/img/no-image.svg";
                   const opacity = photo_id >= 0 ? 1 : 0.3;
                   if(photo !== null) photo.landscape = photo.width > photo.height;
 

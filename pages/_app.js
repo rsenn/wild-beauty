@@ -133,8 +133,8 @@ class MyApp extends App {
         <style jsx global>{`
           @font-face {
             font-family: "Fixed";
-            src: url("/static/fonts/Fixed-Medium.eot");
-            src: url("/static/fonts/Fixed-Medium.eot?#iefix") format("embedded-opentype"), url("/static/fonts/Fixed-Medium.woff2") format("woff2"), url("/static/fonts/Fixed-Medium.woff") format("woff"), url("/static/fonts/Fixed-Medium.ttf") format("truetype"), url("/static/fonts/Fixed-Medium.svg#Fixed-Medium") format("svg");
+            src: url("static/fonts/Fixed-Medium.eot");
+            src: url("static/fonts/Fixed-Medium.eot?#iefix") format("embedded-opentype"), url("static/fonts/Fixed-Medium.woff2") format("woff2"), url("static/fonts/Fixed-Medium.woff") format("woff"), url("static/fonts/Fixed-Medium.ttf") format("truetype"), url("static/fonts/Fixed-Medium.svg#Fixed-Medium") format("svg");
             font-weight: 500;
             font-style: normal;
           }
@@ -142,7 +142,7 @@ class MyApp extends App {
           body {
             font-family: Fixed;
             font-size: 13px;
-            background: url(/static/img/tile-background.png) repeat;
+            background: url(static/img/tile-background.png) repeat;
             background-size: auto 50vmin;
             margin: 0;
           }
