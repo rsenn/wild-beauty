@@ -15,9 +15,7 @@ import { trkl } from "../lib/trkl.js";
 import { Graph } from "../lib/fd-graph.js";
 import { makeItemToOption, findInTree, treeToGraph } from "../stores/functions.js";
 import { lazyInitializer } from "../lib/lazyInitializer.js";
-import "../static/css/grid.css";
 import DropdownTreeSelect from "react-dropdown-tree-select";
-import "../static/css/react-dropdown-tree-select.css";
 import { TreeGraph } from "../components/views/treeGraph.js";
 import Alea from "../lib/alea.js";
 
@@ -205,7 +203,7 @@ class TreePage extends React.Component {
       spacing: 12,
       timestep: 300,
       prng: (function() {
-        var rng = new Alea(query.seed || 1341);
+        var rng = new Alea(query ? query.seed : 1341);
         console.log("rng:", rng);
         return rng;
       })()
@@ -235,7 +233,8 @@ class TreePage extends React.Component {
 
     let root = rootStore.getTree(rootItem.id, it => Util.filterOutKeys(toJS(it), ["childIds", "users"]));
 
-    //console.log("root:", toJS(root));
+    /* console.log("g:", g);
+     console.log("root:", toJS(root));*/
 
     treeToGraph(g, root, item => {
       let { children, parent, users, photos, ...restOfItem } = item;
@@ -253,8 +252,7 @@ class TreePage extends React.Component {
       }
 
       // if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
-
-      // console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
+   //console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
       return true;
     });
 
@@ -325,7 +323,7 @@ class TreePage extends React.Component {
     }
     rootStore.items.clear();
     this.tree = rootStore.getItem(rootStore.rootItemId, makeItemToOption());
-    if(this.props.params.id !== undefined) {
+    if(this.props.params?.id !== undefined) {
       this.state.view = "item";
       this.state.itemId = parseInt(this.props.params.id);
     } else if(this.tree) {

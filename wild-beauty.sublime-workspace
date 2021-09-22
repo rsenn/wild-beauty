@@ -28,29 +28,1663 @@
 	"buffers":
 	[
 		{
-			"contents": "hvOffset\ninit()\ne =>\ne =>\ne =>\n.ondragstart\nr =>\nitem =>\nfindIndex(point)\nitem =>\ncreate(line, event, origin)\nupdate(line, event, origin)\n(rect, i) =>\ndestroy(event, origin)\n(rect, i) =>\n({ images, rootStore, onChoose, onDelete, onRotate, shiftState, ...props }) =>\nasync response =>\nasync photo =>\narg =>\n(uploadedImages, options) =>\n(a, b) =>\n(image, index) =>\nevent =>\nevent =>\n() =>",
+			"contents": "TreePage\n  static getInitialProps(ctx)\n  function()\n  constructor(props)\n  checkTagRemove()\n  componentDidMount()\n  componentDidUpdate()\n  getNum(elem, name)\n  getId(elem)\n  selectNode(item)\n  treeSelEvent(type, arg)\n  render()",
 			"settings":
 			{
-				"buffer_size": 386,
+				"buffer_size": 227,
 				"line_ending": "Unix",
 				"name": "𝌆 Outline",
 				"scratch": true
-			}
+			},
+			"undo_stack":
+			[
+				[
+					1,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/lib/trkl.js",
+						"symkeys":
+						[
+						],
+						"symlist":
+						[
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAACCAQAAaHZPZmZzZXQKaW5pdCgpCmUgPT4KZSA9PgplID0+Ci5vbmRyYWdzdGFydApyID0+Cml0ZW0gPT4KZmluZEluZGV4KHBvaW50KQppdGVtID0+CmNyZWF0ZShsaW5lLCBldmVudCwgb3JpZ2luKQp1cGRhdGUobGluZSwgZXZlbnQsIG9yaWdpbikKKHJlY3QsIGkpID0+CmRlc3Ryb3koZXZlbnQsIG9yaWdpbikKKHJlY3QsIGkpID0+Cih7IGltYWdlcywgcm9vdFN0b3JlLCBvbkNob29zZSwgb25EZWxldGUsIG9uUm90YXRlLCBzaGlmdFN0YXRlLCAuLi5wcm9wcyB9KSA9Pgphc3luYyByZXNwb25zZSA9Pgphc3luYyBwaG90byA9PgphcmcgPT4KKHVwbG9hZGVkSW1hZ2VzLCBvcHRpb25zKSA9PgooYSwgYikgPT4KKGltYWdlLCBpbmRleCkgPT4KZXZlbnQgPT4KZXZlbnQgPT4KKCkgPT4AAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					2,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/query.js",
+						"symkeys":
+						[
+							[
+								730,
+								741
+							],
+							[
+								2555,
+								2564
+							],
+							[
+								2605,
+								2611
+							],
+							[
+								3319,
+								3334
+							],
+							[
+								3816,
+								3833
+							],
+							[
+								3890,
+								3899
+							],
+							[
+								3920,
+								3924
+							],
+							[
+								4019,
+								4023
+							],
+							[
+								4075,
+								4084
+							],
+							[
+								4350,
+								4358
+							],
+							[
+								4441,
+								4449
+							],
+							[
+								4586,
+								4594
+							]
+						],
+						"symlist":
+						[
+							"async () =>",
+							"(a, b) =>",
+							"rec =>",
+							"(key, value) =>",
+							"([key, value]) =>",
+							"(a, b) =>",
+							"f =>",
+							"f =>",
+							"(f, i) =>",
+							"field =>",
+							"field =>",
+							"field =>"
+						]
+					},
+					"AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					3,
+					2,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/query.js",
+						"symkeys":
+						[
+							[
+								727,
+								738
+							],
+							[
+								2552,
+								2561
+							],
+							[
+								2602,
+								2608
+							],
+							[
+								3316,
+								3331
+							],
+							[
+								3813,
+								3830
+							],
+							[
+								3887,
+								3896
+							],
+							[
+								3917,
+								3921
+							],
+							[
+								4016,
+								4020
+							],
+							[
+								4072,
+								4081
+							],
+							[
+								4347,
+								4355
+							],
+							[
+								4438,
+								4446
+							],
+							[
+								4583,
+								4591
+							]
+						],
+						"symlist":
+						[
+							"async () =>",
+							"(a, b) =>",
+							"rec =>",
+							"(key, value) =>",
+							"([key, value]) =>",
+							"(a, b) =>",
+							"f =>",
+							"f =>",
+							"(f, i) =>",
+							"field =>",
+							"field =>",
+							"field =>"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					4,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/stores/api.js",
+						"symkeys":
+						[
+						],
+						"symlist":
+						[
+						]
+					},
+					"AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					5,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/query.js",
+						"symkeys":
+						[
+							[
+								727,
+								738
+							],
+							[
+								2552,
+								2561
+							],
+							[
+								2602,
+								2608
+							],
+							[
+								3316,
+								3331
+							],
+							[
+								3813,
+								3830
+							],
+							[
+								3887,
+								3896
+							],
+							[
+								3917,
+								3921
+							],
+							[
+								4016,
+								4020
+							],
+							[
+								4072,
+								4081
+							],
+							[
+								4347,
+								4355
+							],
+							[
+								4438,
+								4446
+							],
+							[
+								4583,
+								4591
+							]
+						],
+						"symlist":
+						[
+							"async () =>",
+							"(a, b) =>",
+							"rec =>",
+							"(key, value) =>",
+							"([key, value]) =>",
+							"(a, b) =>",
+							"f =>",
+							"f =>",
+							"(f, i) =>",
+							"field =>",
+							"field =>",
+							"field =>"
+						]
+					},
+					"AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					6,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/lib/trkl.js",
+						"symkeys":
+						[
+							[
+								245,
+								380
+							],
+							[
+								401,
+								403
+							],
+							[
+								409,
+								563
+							],
+							[
+								687,
+								862
+							],
+							[
+								894,
+								901
+							],
+							[
+								929,
+								949
+							],
+							[
+								966,
+								1039
+							],
+							[
+								1070,
+								1305
+							],
+							[
+								1345,
+								1827
+							],
+							[
+								1840,
+								1849
+							],
+							[
+								1882,
+								2024
+							],
+							[
+								2065,
+								2097
+							],
+							[
+								2140,
+								2193
+							],
+							[
+								2278,
+								2280
+							],
+							[
+								2283,
+								2352
+							],
+							[
+								2360,
+								2366
+							],
+							[
+								2369,
+								2408
+							],
+							[
+								2418,
+								2429
+							],
+							[
+								2524,
+								2527
+							],
+							[
+								2535,
+								2543
+							],
+							[
+								2546,
+								2574
+							],
+							[
+								2580,
+								2640
+							],
+							[
+								2653,
+								2702
+							],
+							[
+								2737,
+								2743
+							],
+							[
+								2781,
+								2832
+							],
+							[
+								2836,
+								2883
+							],
+							[
+								2904,
+								2953
+							],
+							[
+								2965,
+								2972
+							],
+							[
+								2980,
+								2984
+							],
+							[
+								2987,
+								3021
+							],
+							[
+								3027,
+								3031
+							],
+							[
+								3045,
+								3063
+							],
+							[
+								3071,
+								3079
+							],
+							[
+								3082,
+								3228
+							],
+							[
+								3239,
+								3243
+							],
+							[
+								3327,
+								3359
+							],
+							[
+								3433,
+								3494
+							],
+							[
+								3504,
+								3533
+							],
+							[
+								3541,
+								3545
+							],
+							[
+								3548,
+								3638
+							],
+							[
+								3936,
+								3949
+							],
+							[
+								4076,
+								4096
+							],
+							[
+								4104,
+								4110
+							],
+							[
+								4113,
+								4213
+							],
+							[
+								4249,
+								4271
+							],
+							[
+								4274,
+								4315
+							],
+							[
+								4346,
+								4366
+							],
+							[
+								4404,
+								4411
+							],
+							[
+								4413,
+								4461
+							],
+							[
+								4480,
+								4510
+							],
+							[
+								4535,
+								4542
+							]
+						],
+						"symlist":
+						[
+							"function trkl(initValue) { let value = initValue; let subscribers = []; let self = function(...args) { return args.length ? ",
+							": ",
+							"; }; //Using string keys tells Uglify that we intend to export these symbols self.subscribe = subscribe; self['bind_to'] = (obj, prop) => { ",
+							"; return self; }; //declaring as a private function means the minifier can scrub its name on internal references function subscribe(subscriber, immediate) { if(",
+							"== -1) ",
+							"; if(immediate) ",
+							"; return this; } self.unsubscribe = function(subscriber) { ",
+							"; return this; }; function write(newValue, thisObj) { let oldValue = value; if(newValue === oldValue && (newValue === null || typeof newValue !== 'object')) { return; //bail out } value = newValue; ",
+							"; //We will now rewind through as many effects as we have subscribers //We don't recheck the length during the loop, as subscribers may be mutated //(e.g. when a subscribers unsubs itself) let subCount = subscribers.length; for(let i = 0; i < subCount; i++) { //If a sub throws an error, the effects array will just keep growing and growing. //It won't stop operating properly, but it might eat memory. We're okay with this, I guess? let fn = ",
+							"; ",
+							"; } } function read() { let runningComputation = computedTracker[computedTracker.length - 1]; if(runningComputation) { ",
+							"; } return value; } ",
+							"; self.subscribers = subscribers; return self; }",
+							"is",
+							"arg => typeof arg == 'function' && typeof arg.subscribe == 'function'",
+							"getset",
+							"function(arg) { let trkl = arg || new",
+							"; return ",
+							"; }",
+							"computed",
+							"function(fn) { let self = ",
+							"; let computationToken = { _subscriber: runComputed }; ",
+							"; return self; function runComputed() { ",
+							"; ",
+							"; let errors, result; try { result = ",
+							"; } catch(e) { errors = e; } ",
+							"; if(errors) { throw errors; } ",
+							"; } }",
+							"from",
+							"function(executor) { let self = ",
+							"; ",
+							"; return self; }",
+							"property",
+							"function(object, name, options = { enumerable: true, configurable: true, deletable: false }) { const { value, ...opts } = options; let self = ",
+							"; ",
+							"; if(options.deletable) { ",
+							"; self.delete = () => { delete object[name]; ",
+							"; }; } return self; }",
+							"bind",
+							"function(object, name, handler) { let self = handler; if(typeof name == 'object') ",
+							"; else ",
+							"; return object; }",
+							"object",
+							"function(handlers, ret = {}) { for(let prop in handlers) { ret[prop] = handlers[prop](); ",
+							"; } return ret; }",
+							"function detectCircularity(token) { if(",
+							"!== -1) { throw ",
+							"; } }",
+							"function remove(array, item) { let position = ",
+							"; if(position !== -1) { ",
+							"; } }"
+						]
+					},
+					"AQAAAAAAAAAAAAAANQgAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					7,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/components/views/imageUpload.js",
+						"symkeys":
+						[
+							[
+								686,
+								694
+							],
+							[
+								697,
+								977
+							],
+							[
+								1081,
+								1107
+							],
+							[
+								1142,
+								1143
+							],
+							[
+								1436,
+								1468
+							],
+							[
+								1499,
+								1529
+							],
+							[
+								1973,
+								1978
+							],
+							[
+								1982,
+								2027
+							],
+							[
+								2066,
+								2090
+							],
+							[
+								2106,
+								2111
+							],
+							[
+								2115,
+								2178
+							],
+							[
+								2184,
+								2217
+							],
+							[
+								2235,
+								2305
+							],
+							[
+								2309,
+								2359
+							],
+							[
+								2377,
+								2470
+							],
+							[
+								2477,
+								2478
+							],
+							[
+								2484,
+								2552
+							],
+							[
+								3019,
+								3031
+							],
+							[
+								3045,
+								3112
+							],
+							[
+								3116,
+								3170
+							],
+							[
+								3177,
+								3178
+							],
+							[
+								3184,
+								3273
+							],
+							[
+								3536,
+								3600
+							]
+						],
+						"symlist":
+						[
+							"hvOffset",
+							"(width, height) => { let w = width > height ? (width * 100) / height : 100; let h = width > height ? 100 : (height * 100) / width; let hr, vr; if(h > 100) { hr = 0; vr = h - 100; } else if(w > 100) { hr = w - 100; vr = 0; } return { w, h, hr, vr }; }",
+							"init() { this.items = ",
+							".",
+							"; if(this.rects) this.rects.",
+							"; this.rects = this.items.",
+							"; }",
+							"findIndex(point) { let item = this.items.",
+							"; return this.items.",
+							"; }",
+							"create(line, event, origin) { if(!this.items) { this.",
+							"; } this.index[0] = this.",
+							"; //console.log(\"SelectionListener.create\", line, this.index); }",
+							"update(line, event, origin) { const to = this.",
+							"; if(this.index[1] == to) return; this.index[1] = to; let indexes = this.index.",
+							".",
+							"; if(indexes[0] == -1) indexes[0] = indexes[1]; this.rects.",
+							"; this.",
+							"; //console.log(\"SelectionListener.update\", line, indexes); }",
+							"destroy(event, origin) { let indexes = this.index.",
+							".",
+							"; if(indexes[0] == -1) indexes[0] = indexes[1]; if(this.rects) this.rects.",
+							"; /* this.index = [-1, -1]; this.items = [];*/ }"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAA1CAAAICB0cmtsKGluaXRWYWx1ZSkgeyBsZXQgdmFsdWUgPSBpbml0VmFsdWU7IGxldCBzdWJzY3JpYmVycyA9IFtdOyBsZXQgc2VsZiA9IGZ1bmN0aW9uKC4uLmFyZ3MpIHsgcmV0dXJuIGFyZ3MubGVuZ3RoID8gCjsgcmV0dXJuIHNlbGY7IH07IC8vZGVjbGFyaW5nIGFzIGEgcHJpdmF0ZSBmdW5jdGlvbiBtZWFucyB0aGUgbWluaWZpZXIgY2FuIHNjcnViIGl0cyBuYW1lIG9uIGludGVybmFsIHJlZmVyZW5jZXMgZnVuY3Rpb24gc3Vic2NyaWJlKHN1YnNjcmliZXIsIGltbWVkaWF0ZSkgeyBpZigKOyBpZihpbW1lZGlhdGUpIAo7IHJldHVybiB0aGlzOyB9IHNlbGYudW5zdWJzY3JpYmUgPSBmdW5jdGlvbihzdWJzY3JpYmVyKSB7IAo7IHJldHVybiB0aGlzOyB9OyBmdW5jdGlvbiB3cml0ZShuZXdWYWx1ZSwgdGhpc09iaikgeyBsZXQgb2xkVmFsdWUgPSB2YWx1ZTsgaWYobmV3VmFsdWUgPT09IG9sZFZhbHVlICYmIChuZXdWYWx1ZSA9PT0gbnVsbCB8fCB0eXBlb2YgbmV3VmFsdWUgIT09ICdvYmplY3QnKSkgeyByZXR1cm47IC8vYmFpbCBvdXQgfSB2YWx1ZSA9IG5ld1ZhbHVlOyAKOyAvL1dlIHdpbGwgbm93IHJld2luZCB0aHJvdWdoIGFzIG1hbnkgZWZmZWN0cyBhcyB3ZSBoYXZlIHN1YnNjcmliZXJzIC8vV2UgZG9uJ3QgcmVjaGVjayB0aGUgbGVuZ3RoIGR1cmluZyB0aGUgbG9vcCwgYXMgc3Vic2NyaWJlcnMgbWF5IGJlIG11dGF0ZWQgLy8oZS5nLiB3aGVuIGEgc3Vic2NyaWJlcnMgdW5zdWJzIGl0c2VsZikgbGV0IHN1YkNvdW50ID0gc3Vic2NyaWJlcnMubGVuZ3RoOyBmb3IobGV0IGkgPSAwOyBpIDwgc3ViQ291bnQ7IGkrKykgeyAvL0lmIGEgc3ViIHRocm93cyBhbiBlcnJvciwgdGhlIGVmZmVjdHMgYXJyYXkgd2lsbCBqdXN0IGtlZXAgZ3Jvd2luZyBhbmQgZ3Jvd2luZy4gLy9JdCB3b24ndCBzdG9wIG9wZXJhdGluZyBwcm9wZXJseSwgYnV0IGl0IG1pZ2h0IGVhdCBtZW1vcnkuIFdlJ3JlIG9rYXkgd2l0aCB0aGlzLCBJIGd1ZXNzPyBsZXQgZm4gPSAKOyB9IH0gZnVuY3Rpb24gcmVhZCgpIHsgbGV0IHJ1bm5pbmdDb21wdXRhdGlvbiA9IGNvbXB1dGVkVHJhY2tlcltjb21wdXRlZFRyYWNrZXIubGVuZ3RoIC0gMV07IGlmKHJ1bm5pbmdDb21wdXRhdGlvbikgeyAKOyB9IHJldHVybiB2YWx1ZTsgfSAKOyBzZWxmLnN1YnNjcmliZXJzID0gc3Vic2NyaWJlcnM7IHJldHVybiBzZWxmOyB9CiAgZ2V0c2V0CiAgZnVuY3Rpb24oYXJnKSB7IGxldCB0cmtsID0gYXJnIHx8IG5ldwo7IHJldHVybiAKICBjb21wdXRlZAogIGZ1bmN0aW9uKGZuKSB7IGxldCBzZWxmID0gCjsgbGV0IGNvbXB1dGF0aW9uVG9rZW4gPSB7IF9zdWJzY3JpYmVyOiBydW5Db21wdXRlZCB9OyAKOyByZXR1cm4gc2VsZjsgZnVuY3Rpb24gcnVuQ29tcHV0ZWQoKSB7IAo7IGxldCBlcnJvcnMsIHJlc3VsdDsgdHJ5IHsgcmVzdWx0ID0gCjsgfSBjYXRjaChlKSB7IGVycm9ycyA9IGU7IH0gCjsgaWYoZXJyb3JzKSB7IHRocm93IGVycm9yczsgfSAKICBmcm9tCiAgZnVuY3Rpb24oZXhlY3V0b3IpIHsgbGV0IHNlbGYgPSAKOyByZXR1cm4gc2VsZjsgfQogIHByb3BlcnR5CiAgZnVuY3Rpb24ob2JqZWN0LCBuYW1lLCBvcHRpb25zID0geyBlbnVtZXJhYmxlOiB0cnVlLCBjb25maWd1cmFibGU6IHRydWUsIGRlbGV0YWJsZTogZmFsc2UgfSkgeyBjb25zdCB7IHZhbHVlLCAuLi5vcHRzIH0gPSBvcHRpb25zOyBsZXQgc2VsZiA9IAo7IGlmKG9wdGlvbnMuZGVsZXRhYmxlKSB7IAo7IH07IH0gcmV0dXJuIHNlbGY7IH0KICBiaW5kCiAgZnVuY3Rpb24ob2JqZWN0LCBuYW1lLCBoYW5kbGVyKSB7IGxldCBzZWxmID0gaGFuZGxlcjsgaWYodHlwZW9mIG5hbWUgPT0gJ29iamVjdCcpIAo7IGVsc2UgCjsgcmV0dXJuIG9iamVjdDsgfQogIG9iamVjdAogIGZ1bmN0aW9uKGhhbmRsZXJzLCByZXQgPSB7fSkgeyBmb3IobGV0IHByb3AgaW4gaGFuZGxlcnMpIHsgcmV0W3Byb3BdID0gaGFuZGxlcnNbcHJvcF0oKTsgCjsgfSByZXR1cm4gcmV0OyB9CiAgZGV0ZWN0Q2lyY3VsYXJpdHkodG9rZW4pIHsgaWYoCiE9PSAtMSkgeyB0aHJvdyAKICByZW1vdmUoYXJyYXksIGl0ZW0pIHsgbGV0IHBvc2l0aW9uID0gCjsgaWYocG9zaXRpb24gIT09IC0xKSB7IAAAAAAAAAAA4gIAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					8,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/pages/test.js",
+						"symkeys":
+						[
+							[
+								678,
+								693
+							],
+							[
+								735,
+								740
+							],
+							[
+								769,
+								781
+							],
+							[
+								1327,
+								1341
+							],
+							[
+								1514,
+								1532
+							],
+							[
+								1545,
+								1563
+							]
+						],
+						"symlist":
+						[
+							"getPrng = () =>",
+							"() =>",
+							"Test = () =>",
+							" event =>",
+							"onError = event =>",
+							"onImage = event =>"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAADiAgAAICBodk9mZnNldAogIGluaXQoKSB7IHRoaXMuaXRlbXMgPSAKOyBpZih0aGlzLnJlY3RzKSB0aGlzLnJlY3RzLgo7IHRoaXMucmVjdHMgPSB0aGlzLml0ZW1zLgogIGZpbmRJbmRleChwb2ludCkgeyBsZXQgaXRlbSA9IHRoaXMuaXRlbXMuCjsgcmV0dXJuIHRoaXMuaXRlbXMuCiAgY3JlYXRlKGxpbmUsIGV2ZW50LCBvcmlnaW4pIHsgaWYoIXRoaXMuaXRlbXMpIHsgdGhpcy4KOyB9IHRoaXMuaW5kZXhbMF0gPSB0aGlzLgo7IC8vY29uc29sZS5sb2coIlNlbGVjdGlvbkxpc3RlbmVyLmNyZWF0ZSIsIGxpbmUsIHRoaXMuaW5kZXgpOyB9CiAgdXBkYXRlKGxpbmUsIGV2ZW50LCBvcmlnaW4pIHsgY29uc3QgdG8gPSB0aGlzLgo7IGlmKHRoaXMuaW5kZXhbMV0gPT0gdG8pIHJldHVybjsgdGhpcy5pbmRleFsxXSA9IHRvOyBsZXQgaW5kZXhlcyA9IHRoaXMuaW5kZXguCjsgaWYoaW5kZXhlc1swXSA9PSAtMSkgaW5kZXhlc1swXSA9IGluZGV4ZXNbMV07IHRoaXMucmVjdHMuCjsgdGhpcy4KOyAvL2NvbnNvbGUubG9nKCJTZWxlY3Rpb25MaXN0ZW5lci51cGRhdGUiLCBsaW5lLCBpbmRleGVzKTsgfQogIGRlc3Ryb3koZXZlbnQsIG9yaWdpbikgeyBsZXQgaW5kZXhlcyA9IHRoaXMuaW5kZXguCjsgaWYoaW5kZXhlc1swXSA9PSAtMSkgaW5kZXhlc1swXSA9IGluZGV4ZXNbMV07IGlmKHRoaXMucmVjdHMpIHRoaXMucmVjdHMuCjsgLyp0aGlzLmluZGV4ID0gWy0xLCAtMV07IHRoaXMuaXRlbXMgPSBbXTsqLyB9AAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					9,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/pages/tree.js",
+						"symkeys":
+						[
+							[
+								1295,
+								1333
+							],
+							[
+								1469,
+								1514
+							],
+							[
+								4566,
+								4574
+							],
+							[
+								5103,
+								5108
+							],
+							[
+								5378,
+								5411
+							],
+							[
+								6668,
+								6677
+							],
+							[
+								6788,
+								6795
+							],
+							[
+								7057,
+								7067
+							],
+							[
+								7261,
+								7307
+							],
+							[
+								7873,
+								7878
+							],
+							[
+								8017,
+								8023
+							],
+							[
+								8144,
+								8152
+							],
+							[
+								9530,
+								9545
+							],
+							[
+								9552,
+								9567
+							],
+							[
+								10138,
+								10145
+							],
+							[
+								10255,
+								10273
+							],
+							[
+								11101,
+								11106
+							],
+							[
+								11759,
+								11775
+							],
+							[
+								11924,
+								11929
+							],
+							[
+								11987,
+								11993
+							],
+							[
+								12036,
+								12044
+							],
+							[
+								12202,
+								12221
+							],
+							[
+								12304,
+								12324
+							],
+							[
+								12373,
+								12382
+							],
+							[
+								12402,
+								12411
+							],
+							[
+								12631,
+								12638
+							],
+							[
+								13483,
+								13514
+							],
+							[
+								13573,
+								13597
+							],
+							[
+								13705,
+								13721
+							],
+							[
+								13791,
+								13799
+							],
+							[
+								13858,
+								13881
+							],
+							[
+								14002,
+								14010
+							],
+							[
+								14342,
+								14351
+							],
+							[
+								14614,
+								14619
+							],
+							[
+								14680,
+								14689
+							],
+							[
+								15315,
+								15319
+							],
+							[
+								15788,
+								15792
+							],
+							[
+								15936,
+								15940
+							],
+							[
+								17169,
+								17180
+							],
+							[
+								17641,
+								17649
+							],
+							[
+								17800,
+								17818
+							],
+							[
+								17833,
+								17851
+							],
+							[
+								18008,
+								18017
+							],
+							[
+								18095,
+								18130
+							],
+							[
+								18370,
+								18374
+							]
+						],
+						"symlist":
+						[
+							"insertParent = (element, newParent) =>",
+							"removeParent = (element, pred = e => true) =>",
+							"TreePage",
+							"() =>",
+							"static async getInitialProps(ctx)",
+							"(a, b) =>",
+							"item =>",
+							"function()",
+							"({ photos, children, users, key, ...item }) =>",
+							"id =>",
+							" it =>",
+							" item =>",
+							" item =>",
+							" item =>",
+							"item =>",
+							"constructor(props)",
+							" i =>",
+							"checkTagRemove()",
+							" e =>",
+							" () =>",
+							" node =>",
+							"componentDidMount()",
+							"componentDidUpdate()",
+							" event =>",
+							" event =>",
+							"rect =>",
+							" function getNum(elem, name)",
+							" function getId(elem)",
+							"selectNode(item)",
+							"child =>",
+							"treeSelEvent(type, arg)",
+							" item =>",
+							" event =>",
+							" e =>",
+							" event =>",
+							"e =>",
+							"p =>",
+							"p =>",
+							"tend = e =>",
+							"render()",
+							"onError = event =>",
+							"onImage = event =>",
+							" event =>",
+							"makeTreeSelEvent = name => event =>",
+							"e =>"
+						]
+					},
+					"AQAAAAAAAAAAAAAA4wAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					10,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/stores/functions.js",
+						"symkeys":
+						[
+							[
+								134,
+								153
+							],
+							[
+								223,
+								240
+							],
+							[
+								295,
+								299
+							],
+							[
+								378,
+								382
+							],
+							[
+								406,
+								415
+							],
+							[
+								458,
+								487
+							],
+							[
+								799,
+								821
+							],
+							[
+								1094,
+								1113
+							],
+							[
+								1339,
+								1390
+							],
+							[
+								1513,
+								1521
+							],
+							[
+								1545,
+								1550
+							],
+							[
+								2604,
+								2609
+							],
+							[
+								3444,
+								3457
+							],
+							[
+								3554,
+								3579
+							],
+							[
+								3879,
+								3903
+							],
+							[
+								4031,
+								4035
+							],
+							[
+								4142,
+								4163
+							],
+							[
+								4222,
+								4260
+							]
+						],
+						"symlist":
+						[
+							"RandomColor = () =>",
+							"maxZIndex = () =>",
+							"e =>",
+							"e =>",
+							"(a, b) =>",
+							"findInTree = (tree, value) =>",
+							"fn = (node, parent) =>",
+							"fn = (acc, node) =>",
+							"treeToGraph = (graph, tree, pred = item => true) =>",
+							" item =>",
+							"it =>",
+							" n =>",
+							"idOf = obj =>",
+							"transformItemData = it =>",
+							"transformItemIds = it =>",
+							"m =>",
+							"transformItem = it =>",
+							"makeItemToOption = selected => item =>"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAADjAAAAVHJlZVBhZ2UKICBzdGF0aWMgZ2V0SW5pdGlhbFByb3BzKGN0eCkKICBmdW5jdGlvbigpCiAgY29uc3RydWN0b3IocHJvcHMpCiAgY2hlY2tUYWdSZW1vdmUoKQogIGNvbXBvbmVudERpZE1vdW50KCkKICBjb21wb25lbnREaWRVcGRhdGUoKQogIGdldE51bShlbGVtLCBuYW1lKQogIGdldElkKGVsZW0pCiAgc2VsZWN0Tm9kZShpdGVtKQogIHRyZWVTZWxFdmVudCh0eXBlLCBhcmcpCiAgcmVuZGVyKCkAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					11,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/pages/tree.js",
+						"symkeys":
+						[
+							[
+								1295,
+								1333
+							],
+							[
+								1469,
+								1514
+							],
+							[
+								4566,
+								4574
+							],
+							[
+								5103,
+								5108
+							],
+							[
+								5378,
+								5411
+							],
+							[
+								6668,
+								6677
+							],
+							[
+								6788,
+								6795
+							],
+							[
+								7057,
+								7067
+							],
+							[
+								7261,
+								7307
+							],
+							[
+								7873,
+								7878
+							],
+							[
+								8017,
+								8023
+							],
+							[
+								8144,
+								8152
+							],
+							[
+								9530,
+								9545
+							],
+							[
+								9552,
+								9567
+							],
+							[
+								10138,
+								10145
+							],
+							[
+								10255,
+								10273
+							],
+							[
+								11101,
+								11106
+							],
+							[
+								11759,
+								11775
+							],
+							[
+								11924,
+								11929
+							],
+							[
+								11987,
+								11993
+							],
+							[
+								12036,
+								12044
+							],
+							[
+								12202,
+								12221
+							],
+							[
+								12304,
+								12324
+							],
+							[
+								12373,
+								12382
+							],
+							[
+								12402,
+								12411
+							],
+							[
+								12631,
+								12638
+							],
+							[
+								13483,
+								13514
+							],
+							[
+								13573,
+								13597
+							],
+							[
+								13705,
+								13721
+							],
+							[
+								13791,
+								13799
+							],
+							[
+								13858,
+								13881
+							],
+							[
+								14002,
+								14010
+							],
+							[
+								14342,
+								14351
+							],
+							[
+								14614,
+								14619
+							],
+							[
+								14680,
+								14689
+							],
+							[
+								15315,
+								15319
+							],
+							[
+								15788,
+								15792
+							],
+							[
+								15936,
+								15940
+							],
+							[
+								17169,
+								17180
+							],
+							[
+								17641,
+								17649
+							],
+							[
+								17800,
+								17818
+							],
+							[
+								17833,
+								17851
+							],
+							[
+								18008,
+								18017
+							],
+							[
+								18095,
+								18130
+							],
+							[
+								18370,
+								18374
+							]
+						],
+						"symlist":
+						[
+							"insertParent = (element, newParent) =>",
+							"removeParent = (element, pred = e => true) =>",
+							"TreePage",
+							"() =>",
+							"static async getInitialProps(ctx)",
+							"(a, b) =>",
+							"item =>",
+							"function()",
+							"({ photos, children, users, key, ...item }) =>",
+							"id =>",
+							" it =>",
+							" item =>",
+							" item =>",
+							" item =>",
+							"item =>",
+							"constructor(props)",
+							" i =>",
+							"checkTagRemove()",
+							" e =>",
+							" () =>",
+							" node =>",
+							"componentDidMount()",
+							"componentDidUpdate()",
+							" event =>",
+							" event =>",
+							"rect =>",
+							" function getNum(elem, name)",
+							" function getId(elem)",
+							"selectNode(item)",
+							"child =>",
+							"treeSelEvent(type, arg)",
+							" item =>",
+							" event =>",
+							" e =>",
+							" event =>",
+							"e =>",
+							"p =>",
+							"p =>",
+							"tend = e =>",
+							"render()",
+							"onError = event =>",
+							"onImage = event =>",
+							" event =>",
+							"makeTreeSelEvent = name => event =>",
+							"e =>"
+						]
+					},
+					"AQAAAAAAAAAAAAAA4wAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					12,
+					4,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/rsenn/wild-beauty/pages/tree.js",
+						"symkeys":
+						[
+							[
+								1295,
+								1333
+							],
+							[
+								1469,
+								1514
+							],
+							[
+								4566,
+								4574
+							],
+							[
+								5103,
+								5108
+							],
+							[
+								5378,
+								5411
+							],
+							[
+								6668,
+								6677
+							],
+							[
+								6788,
+								6795
+							],
+							[
+								7057,
+								7067
+							],
+							[
+								7261,
+								7307
+							],
+							[
+								7873,
+								7878
+							],
+							[
+								8017,
+								8023
+							],
+							[
+								8143,
+								8151
+							],
+							[
+								9529,
+								9544
+							],
+							[
+								9551,
+								9566
+							],
+							[
+								10137,
+								10144
+							],
+							[
+								10254,
+								10272
+							],
+							[
+								11100,
+								11105
+							],
+							[
+								11758,
+								11774
+							],
+							[
+								11923,
+								11928
+							],
+							[
+								11986,
+								11992
+							],
+							[
+								12035,
+								12043
+							],
+							[
+								12201,
+								12220
+							],
+							[
+								12303,
+								12323
+							],
+							[
+								12372,
+								12381
+							],
+							[
+								12401,
+								12410
+							],
+							[
+								12630,
+								12637
+							],
+							[
+								13482,
+								13513
+							],
+							[
+								13572,
+								13596
+							],
+							[
+								13704,
+								13720
+							],
+							[
+								13790,
+								13798
+							],
+							[
+								13857,
+								13880
+							],
+							[
+								14001,
+								14009
+							],
+							[
+								14341,
+								14350
+							],
+							[
+								14613,
+								14618
+							],
+							[
+								14679,
+								14688
+							],
+							[
+								15314,
+								15318
+							],
+							[
+								15787,
+								15791
+							],
+							[
+								15935,
+								15939
+							],
+							[
+								17168,
+								17179
+							],
+							[
+								17640,
+								17648
+							],
+							[
+								17799,
+								17817
+							],
+							[
+								17832,
+								17850
+							],
+							[
+								18007,
+								18016
+							],
+							[
+								18094,
+								18129
+							],
+							[
+								18369,
+								18373
+							]
+						],
+						"symlist":
+						[
+							"insertParent = (element, newParent) =>",
+							"removeParent = (element, pred = e => true) =>",
+							"TreePage",
+							"() =>",
+							"static async getInitialProps(ctx)",
+							"(a, b) =>",
+							"item =>",
+							"function()",
+							"({ photos, children, users, key, ...item }) =>",
+							"id =>",
+							" it =>",
+							" item =>",
+							" item =>",
+							" item =>",
+							"item =>",
+							"constructor(props)",
+							" i =>",
+							"checkTagRemove()",
+							" e =>",
+							" () =>",
+							" node =>",
+							"componentDidMount()",
+							"componentDidUpdate()",
+							" event =>",
+							" event =>",
+							"rect =>",
+							" function getNum(elem, name)",
+							" function getId(elem)",
+							"selectNode(item)",
+							"child =>",
+							"treeSelEvent(type, arg)",
+							" item =>",
+							" event =>",
+							" e =>",
+							" event =>",
+							"e =>",
+							"p =>",
+							"p =>",
+							"tend = e =>",
+							"render()",
+							"onError = event =>",
+							"onImage = event =>",
+							" event =>",
+							"makeTreeSelEvent = name => event =>",
+							"e =>"
+						]
+					},
+					"CAAAAAAAAAAAAAAAAAAAAAAAAADjAAAAVHJlZVBhZ2UKICBzdGF0aWMgZ2V0SW5pdGlhbFByb3BzKGN0eCkKICBmdW5jdGlvbigpCiAgY29uc3RydWN0b3IocHJvcHMpCiAgY2hlY2tUYWdSZW1vdmUoKQogIGNvbXBvbmVudERpZE1vdW50KCkKICBjb21wb25lbnREaWRVcGRhdGUoKQogIGdldE51bShlbGVtLCBuYW1lKQogIGdldElkKGVsZW0pCiAgc2VsZWN0Tm9kZShpdGVtKQogIHRyZWVTZWxFdmVudCh0eXBlLCBhcmcpCiAgcmVuZGVyKCkAAAAAAAAAAOMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADjAAAAVHJlZVBhZ2UKICBzdGF0aWMgZ2V0SW5pdGlhbFByb3BzKGN0eCkKICBmdW5jdGlvbigpCiAgY29uc3RydWN0b3IocHJvcHMpCiAgY2hlY2tUYWdSZW1vdmUoKQogIGNvbXBvbmVudERpZE1vdW50KCkKICBjb21wb25lbnREaWRVcGRhdGUoKQogIGdldE51bShlbGVtLCBuYW1lKQogIGdldElkKGVsZW0pCiAgc2VsZWN0Tm9kZShpdGVtKQogIHRyZWVTZWxFdmVudCh0eXBlLCBhcmcpCiAgcmVuZGVyKCkAAAAAAAAAAOMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADjAAAAVHJlZVBhZ2UKICBzdGF0aWMgZ2V0SW5pdGlhbFByb3BzKGN0eCkKICBmdW5jdGlvbigpCiAgY29uc3RydWN0b3IocHJvcHMpCiAgY2hlY2tUYWdSZW1vdmUoKQogIGNvbXBvbmVudERpZE1vdW50KCkKICBjb21wb25lbnREaWRVcGRhdGUoKQogIGdldE51bShlbGVtLCBuYW1lKQogIGdldElkKGVsZW0pCiAgc2VsZWN0Tm9kZShpdGVtKQogIHRyZWVTZWxFdmVudCh0eXBlLCBhcmcpCiAgcmVuZGVyKCkAAAAAAAAAAOMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADjAAAAVHJlZVBhZ2UKICBzdGF0aWMgZ2V0SW5pdGlhbFByb3BzKGN0eCkKICBmdW5jdGlvbigpCiAgY29uc3RydWN0b3IocHJvcHMpCiAgY2hlY2tUYWdSZW1vdmUoKQogIGNvbXBvbmVudERpZE1vdW50KCkKICBjb21wb25lbnREaWRVcGRhdGUoKQogIGdldE51bShlbGVtLCBuYW1lKQogIGdldElkKGVsZW0pCiAgc2VsZWN0Tm9kZShpdGVtKQogIHRyZWVTZWxFdmVudCh0eXBlLCBhcmcpCiAgcmVuZGVyKCkAAAAAAAAAAOMAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				]
+			]
 		},
 		{
 			"file": "lib/trkl.js",
 			"settings":
 			{
-				"buffer_size": 3738,
+				"buffer_size": 4789,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "polyserver/delaunay.js",
+			"file": "query.js",
 			"settings":
 			{
-				"buffer_size": 7072,
+				"buffer_size": 5427,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					31,
+					1,
+					"insert",
+					{
+						"characters": "o"
+					},
+					"AgAAALkBAAAAAAAAugEAAAAAAAAAAAAAugEAAAAAAAC6AQAAAAAAAAMAAAB2YXI",
+					"AQAAAAAAAAABAAAAuQEAAAAAAAC8AQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					32,
+					1,
+					"left_delete",
+					null,
+					"AQAAALkBAAAAAAAAuQEAAAAAAAABAAAAbw",
+					"AQAAAAAAAAABAAAAugEAAAAAAAC6AQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					33,
+					1,
+					"insert",
+					{
+						"characters": "import"
+					},
+					"BgAAALkBAAAAAAAAugEAAAAAAAAAAAAAugEAAAAAAAC7AQAAAAAAAAAAAAC7AQAAAAAAALwBAAAAAAAAAAAAALwBAAAAAAAAvQEAAAAAAAAAAAAAvQEAAAAAAAC+AQAAAAAAAAAAAAC+AQAAAAAAAL8BAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAuQEAAAAAAAC5AQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					37,
+					10,
+					"left_delete",
+					null,
+					"CgAAAM4BAAAAAAAAzgEAAAAAAAABAAAAKM0BAAAAAAAAzQEAAAAAAAABAAAAZcwBAAAAAAAAzAEAAAAAAAABAAAAcssBAAAAAAAAywEAAAAAAAABAAAAacoBAAAAAAAAygEAAAAAAAABAAAAdckBAAAAAAAAyQEAAAAAAAABAAAAccgBAAAAAAAAyAEAAAAAAAABAAAAZccBAAAAAAAAxwEAAAAAAAABAAAAcsYBAAAAAAAAxgEAAAAAAAABAAAAIMUBAAAAAAAAxQEAAAAAAAABAAAAPQ",
+					"AQAAAAAAAAABAAAAzwEAAAAAAADPAQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					38,
+					1,
+					"insert",
+					{
+						"characters": "r"
+					},
+					"AQAAAMUBAAAAAAAAxgEAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAxQEAAAAAAADFAQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					39,
+					1,
+					"left_delete",
+					null,
+					"AQAAAMUBAAAAAAAAxQEAAAAAAAABAAAAcg",
+					"AQAAAAAAAAABAAAAxgEAAAAAAADGAQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					40,
+					1,
+					"insert",
+					{
+						"characters": "from"
+					},
+					"BAAAAMUBAAAAAAAAxgEAAAAAAAAAAAAAxgEAAAAAAADHAQAAAAAAAAAAAADHAQAAAAAAAMgBAAAAAAAAAAAAAMgBAAAAAAAAyQEAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAxQEAAAAAAADFAQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					41,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AQAAAMkBAAAAAAAAygEAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAyQEAAAAAAADJAQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					44,
+					1,
+					"left_delete",
+					null,
+					"AQAAANABAAAAAAAA0AEAAAAAAAABAAAAKQ",
+					"AQAAAAAAAAABAAAA0QEAAAAAAADRAQAAAAAAAAAAAAAAAPC/"
+				]
+			]
+		},
+		{
+			"file": "stores/api.js",
+			"settings":
+			{
+				"buffer_size": 5925,
 				"line_ending": "Unix"
 			}
 		},
@@ -80,18 +1714,10 @@
 			}
 		},
 		{
-			"file": "lib/dom/line.js",
-			"settings":
-			{
-				"buffer_size": 5583,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "lib/touchHandler.js",
 			"settings":
 			{
-				"buffer_size": 13575,
+				"buffer_size": 13872,
 				"line_ending": "Unix"
 			}
 		},
@@ -105,29 +1731,45 @@
 			}
 		},
 		{
-			"file": "/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
-			"settings":
-			{
-				"buffer_size": 29207,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/roman/the-wild-beauty-company/pages/new.js",
-			"settings":
-			{
-				"buffer_size": 7439,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "components/views/imageUpload.js",
 			"settings":
 			{
-				"buffer_size": 29207,
+				"buffer_size": 29171,
 				"line_ending": "Unix"
 			}
+		},
+		{
+			"file": "pages/tree.js",
+			"settings":
+			{
+				"buffer_size": 25493,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					4,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AgAAAJMfAAAAAAAAlB8AAAAAAAAAAAAAlB8AAAAAAACUHwAAAAAAAAIAAAAvLw",
+					"AQAAAAAAAAABAAAAlR8AAAAAAACTHwAAAAAAAAAAAAAAAPC/"
+				]
+			]
+		},
+		{
+			"file": "stores/functions.js",
+			"settings":
+			{
+				"buffer_size": 4783,
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+			]
 		},
 		{
 			"file": "components/upload/RUG.js",
@@ -146,18 +1788,10 @@
 			}
 		},
 		{
-			"file": "lib/dom/rect.js",
-			"settings":
-			{
-				"buffer_size": 8347,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "lib/devtools.js",
 			"settings":
 			{
-				"buffer_size": 31402,
+				"buffer_size": 31888,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -166,7 +1800,7 @@
 			"file": "lib/dom/element.js",
 			"settings":
 			{
-				"buffer_size": 24787,
+				"buffer_size": 35152,
 				"line_ending": "Unix"
 			}
 		}
@@ -283,16 +1917,17 @@
 	},
 	"expanded_folders":
 	[
-		"/home/roman/wild-beauty",
-		"/home/roman/wild-beauty/components",
-		"/home/roman/wild-beauty/components/views",
-		"/home/roman/wild-beauty/lib",
-		"/home/roman/wild-beauty/pages",
-		"/home/roman/wild-beauty/pages/new"
+		"/home/roman/Projects/rsenn/wild-beauty",
+		"/home/roman/Projects/rsenn/wild-beauty/pages",
+		"/home/roman/Projects/rsenn/wild-beauty/stores"
 	],
 	"file_history":
 	[
+		"/home/roman/Projects/rsenn/wild-beauty/lib/dom/rect.js",
 		"/home/roman/the-wild-beauty-company/pages/new.js",
+		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
+		"/home/roman/Projects/rsenn/wild-beauty/lib/dom/line.js",
+		"/home/roman/Projects/rsenn/wild-beauty/polyserver/delaunay.js",
 		"/home/roman/wild-beauty/lib/dom/rect.js",
 		"/home/roman/wild-beauty/pages/new/[photo_id].js",
 		"/home/roman/wild-beauty/pages/new.js",
@@ -305,7 +1940,6 @@
 		"/home/roman/wild-beauty/components/upload/RUG.js",
 		"/home/roman/wild-beauty/wild-beauty.sublime-project",
 		"/home/roman/wild-beauty/package.json",
-		"/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
 		"/home/roman/wild-beauty/lib/util.js",
 		"/home/roman/wild-beauty/components/views/itemEditor.js",
 		"/home/roman/the-wild-beauty-company/lib/util.js",
@@ -416,10 +2050,7 @@
 		"/home/roman/wild-beauty/components/simple/icons.js",
 		"/home/roman/wild-beauty/pages/_document.js",
 		"/home/roman/wild-beauty/.eslintrc",
-		"/home/roman/wild-beauty/static/style.css",
-		"/home/roman/wild-beauty/lib/clipper.js",
-		"/home/roman/wild-beauty/lib/dom/hsla.js",
-		"/home/roman/wild-beauty/components/upload/view/index.js"
+		"/home/roman/wild-beauty/static/style.css"
 	],
 	"find":
 	{
@@ -606,23 +2237,25 @@
 			"Timer.std"
 		],
 		"reverse": false,
+		"scrollbar_highlights": true,
 		"show_context": true,
 		"use_buffer2": false,
+		"use_gitignore": true,
 		"whole_word": false,
 		"wrap": true
 	},
 	"groups":
 	[
 		{
-			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
+					"selected": true,
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 386,
+						"buffer_size": 227,
 						"regions":
 						{
 						},
@@ -632,138 +2265,73 @@
 						"settings":
 						{
 							"color_scheme": "Packages/Outline/outline.hidden-tmTheme",
-							"current_file": "/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
+							"current_file": "/home/roman/Projects/rsenn/wild-beauty/pages/tree.js",
 							"outline_rename_mode": false,
 							"symkeys":
 							[
 								[
-									722,
-									751
-								],
-								[
-									1117,
-									1123
-								],
-								[
-									1183,
-									1187
-								],
-								[
-									1232,
-									1236
-								],
-								[
-									1320,
-									1324
-								],
-								[
-									1408,
-									1427
-								],
-								[
-									1512,
-									1516
-								],
-								[
-									1569,
-									1576
-								],
-								[
-									2018,
-									2034
-								],
-								[
-									2070,
-									2077
-								],
-								[
-									2151,
-									2178
-								],
-								[
-									2345,
-									2372
-								],
-								[
-									2596,
-									2608
-								],
-								[
-									3152,
-									3174
-								],
-								[
-									3317,
-									3329
-								],
-								[
-									3868,
-									3946
-								],
-								[
-									4278,
-									4295
-								],
-								[
-									4560,
+									4566,
 									4574
 								],
 								[
-									5339,
-									5345
+									5378,
+									5411
 								],
 								[
-									5788,
-									5816
+									7057,
+									7067
 								],
 								[
-									5907,
-									5916
+									10254,
+									10272
 								],
 								[
-									6206,
-									6223
+									11758,
+									11774
 								],
 								[
-									10485,
-									10493
+									12201,
+									12220
 								],
 								[
-									11672,
-									11680
+									12303,
+									12323
 								],
 								[
-									12760,
-									12765
+									13482,
+									13513
+								],
+								[
+									13572,
+									13596
+								],
+								[
+									13704,
+									13720
+								],
+								[
+									13857,
+									13880
+								],
+								[
+									17640,
+									17648
 								]
 							],
 							"symlist":
 							[
-								"hvOffset",
-								"init()",
-								"e =>",
-								"e =>",
-								"e =>",
-								".ondragstart",
-								"r =>",
-								"item =>",
-								"findIndex(point)",
-								"item =>",
-								"create(line, event, origin)",
-								"update(line, event, origin)",
-								"(rect, i) =>",
-								"destroy(event, origin)",
-								"(rect, i) =>",
-								"({ images, rootStore, onChoose, onDelete, onRotate, shiftState, ...props }) =>",
-								"async response =>",
-								"async photo =>",
-								"arg =>",
-								"(uploadedImages, options) =>",
-								"(a, b) =>",
-								"(image, index) =>",
-								"event =>",
-								"event =>",
-								"() =>"
+								"TreePage",
+								"  static getInitialProps(ctx)",
+								"  function()",
+								"  constructor(props)",
+								"  checkTagRemove()",
+								"  componentDidMount()",
+								"  componentDidUpdate()",
+								"  getNum(elem, name)",
+								"  getId(elem)",
+								"  selectNode(item)",
+								"  treeSelEvent(type, arg)",
+								"  render()"
 							],
 							"syntax": "Packages/Outline/outline.hidden-tmLanguage"
 						},
@@ -771,13 +2339,13 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 16,
+					"stack_index": 0,
+					"stack_multiselect": false,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 8,
 			"sheets":
 			[
 				{
@@ -786,21 +2354,23 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3738,
+						"buffer_size": 4789,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								910,
-								910
+								0,
+								0
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
+							"tabs_extra_last_activated": 1632271895.08,
+							"tabs_extra_last_activated_sheet_index": 0,
 							"translate_tabs_to_spaces": true,
 							"typescript_plugin_format_options":
 							{
@@ -814,48 +2384,78 @@
 						"translation.y": 441.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 3,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "polyserver/delaunay.js",
+					"file": "query.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7072,
+						"buffer_size": 5427,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1430,
-								1430
+								466,
+								510
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
 							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
+							"tabs_extra_last_activated": 1632271893.32,
+							"tabs_extra_last_activated_sheet_index": 1,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2079.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 15,
+					"stack_index": 4,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
 					"buffer": 3,
+					"file": "stores/api.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5925,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
+							"tab_size": 2,
+							"tabs_extra_last_activated": 1632269515.18,
+							"tabs_extra_last_activated_sheet_index": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1938.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
 					"file": "static/html/bpgdec.js",
 					"semi_transient": false,
 					"settings":
@@ -877,14 +2477,15 @@
 							"use_tab_stops": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 43744.0,
+						"translation.y": 392.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 14,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 5,
 					"file": "static/wasm/bpgdec.wasm.js",
 					"semi_transient": false,
 					"settings":
@@ -908,14 +2509,15 @@
 							"use_tab_stops": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 20791.0,
+						"translation.y": 17273.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 8,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 6,
 					"file": "server.js",
 					"semi_transient": false,
 					"settings":
@@ -948,44 +2550,8 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "lib/dom/line.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5583,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1633,
-								1633
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 504.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
+					"stack_index": 9,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
@@ -994,15 +2560,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 13575,
+						"buffer_size": 13872,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								10147,
-								10147
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1022,7 +2588,8 @@
 						"translation.y": 6854.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 10,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
@@ -1058,104 +2625,1054 @@
 						"translation.y": 2079.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 7,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
 					"buffer": 9,
-					"file": "/home/roman/the-wild-beauty-company/components/views/imageUpload.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 29207,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2875,
-								2875
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 2520.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "/home/roman/the-wild-beauty-company/pages/new.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7439,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2496,
-								2496
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"typescript_plugin_format_options":
-							{
-								"convertTabsToSpaces": true,
-								"indentSize": 2,
-								"tabSize": 2
-							},
-							"use_tab_stops": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 315.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
 					"file": "components/views/imageUpload.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 29207,
+						"buffer_size": 29171,
 						"regions":
 						{
+							"col_0000007F":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										8466,
+										8481
+									]
+								],
+								"scope": "col_0000007F"
+							},
+							"col_0000007F_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_0000007F_circle.png",
+								"regions":
+								[
+									[
+										8425,
+										8425
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_000000B2":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										20341,
+										20359
+									]
+								],
+								"scope": "col_000000B2"
+							},
+							"col_000000B2_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_000000B2_circle.png",
+								"regions":
+								[
+									[
+										20327,
+										20327
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_000000BF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										14510,
+										14529
+									]
+								],
+								"scope": "col_000000BF"
+							},
+							"col_000000BF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_000000BF_circle.png",
+								"regions":
+								[
+									[
+										14470,
+										14470
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_000000CC":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										20305,
+										20323
+									]
+								],
+								"scope": "col_000000CC"
+							},
+							"col_000000CC_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_000000CC_circle.png",
+								"regions":
+								[
+									[
+										20291,
+										20291
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_0000FFFF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										13518,
+										13522
+									]
+								],
+								"scope": "col_0000FFFF"
+							},
+							"col_0000FFFF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_0000FFFF_circle.png",
+								"regions":
+								[
+									[
+										13478,
+										13478
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_007AFF26":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										17776,
+										17799
+									]
+								],
+								"scope": "col_007AFF26"
+							},
+							"col_007AFF26_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_007AFF26_circle.png",
+								"regions":
+								[
+									[
+										17746,
+										17746
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_00800001":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										1640,
+										1649
+									]
+								],
+								"scope": "col_00800001"
+							},
+							"col_00800001_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_00800001_circle.png",
+								"regions":
+								[
+									[
+										1582,
+										1582
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_010101FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										2952,
+										2961
+									],
+									[
+										14463,
+										14468
+									],
+									[
+										15916,
+										15920
+									],
+									[
+										17106,
+										17110
+									],
+									[
+										17518,
+										17522
+									],
+									[
+										21977,
+										21981
+									],
+									[
+										22918,
+										22922
+									],
+									[
+										23752,
+										23756
+									],
+									[
+										24448,
+										24452
+									],
+									[
+										27004,
+										27008
+									]
+								],
+								"scope": "col_010101FF"
+							},
+							"col_010101FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_010101FF_circle.png",
+								"regions":
+								[
+									[
+										2914,
+										2914
+									],
+									[
+										14433,
+										14433
+									],
+									[
+										15897,
+										15897
+									],
+									[
+										17076,
+										17076
+									],
+									[
+										17498,
+										17498
+									],
+									[
+										21947,
+										21947
+									],
+									[
+										22898,
+										22898
+									],
+									[
+										23722,
+										23722
+									],
+									[
+										24418,
+										24418
+									],
+									[
+										26984,
+										26984
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_198CFF01":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										3439,
+										3461
+									]
+								],
+								"scope": "col_198CFF01"
+							},
+							"col_198CFF01_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_198CFF01_circle.png",
+								"regions":
+								[
+									[
+										3409,
+										3409
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_198CFF7F":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										2757,
+										2779
+									],
+									[
+										2815,
+										2837
+									]
+								],
+								"scope": "col_198CFF7F"
+							},
+							"col_198CFF7F_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_198CFF7F_circle.png",
+								"regions":
+								[
+									[
+										2725,
+										2725
+									],
+									[
+										2782,
+										2782
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_198CFFFF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										3495,
+										3512
+									]
+								],
+								"scope": "col_198CFFFF"
+							},
+							"col_198CFFFF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_198CFFFF_circle.png",
+								"regions":
+								[
+									[
+										3464,
+										3464
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_3D4852FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										22078,
+										22085
+									],
+									[
+										26221,
+										26228
+									]
+								],
+								"scope": "col_3D4852FF"
+							},
+							"col_3D4852FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_3D4852FF_circle.png",
+								"regions":
+								[
+									[
+										22060,
+										22060
+									],
+									[
+										26203,
+										26203
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_65B2FFFF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										13458,
+										13475
+									]
+								],
+								"scope": "col_65B2FFFF"
+							},
+							"col_65B2FFFF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_65B2FFFF_circle.png",
+								"regions":
+								[
+									[
+										13419,
+										13419
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_8A0010CC":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										17723,
+										17744
+									],
+									[
+										17947,
+										17968
+									],
+									[
+										18334,
+										18355
+									],
+									[
+										21296,
+										21317
+									],
+									[
+										22233,
+										22254
+									],
+									[
+										22369,
+										22390
+									],
+									[
+										23127,
+										23148
+									],
+									[
+										23376,
+										23397
+									],
+									[
+										24978,
+										24999
+									],
+									[
+										26448,
+										26469
+									],
+									[
+										27409,
+										27430
+									]
+								],
+								"scope": "col_8A0010CC"
+							},
+							"col_8A0010CC_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_8A0010CC_circle.png",
+								"regions":
+								[
+									[
+										17692,
+										17692
+									],
+									[
+										17927,
+										17927
+									],
+									[
+										18304,
+										18304
+									],
+									[
+										21276,
+										21276
+									],
+									[
+										22203,
+										22203
+									],
+									[
+										22351,
+										22351
+									],
+									[
+										23097,
+										23097
+									],
+									[
+										23356,
+										23356
+									],
+									[
+										24954,
+										24954
+									],
+									[
+										26430,
+										26430
+									],
+									[
+										27389,
+										27389
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_A00010FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										19719,
+										19738
+									],
+									[
+										24753,
+										24772
+									]
+								],
+								"scope": "col_A00010FF"
+							},
+							"col_A00010FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_A00010FF_circle.png",
+								"regions":
+								[
+									[
+										19689,
+										19689
+									],
+									[
+										24723,
+										24723
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_AA0000FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										12110,
+										12114
+									]
+								],
+								"scope": "col_AA0000FF"
+							},
+							"col_AA0000FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_AA0000FF_circle.png",
+								"regions":
+								[
+									[
+										12069,
+										12069
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_C00820CC":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										18686,
+										18707
+									]
+								],
+								"scope": "col_C00820CC"
+							},
+							"col_C00820CC_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_C00820CC_circle.png",
+								"regions":
+								[
+									[
+										18656,
+										18656
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_C3C3C3FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										21071,
+										21078
+									]
+								],
+								"scope": "col_C3C3C3FF"
+							},
+							"col_C3C3C3FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_C3C3C3FF_circle.png",
+								"regions":
+								[
+									[
+										21052,
+										21052
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_CCCCCCFF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										28581,
+										28585
+									]
+								],
+								"scope": "col_CCCCCCFF"
+							},
+							"col_CCCCCCFF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_CCCCCCFF_circle.png",
+								"regions":
+								[
+									[
+										28562,
+										28562
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_CDCDCDFF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										14890,
+										14897
+									],
+									[
+										15509,
+										15516
+									]
+								],
+								"scope": "col_CDCDCDFF"
+							},
+							"col_CDCDCDFF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_CDCDCDFF_circle.png",
+								"regions":
+								[
+									[
+										14859,
+										14859
+									],
+									[
+										15479,
+										15479
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_DDDDDDFF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										28341,
+										28345
+									]
+								],
+								"scope": "col_DDDDDDFF"
+							},
+							"col_DDDDDDFF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_DDDDDDFF_circle.png",
+								"regions":
+								[
+									[
+										28322,
+										28322
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_F5F5F5FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										20470,
+										20477
+									],
+									[
+										25615,
+										25622
+									],
+									[
+										28037,
+										28044
+									]
+								],
+								"scope": "col_F5F5F5FF"
+							},
+							"col_F5F5F5FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_F5F5F5FF_circle.png",
+								"regions":
+								[
+									[
+										20451,
+										20451
+									],
+									[
+										25596,
+										25596
+									],
+									[
+										28018,
+										28018
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FF0000FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										12062,
+										12066
+									]
+								],
+								"scope": "col_FF0000FF"
+							},
+							"col_FF0000FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FF0000FF_circle.png",
+								"regions":
+								[
+									[
+										12023,
+										12023
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FFDC20C0":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										15594,
+										15603
+									],
+									[
+										15650,
+										15659
+									]
+								],
+								"scope": "col_FFDC20C0"
+							},
+							"col_FFDC20C0_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FFDC20C0_circle.png",
+								"regions":
+								[
+									[
+										15570,
+										15570
+									],
+									[
+										15605,
+										15605
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FFFF0001":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										1627,
+										1636
+									]
+								],
+								"scope": "col_FFFF0001"
+							},
+							"col_FFFF0001_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FFFF0001_circle.png",
+								"regions":
+								[
+									[
+										1582,
+										1582
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FFFFFF60":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										14959,
+										14968
+									]
+								],
+								"scope": "col_FFFFFF60"
+							},
+							"col_FFFFFF60_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FFFFFF60_circle.png",
+								"regions":
+								[
+									[
+										14935,
+										14935
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FFFFFFB2":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										21732,
+										21756
+									],
+									[
+										22487,
+										22511
+									],
+									[
+										25936,
+										25960
+									],
+									[
+										26598,
+										26622
+									]
+								],
+								"scope": "col_FFFFFFB2"
+							},
+							"col_FFFFFFB2_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FFFFFFB2_circle.png",
+								"regions":
+								[
+									[
+										21702,
+										21702
+									],
+									[
+										22457,
+										22457
+									],
+									[
+										25906,
+										25906
+									],
+									[
+										26568,
+										26568
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FFFFFFE5":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										21921,
+										21945
+									],
+									[
+										23180,
+										23204
+									],
+									[
+										26100,
+										26124
+									],
+									[
+										27213,
+										27237
+									]
+								],
+								"scope": "col_FFFFFFE5"
+							},
+							"col_FFFFFFE5_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FFFFFFE5_circle.png",
+								"regions":
+								[
+									[
+										21891,
+										21891
+									],
+									[
+										23150,
+										23150
+									],
+									[
+										26070,
+										26070
+									],
+									[
+										27183,
+										27183
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FFFFFFFF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										15015,
+										15024
+									],
+									[
+										18436,
+										18440
+									],
+									[
+										21607,
+										21611
+									],
+									[
+										23716,
+										23720
+									],
+									[
+										24202,
+										24206
+									],
+									[
+										29002,
+										29006
+									]
+								],
+								"scope": "col_FFFFFFFF"
+							},
+							"col_FFFFFFFF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FFFFFFFF_circle.png",
+								"regions":
+								[
+									[
+										14970,
+										14970
+									],
+									[
+										18417,
+										18417
+									],
+									[
+										21588,
+										21588
+									],
+									[
+										23697,
+										23697
+									],
+									[
+										24170,
+										24170
+									],
+									[
+										28983,
+										28983
+									]
+								],
+								"scope": "col_gutter"
+							}
 						},
 						"selection":
 						[
 							[
-								18052,
-								18052
+								0,
+								0
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
 							"tab_size": 2,
+							"tabs_extra_last_activated": 1632271911.83,
+							"tabs_extra_last_activated_sheet_index": 8,
 							"translate_tabs_to_spaces": true,
 							"typescript_plugin_format_options":
 							{
@@ -1169,7 +3686,332 @@
 						"translation.y": 10793.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 2,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "pages/tree.js",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 25493,
+						"regions":
+						{
+							"col_000000BF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										20477,
+										20496
+									]
+								],
+								"scope": "col_000000BF"
+							},
+							"col_000000BF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_000000BF_circle.png",
+								"regions":
+								[
+									[
+										20423,
+										20423
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_0000FFFF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										3503,
+										3507
+									]
+								],
+								"scope": "col_0000FFFF"
+							},
+							"col_0000FFFF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_0000FFFF_circle.png",
+								"regions":
+								[
+									[
+										3484,
+										3484
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_006600FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										2007,
+										2014
+									]
+								],
+								"scope": "col_006600FF"
+							},
+							"col_006600FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_006600FF_circle.png",
+								"regions":
+								[
+									[
+										1954,
+										1954
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_00CC00FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										1921,
+										1928
+									]
+								],
+								"scope": "col_00CC00FF"
+							},
+							"col_00CC00FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_00CC00FF_circle.png",
+								"regions":
+								[
+									[
+										1870,
+										1870
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_010101FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										3531,
+										3535
+									],
+									[
+										3837,
+										3841
+									],
+									[
+										4046,
+										4050
+									],
+									[
+										4386,
+										4390
+									]
+								],
+								"scope": "col_010101FF"
+							},
+							"col_010101FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_010101FF_circle.png",
+								"regions":
+								[
+									[
+										3510,
+										3510
+									],
+									[
+										3816,
+										3816
+									],
+									[
+										3915,
+										3915
+									],
+									[
+										4279,
+										4279
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FAEC9D7F":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										21541,
+										21564
+									]
+								],
+								"scope": "col_FAEC9D7F"
+							},
+							"col_FAEC9D7F_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FAEC9D7F_circle.png",
+								"regions":
+								[
+									[
+										21457,
+										21457
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FDF6CD33":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										21569,
+										21592
+									]
+								],
+								"scope": "col_FDF6CD33"
+							},
+							"col_FDF6CD33_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FDF6CD33_circle.png",
+								"regions":
+								[
+									[
+										21457,
+										21457
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FF0000FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										3220,
+										3224
+									],
+									[
+										25313,
+										25316
+									]
+								],
+								"scope": "col_FF0000FF"
+							},
+							"col_FF0000FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FF0000FF_circle.png",
+								"regions":
+								[
+									[
+										3134,
+										3134
+									],
+									[
+										25294,
+										25294
+									]
+								],
+								"scope": "col_gutter"
+							},
+							"col_FFDD00FF":
+							{
+								"flags": 16,
+								"regions":
+								[
+									[
+										3806,
+										3813
+									]
+								],
+								"scope": "col_FFDD00FF"
+							},
+							"col_FFDD00FF_icon":
+							{
+								"flags": 16,
+								"icon": "Packages/User/Color Highlight.cache/col_FFDD00FF_circle.png",
+								"regions":
+								[
+									[
+										3787,
+										3787
+									]
+								],
+								"scope": "col_gutter"
+							}
+						},
+						"selection":
+						[
+							[
+								8101,
+								8105
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
+							"tab_size": 2,
+							"tabs_extra_last_activated": 1632271975.15,
+							"tabs_extra_last_activated_sheet_index": 9,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3457.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "stores/functions.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4783,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2748,
+								2748
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScriptNext - ES6 Syntax/JavaScriptNext.tmLanguage",
+							"tab_size": 2,
+							"tabs_extra_last_activated": 1632271934.6,
+							"tabs_extra_last_activated_sheet_index": 10,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 856.0,
+						"zoom_level": 1.0
+					},
 					"stack_index": 1,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
@@ -1203,10 +4045,11 @@
 							"use_tab_stops": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 5165.0,
+						"translation.y": 4846.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 6,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
@@ -1243,54 +4086,25 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 12,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
 					"buffer": 14,
-					"file": "lib/dom/rect.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8347,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5620,
-								5620
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 3515.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 15,
 					"file": "lib/devtools.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 31402,
+						"buffer_size": 31888,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								28783,
-								28783
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1304,24 +4118,25 @@
 						"translation.y": 2938.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 11,
+					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
-					"buffer": 16,
+					"buffer": 15,
 					"file": "lib/dom/element.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 24787,
+						"buffer_size": 35152,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								28,
-								28
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1341,7 +4156,8 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 13,
+					"stack_multiselect": false,
 					"type": "text"
 				}
 			]

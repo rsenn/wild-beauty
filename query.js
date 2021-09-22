@@ -12,15 +12,15 @@
 
  */
 
-const prettyoutput = require("prettyoutput");
-var Blob = require("blob");
+//const prettyoutput = require("prettyoutput");
+import Blob from "blob";
 const API = require("./stores/api.js").API;
-const Util = require("./lib/util.es5.js").default;
+const Util = require("./lib/util.js").default;
 const util = require("util");
 const fs = require("fs");
 const path = require("path");
 const jpeg = require("./lib/jpeg.js");
-const RGBA = require("./lib/dom.es5.js").RGBA;
+const RGBA = require("./lib/dom.js").RGBA;
 
 (async () => {
   // prettier-ignore

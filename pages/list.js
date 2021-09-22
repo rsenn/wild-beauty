@@ -15,8 +15,6 @@ import Layout from "../components/layout.js";
 import { findInTree } from "../stores/functions.js";
 import { withSize } from "react-sizeme";
 
-import "../static/css/grid.css";
-import "../static/css/react-dropdown-tree-select.css";
 
 @inject("rootStore")
 @observer

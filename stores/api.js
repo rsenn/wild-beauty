@@ -1,7 +1,7 @@
 //const Blob = require("blob");
 import Blob from 'blob';
 
-import { httpClient as axios } from 'axios';
+import axios from 'axios';
 import Util from '../lib/util.js';
 //const axios = require("../lib/axios.es5.js").httpClient;
 //const Util = require("../lib/util.es5.js").default;

@@ -15,10 +15,8 @@ import { fromTriangles } from "transformation-matrix";
 import { trkl } from "../lib/trkl.js";
 import { TreeView } from "../components/views/treeView.js";
 import { makeItemToOption, findInTree } from "../stores/functions.js";
-import "../static/css/grid.css";
 
 import DropdownTreeSelect from "react-dropdown-tree-select";
-import "../static/css/react-dropdown-tree-select.css";
 
 const RandomColor = () => {
   const c = HSLA.random();

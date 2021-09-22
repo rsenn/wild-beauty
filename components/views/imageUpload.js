@@ -12,7 +12,6 @@ import { DraggableList } from "../views/draggableList.js";
 import { SelectionListener, SelectionRenderer, TouchListener } from "../../lib/touchHandler.js";
 import { trkl } from "../../lib/trkl.js";
 
-import "../../static/css/grid.css";
 
 const DEG2RAD = Math.PI / 180;
 

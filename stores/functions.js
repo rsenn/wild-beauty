@@ -88,6 +88,7 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
       let parent = Util.find(graph.nodes, n => n.node.id == node.parent_id);
       if(parent !== null && n !== null && parent !== n) {
         let e = new Edge(parent, n);
+        console.log("treeToGraph", {Edge, e})
         graph.addEdge(e);
       }
     }

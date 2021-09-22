@@ -1,6 +1,6 @@
 import React from "react";
 import { useSpring, animated } from "react-spring";
-import { Point } from "../../lib/dom/point.js";
+import { Point } from "../../lib/geom/point.js";
 import Util from "../../lib/util.js";
 
 export const CircleSegmentPath = (x, y, r, start, end, close = false) => {

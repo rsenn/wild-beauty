@@ -9,6 +9,9 @@ import { withRouter } from "next/router";
 import i18nStore from "../stores/i18nStore.js";
 import SiteMap from "../components/siteMap.js";
 
+import "../static/css/grid.css";
+import "../static/css/react-dropdown-tree-select.css";
+
 class MyApp extends App {
   static async getInitialProps({ Component, router, ctx }) {
     // create a store with the initial state
