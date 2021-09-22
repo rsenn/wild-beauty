@@ -72,10 +72,9 @@ const RGBA = require("./lib/dom.js").RGBA;
 
   console.log("args:", { api, entity, where, f, set });
   let result = await fn.call(api, entity, where, f, set);
-  /*
-if(debug)
-  console.log("result:", util.inspect(result, false, 10, true));
-*/
+
+  if(debug) console.log("result:", util.inspect(result, false, 10, true));
+
   const { affected_rows } = result;
 
   let records = await result[entity];

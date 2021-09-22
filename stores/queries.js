@@ -67,13 +67,13 @@ export class Queries {
    * @return     {Promise}  The items.
    */
   async loadItems(where = {}) {
+    console.log("RootStore.loadItems", where);
     let response = await this.apiRequest("/api/tree", Util.isEmpty(where) ? {} : { where });
     let items,
       data = response ? await response.data : null;
     if(await data) items = await data.items;
     if(!items) return 0;
 
-  console.log("RootStore.loadItems", data);
     for(let key in items) {
       const id = parseInt(items[key].id || key);
       this.items.delete("" + id);
@@ -164,7 +164,10 @@ export class Queries {
 
   async apiRequest(endpoint, data) {
     let res;
-    console.log("Queries.apiRequest", { endpoint, data });
+
+    if(process.env.PORT) endpoint = "http://127.0.0.1:" + process.env.PORT + endpoint;
+
+    console.warn("Queries.apiRequest", { endpoint, data });
     if(!data) res = await axios.get(endpoint);
     else res = await axios.post(endpoint, data);
 
