@@ -69,14 +69,14 @@ export const RandomImages = (arg => {
     if(!style) style = {};
     style = { ...style, width, height: height ? height : "auto" };
     props = { ...rest, style };
-    return randomImagePaths().map(path => <img src={path} border={0} alt={path.replace(/.*\//g, "")} {...props} />);
+    return randomImagePaths().map((path,i) => <img key={i} src={path} border={0} alt={path.replace(/.*\//g, "")} {...props} />);
   };
 })(defaultImageProps);
 
 /**
  * <ImageList images={[ paths... ]} />
  */
-export const ImageList = ({ images }) => images.map(img => <ImageLayer src={img} />);
+export const ImageList = ({ images }) => images.map((img, i) => <ImageLayer key={i} src={img} />);
 
 /**
  * <ImageLayer path="" bgcolor="" />
