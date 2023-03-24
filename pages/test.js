@@ -85,8 +85,8 @@ const Test = () => {
           maxHeight: "100%"
         }}
       >
-        {list.map(path => (
-          <Layer inline style={{ flex: "1 0 auto", backgroundColor: RandomColor() }}>
+        {list.map((path,i) => (
+          <Layer inline key={i} style={{ flex: "1 0 auto", backgroundColor: RandomColor() }}>
             <img src={path} style={{ maxWidth: "50vmin", width: "100%", height: "auto" }} className='gallery-image' />
           </Layer>
         ))}

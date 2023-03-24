@@ -212,7 +212,7 @@ class Show extends React.Component {
         const item = findInTree(this.tree, arg.value);
         if(item) {
           item.checked = true;
-          this.state.node = item.value;
+          this.setState({ node: item.value });
           this.selectNode(item);
         }
         break;

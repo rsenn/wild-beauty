@@ -455,7 +455,8 @@ class TreePage extends React.Component {
         const item = findInTree(this.tree, arg.value);
         if(item) {
           item.checked = true;
-          this.state.node = item.value;
+          //this.state.node = item.value;
+          this.setState({ node: item.value });
           this.selectNode(item);
         }
         break;
@@ -490,10 +491,12 @@ class TreePage extends React.Component {
         this.back.parentElement.removeChild(this.back);
         this.back = null;
       }
-      this.state.currentItem = null;
+      //this.state.currentItem = null;
+      this.setState({ currentItem: null });
       return;
     }
-    this.state.currentItem = parseInt(id);
+    //this.state.currentItem = parseInt(id);
+    this.setState({ currentItem: parseInt(id) });
     Element.findAll(".tile").forEach(e => {
       if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
       e.style.setProperty("transform", "none");
@@ -600,7 +603,7 @@ class TreePage extends React.Component {
             {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
-                {items.map(item => {
+                {items.map((item,i) => {
                   const photo_id = item.photos.length > 0 ? item.photos[0].photo.id : -1;
                   const haveImage = photo_id >= 0;
                   let photo = haveImage ? item.photos[0].photo : null;
@@ -616,7 +619,7 @@ class TreePage extends React.Component {
                   if(typeof data != "object" || data === null) data = {};
                   if(!haveImage) return undefined;
                   return (
-                    <div className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
+                    <div key={i} className={"tile"} id={`item-${item.id}`} onClick={this.handleClick}>
                       <SizedAspectRatioBox
                         style={{
                           position: "relative",

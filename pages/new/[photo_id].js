@@ -232,7 +232,7 @@ export class NewItem extends React.Component {
           <div>
             <a href={`/new/${query.photo_id}`}>New item {query.photo_id}</a>
 
-            <ItemEditor image={img} /*tree={this.state.tree}*/ makeTreeSelEvent={makeTreeSelEvent} image={img} />
+            <ItemEditor image={img} /*tree={this.state.tree}*/ makeTreeSelEvent={makeTreeSelEvent} />
           </div>
           <style jsx global>{`
             .colors-text {

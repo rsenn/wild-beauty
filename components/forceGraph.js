@@ -2,7 +2,7 @@ import React from "react";
 import d3 from "d3";
 import s from "react-hyperscript";
 const { setupSimulationForces: defaultSetupSimulationForces, destroySimulation } = require("./simulation");
-const renderGraph = require("./normal");
+//const renderGraph = require("./normal");
 
 function mergeGraph(oldGraph, newGraph) {
   const { width, height } = newGraph.container;
