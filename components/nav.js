@@ -187,7 +187,7 @@ const Nav = inject(
     const angle = ((color[0].h + color[0].s + color[0].l) % 360) - 180;
     customStyles.overlay.background = `linear-gradient(${Math.floor(angle)}deg, ${color[0].toString()} 0%, ${color[1].toString()} 100%)`;
 
-    const language = i18nStore.user.lang;
+    const language = i18nStore?.user?.lang;
     const authenticated = loginIsOpen ? false : rootStore.authenticated; //console.log("i18nStore: ", i18nStore);
 
     if(global.window) {

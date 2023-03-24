@@ -15,7 +15,14 @@ class Browse extends React.Component {
     const rootStore = mobxStore.RootStore;
 
     let fields = ["id", "name", "type", "parent { id }", "order", "children(order_by: {order: asc}) { id name type }", "data", "photos { photo { id } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
-    let items = await rootStore.api.list("items", fields, { order_by: "{parent: { id: asc }, order: asc, created: asc}", where: "{parent_id:{_gte:1}}" });
+    let items;
+
+    try {
+
+      items = await rootStore.api.list("items", fields, { order_by: "{parent: { id: asc }, order: asc, created: asc}", where: "{parent_id:{_gte:1}}" });
+    }catch(e) {
+      items=[];
+    }
 
     return { items, query, params };
   }
