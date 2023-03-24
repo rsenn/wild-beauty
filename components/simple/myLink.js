@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 export default function MyLink({ href, title, prefetch }) {
-  if(href != "#") {
+  //if(href != "#") {
     const router = useRouter();
     const style = {
       marginRight: 10,
@@ -29,7 +29,7 @@ export default function MyLink({ href, title, prefetch }) {
       `}</style>
       </a>
     );
-  }
+  //}
 
   return title;
 }
