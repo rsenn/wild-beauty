@@ -4,7 +4,10 @@ import { action } from "mobx";
 import { autofillEvent } from "../lib/autofillEvent.js";
 import { CubeSpinner } from "../components/simple/cubeSpinner.js";
 import { inject, observer } from "mobx-react";
-import { Translate } from "react-i18nify-mobx";
+//import { Translate } from "react-i18nify-mobx";
+
+const Translate = ({value}) => <div>{value}</div>;
+
 
 const LoginForm = inject("rootStore")(
   observer(({ show = true, className, style, onLogin, rootStore, ...props }) => {
@@ -20,7 +23,7 @@ const LoginForm = inject("rootStore")(
       <React.Fragment>
         <div className={classNames("login-view", className)} style={style}>
           <div className={"form-title form-row"}>
-            <Translate value='login.title' />
+      <Translate value='login.title' />
           </div>
           <form
             className={"login"}

@@ -1,4 +1,5 @@
-import { Translate } from "react-i18nify-mobx";
+//import { Translate } from "react-i18nify-mobx";
+const Translate = ({value}) => <div>{value}</div>;
 
 export const SiteMap = [
   {

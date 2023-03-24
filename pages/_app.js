@@ -6,7 +6,7 @@ import { Provider } from "mobx-react";
 import Util from "../lib/util.js";
 import { getOrCreateStore } from "../stores/createStore.js";
 import { withRouter } from "next/router";
-import i18nStore from "../stores/i18nStore.js";
+//import i18nStore from "../stores/i18nStore.js";
 import SiteMap from "../components/siteMap.js";
 
 import "../static/css/grid.css";
@@ -129,7 +129,7 @@ class MyApp extends App {
     //console.log("App.render");
     return (
       <React.Fragment>
-        <Provider rootStore={this.mobxStore.RootStore} editorStore={this.mobxStore.EditorStore} i18nStore={i18nStore} store={this.mobxStore}>
+        <Provider rootStore={this.mobxStore.RootStore} editorStore={this.mobxStore.EditorStore} i18nStore={null /*i18nStore*/} store={this.mobxStore}>
           <Component {...pageProps} router={router} key={Router.route} />
         </Provider>
 
