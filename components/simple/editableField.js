@@ -78,10 +78,9 @@ export const EditableField = ({ options, storageKey, className, style, multiline
     <React.Fragment>
       {multiline || String(name).toLowerCase() == "text" ? (
         <textarea
-          style={{ background }}
+          style={{ ...lineStyle, background }}
           className={classNames("content", className + "-content")}
           rows={lines}
-          style={lineStyle}
           value={editValue}
           onFocus={handleFocus}
           onBlur={handleBlur}
