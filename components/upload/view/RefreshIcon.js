@@ -1,6 +1,6 @@
 import React from "react";
 
-export default () => {
+export const RefreshIcon = () => {
   return (
     <svg viewBox='0 0 65 65' className='__refresh-icon'>
       <g>
@@ -10,3 +10,4 @@ export default () => {
     </svg>
   );
 };
+export default RefreshIcon;

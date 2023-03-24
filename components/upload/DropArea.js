@@ -12,7 +12,6 @@ class DropArea extends React.Component {
     this.onDragOver = this.onDragOver.bind(this);
     this.onDragEnter = this.onDragEnter.bind(this);
     this.onDragLeave = this.onDragLeave.bind(this);
-
     this.state = { isDrag: false, rejected: false };
     this.dragCounter = 0;
   }
@@ -90,4 +89,5 @@ DropArea.propTypes = {
   onDragLeave: PropTypes.func
 };
 
-export default props => <Context.Consumer>{values => <DropArea {...props} {...values} />}</Context.Consumer>;
+export const DropAreaContext = props => <Context.Consumer>{values => <DropArea displayName={'Drag and drop area'} {...props} {...values} />}</Context.Consumer>;
+export default DropAreaContext;

@@ -1,7 +1,7 @@
 import React from "react";
 import DropArea from "./DropArea.js";
 
-export default (options, { handle }) => (
+export const Handle = (options, { handle }) => (
   <DropArea>
     {isDrag => (
       <div className={`upload-handle ${isDrag ? "__dragging" : ""}`}>
@@ -32,3 +32,5 @@ export default (options, { handle }) => (
     )}
   </DropArea>
 );
+
+export default Handle;

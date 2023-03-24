@@ -1,6 +1,6 @@
 import React from "react";
 
-export default () => {
+export const UploadIcon = () => {
   return (
     <svg viewBox='0 -5 32 52'>
       <g>
@@ -11,3 +11,4 @@ export default () => {
     </svg>
   );
 };
+export default UploadIcon;
