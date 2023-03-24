@@ -59,8 +59,8 @@ export const ItemView = inject("rootStore")(
       <React.Fragment>
         <div className={"item-view"}>
           {item && item.photos && item.photos.map
-            ? item.photos.map(photo => (
-                <SizedAspectRatioBox className={"item-box"}>
+            ? item.photos.map((photo, i) => (
+                <SizedAspectRatioBox key={i} className={"item-box"}>
                   <img
                     src={photo.href || `/api/photo/get/${photo.id}`}
                     width={photo.width}
