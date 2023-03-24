@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import RUG from './components/upload/RUG.js'
+import RUG from '../components/upload/RUG.js'
 import Head from "next/head";
 import Nav from "../components/nav.js";
 import Layer from "../components/simple/layer.js";
