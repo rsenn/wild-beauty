@@ -1,3 +1,4 @@
+import React from "react";
 import { Translate } from "react-i18nify-mobx";
 
 export const SiteMap = [

@@ -7,7 +7,7 @@ export const SVGText = ({ x, y, lineHeight = 12, children, textAnchor = "middle"
 
   const ystart = (-(children.length - 1) / 2) * lineHeight;
   return children.map((line, i) => (
-    <text textAnchor={textAnchor} alignmentBaseline={alignmentBaseline} fontFamily={fontFamily} fontSize={fontSize} y={y + ystart + i * lineHeight} x={x} {...props}>
+    <text key={i} textAnchor={textAnchor} alignmentBaseline={alignmentBaseline} fontFamily={fontFamily} fontSize={fontSize} y={y + ystart + i * lineHeight} x={x} {...props}>
       {line}
     </text>
   ));
