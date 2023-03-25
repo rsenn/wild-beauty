@@ -9,6 +9,7 @@ import { withRouter } from "next/router";
 //import i18nStore from "../stores/i18nStore.js";
 import SiteMap from "../components/siteMap.js";
 
+import "../static/style.css";
 import "../static/css/grid.css";
 import "../static/css/react-dropdown-tree-select.css";
 
@@ -34,7 +35,17 @@ class MyApp extends App {
       // inject the basePageProps in the parameters of getInitialProps
       pageProps = await getInit(pageCtx);
 
-      console.log("App pageProps=", Object.fromEntries(Object.entries(pageProps).map(([key, value]) => [key, Util.isArray(value) || (typeof value == "object" && value !== null && value.length !== undefined) ? `Array(${value.length})` : typeof value])));
+      console.log(
+        "App pageProps=",
+        Object.fromEntries(
+          Object.entries(pageProps).map(([key, value]) => [
+            key,
+            Util.isArray(value) || (typeof value == "object" && value !== null && value.length !== undefined)
+              ? `Array(${value.length})`
+              : typeof value
+          ])
+        )
+      );
 
       if(pageProps.items) {
         pageProps.items.forEach(item => {
@@ -115,7 +126,10 @@ class MyApp extends App {
     // Router.events.on("routeChangeStart", handleRouteChange);
 
     console.log("App.componentDidMount ", router.query);
-    const obj = ["step", "image", "selected"].reduce((acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc), {});
+    const obj = ["step", "image", "selected"].reduce(
+      (acc, key) => (router.query[key] !== undefined ? { ...acc, [key]: parseInt(router.query[key]) } : acc),
+      {}
+    );
     //console.log("newState: ", obj);
 
     rootStore.setState(obj);
@@ -129,7 +143,12 @@ class MyApp extends App {
     //console.log("App.render");
     return (
       <React.Fragment>
-        <Provider rootStore={this.mobxStore.RootStore} editorStore={this.mobxStore.EditorStore} i18nStore={null /*i18nStore*/} store={this.mobxStore}>
+        <Provider
+          rootStore={this.mobxStore.RootStore}
+          editorStore={this.mobxStore.EditorStore}
+          i18nStore={null /*i18nStore*/}
+          store={this.mobxStore}
+        >
           <Component {...pageProps} router={router} key={Router.route} />
         </Provider>
 
@@ -137,7 +156,11 @@ class MyApp extends App {
           @font-face {
             font-family: "Fixed";
             src: url("static/fonts/Fixed-Medium.eot");
-            src: url("static/fonts/Fixed-Medium.eot?#iefix") format("embedded-opentype"), url("static/fonts/Fixed-Medium.woff2") format("woff2"), url("static/fonts/Fixed-Medium.woff") format("woff"), url("static/fonts/Fixed-Medium.ttf") format("truetype"), url("static/fonts/Fixed-Medium.svg#Fixed-Medium") format("svg");
+            src: url("static/fonts/Fixed-Medium.eot?#iefix") format("embedded-opentype"),
+              url("static/fonts/Fixed-Medium.woff2") format("woff2"),
+              url("static/fonts/Fixed-Medium.woff") format("woff"),
+              url("static/fonts/Fixed-Medium.ttf") format("truetype"),
+              url("static/fonts/Fixed-Medium.svg#Fixed-Medium") format("svg");
             font-weight: 500;
             font-style: normal;
           }
@@ -222,7 +245,14 @@ class MyApp extends App {
           button:active:enabled {
             border: 1px inset #aaa;
             background: linear-gradient(bottom, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
-            background: -webkit-linear-gradient(bottom, #f0f0f0 0%, #dcdcdc 44%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
+            background: -webkit-linear-gradient(
+              bottom,
+              #f0f0f0 0%,
+              #dcdcdc 44%,
+              #dcdcdc 44%,
+              #c8c8c8 63%,
+              #8d8d8d 100%
+            );
           }
           button:active:enabled > svg,
           button:active:enabled > img {

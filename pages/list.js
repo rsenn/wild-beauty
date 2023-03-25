@@ -15,7 +15,6 @@ import Layout from "../components/layout.js";
 import { findInTree } from "../stores/functions.js";
 import { withSize } from "react-sizeme";
 
-
 @inject("rootStore")
 @observer
 class List extends React.Component {
@@ -25,7 +24,16 @@ class List extends React.Component {
     parentIds: [],
     view: "list"
   };
-  static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize colors original_name } }", "users { user { id username last_seen } }"];
+  static fields = [
+    "id",
+    "type",
+    "parent_id",
+    "parent { id type data }",
+    "children { id type data }",
+    "data",
+    "photos { photo { id width height filesize colors original_name } }",
+    "users { user { id username last_seen } }"
+  ];
 
   svgRef = trkl();
 
@@ -36,9 +44,13 @@ class List extends React.Component {
     List.api = api;
     let result,
       items = [];
-    result = await List.api(`query MyQuery { items(where: {id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`);
+    result = await List.api(
+      `query MyQuery { items(where: {id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`
+    );
     if(result.items) items = items.concat(result.items);
-    result = await List.api(`query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`);
+    result = await List.api(
+      `query MyQuery { items(where: {parent_id: {_eq: ${categoryId}}}) { id data children { id } parent { id parent { id } } photos { photo { id width height } } users { user { id } } } }`
+    );
     if(result.items) items = items.concat(result.items);
     let depth, children;
     const pageProps = { items, categoryId, depth, children };
@@ -49,7 +61,11 @@ class List extends React.Component {
   constructor(props) {
     super(props);
     const { rootStore } = this.props;
-    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
+    this.api = getAPI(
+      global.window && /192\.168/.test(window.location.href)
+        ? "http://wild-beauty.herokuapp.com/v1/graphql"
+        : "/v1/graphql"
+    );
     if(global.window) {
       window.api = this.api;
       window.page = this;
@@ -70,17 +86,20 @@ class List extends React.Component {
 
   componentDidMount() {
     const { rootStore, router } = this.props;
-    rootStore.loadItems().then(response => {
-      if(response) {
-        //console.log("Items: ", response.items);
-        this.tree = rootStore.getHierarchy(undefined, it => {
-          if(!it.children) it.size = 20;
-          it.value = it.id;
-          return it;
-        });
-        //console.log("this.tree", toJS(this.tree));
-      }
-    });
+
+    try {
+      rootStore.loadItems().then(response => {
+        if(response) {
+          //console.log("Items: ", response.items);
+          this.tree = rootStore.getHierarchy(undefined, it => {
+            if(!it.children) it.size = 20;
+            it.value = it.id;
+            return it;
+          });
+          //console.log("this.tree", toJS(this.tree));
+        }
+      });
+    } catch(e) {}
   }
 
   handleClick = event => {
@@ -98,7 +117,8 @@ class List extends React.Component {
       return;
     }
     Element.findAll(".tile").forEach(e => {
-      if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
+      if(e !== event.currentTarget)
+        Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
       e.style.setProperty("transform", "none");
     });
     while(e.parentElement && !e.classList.contains("tile")) {
@@ -182,7 +202,9 @@ class List extends React.Component {
       });
     }
     let tree = this.tree;
-    const items = this.props.items ? this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1) : [];
+    const items = this.props.items
+      ? this.props.items.filter(item => this.state.parentIds.indexOf(item.parent_id) != -1)
+      : [];
     console.log("List.render ");
     return (
       <Layout>
@@ -233,14 +255,14 @@ class List extends React.Component {
                             }}
                             className='gallery-image'
                           />
-                        ) : (
-                          undefined
-                        )}
+                        ) : undefined}
                         <div
                           style={{
                             position: "absolute",
                             padding: "2px",
-                            background: haveImage ? "none" : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                            background: haveImage
+                              ? "none"
+                              : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
                             textAlign: "left",
                             top: "0px",
                             left: "0px",
@@ -254,9 +276,7 @@ class List extends React.Component {
                               Children[{children.length}]: {children.map(ch => ch.id).join(",")}
                               <br />
                             </span>
-                          ) : (
-                            undefined
-                          )}
+                          ) : undefined}
                           Parent: {parent ? parent.id : -1} <br />
                           {!!type ? `Type: ${type}` : undefined}
                           {!!name ? `Name: ${name}` : undefined}
@@ -268,7 +288,9 @@ class List extends React.Component {
                               fontSize: "16px"
                             }}
                           >
-                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
+                            {[...Object.entries(data)]
+                              .map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`))
+                              .join("\n")}
                           </pre>
                         </div>
                       </SizedAspectRatioBox>

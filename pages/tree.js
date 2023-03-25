@@ -151,7 +151,16 @@ class TreePage extends React.Component {
     secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H"
   });
 
-  static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize colors original_name } }", "users { user { id username last_seen } }"];
+  static fields = [
+    "id",
+    "type",
+    "parent_id",
+    "parent { id type data }",
+    "children { id type data }",
+    "data",
+    "photos { photo { id width height filesize colors original_name } }",
+    "users { user { id username last_seen } }"
+  ];
 
   svgRef = trkl();
 
@@ -173,8 +182,41 @@ class TreePage extends React.Component {
     console.log("TreePage.getInitialProps ", { query, params });
     const rootStore = ctx.mobxStore["RootStore"];
 
-    let fields = ["id", "name", "type", "parent_id", "parent { id }", "order", "children(order_by: {order: asc}) { id name type }", "data", "photos { photo { id colors } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
-    let items = await rootStore.api.list("items", fields, { where: "{visible: {_eq: true}},order_by:{parent: {id: asc}, order: asc, created: asc}" });
+    let fields = [
+      "id",
+      "name",
+      "type",
+      "parent_id",
+      "parent { id }",
+      "order",
+      "children(order_by: {order: asc}) { id name type }",
+      "data",
+      "photos { photo { id colors } }",
+      "users { user { id } }",
+      "children_aggregate { aggregate {count } }"
+    ];
+    let items;
+
+    //  let root = rootStore.getItem(rootItem.id);
+    let g = new Graph({
+      origin: new Point(0, 0),
+      gravitate_to_origin: true,
+      spacing: 12,
+      timestep: 300,
+      prng: (function () {
+        var rng = new Alea(query ? query.seed : 1341);
+        console.log("rng:", rng);
+        return rng;
+      })()
+    });
+
+    try {
+      items = await rootStore.api.list("items", fields, {
+        where: "{visible: {_eq: true}},order_by:{parent: {id: asc}, order: asc, created: asc}"
+      });
+    } catch(e) {
+      items = [];
+    }
 
     //   console.log('Tree.getInitialProps items=', items);
     /*      let items;
@@ -194,67 +236,59 @@ class TreePage extends React.Component {
     if(rootStore.items && rootStore.items.clear) rootStore.items.clear();
     items = items.map(item => rootStore.newItem(item));
 
-    let rootItem = rootStore.getTree(1);
+    try {
+      let rootItem = rootStore.getTree(1);
 
-    //  let root = rootStore.getItem(rootItem.id);
-    let g = new Graph({
-      origin: new Point(0, 0),
-      gravitate_to_origin: true,
-      spacing: 12,
-      timestep: 300,
-      prng: (function() {
-        var rng = new Alea(query ? query.seed : 1341);
-        console.log("rng:", rng);
-        return rng;
-      })()
-    });
-    let iter = Object.fromEntries([
-      ...rootStore.entries(({ photos, children, users, key, ...item }) => {
-        item = toJS(item);
-        if(!item.type) delete item.type;
-        if(!Util.isEmpty(item.data)) delete item.data;
-        return item;
-      })
-    ]);
-    for(let key in iter) {
-      let { parent, childIds, children, ...item } = iter[key];
-      let parent_id = parent && parent.id;
-      let depth = ((iter[parent_id] && iter[parent_id].depth) || 0) + 1;
-      let p;
-      if(parent_id > 0) {
-        iter[key].parent = iter[parent_id];
+      let iter = Object.fromEntries([
+        ...rootStore.entries(({ photos, children, users, key, ...item }) => {
+          item = toJS(item);
+          if(!item.type) delete item.type;
+          if(!Util.isEmpty(item.data)) delete item.data;
+          return item;
+        })
+      ]);
+      for(let key in iter) {
+        let { parent, childIds, children, ...item } = iter[key];
+        let parent_id = parent && parent.id;
+        let depth = ((iter[parent_id] && iter[parent_id].depth) || 0) + 1;
+        let p;
+        if(parent_id > 0) {
+          iter[key].parent = iter[parent_id];
+        }
+        item = iter[key];
+        item.depth = depth;
+        if(childIds.length) item.children = childIds.map(id => iter[id]);
+
+        if(item.data === null || Util.isEmpty(item.data)) delete item.data;
       }
-      item = iter[key];
-      item.depth = depth;
-      if(childIds.length) item.children = childIds.map(id => iter[id]);
 
-      if(item.data === null || Util.isEmpty(item.data)) delete item.data;
-    }
+      let root;
 
-    let root = rootStore.getTree(rootItem.id, it => Util.filterOutKeys(toJS(it), ["childIds", "users"]));
+      root = rootStore.getTree(rootItem.id, it => Util.filterOutKeys(toJS(it), ["childIds", "users"]));
 
-    /* console.log("g:", g);
+      /* console.log("g:", g);
      console.log("root:", toJS(root));*/
 
-    treeToGraph(g, root, item => {
-      let { children, parent, users, photos, ...restOfItem } = item;
-      let parent_id = parent && parent.id;
-      if(parent_id !== undefined) item.parent_id = parent_id;
-      let numChildren = children ? children.length : 0;
-      let output = { itemKeys: Object.keys(item), parent_id, restOfItem };
-      if(numChildren) item.num_children = numChildren;
-      if(item.photos && item.photos[0] && item.photos[0].photo) {
-        let photo = item.photos[0].photo;
-        let colors = Util.jsonToObject(photo.colors);
-        let color = Object.keys(colors)[0];
-        console.log("color:", color);
-        item.color = color;
-      }
+      treeToGraph(g, root, item => {
+        let { children, parent, users, photos, ...restOfItem } = item;
+        let parent_id = parent && parent.id;
+        if(parent_id !== undefined) item.parent_id = parent_id;
+        let numChildren = children ? children.length : 0;
+        let output = { itemKeys: Object.keys(item), parent_id, restOfItem };
+        if(numChildren) item.num_children = numChildren;
+        if(item.photos && item.photos[0] && item.photos[0].photo) {
+          let photo = item.photos[0].photo;
+          let colors = Util.jsonToObject(photo.colors);
+          let color = Object.keys(colors)[0];
+          console.log("color:", color);
+          item.color = color;
+        }
 
-      // if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
-   //console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
-      return true;
-    });
+        // if(!numChildren && !(item.type && item.type.endsWith("category"))) return false;
+        //console.log("item: ", Util.filterOutKeys(item, ["children", "num_children", "parent"]));
+        return true;
+      });
+    } catch(e) {}
 
     while(!g.done_rendering) g.checkRedraw();
 
@@ -286,7 +320,7 @@ class TreePage extends React.Component {
         root,
         item => true,
         item => {
-          delete item.parent;
+          if(typeof item == "object") delete item.parent;
           return item;
         }
       )
@@ -309,7 +343,12 @@ class TreePage extends React.Component {
 
   constructor(props) {
     super(props);
-    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
+    this.api = getAPI(
+      global.window && /192\.168/.test(window.location.href)
+        ? "http://wild-beauty.herokuapp.com/v1/graphql"
+        : "/v1/graphql",
+      { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" }
+    );
     const { rootStore } = this.props;
 
     /*    this.tree = this.props.tree;
@@ -495,7 +534,8 @@ class TreePage extends React.Component {
     }
     this.state.currentItem = parseInt(id);
     Element.findAll(".tile").forEach(e => {
-      if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
+      if(e !== event.currentTarget)
+        Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
       e.style.setProperty("transform", "none");
     });
     while(e.parentElement && !e.classList.contains("tile")) {
@@ -596,7 +636,18 @@ class TreePage extends React.Component {
           <ItemView id={this.state.itemId} />
         ) : (
           <div className={"show-layout2"}>
-            {tree ? <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} /> : undefined}
+            {tree ? (
+              <DropdownTreeSelect
+                data={tree}
+                onChange={makeTreeSelEvent("change")}
+                onNodeToggle={makeTreeSelEvent("node-toggle")}
+                onFocus={makeTreeSelEvent("focus")}
+                onBlur={makeTreeSelEvent("blur")}
+                className={"dropdown-tree"}
+                mode={"radioSelect"}
+                texts={{ placeholder: "parent item" }}
+              />
+            ) : undefined}
             {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
@@ -637,14 +688,14 @@ class TreePage extends React.Component {
                             }}
                             className='gallery-image'
                           />
-                        ) : (
-                          undefined
-                        )}
+                        ) : undefined}
                         <div
                           style={{
                             position: "absolute",
                             padding: "2px",
-                            background: haveImage ? "none" : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                            background: haveImage
+                              ? "none"
+                              : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
                             textAlign: "left",
                             top: "0px",
                             left: "0px",
@@ -658,9 +709,7 @@ class TreePage extends React.Component {
                               Children[{children.length}]: {children.map(ch => ch.id).join(",")}
                               <br />
                             </span>
-                          ) : (
-                            undefined
-                          )}
+                          ) : undefined}
                           Parent: {parent ? parent.id : -1} <br />
                           {!!type ? `Type: ${type}` : undefined}
                           {!!name ? `Name: ${name}` : undefined}
@@ -672,7 +721,9 @@ class TreePage extends React.Component {
                               fontSize: "16px"
                             }}
                           >
-                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
+                            {[...Object.entries(data)]
+                              .map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`))
+                              .join("\n")}
                           </pre>
                         </div>
                       </SizedAspectRatioBox>

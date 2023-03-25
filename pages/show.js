@@ -24,7 +24,9 @@ const RandomColor = () => {
 };
 
 const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")]
+    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
+    .filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -53,7 +55,16 @@ class Show extends React.Component {
     view: "list"
   };
 
-  static fields = ["id", "type", "parent_id", "parent { id type data }", "children { id type data }", "data", "photos { photo { id width height filesize colors original_name } }", "users { user { id username last_seen } }"];
+  static fields = [
+    "id",
+    "type",
+    "parent_id",
+    "parent { id type data }",
+    "children { id type data }",
+    "data",
+    "photos { photo { id width height filesize colors original_name } }",
+    "users { user { id username last_seen } }"
+  ];
 
   svgRef = trkl();
 
@@ -64,27 +75,36 @@ class Show extends React.Component {
     const { query, params } = (ctx && ctx.req) || {};
     //console.log("Show.getInitialProps ", { query, params });
     const { RootStore } = ctx.mobxStore;
+
     let items;
-    if(params && params.id !== undefined) {
-      let id = parseInt(params.id);
-      const name = params.id;
-      if(isNaN(id) || typeof id != "number") id = -1;
-      const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize colors  height width id offset uploaded original_name } } parent_id } }`;
-      //console.log("query: ", q);
-      let response = await Show.API(q);
-      items = response.items || [];
-    } else {
-      items = await Show.API.list("items", Show.fields);
+    try {
+      if(params && params.id !== undefined) {
+        let id = parseInt(params.id);
+        const name = params.id;
+        if(isNaN(id) || typeof id != "number") id = -1;
+        const q = `query MyQuery { items(where: { _or: [ {id: {_eq: ${id}}}, {name:{_eq:"${name}"}}] }) { id data photos { photo { filesize colors  height width id offset uploaded original_name } } parent_id } }`;
+        //console.log("query: ", q);
+        let response = await Show.API(q);
+        items = response.items || [];
+      } else {
+        items = await Show.API.list("items", Show.fields);
+      }
+      items = items.sort((a, b) => a.id - b.id);
+      // console.log("items: ", items);
+      if(typeof RootStore.items == "object" && RootStore.items.clear) RootStore.items.clear();
+    } catch(e) {
+      items = [];
     }
-    items = items.sort((a, b) => a.id - b.id);
-    // console.log("items: ", items);
-    if(typeof RootStore.items == "object" && RootStore.items.clear) RootStore.items.clear();
     return { items, params };
   }
 
   constructor(props) {
     super(props);
-    this.api = getAPI(global.window && /192\.168/.test(window.location.href) ? "http://wild-beauty.herokuapp.com/v1/graphql" : "/v1/graphql");
+    this.api = getAPI(
+      global.window && /192\.168/.test(window.location.href)
+        ? "http://wild-beauty.herokuapp.com/v1/graphql"
+        : "/v1/graphql"
+    );
     const { rootStore } = this.props;
     if(global.window) {
       window.api = this.api;
@@ -96,28 +116,31 @@ class Show extends React.Component {
     props.items.forEach(item => {
       rootStore.newItem(item);
     });
-    let tempTree = rootStore.getTree(rootStore.rootItemId, makeItemToOption(), null);
+    try {
+      let tempTree = rootStore.getTree(rootStore.rootItemId, makeItemToOption(), null);
 
-    function removeLeafs(tree) {
-      let { children, ...node } = tree;
-      if(children && children.length !== undefined) children = children.filter(child => !(!child.children || !child.children.length)).map(removeLeafs);
-      return { children, ...node };
-    }
-
-    this.tree = removeLeafs(tempTree);
-
-    if(this.props.params && this.props.params.id !== undefined) {
-      this.state.view = "item";
-      this.state.itemId = parseInt(this.props.params.id);
-    } else if(this.tree) {
-      var item = findInTree(this.tree, "Objects");
-      if(item) item.checked = true;
-      Util.traverseTree(item, i => i && this.state.parentIds.push(i.id));
-
-      for(let node in Util.walkTree(this.tree)) {
-        console.log("walkTree: ", node);
+      function removeLeafs(tree) {
+        let { children, ...node } = tree || {};
+        if(children && children.length !== undefined)
+          children = children.filter(child => !(!child.children || !child.children.length)).map(removeLeafs);
+        return { children, ...node };
       }
-    }
+
+      this.tree = removeLeafs(tempTree);
+
+      if(this.props.params && this.props.params.id !== undefined) {
+        this.state.view = "item";
+        this.state.itemId = parseInt(this.props.params.id);
+      } else if(this.tree) {
+        var item = findInTree(this.tree, "Objects");
+        if(item) item.checked = true;
+        Util.traverseTree(item, i => i && this.state.parentIds.push(i.id));
+
+        for(let node in Util.walkTree(this.tree)) {
+          console.log("walkTree: ", node);
+        }
+      }
+    } catch(e) {}
   }
 
   checkTagRemove() {
@@ -200,6 +223,7 @@ class Show extends React.Component {
     //console.log("treeSelEvent: ", ids, item.title);
     this.setState({ parentIds: ids });
   }
+
   treeSelEvent(type, arg) {
     const { rootStore } = this.props;
     //console.log("treeSelEvent: ", type, arg);
@@ -240,7 +264,8 @@ class Show extends React.Component {
     }
 
     Element.findAll(".tile").forEach(e => {
-      if(e !== event.currentTarget) Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
+      if(e !== event.currentTarget)
+        Element.setCSS(e, { transition: "transform 0.2s ease-in", transform: "", zIndex: 8 });
 
       e.style.setProperty("transform", "none");
     });
@@ -356,7 +381,18 @@ class Show extends React.Component {
           <ItemView id={this.state.itemId} />
         ) : (
           <div className={"show-layout2"}>
-            {tree ? <DropdownTreeSelect data={tree} onChange={makeTreeSelEvent("change")} onNodeToggle={makeTreeSelEvent("node-toggle")} onFocus={makeTreeSelEvent("focus")} onBlur={makeTreeSelEvent("blur")} className={"dropdown-tree"} mode={"radioSelect"} texts={{ placeholder: "parent item" }} /> : undefined}
+            {tree ? (
+              <DropdownTreeSelect
+                data={tree}
+                onChange={makeTreeSelEvent("change")}
+                onNodeToggle={makeTreeSelEvent("node-toggle")}
+                onFocus={makeTreeSelEvent("focus")}
+                onBlur={makeTreeSelEvent("blur")}
+                className={"dropdown-tree"}
+                mode={"radioSelect"}
+                texts={{ placeholder: "parent item" }}
+              />
+            ) : undefined}
             {}
             <div id={"item-grid"} style={{ margin: "0 0" }}>
               <div className={"grid-col grid-gap-20"}>
@@ -399,14 +435,14 @@ class Show extends React.Component {
                             }}
                             className='gallery-image'
                           />
-                        ) : (
-                          undefined
-                        )}
+                        ) : undefined}
                         <div
                           style={{
                             position: "absolute",
                             padding: "2px",
-                            background: haveImage ? "none" : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
+                            background: haveImage
+                              ? "none"
+                              : "linear-gradient(0deg, hsla(51, 91%, 80%, 0.5) 0%, hsla(51, 95%, 90%, 0.2) 100%)",
                             textAlign: "left",
                             top: "0px",
                             left: "0px",
@@ -420,9 +456,7 @@ class Show extends React.Component {
                               Children[{children.length}]: {children.map(ch => ch.id).join(",")}
                               <br />
                             </span>
-                          ) : (
-                            undefined
-                          )}
+                          ) : undefined}
                           Parent: {parent ? parent.id : -1} <br />
                           {!!type ? `Type: ${type}` : undefined}
                           {!!name ? `Name: ${name}` : undefined}
@@ -434,7 +468,9 @@ class Show extends React.Component {
                               fontSize: "16px"
                             }}
                           >
-                            {[...Object.entries(data)].map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`)).join("\n")}
+                            {[...Object.entries(data)]
+                              .map(([key, value]) => (key == "title" ? value : `${Util.ucfirst(key)}: ${value}`))
+                              .join("\n")}
                           </pre>
                         </div>
                       </SizedAspectRatioBox>

@@ -14,14 +14,27 @@ class Browse extends React.Component {
   static async getInitialProps({ res, req, query, params, asPath, mobxStore }) {
     const rootStore = mobxStore.RootStore;
 
-    let fields = ["id", "name", "type", "parent { id }", "order", "children(order_by: {order: asc}) { id name type }", "data", "photos { photo { id } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
+    let fields = [
+      "id",
+      "name",
+      "type",
+      "parent { id }",
+      "order",
+      "children(order_by: {order: asc}) { id name type }",
+      "data",
+      "photos { photo { id } }",
+      "users { user { id } }",
+      "children_aggregate { aggregate {count } }"
+    ];
     let items;
 
     try {
-
-      items = await rootStore.api.list("items", fields, { order_by: "{parent: { id: asc }, order: asc, created: asc}", where: "{parent_id:{_gte:1}}" });
-    }catch(e) {
-      items=[];
+      items = await rootStore.api.list("items", fields, {
+        order_by: "{parent: { id: asc }, order: asc, created: asc}",
+        where: "{parent_id:{_gte:1}}"
+      });
+    } catch(e) {
+      items = [];
     }
 
     return { items, query, params };
@@ -52,7 +65,17 @@ class Browse extends React.Component {
               <stop offset='100%' stopColor='rgba(0,0,0,0.75)' />
             </linearGradient>
           </defs>
-          <CircleSegment x={50} y={50} r={45} start={-90 * DEG2RAD} end={(-90 + (progress * 360) / 100) * DEG2RAD} fill={"url(#MyGradient)"} stroke={"black"} strokeWidth={0.2} close />
+          <CircleSegment
+            x={50}
+            y={50}
+            r={45}
+            start={-90 * DEG2RAD}
+            end={(-90 + (progress * 360) / 100) * DEG2RAD}
+            fill={"url(#MyGradient)"}
+            stroke={"black"}
+            strokeWidth={0.2}
+            close
+          />
         </svg>
         <style jsx global>{``}</style>
       </Layout>

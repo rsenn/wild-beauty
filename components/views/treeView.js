@@ -1,6 +1,7 @@
 import React from "react";
 import Util from "../../lib/util.js";
-import { HSLA, Point, isPoint, Line, ReactComponent } from "../../lib/dom.js";
+import { HSLA, Point, isPoint, Line } from "../../lib/dom.js";
+import { ReactComponent } from "../../lib/dom/reactComponent.js";
 import { SVGText } from "../simple/svgText.js";
 
 function* Table2DIterator(table) {
@@ -71,7 +72,10 @@ if(global.window) {
   });
 }
 
-export const TreeView = ({ tree, minWidth, minHeight, treeVerify = node => true, active = -1, ...props }, reactComponent = true) => {
+export const TreeView = (
+  { tree, minWidth, minHeight, treeVerify = node => true, active = -1, ...props },
+  reactComponent = true
+) => {
   var width = 200;
   var height = 200;
 
@@ -149,7 +153,12 @@ export const TreeView = ({ tree, minWidth, minHeight, treeVerify = node => true,
         y: ystart + y
       });
       table[y][x].pos = pt; //new Point(Math.sin(pt.x)*xdist, - Math.cos(pt.y));*/
-      table[y][x].color = new HSLA((i++ * 360) / n_items, table[y][x].id == active ? 100 : 85, table[y][x].id == active ? 60 : 70, 1);
+      table[y][x].color = new HSLA(
+        (i++ * 360) / n_items,
+        table[y][x].id == active ? 100 : 85,
+        table[y][x].id == active ? 60 : 70,
+        1
+      );
       table[y][x].title = Util.splitLines(table[y][x].title || "", max_chars);
     }
     // xdist *= xdist_mul;
@@ -275,8 +284,24 @@ if(height  < minHeight)
     return (
       <React.Fragment key={i}>
         <path d={data} stroke={"black"} strokeWidth={W} fill={"none"} />
-        {item.branch && <circle cx={item.branch.a.x} cy={item.branch.a.y} r={10} fill={"none"} stroke={item.color.toHSL().toString()} />}
-        {0 && item.vector && <line x1={item.vector.x1} y1={item.vector.y1} x2={item.vector.x2} y2={item.vector.y2} stroke={item.color.toHSL().toString()} />}
+        {item.branch && (
+          <circle
+            cx={item.branch.a.x}
+            cy={item.branch.a.y}
+            r={10}
+            fill={"none"}
+            stroke={item.color.toHSL().toString()}
+          />
+        )}
+        {0 && item.vector && (
+          <line
+            x1={item.vector.x1}
+            y1={item.vector.y1}
+            x2={item.vector.x2}
+            y2={item.vector.y2}
+            stroke={item.color.toHSL().toString()}
+          />
+        )}
         {/*        <circle cx={ca.x} cy={ca.y} r={4} fill={item.color.toHSL()} />
             <circle cx={cb.x} cy={cb.y} r={4} fill={item.color.toHSL()} />*/}
       </React.Fragment>
@@ -316,7 +341,20 @@ if(height  < minHeight)
         {[...Table2DIterator(table)].map((item, i) => (
           <g key={i} transform={`translate(${item.pos.x},${item.pos.y})`}>
             <g id={"item." + item.id}>
-              <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={8} ry={8} vectorEffect={"non-scaling-stroke"} stroke={item.id == active ? "white" : "none"} strokeDasharray={item.id == active ? "4" : ""} fill={item.color.toString()} strokeWidth={item.id == active ? W * 3 : W} style={{ filter: "url(#shadow)" }} />
+              <rect
+                x={-radius}
+                y={-radius}
+                width={radius * 2}
+                height={radius * 2}
+                rx={8}
+                ry={8}
+                vectorEffect={"non-scaling-stroke"}
+                stroke={item.id == active ? "white" : "none"}
+                strokeDasharray={item.id == active ? "4" : ""}
+                fill={item.color.toString()}
+                strokeWidth={item.id == active ? W * 3 : W}
+                style={{ filter: "url(#shadow)" }}
+              />
               <SVGText key={i} x={0} y={0}>
                 {item.label}
               </SVGText>
