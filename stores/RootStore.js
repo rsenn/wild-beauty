@@ -69,7 +69,7 @@ export class RootStore extends Queries {
       }
     }
     if(global.window) {
-      if(!window.devp) window.devp = new devpane('root','.pane', ReactDOM);
+      if(!window.devp) window.devp = new devpane("root", ".pane", ReactDOM);
       window.rs = this;
       set(this.auth, JSON.parse(localStorage.getItem("auth")));
     }
@@ -234,10 +234,10 @@ export class RootStore extends Queries {
 
   get rootItem() {
     if(this.items.size == 0) {
-    try {
-      this.loadItems();
-    }catch(e) {}
-  }
+      try {
+        this.loadItems();
+      } catch(e) {}
+    }
     var root = null;
     if(this.items && this.items.entries)
       for(let [id, item] of this.items.entries()) {
@@ -294,7 +294,10 @@ export class RootStore extends Queries {
       idMap.push(item.id);
       if(typeof item == "object") {
         let { parent_id } = item;
-        if(depth > 0 && item.children && item.children.length) item.children = item.children.map(i => (i != null ? this.getTree(parseInt(i.id), tr, idMap, depth - 1) : null)).filter(c => c !== null);
+        if(depth > 0 && item.children && item.children.length)
+          item.children = item.children
+            .map(i => (i != null ? this.getTree(parseInt(i.id), tr, idMap, depth - 1) : null))
+            .filter(c => c !== null);
         else item.children = [];
         item.children = item.children.filter(i => i !== null);
         item.children = item.children.map(child => {
@@ -306,7 +309,7 @@ export class RootStore extends Queries {
     return item ? tr(item) : null;
   }
 
-  entries = function*(map = null) {
+  entries = function* (map = null) {
     if(map === null) map = item => item;
     for(let [key, item] of this.items.entries()) yield [key, map(item)];
   };
@@ -331,7 +334,9 @@ export class RootStore extends Queries {
     if(item) {
       let { name, id } = item;
       if(!name) name = `[${id}]`;
-      let children = [...this.items.values()].filter(child => child.parent && child.parent.id == id).map(child => this.getHierarchy(child, fn));
+      let children = [...this.items.values()]
+        .filter(child => child.parent && child.parent.id == id)
+        .map(child => this.getHierarchy(child, fn));
       let ret = { name };
       if(children && children.length > 0) ret.children = children;
 

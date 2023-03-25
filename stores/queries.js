@@ -18,7 +18,11 @@ export class Queries {
 
   async fetchImages(where = {}) {
     //console.log("⇒ photos ", { where });
-    let response = await this.api.list("photos", ["id", "original_name", "width", "height", "uploaded", "filesize", "colors", "user_id", "items { item_id }"], { where });
+    let response = await this.api.list(
+      "photos",
+      ["id", "original_name", "width", "height", "uploaded", "filesize", "colors", "user_id", "items { item_id }"],
+      { where }
+    );
     //console.log("⇐ photos =", response);
 
     return response.map(photo => {
@@ -29,10 +33,24 @@ export class Queries {
 
   async fetchItems(where, fields, t = transformItemData) {
     where = where || {};
-    fields = fields || ["id", "name", "type", "parent { id }", "order", "children(order_by: {order: asc}) { id name type }", "data", "photos { photo { id } }", "users { user { id } }", "children_aggregate { aggregate {count } }"];
+    fields = fields || [
+      "id",
+      "name",
+      "type",
+      "parent { id }",
+      "order",
+      "children(order_by: {order: asc}) { id name type }",
+      "data",
+      "photos { photo { id } }",
+      "users { user { id } }",
+      "children_aggregate { aggregate {count } }"
+    ];
     //console.log("⇒ items:", where);
 
-    let response = await this.api.list("items", fields, { order_by: "{parent_id: asc, order: asc, created: asc}", where });
+    let response = await this.api.list("items", fields, {
+      order_by: "{parent_id: asc, order: asc, created: asc}",
+      where
+    });
     let items = response && response.items ? await response.items : null;
 
     if(items !== null) items = items.map(t);
@@ -68,23 +86,36 @@ export class Queries {
    */
   async loadItems(where = {}) {
     console.log("RootStore.loadItems", where);
-    let response = await this.apiRequest("/api/tree", Util.isEmpty(where) ? {} : { where });
-    let items,
-      data = response ? await response.data : null;
-    if(await data) items = await data.items;
-    if(!items) return 0;
+    let items;
+    try {
+      let response = await this.apiRequest("/api/tree", Util.isEmpty(where) ? {} : { where });
+      let data = response ? await response.data : null;
+      if(await data) items = await data.items;
+      if(!items) return 0;
 
-    for(let key in items) {
-      const id = parseInt(items[key].id || key);
-      this.items.delete("" + id);
-      this.items.set("" + id, items[key]);
-    }
+      for(let key in items) {
+        const id = parseInt(items[key].id || key);
+        this.items.delete("" + id);
+        this.items.set("" + id, items[key]);
+      }
+    } catch(e) {}
+
     return items;
   }
 
   async loadItem(where = {}) {
     if(typeof where == "number") where = { id: where };
-    let response = Util.isServer() ? await this.api.select("items", where, ["id", "type", "parent { id }", "children { id }", "data", "photos { photo { id original_name width height filesize colors } }", "users { user { id } }"]) : await this.apiRequest("/api/item", where);
+    let response = Util.isServer()
+      ? await this.api.select("items", where, [
+          "id",
+          "type",
+          "parent { id }",
+          "children { id }",
+          "data",
+          "photos { photo { id original_name width height filesize colors } }",
+          "users { user { id } }"
+        ])
+      : await this.apiRequest("/api/item", where);
     let items = response ? await response.items : null;
     let item = (await items) ? await items[0] : null;
     const id = "" + (item && item.id !== undefined ? item.id : where.id);
@@ -121,7 +152,13 @@ export class Queries {
 
     console.log("saveItem", { entries, photo_id, parent_id, user_id, name, dataObj });
 
-    return this.apiRequest("/api/item/new", { photo_id, parent_id, users: `{data: {user_id: ${user_id}}}`, name, data: JSON.stringify(dataObj) }).then(response => {
+    return this.apiRequest("/api/item/new", {
+      photo_id,
+      parent_id,
+      users: `{data: {user_id: ${user_id}}}`,
+      name,
+      data: JSON.stringify(dataObj)
+    }).then(response => {
       console.log("saveitem API response:", response);
       doneHandler(response);
     });
