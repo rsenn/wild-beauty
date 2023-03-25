@@ -233,7 +233,11 @@ export class RootStore extends Queries {
   }
 
   get rootItem() {
-    if(this.items.size == 0) this.loadItems();
+    if(this.items.size == 0) {
+    try {
+      this.loadItems();
+    }catch(e) {}
+  }
     var root = null;
     if(this.items && this.items.entries)
       for(let [id, item] of this.items.entries()) {

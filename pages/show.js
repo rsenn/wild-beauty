@@ -164,11 +164,16 @@ class Show extends React.Component {
 
   componentDidMount() {
     const { rootStore, router } = this.props;
-    this.checkTagRemove();
+
+    try {
+      this.checkTagRemove();
+    } catch(e) {}
   }
 
   componentDidUpdate() {
-    this.checkTagRemove();
+    try {
+      this.checkTagRemove();
+    } catch(e) {}
   }
 
   touchEvent = event => {
