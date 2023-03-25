@@ -4,12 +4,12 @@ import Gallery, { randomImagePaths } from "../components/gallery.js";
 import { ScrollController } from "../lib/scrollController.js";
 import Alea from "../lib/alea.js";
 import { SwipeTracker } from "../lib/swipeTracker.js";
-import { MultitouchListener, MovementListener } from "../lib/touchHandler.js";
-import { lazyInitializer } from "../lib/lazyInitializer.js";
+ import { lazyInitializer } from "../lib/lazyInitializer.js";
 import { SvgOverlay } from "../lib/svg/overlay.js";
 import { TouchCallback } from "../components/TouchCallback.js";
 import Layout from "../components/layout.js";
 import { RandomColor } from "../stores/functions.js";
+import { MovementListener, MultitouchListener, TurnListener, SelectionListener, SelectionRenderer, TouchEvents, MouseEvents, addTouchListeners, addMouseListeners, TouchListener, TouchHandler } from "../lib/touchHandler.js";
 
 const getPrng = () => Alea;
 const imagePaths = lazyInitializer(() => randomImagePaths());
@@ -56,7 +56,14 @@ const Test = () => {
     error: useState(0)
   };
   let list = imagePaths();
-  if(list === null || (list && list.length == undefined)) list = ["static/img/86463ed8ed391bf6b0a2907df74adb37.jpg", "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg", "static/img/cdb466a69cc7944809b20e7f34840486.jpg", "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg", "static/img/fdcce856cf66f33789dc3934418113a2.jpg"];
+  if(list === null || (list && list.length == undefined))
+    list = [
+      "static/img/86463ed8ed391bf6b0a2907df74adb37.jpg",
+      "static/img/8cb3c5366cc81b5fe3e061a65fbf4045.jpg",
+      "static/img/cdb466a69cc7944809b20e7f34840486.jpg",
+      "static/img/e758ee9aafbc843a1189ff546c56e5b5.jpg",
+      "static/img/fdcce856cf66f33789dc3934418113a2.jpg"
+    ];
   return (
     <Layout>
       {/*    <form action="upload" method="POST" onSubmit={e => e.preventDefault()}>

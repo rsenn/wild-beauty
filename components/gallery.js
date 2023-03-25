@@ -53,7 +53,7 @@ const defaultImageProps = { style: { width: "100%", maxWidth: "100px", maxHeight
  */
 export const randomImagePaths = (names = imageNames) => {
   let images = names.map(name => `static/img/${name}.jpg`);
-  const rnd = Alea.singleton();
+  const rnd = new Alea(1341);
 
   images = Util.shuffle(images, rnd);
   const num = Math.floor(rnd() * (images.length - 3) + 3);

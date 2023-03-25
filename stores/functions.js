@@ -1,5 +1,6 @@
 import { toJS } from "mobx";
 import { Graph, Node, Edge } from "../lib/fd-graph.js";
+import { HSLA } from "../lib/color.js";
 import Util from "../lib/util.js";
 
 export const RandomColor = () => {
@@ -8,7 +9,9 @@ export const RandomColor = () => {
 };
 
 export const maxZIndex = () => {
-  let arr = [...document.querySelectorAll("*")].map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined)).filter(e => !isNaN(e));
+  let arr = [...document.querySelectorAll("*")]
+    .map(e => (e.style.zIndex !== undefined ? parseInt(e.style.zIndex) : undefined))
+    .filter(e => !isNaN(e));
   arr.sort((a, b) => a < b);
   return arr[0];
 };
@@ -88,7 +91,7 @@ export const treeToGraph = (graph, tree, pred = item => true) => {
       let parent = Util.find(graph.nodes, n => n.node.id == node.parent_id);
       if(parent !== null && n !== null && parent !== n) {
         let e = new Edge(parent, n);
-        console.log("treeToGraph", {Edge, e})
+        console.log("treeToGraph", { Edge, e });
         graph.addEdge(e);
       }
     }

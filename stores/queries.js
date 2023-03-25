@@ -87,6 +87,7 @@ export class Queries {
   async loadItems(where = {}) {
     console.log("RootStore.loadItems", where);
     let items;
+
     try {
       let response = await this.apiRequest("/api/tree", Util.isEmpty(where) ? {} : { where });
       let data = response ? await response.data : null;

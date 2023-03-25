@@ -17,7 +17,9 @@ class MyApp extends App {
   static async getInitialProps({ Component, router, ctx }) {
     // create a store with the initial state
     const mobxStore = getOrCreateStore(!Util.isBrowser());
-    console.log("mobxStore:", Object.keys(mobxStore));
+
+    //console.log("mobxStore:", Object.keys(mobxStore));
+
     ctx.mobxStore = mobxStore;
     const basePageProps = {
       initialMobxState: mobxStore // store that will be serialized for ssr (see constructor)
@@ -35,17 +37,7 @@ class MyApp extends App {
       // inject the basePageProps in the parameters of getInitialProps
       pageProps = await getInit(pageCtx);
 
-      console.log(
-        "App pageProps=",
-        Object.fromEntries(
-          Object.entries(pageProps).map(([key, value]) => [
-            key,
-            Util.isArray(value) || (typeof value == "object" && value !== null && value.length !== undefined)
-              ? `Array(${value.length})`
-              : typeof value
-          ])
-        )
-      );
+      //console.log("App pageProps=", Object.fromEntries(Object.entries(pageProps).map(([key, value]) => [key, Util.isArray(value) || (typeof value == "object" && value !== null && value.length !== undefined) ? `Array(${value.length})` : typeof value ])));
 
       if(pageProps.items) {
         pageProps.items.forEach(item => {
