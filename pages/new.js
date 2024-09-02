@@ -98,6 +98,7 @@ class New extends React.Component {
   componentDidUpdate() {
     const { rootStore, router } = this.props;
 
+if(this.itemSelection)
     this.itemSelection.init();
   }
 

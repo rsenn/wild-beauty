@@ -49,7 +49,7 @@ var log = logStream("server.log");
 global.console = new Console({ stdout: log, stderr: log, inspectOptions: { depth: 10, colors: true } });
 
 const API = getAPI("http://127.0.0.1:8080/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
-API.options.debug=true;
+API.options.debug = true;
 
 var secret = fs.readFileSync("secret.key");
 var etc_hostname = fs.readFileSync("/etc/hostname");
@@ -69,7 +69,7 @@ if(!dev && cluster.isMaster) {
   nextApp.prepare().then(() => {
     const server = express();
     if(!dev) {
-      server.use(function(req, res, next) {
+      server.use(function (req, res, next) {
         var proto = req.headers["x-forwarded-proto"];
         if(proto === "https") {
           res.set({
@@ -109,18 +109,18 @@ if(!dev && cluster.isMaster) {
 
     server.use(bodyParser.json());
 
-    server.use(function(req, res, next) {
+    server.use(function (req, res, next) {
       const { query, params, url } = req;
       return next();
     });
 
     server.post("/api/login", async (req, res) => {
-                 console.log("/api/login", {body:req.body});
-  const { username, password } = req.body;
+      console.log("/api/login", { body: req.body });
+      const { username, password } = req.body;
       try {
         let response = await API.select("users", { username: `"${username}"` }, ["id", "username", "password"]);
-             console.log("/api/login", {response});
-   let user = response.users[0];
+        console.log("/api/login", { response });
+        let user = response.users[0];
         let success = user ? bcrypt.compareSync(password, user.password) : false;
         let token,
           user_id = -1;
@@ -129,7 +129,7 @@ if(!dev && cluster.isMaster) {
           user_id = user.id;
           token = signature.replace(/.*\./g, "");
           last_seen = new Date().toISOString();
-          response = await API.update("users", { username/*: `"${username}"`*/ }, { token, last_seen });
+          response = await API.update("users", { username /*: `"${username}"`*/ }, { token, last_seen });
         }
         const cookieOptions = {
           maxAge: 1000 * 60 * 60 * 24,

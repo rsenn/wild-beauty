@@ -47,10 +47,7 @@ async function getImagePalette(data) {
       img.raw().toBuffer((_err, buffer, info) => {
         if(!_err) {
           let colorCount = 16;
-          cquant
-            .paletteAsync(buffer, info.channels, colorCount)
-            .then(resolve)
-            .catch(reject);
+          cquant.paletteAsync(buffer, info.channels, colorCount).then(resolve).catch(reject);
         }
       });
     });
@@ -137,9 +134,7 @@ const rotatePhoto = async (inputBuf, angle) => {
   const finished = util.promisify(stream.finished);
   outputStream.on("finish", () => {});
 
-  let transformer = sharp()
-    .jpeg({ quality: 100 })
-    .rotate(angle);
+  let transformer = sharp().jpeg({ quality: 100 }).rotate(angle);
 
   inputStream.pipe(transformer).pipe(outputStream);
   await finished(outputStream);

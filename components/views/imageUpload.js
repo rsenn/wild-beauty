@@ -44,7 +44,8 @@ const ImageSelection = {
     });
     if(this.rects) this.rects.forEach(r => Element.remove(r));
     this.rects = this.items.map(item => {
-      let r = Element.rect(item.card);
+      let r = Element.rect(item.card[0] ?? item.card);
+      console.log('ImageSelection.init', { card: item.card, r});
       let e = rect(r.move(-4, -4).inset(2), "#ffff0000", "#00800000");
       e.parentElement.removeChild(e);
       item.card.parentElement.appendChild(e);
@@ -183,7 +184,7 @@ export const ImageUpload = inject("rootStore")(
 
             imageList.sort((a, b) => a.uploaded - b.uploaded);
 
-            console.log("RUG render children=", uploadedImages.map(toJS));
+            //4console.log("RUG render children=", uploadedImages.map(toJS));
 
             return (
               <div className={"upload"} {...TouchHandler.events}>
