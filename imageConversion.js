@@ -114,9 +114,9 @@ const imageImporter = maxWidthOrHeight =>
       props = jpeg.jpegProps(output);
       width = size.width ? size.width : props.width;
       height = size.height ? size.height : props.height;
-      //console.log("output:", output);
     }
-    let data = output.toString("base64");
+        console.log("output:", output);
+ let data = output.toString("base64");
     //console.log("data:", data.substring(0, 100));
     let word = (output[0] << 8) + output[1];
     let palette = await getImagePalette(output);
