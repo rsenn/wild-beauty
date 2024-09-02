@@ -69,7 +69,7 @@ class Show extends React.Component {
   svgRef = trkl();
 
   static async getInitialProps(ctx) {
-    Show.API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", {
+    Show.API = getAPI("http://127.0.0.1:8080/v1/graphql", {
       secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H"
     });
     const { query, params } = (ctx && ctx.req) || {};
@@ -102,7 +102,7 @@ class Show extends React.Component {
     super(props);
     this.api = getAPI(
       global.window && /192\.168/.test(window.location.href)
-        ? "http://wild-beauty.herokuapp.com/v1/graphql"
+        ? "http://127.0.0.1:8080/v1/graphql"
         : "/v1/graphql"
     );
     const { rootStore } = this.props;

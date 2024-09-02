@@ -147,7 +147,7 @@ class TreePage extends React.Component {
     view: "list",
     currentItem: null
   };
-  static API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", {
+  static API = getAPI("http://127.0.0.1:8080/v1/graphql", {
     secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H"
   });
 
@@ -345,7 +345,7 @@ class TreePage extends React.Component {
     super(props);
     this.api = getAPI(
       global.window && /192\.168/.test(window.location.href)
-        ? "http://wild-beauty.herokuapp.com/v1/graphql"
+        ? "http://127.0.0.1:8080/v1/graphql"
         : "/v1/graphql",
       { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" }
     );

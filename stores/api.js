@@ -8,7 +8,7 @@ import Util from '../lib/util.js';
 
 //Util.ucfirst = str => str.substring(0, 1).toUpperCase() + str.substring(1);
 
-function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { debug: false }) {
+function API(url = "http://127.0.0.1:8080/v1/graphql", options = { debug: false }) {
   const { debug, secret } = options;
   //console.log("New API: ", { url, debug, secret }, Util.getCallers());
   var api = async function(query) {
@@ -75,10 +75,10 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     const camelCase = Util.ucfirst(name);
     let objStr = obj;
 
-    if(typeof obj == "object") objStr = "{" + Util.map(obj, (key, value) => `${key}: {_eq:${value}}`).join(", ") + "}";
+    if(typeof obj == "object") objStr = "{" + Object.entries(obj).map(([key, value]) => `${key}: {_eq:${value}}`).join(", ") + "}";
     let setStr = typeof set == "string" ? set : typeof fields == "object" ? fields : set;
 
-    if(typeof setStr == "object") setStr = "{" + Util.map(setStr, (key, value) => `${key}: "${value}"`).join(", ") + "}";
+    if(typeof setStr == "object") setStr = "{" +  Object.entries(obj).map(([key, value]) =>  `${key}: "${value}"`).join(", ") + "}";
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
     //console.log("setStr = ", setStr);
     const queryName = `update_${name.replace(/s*$/, "s")}`;
@@ -99,7 +99,7 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
     let objStr;
 
     if(typeof obj == "string") objStr = obj;
-    else objStr = "{" + Util.map(obj, (key, value) => `${key}: {_eq: ${value}}`).join(", ") + "}";
+    else objStr = "{" +  Object.entries(obj).map(([key, value]) => `${key}: {_eq: ${value}}`).join(", ") + "}";
 
     console.log("objStr:", objStr);
     if(typeof fields == "string") fields = fields.split(/[ ,;]/g);
@@ -142,11 +142,10 @@ function API(url = "http://wild-beauty.herokuapp.com/v1/graphql", options = { de
 
 let apiInstance = null;
 
-function getAPI() {
+export function getAPI() {
   if(apiInstance == null) {
     apiInstance = API.apply(API, arguments);
   }
   return apiInstance;
 }
 
-module.exports = { API, getAPI };

@@ -6,10 +6,10 @@ const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
 const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
-const jpeg = require("./lib/jpeg.js");
-const Util = require("./lib/util.js").default;
-const getAPI = require("./stores/api.js").getAPI;
-const dom = require("./lib/dom.js");
+const jpeg = require("./lib/jpeg.cjs");
+const Util = require("./lib/util.cjs");
+const getAPI = require("./stores/api.cjs").getAPI;
+const dom = require("./lib/dom.cjs");
 const { RGBA, HSLA } = dom;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -17,12 +17,12 @@ const fs = require("fs");
 const cookieParser = require("cookie-parser");
 const util = require("util");
 const stream = require("stream");
-const Alea = require("./lib/alea.js");
+const Alea = require("./lib/alea.cjs");
 const Readable = stream.Readable;
 //const tempfile = require("tempfile");
 const fsPromises = require("fs").promises;
 const { loadFile, getImagePalette, imageImport, rotatePhoto } = require("./imageConversion.js");
-const { isJpeg, jpegProps } = require("./lib/jpeg.js");
+const { isJpeg, jpegProps } = require("./lib/jpeg.cjs");
 const { Console } = require("console");
 const { stdout, stderr } = process;
 const sha1 = require("node-sha1");
@@ -48,7 +48,8 @@ var log = logStream("server.log");
 
 global.console = new Console({ stdout: log, stderr: log, inspectOptions: { depth: 10, colors: true } });
 
-const API = getAPI("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
+const API = getAPI("http://127.0.0.1:8080/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
+API.options.debug=true;
 
 var secret = fs.readFileSync("secret.key");
 var etc_hostname = fs.readFileSync("/etc/hostname");
@@ -114,10 +115,12 @@ if(!dev && cluster.isMaster) {
     });
 
     server.post("/api/login", async (req, res) => {
-      const { username, password } = req.body;
+                 console.log("/api/login", {body:req.body});
+  const { username, password } = req.body;
       try {
         let response = await API.select("users", { username: `"${username}"` }, ["id", "username", "password"]);
-        let user = response.users[0];
+             console.log("/api/login", {response});
+   let user = response.users[0];
         let success = user ? bcrypt.compareSync(password, user.password) : false;
         let token,
           user_id = -1;
@@ -126,7 +129,7 @@ if(!dev && cluster.isMaster) {
           user_id = user.id;
           token = signature.replace(/.*\./g, "");
           last_seen = new Date().toISOString();
-          response = await API.update("users", { username: `"${username}"` }, { token, last_seen });
+          response = await API.update("users", { username/*: `"${username}"`*/ }, { token, last_seen });
         }
         const cookieOptions = {
           maxAge: 1000 * 60 * 60 * 24,
@@ -139,7 +142,9 @@ if(!dev && cluster.isMaster) {
           req.session.token = token;
           req.session.user_id = user_id;
         }
-        user = Util.filterKeys(user, key => key != "password");
+        delete user.password;
+        //user = Util.filterKeys(user, key => key != "password");
+
         console.error("Login user: ", user);
         res.json({ success, token, user, user_id: user ? user.id : -1 });
       } catch(err) {

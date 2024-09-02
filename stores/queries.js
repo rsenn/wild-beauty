@@ -11,7 +11,7 @@ function getImageColors(colorstr) {
   return Object.fromEntries(Object.entries(obj).sort((a, b) => b[1] - a[1]));
 }
 
-const apiURL = "http://wild-beauty.herokuapp.com/v1/graphql";
+const apiURL = "http://127.0.0.1:8080/v1/graphql";
 
 export class Queries {
   api = getAPI(apiURL, { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H" });
@@ -51,10 +51,10 @@ export class Queries {
       order_by: "{parent_id: asc, order: asc, created: asc}",
       where
     });
-    let items = response && response.items ? await response.items : null;
+       //console.log("⇐ response =", response);
+  let items = response && response.items ? await response.items : response;
 
     if(items !== null) items = items.map(t);
-    //console.log("⇐ items =", items);
     return items;
   }
 
@@ -117,9 +117,12 @@ export class Queries {
           "users { user { id } }"
         ])
       : await this.apiRequest("/api/item", where);
-    let items = response ? await response.items : null;
+    
+ let items = (response && 'items' in response) ? await response.items : response;
+      
     let item = (await items) ? await items[0] : null;
     const id = "" + (item && item.id !== undefined ? item.id : where.id);
+    if('newPhoto' in this) 
     if(item.photos && item.photos.length) {
       for(let i = 0; i < item.photos.length; i++) item.photos[i] = this.newPhoto(item.photos[i].photo);
     }
@@ -132,10 +135,15 @@ export class Queries {
       } catch(err) {}
       if(typeof obj == "object") Object.assign(item, obj);
     }
+    
+    if('items' in this) {
     if(!this.items.has(id)) this.items.set(id, item);
+
     let it = this.items.get(id);
     Object.assign(it, item);
     return it;
+  }
+  return item;
   }
 
   /**
@@ -205,9 +213,18 @@ export class Queries {
 
     if(process.env.PORT) endpoint = "http://127.0.0.1:" + process.env.PORT + endpoint;
 
+
     console.warn("Queries.apiRequest", { endpoint, data });
-    if(!data) res = await axios.get(endpoint);
-    else res = await axios.post(endpoint, data);
+
+    if(!data) res = await fetch(endpoint);
+    else res = await fetch(endpoint, {method:'POST', headers: {  "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    console.warn("Queries.apiRequest", { res });
+
+/*    if(!data) res = await axios.get(endpoint);
+    else res = await axios.post(endpoint, data);*/
+
+if(res.status==200)
+res.data=await res.json();
 
     if((await res) && ((await res.status) != 200 || !(await res.data))) {
       console.error("RootStore.apiRequest " + endpoint, data, " ERROR ", res);

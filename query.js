@@ -14,13 +14,13 @@
 
 //const prettyoutput = require("prettyoutput");
 import Blob from "blob";
-const API = require("./stores/api.js").API;
-const Util = require("./lib/util.js").default;
+const API = require("./stores/api.cjs").API;
+const Util = require("./lib/util.cjs").default;
 const util = require("util");
 const fs = require("fs");
 const path = require("path");
-const jpeg = require("./lib/jpeg.js");
-const RGBA = require("./lib/dom.js").RGBA;
+const jpeg = require("./lib/jpeg.cjs");
+const RGBA = require("./lib/dom.cjs").RGBA;
 
 (async () => {
   // prettier-ignore
@@ -32,7 +32,7 @@ const RGBA = require("./lib/dom.js").RGBA;
 
   const debug = true;
 
-  const api = new API("http://wild-beauty.herokuapp.com/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H", debug });
+  const api = new API("http://127.0.0.1:8080/v1/graphql", { secret: "RUCXOZZjwWXeNxOOzNZBptPxCNl18H", debug });
 
   let args = process.argv;
 

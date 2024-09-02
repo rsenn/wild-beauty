@@ -349,8 +349,9 @@ export class RootStore extends Queries {
   doLogin(username, password, completed = () => {}) {
     this.setState({ loading: true });
     Timer.once(100, () => {
+      
       this.apiRequest("/api/login", { username, password }).then(res => {
-        //console.log("RootStore.doLogin ", res);
+      console.log("RootStore.doLogin ", res);
         const { success, token, user_id, user } = res.data;
         const { username } = user;
         this.setState({

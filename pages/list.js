@@ -63,7 +63,7 @@ class List extends React.Component {
     const { rootStore } = this.props;
     this.api = getAPI(
       global.window && /192\.168/.test(window.location.href)
-        ? "http://wild-beauty.herokuapp.com/v1/graphql"
+        ? "http://127.0.0.1:8080/v1/graphql"
         : "/v1/graphql"
     );
     if(global.window) {
