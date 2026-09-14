@@ -89,16 +89,95 @@ These are concrete findings from reading the code, not general concerns - useful
 - **Frontend**: Next.js (current stable, App Router) + React + TypeScript. Server Components for read-heavy pages (browse/graph/tile view); client components for the interactive editor, upload widget, and graph canvas.
 - **State/data-fetching**: React Query (or Next's built-in data fetching) - MobX's global-singleton-store pattern is not needed once server components own most data.
 - **API layer**: a typed application server (tRPC or a thin REST/GraphQL layer with Prisma) fronting Postgres directly, so there is exactly one place service-level credentials live. If GraphQL is still desired for its introspection/tooling benefits, run Hasura (or Postgraphile) **behind** the app server with row-level security and per-user JWTs - never hand an admin secret to any client-reachable code.
-- **Database**: Postgres, schema below (S4.2).
-- **Object storage**: S3-compatible bucket (Cloudflare R2 / Backblaze B2 / AWS S3) for original + derived image sizes, served via CDN.
+- **Runtime**: Bun (decided - S8 Q6), independent of which frontend framework is eventually chosen (S8 Q9 - both the Next.js and Astro/Preact options in S4.1/S4.1.1 can run on Bun).
+- **Hosting**: self-hosted on a VPS (decided - S8 Q6), not a managed PaaS - drops the "Heroku isn't free anymore" problem by owning the box outright instead of trading one hosted platform for another.
+- **Database**: Postgres by default, schema below (S4.2); a non-SQL/document store remains under consideration (S8 Q6) since `tiles.data`/`tiles.layout` are already schemaless JSON in the proposed schema.
+- **Object storage**: S3-compatible bucket (Cloudflare R2 / Backblaze B2 / AWS S3, or a self-hosted MinIO on the same VPS) for original + derived image sizes, served via CDN.
 - **Auth**: standard email/password (or OAuth) with a real session mechanism (e.g., signed, `httpOnly`, `secure` cookies via a library like `iron-session`/`next-auth`), bcrypt for password hashing (keep - it was already correct).
+
+#### 4.1.1 Alternative frontend stack: Astro + Preact + Bun
+
+Most of this app's pages (browse/tile view) are read-heavy and only a few surfaces are genuinely interactive (the graph canvas, the upload widget, the content editor). That shape is arguably a better fit for an islands-architecture framework than for React/Next's client-bundle-by-default model, so a lighter alternative is worth considering instead of S4.1's Next.js proposal:
+
+- **Framework**: Astro (SSR/SSG, islands architecture - ships near-zero JS for static pages, hydrates only the interactive components) instead of Next.js.
+- **UI library**: Preact instead of React - same component API (`preact/compat` covers libraries that assume real React internals), much smaller runtime, drop-in for `d3-force`/graph-canvas code either way. Official `@astrojs/preact` integration provides SSR + selective client hydration for Preact components.
+- **Runtime**: Bun instead of Node - Astro runs on Bun (`bun create astro`, `bun run dev`/`build`) as a supported target, and `@astrojs/preact` explicitly accounts for Bun's JSX-transform import behavior.
+- **Tradeoff vs. S4.1's Next.js proposal**: significantly less JS shipped to the browser for the mostly-static pages (browse, tile view), and no framework lock-in to React's ecosystem; in exchange, a smaller plugin/library ecosystem than Next's, and no built-in image-optimization pipeline as polished as `next/image` (not a blocker here, since S4.3 already moves image derivation to upload-time + object storage regardless of frontend framework).
+- This is an open question (S8) - either stack satisfies the rest of this document's architecture (S4.2-S4.5 are frontend-framework-agnostic).
 
 ### 4.2 Data Model
 
+#### 4.2.0 Old schema, exact (extracted from `graphql-schema.json` introspection dump)
+
+The table below supersedes S2.2's approximate description with the literal field names/types Hasura exposes today (GraphQL scalar types shown; `!` = non-null). This is the ground truth the migration (S5) maps from - not the proposed schema itself, which follows below.
+
+```
+items (
+  id: Int!
+  name: String
+  type: String
+  data: String                -- schemaless JSON-as-text blob (title/text/custom fields)
+  visible: Boolean!
+  parent_id: Int
+  parent: items                -- single FK, confirms the tree-not-DAG finding (S2.2)
+  children: [items!]!          -- reverse of parent_id
+  photos: [items_photos!]!
+  users: [items_users!]!
+)                               -- NOTE: no `order` or `created` field exists - confirms
+                                -- the S2.5-3/browse.js "queries fields that don't exist" finding
+
+photos (
+  id: Int!
+  original_name: String
+  original_sha1: String
+  width: Int!
+  height: Int!
+  filesize: Int
+  offset: Int
+  colors: String                -- JSON-as-text, object keyed by hex (S2.3's key-order bug)
+  exif: String                  -- JSON-as-text
+  data: String                  -- base64-encoded JPEG bytes, stored inline in Postgres
+  uploaded: timestamptz
+  user_id: Int
+  user: users
+  items: [items_photos!]!
+)
+
+users (
+  id: Int!
+  username: String!
+  email: String
+  password: String              -- bcrypt hash
+  token: String                 -- bespoke bearer value, not a real session/JWT (S2.5-4)
+  last_seen: timestamptz
+)
+
+items_photos (                  -- join table
+  id: Int!
+  item_id: Int!
+  item: items!
+  photo_id: Int!
+  photo: photos!
+)
+
+items_users (                   -- join table
+  id: Int!
+  item_id: Int!
+  item: items!
+  user_id: Int!
+  user: users!
+)
+```
+
+#### 4.2.1 Proposed new schema
+
 ```
 users        (id, username, email, password_hash, created_at, ...)
-tiles        (id, owner_id -> users, title, body, data jsonb, palette jsonb,
-              visible boolean, created_at, updated_at, position/order)
+groups       (id, name, created_at, ...)                             -- real DB entity, not content (S8 Q7)
+users_groups (user_id -> users, group_id -> groups)                  -- membership join
+tiles        (id, owner_id -> users, title, body, data jsonb, layout jsonb,
+              palette jsonb, visible boolean, created_at, updated_at,
+              position/order)
 tile_photos  (id, tile_id -> tiles, photo_id -> photos, sort_order)   -- ordered slideshow
 photos       (id, owner_id -> users, storage_key, thumb_key, width, height,
               filesize, sha1, exif jsonb, palette jsonb, uploaded_at)
@@ -110,6 +189,8 @@ Notes:
 - `tiles.palette` is derived at tile-creation time from its photos' `photos.palette` (itself computed once at upload), stored as an **ordered** array of `{hex, weight}` so "dominant color" is unambiguous by construction, not by object-key-order accident.
 - `tile_links` is the structural fix for S2.2/S2.5-9: many-to-many, directed, no implicit single-parent constraint. A `UNIQUE(from_tile_id, to_tile_id)` constraint prevents duplicate edges; cycle prevention (if required - see Open Questions) is enforced in application code at write time via a graph-reachability check, not a DB constraint.
 - Keep `tile_photos` as an explicit join (already correct in the old schema) so a tile can have an ordered slideshow of N photos, and in principle a photo could be reused across tiles.
+- `tiles.layout` (decided - S8 Q8) holds the free-form per-tile layout the user composes in the editor: chosen font (from a fixed set of 2-3 offered faces), an ordered/positioned list of text blocks (paragraph/div-equivalent nodes with position + styling), and per-photo presentation parameters (mask shape, composite/blend mode, transform (position/scale/rotation), and animation) keyed by `tile_photos.id`. This replaces the old ad hoc `EditorStore.addField` dynamic-field system (S2.4) with a layout the user directly arranges rather than a form.
+- `groups` is a real entity (not a content/category node like the old "Boxes/Bags/Motiv" map, S8 Q7) - what a group is *for* (ownership/visibility scoping vs. just another browsable node type) is still open; `users_groups` is a plain membership join in the meantime.
 
 ### 4.3 Image Pipeline
 
@@ -127,7 +208,13 @@ Notes:
 
 ### 4.5 Content Editor
 
-Keep the two-step flow (upload photos -> compose tile), replacing the ad hoc dynamic-field system with either (a) a fixed, well-designed schema (title, body, tags) that covers the actual use cases observed, or (b) a deliberately-designed flexible-fields system (not the old one-field-at-a-time `EditorStore.addField` UI) if user-defined fields per tile is a real, wanted feature - confirm with the user before rebuilding it as-is.
+Keep the two-step flow (upload photos -> compose tile). Replace the old ad hoc `EditorStore.addField` dynamic-field system entirely with a per-tile **layout editor** (decided - S8 Q8), stored as `tiles.layout` (S4.2):
+
+- **Typography**: the user picks one of a small, curated set of 2-3 fonts for the tile (not a free font picker) - keeps the visual identity coherent (S7.3) while giving some per-tile expression.
+- **Text placement**: the user arbitrarily places one or more paragraph/text blocks on the tile's canvas (free positioning, not a fixed title/body template) - closer to a minimal page-builder than a form.
+- **Photo treatment**: each photo attached to the tile can be individually masked (clip to a shape), composited/blended (CSS `mix-blend-mode`/`mask-*` equivalents), transformed (position, scale, rotation), and animated - the user directly art-directs how their photos sit within the tile rather than getting a fixed slideshow-only presentation.
+- This explicitly replaces the old raw `Id`/`Parent` debug-style card metadata (S7.6, S8 Q8) - the card's visible content is now entirely the user's own composed layout, with no framework-generated ids/labels overlaid.
+- Implementation note: this is a real (small) canvas/layout engine, not a CSS-only concern - budget for a dedicated editor surface (e.g., an absolutely-positioned canvas with drag/resize handles, serialized to `tiles.layout` JSON) rather than treating it as a minor styling add-on to S2.4's old flow.
 
 ## 5. Migration Considerations
 
@@ -157,7 +244,7 @@ A **blocky monospace / bitmap-style pixel font** (looks like a "terminal"/DOS-VG
 Two visually distinct graph renderings appear in the screenshots, which the rewrite should treat as two ends of one continuum (structural content graph vs. curated category map):
 
 - **Live content graph** (desktop `tree.js`, image of orange/purple squares): nodes are **flat-filled rounded squares with a solid black outline** (~3-4px), two sizes/colors observed - larger **amber/orange** (`~#f5a623`) squares for tiles with content/children, smaller **purple/violet** (`~#5b2d8f`-`#6a1b9a`) squares for leaf items or unattached photos. No drop shadow, no gradient - flat and graphic. Edges are **thin black straight lines**, no arrowheads (undirected look, even though the underlying data may be a tree/DAG). Layout is clearly force-directed/spring - nodes settle into organic, non-grid clusters with a "hub" node showing many short spokes.
-- **Categorical "Motiv" map** (mobile + desktop screenshots of "Boxes / Bags / Users / Groups / Objects / Subjects / The Wild Beauty Company / Motiv #1-4 / RGB color mixing / PIC Microcontroller / etc."): nodes are **rounded rectangles in varied, saturated flat colors** - one distinct hue per node/category (magenta, violet, indigo, blue, teal/mint, green, lime, yellow, orange, red, brown all appear across the two screenshots), each with a subtle drop shadow giving a "sticky note" / app-icon feel, black pixel-font label centered. A **focused/selected node** gets a **dashed white outline** overlay (seen on "Bags"). Edges here are **curved bezier lines in black**, converging on shared parents/roots - visually softer than the straight-line content graph. This appears to be either an earlier/alternate view or a hand-curated "sitemap" of top-level categories rather than raw content - worth confirming with the user whether this categorical map is a distinct feature to keep (e.g., a curated top-level "table of contents" view) alongside the raw force-directed content graph, since both existed side by side in the screenshots.
+- **Categorical "Motiv" map** (mobile + desktop screenshots of "Boxes / Bags / Users / Groups / Objects / Subjects / The Wild Beauty Company / Motiv #1-4 / RGB color mixing / PIC Microcontroller / etc."): nodes are **rounded rectangles in varied, saturated flat colors** - one distinct hue per node/category (magenta, violet, indigo, blue, teal/mint, green, lime, yellow, orange, red, brown all appear across the two screenshots), each with a subtle drop shadow giving a "sticky note" / app-icon feel, black pixel-font label centered. A **focused/selected node** gets a **dashed white outline** overlay (seen on "Bags"). Edges here are **curved bezier lines in black**, converging on shared parents/roots - visually softer than the straight-line content graph. **Resolved (S8 Q7)**: this is not a distinct/curated feature or an earlier alternate view - "Boxes"/"Bags"/"Motiv #N"/etc. are ordinary content that lived in Hasura/GraphQL like any other item, i.e. they render through the same content-graph mechanism as everything else, not a hand-built taxonomy needing its own view. `Users` and `Groups` nodes seen in the same screenshots are different in kind, however: they are real DB entities (S4.2's `users`/`groups` tables), not content nodes, so the rewrite's graph view needs to represent at least two node kinds (content tiles vs. entity nodes) within one rendering, not one homogeneous content graph.
 - In both variants, node **fill color is the design's primary carrier of identity/category** - this directly matches the "dominant palette seeds the tile's color scheme" requirement (S2.3/S4.3): a photo-backed tile's node color in the graph should come from its extracted palette, while non-photo/organizational nodes (categories, "boxes") can carry a manually chosen flat color, matching what's seen here (some nodes are clearly manual category colors, not derived from a photo).
 
 ### 7.5 Modals & buttons
@@ -169,7 +256,7 @@ Two visually distinct graph renderings appear in the screenshots, which the rewr
 ### 7.6 Content editor & upload grid
 
 - **Parent picker**: a plain white rounded-rect input styled like a tag/chip multi-select - chosen parent shown as a dark pill chip with label + white "X" remove button, followed by placeholder text "parent item" in a lighter gray, standard input-box border. Simple, not heavily styled - contrasts with the more graphic node/button styling elsewhere.
-- **Editor grid cards**: each item is a plain **white square card**, the photo filling the square, with **black monospace metadata directly overlaid on the image** at the top-left ("Id: 98", "Parent: 4") and a label near the bottom ("Motiv #1"). This overlay-on-image, no-separate-caption-bar approach gives an "index card" / field-specimen-label feel. It's ambiguous whether this raw `Id`/`Parent` debug text was intended as final UI copy or leftover dev output (it reads like debug output) - flag as an open question (S8) whether to keep exposing raw ids in the final card design or replace with clean title/date-style captions while keeping the "text directly on the photo" visual motif.
+- **Editor grid cards**: each item is a plain **white square card**, the photo filling the square, with **black monospace metadata directly overlaid on the image** at the top-left ("Id: 98", "Parent: 4") and a label near the bottom ("Motiv #1"). This overlay-on-image, no-separate-caption-bar approach gives an "index card" / field-specimen-label feel. **Resolved (S8 Q8)**: the raw `Id`/`Parent` debug text is dropped entirely in the rewrite - it was leftover dev output, not intended final UI copy. In its place, the card shows the tile's own user-composed layout (S4.5): chosen font, freely placed text blocks, and masked/composited/transformed/animated photos - the "text directly on the photo" motif is kept, but the text and composition are now the user's own design rather than framework-generated metadata.
 - **Upload grid**: a 5-column grid of square thumbnails, each with two small circular icon buttons overlapping its lower area - a **red circle with white "X"** (delete) and a **blue circle with a stylized "C"/rotate glyph** (rotate) - a compact icon-on-thumbnail pattern worth keeping as-is. Selected thumbnails (queued for the new tile) get a **blue outline border**. Above the grid, the drop-zone is a simple black-outlined rectangle with an upload-arrow glyph and the crimson "Select Images to Upload" button, same style as the login button.
 
 ### 7.7 Overall composition principles to preserve
@@ -185,6 +272,7 @@ Two visually distinct graph renderings appear in the screenshots, which the rewr
 3. **Custom per-tile fields**: keep the old free-form field system, or settle on a fixed content schema?
 4. **Palette size**: is 16 colors still the right target, or should this be revisited (e.g., 5-8 for a cleaner "theme" feel)?
 5. **Hasura vs. app-server-only**: does the user want to keep Hasura in the stack (for its console/tooling) with proper per-role permissions, or move to a simpler single-server model (tRPC/Prisma) now that the two-Heroku-app split is being abandoned anyway?
-6. **Hosting target**: any preference among Fly.io/Render/Railway/self-hosted/Vercel+external DB, given the "Heroku isn't free anymore" motivation?
-7. **Categorical "Motiv" map** (S7.4): is the curated, hand-colored category map (Boxes/Bags/Users/Groups/Objects/Subjects/...) a distinct feature to keep alongside the raw force-directed content graph (e.g. a fixed "table of contents" view), or was it an earlier/superseded iteration of the same graph view?
-8. **Card metadata overlay** (S7.6): keep exposing raw `Id`/`Parent` values on editor-grid cards (debug-style), or replace with clean user-facing captions (title/date) while preserving the "text directly on the photo" visual motif?
+6. **Hosting target - RESOLVED**: self-hosted on a VPS (not a managed PaaS), with Bun as the runtime (S4.1). Database engine still partially open: Postgres is the default (S4.2), but a non-SQL/document store is also under consideration, since `tiles.data`/`tiles.layout` are already schemaless JSON - needs a decision before finalizing S4.2's schema as SQL tables specifically.
+7. **Categorical "Motiv" map** (S7.4) - **RESOLVED**: not a distinct curated feature - it was ordinary GraphQL/Hasura content (Boxes/Bags/Motiv-style category tiles), rendered through the same content-graph mechanism as everything else. `Users`/`Groups` seen in the same screenshots *are* real DB entities, not content, so the graph view needs to distinguish content-tile nodes from entity nodes. Open sub-question: what a `Group` is actually *for* (ownership/visibility scoping vs. just another browsable node type) is not yet decided.
+8. **Card metadata overlay** (S7.6) - **RESOLVED**: raw `Id`/`Parent` debug values are dropped entirely. Replaced by a per-tile layout editor (S4.5): the user chooses one of 2-3 offered fonts, freely places text blocks on the tile, and individually masks/composites/blends/transforms/animates each attached photo - a small page-builder per tile, not framework-generated captions.
+9. **Frontend framework - still undecided**: Next.js + React (S4.1) or Astro + Preact + Bun (S4.1.1)? Explicitly not yet chosen as of this revision; needs further consideration before implementation starts. Both satisfy the rest of the architecture and both run on the now-decided Bun runtime; the choice trades Next's larger ecosystem/built-in image pipeline against Astro's smaller JS footprint for this app's mostly-static page shape.
