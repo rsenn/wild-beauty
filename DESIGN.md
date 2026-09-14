@@ -86,24 +86,18 @@ These are concrete findings from reading the code, not general concerns - useful
 
 ### 4.1 Stack
 
-- **Frontend**: Next.js (current stable, App Router) + React + TypeScript. Server Components for read-heavy pages (browse/graph/tile view); client components for the interactive editor, upload widget, and graph canvas.
-- **State/data-fetching**: React Query (or Next's built-in data fetching) - MobX's global-singleton-store pattern is not needed once server components own most data.
-- **API layer**: a typed application server (tRPC or a thin REST/GraphQL layer with Prisma) fronting Postgres directly, so there is exactly one place service-level credentials live. If GraphQL is still desired for its introspection/tooling benefits, run Hasura (or Postgraphile) **behind** the app server with row-level security and per-user JWTs - never hand an admin secret to any client-reachable code.
-- **Runtime**: Bun (decided - S8 Q6), independent of which frontend framework is eventually chosen (S8 Q9 - both the Next.js and Astro/Preact options in S4.1/S4.1.1 can run on Bun).
+- **Frontend framework - decided (S8 Q9)**: Astro (SSR, islands architecture - ships near-zero JS for the mostly-static pages, hydrates only the interactive surfaces) with **Preact** as the UI library (same component API as React via `preact/compat`, much smaller runtime; official `@astrojs/preact` integration provides SSR + selective client hydration). React/Next.js was considered (see S4.1.1) and rejected in favor of this lighter stack, since most pages here (browse/tile view) are read-heavy and only a few surfaces are genuinely interactive (graph canvas, upload widget, layout editor).
+- **State/data-fetching**: minimal client-side state per interactive island (e.g. a small store or plain hooks scoped to the graph canvas / editor) rather than a global singleton store - MobX's `RootStore` pattern (S2.1) is not needed once static pages carry no client JS by default.
+- **API layer - decided (S8 Q5)**: app-server-only, no Hasura. A typed server (tRPC or a thin REST layer) with Prisma fronting Postgres directly, so there is exactly one place service-level credentials live and no separate GraphQL-engine process/admin-secret model to secure - this is the direct structural fix for the S2.5-1 secret-exposure bug, and keeps the self-hosted VPS (below) to one fewer moving part.
+- **Runtime**: Bun (decided - S8 Q6). Astro runs on Bun (`bun create astro`, `bun run dev`/`build`) as a supported target, and `@astrojs/preact` explicitly accounts for Bun's JSX-transform import behavior.
 - **Hosting**: self-hosted on a VPS (decided - S8 Q6), not a managed PaaS - drops the "Heroku isn't free anymore" problem by owning the box outright instead of trading one hosted platform for another.
-- **Database**: Postgres by default, schema below (S4.2); a non-SQL/document store remains under consideration (S8 Q6) since `tiles.data`/`tiles.layout` are already schemaless JSON in the proposed schema.
+- **Database**: Postgres by default, schema below (S4.2); a non-SQL/document store remains under consideration (S8 Q6) since `tiles.data`/`tiles.layout`/`tiles.fields` are already schemaless JSON in the proposed schema.
 - **Object storage**: S3-compatible bucket (Cloudflare R2 / Backblaze B2 / AWS S3, or a self-hosted MinIO on the same VPS) for original + derived image sizes, served via CDN.
-- **Auth**: standard email/password (or OAuth) with a real session mechanism (e.g., signed, `httpOnly`, `secure` cookies via a library like `iron-session`/`next-auth`), bcrypt for password hashing (keep - it was already correct).
+- **Auth**: standard email/password (or OAuth) with a real session mechanism (e.g., signed, `httpOnly`, `secure` cookies via a library like `iron-session`), bcrypt for password hashing (keep - it was already correct).
 
-#### 4.1.1 Alternative frontend stack: Astro + Preact + Bun
+#### 4.1.1 Rejected alternative: Next.js + React
 
-Most of this app's pages (browse/tile view) are read-heavy and only a few surfaces are genuinely interactive (the graph canvas, the upload widget, the content editor). That shape is arguably a better fit for an islands-architecture framework than for React/Next's client-bundle-by-default model, so a lighter alternative is worth considering instead of S4.1's Next.js proposal:
-
-- **Framework**: Astro (SSR/SSG, islands architecture - ships near-zero JS for static pages, hydrates only the interactive components) instead of Next.js.
-- **UI library**: Preact instead of React - same component API (`preact/compat` covers libraries that assume real React internals), much smaller runtime, drop-in for `d3-force`/graph-canvas code either way. Official `@astrojs/preact` integration provides SSR + selective client hydration for Preact components.
-- **Runtime**: Bun instead of Node - Astro runs on Bun (`bun create astro`, `bun run dev`/`build`) as a supported target, and `@astrojs/preact` explicitly accounts for Bun's JSX-transform import behavior.
-- **Tradeoff vs. S4.1's Next.js proposal**: significantly less JS shipped to the browser for the mostly-static pages (browse, tile view), and no framework lock-in to React's ecosystem; in exchange, a smaller plugin/library ecosystem than Next's, and no built-in image-optimization pipeline as polished as `next/image` (not a blocker here, since S4.3 already moves image derivation to upload-time + object storage regardless of frontend framework).
-- This is an open question (S8) - either stack satisfies the rest of this document's architecture (S4.2-S4.5 are frontend-framework-agnostic).
+Considered and **not chosen** (S8 Q9 resolved in favor of S4.1's Astro/Preact/Bun stack): Next.js (current stable, App Router) + React + TypeScript, with Server Components for read-heavy pages and client components for the interactive editor/upload widget/graph canvas, React Query for data-fetching. This would have had a larger ecosystem (`react-force-graph`, `next-auth`, built-in `next/image` optimization) at the cost of a heavier default client bundle for pages that don't need one - not the right tradeoff for this app's mostly-static page shape. Kept here for the record rather than deleted, in case a future reconsideration wants the reasoning.
 
 ### 4.2 Data Model
 
@@ -175,51 +169,54 @@ items_users (                   -- join table
 users        (id, username, email, password_hash, created_at, ...)
 groups       (id, name, created_at, ...)                             -- real DB entity, not content (S8 Q7)
 users_groups (user_id -> users, group_id -> groups)                  -- membership join
-tiles        (id, owner_id -> users, title, body, data jsonb, layout jsonb,
-              palette jsonb, visible boolean, created_at, updated_at,
-              position/order)
+tiles        (id, owner_id -> users, title, body, tags text[], fields jsonb,
+              layout jsonb, palette jsonb, visible boolean, created_at,
+              updated_at, position/order)
 tile_photos  (id, tile_id -> tiles, photo_id -> photos, sort_order)   -- ordered slideshow
 photos       (id, owner_id -> users, storage_key, thumb_key, width, height,
               filesize, sha1, exif jsonb, palette jsonb, uploaded_at)
-tile_links   (id, from_tile_id -> tiles, to_tile_id -> tiles, label text null,
-              created_at)                                            -- the real DAG
+tile_links   (id, from_tile_id -> tiles, to_tile_id -> tiles, label text not null,
+              created_at)                                            -- the real graph
 ```
 
 Notes:
 - `tiles.palette` is derived at tile-creation time from its photos' `photos.palette` (itself computed once at upload), stored as an **ordered** array of `{hex, weight}` so "dominant color" is unambiguous by construction, not by object-key-order accident.
-- `tile_links` is the structural fix for S2.2/S2.5-9: many-to-many, directed, no implicit single-parent constraint. A `UNIQUE(from_tile_id, to_tile_id)` constraint prevents duplicate edges; cycle prevention (if required - see Open Questions) is enforced in application code at write time via a graph-reachability check, not a DB constraint.
+- `tile_links` is the structural fix for S2.2/S2.5-9: many-to-many, directed, no implicit single-parent constraint. A `UNIQUE(from_tile_id, to_tile_id, label)` constraint prevents duplicate edges of the same label between the same pair. **Decided (S8 Q1)**: this is a general graph, not a strict DAG - cycles are allowed (no reachability check needed on writes), matching that mutual cross-links between tiles are a normal, expected pattern. **Decided (S8 Q2)**: `label` is required and carries semantic meaning (e.g. `"part of"`, `"inspired by"`, `"see also"`) rather than being purely structural - the graph view can style/filter edges by label, and a fixed enum (vs. free text) for the label set is a small follow-up decision at implementation time.
 - Keep `tile_photos` as an explicit join (already correct in the old schema) so a tile can have an ordered slideshow of N photos, and in principle a photo could be reused across tiles.
 - `tiles.layout` (decided - S8 Q8) holds the free-form per-tile layout the user composes in the editor: chosen font (from a fixed set of 2-3 offered faces), an ordered/positioned list of text blocks (paragraph/div-equivalent nodes with position + styling), and per-photo presentation parameters (mask shape, composite/blend mode, transform (position/scale/rotation), and animation) keyed by `tile_photos.id`. This replaces the old ad hoc `EditorStore.addField` dynamic-field system (S2.4) with a layout the user directly arranges rather than a form.
+- `tiles.title`/`tiles.body`/`tiles.tags` are the small fixed schema, and `tiles.fields` (jsonb, ordered array of `{label, value}`) is a lightweight named-field system kept **alongside** the layout editor, not replaced by it (**decided - S8 Q3**): the layout editor covers free-form visual placement of text/photos, while `tiles.fields` covers structured metadata (e.g. "Location: Berlin") that isn't part of the visual composition - two distinct concerns, both kept.
 - `groups` is a real entity (not a content/category node like the old "Boxes/Bags/Motiv" map, S8 Q7) - what a group is *for* (ownership/visibility scoping vs. just another browsable node type) is still open; `users_groups` is a plain membership join in the meantime.
 
 ### 4.3 Image Pipeline
 
 1. Client uploads original file (drag-drop or file picker) directly to a signed object-storage URL (skip proxying the full binary through the app server).
-2. A server-side job (or synchronous step for v1): extract EXIF, generate a square-cropped "tile" size + a small thumbnail + keep the original, compute the 16-color palette (or however many is visually useful - revisit whether 16 is the right number) via a quantization library, store palette as an ordered array.
+2. A server-side job (or synchronous step for v1): extract EXIF, generate a square-cropped "tile" size + a small thumbnail + keep the original, compute a **5-8 color palette** (reduced from the old system's 16 - decided, S8 Q4, for a tighter "theme" feel per tile/photo) via a quantization library, store palette as an ordered array.
 3. Persist `photos` row with storage keys for each derived size + palette + EXIF; return to the client so it can proceed to the tile editor.
 4. Format decision: default to modern web formats (AVIF with WebP/JPEG fallback) for derived sizes; BPG is not recommended for a rewrite - it has poor browser/tooling support today and the old code never actually used it beyond a decoder prototype. If ultra-high compression at a given quality remains a real requirement, evaluate AVIF against BPG on real photos before deciding - but do not default back to BPG on the strength of the old prototype alone.
 
 ### 4.4 Graph Navigation
 
-- Model: nodes = tiles (with palette-derived color + thumbnail), edges = `tile_links` rows (now genuinely multi-parent/multi-child).
-- Rendering: use `d3-force` for the physics simulation (battle-tested, replaces the 450-line hand-rolled `fd-graph.js`) with a canvas or SVG renderer - canvas recommended once the graph exceeds a few hundred nodes for performance. `react-force-graph` wraps this well if a ready-made component is preferred over hand-wiring `d3-force`.
-- Interaction: click a node to navigate/zoom into that tile (a CSS/Framer-Motion shared-element transition, replacing the old hand-computed `DOMMatrix` animation), pan/zoom the canvas, optionally filter by author/tag.
+- Model: nodes = tiles (with palette-derived color + thumbnail) plus entity nodes for `users`/`groups` (S7.4/S8 Q7); edges = `tile_links` rows, a general graph (cycles allowed, S8 Q1) with a required semantic `label` per edge (S8 Q2) the view can style/filter by.
+- Rendering: use `d3-force` for the physics simulation (battle-tested, replaces the 450-line hand-rolled `fd-graph.js`) with a canvas or SVG renderer - canvas recommended once the graph exceeds a few hundred nodes for performance. Since the frontend is Preact (S4.1), wire `d3-force` directly to a canvas/SVG Preact component rather than relying on a React-specific wrapper like `react-force-graph`.
+- Interaction: click a node to navigate/zoom into that tile (a CSS view-transition, replacing the old hand-computed `DOMMatrix` animation - the View Transitions API is framework-agnostic and fits a Preact/Astro stack better than a React-specific animation library), pan/zoom the canvas, optionally filter by author/tag/edge-label.
 - Since the underlying model is now a real graph, decide (Open Questions) whether the default view still roots itself at a single "home" tile and expands outward, or presents the whole graph - multi-parent tiles change what "rooted" navigation even means.
 
 ### 4.5 Content Editor
 
-Keep the two-step flow (upload photos -> compose tile). Replace the old ad hoc `EditorStore.addField` dynamic-field system entirely with a per-tile **layout editor** (decided - S8 Q8), stored as `tiles.layout` (S4.2):
+Keep the two-step flow (upload photos -> compose tile). Replace the old ad hoc `EditorStore.addField` dynamic-field system with a per-tile **layout editor** (decided - S8 Q8) plus a small kept-alongside named-field system (decided - S8 Q3), both stored on `tiles` (S4.2):
 
 - **Typography**: the user picks one of a small, curated set of 2-3 fonts for the tile (not a free font picker) - keeps the visual identity coherent (S7.3) while giving some per-tile expression.
-- **Text placement**: the user arbitrarily places one or more paragraph/text blocks on the tile's canvas (free positioning, not a fixed title/body template) - closer to a minimal page-builder than a form.
-- **Photo treatment**: each photo attached to the tile can be individually masked (clip to a shape), composited/blended (CSS `mix-blend-mode`/`mask-*` equivalents), transformed (position, scale, rotation), and animated - the user directly art-directs how their photos sit within the tile rather than getting a fixed slideshow-only presentation.
-- This explicitly replaces the old raw `Id`/`Parent` debug-style card metadata (S7.6, S8 Q8) - the card's visible content is now entirely the user's own composed layout, with no framework-generated ids/labels overlaid.
-- Implementation note: this is a real (small) canvas/layout engine, not a CSS-only concern - budget for a dedicated editor surface (e.g., an absolutely-positioned canvas with drag/resize handles, serialized to `tiles.layout` JSON) rather than treating it as a minor styling add-on to S2.4's old flow.
+- **Text placement**: the user arbitrarily places one or more paragraph/text blocks on the tile's canvas (free positioning, not a fixed title/body template) - closer to a minimal page-builder than a form. Stored in `tiles.layout`.
+- **Photo treatment**: each photo attached to the tile can be individually masked (clip to a shape), composited/blended (CSS `mix-blend-mode`/`mask-*` equivalents), transformed (position, scale, rotation), and animated - the user directly art-directs how their photos sit within the tile rather than getting a fixed slideshow-only presentation. Stored in `tiles.layout`.
+- **Structured fields**: separately from the visual layout, the user can still add named metadata fields (e.g. "Location: Berlin") - stored in `tiles.fields`, an ordered array of `{label, value}`, distinct from the free-form layout (S8 Q3).
+- This explicitly replaces the old raw `Id`/`Parent` debug-style card metadata (S7.6, S8 Q8) - the card's visible content is now entirely the user's own composed layout (plus any structured fields they chose to add), with no framework-generated ids/labels overlaid.
+- Implementation note: the layout editor is a real (small) canvas/layout engine, not a CSS-only concern - budget for a dedicated editor surface (e.g., an absolutely-positioned canvas with drag/resize handles, serialized to `tiles.layout` JSON) rather than treating it as a minor styling add-on to S2.4's old flow.
 
 ## 5. Migration Considerations
 
-- If any production data still exists in the old Postgres/Hasura instance, write a one-time migration script: `items` -> `tiles` (dropping the single-`parent_id` tree into `tile_links` edges, one edge per old parent/child pair, so existing structure is preserved as a starting graph rather than lost), `photos.data` (base64) -> decode and upload to object storage, `photos.colors` (JSON object) -> ordered array by count descending.
-- Recompute palettes on migration rather than trusting the old inconsistent extraction, to fix finding S2.5-7 retroactively.
+- If any production data still exists in the old Postgres/Hasura instance, write a one-time migration script: `items` -> `tiles` (dropping the single-`parent_id` tree into `tile_links` edges, one edge per old parent/child pair, labeled e.g. `"part of"` since labels are now required (S8 Q2), so existing structure is preserved as a starting graph rather than lost), `photos.data` (base64) -> decode and upload to object storage, `photos.colors` (JSON object) -> ordered array by count descending.
+- Recompute palettes on migration rather than trusting the old inconsistent extraction, to fix finding S2.5-7 retroactively - target the new 5-8 color size (S8 Q4), not the old 16.
+- Old `items.data` (freeform JSON blob, S4.2.0) has no equivalent to the new `tiles.layout` - migrated tiles get an empty/default layout (title + body dropped into simple default text placement) rather than an attempt to reverse-engineer a visual layout from unstructured old data; users can re-lay-out migrated tiles afterward if desired.
 
 ## 7. Visual Design Language (from original screenshots)
 
@@ -265,14 +262,16 @@ Two visually distinct graph renderings appear in the screenshots, which the rewr
 - Content (graph canvas, upload grid, or editor grid) fills essentially the whole viewport below the nav.
 - One accent color (crimson) is reserved strictly for interactive/brand chrome (nav, primary buttons, modal headers); the paper-texture beige is the constant "canvas"; all remaining color variety comes from content itself (photos, extracted/assigned node palettes) - i.e., the app's *own* chrome is deliberately restrained so that user-uploaded imagery and its derived palette supply the color richness. This is an important principle to state explicitly for the rewrite's design system: **the UI is a neutral frame; tiles and the graph are where color lives.**
 
-## 8. Open Questions (need user decisions before implementation)
+## 8. Open Questions
 
-1. **True DAG or general graph?** Should `tile_links` forbid cycles (a strict DAG, matching the name the user used) or is a general graph (cycles allowed) acceptable/desirable for how people might want to cross-link tiles?
-2. **Edge semantics.** Are links directed with meaning (e.g., "part of", "inspired by", "see also") that should carry a label/type, or purely structural for graph layout?
-3. **Custom per-tile fields**: keep the old free-form field system, or settle on a fixed content schema?
-4. **Palette size**: is 16 colors still the right target, or should this be revisited (e.g., 5-8 for a cleaner "theme" feel)?
-5. **Hasura vs. app-server-only**: does the user want to keep Hasura in the stack (for its console/tooling) with proper per-role permissions, or move to a simpler single-server model (tRPC/Prisma) now that the two-Heroku-app split is being abandoned anyway?
-6. **Hosting target - RESOLVED**: self-hosted on a VPS (not a managed PaaS), with Bun as the runtime (S4.1). Database engine still partially open: Postgres is the default (S4.2), but a non-SQL/document store is also under consideration, since `tiles.data`/`tiles.layout` are already schemaless JSON - needs a decision before finalizing S4.2's schema as SQL tables specifically.
-7. **Categorical "Motiv" map** (S7.4) - **RESOLVED**: not a distinct curated feature - it was ordinary GraphQL/Hasura content (Boxes/Bags/Motiv-style category tiles), rendered through the same content-graph mechanism as everything else. `Users`/`Groups` seen in the same screenshots *are* real DB entities, not content, so the graph view needs to distinguish content-tile nodes from entity nodes. Open sub-question: what a `Group` is actually *for* (ownership/visibility scoping vs. just another browsable node type) is not yet decided.
-8. **Card metadata overlay** (S7.6) - **RESOLVED**: raw `Id`/`Parent` debug values are dropped entirely. Replaced by a per-tile layout editor (S4.5): the user chooses one of 2-3 offered fonts, freely places text blocks on the tile, and individually masks/composites/blends/transforms/animates each attached photo - a small page-builder per tile, not framework-generated captions.
-9. **Frontend framework - still undecided**: Next.js + React (S4.1) or Astro + Preact + Bun (S4.1.1)? Explicitly not yet chosen as of this revision; needs further consideration before implementation starts. Both satisfy the rest of the architecture and both run on the now-decided Bun runtime; the choice trades Next's larger ecosystem/built-in image pipeline against Astro's smaller JS footprint for this app's mostly-static page shape.
+All nine original questions are now resolved; only sub-questions raised while resolving them remain open (marked below). Kept as a historical decision log rather than deleted.
+
+1. **True DAG or general graph? - RESOLVED**: general graph, cycles allowed. No reachability check needed on `tile_links` writes; mutual cross-links between tiles (A "see also" B and B "see also" A) are treated as a normal pattern, not an error case.
+2. **Edge semantics - RESOLVED**: `tile_links.label` is required and carries semantic meaning (e.g. "part of", "inspired by", "see also"), not purely structural. Open sub-question: fixed enum vs. free-text label values - not yet decided, small enough to settle at implementation time.
+3. **Custom per-tile fields - RESOLVED**: kept alongside the new layout editor, not replaced by it. `tiles.fields` (ordered `{label, value}` array) covers structured metadata; `tiles.layout` (S4.5) separately covers free-form visual composition. Two distinct concerns, both built.
+4. **Palette size - RESOLVED**: reduced from 16 to **5-8** colors, for a tighter "theme" feel per tile/photo (S4.3).
+5. **Hasura vs. app-server-only - RESOLVED**: app-server-only (tRPC/Prisma, S4.1). Hasura is dropped entirely - one fewer moving part on the self-hosted VPS (Q6) and the direct structural fix for the S2.5-1 admin-secret exposure bug.
+6. **Hosting target - RESOLVED**: self-hosted on a VPS (not a managed PaaS), with Bun as the runtime (S4.1). Open sub-question: Postgres is the default (S4.2), but a non-SQL/document store remains under consideration since `tiles.layout`/`tiles.fields` are already schemaless JSON - not yet decided.
+7. **Categorical "Motiv" map (S7.4) - RESOLVED**: not a distinct curated feature - it was ordinary GraphQL/Hasura content (Boxes/Bags/Motiv-style category tiles), rendered through the same content-graph mechanism as everything else. `Users`/`Groups` seen in the same screenshots *are* real DB entities, not content, so the graph view needs to distinguish content-tile nodes from entity nodes (S4.4). Open sub-question: what a `Group` is actually *for* (ownership/visibility scoping vs. just another browsable node type) is not yet decided.
+8. **Card metadata overlay (S7.6) - RESOLVED**: raw `Id`/`Parent` debug values are dropped entirely. Replaced by the per-tile layout editor (S4.5) plus `tiles.fields` for any structured metadata the user chooses to add.
+9. **Frontend framework - RESOLVED**: Astro + Preact + Bun (S4.1), not Next.js + React (kept as a rejected alternative in S4.1.1). Chosen for the smaller JS footprint on this app's mostly-static page shape.
