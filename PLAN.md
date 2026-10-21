@@ -445,7 +445,7 @@ the clip (masking), which is the useful behaviour.
 
 ### 11.7 Multi-language
 - `locales/<code>.json`: flat keys, plurals via `Intl.PluralRules` (categories
-  `one`/`other`/... per language); `meta.name` and `meta.dir` ("ltr"/"rtl") inside.
+  `one`/`other`/... per language); `meta.name`, `meta.dir` ("ltr"/"rtl") and `meta.flag` (the `static/img/flag-<flag>.svg` name; `en` uses `gb`) inside.
 - Negotiation order: URL prefix, `wb-lang` cookie, `Accept-Language`, `en`.
 - Missing key falls back to `en`, then to the key itself, and logs once in
   development. A test script compares key sets across files and fails on
@@ -582,6 +582,7 @@ to every theme and to the sanitiser whitelist.
 | round buttons | `--wb-button-round-bg/-border/-hover` | `#ffffff60`, `#cdcdcd`, `#ffdc20c0` | `.image-button` |
 | raised buttons | `--wb-button-bg/-bg-active/-border` | grey gradient, reversed, `#555` | `button` in `_app.js` |
 | tooltip | `--wb-tip-bg/-ink` | yellow gradient, black | `.tooltip:after` |
+| logo | `--wb-logo-image`, `--wb-logo-height` | `logo-transparent.png`, 56px | header |
 | icons | `--wb-icon-upload/-new/-delete/-rotate/-next` | `action-upload`, `action-new`, `icon-error`, `icon-rotate`, `arrow-next` svgs | the screenshots |
 
 The theme itself is `static/themes/kraft.css` (written, still to be checked

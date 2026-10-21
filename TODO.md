@@ -33,9 +33,9 @@ The whole UI is **themable, and a theme can change per content node**. So:
 Assets already in `static/` (checked): `img/logo-transparent.png`,
 `img/tile-background.png` (the kraft-paper ground), `img/favicon.png`,
 `img/*.svg` (action-*, icon-*, flag-de/fr/gb, arrow-*), `fonts/stylesheet.css`.
-Note: `stylesheet.css` declares Fixed, Jewel Hill and Manjari, but only
-`Fixed-Medium.*` and `jewel-hill.ttf` exist on disk; the `hinted-*` files it
-points to (Jewel Hill, Manjari) are missing. Fonts are served from `/static/`.
+Note: `static/style.css` (old, not linked) declares Jewel Hill and Manjari whose
+`hinted-*` files are missing; `static/fonts/stylesheet.css` only declares Fixed, now
+woff2/woff/ttf. Fonts are served from `/static/`.
 
 ---
 
@@ -73,16 +73,16 @@ points to (Jewel Hill, Manjari) are missing. Fonts are served from `/static/`.
 
 ## M2 - `/new` page, SSR, our design
 
-- [ ] **2.1 Vendor Preact** (`vendor/`, served as `/vendor/`): `preact.js`, `hooks.js`, `htm.js`,
+- [x] **2.1 Vendor Preact** (`vendor/`, served as `/vendor/`): `preact.js`, `hooks.js`, `htm.js`,
       `preact-render-to-string.js`, bare `preact` import rewritten to relative,
       pinned in `vendor/VERSIONS`, licences copied (D S9.2, S9.5). Script:
       `tools/vendor.sh`. Done when `bun -e "import('./vendor/htm.js')"` works and
       `vendor/VERSIONS` lists four packages.
-- [ ] **2.2 SSR shell**: `server/ssr.js` `renderPage(vnode, {lang, title})` ->
+- [x] **2.2 SSR shell**: `server/ssr.js` `renderPage(vnode, {lang, title})` ->
       `<!doctype html>` with head (charset, viewport, favicon, CSS links,
       import map for `/vendor/*`), body, boot JSON. `GET /:lang/new` renders a
       placeholder `<h1>`. Done when `curl localhost:3000/en/new` returns the page.
-- [ ] **2.3 Token contract + default theme**: `static/css/layout.css` (no
+- [x] **2.3 Token contract + default theme**: `static/css/layout.css` (no
       colours) and `static/themes/kraft.css` defining the `--wb-*` tokens
       (contract: P S16.3; a distilled draft of `kraft.css` is already written,
       this task wires it to `layout.css` and checks it on a page): wallpaper image/colour (`tile-background.png` is the wallpaper of `kraft`), ink, accent (crimson
@@ -92,19 +92,19 @@ points to (Jewel Hill, Manjari) are missing. Fonts are served from `/static/`.
       screenshots and D S7; only what `/new` needs now (full extraction is H1).
       Document each token in a comment. Done when the page shows the paper
       texture and changing `kraft.css` alone restyles it.
-- [ ] **2.4 Fonts**: fix `static/fonts/stylesheet.css` so every `src` points at an
+- [x] **2.4 Fonts**: fix `static/fonts/stylesheet.css` so every `src` points at an
       existing file (drop the dead `hinted-*` entries or the Jewel Hill/Manjari
       faces); set the pixel/terminal face (Fixed) for UI chrome (D S7.3). Done when
       the browser network tab shows no 404 for fonts.
-- [ ] **2.5 Chrome** (colours via tokens only): header with logo (`logo-transparent.png`) and the crimson
+- [x] **2.5 Chrome** (colours via tokens only): header with logo (`logo-transparent.png`) and the crimson
       tab strip (Home, Show, Tree, New active, Language) as `client/components/Nav.js`;
       active tab glow and the one-line caption under it (D S7.2). Tabs for
       unbuilt pages are plain links to `/`. Done when `/en/new` looks like the old
       app's chrome on desktop and phone width (no truncated tab text).
-- [ ] **2.6 Components dir + htm helper**: `client/components/`, one
+- [x] **2.6 Components dir + htm helper**: `client/components/`, one
       `client/html.js` (`html = htm.bind(h)`) shared by server and browser. Nav from 2.5 moves
       there. Done when the same file is imported by `ssr.js` and served at `/app/`.
-- [ ] **2.7 Static route for modules**: `GET /app/*` and `GET /vendor/*` in
+- [x] **2.7 Static route for modules**: `GET /app/*` and `GET /vendor/*` in
       `server.js`; browser import map maps `preact`, `preact/hooks`, `htm`.
       Done when a `<script type="module" src="/app/app.js">` runs in the browser.
 
@@ -130,15 +130,15 @@ points to (Jewel Hill, Manjari) are missing. Fonts are served from `/static/`.
 
 ## M3 - i18n (de, fr, en)
 
-- [ ] **3.1 `locales/{en,de,fr}.json`** with the keys used so far (tab labels,
+- [x] **3.1 `locales/{en,de,fr}.json`** with the keys used so far (tab labels,
       page title, drop-zone text) and `meta.name`; `t(key, params)` with `en`
       fallback and `Intl.PluralRules` plurals (P S11.7). Used by SSR and client
       (same file). Done when `/de/new` and `/fr/new` show translated chrome.
-- [ ] **3.2 Locale negotiation**: URL prefix, `wb-lang` cookie, `Accept-Language`,
+- [x] **3.2 Locale negotiation**: URL prefix, `wb-lang` cookie, `Accept-Language`,
       `en`; `/` redirects accordingly. Language tab lists `locales/*.json`
       (flags from `static/img/flag-*.svg`). Done when adding `locales/xx.json`
-      makes `xx` appear with no other edit.
-- [ ] **3.3 `tools/check-locales.js`**: fails when key sets differ. Done when
+      makes `xx` appear with no other edit. (Locales are read at start: restart after adding one.)
+- [x] **3.3 `tools/check-locales.js`**: fails when key sets differ. Done when
       removing a key from `fr.json` makes it exit non-zero.
 
 ## M4 - Upload drop zone (client only, no server yet)
