@@ -1,0 +1,134 @@
+/* Layout only. No literal colour, font, image, border width, radius or
+ * shadow here: everything of that kind is a --wb-* token set by a theme in
+ * static/themes/ (PLAN.md S16). */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--wb-font-ui);
+  font-size: var(--wb-font-size);
+  color: var(--wb-ink);
+  background-color: var(--wb-wallpaper-color);
+  background-image: var(--wb-wallpaper-image);
+  background-size: var(--wb-wallpaper-size);
+}
+
+.wb-page {
+  min-height: 100vh;
+}
+
+.wb-header {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--wb-tab-gap);
+  padding: var(--wb-tab-gap);
+}
+
+.wb-logo {
+  display: block;
+  height: var(--wb-logo-height);
+  aspect-ratio: 976 / 362;
+  background: var(--wb-logo-image) no-repeat left center / contain;
+}
+
+/* tabs: a wrapping row, so labels are never cut off on a phone */
+.wb-tabs {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-end;
+  gap: var(--wb-tab-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wb-tab {
+  min-width: var(--wb-tab-size);
+  height: var(--wb-tab-size);
+  overflow: hidden;
+  background: var(--wb-accent);
+  color: var(--wb-accent-ink);
+  border-radius: var(--wb-radius-tab);
+  transition: height var(--wb-tab-time) var(--wb-tab-ease);
+}
+
+.wb-tab:hover,
+.wb-tab:focus-within,
+.wb-tab-active {
+  height: var(--wb-tab-size-open);
+}
+
+.wb-tab > a,
+.wb-tab-lang > .wb-tab-label {
+  display: block;
+  padding: 0 0.25em;
+  color: inherit;
+  text-decoration: none;
+}
+
+.wb-tab-label {
+  display: block;
+  font-size: min(var(--wb-font-size-tab), 8vw);
+  line-height: var(--wb-tab-size);
+  text-align: center;
+}
+
+.wb-tab:hover .wb-tab-label,
+.wb-tab-active .wb-tab-label {
+  text-shadow: var(--wb-tab-glow);
+}
+
+/* the caption wraps inside the label's width instead of widening the tab */
+.wb-tab-caption {
+  display: block;
+  width: 0;
+  min-width: 100%;
+  padding-bottom: 0.4em;
+  font-size: var(--wb-font-size-small);
+  line-height: 1.2;
+}
+
+.wb-tab:focus-within {
+  outline: var(--wb-border-width) solid var(--wb-ink);
+}
+
+/* language tab: one flag per locale */
+.wb-flags {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  gap: var(--wb-tab-gap);
+}
+
+.wb-flag {
+  display: block;
+  color: inherit;
+}
+
+.wb-flag > img {
+  display: block;
+  width: 24px;
+  height: auto;
+}
+
+.wb-flag[aria-current] > img {
+  outline: var(--wb-border-width) solid var(--wb-accent-ink);
+  outline-offset: 1px;
+}
+
+.wb-content {
+  padding: 0 10px;
+}

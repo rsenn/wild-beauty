@@ -1,0 +1,26 @@
+{
+  "meta.name": "Français",
+  "meta.dir": "ltr",
+  "meta.flag": "fr",
+
+  "page.title.new": "Wild Beauty - Nouveau",
+  "page.new.heading": "Nouveau",
+
+  "nav.main": "Navigation principale",
+  "nav.home": "Début",
+  "nav.home.caption": "Page d'accueil",
+  "nav.show": "Voir",
+  "nav.show.caption": "Parcourir les nœuds",
+  "nav.tree": "Arbre",
+  "nav.tree.caption": "Le graphe des nœuds",
+  "nav.new": "Créer",
+  "nav.new.caption": "Créer un nouveau nœud",
+  "nav.lang": "Lang",
+  "nav.lang.label": "Choisir la langue",
+
+  "upload.drop": "Glissez-déposez des images ici pour les envoyer",
+  "upload.or": "Ou",
+  "upload.select": "Choisir des images à envoyer",
+  "upload.files.one": "{count} image",
+  "upload.files.other": "{count} images"
+}

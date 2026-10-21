@@ -1,0 +1,108 @@
+/* Kraft - the historic look of the old app (default theme).
+ *
+ * Distilled from docs/screenshots/*.jpg, static/style.css and the styled-jsx
+ * blocks in attic/pages/_app.js, attic/components/{nav,layout}.js and
+ * attic/components/views/imageUpload.js. Sets tokens only (PLAN.md S16); the
+ * rules that read them live in layout.css. A node may wear this theme too, so
+ * every selector is :root[data-theme=kraft] or [data-theme=kraft]. */
+
+:root[data-theme="kraft"],
+[data-theme="kraft"] {
+  /* wallpaper: tile-background.png is the wallpaper of this default theme
+   * (kraft paper, 1500x1500, tiled, scaled to half the short side); the
+   * colour is the fallback and the mean of the image */
+  --wb-wallpaper-color: #cabaab;
+  --wb-wallpaper-image: url(/static/img/tile-background.png);
+  --wb-wallpaper-size: auto 50vmin;
+
+  /* ink: text, frames, outlines */
+  --wb-ink: #000;
+  --wb-ink-soft: rgb(0 0 0 / 0.25);
+
+  /* accent: tab blocks and the main button (crimson, 80% over paper) */
+  --wb-accent: rgb(138 0 16 / 0.8);
+  --wb-accent-hover: rgb(192 8 32 / 0.8);
+  --wb-accent-ink: #fff;
+
+  /* selection and drag-over (blue), danger (red cross) */
+  --wb-select: hsl(210 100% 55%);
+  --wb-select-fill: hsl(210 100% 55% / 0.5);
+  --wb-danger: #f30208;
+  --wb-error-frame: rgb(160 0 16);
+
+  /* frames */
+  --wb-frame-width: 4px;
+  --wb-frame-style: solid;
+  --wb-frame-drag-style: dashed;
+  --wb-border-width: 1px;
+  --wb-select-width: 4px;
+
+  /* shape: square tabs and drop zone, soft round buttons and graph nodes */
+  --wb-radius-tab: 0;
+  --wb-radius-frame: 0;
+  --wb-radius-button: 5px;
+  --wb-radius-round: 99999px;
+  --wb-radius-node: 8px;
+  --wb-node-outline: 3px;
+
+  /* type: Fixed is the pixel/terminal face used for everything */
+  --wb-font-ui: Fixed, ui-monospace, monospace;
+  --wb-font-size: 13px;
+  --wb-font-size-small: 14px;
+  --wb-font-size-button: 16px;
+  --wb-font-size-label: 17px;
+  --wb-font-size-lead: 22px;
+  --wb-font-size-tab: 40px;
+
+  /* tabs: 48px collapsed, 100px when active or hovered */
+  --wb-tab-size: 48px;
+  --wb-tab-size-open: 100px;
+  --wb-tab-gap: 4px;
+  --wb-tab-ease: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --wb-tab-time: 1s;
+  --wb-tab-glow: 0 0 4px #fff;
+
+  /* grid of file cards: 5 columns, 3 on phones (layout.css reads these) */
+  --wb-card-gap: 10px;
+  --wb-card-gap-narrow: 5px;
+  --wb-card-columns: 5;
+  --wb-card-columns-narrow: 3;
+
+  /* depth */
+  --wb-shadow-card: 0 0 4px rgb(0 0 0 / 0.75);
+  --wb-shadow-select: 2px 2px 6px #000;
+  --wb-shadow-hover: 0 2px 4px rgb(0 0 0 / 0.5);
+  --wb-shadow-pop: 5px 5px 10px 2px rgb(0 0 0 / 0.62);
+
+  /* round icon buttons on cards (delete, rotate) */
+  --wb-button-round-bg: #ffffff60;
+  --wb-button-round-border: #cdcdcd;
+  --wb-button-round-hover: #ffdc20c0;
+
+  /* raised grey button (toolbar) */
+  --wb-button-bg: linear-gradient(#f0f0f0 0%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
+  --wb-button-bg-active: linear-gradient(0deg, #f0f0f0 0%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
+  --wb-button-border: #555;
+
+  /* tooltip */
+  --wb-tip-bg: linear-gradient(#ffda15, #f3c500);
+  --wb-tip-ink: #000;
+
+  /* logo: drawn as a background of the header link */
+  --wb-logo-image: url(/static/img/logo-transparent.png);
+  --wb-logo-height: 56px;
+
+  /* icons: absolute /static urls only, drawn by layout.css as background
+   * images (delete and rotate are coloured, so no mask recolouring) */
+  --wb-icon-upload: url(/static/img/action-upload.svg);
+  --wb-icon-new: url(/static/img/action-new.svg);
+  --wb-icon-delete: url(/static/img/icon-error.svg);
+  --wb-icon-rotate: url(/static/img/icon-rotate.svg);
+  --wb-icon-next: url(/static/img/arrow-next.svg);
+}
+
+@media (max-width: 375px) {
+  :root[data-theme="kraft"] {
+    --wb-font-size: 14px;
+  }
+}

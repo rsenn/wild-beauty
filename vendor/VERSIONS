@@ -1,0 +1,5 @@
+# package  version  licence  file  (written by tools/vendor.sh)
+preact  10.29.8  MIT  preact.js  https://www.npmjs.com/package/preact/v/10.29.8
+preact/hooks  10.29.8  MIT  hooks.js  https://www.npmjs.com/package/preact/v/10.29.8
+htm  3.1.1  Apache-2.0  htm.js  https://www.npmjs.com/package/htm/v/3.1.1
+preact-render-to-string  6.8.1  MIT  preact-render-to-string.js  https://www.npmjs.com/package/preact-render-to-string/v/6.8.1

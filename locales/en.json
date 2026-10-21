@@ -1,0 +1,26 @@
+{
+  "meta.name": "English",
+  "meta.dir": "ltr",
+  "meta.flag": "gb",
+
+  "page.title.new": "Wild Beauty - New",
+  "page.new.heading": "New",
+
+  "nav.main": "Main navigation",
+  "nav.home": "Home",
+  "nav.home.caption": "Start page",
+  "nav.show": "Show",
+  "nav.show.caption": "Browse nodes",
+  "nav.tree": "Tree",
+  "nav.tree.caption": "The graph of nodes",
+  "nav.new": "New",
+  "nav.new.caption": "Create a new node",
+  "nav.lang": "Lang",
+  "nav.lang.label": "Choose a language",
+
+  "upload.drop": "Drag and drop Images Here to Upload",
+  "upload.or": "Or",
+  "upload.select": "Select Images to Upload",
+  "upload.files.one": "{count} image",
+  "upload.files.other": "{count} images"
+}

@@ -1,0 +1,26 @@
+{
+  "meta.name": "Deutsch",
+  "meta.dir": "ltr",
+  "meta.flag": "de",
+
+  "page.title.new": "Wild Beauty - Neu",
+  "page.new.heading": "Neu",
+
+  "nav.main": "Hauptnavigation",
+  "nav.home": "Start",
+  "nav.home.caption": "Startseite",
+  "nav.show": "Zeig",
+  "nav.show.caption": "Knoten durchsuchen",
+  "nav.tree": "Baum",
+  "nav.tree.caption": "Der Graph der Knoten",
+  "nav.new": "Neu",
+  "nav.new.caption": "Neuen Knoten erstellen",
+  "nav.lang": "Spra",
+  "nav.lang.label": "Sprache wählen",
+
+  "upload.drop": "Bilder hierher ziehen und ablegen zum Hochladen",
+  "upload.or": "Oder",
+  "upload.select": "Bilder zum Hochladen auswählen",
+  "upload.files.one": "{count} Bild",
+  "upload.files.other": "{count} Bilder"
+}
