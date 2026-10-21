@@ -108,6 +108,7 @@ body {
 /* language tab: one flag per locale */
 .wb-flags {
   display: flex;
+  padding-top: var(--wb-tab-gap);
   flex-flow: row wrap;
   justify-content: center;
   gap: var(--wb-tab-gap);
@@ -131,4 +132,215 @@ body {
 
 .wb-content {
   padding: 0 10px;
+}
+
+/* visually hidden but focusable (the file input behind its label) */
+.wb-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* upload area */
+.wb-upload {
+  margin-top: var(--wb-tab-gap);
+}
+
+.wb-drop {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+  min-height: 290px;
+  padding: 16px;
+  text-align: center;
+  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
+  border-radius: var(--wb-radius-frame);
+}
+
+.wb-drop-over {
+  border-style: var(--wb-frame-drag-style);
+  border-color: var(--wb-accent);
+  background: var(--wb-drop-fill);
+}
+
+.wb-drop-icon {
+  width: 70px;
+  height: 70px;
+  background: var(--wb-icon-upload) center / contain no-repeat;
+}
+
+.wb-drop-text {
+  margin: 12px 0 0;
+  font-size: var(--wb-font-size-lead);
+}
+
+.wb-drop-or {
+  margin: 8px 0;
+  font-size: var(--wb-font-size-label);
+}
+
+.wb-button {
+  display: block;
+  max-width: 250px;
+  padding: 7px 12px;
+  font-size: var(--wb-font-size-button);
+  text-align: center;
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border-radius: var(--wb-radius-frame);
+  cursor: pointer;
+}
+
+.wb-button:hover {
+  background: var(--wb-accent-hover);
+}
+
+.wb-button:focus-within,
+.wb-sr-only:focus + .wb-button {
+  outline: var(--wb-border-width) solid var(--wb-ink);
+  outline-offset: 2px;
+}
+
+.wb-upload-note,
+.wb-upload-count {
+  margin: 8px 0 0;
+  text-align: left;
+}
+
+/* grid of cards */
+.wb-cards {
+  display: grid;
+  grid-template-columns: repeat(var(--wb-card-columns), minmax(0, 1fr));
+  gap: var(--wb-card-gap);
+  margin: var(--wb-card-gap) 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 700px) {
+  .wb-cards {
+    grid-template-columns: repeat(var(--wb-card-columns-wide), minmax(0, 1fr));
+  }
+}
+
+.wb-card {
+  display: flex;
+  flex-flow: column nowrap;
+  min-width: 0;
+  text-align: left;
+}
+
+.wb-card-box {
+  position: relative;
+  aspect-ratio: 1;
+  border: var(--wb-border-width) solid var(--wb-ink);
+  box-shadow: var(--wb-shadow-card);
+  background: var(--wb-card-ground);
+}
+
+.wb-card-selected > .wb-card-box {
+  outline: var(--wb-select-width) solid var(--wb-select);
+  box-shadow: var(--wb-shadow-select);
+}
+
+.wb-card-face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: grab;
+}
+
+.wb-card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: transform 0.2s;
+}
+
+.wb-fit-contain {
+  object-fit: contain;
+}
+
+.wb-fit-cover {
+  object-fit: cover;
+}
+
+.wb-card-nopreview {
+  display: block;
+  padding: 4px;
+  font-size: var(--wb-font-size-small);
+}
+
+/* round icon buttons overlapping the top right corner */
+.wb-round {
+  position: absolute;
+  right: 2px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: var(--wb-border-width) outset var(--wb-button-round-border);
+  border-radius: var(--wb-radius-round);
+  cursor: pointer;
+}
+
+.wb-card-remove {
+  top: 2px;
+  background: var(--wb-icon-delete) center / 80% no-repeat, var(--wb-button-round-bg);
+}
+
+.wb-card-rotate {
+  top: 30px;
+  background: var(--wb-icon-rotate) center / 80% no-repeat, var(--wb-button-round-bg);
+}
+
+.wb-round:hover {
+  background-color: var(--wb-button-round-hover);
+}
+
+.wb-round:active {
+  border-style: inset;
+}
+
+.wb-card-fit {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  max-width: calc(100% - 4px);
+  padding: 1px 4px;
+  overflow: hidden;
+  font: inherit;
+  font-size: var(--wb-font-size-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border: 0;
+  cursor: pointer;
+}
+
+.wb-card-fit:hover {
+  background: var(--wb-accent-hover);
+}
+
+.wb-card-name,
+.wb-card-size {
+  overflow: hidden;
+  font-size: var(--wb-font-size-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

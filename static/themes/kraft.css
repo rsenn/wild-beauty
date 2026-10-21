@@ -27,6 +27,7 @@
   /* selection and drag-over (blue), danger (red cross) */
   --wb-select: hsl(210 100% 55%);
   --wb-select-fill: hsl(210 100% 55% / 0.5);
+  --wb-drop-fill: rgb(0 122 255 / 0.15);
   --wb-danger: #f30208;
   --wb-error-frame: rgb(160 0 16);
 
@@ -62,11 +63,13 @@
   --wb-tab-time: 1s;
   --wb-tab-glow: 0 0 4px #fff;
 
-  /* grid of file cards: 5 columns, 3 on phones (layout.css reads these) */
-  --wb-card-gap: 10px;
-  --wb-card-gap-narrow: 5px;
+  /* grid of file cards: 5 columns as on the phone screenshots, 8 from
+   * 700px up (layout.css reads these); the ground shows around a photo shown
+   * whole ("extend") */
+  --wb-card-gap: 8px;
   --wb-card-columns: 5;
-  --wb-card-columns-narrow: 3;
+  --wb-card-columns-wide: 8;
+  --wb-card-ground: rgb(255 255 255 / 0.4);
 
   /* depth */
   --wb-shadow-card: 0 0 4px rgb(0 0 0 / 0.75);
@@ -94,7 +97,7 @@
 
   /* icons: absolute /static urls only, drawn by layout.css as background
    * images (delete and rotate are coloured, so no mask recolouring) */
-  --wb-icon-upload: url(/static/img/action-upload.svg);
+  --wb-icon-upload: url(/static/img/upload-tray.svg);
   --wb-icon-new: url(/static/img/action-new.svg);
   --wb-icon-delete: url(/static/img/icon-error.svg);
   --wb-icon-rotate: url(/static/img/icon-rotate.svg);

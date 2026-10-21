@@ -22,5 +22,14 @@
   "upload.or": "Ou",
   "upload.select": "Choisir des images à envoyer",
   "upload.files.one": "{count} image",
-  "upload.files.other": "{count} images"
+  "upload.files.other": "{count} images",
+
+  "upload.remove": "Retirer",
+  "upload.rotate": "Pivoter",
+  "upload.no-preview": "Pas d'aperçu",
+  "upload.fit.extend": "Entier",
+  "upload.fit.crop": "Recadré",
+  "upload.fit.toggle": "Afficher la photo entière ou la recadrer dans le carré",
+  "upload.ignored.one": "{count} fichier ignoré (pas une image)",
+  "upload.ignored.other": "{count} fichiers ignorés (pas des images)"
 }

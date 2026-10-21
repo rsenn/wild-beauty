@@ -316,7 +316,7 @@ eyeballed numbers in S7.1-S7.7, this section wins.
 - Five columns (20% each, margin 10 px) above 376 px, three columns (33%,
   margin 5 px) below. The screenshots are 360 px wide yet show **five**
   columns, so the deployed build did not apply the 3-column rule (cause not
-  verified); the rewrite decides this itself (`--wb-card-columns-narrow`).
+  verified); the rewrite follows the screenshots: 5 columns, 8 from 700 px (`--wb-card-columns`, `--wb-card-columns-wide`).
 - Each card: square, `1px solid black`, shadow `0 0 4px rgba(0,0,0,.75)`,
   photo `background-size: contain` (so non-square photos are letterboxed),
   cursor `grab`.

@@ -22,5 +22,14 @@
   "upload.or": "Oder",
   "upload.select": "Bilder zum Hochladen auswählen",
   "upload.files.one": "{count} Bild",
-  "upload.files.other": "{count} Bilder"
+  "upload.files.other": "{count} Bilder",
+
+  "upload.remove": "Entfernen",
+  "upload.rotate": "Drehen",
+  "upload.no-preview": "Keine Vorschau",
+  "upload.fit.extend": "Ganz",
+  "upload.fit.crop": "Zuschnitt",
+  "upload.fit.toggle": "Ganzes Foto zeigen oder auf das Quadrat zuschneiden",
+  "upload.ignored.one": "{count} Datei ignoriert (kein Bild)",
+  "upload.ignored.other": "{count} Dateien ignoriert (keine Bilder)"
 }

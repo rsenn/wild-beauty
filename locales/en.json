@@ -22,5 +22,14 @@
   "upload.or": "Or",
   "upload.select": "Select Images to Upload",
   "upload.files.one": "{count} image",
-  "upload.files.other": "{count} images"
+  "upload.files.other": "{count} images",
+
+  "upload.remove": "Remove",
+  "upload.rotate": "Rotate",
+  "upload.no-preview": "No preview",
+  "upload.fit.extend": "Extend",
+  "upload.fit.crop": "Crop",
+  "upload.fit.toggle": "Show the whole photo or crop it to fill the square",
+  "upload.ignored.one": "{count} file ignored (not an image)",
+  "upload.ignored.other": "{count} files ignored (not images)"
 }

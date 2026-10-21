@@ -571,19 +571,19 @@ to every theme and to the sanitiser whitelist.
 | wallpaper | `--wb-wallpaper-color`, `-image`, `-size` | `#cabaab`, `tile-background.png`, `auto 50vmin` | body in `_app.js`; sampled from the screenshots |
 | ink | `--wb-ink`, `--wb-ink-soft` | `#000`, 25% black | text, frames, outlines |
 | accent | `--wb-accent`, `-hover`, `-ink` | `rgb(138 0 16 / .8)`, `rgb(192 8 32 / .8)`, `#fff` | `li.menu-item`, `.upload-handle-button` |
-| selection | `--wb-select`, `-fill` | `hsl(210 100% 55%)`, 50% of it | selection overlay in `imageUpload.js`; blue frame in the screenshot |
+| selection | `--wb-select`, `-fill`, `--wb-drop-fill` | `hsl(210 100% 55%)`, 50% of it | selection overlay in `imageUpload.js`; blue frame in the screenshot |
 | state | `--wb-danger`, `--wb-error-frame` | `#f30208`, `rgb(160 0 16)` | red cross; `.upload-card.__error` |
 | frames | `--wb-frame-width/-style/-drag-style`, `--wb-border-width`, `--wb-select-width` | 4px solid, dashed on drag, 1px, 4px | `.upload-handle:before` and the screenshots |
 | shape | `--wb-radius-tab/-frame/-button/-round/-node`, `--wb-node-outline` | 0, 0, 5px, pill, 8px, 3px | `button` in `_app.js`; graph screenshot |
 | type | `--wb-font-ui`, `--wb-font-size`, `-small/-button/-label/-lead/-tab` | Fixed; 13px (14px at <=375px), 14, 16, 17, 22, 40 | `_app.js`, `nav.js`, `imageUpload.js` |
 | tabs | `--wb-tab-size/-size-open/-gap/-ease/-time/-glow` | 48px, 100px, 4px, `cubic-bezier(.165,.84,.44,1)`, 1s, white glow | `li.menu-item` in `nav.js` |
-| cards | `--wb-card-columns/-narrow`, `--wb-card-gap/-narrow` | 5, 3, 10px, 5px | `.upload-item` widths 20% / 33% |
+| cards | `--wb-card-columns/-wide`, `--wb-card-gap`, `--wb-card-ground` | 5 (8 from 700px), 8px, 40% white | `.upload-item` 20%; the phone screenshots show 5 columns |
 | depth | `--wb-shadow-card/-select/-hover/-pop` | `0 0 4px .75`, `2px 2px 6px #000`, `0 2px 4px .5`, tooltip shadow | `imageUpload.js`, `style.css`, `_app.js` |
 | round buttons | `--wb-button-round-bg/-border/-hover` | `#ffffff60`, `#cdcdcd`, `#ffdc20c0` | `.image-button` |
 | raised buttons | `--wb-button-bg/-bg-active/-border` | grey gradient, reversed, `#555` | `button` in `_app.js` |
 | tooltip | `--wb-tip-bg/-ink` | yellow gradient, black | `.tooltip:after` |
 | logo | `--wb-logo-image`, `--wb-logo-height` | `logo-transparent.png`, 56px | header |
-| icons | `--wb-icon-upload/-new/-delete/-rotate/-next` | `action-upload`, `action-new`, `icon-error`, `icon-rotate`, `arrow-next` svgs | the screenshots |
+| icons | `--wb-icon-upload/-new/-delete/-rotate/-next` | `upload-tray` (arrow over a tray, as on the screenshots), `action-new`, `icon-error`, `icon-rotate`, `arrow-next` svgs | the screenshots |
 
 The theme itself is `static/themes/kraft.css` (written, still to be checked
 against a running page in TODO 2.3); this table is its documentation, not a

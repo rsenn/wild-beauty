@@ -143,19 +143,19 @@ woff2/woff/ttf. Fonts are served from `/static/`.
 
 ## M4 - Upload drop zone (client only, no server yet)
 
-- [ ] **4.1 `UploadArea` component** (SSR renders it empty, client adopts it),
+- [x] **4.1 `UploadArea` component** (SSR renders it empty, client adopts it),
       laid out like the historic screenshot: framed square-cornered zone
       (frame width/colour from tokens), big `action-upload.svg`, text "Drag and
       drop Images Here to Upload", "Or", accent button "Select Images to Upload"
       (all translated, M3), hidden `<input type=file multiple accept=image/*>`.
       Done when dropped files are listed by name and size under the zone.
-- [ ] **4.2 File cards**: square thumbnail (5 columns on phone width, more on
+- [x] **4.2 File cards**: square thumbnail (5 columns on phone width, more on
       wide screens) with thin border, round remove button (red X, token
       `--wb-danger`) and rotate button (blue, `icon-rotate.svg`) overlapping the
       top-right, state (queued), selected state (thick `--wb-select` border and
       shadow). Dragover highlight. Directories ignored for now. Done when 10
       dropped photos show as 10 cards and selecting one gives the blue frame.
-- [ ] **4.3 Extend preview (client-side)**: `object-fit: contain` over a
+- [x] **4.3 Extend preview (client-side)**: `object-fit: contain` over a
       neutral ground; toggle per card to `cover` (P S11.1). Colours come in M6.
       Done when the toggle flips one card without touching the others.
 
