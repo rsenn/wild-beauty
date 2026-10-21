@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
+import { useBoot } from '../boot.js';
 import { ACCEPT, isImageFile } from '../files.js';
+import { createQueue } from '../upload.js';
 import { UploadCard } from './UploadCard.js';
 
 // drop zone plus the grid of chosen files. The server renders it empty and
-// the browser adopts it. Files are only held in memory here; M5 uploads them.
+// the browser adopts it. Each file is uploaded as soon as it is chosen.
 export const UploadArea = () => {
   const { t } = useI18n();
+  const { limits } = useBoot();
   const [items, setItems] = useState([]);
   const [ignored, setIgnored] = useState(0);
   const [over, setOver] = useState(false);
@@ -17,14 +20,39 @@ export const UploadArea = () => {
 
   latest.current = items;
 
+  // upload progress and results arrive as patches for one item
+  const queue = useRef(null);
+
+  queue.current ??= createQueue({ onChange: (id, patch) => setItems(old => old.map(item => (item.id === id ? { ...item, ...patch } : item))) });
+
   // object URLs are released when the area goes away
-  useEffect(() => () => latest.current.forEach(item => URL.revokeObjectURL(item.url)), []);
+  useEffect(
+    () => () => {
+      latest.current.forEach(item => URL.revokeObjectURL(item.url));
+    },
+    [],
+  );
+
+  // a finished upload shows the server's file; the local one can go
+  useEffect(() => {
+    for(const item of items) if(item.record && item.url) URL.revokeObjectURL(item.url);
+  }, [items.map(item => item.record?.hash).join()]);
 
   const add = files => {
     const images = [...files].filter(isImageFile);
 
+    const added = images.map(file => ({ id: nextId.current++, file, url: URL.createObjectURL(file), fit: 'contain', rotation: 0, selected: false, state: 'queued', progress: 0, error: null, record: null }));
+
     setIgnored(files.length - images.length);
-    setItems(old => [...old, ...images.map(file => ({ id: nextId.current++, file, url: URL.createObjectURL(file), fit: 'contain', rotation: 0, selected: false, state: 'queued' }))]);
+    setItems(old => [...old, ...added]);
+
+    for(const item of added) start(item);
+  };
+
+  // too large for the server: fail at once instead of sending 40 MB for a 413
+  const start = item => {
+    if(item.file.size > limits.maxBytes) setItems(old => old.map(i => (i.id === item.id ? { ...i, state: 'failed', error: 'too-large' } : i)));
+    else queue.current.add(item.id, item.file);
   };
 
   const update = (id, change) => setItems(old => old.map(item => (item.id === id ? { ...item, ...change(item) } : item)));
@@ -32,7 +60,10 @@ export const UploadArea = () => {
   const remove = id => {
     const gone = items.find(item => item.id === id);
 
+    queue.current.cancel(id);
+
     if(gone) URL.revokeObjectURL(gone.url);
+    if(gone?.record) fetch(`/api/uploads/${gone.record.hash}`, { method: 'DELETE' }).catch(() => {});
 
     setItems(old => old.filter(item => item.id !== id));
   };
@@ -80,6 +111,7 @@ export const UploadArea = () => {
             onRemove=${() => remove(item.id)}
             onRotate=${() => update(item.id, i => ({ rotation: (i.rotation + 90) % 360 }))}
             onFit=${() => update(item.id, i => ({ fit: i.fit === 'contain' ? 'cover' : 'contain' }))}
+            onRetry=${() => start(item)}
           />`,
         )}
       </ul>

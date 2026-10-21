@@ -344,3 +344,50 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* upload progress and state */
+.wb-card-progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 6px;
+  background: var(--wb-ink-soft);
+}
+
+.wb-card-progress-bar {
+  height: 100%;
+  background: var(--wb-accent);
+  transition: width 0.15s linear;
+}
+
+.wb-card-failed > .wb-card-box {
+  outline: var(--wb-select-width) solid var(--wb-error-frame);
+}
+
+.wb-card-queued .wb-card-image,
+.wb-card-uploading .wb-card-image,
+.wb-card-processing .wb-card-image {
+  opacity: 0.6;
+}
+
+.wb-card-status {
+  font-size: var(--wb-font-size-small);
+  overflow-wrap: anywhere;
+}
+
+.wb-card-retry {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 1px 6px;
+  font: inherit;
+  font-size: var(--wb-font-size-small);
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border: 0;
+  cursor: pointer;
+}
+
+.wb-card-retry:hover {
+  background: var(--wb-accent-hover);
+}

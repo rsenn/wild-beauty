@@ -31,5 +31,17 @@
   "upload.fit.crop": "Crop",
   "upload.fit.toggle": "Show the whole photo or crop it to fill the square",
   "upload.ignored.one": "{count} file ignored (not an image)",
-  "upload.ignored.other": "{count} files ignored (not images)"
+  "upload.ignored.other": "{count} files ignored (not images)",
+
+  "upload.state.queued": "Queued",
+  "upload.state.uploading": "{percent} %",
+  "upload.state.processing": "Processing",
+  "upload.retry": "Retry",
+  "upload.error.too-large": "Too large (max {max})",
+  "upload.error.unsupported": "Not a supported image",
+  "upload.error.undecodable": "Could not be decoded",
+  "upload.error.empty": "Empty file",
+  "upload.error.network": "Network error",
+  "upload.error.generic": "Upload failed",
+  "upload.error.upload-failed": "Upload failed"
 }

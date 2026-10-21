@@ -197,9 +197,9 @@ One request per file, so the browser reports real byte progress (XHR
 3b. **HEIC/HEIF extraction.** Browsers cannot show these, so the primary image
    is decoded out of the container right away into a display file next to the
    original: `uploads/<hash>.display.jpg` (or `.display.png` when the image
-   has an alpha channel). Tool: `heif-convert -q 99` (libheif; installed here), with
-   ImageMagick `convert in.heic[0]` as fallback; argv array, `--`, timeout,
-   pixel limit; rotation (`irot`) and EXIF orientation applied once, metadata
+   has an alpha channel). Tool: `heif-convert -q 99` (libheif; installed here) and
+   `heif-info` (alpha, id of the primary image); no ImageMagick fallback, it
+   decodes HEIC through the same libheif; argv array, `--`, timeout; rotation (`irot`) and EXIF orientation applied once, metadata
    kept (S6.2 step 4 reads the original). Only the primary image is taken
    (no burst/Live-Photo frames, no depth or auxiliary images). The original
    stays in `uploads/` (so the extraction can be redone); everything

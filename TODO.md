@@ -161,15 +161,16 @@ woff2/woff/ttf. Fonts are served from `/static/`.
 
 ## M5 - Upload to server, with progress
 
-- [ ] **5.1 `POST /api/uploads`**: raw body, filename in `X-Filename`; stream to
+- [x] **5.1 `POST /api/uploads`**: raw body, filename in `X-Filename`; stream to
       `uploads/.tmp/<rand>` while hashing (`Bun.CryptoHasher` sha256); enforce
       `maxBytes`; magic-byte sniff (main: jpg/jpeg/png/heif/heic; also webp/gif/avif/tiff; images only,
       anything else incl. video -> 415); rename to
       `uploads/<hash>.<ext>`; dedupe; respond JSON `{hash, ext, name, size}`
       (P S6.2 steps 1-3). Done when `curl --data-binary @a.jpg` creates the file.
-- [ ] **5.1b HEIC/HEIF extraction** (`server/media/heif.js`, P S6.2 step 3b): for
+- [x] **5.1b HEIC/HEIF extraction** (`server/media/heif.js`, P S6.2 step 3b): for
       `.heic`/`.heif` write `uploads/<hash>.display.jpg` (`.png` when alpha) with
-      `heif-convert -q 99`, fallback ImageMagick `convert in[0]`; argv array, `--`,
+      `heif-convert -q 99` (+ `heif-info` for alpha and the primary id; no ImageMagick
+      fallback, same libheif); argv array, `--`,
       timeout, primary image only; undecodable file -> upload rejected. Hash stays
       that of the uploaded bytes. Done when an iPhone `.heic` shows a preview card
       and a corrupt one returns an error.
@@ -180,11 +181,11 @@ woff2/woff/ttf. Fonts are served from `/static/`.
       bodies; set the limit explicitly (default is 128 MiB); remove the temp file when
       the body iterator throws; no small `idleTimeout` (D S9.6, P S14). Re-check
       with a real slow client in 5.3.
-- [ ] **5.3 Client upload with progress**: `XMLHttpRequest` per file,
+- [x] **5.3 Client upload with progress**: `XMLHttpRequest` per file,
       `upload.onprogress` -> progress bar on the card, concurrency 3, states
       queued/uploading/done/failed + retry, abort on remove (P S11.1). Done when a
       large file shows a moving bar and a killed server shows "failed".
-- [ ] **5.4 Hash safety**: `hash` validated `^[0-9a-f]{64}$` everywhere, extension
+- [x] **5.4 Hash safety**: `hash` validated `^[0-9a-f]{64}$` everywhere, extension
       whitelist, no path built from user text (P S9). Done when
       `GET /files/uploads/../../etc/passwd` returns 400/404.
 
@@ -213,11 +214,11 @@ woff2/woff/ttf. Fonts are served from `/static/`.
 ## M7 - Existing uploads (list, SSR, delete)
 
 - [ ] **7.1 `GET /api/uploads`**: read `uploads/*.json`, newest first.
-- [ ] **7.2 `GET /files/uploads/:hash.:ext`** (validated, `Cache-Control`).
+- [x] **7.2 `GET /files/uploads/:hash.:ext`** (validated, `Cache-Control`).
 - [ ] **7.3 SSR the list**: `/:lang/new` renders cards for files already on
       disk and a `<script type=application/json id=boot>`; the client adopts
       them (no flash). Done when a reload keeps the cards.
-- [ ] **7.4 `DELETE /api/uploads/:hash`** removes image and sidecar; delete
+- [x] **7.4 `DELETE /api/uploads/:hash`** removes image and sidecar; delete
       button on the card calls it. Done when the files vanish from `uploads/`.
 - [ ] **7.5 Quota**: total `uploads/` size cap with a translated error (P S9).
 

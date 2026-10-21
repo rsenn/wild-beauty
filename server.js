@@ -4,6 +4,8 @@ import { html } from './client/html.js';
 import { App } from './client/components/App.js';
 import { renderPage } from './server/ssr.js';
 import { DEFAULT_LANG, languageList, loadLocales, negotiate } from './server/i18n.js';
+import { config } from './server/config.js';
+import { createUpload, deleteUpload, serveUpload } from './server/api/uploads.js';
 
 const PORT = Number(process.env.PORT ?? 3000);
 // directories served as files: /static/ (assets), /app/ (browser modules),
@@ -54,7 +56,7 @@ async function serveFile(pathname, method, prefix, root) {
 function bootFor(lang) {
   const fallback = lang === DEFAULT_LANG ? {} : locales.get(DEFAULT_LANG);
 
-  return { lang, messages: locales.get(lang), fallback, languages };
+  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes } };
 }
 
 function page(lang, titleKey) {
@@ -77,7 +79,25 @@ function page(lang, titleKey) {
 function route(req) {
   const { pathname } = new URL(req.url);
 
+  if(pathname === '/api/uploads') return req.method === 'POST' ? createUpload(req) : text('method not allowed\n', 405);
+
+  const upload = /^\/api\/uploads\/([^/]+)$/.exec(pathname);
+
+  if(upload) return req.method === 'DELETE' ? deleteUpload(upload[1]) : text('method not allowed\n', 405);
+
   if(req.method !== 'GET' && req.method !== 'HEAD') return text('method not allowed\n', 405);
+
+  if(pathname.startsWith('/files/uploads/')) {
+    let name;
+
+    try {
+      name = decodeURIComponent(pathname.slice('/files/uploads/'.length));
+    } catch {
+      return text('not found\n', 404);
+    }
+
+    return serveUpload(name, req.method);
+  }
 
   if(pathname === '/') {
     const location = new URL(`/${negotiate(locales, { req })}/new`, req.url).href;
@@ -94,6 +114,6 @@ function route(req) {
   return text('not found\n', 404);
 }
 
-const server = Bun.serve({ port: PORT, fetch: route });
+const server = Bun.serve({ port: PORT, maxRequestBodySize: config.maxBytes, fetch: route });
 
 console.log(`wild-beauty listening on ${server.url}`);

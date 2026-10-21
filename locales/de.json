@@ -31,5 +31,17 @@
   "upload.fit.crop": "Zuschnitt",
   "upload.fit.toggle": "Ganzes Foto zeigen oder auf das Quadrat zuschneiden",
   "upload.ignored.one": "{count} Datei ignoriert (kein Bild)",
-  "upload.ignored.other": "{count} Dateien ignoriert (keine Bilder)"
+  "upload.ignored.other": "{count} Dateien ignoriert (keine Bilder)",
+
+  "upload.state.queued": "Wartet",
+  "upload.state.uploading": "{percent} %",
+  "upload.state.processing": "Verarbeitung",
+  "upload.retry": "Erneut",
+  "upload.error.too-large": "Zu gross (max. {max})",
+  "upload.error.unsupported": "Kein unterstütztes Bild",
+  "upload.error.undecodable": "Nicht lesbar",
+  "upload.error.empty": "Leere Datei",
+  "upload.error.network": "Netzwerkfehler",
+  "upload.error.generic": "Hochladen fehlgeschlagen",
+  "upload.error.upload-failed": "Hochladen fehlgeschlagen"
 }

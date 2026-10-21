@@ -31,5 +31,17 @@
   "upload.fit.crop": "Recadré",
   "upload.fit.toggle": "Afficher la photo entière ou la recadrer dans le carré",
   "upload.ignored.one": "{count} fichier ignoré (pas une image)",
-  "upload.ignored.other": "{count} fichiers ignorés (pas des images)"
+  "upload.ignored.other": "{count} fichiers ignorés (pas des images)",
+
+  "upload.state.queued": "En attente",
+  "upload.state.uploading": "{percent} %",
+  "upload.state.processing": "Traitement",
+  "upload.retry": "Réessayer",
+  "upload.error.too-large": "Trop grand (max {max})",
+  "upload.error.unsupported": "Image non prise en charge",
+  "upload.error.undecodable": "Illisible",
+  "upload.error.empty": "Fichier vide",
+  "upload.error.network": "Erreur réseau",
+  "upload.error.generic": "Échec de l'envoi",
+  "upload.error.upload-failed": "Échec de l'envoi"
 }
