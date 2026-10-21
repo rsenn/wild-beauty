@@ -86,6 +86,8 @@ These are concrete findings from reading the code, not general concerns - useful
 
 ### 4.1 Stack
 
+> **PoC supersession (2026-10-21)**: for the `/new` PoC described in `PLAN.md`, the stack in this section is replaced by Preact without a bundler (`h`/htm, no JSX), a runtime-neutral server on Bun or QuickJS, SQLite, local disk and no auth. Library choices are in S9. The rest of this section remains the long-term direction.
+
 - **Frontend framework - decided (S8 Q9)**: Astro (SSR, islands architecture - ships near-zero JS for the mostly-static pages, hydrates only the interactive surfaces) with **Preact** as the UI library (same component API as React via `preact/compat`, much smaller runtime; official `@astrojs/preact` integration provides SSR + selective client hydration). React/Next.js was considered (see S4.1.1) and rejected in favor of this lighter stack, since most pages here (browse/tile view) are read-heavy and only a few surfaces are genuinely interactive (graph canvas, upload widget, layout editor).
 - **State/data-fetching**: minimal client-side state per interactive island (e.g. a small store or plain hooks scoped to the graph canvas / editor) rather than a global singleton store - MobX's `RootStore` pattern (S2.1) is not needed once static pages carry no client JS by default.
 - **API layer - decided (S8 Q5)**: app-server-only, no Hasura. A typed server (tRPC or a thin REST layer) with Prisma fronting Postgres directly, so there is exactly one place service-level credentials live and no separate GraphQL-engine process/admin-secret model to secure - this is the direct structural fix for the S2.5-1 secret-exposure bug, and keeps the self-hosted VPS (below) to one fewer moving part.
@@ -275,3 +277,85 @@ All nine original questions are now resolved; only sub-questions raised while re
 7. **Categorical "Motiv" map (S7.4) - RESOLVED**: not a distinct curated feature - it was ordinary GraphQL/Hasura content (Boxes/Bags/Motiv-style category tiles), rendered through the same content-graph mechanism as everything else. `Users`/`Groups` seen in the same screenshots *are* real DB entities, not content, so the graph view needs to distinguish content-tile nodes from entity nodes (S4.4). Open sub-question: what a `Group` is actually *for* (ownership/visibility scoping vs. just another browsable node type) is not yet decided.
 8. **Card metadata overlay (S7.6) - RESOLVED**: raw `Id`/`Parent` debug values are dropped entirely. Replaced by the per-tile layout editor (S4.5) plus `tiles.fields` for any structured metadata the user chooses to add.
 9. **Frontend framework - RESOLVED**: Astro + Preact + Bun (S4.1), not Next.js + React (kept as a rejected alternative in S4.1.1). Chosen for the smaller JS footprint on this app's mostly-static page shape.
+
+## 9. PoC Library Selection (2026-10-21)
+
+Method: versions, licences and sizes from the npm registry (`npm view`); behaviour checked by running spikes under **Bun 1.4.2** and **qjsm** (QuickJS 2026-06-04, `/usr/local/bin/qjsm`) on this machine; tools queried locally. The spike code was throw-away and is not in the tree. Web search added little (see "Not verified").
+
+Rule: a dependency must earn its place. It is vendored (copied, pinned, no CDN at runtime, no `node_modules` in the served tree), must be ES-module or trivially wrappable, and must load under **both** runtimes if the server uses it.
+
+### 9.1 What the two runtimes actually provide (verified)
+
+| Need | Bun | qjsm |
+|---|---|---|
+| HTTP server | `Bun.serve({ fetch })` | `import { serve } from 'serve'` - **Bun-shaped**: `serve(opts, (req) => Response)`, same `fetch` handler signature, also `websocket` in Bun's evented shape (`/usr/local/lib/quickjs/serve.js`) |
+| `Request`/`Response` | globals | `import { Request, Response } from 'serve'` (not globals) |
+| SQLite | `bun:sqlite` | `import { SQLite3 } from 'sqlite'` (`open/query/exec/close`, `lastInsertRowid`, `escapeString`) |
+| Child processes | `Bun.spawn` | `import ... from 'child_process'` |
+| Hashing | `Bun.CryptoHasher` | **none**: `crypto` (after `import 'globals'`) has only `getRandomValues` and `randomUUID`, no `subtle`; no sha/md5 module (only `bcrypt`) |
+| `Intl` | yes | **no** |
+| Web globals | yes | **after `import 'globals';`** (checked): `URL`, `TextEncoder`, `ReadableStream`, `Blob`, `AbortController`, `structuredClone`, `crypto`, and a `Bun` shim (`bun.js`: `Bun.file/write/plugin`). **Not global but importable** (all four checked): `import { fetch } from 'fetch'`, `import { FormData } from 'lws/formdata'`, `import { Headers } from 'lws/headers'`, `import { Request, Response } from 'serve'` |
+| Bare-specifier / `node_modules` resolution | yes | `qjsm --help` lists node_modules loader hooks (`-N` disables them), but `import 'htm'`, `'preact'` and `'preact/hooks'` all failed from a directory with `node_modules` in my test (also with `-C browser`); cause not found. Vendoring with relative paths avoids the question |
+
+Every QuickJS entry file starts with `import 'globals';` (the first spike omitted it and wrongly reported the web globals as missing). Consequences: (1) write the server against `fetch(req)`, which both runtimes already share, so the adapter stays tiny; (2) never rely on `Intl`, so plural rules, number and date formatting are own code (S9.3); (3) hashing on the QuickJS adapter shells out to `sha256sum`; (4) every browser-and-server module is imported by **relative path**, never by bare name, which also makes the import map unnecessary on the server (the browser import map can alias the same files).
+
+### 9.2 Adopted
+
+| Library | Version | Licence | Role | Notes |
+|---|---|---|---|---|
+| `preact` (+ `preact/hooks`) | 10.29.8 | MIT | UI | Verified under Bun and qjsm. npm `latest` is already **11.0.1**; PoC pins the 10 line and re-tests on 11 later. Files `dist/preact.mjs`, `hooks/dist/hooks.mjs` |
+| `htm` | 3.1.1 | Apache-2.0 | `` html`...` `` templates bound to `h` | 1.2 KB `dist/htm.mjs`. Do not use `htm/preact/standalone` (bundles a second Preact copy) |
+| `preact-render-to-string` | 6.8.1 | MIT | SSR | `dist/index.mjs`; peer `preact >=10`. **Verified identical output under Bun and qjsm**, including attribute and text escaping. Its one bare import (`from"preact"`) is rewritten to `./preact.js` when vendoring |
+| `perfect-freehand` | 1.2.3 | MIT | ink-pen outline from pressure/speed samples | ~6 KB of real code, pure functions, ESM in `dist/esm`. Replaces the hand-written outline code planned in PLAN S11.4; smoothing and the speed model stay ours |
+| `bezier-js` | 6.1.4 | MIT | hit-testing, nearest point, splitting, bounding boxes for the shape tool | native ESM (`src/bezier.js`), no dependencies |
+| ImageMagick | 6.9.12-98 (installed; command is `convert`, IM7 uses `magick`) | Apache-style | all pixel work: orient, resize, pad, strip, re-encode, palette | detected at start: `magick` else `convert`. **Palette needs no JS library**: `convert f[0] -auto-orient -resize 128x128 -colors 8 -depth 8 -format %c histogram:info:-` printed an ordered histogram in ~0.1 s (weight, rgb, hex) - exactly the ordered `{hex, weight}` array S4.2.1 wants |
+| `mediainfo` | 24.01 (CLI) | BSD | media metadata, `--Output=JSON` | installed |
+| `exiv2` 0.27.6 / `exiftool` 12.76 | CLI | GPL / Perl | EXIF/IPTC/XMP | both installed; prefer `exiftool -json -n` (one call, structured), fall back to `exiv2 -pa` |
+
+### 9.3 Written in-house (deliberately no dependency)
+
+| Piece | Why not a library |
+|---|---|
+| Router (~60 lines, `Request -> Response`) | Hono/Elysia/Express assume the full web-standard globals that qjsm lacks; `serve` already hands us `fetch(req)` |
+| i18n (`t()`, interpolation, plurals) | No `Intl` on qjsm; `@messageformat/core` and friends assume it. A per-locale plural function in each `locales/<code>.json`-adjacent table is ~20 lines; number/date helpers are minimal |
+| One-Euro filter + arc-length resampler | ~40 lines; the npm `1eurofilter` is BSD-3 and adds nothing |
+| Pointer-events gestures (similarity transform from two pointers) | `@use-gesture/vanilla` (MIT, 39 KB) is generic and fights `touch-action`; our need is one function, specified in PLAN S11.3 |
+| Filmstrip reorder | `sortablejs` is 640 KB unpacked for one list; pointer events suffice |
+| Magic-byte sniffing | `file-type` pulls four dependencies; a table of ~15 signatures covers jpeg/png/webp/gif/avif/heic/tiff |
+| SHA-256 on QuickJS | `sha256sum` subprocess on that adapter, `Bun.CryptoHasher` on Bun; a pure-JS fallback only if the binary is missing |
+| OKLab distance for choosing the two padding colours | ~15 lines; `culori` is 1.1 MB unpacked |
+| Stroke-to-bezier fitting (Schneider) | `fit-curve` 0.2.0 (MIT) is CommonJS-only; defer. Perfect-freehand already yields smooth outlines, fitting is an optimisation for stored size |
+| Shape/path model | own segment array serialised to an SVG `d`; `svgpath` / `svg-path-commander` not needed until arbitrary imported SVG matters |
+
+### 9.4 Considered and rejected
+
+| Candidate | Reason |
+|---|---|
+| React / Next.js / Astro | Excluded by the PoC brief; Astro and Next.js still stand in S4.1/4.1.1 as long-term notes |
+| `sharp`, `wasm-vips`, `jimp` | `sharp` is native and Bun/Node-only (breaks the QuickJS target); `wasm-vips` is large; ImageMagick is installed and runs on both |
+| `node-vibrant`, `colorthief`, `quantize` | Need pixel arrays decoded in JS; ImageMagick's histogram does the quantisation natively |
+| `@preact/signals` 2.11.3 | Not needed for the PoC; editor state is a plain store plus hooks. Revisit if redraw cost shows up |
+| `polygon-clipping` 0.15.7 | Boolean shape ops are not in the PoC (clipping is SVG `clipPath`) |
+| `paper`, `fabric`, `konva`, `tldraw` | Whole canvas frameworks; they replace rather than serve the node document model (PLAN S7) |
+| `mediainfo.js` (wasm) | The CLI is installed and simpler |
+| Chrome Handwriting Recognition API as a dependency | Documented for Chrome OS, a single language (English) and a gesture model; feature-detect only. Gesture snapping uses the `$1`/`$P` recogniser written in-house (~80 lines) |
+| Tesseract.js | Wrong problem (printed OCR), large wasm |
+
+### 9.5 Vendoring layout
+
+```
+vendor/                          (checked in; pinned in vendor/VERSIONS)
+  preact.js  hooks.js  htm.js  preact-render-to-string.js
+  perfect-freehand.js  bezier.js
+tools/vendor.sh                  npm pack -> copy dist file -> sed bare imports to relative
+```
+
+`vendor/VERSIONS` records package, version, licence and source URL per file. Licences present: MIT and Apache-2.0 (htm); keep each licence file beside its code.
+
+### 9.6 Not verified (do before relying on it)
+
+- **QuickJS `SQLite3.query` parameter binding.** `query('insert ... values(?,?)', [..])` did not throw but the select-back result could not be inspected (`SQLite3Result` serialises to `{}`); read the result object API in `quickjs-sqlite.c` and decide between binding and `escapeString`/`valueString` (SQL-injection relevant).
+- **QuickJS `serve` request bodies**: streaming vs buffering and any size cap, important for 40 MB uploads; `Bun.serve` behaviour of `maxRequestBodySize` (default not confirmed from docs).
+- **Background removal**: `qjs-opencv` was searched for `grabCut` in `src/` and `include/` and not found there; confirm it is exposed at all before promising the feature on the QuickJS side.
+- **Preact 11.0.1** compatibility with `htm` and `preact-render-to-string` (not tested).
+- Browser support of pointer pressure and `touch-action` combinations on iOS Safari.
