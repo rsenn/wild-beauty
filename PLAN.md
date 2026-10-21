@@ -2,7 +2,7 @@
 
 Status: draft, 2026-10-21. Supersedes the stack choices in `DESIGN.md` S4.1
 (Astro, Postgres, Prisma, object storage, auth) **for the PoC only**; the data
-model ideas in `DESIGN.md` S4.2.1 (tiles, photos, tile_links, palette as an
+model ideas in `DESIGN.md` S4.2.1 (tiles - called **nodes** from now on -, photos, links, palette as an
 ordered array) and the visual language in S7 stay valid. The old code is
 frozen, see `CLAUDE.md` and Phase 0.
 
@@ -20,15 +20,21 @@ The PoC implements **one page, `/new`**, and everything it needs:
 8. saving a node: used photos move from `uploads/` to `data/` and into SQLite
 
 Out of scope: login/sessions (anyone can upload and create), the graph view,
-browse pages, user/group tables, migration of the old data.
+browse pages, user/group tables, migration of the old data, **videos** (images
+only, anything else is rejected at upload), handwriting recognition.
+
+Vocabulary: a content item is a **node** (never "tile", never "file"); a
+node's pictures are **photos**; a stored upload is an **upload**. `DESIGN.md`
+still says "tile" in places; read it as "node".
 
 ## 2. Constraints and decisions
 
 | Topic | Decision |
 |---|---|
 | UI library | Preact, no JSX, no bundler, no Next.js |
+| Theming | CSS custom properties `--wb-*`; a theme is one CSS file that only sets tokens; a node can wear its own theme (S16) |
 | Components | `h('tag', props, children)` or `` html`<a href=${href}>..</a>` `` (htm bound to `h`) |
-| Modules | plain ES modules served as files; an import map maps `preact`, `preact/hooks`, `htm`; vendored under `static/vendor/` (no CDN at runtime) |
+| Modules | plain ES modules served as files; an import map maps `preact`, `preact/hooks`, `htm`; vendored under `vendor/`, served as `/vendor/` (no CDN at runtime) |
 | Server | **Bun only**: `Bun.serve()`, written directly against Bun's APIs (S2.1) |
 | DB | `bun:sqlite` directly, a few small helper functions in `db.js` (not an abstraction layer) |
 | SSR | `preact-render-to-string`; same component tree as the client |
@@ -53,9 +59,11 @@ code: the server calls `Bun.serve`, `Bun.spawn`, `Bun.file`, `Bun.write`,
 - Consequences: `Intl` is available (plural rules and date/number formatting
   use `Intl.PluralRules`, `Intl.NumberFormat`, `Intl.DateTimeFormat`);
   SHA-256 is `Bun.CryptoHasher`; no `sha256sum` subprocess.
-- Optional QuickJS-only tooling (background removal, S10) is a **separate
-  program run as a subprocess** from the Bun server (`qjsm tools/rembg.js`),
-  detected through `/api/capabilities`; it is not a second server runtime.
+- Optional QuickJS-only tooling (background removal and server-side clip
+  paths, S10) is a **separate program run as a subprocess** from the Bun
+  server (`qjsm opencv-imgproc.js`, specified in `opencv-imgproc.md`, lives in
+  the `qjs-opencv` project), detected through `/api/capabilities`; it is not a
+  second server runtime.
 
 ## 3. Phase 0 - housekeeping (before any code)
 
@@ -95,30 +103,34 @@ throw-away script in the scratchpad is enough and is not committed.
 
 ## 5. Repository layout (new tree)
 
+`TODO.md` is the authority for this layout; this section mirrors it.
+
 ```
-server/
-  main.js                 entry: Bun.serve({ fetch: router })
-  core/
-    router.js             (Request) -> Response, path params, method table
-    ssr.js                renderPage(component, props, ctx) -> full HTML
-    i18n.js               locale negotiation, t(), plural, fallback chain
-    config.js             paths, limits, tool names
+server.js                 entry: Bun.serve({ port: 3000, fetch }), routing
+server/                   modules the entry imports; created as they are needed
+  ssr.js                  renderPage(vnode, {lang, title}) -> full HTML
+  theme.js                theme list, token sanitiser (S16.6)
+  i18n.js                 locale negotiation, t(), plural, fallback chain
+  config.js               paths, limits, tool names
   api/
     uploads.js            list / create / delete uploads, serve originals
     nodes.js              create node, move photos to data/
     capabilities.js
+    themes.js             GET /api/themes
   media/
     ingest.js             hash, extension, sidecar orchestration
     probe.js              mediainfo + exiv2/exiftool -> normalised JSON
-    palette.js            ImageMagick histogram -> ordered palette
+    palette.js            `opencv-imgproc palette` when present, else ImageMagick histogram -> ordered palette
     bake.js               final crop/extend/strip/resample into data/
-    rembg.js              spawns `qjsm tools/rembg.js` (qjs-opencv grabCut), optional
+    imgproc.js            spawns `qjsm opencv-imgproc.js` (S10): cutout, clip; optional
+    heif.js               HEIC/HEIF -> display jpg/png at ingest (S6.2 step 3b)
   db/
-    db.js                 wrapper: open(), exec(), run(), get(), all(), tx()
+    db.js                 helpers: open(), run(), get(), all(), tx()
     schema.sql
 client/                   served as-is under /app/
   app.js                  hydrate entry
-  components/             Upload*, NodeEditor, Toolbar, Filmstrip, ...
+  html.js                 `html = htm.bind(h)`, shared by server and browser
+  components/             Nav, UploadArea, UploadList, NodeEditor, Toolbar, Filmstrip, ...
   editor/
     model.js              node document model (S7)
     render.js             model -> SVG vnode tree (shared with SSR)
@@ -126,15 +138,26 @@ client/                   served as-is under /app/
     pen.js                stroke capture, smoothing, width profile
     shapes.js             polyline / bezier editing
   i18n.js                 client t(), same JSON files
-static/                   css/tokens.css, fonts, img (from the old assets)
+vendor/                   preact, hooks, htm, preact-render-to-string, ...; VERSIONS; served as /vendor/
+static/                   served as /static/
+  css/layout.css          layout only, no colours (S16)
+  themes/<id>.css         tokens only: kraft.css, blueprint.css, ...
+  fonts/ img/             from the old assets
 locales/                  en.json de.json fr.json
+tools/                    vendor.sh, check-locales.js
+docs/screenshots/         historic reference
 uploads/                  <hash>.<ext>, <hash>.json         (gitignored)
 data/                     photos/<hash>.<ext>, wb.sqlite3   (gitignored)
-PLAN.md DESIGN.md CLAUDE.md   (old README.md and HISTORIC.md live in attic/)
+PLAN.md DESIGN.md TODO.md CLAUDE.md   (old README.md and HISTORIC.md live in attic/)
 ```
+
+`static/style.css`, `static/css/grid.css`, `static/css/react-*.css` and
+`static/wasm.html` are leftovers of the old app: read them, do not link them;
+what is still needed moves into `layout.css`, the rest is dead (DESIGN.md H1).
 
 No `package.json` scripts that build. Vendored files are copied once by a
 documented shell snippet (`tools/vendor.sh`), checked in, and pinned by version.
+`server.js` stays the entry even when `server/` grows.
 
 ## 6. Server
 
@@ -144,15 +167,16 @@ documented shell snippet (`tools/vendor.sh`), checked in, and pinned by version.
 |---|---|
 | `GET /` | redirect to `/<locale>/new` |
 | `GET /:lang/new` | SSR page (S6.3) |
-| `GET /app/*`, `/static/*` | module and asset files, `Cache-Control` by extension |
-| `GET /api/capabilities` | `{ rembg, languages, limits, tools }` |
+| `GET /app/*`, `/vendor/*`, `/static/*` | `client/`, `vendor/` and `static/` files, `Cache-Control` by extension |
+| `GET /api/themes` | list of `static/themes/*.css` (id, name) |
+| `GET /api/capabilities` | `{ imgproc, languages, limits, tools }` |
 | `GET /api/uploads` | list uploads with sidecar JSON |
 | `POST /api/uploads` | one file per request, raw body, name in header |
 | `DELETE /api/uploads/:hash` | remove file and sidecar |
 | `GET /files/uploads/:hash.:ext` | original, used by the editor |
 | `GET /files/photos/:hash.:ext` | final stored photo |
 | `POST /api/nodes` | create node (S8) |
-| `POST /api/uploads/:hash/rembg` | optional, needs `qjsm` + qjs-opencv |
+| `POST /api/uploads/:hash/cutout` | optional: background removal and/or clip (job JSON body, S10); creates a derived upload; needs `qjsm` + qjs-opencv |
 
 `:hash` is validated against `^[0-9a-f]{64}$` before it touches a path.
 
@@ -163,11 +187,25 @@ One request per file, so the browser reports real byte progress (XHR
 
 1. Stream the body to `uploads/.tmp/<random>` while hashing (SHA-256).
    Reject above `maxBytes`.
-2. Sniff the type from magic bytes (jpeg, png, webp, gif, avif, heic, tiff,
-   plus mp4/mov if video is wanted later); the client-supplied extension is
-   only used if it agrees. Extension is lower-cased and whitelisted.
+2. Sniff the type from magic bytes. Main types: `.jpg`, `.jpeg`, `.png`,
+   `.heif`, `.heic`; also accepted without special handling: webp, gif, avif,
+   tiff. Images only, no video. The client-supplied extension is only used if
+   it agrees; it is lower-cased and whitelisted (`jpeg` is stored as `jpg`).
 3. Rename to `uploads/<hash>.<ext>`; if it already exists, drop the temp file
-   and return the existing record (dedupe for free).
+   and return the existing record (dedupe for free). The hash is always of
+   the bytes as uploaded.
+3b. **HEIC/HEIF extraction.** Browsers cannot show these, so the primary image
+   is decoded out of the container right away into a display file next to the
+   original: `uploads/<hash>.display.jpg` (or `.display.png` when the image
+   has an alpha channel). Tool: `heif-convert -q 99` (libheif; installed here), with
+   ImageMagick `convert in.heic[0]` as fallback; argv array, `--`, timeout,
+   pixel limit; rotation (`irot`) and EXIF orientation applied once, metadata
+   kept (S6.2 step 4 reads the original). Only the primary image is taken
+   (no burst/Live-Photo frames, no depth or auxiliary images). The original
+   stays in `uploads/` (so the extraction can be redone); everything
+   downstream (palette, preview, editor, bake) uses the display file. For
+   non-HEIF uploads `display` is the file itself. Failure to decode rejects
+   the upload with a clear error (an undisplayable image is useless).
 4. Probe, in parallel, with a timeout each:
    - `mediainfo --Output=JSON <file>`
    - `exiv2 -pa -b` or `exiftool -json -n -G1` (whichever is installed;
@@ -178,9 +216,16 @@ One request per file, so the browser reports real byte progress (XHR
    `DESIGN.md` S4.2.1 asks for. No JS quantiser needed. Also store
    `padding: [hex, hex]`: the most dominant colour plus the next one far
    enough from it in OKLab (own 15-line conversion).
+   **Preferred source when `capabilities.imgproc` lists it**: `opencv-imgproc
+   palette --in=<file> --count=8` (S10 use 5; `dominant_colors_grabber` through
+   `cv.paletteGenerate`, one JSON line `{ ok, colors: ["#rrggbb", ...] }`, no weights
+   yet). ImageMagick stays the fallback and the only source for the weights.
 6. Write the sidecar `uploads/<hash>.json`:
-   `{ hash, ext, name, size, mime, width, height, orientation, mediainfo,
-   exif, palette, padding, uploadedAt }` via temp file + rename.
+   `{ hash, ext, display, name, size, mime, width, height, hasAlpha,
+   orientation, mediainfo, exif, palette, padding, uploadedAt }` via temp
+   file + rename. `display` is `<hash>.<ext>` or `<hash>.display.<jpg|png>`;
+   `width`, `height`, `hasAlpha` describe the display file. Derived uploads
+   (S10) add `derivedFrom: <hash>` and `op`.
 7. Respond with the sidecar.
 
 Failures at steps 4-5 degrade (sidecar gets `"errors": [...]`), they do not
@@ -222,7 +267,7 @@ step = one of
   from shapes, `mix-blend-mode` via style, strokes as filled `<path>`.
   SVG, not canvas, because it is SSR-able, resolution-independent and easy to
   hit-test. If it gets slow with many strokes, rasterise finished pages.
-- "Free", "slide-show" and "tile-grid" are different `mode`s over the same
+- "Free", "slide-show" and "grid" are different `mode`s over the same
   steps (grid = auto-generated transforms, slides = one photo step per page).
 - Page N shows steps `0..k` of that page; the sequencer UI scrubs `k`.
 
@@ -241,9 +286,8 @@ node_links(id INTEGER PRIMARY KEY, from_id INT, to_id INT, label TEXT NOT NULL,
 
 `PRAGMA journal_mode=WAL; foreign_keys=ON`. Schema version in
 `PRAGMA user_version`, migrations as numbered statements in `schema.sql`.
-Names follow `DESIGN.md` S4.2.1 where they overlap (`tile` is called `node`
-here, since that is the term the editor uses; keep one name and rename the
-other docs when the PoC lands).
+Names follow `DESIGN.md` S4.2.1 where they overlap, with `tile` renamed to
+`node` (decided, S15); `DESIGN.md` is updated when the PoC lands (TODO H3).
 
 ### Saving a node (`POST /api/nodes`)
 
@@ -251,11 +295,24 @@ Body: the node doc. In one transaction:
 1. validate the doc (size, step count, referenced hashes exist in `uploads/`
    or `data/photos/`);
 2. for each used upload: **bake** into `data/photos/<hash>.<ext>`:
-   auto-orient, strip all metadata (`magick -strip`), resample to a max long
-   edge (2048), re-encode (JPEG q82 or WebP); the original crop/extend stays
+   auto-orient, strip all metadata, resample to a max long edge (2048). The
+   encoding rule is **never raise the quality of a JPEG**:
+   - JPEG source (the upload itself, or the HEIC display file) with long edge
+     <= 2048: **no re-encode**, a lossless transform: `jpegtran -copy none`
+     with the EXIF orientation applied as `-rotate`/`-transpose`/`-flip`
+     (`-perfect`, else `-trim`), which also strips metadata;
+   - JPEG source that must be shrunk: re-encode with ImageMagick at the
+     source's own estimated quality (`identify -format %Q`, never higher; 90
+     if it cannot be estimated);
+   - any other opaque source (png, tiff, webp, gif, avif; the `display` file
+     of a HEIC is already a JPEG): JPEG at **quality 99** (`-quality 99`,
+     default 4:2:0);
+   - with an alpha channel (e.g. after a cutout): WebP q99 or PNG, never JPEG;
+   the baking source is the `display` file; the original crop/extend stays
    a *non-destructive transform in the doc*, so editing later is lossless;
-   additionally a `<hash>.tile.jpg` square rendition with the node's own
-   crop/extend applied for thumbnails;
+   additionally a `<hash>.thumb.jpg` square rendition with the node's own
+   crop/extend applied for thumbnails (same quality rule: at most the
+   source's quality for JPEG sources, 99 otherwise);
 3. insert `photos`, `nodes`, `node_photos`;
 4. delete the upload and its sidecar only after the commit succeeded.
 
@@ -279,19 +336,43 @@ No login does not mean no limits:
 - documented plainly: the PoC is for a trusted network or behind a reverse
   proxy that rate-limits.
 
-## 10. Optional QuickJS helper (background removal)
+## 10. Optional QuickJS helper (background removal, clip paths)
 
-Not a server runtime. Background removal needs OpenCV, which exists as
-`qjs-opencv`. If `qjsm` and the module are present, the Bun server runs
-`qjsm tools/rembg.js <in> <out>` as a child process (argv array, timeout).
+Not a server runtime. The pixel work that ImageMagick one-liners cannot do
+(segmentation, polygon masks) is done by one CLI script in the `qjs-opencv`
+project, `opencv-imgproc.js`, specified in `opencv-imgproc.md` (the contract
+between that project and this one). `cv.grabCut`, `fillPoly`, `floodFill`,
+`watershed`, `kmeans`, `readNetFromONNX` and the background subtractors are
+bound in `qjs-opencv` (verified 2026-10-21).
 
-- grabCut seeded with the centre rectangle or a user-supplied rectangle;
-  output is a PNG with alpha, saved as a new upload (new hash, `derivedFrom`
-  in the sidecar).
-- Availability is detected once at start and reported in
-  `/api/capabilities`; the client hides the tool when `rembg` is false.
-- Open: `grabCut` was not found in `qjs-opencv`'s `src/` or `include/`
-  (`DESIGN.md` S9.6); confirm before promising the feature.
+The Bun server runs `qjsm opencv-imgproc.js <command> --job job.json` as a
+child process (argv array, timeout, minimal environment) from
+`server/media/imgproc.js`, reads the one-line JSON result from stdout.
+
+Uses:
+1. **Background removal** (`POST /api/uploads/:hash/cutout`): methods are
+   grabCut (centre or user rectangle, or a mask), border flood fill, chroma
+   key, k-means, watershed, ONNX segmentation model, difference to a reference
+   image, and `auto`; all in the spec. The result **always has an alpha
+   channel**: if the source format has none (jpg, heic) it is written as PNG
+   (or WebP), never as JPEG. It is saved as a **new upload** (new SHA-256, `derivedFrom`
+   and `op` in the sidecar) and appears in the upload list; the original stays.
+2. **Server-side clip**: a polygon or SVG path (the node doc's `shape`
+   steps, S7) is rasterised into a mask and applied as alpha. Used when a
+   *destructive* cut-out is wanted (derive a new photo), when baking the
+   square thumbnail rendition (S8), and for flat exports of a node. In the
+   editor, clipping stays non-destructive SVG `clipPath` (S11.6); the server
+   path exists for output that must not need an SVG renderer.
+3. Availability is detected once at start (`qjsm opencv-imgproc.js
+   capabilities`) and reported in `/api/capabilities` as `imgproc`
+   (methods, models, limits); the client hides the tools when it is absent.
+4. The server converts HEIC/HEIF to the display file first (S6.2 step 3b):
+   the tool only reads formats OpenCV decodes (jpg, png, webp, tiff, ...).
+5. **Palette generation**: `opencv-imgproc palette --in=FILE [--count=N]
+   [--dist=cube|cie76|cie94|kmeans] [--hsv]` returns the dominant colours of an
+   image (S6.2 step 5 uses it instead of the ImageMagick histogram when the tool
+   is installed). Options on this tool are `--name=value` (it parses with
+   `cv.CommandLineParser`), so the server builds argv as `--in=<path>` etc.
 
 ## 11. Client
 
@@ -344,10 +425,9 @@ modifier-drag on desktop. Result is always a 6-number matrix in model space.
   offsets with round caps, as a filled path (the perfect-freehand approach,
   written here, no dependency).
 - Stored as `stroke` with the already-smoothed points so replay is exact.
-- Handwriting recognition: **stretch goal, not PoC-blocking**. Start with the
-  `$1`/`$P` recogniser for shapes (snap a scribbled circle/line/rect to a
-  real shape); real text recognition via the browser Handwriting Recognition
-  API where present (feature-detected), nothing server-side.
+- Handwriting recognition: **deferred past the PoC**. Possible later: `$1`/`$P`
+  to snap a scribbled circle/line/rect to a real shape, and the browser
+  Handwriting Recognition API where present (feature-detected).
 
 ### 11.5 Shape tool (`shapes.js`)
 Click adds a vertex, click-drag pulls a symmetric bezier handle, Alt/second
@@ -381,17 +461,19 @@ Each milestone ends in something runnable and checkable.
 | M | Deliverable | Done when |
 |---|---|---|
 | 0 | Phase 0 items | archive done, override written, `DESIGN.md` has tokens |
-| 1 | Skeleton | `bun server/main.js` serves `/en/new` SSR with the Preact chrome; strings in 3 languages |
+| 1 | Skeleton | `bun server.js` serves `/en/new` SSR with the Preact chrome; strings in 3 languages |
+| 1b | Theming | `kraft` and `blueprint` themes, switcher, scoped theme, sanitiser tests (S16; TODO M2b) |
 | 2 | Upload | multi-file DnD with progress; files appear in `uploads/` with `<hash>.<ext>`; reload shows them (SSR); delete works |
 | 3 | Ingest | sidecar JSON with mediainfo + exif + palette; cards show extended previews with the two padding colours |
-| 4 | Node editor shell | "new node" mounts the square editor; photo drag-in; pinch/rotate/zoom; extend/cover toggle |
+| 4 | Node editor shell | "new node" mounts the square editor; photo drag-in; pinch/rotate/zoom; extend/cover toggle; per-node theme |
 | 5 | Save | node saved, photos baked into `data/photos`, rows in SQLite, uploads cleaned up, survives a crash between steps |
 | 6 | Film-strip + pages | strip appears at >1 photo, reorder; step-sequencer scrub; mode free/slides/grid |
 | 7 | Vector tools | pen with pressure/speed width; shape tool; clip/unclip |
-| 8 | Extras | optional `rembg` helper (S10) and button; handwriting stretch goal |
+| 8 | Extras | optional `imgproc` helper (cutout, clip; S10) and button |
 
 Order is deliberate: SSR and the vendored-module setup are proven in M1,
-before UI work piles on top.
+before UI work piles on top. `TODO.md` splits these into finer milestones
+(M0-M11) and is the working list.
 
 ## 13. Testing
 
@@ -410,22 +492,158 @@ before UI work piles on top.
 
 | Risk | Mitigation |
 |---|---|
-| Large upload bodies | verify `Bun.serve` streaming and `maxRequestBodySize`; stream to disk, never hold 40 MB in memory |
+| Large upload bodies | verified 2026-10-21 (Bun 1.4.2): set `maxRequestBodySize` explicitly, stream `req.body` to disk while hashing (RSS stayed ~45 MB for a 40 MB upload); oversize gets 413 from Bun; keep the idle timeout at its default or higher |
 | No bundler -> many small module requests | fine for a PoC; HTTP/2 or a later concat step; import map versions in the URL for caching |
 | bare imports in the browser | vendored files use relative paths; the import map aliases the same files |
 | Pixel decoding without a library | ImageMagick subprocess is the one dependency; palette needs only 64x64 |
 | Pointer-event pressure differs by device | width model works from speed alone, pressure optional |
 | SVG performance with many strokes | rasterise finished pages, keep live strokes as SVG |
 
-## 15. Open questions
+## 15. Decisions and open questions
 
-1. Archive mechanism (tag, branch or `attic/`), and where the new tree lives
-   (same repo, root level, as laid out in S5).
-2. Hash: SHA-256 (64 hex, proposed) or SHA-1 (40 hex, as the old schema's
-   `sha1`). Either is fine; pick once, the validation regex depends on it.
-3. Baked photo format: JPEG for compatibility or WebP/AVIF for size (the old
-   `DESIGN.md` S4.3 leans AVIF with fallbacks).
-4. Are videos in scope? `mediainfo` suggests yes eventually; the PoC treats
-   non-images as "stored, no preview" unless told otherwise.
-5. `node` vs `tile` naming across the docs.
-6. Ink recognition: acceptable to defer entirely past the PoC?
+Decided 2026-10-21:
+- Videos are out of the PoC; non-image uploads are rejected.
+- A content item is a **node** (not tile, not file); docs and code use `node`.
+- Handwriting recognition is deferred past the PoC.
+- Directory layout: `TODO.md` wins, S5 mirrors it.
+- Theming: S16.
+
+- Hash: **SHA-256**, 64 lower-case hex (`^[0-9a-f]{64}$`), over the uploaded bytes.
+- Upload formats: `.jpg`, `.jpeg`, `.png`, `.heif`, `.heic` mainly (S6.2); HEIC/HEIF
+  are extracted to a display jpg/png at ingest.
+- Background removal always yields an alpha format (PNG/WebP), never JPEG.
+- Clip paths may also be applied server-side (S10).
+- `grabCut` exists in `qjs-opencv`; the tool is specified in `opencv-imgproc.md`.
+
+- Baked photo format: JPEG for opaque images, **never re-encoded at a higher
+  quality than its source**: JPEG sources are passed through losslessly
+  (`jpegtran`) or, when shrunk, re-encoded at their own quality; **quality 99**
+  only for non-JPEG sources (checked with ImageMagick here: a 720x1280 q72 JPEG
+  becomes 326 KB at q99 vs 159 KB at q82, so re-encoding only inflates).
+  Alpha images: WebP or PNG. Open: `jpegtran -copy none` drops an ICC profile;
+  keep it when present and not sRGB.
+- `Bun.serve` upload bodies: verified, see S14 and `DESIGN.md` S9.6.
+
+Still open: nothing blocking M1.
+
+## 16. Theming
+
+### 16.1 Goals
+- The whole UI is themable, and **a node can wear a theme different from the
+  page's**: two stacked editors, or a page full of nodes, each in its own look.
+- Adding a theme = adding one CSS file. No component changes, no build.
+- A theme changes colour, wallpaper, type, borders, radii, shadows, icons, tab
+  and button sizes. It does not change markup or layout structure.
+- A node's look is user content, so it is stored in the node doc and
+  sanitised (S16.6).
+
+### 16.2 Mechanism
+1. **`static/css/layout.css`**: all structure (flex, grid, positioning,
+   sizes in tokens, transitions). It contains **no literal colour, font,
+   image, border width, radius or shadow**: only `var(--wb-...)`.
+2. **`static/themes/<id>.css`**: only custom property declarations, scoped to
+   `:root[data-theme=<id>], [data-theme=<id>]`. The second selector is what
+   lets any element, such as a node wrapper, wear a theme.
+3. Custom properties inherit, so the nearest `data-theme` ancestor wins and
+   nothing leaks out of the wrapper. A node wrapper always sets both
+   `data-theme` and the complete token set of its theme (themes are
+   self-contained: each defines every token), so a node never half-inherits
+   from the page.
+4. Page theme: `<html data-theme>` set by SSR from the `wb-theme` cookie
+   (default `kraft`), plus `<link id=theme href=/static/themes/<id>.css>` in
+   `<head>` (no flash on reload). Other themes' files are loaded on demand,
+   when a node or the switcher asks for them.
+5. Switching without reload: swap the `<link>` href, set `data-theme` and the
+   cookie. A node picker only changes that node's wrapper and doc.
+6. Icons are `url(/static/...)` tokens drawn as CSS background images. Colour
+   inside a node's *content* (photos, strokes, shapes, graph-node fill) is data
+   and never themed; the theme only styles the chrome around it.
+7. Responsive rules (phone vs desktop) use tokens too: the breakpoint lives in
+   `layout.css`, the values (`--wb-card-columns-narrow`) in the theme.
+
+### 16.3 Token contract
+Every theme defines all of these; `layout.css` may use only these. Values
+shown are the `kraft` ones. Names are a contract: adding one means adding it
+to every theme and to the sanitiser whitelist.
+
+| Group | Tokens | kraft | Source |
+|---|---|---|---|
+| wallpaper | `--wb-wallpaper-color`, `-image`, `-size` | `#cabaab`, `tile-background.png`, `auto 50vmin` | body in `_app.js`; sampled from the screenshots |
+| ink | `--wb-ink`, `--wb-ink-soft` | `#000`, 25% black | text, frames, outlines |
+| accent | `--wb-accent`, `-hover`, `-ink` | `rgb(138 0 16 / .8)`, `rgb(192 8 32 / .8)`, `#fff` | `li.menu-item`, `.upload-handle-button` |
+| selection | `--wb-select`, `-fill` | `hsl(210 100% 55%)`, 50% of it | selection overlay in `imageUpload.js`; blue frame in the screenshot |
+| state | `--wb-danger`, `--wb-error-frame` | `#f30208`, `rgb(160 0 16)` | red cross; `.upload-card.__error` |
+| frames | `--wb-frame-width/-style/-drag-style`, `--wb-border-width`, `--wb-select-width` | 4px solid, dashed on drag, 1px, 4px | `.upload-handle:before` and the screenshots |
+| shape | `--wb-radius-tab/-frame/-button/-round/-node`, `--wb-node-outline` | 0, 0, 5px, pill, 8px, 3px | `button` in `_app.js`; graph screenshot |
+| type | `--wb-font-ui`, `--wb-font-size`, `-small/-button/-label/-lead/-tab` | Fixed; 13px (14px at <=375px), 14, 16, 17, 22, 40 | `_app.js`, `nav.js`, `imageUpload.js` |
+| tabs | `--wb-tab-size/-size-open/-gap/-ease/-time/-glow` | 48px, 100px, 4px, `cubic-bezier(.165,.84,.44,1)`, 1s, white glow | `li.menu-item` in `nav.js` |
+| cards | `--wb-card-columns/-narrow`, `--wb-card-gap/-narrow` | 5, 3, 10px, 5px | `.upload-item` widths 20% / 33% |
+| depth | `--wb-shadow-card/-select/-hover/-pop` | `0 0 4px .75`, `2px 2px 6px #000`, `0 2px 4px .5`, tooltip shadow | `imageUpload.js`, `style.css`, `_app.js` |
+| round buttons | `--wb-button-round-bg/-border/-hover` | `#ffffff60`, `#cdcdcd`, `#ffdc20c0` | `.image-button` |
+| raised buttons | `--wb-button-bg/-bg-active/-border` | grey gradient, reversed, `#555` | `button` in `_app.js` |
+| tooltip | `--wb-tip-bg/-ink` | yellow gradient, black | `.tooltip:after` |
+| icons | `--wb-icon-upload/-new/-delete/-rotate/-next` | `action-upload`, `action-new`, `icon-error`, `icon-rotate`, `arrow-next` svgs | the screenshots |
+
+The theme itself is `static/themes/kraft.css` (written, still to be checked
+against a running page in TODO 2.3); this table is its documentation, not a
+second copy.
+
+What the screenshots fix, so no later restyle forgets it (details: `DESIGN.md` S7.8): paper wallpaper; black
+square-cornered 4px frame around the drop zone; crimson square tab blocks with
+big pixel type, the active one grown downward with a caption; 5-column grid of
+thumbnails with a 1px black border and the two round buttons overlapping the
+top-right (red cross on top, blue rotate below); selected card = 4px blue frame
+plus a hard shadow; a black square with a white arrow bottom-right to continue;
+graph nodes as rounded squares with a 3px black outline, flat saturated fill
+and a pixel-font label.
+
+Known defects not to copy: tab labels cut off at 360px ("Hom", "Sho", "Tre");
+the old `body` and `a:hover` rules that apply a drop-shadow filter to every
+link; `user-select: none` on every `a` and `button`.
+
+### 16.4 Distilling rules (how the kraft values were chosen)
+- Colours are the literal values in the old CSS where a rule exists; where
+  only a screenshot shows it, the value was sampled and matched against the
+  CSS (crimson `rgb(138 0 16 / .8)` over the sampled paper `#cabaab` computes
+  to `rgb(151 37 47)`, the screenshot shows `rgb(149 35 45)`).
+- Many tokens, few concepts: five colours (ink, accent, select, danger, wallpaper),
+  three radii, three font sizes in use, one transition. A new theme can start
+  from `kraft.css` and change those few.
+- Old per-component one-off values (modal 3-D transform, flag flip, cube
+  spinner) are not tokens; they are dropped or kept as `layout.css` rules until
+  the component returns.
+
+### 16.5 Second theme: `blueprint`
+Exists to prove the mechanism (TODO 2b.2): dark blue flat wallpaper (no image),
+white ink, cyan accent, square everything, a different `--wb-font-ui`.
+Acceptance: switching it restyles `/en/new` and a node editor with no
+component change, and `/en/themes` shows kraft, blueprint and a page where both
+are side by side.
+
+### 16.6 Per-node themes and the sanitiser
+A node doc carries `style: { theme: "<id>", vars: { "--wb-accent": "#2a6" } }`.
+- `theme` must be an id from `static/themes/`. Unknown id falls back to the
+  page theme.
+- `vars` keys must be in the token whitelist (S16.3). Values must match a
+  pattern per token kind: colour (`#rgb[a]`, `#rrggbb[aa]`, `rgb()`, `hsl()`,
+  plain names from a short list), length (`<number>(px|em|rem|vmin|%)` with a
+  range), number, time, `url(/static/<path>)` for image tokens only,
+  font-family from a list. No `;`, `{`, `}`, `\`, `@`, `expression`,
+  `javascript:`, `data:`, external URLs, or comments.
+- `server/theme.js` exports `sanitize(style) -> { theme, vars }` and
+  `toAttr(style) -> string` (the inline `style` attribute). It runs **on save
+  and again on render**, so a hand-edited database row cannot inject CSS.
+- The editor and every viewer render the node inside
+  `<div data-theme=ID style="...">`, in SSR and in the browser, so both agree.
+- Unit tests feed hostile values (`url(javascript:...)`, `}` / `;` injection,
+  `expression()`, huge lengths, unknown tokens) and expect them dropped.
+
+### 16.7 Order of work
+TODO M2 builds `layout.css` plus `kraft.css` for the `/new` chrome; M2b adds
+loading, `blueprint`, the switcher, scoped themes and the sanitiser; M8 (8.3b)
+adds the per-node wrapper; M9 (9.2b) persists and re-validates it.
+
+### 16.8 Not in the PoC
+Per-user theme storage (cookie only), `prefers-color-scheme` auto-switching,
+theme editor UI, theme-supplied fonts beyond the existing ones (a theme may
+name a font that `static/fonts/stylesheet.css` already declares).

@@ -266,6 +266,96 @@ Two visually distinct graph renderings appear in the screenshots, which the rewr
 - Content (graph canvas, upload grid, or editor grid) fills essentially the whole viewport below the nav.
 - One accent color (crimson) is reserved strictly for interactive/brand chrome (nav, primary buttons, modal headers); the paper-texture beige is the constant "canvas"; all remaining color variety comes from content itself (photos, extracted/assigned node palettes) - i.e., the app's *own* chrome is deliberately restrained so that user-uploaded imagery and its derived palette supply the color richness. This is an important principle to state explicitly for the rewrite's design system: **the UI is a neutral frame; tiles and the graph are where color lives.**
 
+### 7.8 Facts measured from `docs/screenshots/` (2026-10-21)
+
+Source: the five phone screenshots (iPhone, 720 x 1280 px = 360 x 640 CSS px at
+2x, taken 2022-08-25) and the old CSS (`attic/pages/_app.js`,
+`attic/components/{nav,layout}.js`, `attic/components/views/imageUpload.js`,
+`static/style.css`). Colours were sampled from pixels; where the old CSS states
+a value, the CSS is authoritative. These corrected values feed the `kraft`
+theme (`static/themes/kraft.css`, PLAN S16). Where they disagree with the
+eyeballed numbers in S7.1-S7.7, this section wins.
+
+**Wallpaper** (`new-dropzone`, `graph-mobile-*`)
+- `static/img/tile-background.png`, 1500 x 1500 RGBA, is the wallpaper of the
+  default theme. CSS: `background: url(...) repeat; background-size: auto
+  50vmin`, so on a 360 px wide phone one tile is 180 CSS px and the repeat is
+  visible (the image is not seamless; a soft vertical seam shows at x = 360
+  device px in `graph-mobile-overview`). It is also upscaled and therefore
+  blurry on large screens.
+- Sampled mean colour `#cabaab`; range `rgb(197 184 168)` to `rgb(213 199 186)`
+  (S7.1's `#c9bfae`-`#cfc6b4` is about right; the cloudy patches are darker).
+
+**Tabs** (`new-dropzone`, `graph-mobile-overview`; CSS: `li.menu-item` in `nav.js`)
+- Block colour is `rgba(138, 0, 16, 0.8)` over the wallpaper, which computes
+  to about `rgb(151 37 47)` and reads `rgb(148 42 56)` to `rgb(149 35 45)` in
+  the screenshots (S7.2's `#9c2b3c` is the visual approximation).
+- Collapsed 48 x 48 CSS px, 4 px side margins, 2 px vertical; active or
+  hovered grows to 100 x 100 over 1 s with `cubic-bezier(.165,.84,.44,1)`.
+  Label is the Fixed pixel face at 40 px (the `font-size: 3em` and the
+  `span` rule), white, with a white glow (`drop-shadow(0 0 4px #fff)`) on the
+  link under hover. The caption below the label is 14 px.
+- Tabs: Home, Show, Tree, New, Login, Language. The strip is right-aligned
+  (`direction: rtl` on `div.menu`, `ul` flips back to `ltr`) on both pages; on
+  `/new` the active tab expands downward and shows the caption (then "Create a
+  new tile", now "node").
+- Defect, not to copy: 40 px labels in a 48 px block cut off at 360 px
+  ("Hom", "Sho", "Tre", "Log", "Lar").
+
+**Drop zone** (`new-dropzone`; CSS: `.upload-handle` in `imageUpload.js`)
+- 290 px high; a 4 px solid black frame drawn as a `:before` inset by 4 px, no
+  radius. Dragging over: frame becomes `4px dashed rgba(138,0,16,.8)`, fill
+  `rgba(0,122,255,.15)`, the arrow turns accent-coloured and bounces
+  (`up-arrow` animation, 1 s, infinite).
+- Content, centred: inline SVG arrow-into-tray icon 70 px wide, 2 px black
+  stroke, round joins (`.upload-handle-icon`); "Drag and drop Images Here to
+  Upload" at 22 px; "Or" at 17 px; button `rgba(138,0,16,.8)`, white 16 px
+  text, `padding: 7px 12px`, max-width 250 px, hover `rgba(192,8,32,.8)`.
+
+**File cards** (`new-dropzone`, `new-upload-grid-selected`)
+- Five columns (20% each, margin 10 px) above 376 px, three columns (33%,
+  margin 5 px) below. The screenshots are 360 px wide yet show **five**
+  columns, so the deployed build did not apply the 3-column rule (cause not
+  verified); the rewrite decides this itself (`--wb-card-columns-narrow`).
+- Each card: square, `1px solid black`, shadow `0 0 4px rgba(0,0,0,.75)`,
+  photo `background-size: contain` (so non-square photos are letterboxed),
+  cursor `grab`.
+- Two round buttons stacked on the card's top right (`.image-delete`
+  top 2 / right 2, `.image-rotate` top 30 / right 2): 24 px icons, `border:
+  1px outset #cdcdcd`, `border-radius: 99999px`, `background: #ffffff60`, glow
+  `drop-shadow(1px 1px 10px #fff)`; hover turns yellow `#ffdc20c0`. The delete
+  icon is a red cross (sampled `rgb(243 2 8)`, matches `icon-error.svg`), the
+  rotate icon a blue circular arrow (`icon-rotate.svg`).
+- Error card: `3px solid rgb(160 0 16)`.
+- **Selected**: `hsla(210,100%,55%,.5)` fill and `4px solid hsla(210,100%,55%,
+  .5)` border (sampled `rgb(36 136 234)` to `rgb(72 139 255)` over the photo),
+  `border-radius: 5%`, `box-shadow: 2px 2px 6px #000`; the selection overlay
+  is drawn by `ImageSelection` (`imageUpload.js:32`). The yellow and red lines
+  in `new-upload-grid-selected` look like the touch-drag **range-selection
+  stroke** (select by dragging across cards; `ImageSelection`), not static UI.
+- A black square of about 56 x 56 CSS px with a white right arrow sits
+  bottom-right under the grid; it presumably continues with the selection
+  (its handler was not traced).
+
+**Graph nodes** (`graph-mobile-overview`, `graph-mobile-zoomed`)
+- Rounded squares, about 12% corner radius, ~3 px black outline (at zoom 2.5
+  the outline is ~7 device px), flat saturated fill, label in the Fixed face
+  centred and word-wrapped, black. Edges: ~1 px black straight lines, no
+  arrowheads, drawn under the nodes. Node size follows zoom. Fill hues are all different (cyan, lime, red, brown,
+  pink, orange, mint, violet, magenta).
+- No drop shadow in these screenshots (S7.4 mentions one for another view).
+- Typical node text: "Motiv #3", "Böxli", "Objects", "Bags", "This is a
+  chair", "The Wild Beauty Company".
+
+**Type**: `body` is `Fixed` at 13 px (14 px at <= 375 px), `font-weight: 500`
+face only (`Fixed-Medium.*`). `Jewel Hill` and `Manjari` are declared in
+`static/style.css` but the files they name are missing (only `jewel-hill.ttf`
+is on disk).
+
+**Interaction CSS to drop**: `-webkit-user-select: none` on every `a`/`button`;
+a drop-shadow filter on every `a:hover`; `:focus { outline: none !important }`
+(removes keyboard focus visibility; the rewrite keeps a focus ring).
+
 ## 8. Open Questions
 
 All nine original questions are now resolved; only sub-questions raised while resolving them remain open (marked below). Kept as a historical decision log rather than deleted.
@@ -312,7 +402,7 @@ Every QuickJS entry file starts with `import 'globals';` (the first spike omitte
 | `preact-render-to-string` | 6.8.1 | MIT | SSR | `dist/index.mjs`; peer `preact >=10`. **Verified identical output under Bun and qjsm**, including attribute and text escaping. Its one bare import (`from"preact"`) is rewritten to `./preact.js` when vendoring |
 | `perfect-freehand` | 1.2.3 | MIT | ink-pen outline from pressure/speed samples | ~6 KB of real code, pure functions, ESM in `dist/esm`. Replaces the hand-written outline code planned in PLAN S11.4; smoothing and the speed model stay ours |
 | `bezier-js` | 6.1.4 | MIT | hit-testing, nearest point, splitting, bounding boxes for the shape tool | native ESM (`src/bezier.js`), no dependencies |
-| ImageMagick | 6.9.12-98 (installed; command is `convert`, IM7 uses `magick`) | Apache-style | all pixel work: orient, resize, pad, strip, re-encode, palette | detected at start: `magick` else `convert`. **Palette needs no JS library**: `convert f[0] -auto-orient -resize 128x128 -colors 8 -depth 8 -format %c histogram:info:-` printed an ordered histogram in ~0.1 s (weight, rgb, hex) - exactly the ordered `{hex, weight}` array S4.2.1 wants |
+| ImageMagick | 6.9.12-98 (installed; command is `convert`, IM7 uses `magick`) | Apache-style | all pixel work: orient, resize, pad, strip, re-encode, palette | detected at start: `magick` else `convert`. **Palette needs no JS library** (and where `opencv-imgproc palette` from the qjs-opencv project is installed, the server uses it instead: dominant-colour grabber, `--count=8`, optional CIE76/CIE94/k-means distance; ImageMagick is the fallback and gives the weights): `convert f[0] -auto-orient -resize 128x128 -colors 8 -depth 8 -format %c histogram:info:-` printed an ordered histogram in ~0.1 s (weight, rgb, hex) - exactly the ordered `{hex, weight}` array S4.2.1 wants |
 | `mediainfo` | 24.01 (CLI) | BSD | media metadata, `--Output=JSON` | installed |
 | `exiv2` 0.27.6 / `exiftool` 12.76 | CLI | GPL / Perl | EXIF/IPTC/XMP | both installed; prefer `exiftool -json -n` (one call, structured), fall back to `exiv2 -pa` |
 
@@ -359,7 +449,7 @@ tools/vendor.sh                  npm pack -> copy dist file -> sed bare imports 
 ### 9.6 Not verified (do before relying on it)
 
 - *(No longer relevant: Bun is the only target; `bun:sqlite` has real prepared statements.)*
-- **`Bun.serve` request bodies**: confirm streaming a 40 MB upload to disk without buffering, and the `maxRequestBodySize` default (not confirmed from the docs).
-- **Background removal**: `qjs-opencv` was searched for `grabCut` in `src/` and `include/` and not found there; confirm it is exposed at all before promising the feature on the QuickJS side.
+- *(Verified 2026-10-21, Bun 1.4.2)* **`Bun.serve` request bodies**: with `maxRequestBodySize: 40 MiB`, a 40 MiB body (Content-Length or chunked) is streamed with `for await (chunk of req.body)` into `Bun.file(tmp).writer()` while `Bun.CryptoHasher('sha256')` hashes it; peak RSS was 44-45 MB (so not buffered) and the digest matched `sha256sum`. 40 MiB + 1 byte and 41 MiB return 413 with an empty body from Bun itself, chunked bodies too (no Content-Length), so the handler's own byte counter is only a second line of defence. A client that disconnects mid-upload makes the body iterator throw; the handler must remove its temp file (done in the test, none left). Not set explicitly the limit is 128 MiB (Bun's default), so always set it. Idle timeout: with the default (10 s) a request that sent its first chunk and then paused 12 s still completed; explicit `idleTimeout` values of 3 and 6 s closed connections even during steady traffic or 4 s pauses, so do not configure a small value (re-check with a real slow client when 5.3 exists).
+- *(Resolved 2026-10-21)* **Background removal**: `cv.grabCut` is bound in `qjs-opencv/js_imgproc.cpp` (the earlier search only looked in `src/` and `include/`), is exercised by `tests/test_grabcut.js`, and is present in the built `opencv.so`. `readNetFromONNX` and `createBackgroundSubtractor*` are bound too; `StaticSaliency*` and `guidedFilter` are not. The tool is specified in `opencv-imgproc.md`.
 - **Preact 11.0.1** compatibility with `htm` and `preact-render-to-string` (not tested).
 - Browser support of pointer pressure and `touch-action` combinations on iOS Safari.
