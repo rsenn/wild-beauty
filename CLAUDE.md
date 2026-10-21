@@ -1,24 +1,27 @@
-# Project Status: ARCHIVED / ABANDONED
+# Project Status: legacy code ARCHIVED in `attic/`, rewrite in progress
 
-This project is **archived**. It is a frozen historical artifact, not an active codebase. See `DESIGN.md` for the full rationale and reverse-engineering notes, and `HISTORIC.md` for a structural reference (file/line-level map of the codebase).
+The original Next.js/Hasura implementation is a frozen historical artifact and lives in `attic/` (also pinned by the git tag and branch `before-rewrite`). The rewrite is a minimal PoC described in `PLAN.md`; library choices and the design source of truth are in `DESIGN.md`; `attic/HISTORIC.md` is the structural reference for the old code (its paths predate the move, read `components/…` as `attic/components/…`); `attic/README.md` is the old readme.
 
-## Hard rule: no source code changes
+## Hard rule: no changes inside `attic/`
 
-**Do not create, edit, or delete any source code, configuration, dependency, build, or asset file in this project.** This includes (non-exhaustive): `*.js`, `*.jsx`, `*.ts`, `*.tsx`, `*.css`, `*.scss`, `*.json` (including `package.json`, `graphql-schema.json`), `*.yaml`/`*.yml`, `.babelrc`, `Dockerfile*`, anything under `pages/`, `components/`, `stores/`, `lib/`, `static/`, `public/`, `service/`, `assembly/`, `build/`, or the `lib/` submodule.
+**Do not create, edit, or delete any file under `attic/`, except the documentation files `attic/*.md` (see below).** It is read-only reference material. This includes (non-exhaustive) `*.js`, `*.json`, `*.yaml`/`*.yml`, `.babelrc`, `.env`, and everything under `attic/pages/`, `attic/components/`, `attic/stores/`, `attic/service/`, `attic/assembly/`, `attic/public/`, `attic/build/`.
 
 Do not:
-- Fix bugs, even ones documented in `DESIGN.md` (e.g. the exposed Hasura admin secret, the `browse.js` schema drift, the query-injection path).
-- Refactor, clean up, or remove dead code (e.g. `components/forceGraph.js`, `tmp.js`, `data.js`, `service/next/`, `webpack.config.js`).
-- Upgrade, add, or remove dependencies.
-- Run build, install, or dev-server commands that would write generated artifacts back into the tree (e.g. `next build`, `yarn install` producing a new lockfile).
-- "Helpfully" apply unrelated formatting, linting, or reorganization.
+- Fix bugs in it, even ones documented in `DESIGN.md` (e.g. the exposed Hasura admin secret, the `browse.js` schema drift, the query-injection path).
+- Refactor, clean up, or remove dead code there (e.g. `attic/components/forceGraph.js`, `attic/tmp.js`, `attic/data.js`, `attic/service/next/`, `attic/webpack.config.js`).
+- Upgrade, add, or remove its dependencies, or run its build/install/dev-server commands (e.g. `next build`, `yarn install`).
+- Reformat or reorganize it.
 
-If asked to do any of the above, explain that the project is archived and that only documentation changes are in scope; do not proceed without explicit override from the user.
+If asked to change anything under `attic/`, explain that it is archived and do not proceed without explicit override from the user. Reading it, and copying ideas or assets out of it into the new tree, is fine.
 
-## What IS allowed
+## Outside `attic/`
 
-Writing and updating **documentation only**: `*.md`, `*.txt`, and similar plain-text notes. This is for capturing analysis, findings, and historical context - not for reviving development.
+Source, configuration, build and asset files outside `attic/` (the rewrite, `static/`, `lib/`, `scripts`) may be created and changed as the work in `PLAN.md` requires. `lib/` is a git submodule: do not commit changes inside it without being asked.
 
-## HISTORIC.md maintenance
+## Documentation
 
-`HISTORIC.md` is a living structural reference for this codebase (project summary, db-structure/migration, build files, library sources, server sources, frontend sources, assets, dead code). Whenever you discover a new fact about how the codebase is structured or how it works - a function's real location, a previously-unnoticed dependency, an additional piece of dead code, a corrected line reference - **update `HISTORIC.md` immediately** to keep it current. Cite exact `file:line` locations (function/class names, not just file names) whenever documenting where something is implemented. Treat this as an ongoing archival responsibility for every conversation touching this project, even ones focused on something else.
+`*.md` and `*.txt` notes are always in scope: analysis, findings, plans, historical context.
+
+## attic/HISTORIC.md maintenance
+
+`attic/HISTORIC.md` is a living structural reference for the old codebase (project summary, db-structure/migration, build files, library sources, server sources, frontend sources, assets, dead code). Whenever you discover a new fact about how the old code is structured or how it works - a function's real location, a previously-unnoticed dependency, an additional piece of dead code, a corrected line reference - **update `attic/HISTORIC.md` immediately**. Cite exact `file:line` locations (function/class names, not just file names), written with the `attic/` prefix. Treat this as an ongoing archival responsibility for every conversation touching this project.

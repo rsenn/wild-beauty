@@ -284,7 +284,9 @@ Method: versions, licences and sizes from the npm registry (`npm view`); behavio
 
 Rule: a dependency must earn its place. It is vendored (copied, pinned, no CDN at runtime, no `node_modules` in the served tree), must be ES-module or trivially wrappable, and must load under **both** runtimes if the server uses it.
 
-### 9.1 What the two runtimes actually provide (verified)
+### 9.1 What the two runtimes provide (verified; background only)
+
+**Decision (PLAN S2.1): Bun is the only target, with no adapter or portability layer.** This table records what the qjsm survey found; it explains why some choices below were first made for qjsm, and it matters only for the optional QuickJS helper (PLAN S10). Where a row says "qjsm lacks X", Bun has X and the project simply uses it.
 
 | Need | Bun | qjsm |
 |---|---|---|
@@ -316,13 +318,13 @@ Every QuickJS entry file starts with `import 'globals';` (the first spike omitte
 
 | Piece | Why not a library |
 |---|---|
-| Router (~60 lines, `Request -> Response`) | Hono/Elysia/Express assume the full web-standard globals that qjsm lacks; `serve` already hands us `fetch(req)` |
-| i18n (`t()`, interpolation, plurals) | No `Intl` on qjsm; `@messageformat/core` and friends assume it. A per-locale plural function in each `locales/<code>.json`-adjacent table is ~20 lines; number/date helpers are minimal |
+| Router (~60 lines, `Request -> Response`) | Hono/Elysia/Express add a dependency for what `Bun.serve({ fetch })` plus a small route table does |
+| i18n (`t()`, interpolation) | Plurals and number/date formatting use `Intl` (available on Bun); `@messageformat/core` is more than three languages need |
 | One-Euro filter + arc-length resampler | ~40 lines; the npm `1eurofilter` is BSD-3 and adds nothing |
 | Pointer-events gestures (similarity transform from two pointers) | `@use-gesture/vanilla` (MIT, 39 KB) is generic and fights `touch-action`; our need is one function, specified in PLAN S11.3 |
 | Filmstrip reorder | `sortablejs` is 640 KB unpacked for one list; pointer events suffice |
 | Magic-byte sniffing | `file-type` pulls four dependencies; a table of ~15 signatures covers jpeg/png/webp/gif/avif/heic/tiff |
-| SHA-256 on QuickJS | `sha256sum` subprocess on that adapter, `Bun.CryptoHasher` on Bun; a pure-JS fallback only if the binary is missing |
+| SHA-256 | `Bun.CryptoHasher`, no library |
 | OKLab distance for choosing the two padding colours | ~15 lines; `culori` is 1.1 MB unpacked |
 | Stroke-to-bezier fitting (Schneider) | `fit-curve` 0.2.0 (MIT) is CommonJS-only; defer. Perfect-freehand already yields smooth outlines, fitting is an optimisation for stored size |
 | Shape/path model | own segment array serialised to an SVG `d`; `svgpath` / `svg-path-commander` not needed until arbitrary imported SVG matters |
@@ -332,7 +334,7 @@ Every QuickJS entry file starts with `import 'globals';` (the first spike omitte
 | Candidate | Reason |
 |---|---|
 | React / Next.js / Astro | Excluded by the PoC brief; Astro and Next.js still stand in S4.1/4.1.1 as long-term notes |
-| `sharp`, `wasm-vips`, `jimp` | `sharp` is native and Bun/Node-only (breaks the QuickJS target); `wasm-vips` is large; ImageMagick is installed and runs on both |
+| `sharp`, `wasm-vips`, `jimp` | `sharp` is a native addon (works on Bun, but ImageMagick is already installed and needs no addon); `wasm-vips` is large; ImageMagick is installed and runs on both |
 | `node-vibrant`, `colorthief`, `quantize` | Need pixel arrays decoded in JS; ImageMagick's histogram does the quantisation natively |
 | `@preact/signals` 2.11.3 | Not needed for the PoC; editor state is a plain store plus hooks. Revisit if redraw cost shows up |
 | `polygon-clipping` 0.15.7 | Boolean shape ops are not in the PoC (clipping is SVG `clipPath`) |
@@ -354,8 +356,8 @@ tools/vendor.sh                  npm pack -> copy dist file -> sed bare imports 
 
 ### 9.6 Not verified (do before relying on it)
 
-- **QuickJS `SQLite3.query` parameter binding.** `query('insert ... values(?,?)', [..])` did not throw but the select-back result could not be inspected (`SQLite3Result` serialises to `{}`); read the result object API in `quickjs-sqlite.c` and decide between binding and `escapeString`/`valueString` (SQL-injection relevant).
-- **QuickJS `serve` request bodies**: streaming vs buffering and any size cap, important for 40 MB uploads; `Bun.serve` behaviour of `maxRequestBodySize` (default not confirmed from docs).
+- *(No longer relevant: Bun is the only target; `bun:sqlite` has real prepared statements.)*
+- **`Bun.serve` request bodies**: confirm streaming a 40 MB upload to disk without buffering, and the `maxRequestBodySize` default (not confirmed from the docs).
 - **Background removal**: `qjs-opencv` was searched for `grabCut` in `src/` and `include/` and not found there; confirm it is exposed at all before promising the feature on the QuickJS side.
 - **Preact 11.0.1** compatibility with `htm` and `preact-render-to-string` (not tested).
 - Browser support of pointer pressure and `touch-action` combinations on iOS Safari.
