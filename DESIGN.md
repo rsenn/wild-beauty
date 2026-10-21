@@ -224,6 +224,8 @@ Keep the two-step flow (upload photos -> compose tile). Replace the old ad hoc `
 
 The user supplied a set of screenshots of the deployed prototype (`/mnt/data/Dokumente/Wild Beauty/Webpage/`), covering the graph view (desktop + mobile), the categorical/tree "Motiv" graph, the login modal, the upload grid, and the content-editor grid. These establish a distinctive, consistent visual identity that the rewrite should reproduce closely, not just functionally replicate. Colors below are eyeballed from the screenshots (approximate hex) - sample the source images directly for pixel-exact values before finalizing a design-token file.
 
+Phone screenshots of the deployed prototype (2022-08-25) are kept in `docs/screenshots/`: `graph-mobile-overview.jpg`, `graph-mobile-zoomed.jpg`, `new-dropzone.jpg`, `new-upload-grid-selected.jpg`, `ios-photo-picker.jpg` (the iOS picker used to select the files; not part of the app).
+
 ### 7.1 Background: textured "kraft paper" ground
 
 Every page - graph view, login modal, upload grid, editor grid, on both desktop and mobile - sits on the same warm, low-contrast, mottled beige/tan texture (looks like crumpled kraft paper or a soft marble/stone wash, approx. `#c9bfae`-`#cfc6b4`, with darker cloudy patches ~`#b8ab95`). It's a full-bleed background image, not a flat color, and it's the single strongest "brand" cue tying every screen together. No page has a plain white or flat-color background. This texture should be recreated as a repeating/cover background image (subtle, non-distracting, low contrast against foreground elements) rather than approximated with a flat beige - the mottling is part of the identity.
