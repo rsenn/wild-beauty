@@ -337,6 +337,27 @@ body {
   background: var(--wb-accent-hover);
 }
 
+.wb-card-add {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 28px;
+  min-height: 28px;
+  font: inherit;
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border: 0;
+  cursor: pointer;
+}
+
+.wb-card-add:hover {
+  background: var(--wb-accent-hover);
+}
+
+[draggable='true'] {
+  cursor: grab;
+}
+
 .wb-card-name,
 .wb-card-size {
   overflow: hidden;
@@ -517,8 +538,49 @@ body {
   box-shadow: var(--wb-shadow-card);
 }
 
+.wb-editor-stage {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.wb-node {
+  width: 100%;
+  height: 100%;
+}
+
+.wb-editor-stage svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wb-editor-stage-over {
+  outline: var(--wb-select-width) solid var(--wb-select);
+}
+
+.wb-editor-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.wb-editor-pen {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
 .wb-editor-stage-hint {
+  position: absolute;
+  pointer-events: none;
   opacity: 0.6;
+}
+
+.wb-editor-pen-options {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
 }
 
 .wb-editor-context {

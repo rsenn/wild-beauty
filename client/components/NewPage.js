@@ -15,7 +15,7 @@ export const NewPage = () => {
   return html`
     <${Layout} active="new" hrefFor=${code => `/${code}/new`}>
       <h1 class="wb-sr-only">${t('page.new.heading')}</h1>
-      <${UploadArea} extra=${html`<${NewNodeTile} open=${editing} onToggle=${() => setEditing(!editing)} />`} />
+      <${UploadArea} canAdd=${editing} extra=${html`<${NewNodeTile} open=${editing} onToggle=${() => setEditing(!editing)} />`} />
       ${editing && html`<${NodeEditor} onClose=${() => setEditing(false)} />`}
     <//>
   `;

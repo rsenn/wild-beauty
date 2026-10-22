@@ -72,5 +72,10 @@
   "editor.short.undo": "\u21b6",
   "editor.short.redo": "\u21b7",
   "editor.short.page": "\u29c9",
-  "editor.short.delete": "\u2715"
+  "editor.short.delete": "\u2715",
+  "upload.add": "Ajouter au nœud",
+  "upload.add.short": "+",
+  "editor.pen.color": "Couleur du stylo",
+  "editor.pen.size": "Taille du stylo",
+  "editor.context.pen": "Dessinez sur la scène avec le stylo."
 }

@@ -55,7 +55,7 @@ export const ALIGNS = ['left', 'center', 'right'];
 const isObject = v => v !== null && typeof v === 'object' && !Array.isArray(v);
 const isNumber = v => typeof v === 'number';
 const isString = v => typeof v === 'string';
-const isColour = v => isString(v) && /^(#[0-9a-f]{6}([0-9a-f]{2})?|(rgb|hsl)a?\([0-9a-z.,%\s/-]+\))$/i.test(v);
+export const isColour = v => isString(v) && /^(#[0-9a-f]{6}([0-9a-f]{2})?|(rgb|hsl)a?\([0-9a-z.,%\s/-]+\))$/i.test(v);
 const isMatrix = v => Array.isArray(v) && v.length === 6 && v.every(isNumber);
 const isId = v => isString(v) && /^[0-9a-z]{8}$/.test(v);
 const isHash = v => isString(v) && /^[0-9a-f]{64}$/.test(v);

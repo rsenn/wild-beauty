@@ -72,5 +72,10 @@
   "editor.short.undo": "\u21b6",
   "editor.short.redo": "\u21b7",
   "editor.short.page": "\u29c9",
-  "editor.short.delete": "\u2715"
+  "editor.short.delete": "\u2715",
+  "upload.add": "Zum Node hinzufügen",
+  "upload.add.short": "+",
+  "editor.pen.color": "Stiftfarbe",
+  "editor.pen.size": "Stiftgröße",
+  "editor.context.pen": "Mit dem Stift auf die Fläche zeichnen."
 }

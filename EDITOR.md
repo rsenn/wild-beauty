@@ -564,7 +564,8 @@ points so replay is exact. Mouse input has no pressure (speed only).
 
 **Shape tool** (`shapes.js`). Vertices with optional symmetric bezier handles;
 output an SVG path string; closed/open, fill, stroke. Pure functions
-`pathFromVertices(v)` and `verticesFromPath(d)` round-trip; hit-testing, nearest point and
+`pathFromVertices(v, closed)` and `verticesFromPath(d)` round-trip (vertex `{x, y, hin?, hout?, broken?}`,
+handles are offsets, mirrored unless `broken`; only `M L C Z` absolute); hit-testing, nearest point and
 bounding boxes use the vendored `bezier-js` 6.1.4 (MIT, `DESIGN.md` S9.2).
 
 **Gestures** (`gestures.js`). `solveSimilarity(p0, q0, p1, q1)` returns the
@@ -649,16 +650,16 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 - [x] **E12 `pen.js` outline**: vendor `perfect-freehand` (`tools/vendor.sh`, `vendor/VERSIONS`);
       points+widths -> outline polygon -> path string. Done when a straight stroke gives an outline
       of the right length with round caps.
-- [ ] **E13 `shapes.js`**: vendor `bezier-js`; `pathFromVertices`, `verticesFromPath`, vertex ops
+- [x] **E13 `shapes.js`**: vendor `bezier-js`; `pathFromVertices`, `verticesFromPath`, vertex ops
       (insert, move, delete, break symmetry), `hitTest(path, point, tolerance)`. Done when the round
       trip is stable for lines and curves and a point near a curve is hit.
-- [ ] **E14 `render.js` photo step**: ground rect (padding colours) + image + matrix.
+- [x] **E14 `render.js` photo step**: ground rect (padding colours) + image + matrix.
       Done when `renderToString` of a one-photo node matches a snapshot (extend and cover).
-- [ ] **E15 `render.js` stroke, shape, clip, blend, transform ops**. Done when each op
+- [x] **E15 `render.js` stroke, shape, clip, blend, transform ops**. Done when each op
       has a snapshot and a clipped photo yields a `<clipPath>`.
-- [ ] **E16 `render.js` pages, steps `upTo`, modes** (`free`, `slides`, `grid`). Done
+- [x] **E16 `render.js` pages, steps `upTo`, modes** (`free`, `slides`, `grid`). Done
       when `upTo=k` shows exactly the first k steps.
-- [ ] **E17 `render.js` theme wrapper**: `data-theme` + sanitised `style` attribute (stub
+- [x] **E17 `render.js` theme wrapper**: `data-theme` + sanitised `style` attribute (stub
       whitelist until `server/theme.js` exists, then use it). Done when hostile vars are dropped.
 
 ### Phase B - server storage (S)

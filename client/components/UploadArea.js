@@ -12,7 +12,7 @@ const existingItem = (record, index) => ({ id: index + 1, file: { name: record.n
 // drop zone plus the grid of chosen files. The server renders the files already on disk
 // (boot.uploads) and the browser adopts them. Each file is uploaded as soon as
 // it is chosen. `extra` is a last grid cell (the "New node" tile).
-export const UploadArea = ({ extra = null }) => {
+export const UploadArea = ({ extra = null, canAdd = false }) => {
   const { t } = useI18n();
   const { limits, uploads = [] } = useBoot();
   const [items, setItems] = useState(() => uploads.map(existingItem));
@@ -116,6 +116,7 @@ export const UploadArea = ({ extra = null }) => {
             onRotate=${() => update(item.id, i => ({ rotation: (i.rotation + 90) % 360 }))}
             onFit=${() => update(item.id, i => ({ fit: i.fit === 'contain' ? 'cover' : 'contain' }))}
             onRetry=${() => start(item)}
+            canAdd=${canAdd}
           />`,
         )}
         ${extra}

@@ -4,3 +4,4 @@ preact/hooks  10.29.8  MIT  hooks.js  https://www.npmjs.com/package/preact/v/10.
 htm  3.1.1  Apache-2.0  htm.js  https://www.npmjs.com/package/htm/v/3.1.1
 preact-render-to-string  6.8.1  MIT  preact-render-to-string.js  https://www.npmjs.com/package/preact-render-to-string/v/6.8.1
 perfect-freehand  1.2.3  MIT  perfect-freehand.js  https://www.npmjs.com/package/perfect-freehand/v/1.2.3
+bezier-js  6.1.4  MIT  bezier-js/bezier.js  https://www.npmjs.com/package/bezier-js/v/6.1.4

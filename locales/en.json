@@ -72,5 +72,10 @@
   "editor.short.delete": "✕",
   "editor.short.save": "Save",
   "editor.page.1": "Page 1",
-  "editor.page.add": "Add page"
+  "editor.page.add": "Add page",
+  "upload.add": "Add to node",
+  "upload.add.short": "+",
+  "editor.pen.color": "Pen colour",
+  "editor.pen.size": "Pen size",
+  "editor.context.pen": "Draw on the stage with the pen."
 }

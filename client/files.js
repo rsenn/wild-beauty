@@ -25,3 +25,8 @@ export function formatSize(bytes, lang) {
 
   return new Intl.NumberFormat(lang, { style: 'unit', unit, unitDisplay: 'short', maximumFractionDigits: unit === 'byte' ? 0 : 1 }).format(bytes / size);
 }
+
+// what a dragged or "added" upload card tells the editor (EDITOR.md S2.5)
+export const UPLOAD_MIME = 'application/x-wb-upload';
+
+export const uploadPayload = record => ({ hash: record.hash, display: record.display, width: record.width, height: record.height, padding: record.padding });
