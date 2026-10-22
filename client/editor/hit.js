@@ -164,3 +164,16 @@ export function outlineOf(doc, id, { photos = () => null, page = 0 } = {}) {
 
   return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
 }
+
+// the matrix a step is drawn with now (after its transform ops), or null when
+// it is not drawn
+export function matrixOf(doc, id, { page = 0 } = {}) {
+  return drawn(doc, page).entries.find(e => e.step.id === id)?.m ?? null;
+}
+
+// the centre of a step's outline: where keys and Alt-drag scale and turn it
+export function centreOf(doc, id, options = {}) {
+  const outline = outlineOf(doc, id, options);
+
+  return outline && [outline.reduce((s, p) => s + p[0], 0) / outline.length, outline.reduce((s, p) => s + p[1], 0) / outline.length];
+}

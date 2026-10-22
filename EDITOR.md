@@ -729,21 +729,21 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 ### Phase D - photos (C)
 
-- [ ] **E45 drop a card onto the stage** (HTML5 drag): creates a `photo` step, extend, centred.
+- [x] **E45 drop a card onto the stage** (HTML5 drag): creates a `photo` step, extend, centred.
       Done when dragging a card adds a visible photo.
-- [ ] **E46 touch drag fallback**: pointer-based ghost drag from card to stage. Done when it works
+- [x] **E46 touch drag fallback**: pointer-based ghost drag from card to stage. Done when it works
       on a phone emulation where HTML5 drag does not fire.
-- [ ] **E47 "add to node" card button** (no drag; opens an editor if none). Done when it works with keyboard only.
-- [ ] **E48 move/scale/rotate gestures** on the selection: one pointer translate, two pointers
+- [x] **E47 "add to node" card button** (no drag; opens an editor if none). Done when it works with keyboard only.
+- [x] **E48 move/scale/rotate gestures** on the selection: one pointer translate, two pointers
       similarity, wheel zoom, Alt-drag. Done when pinch on the emulator is stable without drift.
-- [ ] **E49 fit modes**: extend/cover/free, double-tap cycle, ground from `padding`. Done when
+- [x] **E49 fit modes**: extend/cover/free, double-tap cycle, ground from `padding`. Done when
       toggling shows the padding gradient and the cropped fill.
-- [ ] **E50 opacity and blend popover**. Done when blend `multiply` visibly darkens an overlap.
-- [ ] **E51 z-order** (`[ ]` keys, buttons). Done when a photo goes behind a stroke.
-- [ ] **E52 delete step** with cleanup of clips pointing at it. Done when undo restores both.
-- [ ] **E53 film-strip**: appears at >1 photo, select, reorder by drag, remove; scrolls with the
+- [x] **E50 opacity and blend popover**. Done when blend `multiply` visibly darkens an overlap.
+- [x] **E51 z-order** (`[ ]` keys, buttons). Done when a photo goes behind a stroke.
+- [x] **E52 delete step** with cleanup of clips pointing at it. Done when undo restores both.
+- [x] **E53 film-strip**: appears at >1 photo, select, reorder by drag, remove; scrolls with the
       page. Done when reordering changes draw order and survives undo.
-- [ ] **E54 palette strip** (UI of S2.3a, after E85-E87): eight swatches under the context bar,
+- [x] **E54 palette strip** (UI of S2.3a, after E85-E87): eight swatches under the context bar,
       target chip, tap sets the colour of the active target. Done when a swatch sets the pen colour.
 
 ### Phase E - pages, steps, modes (C)
@@ -802,13 +802,13 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 Colour first (E84-E87 can start any time after E3), then text.
 
-- [ ] **E84 shared colour module** `client/color.js`: move `toOklab`, `distance` and friends out of
+- [x] **E84 shared colour module** `client/color.js`: move `toOklab`, `distance` and friends out of
       `server/media/color.js` (server imports the client module), add `toOklch`, `fromOklch`,
       `clampToSrgb`, hex/rgba parse and format with alpha. Done when the existing server tests still
       pass and round trips hex -> OKLCH -> hex are within 1 unit per channel.
-- [ ] **E85 `palette.js` dominant colours**: reference-photo choice and D1-D4 with the 0.08 distance rule
+- [x] **E85 `palette.js` dominant colours**: reference-photo choice and D1-D4 with the 0.08 distance rule
       and fill-up. Done when fixtures (a 2-colour photo, an 8-colour photo, a grey photo) give 4 distinct colours.
-- [ ] **E86 `palette.js` derived colours**: tetradic pair choice and complements T1/T2, triadic completion R,
+- [x] **E86 `palette.js` derived colours**: tetradic pair choice and complements T1/T2, triadic completion R,
       neutral N, achromatic rule, gamut clamp. Done when tests check T1/T2 are exactly 180 degrees from
       their sources, R is 120 degrees from both when E1/E2 are 120 apart, and every result is inside sRGB.
 - [ ] **E87 `Palette.js` + `ColorPicker.js` components** (swatch grid, long-press picker with hex and alpha).

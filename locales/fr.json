@@ -2,10 +2,8 @@
   "meta.name": "Français",
   "meta.dir": "ltr",
   "meta.flag": "fr",
-
   "page.title.new": "Wild Beauty - Nouveau",
   "page.new.heading": "Nouveau",
-
   "nav.main": "Navigation principale",
   "nav.home": "Début",
   "nav.home.caption": "Page d'accueil",
@@ -17,13 +15,11 @@
   "nav.new.caption": "Créer un nouveau nœud",
   "nav.lang": "Lang",
   "nav.lang.label": "Choisir la langue",
-
   "upload.drop": "Glissez-déposez des images ici pour les envoyer",
   "upload.or": "Ou",
   "upload.select": "Choisir des images à envoyer",
   "upload.files.one": "{count} image",
   "upload.files.other": "{count} images",
-
   "upload.remove": "Retirer",
   "upload.rotate": "Pivoter",
   "upload.no-preview": "Pas d'aperçu",
@@ -32,7 +28,6 @@
   "upload.fit.toggle": "Afficher la photo entière ou la recadrer dans le carré",
   "upload.ignored.one": "{count} fichier ignoré (pas une image)",
   "upload.ignored.other": "{count} fichiers ignorés (pas des images)",
-
   "upload.state.queued": "En attente",
   "upload.state.uploading": "{percent} %",
   "upload.state.processing": "Traitement",
@@ -44,7 +39,6 @@
   "upload.error.network": "Erreur réseau",
   "upload.error.generic": "Échec de l'envoi",
   "upload.error.upload-failed": "Échec de l'envoi",
-
   "editor.new": "Nouveau nœud",
   "editor.close": "Fermer",
   "editor.label": "Éditeur de nœud",
@@ -69,10 +63,10 @@
   "editor.short.save": "Enregistrer",
   "editor.page.1": "Page 1",
   "editor.page.add": "Ajouter une page",
-  "editor.short.undo": "\u21b6",
-  "editor.short.redo": "\u21b7",
-  "editor.short.page": "\u29c9",
-  "editor.short.delete": "\u2715",
+  "editor.short.undo": "↶",
+  "editor.short.redo": "↷",
+  "editor.short.page": "⧉",
+  "editor.short.delete": "✕",
   "upload.add": "Ajouter au nœud",
   "upload.add.short": "+",
   "editor.pen.color": "Couleur du stylo",
@@ -117,5 +111,20 @@
   "editor.draft.found": "Un brouillon non enregistré du {time} a été trouvé.",
   "editor.draft.restore": "Restaurer le brouillon",
   "editor.draft.discard": "Supprimer le brouillon",
-  "editor.close.confirm": "Des modifications ne sont pas enregistrées. Fermer quand même l'éditeur ? Elles restent en brouillon."
+  "editor.close.confirm": "Des modifications ne sont pas enregistrées. Fermer quand même l'éditeur ? Elles restent en brouillon.",
+  "editor.look": "Aspect",
+  "editor.order.up": "Avancer",
+  "editor.order.down": "Reculer",
+  "editor.strip": "Photos",
+  "editor.strip.left": "Plus tôt",
+  "editor.strip.right": "Plus tard",
+  "editor.strip.remove": "Retirer",
+  "editor.strip.photo": "Photo {n}",
+  "editor.palette": "Couleurs",
+  "editor.palette.target": "Couleurs pour",
+  "editor.target.pen": "Stylo",
+  "editor.target.stroke": "Trait",
+  "editor.target.fill": "Remplissage",
+  "editor.target.outline": "Contour",
+  "editor.swatch": "Couleur {hex}"
 }

@@ -29,4 +29,4 @@ export function formatSize(bytes, lang) {
 // what a dragged or "added" upload card tells the editor (EDITOR.md S2.5)
 export const UPLOAD_MIME = 'application/x-wb-upload';
 
-export const uploadPayload = record => ({ hash: record.hash, display: record.display, width: record.width, height: record.height, padding: record.padding });
+export const uploadPayload = record => ({ hash: record.hash, display: record.display, width: record.width, height: record.height, padding: record.padding, palette: record.palette });

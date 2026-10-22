@@ -20,3 +20,12 @@ export function solveSimilarity(p0, q0, p1, q1) {
 
   return [a, b, -b, a, p1[0] - (a * p0[0] - b * p0[1]), p1[1] - (b * p0[0] + a * p0[1])];
 }
+
+// scale by `scale` and turn by `rotation` (radians) about the point p: the
+// similarity for a wheel turn or a key press
+export function aboutPoint(scale, rotation, p) {
+  const a = scale * Math.cos(rotation);
+  const b = scale * Math.sin(rotation);
+
+  return [a, b, -b, a, p[0] - (a * p[0] - b * p[1]), p[1] - (b * p[0] + a * p[1])];
+}

@@ -8,7 +8,8 @@ import { STAGE, eventUnits, pixelsPerUnit } from '../editor/stage.js';
 // the overlay come out as `onPointer.{down,move,up,cancel}(event, [x, y])`
 // with the position already in stage units. A ResizeObserver keeps the
 // on-screen size, so `overlay({ scale })` can size handles in pixels and
-// `onSize({ width, height })` hears of changes.
+// `onSize({ width, height })` hears of changes. A wheel turn comes out as
+// `onPointer.wheel` too; the handler calls preventDefault when it uses it.
 //  interactive  the overlay takes pointer events (a tool is active)
 //  className    extra class on the overlay (cursor); `class` goes on the stage box
 export const Stage = ({ class: extra = '', label, content, overlay, interactive = false, className = '', onPointer = {}, onSize, children, ...rest }) => {
@@ -48,7 +49,7 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
   return html`
     <div ref=${box} class=${'wb-editor-stage' + (extra ? ' ' + extra : '')} role="img" aria-label=${label} ...${rest}>
       ${content}
-      <svg ref=${svg} class=${'wb-editor-overlay' + (interactive ? ' wb-editor-interactive' : '') + (className ? ' ' + className : '')} viewBox=${`0 0 ${STAGE} ${STAGE}`} onPointerDown=${interactive ? down : undefined} onPointerMove=${interactive ? wrap('move') : undefined} onPointerUp=${interactive ? wrap('up') : undefined} onPointerCancel=${interactive ? wrap('cancel') : undefined}>
+      <svg ref=${svg} class=${'wb-editor-overlay' + (interactive ? ' wb-editor-interactive' : '') + (className ? ' ' + className : '')} viewBox=${`0 0 ${STAGE} ${STAGE}`} onPointerDown=${interactive ? down : undefined} onPointerMove=${interactive ? wrap('move') : undefined} onPointerUp=${interactive ? wrap('up') : undefined} onPointerCancel=${interactive ? wrap('cancel') : undefined} onWheel=${interactive ? wrap('wheel') : undefined}>
         ${typeof overlay === 'function' ? overlay({ scale }) : overlay}
       </svg>
       ${children}

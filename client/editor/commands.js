@@ -14,6 +14,7 @@ const KEYED = {
   setBg: () => 'bg',
   setColor: c => `color:${c.id}:${c.field ?? 'color'}`,
   setStrokeWidth: c => `strokeWidth:${c.id}`,
+  setMatrix: c => `matrix:${c.id}`,
 };
 
 // the colour fields of each op a setColor may write
@@ -34,6 +35,8 @@ function onDoc(doc, c) {
       return model.removeStep(doc, c.id);
     case 'moveStep':
       return model.moveStep(doc, c.id, c.to);
+    case 'movePhoto':
+      return model.movePhoto(doc, c.id, c.to);
     case 'setFit':
       return model.setFit(doc, c.id, c.fit, c.info);
     case 'setOpacity':
@@ -54,6 +57,8 @@ function onDoc(doc, c) {
 
       return step && COLOUR_FIELDS[step.op]?.includes(field) && model.isColour(c.color) ? model.updateStep(doc, c.id, { [field]: c.color }) : doc;
     }
+    case 'setMatrix':
+      return model.setMatrix(doc, c.id, c.m);
     case 'setStrokeWidth': {
       const step = model.findStep(doc, c.id)?.step;
 

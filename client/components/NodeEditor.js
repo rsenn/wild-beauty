@@ -2,17 +2,24 @@ import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { UPLOAD_MIME } from '../files.js';
-import { LIMITS, allIds, emptyNode, findStep, unique } from '../editor/model.js';
+import { FITS, LIMITS, allIds, emptyNode, findStep, photoSteps, unique } from '../editor/model.js';
 import { apply } from '../editor/commands.js';
+import { createGesture } from '../editor/gesture.js';
+import { aboutPoint } from '../editor/gestures.js';
+import { multiply } from '../editor/matrix.js';
+import { ADD_EVENT, takePending } from '../editor/pending.js';
 import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
-import { hitTest, outlineOf } from '../editor/hit.js';
+import { centreOf, hitTest, matrixOf, outlineOf } from '../editor/hit.js';
 import { oneEuroPoint, resample, strokePath, strokeWidths } from '../editor/pen.js';
 import { renderNode } from '../editor/render.js';
-import { shortcutFor } from '../editor/shortcuts.js';
+import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
 import { DEFAULT_TOOL, TOOLS, toolForKey } from '../editor/tools.js';
 import { editorStore } from '../editor/useEditor.js';
+import { swatches } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
+import { Filmstrip } from './Filmstrip.js';
+import { Palette } from './Palette.js';
 import { Properties } from './Properties.js';
 import { Stage } from './Stage.js';
 
@@ -25,11 +32,25 @@ const ACTIONS = ['undo', 'redo', 'page', 'delete', 'save'];
 const SPACING = 4;
 const HANDLE_PX = 10; // a selection handle's side on screen
 const TAP_PX = 12; // how far from a thin line still counts as a tap on it
+const SLOP_PX = 6; // a pointer must travel this far before a gesture moves the step
+const DOUBLE_TAP_MS = 350;
+const DOUBLE_TAP_PX = 24;
 const round = (v, k) => Math.round(v * k) / k;
 
 // what the editor needs to draw an upload: where it is and how big
-const photoInfo = p => ({ href: `/files/uploads/${p.display}`, width: p.width, height: p.height, padding: p.padding });
+const photoInfo = p => ({ href: `/files/uploads/${p.display}`, width: p.width, height: p.height, padding: p.padding, palette: Array.isArray(p.palette) ? p.palette.filter(c => /^#[0-9a-f]{6}$/i.test(c?.hex)).slice(0, 8) : [] });
 const isPayload = p => p && /^[0-9a-f]{64}$/.test(p.hash) && typeof p.display === 'string' && p.width > 0 && p.height > 0;
+
+// the theme's own colours, the palette of a node without photos
+const themeColours = () => {
+  try {
+    const style = getComputedStyle(document.documentElement);
+
+    return ['accent', 'ink', 'select', 'danger'].map(name => style.getPropertyValue('--wb-' + name).trim()).filter(c => /^#[0-9a-f]{6}$/i.test(c));
+  } catch {
+    return [];
+  }
+};
 
 // the outline and corner handles of the selection, in the stage overlay
 const Selection = ({ outline, scale }) => {
@@ -53,7 +74,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [over, setOver] = useState(false);
   const [found, setFound] = useState(null); // a stored draft waiting for "restore" or "discard"
   const [scale, setScale] = useState(1);
+  const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
+  const gesture = useRef(null); // { g, id } while a move/scale/rotate gesture runs
+  const lastTap = useRef({ time: 0, id: null, at: null });
   const saved = useRef(hist.present); // the last saved snapshot: what "dirty" is measured against
   const { doc, kind } = hist.present;
   const pageId = doc.pages[0].id;
@@ -86,14 +110,30 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setSelected(null);
   };
 
-  // the "add to node" button of an upload card
+  // the "add to node" button of an upload card queues the photo; an open editor
+  // takes it at once, a freshly opened one when it mounts, and moves the focus in
+  const addQueued = () => {
+    const queued = takePending();
+
+    queued.forEach(addUpload);
+
+    if(queued.length) document.getElementById('wb-editor')?.focus();
+  };
+
   useEffect(() => {
-    const on = e => addUpload(e.detail);
+    addQueued();
+    window.addEventListener(ADD_EVENT, addQueued);
 
-    window.addEventListener('wb:add-photo', on);
-
-    return () => window.removeEventListener('wb:add-photo', on);
+    return () => window.removeEventListener(ADD_EVENT, addQueued);
   }, []);
+
+  // the selection through a matrix change: keys and the wheel
+  const transformSelection = (id, sim) => {
+    const { doc } = latest.current;
+    const m = matrixOf(doc, id);
+
+    if(m) dispatch({ type: 'setMatrix', id, m: multiply(sim, m) });
+  };
 
   // keys: a tool key selects a tool; ctrl+z, ctrl+shift+z / ctrl+y, Delete
   useEffect(() => {
@@ -101,6 +141,26 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       const next = toolForKey(e);
 
       if(next) return setTool(next);
+
+      const move = transformFor(e);
+      const { selected: id, doc } = latest.current;
+
+      if(move && id) {
+        e.preventDefault();
+
+        const centre = centreOf(doc, id, { photos: hash => latest.current.photos[hash] }) ?? [500, 500];
+        const turn = aboutPoint(move.scale ?? 1, move.rotate ?? 0, centre);
+
+        return transformSelection(id, multiply([1, 0, 0, 1, move.dx ?? 0, move.dy ?? 0], turn));
+      }
+
+      const order = orderFor(e);
+
+      if(order && latest.current.selected) {
+        e.preventDefault();
+
+        return dispatch({ type: 'moveStep', id: latest.current.selected, to: order });
+      }
 
       const action = shortcutFor(e);
 
@@ -219,19 +279,61 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // --- pointer: select with the select tool, draw with the pen ---
 
   const down = (e, units) => {
-    if(tool === 'select') {
-      const id = hitTest(latest.current.doc, units, { photos: hash => latest.current.photos[hash], tolerance: TAP_PX / latest.current.scale });
-
-      setSelected(id);
-
-      return;
-    }
+    if(tool === 'select') return selectDown(e, units);
 
     stroke.current = { filter: oneEuroPoint(1.5, 0.01), samples: [] };
     move(e, units);
   };
 
+  // select tool: a tap selects, a drag moves the step, two fingers pinch it,
+  // Alt-drag turns and scales it about its centre, a double tap cycles the fit
+  const selectDown = (e, units) => {
+    const { doc, photos, scale } = latest.current;
+
+    // another finger joins the gesture that is running
+    if(gesture.current) return gesture.current.g.down(e.pointerId, units);
+
+    const id = hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale });
+
+    setSelected(id);
+
+    if(!id) return;
+
+    const step = findStep(doc, id).step;
+    const tap = lastTap.current;
+
+    if(step.op === 'photo' && tap.id === id && e.timeStamp - tap.time < DOUBLE_TAP_MS && Math.hypot(units[0] - tap.at[0], units[1] - tap.at[1]) < DOUBLE_TAP_PX / scale) {
+      lastTap.current = { time: 0, id: null, at: null };
+
+      const info = photos[step.photo];
+      const fit = FITS[(FITS.indexOf(step.fit) + 1) % FITS.length];
+
+      if(info) dispatch({ type: 'setFit', id, fit, info });
+
+      return;
+    }
+
+    lastTap.current = { time: e.timeStamp, id, at: units };
+
+    const m = matrixOf(doc, id);
+
+    if(!m) return;
+
+    const g = createGesture(m, { slop: SLOP_PX / scale });
+
+    g.down(e.pointerId, units, { alt: e.altKey, centre: centreOf(doc, id, { photos: hash => photos[hash] }) });
+    gesture.current = { g, id };
+  };
+
   const move = (e, [x, y]) => {
+    if(gesture.current) {
+      const m = gesture.current.g.move(e.pointerId, [x, y]);
+
+      if(m) dispatch({ type: 'setMatrix', id: gesture.current.id, m });
+
+      return;
+    }
+
     const s = stroke.current;
 
     if(!s) return;
@@ -242,7 +344,18 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setLive(strokePath(s.samples, latest.current.size, SPACING));
   };
 
-  const up = () => {
+  const up = e => {
+    if(gesture.current) {
+      // the last pointer up ends the gesture: it is one undo step
+      if(gesture.current.g.up(e.pointerId) === 0) {
+        if(gesture.current.g.moved) setHist(history.seal);
+
+        gesture.current = null;
+      }
+
+      return;
+    }
+
     const s = stroke.current;
 
     stroke.current = null;
@@ -261,6 +374,19 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     const { doc, color } = latest.current;
 
     dispatch({ type: 'addStep', page: latest.current.pageId, step: { op: 'stroke', id: unique(allIds(doc)), pts, color, smooth: true } });
+  };
+
+  // the wheel zooms the selection about the pointer, with Shift it turns it
+  const wheel = (e, units) => {
+    const { selected: id } = latest.current;
+
+    if(tool !== 'select' || !id) return;
+
+    e.preventDefault();
+
+    const amount = Math.max(-100, Math.min(100, e.deltaY));
+
+    transformSelection(id, e.shiftKey ? aboutPoint(1, amount * 0.002, units) : aboutPoint(Math.exp(-amount * 0.0015), 0, units));
   };
 
   // --- the frame ---
@@ -288,9 +414,21 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const empty = doc.pages[0].steps.length === 0 && !live;
   const outline = selectedStep && outlineOf(doc, selectedStep.id, { photos: hash => photos[hash] });
   const title = doc.title ?? '';
+  const strip = photoSteps(doc);
+
+  // the palette (E54): shown while the pen or a stroke / shape is selected
+  const paletteTargets = tool === 'pen' ? ['pen'] : selectedStep?.op === 'stroke' ? ['stroke'] : selectedStep?.op === 'shape' ? ['fill', 'outline'] : null;
+  const paletteTarget = paletteTargets && (paletteTargets.includes(aim) ? aim : paletteTargets[0]);
+  const reference = selectedStep?.op === 'photo' ? selectedStep : strip[strip.length - 1];
+  const paletteColours = paletteTargets && swatches(photos[reference?.photo]?.palette ?? [], themeColours()).all;
+  const paletteCurrent = paletteTarget === 'pen' ? color : paletteTarget === 'stroke' ? selectedStep.color : paletteTarget === 'fill' ? selectedStep.fill : paletteTarget === 'outline' ? selectedStep.stroke : null;
+  const pick = hex => {
+    if(paletteTarget === 'pen') setColor(hex);
+    else dispatch({ type: 'setColor', id: selectedStep.id, color: hex, ...(paletteTarget === 'fill' ? { field: 'fill' } : paletteTarget === 'outline' ? { field: 'stroke' } : {}) });
+  };
 
   return html`
-    <section id="wb-editor" class="wb-editor" aria-label=${t('editor.label')}>
+    <section id="wb-editor" class="wb-editor" tabindex="-1" aria-label=${t('editor.label')}>
       <div class="wb-editor-head">
         <label class="wb-editor-title">
           <span class="wb-sr-only">${t('editor.title.label')}</span>
@@ -305,6 +443,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <button type="button" class="wb-editor-chip" onClick=${restore}>${t('editor.draft.restore')}</button>
         <button type="button" class="wb-editor-chip" onClick=${discard}>${t('editor.draft.discard')}</button>
       </p>`}
+      <div class="wb-editor-work">
       <div class="wb-editor-body">
         <div class="wb-editor-tools" role="toolbar" aria-label=${t('editor.tools')}>${TOOLS.map(toolButton)}</div>
         <${Stage}
@@ -313,7 +452,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           content=${renderNode(doc, { photos: hash => photos[hash] ?? null })}
           overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
           interactive=${tool === 'select' || tool === 'pen'}
-          onPointer=${{ down, move, up, cancel: up }}
+          onPointer=${{ down, move, up, cancel: up, wheel }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
           onDragEnter=${e => accepts(e) && (e.preventDefault(), setOver(true))}
           onDragOver=${e => accepts(e) && (e.preventDefault(), (e.dataTransfer.dropEffect = 'copy'))}
@@ -324,12 +463,15 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <//>
         <div class="wb-editor-actions" role="toolbar" aria-label=${t('editor.actions')}>${ACTIONS.map(action)}</div>
       </div>
+      <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${selectedStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRemove=${remove} />
+      </div>
       ${tool === 'pen'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
         : html`<${ContextBar} t=${t} step=${selectedStep} clipped=${selectedStep?.clip !== undefined} photo=${selectedStep && photos[selectedStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+      ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       <div class="wb-editor-pages">${inert('page.1', '1')}${inert('page.add', '+')}</div>
     </section>
   `;

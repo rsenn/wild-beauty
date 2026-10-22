@@ -3,6 +3,8 @@ import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { UPLOAD_MIME, formatSize, paddingStyle, uploadPayload } from '../files.js';
+import { watchHold } from '../ghostdrag.js';
+import { requestAdd } from '../editor/pending.js';
 
 // file name and size under the thumbnail are switched off for now
 const SHOW_FILE_INFO = false;
@@ -10,7 +12,7 @@ const SHOW_FILE_INFO = false;
 // one file of the upload grid: thumbnail (whole photo "extend" or "crop"),
 // remove, rotate, select, upload state; the thumbnail is the local file until
 // the server has it, then the server's display file
-export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry, canAdd }) => {
+export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry }) => {
   const { t, lang } = useI18n();
   const { limits } = useBoot();
   const [brokenSrc, setBrokenSrc] = useState(null);
@@ -31,10 +33,13 @@ export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry,
     e.dataTransfer.setData(UPLOAD_MIME, JSON.stringify(uploadPayload(item.record)));
     e.dataTransfer.effectAllowed = 'copy';
   };
-  const add = () => window.dispatchEvent(new CustomEvent('wb:add-photo', { detail: uploadPayload(item.record) }));
+  // the "add to node" button: opens an editor if none is open
+  const add = () => requestAdd(uploadPayload(item.record));
+  // a finger cannot HTML5-drag: holding the card picks it up instead
+  const hold = e => item.record && watchHold(e, { image: src, onDrop: () => add() });
 
   return html`
-    <li class=${cls} draggable=${item.record ? 'true' : undefined} onDragStart=${item.record ? dragStart : undefined}>
+    <li class=${cls} onPointerDown=${hold} draggable=${item.record ? 'true' : undefined} onDragStart=${item.record ? dragStart : undefined}>
       <div class="wb-card-box" style=${paddingStyle(item.record)}>
         <button type="button" class="wb-card-face" aria-pressed=${item.selected ? 'true' : 'false'} onClick=${onToggle} title=${item.file.name}>
           ${brokenSrc === src
@@ -44,7 +49,7 @@ export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry,
         <button type="button" class="wb-round wb-card-remove" onClick=${onRemove} title=${t('upload.remove')} aria-label=${t('upload.remove')}></button>
         <button type="button" class="wb-round wb-card-rotate" onClick=${onRotate} title=${t('upload.rotate')} aria-label=${t('upload.rotate')}></button>
         <button type="button" class="wb-card-fit" onClick=${onFit} title=${t('upload.fit.toggle')} aria-label=${t('upload.fit.toggle')}>${t(item.fit === 'cover' ? 'upload.fit.crop' : 'upload.fit.extend')}</button>
-        ${canAdd && item.record && html`<button type="button" class="wb-card-add" onClick=${add} title=${t('upload.add')} aria-label=${t('upload.add')}>${t('upload.add.short')}</button>`}
+        ${item.record && html`<button type="button" class="wb-card-add" onClick=${add} title=${t('upload.add')} aria-label=${t('upload.add')}>${t('upload.add.short')}</button>`}
         ${busy && html`<div class="wb-card-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow=${percent}><div class="wb-card-progress-bar" style=${`width: ${percent}%`}></div></div>`}
       </div>
       ${SHOW_FILE_INFO && html`<span class="wb-card-name">${item.file.name}</span>`}

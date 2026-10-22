@@ -2,10 +2,8 @@
   "meta.name": "Deutsch",
   "meta.dir": "ltr",
   "meta.flag": "de",
-
   "page.title.new": "Wild Beauty - Neu",
   "page.new.heading": "Neu",
-
   "nav.main": "Hauptnavigation",
   "nav.home": "Start",
   "nav.home.caption": "Startseite",
@@ -17,13 +15,11 @@
   "nav.new.caption": "Neuen Knoten erstellen",
   "nav.lang": "Spra",
   "nav.lang.label": "Sprache wählen",
-
   "upload.drop": "Bilder hierher ziehen und ablegen zum Hochladen",
   "upload.or": "Oder",
   "upload.select": "Bilder zum Hochladen auswählen",
   "upload.files.one": "{count} Bild",
   "upload.files.other": "{count} Bilder",
-
   "upload.remove": "Entfernen",
   "upload.rotate": "Drehen",
   "upload.no-preview": "Keine Vorschau",
@@ -32,7 +28,6 @@
   "upload.fit.toggle": "Ganzes Foto zeigen oder auf das Quadrat zuschneiden",
   "upload.ignored.one": "{count} Datei ignoriert (kein Bild)",
   "upload.ignored.other": "{count} Dateien ignoriert (keine Bilder)",
-
   "upload.state.queued": "Wartet",
   "upload.state.uploading": "{percent} %",
   "upload.state.processing": "Verarbeitung",
@@ -44,7 +39,6 @@
   "upload.error.network": "Netzwerkfehler",
   "upload.error.generic": "Hochladen fehlgeschlagen",
   "upload.error.upload-failed": "Hochladen fehlgeschlagen",
-
   "editor.new": "Neuer Knoten",
   "editor.close": "Schliessen",
   "editor.label": "Knoten-Editor",
@@ -69,10 +63,10 @@
   "editor.short.save": "Speichern",
   "editor.page.1": "Seite 1",
   "editor.page.add": "Seite hinzufügen",
-  "editor.short.undo": "\u21b6",
-  "editor.short.redo": "\u21b7",
-  "editor.short.page": "\u29c9",
-  "editor.short.delete": "\u2715",
+  "editor.short.undo": "↶",
+  "editor.short.redo": "↷",
+  "editor.short.page": "⧉",
+  "editor.short.delete": "✕",
   "upload.add": "Zum Node hinzufügen",
   "upload.add.short": "+",
   "editor.pen.color": "Stiftfarbe",
@@ -117,5 +111,20 @@
   "editor.draft.found": "Ein ungespeicherter Entwurf vom {time} wurde gefunden.",
   "editor.draft.restore": "Entwurf wiederherstellen",
   "editor.draft.discard": "Entwurf verwerfen",
-  "editor.close.confirm": "Es gibt ungespeicherte Änderungen. Editor trotzdem schließen? Sie bleiben als Entwurf erhalten."
+  "editor.close.confirm": "Es gibt ungespeicherte Änderungen. Editor trotzdem schließen? Sie bleiben als Entwurf erhalten.",
+  "editor.look": "Aussehen",
+  "editor.order.up": "Eine Ebene nach vorn",
+  "editor.order.down": "Eine Ebene zurück",
+  "editor.strip": "Fotos",
+  "editor.strip.left": "Früher",
+  "editor.strip.right": "Später",
+  "editor.strip.remove": "Entfernen",
+  "editor.strip.photo": "Foto {n}",
+  "editor.palette": "Farben",
+  "editor.palette.target": "Farben für",
+  "editor.target.pen": "Stift",
+  "editor.target.stroke": "Strich",
+  "editor.target.fill": "Füllung",
+  "editor.target.outline": "Kontur",
+  "editor.swatch": "Farbe {hex}"
 }

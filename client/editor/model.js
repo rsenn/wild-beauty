@@ -290,7 +290,18 @@ export function removeStep(doc, stepId) {
   return withSteps(doc, at.page, steps);
 }
 
-// to: 'front' (drawn last, on top), 'back' (drawn first), or an index
+// where a step taken out of `steps` at `from` lands when it passes the next
+// step with an id in direction `dir` (1: later, drawn above; -1: earlier)
+function neighbour(steps, from, dir) {
+  let i = dir > 0 ? from : from - 1;
+
+  for(; i >= 0 && i < steps.length; i += dir) if(steps[i].id !== undefined) return dir > 0 ? i + 1 : i;
+
+  return dir > 0 ? steps.length : 0;
+}
+
+// to: 'front' (drawn last, on top), 'back' (drawn first), 'up' / 'down' (past
+// the next / previous drawn step, the ones with an id), or an index
 export function moveStep(doc, stepId, to) {
   const at = findStep(doc, stepId);
 
@@ -298,7 +309,7 @@ export function moveStep(doc, stepId, to) {
 
   const steps = doc.pages[at.page].steps.slice();
   const [step] = steps.splice(at.index, 1);
-  const index = to === 'front' ? steps.length : to === 'back' ? 0 : clamp(Math.trunc(to), 0, steps.length);
+  const index = to === 'front' ? steps.length : to === 'back' ? 0 : to === 'up' || to === 'down' ? neighbour(steps, at.index, to === 'up' ? 1 : -1) : clamp(Math.trunc(to), 0, steps.length);
 
   if(!Number.isFinite(index)) return doc;
   if(index === at.index) return doc;
@@ -306,6 +317,34 @@ export function moveStep(doc, stepId, to) {
   steps.splice(index, 0, step);
 
   return withSteps(doc, at.page, steps);
+}
+
+// the photo steps of page `pageIndex` in draw order
+export const photoSteps = (doc, pageIndex = 0) => doc.pages[pageIndex].steps.filter(step => step.op === 'photo');
+
+// Move photo `stepId` to place `to` among the photos (0 = drawn first). The
+// other steps keep their places: only the photo slots are refilled, so a stroke
+// stays above or below the same slot.
+export function movePhoto(doc, stepId, to) {
+  const at = findStep(doc, stepId);
+
+  if(!at || at.step.op !== 'photo') return doc;
+
+  const steps = doc.pages[at.page].steps;
+  const slots = steps.flatMap((step, i) => (step.op === 'photo' ? [i] : []));
+  const photos = slots.map(i => steps[i]);
+  const from = photos.indexOf(at.step);
+  const target = clamp(Math.trunc(to), 0, photos.length - 1);
+
+  if(!Number.isFinite(target) || target === from) return doc;
+
+  photos.splice(target, 0, ...photos.splice(from, 1));
+
+  const next = steps.slice();
+
+  slots.forEach((slot, k) => (next[slot] = photos[k]));
+
+  return withSteps(doc, at.page, next);
 }
 
 // a new empty page at `index` (default: the end)
@@ -344,6 +383,28 @@ export function movePage(doc, pageId, index) {
 }
 
 export const setMode = (doc, mode) => (MODES.includes(mode) && mode !== doc.mode ? { ...doc, mode } : doc);
+
+// Set the matrix a step is drawn with (a gesture, a nudge). A `transform`
+// step that already targets it is updated; else a photo or text box takes it
+// in its own `m` (a photo becomes `free`: the matrix is no longer its fit);
+// else (strokes, shapes) a transform step is added at the end of the page.
+// A matrix that is not finite or beyond the document limits changes nothing.
+export function setMatrix(doc, stepId, m) {
+  const at = findStep(doc, stepId);
+
+  if(!at || !Array.isArray(m) || m.length !== 6 || !m.every(v => Number.isFinite(v) && Math.abs(v) <= LIMITS.number)) return doc;
+  if(!['photo', 'stroke', 'shape', 'text'].includes(at.step.op)) return doc;
+
+  const steps = doc.pages[at.page].steps;
+  const t = steps.findIndex(step => step.op === 'transform' && step.target === stepId);
+
+  if(t >= 0) return withSteps(doc, at.page, steps.map((step, i) => (i === t ? { ...step, m } : step)));
+
+  if(at.step.op === 'photo') return updateStep(doc, stepId, { m, fit: 'free' });
+  if(at.step.op === 'text') return updateStep(doc, stepId, { m });
+
+  return withSteps(doc, at.page, [...steps, { op: 'transform', target: stepId, m }]);
+}
 
 // the stage ground: a colour, or null / '' to remove it
 export function setBg(doc, bg) {

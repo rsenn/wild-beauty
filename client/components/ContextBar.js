@@ -1,5 +1,6 @@
 import { html } from '../html.js';
 import { BLENDS, FITS } from '../editor/model.js';
+import { Popover } from './Popover.js';
 
 // The context bar under the stage (EDITOR.md S2.2): the controls of what is
 // selected, nothing else. `dispatch(command)` is the editor's one way to
@@ -15,6 +16,8 @@ export const ContextBar = ({ t, step, clipped, photo, dispatch }) => {
   const id = step.id;
   const order = html`
     <${Button} onClick=${() => dispatch({ type: 'moveStep', id, to: 'front' })}>${t('editor.order.front')}<//>
+    <${Button} onClick=${() => dispatch({ type: 'moveStep', id, to: 'up' })}>${t('editor.order.up')}<//>
+    <${Button} onClick=${() => dispatch({ type: 'moveStep', id, to: 'down' })}>${t('editor.order.down')}<//>
     <${Button} onClick=${() => dispatch({ type: 'moveStep', id, to: 'back' })}>${t('editor.order.back')}<//>
   `;
   const remove = html`<${Button} onClick=${() => dispatch({ type: 'removeStep', id })}>${t('editor.step.delete')}<//>`;
@@ -26,10 +29,12 @@ export const ContextBar = ({ t, step, clipped, photo, dispatch }) => {
       <span class="wb-editor-group" role="group" aria-label=${t('editor.fit')}>
         ${FITS.filter(fit => fit !== 'free' || step.fit === 'free').map(fit => html`<${Button} pressed=${step.fit === fit} disabled=${fit !== 'free' && !photo} onClick=${() => dispatch({ type: 'setFit', id, fit, info: photo })}>${t('editor.fit.' + fit)}<//>`)}
       </span>
-      <label class="wb-editor-field">${t('editor.opacity')} <input type="range" min="0" max="1" step="0.01" value=${step.opacity} onInput=${e => dispatch({ type: 'setOpacity', id, value: Number(e.target.value) })} /></label>
-      <label class="wb-editor-field">${t('editor.blend')}
-        <select value=${step.blend} onChange=${e => dispatch({ type: 'setBlend', id, mode: e.target.value })}>${BLENDS.map(mode => html`<option value=${mode} selected=${mode === step.blend}>${t('editor.blend.' + mode)}</option>`)}</select>
-      </label>
+      <${Popover} label=${t('editor.look')}>
+        <label class="wb-editor-field">${t('editor.opacity')} <input type="range" min="0" max="1" step="0.01" value=${step.opacity} onInput=${e => dispatch({ type: 'setOpacity', id, value: Number(e.target.value) })} /></label>
+        <label class="wb-editor-field">${t('editor.blend')}
+          <select value=${step.blend} onChange=${e => dispatch({ type: 'setBlend', id, mode: e.target.value })}>${BLENDS.map(mode => html`<option value=${mode} selected=${mode === step.blend}>${t('editor.blend.' + mode)}</option>`)}</select>
+        </label>
+      <//>
       ${clipped && html`<${Button} onClick=${() => dispatch({ type: 'unclip', id })}>${t('editor.tool.unclip')}<//>`}
     `;
   } else if(step.op === 'stroke') {

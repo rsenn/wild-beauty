@@ -2,10 +2,8 @@
   "meta.name": "English",
   "meta.dir": "ltr",
   "meta.flag": "gb",
-
   "page.title.new": "Wild Beauty - New",
   "page.new.heading": "New",
-
   "nav.main": "Main navigation",
   "nav.home": "Home",
   "nav.home.caption": "Start page",
@@ -17,13 +15,11 @@
   "nav.new.caption": "Create a new node",
   "nav.lang": "Lang",
   "nav.lang.label": "Choose a language",
-
   "upload.drop": "Drag and drop Images Here to Upload",
   "upload.or": "Or",
   "upload.select": "Select Images to Upload",
   "upload.files.one": "{count} image",
   "upload.files.other": "{count} images",
-
   "upload.remove": "Remove",
   "upload.rotate": "Rotate",
   "upload.no-preview": "No preview",
@@ -32,7 +28,6 @@
   "upload.fit.toggle": "Show the whole photo or crop it to fill the square",
   "upload.ignored.one": "{count} file ignored (not an image)",
   "upload.ignored.other": "{count} files ignored (not images)",
-
   "upload.state.queued": "Queued",
   "upload.state.uploading": "{percent} %",
   "upload.state.processing": "Processing",
@@ -44,7 +39,6 @@
   "upload.error.network": "Network error",
   "upload.error.generic": "Upload failed",
   "upload.error.upload-failed": "Upload failed",
-
   "editor.new": "New node",
   "editor.close": "Close",
   "editor.label": "Node editor",
@@ -117,5 +111,20 @@
   "editor.draft.found": "An unsaved draft from {time} was found.",
   "editor.draft.restore": "Restore draft",
   "editor.draft.discard": "Discard draft",
-  "editor.close.confirm": "There are unsaved changes. Close the editor anyway? They stay as a draft."
+  "editor.close.confirm": "There are unsaved changes. Close the editor anyway? They stay as a draft.",
+  "editor.look": "Look",
+  "editor.order.up": "Forward",
+  "editor.order.down": "Backward",
+  "editor.strip": "Photos",
+  "editor.strip.left": "Move earlier",
+  "editor.strip.right": "Move later",
+  "editor.strip.remove": "Remove",
+  "editor.strip.photo": "Photo {n}",
+  "editor.palette": "Colours",
+  "editor.palette.target": "Colours for",
+  "editor.target.pen": "Pen",
+  "editor.target.stroke": "Stroke",
+  "editor.target.fill": "Fill",
+  "editor.target.outline": "Outline",
+  "editor.swatch": "Colour {hex}"
 }

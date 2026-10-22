@@ -637,7 +637,110 @@ body {
   margin-top: 8px;
 }
 
+/* film-strip (E53): a row under the stage, a column beside it when wide */
+.wb-editor-strip {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: var(--wb-editor-gap);
+  margin: var(--wb-editor-gap) 0 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+}
+
+.wb-editor-strip-item {
+  flex: 0 0 auto;
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 4px;
+  width: 88px;
+}
+
+.wb-editor-strip-pick {
+  padding: 0;
+  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
+  background: none;
+  cursor: grab;
+}
+
+.wb-editor-strip-selected .wb-editor-strip-pick {
+  outline: 3px solid var(--wb-select);
+}
+
+.wb-editor-strip-drag {
+  opacity: 0.4;
+}
+
+.wb-editor-strip-pick img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.wb-editor-strip-tools {
+  display: flex;
+  justify-content: space-between;
+}
+
+.wb-editor-strip-tools .wb-editor-chip {
+  min-width: 0;
+  padding: 2px 6px;
+}
+
+/* palette (E54): the target chip and two rows of four swatches */
+.wb-editor-palette {
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  margin-top: var(--wb-editor-gap);
+}
+
+.wb-editor-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 36px);
+  gap: 4px;
+}
+
+.wb-editor-swatch {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
+  cursor: pointer;
+}
+
+.wb-editor-swatch[aria-pressed='true'] {
+  outline: 3px solid var(--wb-select);
+}
+
+.wb-editor-popover-left {
+  right: auto;
+  left: 0;
+}
+
 @media (min-width: 700px) {
+  .wb-editor-work {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: var(--wb-editor-gap);
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .wb-editor-work .wb-editor-body {
+    flex: 1 1 auto;
+    margin: 0;
+  }
+
+  .wb-editor-strip {
+    flex-flow: column nowrap;
+    max-height: 90vmin;
+    margin: 0;
+    overflow: auto;
+  }
+
   .wb-editor-body {
     grid-template-columns: 56px minmax(0, 1fr) 56px;
     max-width: calc(90vmin + 2 * 56px + 16px);
@@ -749,4 +852,23 @@ body {
   padding: 4px var(--wb-editor-gap);
   background: var(--wb-editor-banner-bg);
   border-radius: var(--wb-radius-frame);
+}
+
+/* the picture that follows a finger while a card is dragged by touch (E46) */
+.wb-ghost {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  opacity: 0.85;
+  pointer-events: none;
+  border: var(--wb-border-width) solid var(--wb-ink);
+  box-shadow: var(--wb-shadow-pop);
+}
+
+.wb-editor:focus {
+  outline: none;
 }
