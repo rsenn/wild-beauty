@@ -6,7 +6,7 @@ import { renderPage } from './server/ssr.js';
 import { DEFAULT_LANG, languageList, loadLocales, negotiate } from './server/i18n.js';
 import { config } from './server/config.js';
 import { dev, log } from './server/log.js';
-import { createUpload, deleteUpload, serveUpload } from './server/api/uploads.js';
+import { createUpload, deleteUpload, listUploads, readUploads, serveUpload } from './server/api/uploads.js';
 import { capabilities, detectTools } from './server/media/tools.js';
 
 const PORT = Number(process.env.PORT ?? 3000);
@@ -56,15 +56,18 @@ async function serveFile(pathname, method, prefix, root) {
   return new Response(method === 'HEAD' ? null : file, { headers });
 }
 
+// the part of a sidecar record the cards use (no EXIF, no tool output)
+const listed = ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt }) => ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt });
+
 // what the client needs to translate: this language, plus English as fallback
-function bootFor(lang) {
+async function bootFor(lang) {
   const fallback = lang === DEFAULT_LANG ? {} : locales.get(DEFAULT_LANG);
 
-  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes } };
+  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes }, uploads: (await readUploads()).map(listed) };
 }
 
-function page(lang, titleKey) {
-  const boot = bootFor(lang);
+async function page(lang, titleKey) {
+  const boot = await bootFor(lang);
   const body = renderPage(html`<${App} boot=${boot} />`, {
     lang,
     dir: boot.messages['meta.dir'],
@@ -83,7 +86,12 @@ function page(lang, titleKey) {
 function route(req) {
   const { pathname } = new URL(req.url);
 
-  if(pathname === '/api/uploads') return req.method === 'POST' ? createUpload(req) : text('method not allowed\n', 405);
+  if(pathname === '/api/uploads') {
+    if(req.method === 'POST') return createUpload(req);
+    if(req.method === 'GET') return listUploads();
+
+    return text('method not allowed\n', 405);
+  }
 
   const upload = /^\/api\/uploads\/([^/]+)$/.exec(pathname);
 

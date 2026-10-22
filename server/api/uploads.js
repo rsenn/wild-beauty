@@ -1,7 +1,7 @@
 // Upload endpoints (PLAN.md S6.1, S6.2). One file per request, the raw
 // body streamed to disk while it is hashed; the file is then stored as
 // uploads/<sha256>.<ext> next to a sidecar uploads/<sha256>.json.
-import { existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, renameSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { HASH, UPLOAD_FILE, config } from '../config.js';
 import { sniff } from '../media/sniff.js';
@@ -121,6 +121,19 @@ export async function createUpload(req) {
 
     rmSync(tmp, { force: true });
   }
+}
+
+// the sidecar records on disk, newest first; unreadable ones are skipped
+export async function readUploads() {
+  const names = readdirSync(config.uploadsDir).filter(n => n.endsWith('.json') && HASH.test(n.slice(0, -5)));
+  const records = await Promise.all(names.map(n => Bun.file(resolve(config.uploadsDir, n)).json().catch(() => null)));
+
+  return records.filter(r => r && r.hash).sort((a, b) => b.uploadedAt - a.uploadedAt);
+}
+
+// GET /api/uploads
+export async function listUploads() {
+  return Response.json(await readUploads());
 }
 
 // GET /files/uploads/<hash>[.display].<ext>: only names that match UPLOAD_FILE

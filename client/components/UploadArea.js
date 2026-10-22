@@ -6,16 +6,19 @@ import { ACCEPT, isImageFile } from '../files.js';
 import { createQueue } from '../upload.js';
 import { UploadCard } from './UploadCard.js';
 
-// drop zone plus the grid of chosen files. The server renders it empty and
-// the browser adopts it. Each file is uploaded as soon as it is chosen.
+// a file already on the server: the card needs only its name and size
+const existingItem = (record, index) => ({ id: index + 1, file: { name: record.name, size: record.size }, url: null, fit: 'contain', rotation: 0, selected: false, state: 'done', progress: 1, error: null, record });
+
+// drop zone plus the grid of chosen files. The server renders the files already on disk
+// (boot.uploads) and the browser adopts them. Each file is uploaded as soon as it is chosen.
 export const UploadArea = () => {
   const { t } = useI18n();
-  const { limits } = useBoot();
-  const [items, setItems] = useState([]);
+  const { limits, uploads = [] } = useBoot();
+  const [items, setItems] = useState(() => uploads.map(existingItem));
   const [ignored, setIgnored] = useState(0);
   const [over, setOver] = useState(false);
   const depth = useRef(0);
-  const nextId = useRef(1);
+  const nextId = useRef(uploads.length + 1);
   const latest = useRef(items);
 
   latest.current = items;

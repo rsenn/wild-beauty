@@ -215,9 +215,9 @@ woff2/woff/ttf. Fonts are served from `/static/`.
 
 ## M7 - Existing uploads (list, SSR, delete)
 
-- [ ] **7.1 `GET /api/uploads`**: read `uploads/*.json`, newest first.
+- [x] **7.1 `GET /api/uploads`**: read `uploads/*.json`, newest first.
 - [x] **7.2 `GET /files/uploads/:hash.:ext`** (validated, `Cache-Control`).
-- [ ] **7.3 SSR the list**: `/:lang/new` renders cards for files already on
+- [x] **7.3 SSR the list**: `/:lang/new` renders cards for files already on
       disk and a `<script type=application/json id=boot>`; the client adopts
       them (no flash). Done when a reload keeps the cards.
 - [x] **7.4 `DELETE /api/uploads/:hash`** removes image and sidecar; delete
