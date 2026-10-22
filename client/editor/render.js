@@ -2,7 +2,7 @@
 // SSR, the editor stage, thumbnails and the viewer. Pure: everything it
 // needs comes from the document and the options.
 import { html } from '../html.js';
-import { fitMatrix, isColour } from './model.js';
+import { fitMatrix, isColour, isTexture } from './model.js';
 import { gridLayout } from './grid.js';
 import { lerpMatrix } from './matrix.js';
 import { ease } from './playback.js';
@@ -133,7 +133,7 @@ export function effective(steps) {
 
 // The photo steps of the whole node in page order: what `slides` and `grid`
 // show, whatever pages the author drew.
-export const photoSteps = doc => doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo'));
+export const photoSteps = doc => doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo' && !isTexture(step)));
 
 // the steps a mode shows. `free`: the first `upTo` steps of page `page` (all
 // when `upTo` is missing). `slides`: photo `page` alone, shown whole.
@@ -197,6 +197,8 @@ export function renderStage(doc, { photos = () => null, mode = doc.mode, page = 
 
     switch(step.op) {
       case 'photo': {
+        if(isTexture(step)) return null; // for the 3D scene, not a picture
+
         const out = renderPhoto({ ...step, m: st.m ?? step.m, blend: st.blend ?? step.blend }, photos(step.photo));
 
         return out && st.clip && shapes.has(st.clip) ? html`<g clip-path=${`url(#clip-${st.clip})`}>${out}</g>` : out;

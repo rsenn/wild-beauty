@@ -471,8 +471,35 @@ export function fitMatrix(fit, { width, height }) {
 }
 
 // a photo step on top of `pageId`, fit extend, centred
-export function addPhoto(doc, pageId, hash, info, id = unique(allIds(doc))) {
-  return addStep(doc, pageId, { op: 'photo', id, photo: hash, m: fitMatrix('extend', info), fit: 'extend', opacity: 1, blend: 'normal' });
+export function addPhoto(doc, pageId, hash, info, id = unique(allIds(doc)), role) {
+  return addStep(doc, pageId, { op: 'photo', id, photo: hash, m: fitMatrix('extend', info), fit: 'extend', opacity: 1, blend: 'normal', ...(role === 'texture' && { role }) });
+}
+
+// a texture photo is for the 3D scene: not drawn as a picture (EDITOR.md S2.5)
+export const isTexture = step => step?.op === 'photo' && step.role === 'texture';
+
+// Mark the photo of step `stepId` as texture or picture (E71). The role belongs
+// to the photo, not to a step (node_photos.role), so every step that shows
+// the same photo changes with it.
+export function setRole(doc, stepId, role) {
+  const at = findStep(doc, stepId);
+
+  if(!at || at.step.op !== 'photo' || (role !== 'texture' && role !== 'picture')) return doc;
+
+  const change = step => {
+    if(step.op !== 'photo' || step.photo !== at.step.photo || (role === 'texture') === (step.role === 'texture')) return step;
+
+    const { role: _, ...rest } = step;
+
+    return role === 'texture' ? { ...rest, role } : rest;
+  };
+  const pages = doc.pages.map(page => {
+    const steps = page.steps.map(change);
+
+    return steps.some((step, i) => step !== page.steps[i]) ? { ...page, steps } : page;
+  });
+
+  return pages.every((page, i) => page === doc.pages[i]) ? doc : { ...doc, pages };
 }
 
 const updatePhoto = (doc, stepId, patch) => (findStep(doc, stepId)?.step.op === 'photo' ? updateStep(doc, stepId, patch) : doc);

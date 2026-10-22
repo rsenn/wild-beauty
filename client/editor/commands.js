@@ -28,7 +28,7 @@ export const commandKey = command => KEYED[command.type]?.(command) ?? null;
 function onDoc(doc, c) {
   switch(c.type) {
     case 'addPhoto':
-      return model.addPhoto(doc, c.page ?? doc.pages[0].id, c.hash, c.info, c.id);
+      return model.addPhoto(doc, c.page ?? doc.pages[0].id, c.hash, c.info, c.id, c.role);
     case 'addStep':
       return model.addStep(doc, c.page ?? doc.pages[0].id, c.step, c.index);
     case 'updateStep':
@@ -37,6 +37,8 @@ function onDoc(doc, c) {
       return model.removeStep(doc, c.id);
     case 'moveStep':
       return model.moveStep(doc, c.id, c.to);
+    case 'setRole':
+      return model.setRole(doc, c.id, c.role);
     case 'setMode':
       return model.setMode(doc, c.mode);
     case 'addPage':

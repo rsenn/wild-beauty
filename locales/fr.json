@@ -185,5 +185,7 @@
   "editor.lock.retry": "Réessayer",
   "nodes.saved": "Nœuds enregistrés",
   "nodes.empty": "Sans photo",
-  "editor.delete.confirm": "Supprimer définitivement ce nœud ? Ses photos sont supprimées aussi, sauf si un autre nœud les utilise. Cette action est irréversible."
+  "editor.delete.confirm": "Supprimer définitivement ce nœud ? Ses photos sont supprimées aussi, sauf si un autre nœud les utilise. Cette action est irréversible.",
+  "editor.role.texture": "Texture",
+  "editor.role.hint": "Texture pour la scène 3D : n'est pas dessinée comme une image"
 }

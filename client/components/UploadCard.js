@@ -12,7 +12,7 @@ const SHOW_FILE_INFO = false;
 // one file of the upload grid: thumbnail (whole photo "extend" or "crop"),
 // remove, rotate, select, upload state; the thumbnail is the local file until
 // the server has it, then the server's display file
-export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry }) => {
+export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onTexture, onRetry }) => {
   const { t, lang } = useI18n();
   const { limits } = useBoot();
   const [brokenSrc, setBrokenSrc] = useState(null);
@@ -30,11 +30,11 @@ export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry 
 
   // a finished upload can be dragged onto the editor stage
   const dragStart = e => {
-    e.dataTransfer.setData(UPLOAD_MIME, JSON.stringify(uploadPayload(item.record)));
+    e.dataTransfer.setData(UPLOAD_MIME, JSON.stringify(uploadPayload(item.record, item.texture ? 'texture' : 'picture')));
     e.dataTransfer.effectAllowed = 'copy';
   };
   // the "add to node" button: opens an editor if none is open
-  const add = () => requestAdd(uploadPayload(item.record));
+  const add = () => requestAdd(uploadPayload(item.record, item.texture ? 'texture' : 'picture'));
   // a finger cannot HTML5-drag: holding the card picks it up instead
   const hold = e => item.record && watchHold(e, { image: src, onDrop: () => add() });
 
@@ -49,6 +49,7 @@ export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry 
         <button type="button" class="wb-round wb-card-remove" onClick=${onRemove} title=${t('upload.remove')} aria-label=${t('upload.remove')}></button>
         <button type="button" class="wb-round wb-card-rotate" onClick=${onRotate} title=${t('upload.rotate')} aria-label=${t('upload.rotate')}></button>
         <button type="button" class=${'wb-card-fit' + (item.fit === 'cover' ? ' wb-card-fit-cover' : '')} onClick=${onFit} title=${t(item.fit === 'cover' ? 'upload.fit.extend' : 'upload.fit.crop')} aria-label=${t('upload.fit.toggle')} aria-pressed=${item.fit === 'cover' ? 'true' : 'false'}>${t(item.fit === 'cover' ? 'upload.fit.crop' : 'upload.fit.extend')}</button>
+        <button type="button" class=${'wb-card-texture' + (item.texture ? ' wb-card-texture-on' : '')} aria-pressed=${item.texture ? 'true' : 'false'} onClick=${onTexture} title=${t('editor.role.hint')} aria-label=${t('editor.role.texture')}></button>
         ${item.record && html`<button type="button" class="wb-card-add" onClick=${add} title=${t('upload.add')} aria-label=${t('upload.add')}>${t('upload.add.short')}</button>`}
         ${busy && html`<div class="wb-card-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow=${percent}><div class="wb-card-progress-bar" style=${`width: ${percent}%`}></div></div>`}
       </div>

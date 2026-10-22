@@ -35,6 +35,7 @@ export const ContextBar = ({ t, step, vertex, onVertex, clipped, photo, dispatch
           <select value=${step.blend} onChange=${e => dispatch({ type: 'setBlend', id, mode: e.target.value })}>${BLENDS.map(mode => html`<option value=${mode} selected=${mode === step.blend}>${t('editor.blend.' + mode)}</option>`)}</select>
         </label>
       <//>
+      <${Button} pressed=${step.role === 'texture'} onClick=${() => dispatch({ type: 'setRole', id, role: step.role === 'texture' ? 'picture' : 'texture' })}>${t('editor.role.texture')}<//>
       ${clipped && html`<${Button} onClick=${() => dispatch({ type: 'unclip', id })}>${t('editor.tool.unclip')}<//>`}
     `;
   } else if(step.op === 'stroke') {

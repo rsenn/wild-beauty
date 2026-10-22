@@ -785,9 +785,9 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 - [ ] **E70 per-node theme picker** (after `TODO` M2b): wrapper changes; sanitiser on save. Done when the
       stage and the saved tile wear `blueprint` while the page wears `kraft`.
-- [ ] **E71 texture role toggle** on upload cards and film-strip entries; `node_photos.role` saved.
+- [x] **E71 texture role toggle** on upload cards and film-strip entries; `node_photos.role` saved.
       Done when a texture photo is not drawn as a picture.
-- [ ] **E72 i18n**: all editor keys in `en`, `de`, `fr`; parity check passes. Done when `check-locales` is green.
+- [x] **E72 i18n**: all editor keys in `en`, `de`, `fr`; parity check passes. Done when `check-locales` is green.
 - [ ] **E73 keyboard and a11y pass**: every command reachable by keyboard, focus order, labels, `role=img`.
       Done when the editor is usable without a pointer.
 - [ ] **E74 device checklist**: touch emulation, real phone pressure and multitouch, 360 px width, RTL.

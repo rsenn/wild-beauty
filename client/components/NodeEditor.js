@@ -250,7 +250,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setK(null);
     setPlaying(false);
     setPhotos(old => ({ ...old, [payload.hash]: photoInfo(payload) }));
-    dispatch({ type: 'addPhoto', hash: payload.hash, info: payload, page: latest.current.pageId, id: unique(allIds(latest.current.doc)) });
+    dispatch({ type: 'addPhoto', hash: payload.hash, info: payload, role: payload.role, page: latest.current.pageId, id: unique(allIds(latest.current.doc)) });
   };
 
   const remove = id => {
@@ -983,7 +983,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <//>
         <div class="wb-editor-actions" role="toolbar" aria-label=${t('editor.actions')}>${ACTIONS.map(action)}</div>
       </div>
-      <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRemove=${remove} />
+      <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />
       </div>
       ${(tool === 'clip' || tool === 'unclip') && html`<p class="wb-editor-context" role="status">${t('editor.context.' + tool)}</p>`}
       ${tool === 'shape'

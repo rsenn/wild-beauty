@@ -3,6 +3,7 @@
 // sees it: a step's matrix and clip after its transform/clip ops, shapes that
 // serve as a clip not drawn (render.js `effective`). Points are stage units.
 import { apply, invert } from './matrix.js';
+import { isTexture } from './model.js';
 import { effective } from './render.js';
 import { segments, verticesFromPath } from './shapes.js';
 
@@ -77,7 +78,7 @@ function drawn(doc, page, upTo) {
   const steps = upTo === undefined ? all : all.slice(0, Math.max(0, Math.floor(upTo)));
   const { by, clips } = effective(steps);
   const entry = step => ({ step, m: by.get(step.id)?.m ?? IDENTITY, clip: by.get(step.id)?.clip });
-  const entries = steps.filter(step => ['photo', 'stroke', 'shape'].includes(step.op) && !(step.op === 'shape' && clips.has(step.id))).map(entry);
+  const entries = steps.filter(step => ['photo', 'stroke', 'shape'].includes(step.op) && !isTexture(step) && !(step.op === 'shape' && clips.has(step.id))).map(entry);
 
   return { entries, all: new Map(steps.filter(step => step.op === 'shape').map(step => [step.id, entry(step)])) };
 }

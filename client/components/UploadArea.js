@@ -136,6 +136,7 @@ export const UploadArea = ({ extra = null }) => {
             onRemove=${() => remove(item.id)}
             onRotate=${() => update(item.id, i => ({ rotation: (i.rotation + 90) % 360 }))}
             onFit=${() => update(item.id, i => ({ fit: i.fit === 'contain' ? 'cover' : 'contain' }))}
+            onTexture=${() => update(item.id, i => ({ texture: !i.texture }))}
             onRetry=${() => start(item)}
           />`,
         )}

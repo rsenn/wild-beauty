@@ -1045,3 +1045,26 @@ body {
 .wb-saved-edit {
   align-self: flex-start;
 }
+
+/* texture role (E71): a checker toggle on the upload card, a dimmed film-strip entry */
+.wb-card-texture {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: var(--wb-card-icon);
+  height: var(--wb-card-icon);
+  padding: 0;
+  background: repeating-conic-gradient(var(--wb-ink) 0% 25%, var(--wb-button-round-bg) 0% 50%) 0 0 / 50% 50%;
+  border: var(--wb-border-width) outset var(--wb-button-round-border);
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.wb-card-texture-on {
+  opacity: 1;
+  outline: 2px solid var(--wb-select);
+}
+
+.wb-editor-strip-texture .wb-editor-strip-pick {
+  opacity: 0.45;
+}
