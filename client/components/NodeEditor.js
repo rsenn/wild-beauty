@@ -310,6 +310,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // leaving the shape tool finishes an open shape that has two corners, else drops it
   useEffect(() => {
     if(tool !== 'shape' && latest.current.shape.vertices.length) commitShape(latest.current.shape);
+
+    // choosing unclip with a clipped photo already selected frees it at once
+    const { editStep } = latest.current;
+
+    if(tool === 'unclip' && editStep?.op === 'photo' && editStep.clip !== undefined) {
+      dispatch({ type: 'unclip', id: editStep.id });
+      setTool('select');
+    }
   }, [tool]);
 
   // keys: a tool key selects a tool; ctrl+z, ctrl+shift+z / ctrl+y, Delete
@@ -469,6 +477,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const down = (e, units) => {
     if(tool === 'select') return selectDown(e, units);
     if(tool === 'shape') return shapeDown(units);
+    if(tool === 'clip' || tool === 'unclip') return maskDown(units);
 
     stroke.current = { filter: oneEuroPoint(1.5, 0.01), samples: [] };
     move(e, units);
@@ -534,6 +543,32 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const setDraft = next => {
     latest.current.shape = next;
     setShape(next);
+  };
+  // clip tool: with a photo selected, tapping a shape makes it that photo's clip;
+  // tapping a photo selects it. Unclip tool: tapping a clipped photo frees it.
+  const maskDown = units => {
+    const { doc, photos, scale } = latest.current;
+    const opts = { photos: hash => photos[hash], tolerance: TAP_PX / scale, page };
+
+    if(tool === 'clip' && editStep?.op === 'photo') {
+      const shape = hitTest(doc, units, { ...opts, ops: ['shape'] });
+
+      if(shape) {
+        dispatch({ type: 'setClip', id: editStep.id, shape });
+        setTool('select');
+
+        return;
+      }
+    }
+
+    const id = hitTest(doc, units, { ...opts, ops: ['photo'] });
+
+    setSelected(id);
+
+    if(tool === 'unclip' && id && findStep(doc, id).step.clip !== undefined) {
+      dispatch({ type: 'unclip', id });
+      setTool('select');
+    }
   };
   const shapeDown = units => {
     const { shape, scale, doc } = latest.current;
@@ -708,7 +743,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
           overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
-          interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape') && !previewing))}
+          interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
           onDragEnter=${e => accepts(e) && (e.preventDefault(), setOver(true))}
@@ -722,6 +757,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       </div>
       <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRemove=${remove} />
       </div>
+      ${(tool === 'clip' || tool === 'unclip') && html`<p class="wb-editor-context" role="status">${t('editor.context.' + tool)}</p>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>

@@ -92,3 +92,18 @@ describe('setVertices', () => {
     expect(setVertices(doc, 'shape001', 'x')).toBe(doc);
   });
 });
+
+import { hitTest } from '../../client/editor/hit.js';
+
+describe('hitTest ops (clip tool)', () => {
+  const photo = { op: 'photo', id: 'photo001', photo: 'a'.repeat(64), m: [1, 0, 0, 1, 0, 0], fit: 'free', opacity: 1, blend: 'normal' };
+  const d = { ...emptyNode(), pages: [{ id: 'page0001', steps: [photo, { ...step, path: 'M0 0L300 0L150 300Z' }] }] };
+  const info = { href: '/x.jpg', width: 500, height: 500 };
+
+  test('the shape on top, or the photo under it, as asked', () => {
+    expect(hitTest(d, [150, 100], { photos: () => info })).toBe('shape001');
+    expect(hitTest(d, [150, 100], { photos: () => info, ops: ['photo'] })).toBe('photo001');
+    expect(hitTest(d, [150, 100], { photos: () => info, ops: ['shape'] })).toBe('shape001');
+    expect(hitTest(d, [450, 450], { photos: () => info, ops: ['shape'] })).toBe(null);
+  });
+});

@@ -150,5 +150,7 @@
   "editor.shape.cancel": "Cancel",
   "editor.shape.hint": "Click for a corner, drag to pull a curve, click the first corner to close.",
   "editor.vertex.join": "Join handles",
-  "editor.vertex.delete": "Delete corner"
+  "editor.vertex.delete": "Delete corner",
+  "editor.context.clip": "Select a photo, then tap the shape that should mask it.",
+  "editor.context.unclip": "Tap a masked photo to free it again."
 }

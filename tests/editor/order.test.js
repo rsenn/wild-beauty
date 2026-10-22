@@ -78,6 +78,21 @@ describe('film-strip order', () => {
   });
 });
 
+describe('erase', () => {
+  test('a stroke and a shape are erased one by one, and undo and redo bring them back', () => {
+    const shape = { op: 'shape', id: 'shape001', path: 'M0 0L100 0L50 80Z', closed: true, fill: '#ff0000', strokeWidth: 2 };
+    const start = { doc: doc([stroke('strok001'), shape]), kind: 'node' };
+    let h = run(start, [{ type: 'removeStep', id: 'strok001' }, { type: 'removeStep', id: 'shape001' }]);
+
+    expect(ids(h.present.doc)).toEqual([]);
+    h = history.undo(h);
+    expect(ids(h.present.doc)).toEqual(['shape001']);
+    h = history.undo(h);
+    expect(ids(h.present.doc)).toEqual(['strok001', 'shape001']);
+    expect(ids(history.redo(h).present.doc)).toEqual(['shape001']);
+  });
+});
+
 describe('delete step', () => {
   test('undo restores the step and what pointed at it', () => {
     const d = doc([photo('photo001', 1), { ...stroke('strok001') }, { op: 'transform', target: 'strok001', m: [2, 0, 0, 2, 0, 0] }, { op: 'clip', target: 'photo001', shape: 'strok001' }]);

@@ -150,5 +150,7 @@
   "editor.shape.cancel": "Annuler",
   "editor.shape.hint": "Cliquez pour un coin, glissez pour une courbe, cliquez sur le premier coin pour fermer.",
   "editor.vertex.join": "Lier les poignées",
-  "editor.vertex.delete": "Supprimer le coin"
+  "editor.vertex.delete": "Supprimer le coin",
+  "editor.context.clip": "Choisissez une photo, puis touchez la forme qui doit la masquer.",
+  "editor.context.unclip": "Touchez une photo masquée pour la libérer."
 }

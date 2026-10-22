@@ -126,10 +126,10 @@ function covers(entry, p, tolerance, { photos, steps }) {
 // The id of the top-most step under `point`, or null. `photos(hash)` gives
 // { width, height } of a photo (a photo without it cannot be hit); `tolerance`
 // widens thin lines, in units (the caller turns a finger's width into units).
-export function hitTest(doc, point, { photos = () => null, tolerance = 8, page = 0, upTo } = {}) {
+export function hitTest(doc, point, { photos = () => null, tolerance = 8, page = 0, upTo, ops } = {}) {
   const { entries, all: steps } = drawn(doc, page, upTo);
 
-  for(let i = entries.length - 1; i >= 0; i--) if(covers(entries[i], point, tolerance, { photos, steps })) return entries[i].step.id;
+  for(let i = entries.length - 1; i >= 0; i--) if((!ops || ops.includes(entries[i].step.op)) && covers(entries[i], point, tolerance, { photos, steps })) return entries[i].step.id;
 
   return null;
 }

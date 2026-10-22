@@ -150,5 +150,7 @@
   "editor.shape.cancel": "Abbrechen",
   "editor.shape.hint": "Klick setzt eine Ecke, Ziehen formt eine Kurve, Klick auf die erste Ecke schliesst die Form.",
   "editor.vertex.join": "Griffe verbinden",
-  "editor.vertex.delete": "Ecke löschen"
+  "editor.vertex.delete": "Ecke löschen",
+  "editor.context.clip": "Foto wählen, dann die Form antippen, die es maskieren soll.",
+  "editor.context.unclip": "Ein maskiertes Foto antippen, um es wieder freizugeben."
 }
