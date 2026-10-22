@@ -1,0 +1,121 @@
+// Node, photo and link queries (PLAN.md S8). Every function takes the handle
+// from db.js `open()` first. `doc` and `palette` are JSON in the database and
+// plain values here; time is Date.now() unless `now` is given.
+export const LABELS = ['child', 'ref', 'sells'];
+
+const json = value => (value === undefined || value === null ? null : JSON.stringify(value));
+const parse = text => (text === null || text === undefined ? null : JSON.parse(text));
+
+const node = row => (row ? { ...row, doc: parse(row.doc), palette: parse(row.palette), pinned: !!row.pinned } : null);
+
+// a new node at rev 1 -> { id, rev }
+export function insertNode(h, { title = '', doc, palette, kind = 'node', now = Date.now() }) {
+  const { lastInsertRowid } = h.run('INSERT INTO nodes (title, doc, palette, kind, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)', title, json(doc), json(palette), kind, now, now);
+
+  return { id: Number(lastInsertRowid), rev: 1 };
+}
+
+// the node with `doc` and `palette` parsed, or null
+export const getNode = (h, id) => node(h.get('SELECT * FROM nodes WHERE id = ?', id));
+
+// Save a new title, doc and palette if the stored rev is still `rev`.
+// -> the new rev, or null when the node is gone or someone saved in between
+// (getNode tells the two apart).
+export function updateNode(h, id, { rev, title, doc, palette, now = Date.now() }) {
+  const { changes } = h.run('UPDATE nodes SET title = ?, doc = ?, palette = ?, rev = rev + 1, updated_at = ? WHERE id = ? AND rev = ?', title, json(doc), json(palette), now, id, rev);
+
+  return changes ? rev + 1 : null;
+}
+
+// the node; its photo rows, locks and edges go with it. Photos stay (see orphanPhotos).
+export const deleteNode = (h, id) => h.run('DELETE FROM nodes WHERE id = ?', id).changes > 0;
+
+// insert a photo, or refresh the facts of a known hash
+export function upsertPhoto(h, { hash, ext, width, height, bytes, palette, meta, now = Date.now() }) {
+  h.run(
+    `INSERT INTO photos (hash, ext, width, height, bytes, palette, meta, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT (hash) DO UPDATE SET ext = excluded.ext, width = excluded.width, height = excluded.height, bytes = excluded.bytes, palette = excluded.palette, meta = excluded.meta`,
+    hash, ext, width ?? null, height ?? null, bytes ?? null, json(palette), json(meta), now,
+  );
+}
+
+export const getPhoto = (h, hash) => {
+  const row = h.get('SELECT * FROM photos WHERE hash = ?', hash);
+
+  return row && { ...row, palette: parse(row.palette), meta: parse(row.meta) };
+};
+
+// Replace the photos of a node: `photos` is [{ hash, role? }] in drawing
+// order (a hash twice counts once). Every hash must be a known photo.
+export function setNodePhotos(h, id, photos) {
+  h.tx(() => {
+    h.run('DELETE FROM node_photos WHERE node_id = ?', id);
+
+    const seen = new Set();
+
+    for(const { hash, role = 'picture' } of photos) {
+      if(seen.has(hash)) continue;
+
+      h.run('INSERT INTO node_photos (node_id, photo_hash, sort, role) VALUES (?, ?, ?, ?)', id, hash, seen.size, role);
+      seen.add(hash);
+    }
+  });
+}
+
+export const nodePhotos = (h, id) => h.all('SELECT photo_hash AS hash, sort, role FROM node_photos WHERE node_id = ? ORDER BY sort', id);
+
+// photos no node uses any more, to delete from disk and database
+export const orphanPhotos = h => h.all('SELECT hash, ext FROM photos WHERE hash NOT IN (SELECT photo_hash FROM node_photos)');
+
+export const deletePhoto = (h, hash) => h.run('DELETE FROM photos WHERE hash = ?', hash).changes > 0;
+
+// an edge from -> to; adding it again changes its sort. -> true
+export function addLink(h, from, to, label, sort = 0) {
+  if(!LABELS.includes(label)) throw new Error(`unknown link label "${label}"`);
+
+  h.run('INSERT INTO node_links (from_id, to_id, label, sort) VALUES (?, ?, ?, ?) ON CONFLICT (from_id, to_id, label) DO UPDATE SET sort = excluded.sort', from, to, label, sort);
+
+  return true;
+}
+
+export const removeLink = (h, from, to, label) => h.run('DELETE FROM node_links WHERE from_id = ? AND to_id = ? AND label = ?', from, to, label).changes > 0;
+
+// edges out of / into a node, children first in their order; `label` narrows
+export const linksFrom = (h, id, label) => h.all('SELECT to_id AS id, label, sort FROM node_links WHERE from_id = ?1 AND (?2 IS NULL OR label = ?2) ORDER BY sort, id', id, label ?? null);
+
+export const linksTo = (h, id, label) => h.all('SELECT from_id AS id, label, sort FROM node_links WHERE to_id = ?1 AND (?2 IS NULL OR label = ?2) ORDER BY sort, id', id, label ?? null);
+
+// --- editor locks (EDITOR.md S2.8, S3.5) -----------------------------------
+// One row per node. A lock is live while `expires_at` is in the future; an
+// expired row is ignored and replaced, never swept. Times are ms since 1970.
+export const LOCK_TTL = 60000;
+
+// the live lock of a node, or null
+export const getLock = (h, id, now = Date.now()) => h.get('SELECT holder, user_id, acquired_at, expires_at FROM node_locks WHERE node_id = ? AND expires_at > ?', id, now);
+
+// Take or renew the lock for `holder`.
+// -> { ok: true, expires_at } | { ok: false, holder, expires_at } (someone else holds it)
+export function takeLock(h, id, holder, { userId = null, ttl = LOCK_TTL, now = Date.now() } = {}) {
+  return h.tx(() => {
+    const live = getLock(h, id, now);
+
+    if(live && live.holder !== holder) return { ok: false, holder: live.holder, expires_at: live.expires_at };
+
+    const expires = now + ttl;
+
+    h.run(
+      `INSERT INTO node_locks (node_id, holder, user_id, acquired_at, expires_at) VALUES (?1, ?2, ?3, ?4, ?5)
+       ON CONFLICT (node_id) DO UPDATE SET holder = excluded.holder, user_id = excluded.user_id, expires_at = excluded.expires_at,
+         acquired_at = CASE WHEN node_locks.holder = excluded.holder AND node_locks.expires_at > ?4 THEN node_locks.acquired_at ELSE excluded.acquired_at END`,
+      id, holder, userId, now, expires,
+    );
+
+    return { ok: true, expires_at: expires };
+  });
+}
+
+// release the lock if `holder` holds it; true when a row went
+export const releaseLock = (h, id, holder) => h.run('DELETE FROM node_locks WHERE node_id = ? AND holder = ?', id, holder).changes > 0;
+
+// remove the lock whoever holds it; true when a row went
+export const breakLock = (h, id) => h.run('DELETE FROM node_locks WHERE node_id = ?', id).changes > 0;

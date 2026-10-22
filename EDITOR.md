@@ -376,7 +376,7 @@ Every gesture ends in exactly **one history entry** (S2.6), so a pinch is one un
   contrasts come from tokens.
 - Errors are translated keys, never raw server text (`editor.error.<code>`):
   `invalid`, `too_large`, `missing_photo`, `locked`, `conflict`, `network`,
-  `forbidden`, `quota`.
+  `forbidden`, `quota`, `bake_failed` (500, a photo could not be baked).
 - RTL: the tool columns mirror with `dir` (logical properties in `layout.css`).
 
 ---
@@ -503,8 +503,7 @@ SQLite transaction. This section was `PLAN.md` S8 "Saving a node".
      is already a JPEG): JPEG at **quality 99** (default 4:2:0);
    - with an alpha channel (e.g. after a cutout): WebP q99 or PNG, never JPEG.
    The baking source is the display file; the crop/extend stays a non-destructive
-   transform in the document. (Open: `jpegtran -copy none` drops an ICC profile;
-   keep it when present and not sRGB.)
+   transform in the document. A non-sRGB ICC profile is kept (E24, S10 point 1).
 3. Additionally write `<hash>.thumb.jpg`: a square rendition of the node with its
    own crop/extend applied (same quality rule: at most the source's quality for JPEG
    sources, 99 otherwise).
@@ -664,40 +663,40 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 ### Phase B - server storage (S)
 
-- [ ] **E18 `server/db/db.js` + `schema.sql`**: open `data/wb.sqlite3`, WAL, foreign keys,
+- [x] **E18 `server/db/db.js` + `schema.sql`**: open `data/wb.sqlite3`, WAL, foreign keys,
       `user_version` migrations, tables of `P` S8 incl. graph columns, `node_photos.role`,
       `node_locks`. Done when a fresh start creates the file and a second start is a no-op.
-- [ ] **E19 `server/db/nodes.js`**: prepared statements `insertNode, getNode, updateNode(rev),
+- [x] **E19 `server/db/nodes.js`**: prepared statements `insertNode, getNode, updateNode(rev),
       deleteNode, upsertPhoto, setNodePhotos, links`. Done when unit tests round-trip a node.
-- [ ] **E20 `server/node/validate.js`**: server validation = `model.validate` + metadata +
+- [x] **E20 `server/node/validate.js`**: server validation = `model.validate` + metadata +
       photo existence check. Done when a doc naming a missing hash returns `missing_photo`.
-- [ ] **E21 `bake.js`, JPEG pass-through**: orientation as lossless `jpegtran`, metadata
+- [x] **E21 `bake.js`, JPEG pass-through**: orientation as lossless `jpegtran`, metadata
       stripped. Done when the output decodes equal pixels to the oriented input and EXIF is gone.
-- [ ] **E22 `bake.js`, shrink**: long edge > 2048 -> ImageMagick at own `%Q` (90 fallback).
+- [x] **E22 `bake.js`, shrink**: long edge > 2048 -> ImageMagick at own `%Q` (90 fallback).
       Done when output quality estimate <= source and long edge = 2048.
-- [ ] **E23 `bake.js`, non-JPEG and alpha**: opaque -> JPEG q99; alpha -> WebP q99/PNG.
+- [x] **E23 `bake.js`, non-JPEG and alpha**: opaque -> JPEG q99; alpha -> WebP q99/PNG.
       Done when a PNG with alpha never becomes JPEG.
-- [ ] **E24 `bake.js`, HEIC display source and ICC note**: baking reads the display
+- [x] **E24 `bake.js`, HEIC display source and ICC note**: baking reads the display
       file; keep non-sRGB ICC if present (decide with `jpegtran -copy icc`). Done when
       a HEIC fixture bakes to JPEG.
-- [ ] **E25 thumbnail rendition**: square `<hash>.thumb.jpg` with the node's fit applied
+- [x] **E25 thumbnail rendition**: square `<hash>.thumb.jpg` with the node's fit applied
       (PoC: first photo step). Done when the file is square and uses the padding colours.
-- [ ] **E26 `POST /api/nodes`**: validate -> bake -> transaction -> delete uploads after
+- [x] **E26 `POST /api/nodes`**: validate -> bake -> transaction -> delete uploads after
       commit; error mapping. Done when a node with two uploads appears in the DB and
       the uploads are gone.
-- [ ] **E27 crash reconcile at start**: remove uploads that also exist in `data/photos`.
+- [x] **E27 crash reconcile at start**: remove uploads that also exist in `data/photos`.
       Done when a test that kills the process between steps 2 and 5 ends consistent.
-- [ ] **E28 `GET /api/nodes/:id`, `/files/photos/...`**: visibility check (PoC: all), cache
+- [x] **E28 `GET /api/nodes/:id`, `/files/photos/...`**: visibility check (PoC: all), cache
       headers by hash. Done when curl returns the document and the baked photo.
-- [ ] **E29 `PUT /api/nodes/:id` with `rev`**: 409 on mismatch; re-bake only new uploads;
+- [x] **E29 `PUT /api/nodes/:id` with `rev`**: 409 on mismatch; re-bake only new uploads;
       photos no longer referenced are garbage-collected. Done when two stale puts yield one 409.
-- [ ] **E30 `DELETE /api/nodes/:id`**: node, `node_photos`, edges, orphan photos. Done when
+- [x] **E30 `DELETE /api/nodes/:id`**: node, `node_photos`, edges, orphan photos. Done when
       no orphan file remains.
-- [ ] **E31 `server/api/locks.js`**: take/renew/release/break, expiry 60 s, `holder` from a
+- [x] **E31 `server/api/locks.js`**: take/renew/release/break, expiry 60 s, `holder` from a
       session cookie. Done when a fake clock test shows expiry and takeover.
-- [ ] **E32 SSR read-only page `GET /:lang/node/:id`** using `renderNode`. Done when the
+- [x] **E32 SSR read-only page `GET /:lang/node/:id`** using `renderNode`. Done when the
       HTML shows the node without JavaScript.
-- [ ] **E33 hostile and limits tests**: oversize doc/body, unknown op, dangling ids, bad
+- [x] **E33 hostile and limits tests**: oversize doc/body, unknown op, dangling ids, bad
       hash/extension, theme injection, zero-byte, tool missing. Done when all return the
       documented codes and leave no stray files.
 
@@ -853,8 +852,8 @@ Colour first (E84-E87 can start any time after E3), then text.
 
 ## 10. Open points
 
-1. **ICC profiles** on lossless JPEG baking (`jpegtran -copy icc`): keep a non-sRGB
-   profile? Decide at E24.
+1. **ICC profiles** (decided at E24): a non-sRGB profile is kept, an sRGB one or none is
+   dropped. This `jpegtran` has no `-copy icc`, so the profile is put back with `exiftool`.
 2. **Undo across saves** is allowed (S2.6); confirm that is what you want.
 3. **Slides/grid transitions**: which simple transitions? (fade only, proposed.)
 4. **Fonts**: roles decided - Fixed, one artistic book serif, one slick smooth sans (not Caslon/Open Sans

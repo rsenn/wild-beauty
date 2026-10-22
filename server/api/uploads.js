@@ -148,13 +148,12 @@ export function serveUpload(name, method) {
   return file.exists().then(found => (found ? new Response(method === 'HEAD' ? null : file, { headers: { ...headers, 'content-length': String(file.size) } }) : new Response('not found\n', { status: 404 })));
 }
 
-// DELETE /api/uploads/<hash>: the original, the display file and the sidecar
-export async function deleteUpload(hash) {
-  if(!HASH.test(hash)) return fail(400, 'bad-hash', 'invalid hash');
-
+// the original, the display file and the sidecar of an upload; false when
+// there is no such upload
+export async function removeUpload(hash) {
   const meta = existsSync(sidecarPath(hash)) ? await Bun.file(sidecarPath(hash)).json() : null;
 
-  if(!meta) return fail(404, 'not-found', 'no such upload');
+  if(!meta) return false;
 
   for(const name of new Set([`${hash}.${meta.ext}`, meta.display, `${hash}.json`])) {
     if(!UPLOAD_FILE.test(name) && name !== `${hash}.json`) continue;
@@ -163,5 +162,15 @@ export async function deleteUpload(hash) {
     rmSync(resolve(config.uploadsDir, name), { force: true });
   }
 
-  return new Response(null, { status: 204 });
+  return true;
+}
+
+// the sidecar record of an upload, or null
+export const readUpload = async hash => (HASH.test(hash) && existsSync(sidecarPath(hash)) ? Bun.file(sidecarPath(hash)).json().catch(() => null) : null);
+
+// DELETE /api/uploads/<hash>
+export async function deleteUpload(hash) {
+  if(!HASH.test(hash)) return fail(400, 'bad-hash', 'invalid hash');
+
+  return (await removeUpload(hash)) ? new Response(null, { status: 204 }) : fail(404, 'not-found', 'no such upload');
 }

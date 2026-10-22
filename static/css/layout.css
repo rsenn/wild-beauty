@@ -600,3 +600,18 @@ body {
     max-width: calc(90vmin + 2 * 56px + 16px);
   }
 }
+
+.wb-node-title {
+  margin: 8px 0;
+  font-size: var(--wb-font-size-lead);
+}
+
+.wb-node-view {
+  aspect-ratio: 1;
+  width: min(100%, 90vmin);
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--wb-card-ground);
+  border: var(--wb-border-width) solid var(--wb-ink);
+  box-shadow: var(--wb-shadow-card);
+}
