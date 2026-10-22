@@ -121,6 +121,7 @@ setting, WebGPU, WebXR, audio, stairs, multiplayer, game and VM nodes.
    Chrome 121), Safari 26 and Firefox on Windows/Apple silicon, but Linux and
    Android Firefox lag [s]. three.js has a separate `three/webgpu` build (821 KB
    min, 205 KB gzip) [v]; take it only if a feature needs it.
+   Pattern to watch: `WebGPURenderer` + TSL, one shader for both backends (S8).
 
 ---
 
@@ -514,6 +515,19 @@ common and only the module that mounts into the canvas differs.
   [v]) with a WebGL2 fallback inside it; we can swap it in for galleries later
   without changing the plan format. TSL (three's shading language) is the way to
   write one shader for both.
+- **Pattern to watch: `WebGPURenderer` + TSL** (added 2026-10-22, from the project
+  owner; not measured here). For a new gallery project the current practice is to use
+  three.js's native `WebGPURenderer` together with TSL (Three Shading Language).
+  Shaders are written once in TSL and target the high-performance WebGPU backend,
+  with an automatic WebGL2 fallback for browsers without WebGPU. That fits the heavy
+  parts of a gallery: architectural lighting (S3.4), reflection probes, and
+  post-processing such as a bloom on picture frames, without losing frame rate.
+  How it sits with the plan: the baseline stays WebGL (S0 point 8), so a gallery
+  that needs one of those effects writes it in TSL from the start and loads
+  `three/webgpu` for it; plain galleries keep the smaller WebGL build. The node
+  format does not change either way. Before adopting: check the `three/webgpu`
+  size against the vendored-module rule and measure the fallback path on the Android
+  Firefox and Linux cases above.
 - **WebXR**: three.js supports it; a "walk in VR" button is a small add-on later.
   Not for the first version.
 
