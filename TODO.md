@@ -1,8 +1,9 @@
 # TODO - Wild Beauty rewrite
 
-Source of truth: this file for the **directory layout** (PLAN S5 mirrors it), `PLAN.md` for
-everything else, then `DESIGN.md`. A content item is a **node** (not tile). Videos and
-handwriting recognition are out of the PoC. Target is
+Source of truth: this file for the **directory layout** (PLAN S5 mirrors it), `EDITOR.md`
+for the node editor, `PLAN.md` for everything else, then `DESIGN.md`. A content item is a **node** (not tile). Videos and
+handwriting recognition are out of the PoC. After the PoC: M12 graph view (`GRAPH.md`) and
+M13 3D gallery (`GALLERY.md`). Target is
 **Bun only**, no runtime abstraction (`PLAN.md` S2.1). Old code is read-only in
 `attic/` (`CLAUDE.md`).
 
@@ -226,63 +227,22 @@ woff2/woff/ttf. Fonts are served from `/static/`.
 **First deliverable ends here (M1-M7): `/new` with design, i18n, drop zone,
 progress, metadata, palette, list, delete.**
 
-## M8 - Node editor shell
+## M8 - M10 - Node editor, save, vector tools: see `EDITOR.md` S9
 
-- [ ] **8.1 "New node" button** (`action-new.svg`) under the upload area;
-      mounts `NodeEditor` below it. **One editor at a time** (decided 2026-10-22):
-      opening another replaces it (ask to save when dirty). No photos needed.
-- [ ] **8.2 Square frame**: `aspect-ratio: 1`, 1px outline, tool columns left
-      and right, `overflow: hidden; touch-action: none; contain: paint`.
-- [ ] **8.3 Node document model** `client/editor/model.js` (v1; photo steps
-      only) and `render.js` (model -> SVG vnodes, also used for SSR) (P S7).
-      The model has `style: { theme, vars }` from the start (Theming rule).
-- [ ] **8.3b Per-node theme**: the editor frame and the rendered node sit in a
-      wrapper with the node's `data-theme` and sanitised vars (2b.5); a theme
-      picker in the right tool column changes only that node. Done when the
-      one editor and a read-only rendering of another node (tile) wear different
-      themes at once.
-- [ ] **8.4 Drag a card into the frame** (HTML5 drag plus pointer fallback) ->
-      `photo` step, `fit: extend`.
-- [ ] **8.5 Gestures** `gestures.js`: one pointer translate, two pointers
-      similarity transform, wheel zoom, double-tap cycles extend/cover/free
-      (P S11.3). Unit test `solveSimilarity` without a DOM.
-- [ ] **8.6 Undo/redo** for steps.
-- [ ] **8.7 Film-strip**: vertical, right of the frame, only when >1 photo;
-      select, reorder (P S11.2).
+The editor's tasks moved to `EDITOR.md` S9 (E1-E83, client and server, small and
+ordered). Mapping from the old milestones:
 
-## M9 - Save a node
+| Old | Now (`EDITOR.md` S9) |
+|---|---|
+| M8 Node editor shell (8.1-8.7) | phases A (model, pure code), C (shell), D (photos), E (pages) |
+| M9 Save a node (9.1-9.4) | phase B (server storage, E18-E33) and G (save/update/open/lock, E64-E69) |
+| M10 Vector tools (10.1-10.5) | phases A (E10-E13 pen and shapes pure code), F (E59-E63) |
+| per-node theme (8.3b, 9.2b) | E17, E70 |
+| (new) colour palette and text boxes | phase K (E84-E97), after phase F |
 
-- [ ] **9.1 SQLite schema** (`bun:sqlite`, WAL, `user_version`): photos, nodes,
-      node_photos, node_links (P S8), including the graph columns (`owner_id`,
-      `visibility`, `group_id`, `kind`, `x`, `y`, `pinned`, `tile`, `rev`), `node_links.sort` and
-      the indexes on `node_links(from_id, sort)` and `(to_id)`. All SQL lives in
-      `server/db/`. Done when the DB file is created at start.
-- [ ] **9.2 `POST /api/nodes`**: validate doc, bake used uploads into
-      `data/photos/<hash>.<ext>` (auto-orient, strip, max 2048 edge; JPEG sources are never
-      re-encoded at a higher quality: lossless `jpegtran` pass-through, or own `%Q` when
-      shrunk; non-JPEG opaque sources JPEG q99; P S8) plus a
-      square thumbnail rendition = the node **tile** (alpha photos baked as WebP/PNG,
-      never JPEG; who renders it: `GRAPH.md` S3.7), insert rows in one transaction, delete uploads only
-      after commit; reconcile leftovers at start (P S8).
-- [ ] **9.2b Theme in the DB**: `nodes.doc` keeps `style.theme`; on save the
-      sanitiser runs again and rejects unknown theme ids. Done when a node saved
-      with `blueprint` reloads with `blueprint`.
-- [ ] **9.3 Save button** in the editor; saved photos disappear from the upload
-      list.
-- [ ] **9.4 Pages and modes**: multi-page nodes, step scrubber, `free` /
-      `slides` / `grid` (P S7, S11.2).
-
-## M10 - Vector tools
-
-- [ ] **10.1 Vendor `perfect-freehand` and `bezier-js`** (extend 2.1).
-- [ ] **10.2 Ink pen**: pointer samples -> One-Euro filter -> resample ->
-      perfect-freehand outline -> `stroke` step; width from pressure and speed
-      (P S11.4).
-- [ ] **10.3 Shape tool**: click vertices, drag handles, open/closed/filled,
-      `shape` step as SVG path (P S11.5).
-- [ ] **10.4 Clip / unclip** a photo with a shape; blend mode and opacity
-      popover (P S11.6).
-- [ ] **10.5 Gesture snapping** (`$1`/`$P`) for scribbled shapes. Deferred past the PoC.
+Milestones for orientation: **M8 = phases A+C+D**, **M9 = phases B+G**, **M10 = phase F**;
+phase E (pages) and H (theme, i18n, a11y, devices) close the editor. One editor at a time;
+the lock lives in E31/E67.
 
 ## M11 - Optional extras
 
@@ -300,11 +260,11 @@ progress, metadata, palette, list, delete.**
       upload out (new SHA-256, `derivedFrom`, `op`, alpha PNG/WebP, never JPEG), shown
       in the upload list; button hidden unless `capabilities.imgproc` (P S10).
 - [ ] **11.1c Server-side clip**: `clip` job from a `shape` step (polygon or SVG path +
-      the photo matrix) for a destructive cut-out and for the thumbnail rendition in
-      9.2 (P S10 use 2).
+      the photo matrix) for a destructive cut-out and for the thumbnail rendition
+      (`EDITOR.md` E25; P S10 use 2).
 - [ ] **11.2 Handwriting recognition**: deferred past the PoC (decided 2026-10-21).
 
-## M12 - Graph view (after M9; design and numbers in `GRAPH.md`)
+## M12 - Graph view (after the editor's save phase; design and numbers in `GRAPH.md`)
 
 - [x] **12.0 Decide** (2026-10-22): shared landscape, visibility owner/group/public,
       positions owner-defined, server-side cached tiles later. Still open: `GRAPH.md`
@@ -319,6 +279,8 @@ progress, metadata, palette, list, delete.**
 - [ ] **12.2 Ops** `POST /api/graph/ops`: `link`, `unlink`, `move`, `pin`, `order`
       (shift siblings), `retitle`; edge labels limited to `child`, `sells`, `ref`; one
       transaction, bumps `rev`; permission check: owner or group admin.
+- [ ] **12.2b Vendor** `d3-force`, `d3-zoom`, `d3-drag`, `d3-quadtree` (ISC) via
+      `tools/vendor.sh`, versions in `vendor/VERSIONS`, relative imports only.
 - [ ] **12.3 `GraphView`** (Preact SVG + vendored `d3-force`/`d3-zoom`/`d3-drag`):
       tokens for node/edge/label, stored positions, expand-on-demand on tap, tiles
       read-only, semantic zoom (colour -> label -> tile). Looks like
@@ -332,7 +294,7 @@ progress, metadata, palette, list, delete.**
 - [ ] **12.3c Run presentations**: filmstrip/carousel and masonry (per category) as
       alternatives to the straight spine, chosen by the list node.
 - [ ] **12.4 Edit gestures**: drag to move/pin, drag handle to relink, drag in a list to
-      reorder; open a node = the single editor (8.1).
+      reorder; open a node = the single editor (`EDITOR.md` E34).
 - [ ] **12.5 Live updates**: Bun WebSocket pub/sub of ops, `rev` gap -> refetch.
 - [ ] **12.6 Overall-root** (shared landscape): seed the `overall-root` node with
       children `user-profiles` and `featured`; on sign-up create the user's root, a
@@ -344,7 +306,7 @@ progress, metadata, palette, list, delete.**
       profile in three taps.
 - [ ] **12.6b Node lock**: `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
       `DELETE` (release), expiry after ~60 s without heartbeat, owner may break;
-      editor 8.1 takes the lock on open, shows "locked by <name>" read-only when
+      the editor (`EDITOR.md` E67) takes the lock on open, shows "locked by <name>" read-only when
       refused. Ops and saves are rejected without the lock.
 - [ ] **12.7 Groups** (with accounts): create group, invite/accept/leave, promote to
       `admin`, set a node's visibility to `group` (one `group_id`); ops are allowed
@@ -353,22 +315,22 @@ progress, metadata, palette, list, delete.**
 - [ ] **12.8 Server-side tiles** (later): rasterise a node on the server, cache by
       `rev`, serve as the `tile`; until then the palette colour is the fallback.
 
-## M13 - Canvas nodes: 3D gallery, version 1 (`GALLERY.md` S0b, S10; after M10 and M12)
+## M13 - Canvas nodes: 3D gallery, version 1 (`GALLERY.md` S0b, S10; after the editor's phase F and M12; editor parts: `EDITOR.md` E75-E78)
 
 Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
 
-- [ ] **13.1 Document**: `scene3d` step (plan, style, start), validation, sanitiser;
-      `node_photos.role` (`picture` | `texture`) and a "use as texture" toggle on
-      photo cards; texture photos are never hung.
+- [ ] **13.1 Document**: `scene3d` step (plan, style, start), validation, sanitiser; photo
+      role toggle (`EDITOR.md` E71, E76, E77); texture photos are never hung.
 - [ ] **13.2 Builder** `client/gallery/build.js`: walls, room and corridor floors, ramps
       (slope <= 1:12, walls tilt), texture set with default quads (`tools/gallery-warp.mjs`
       is the prototype); unit-tested without a DOM.
-- [ ] **13.3 Scene**: vendored three.js loaded on enter, starfield, art lighting.
+- [ ] **13.3 Scene**: three.js 0.186.1 (`build/three.module.min.js`, `three.core.min.js`,
+      `PointerLockControls`) vendored via `tools/vendor.sh`, loaded on enter, starfield, art lighting.
 - [ ] **13.4 Walking**: pointer lock + WASD, stick + drag-look, wall collision, floor height.
 - [ ] **13.5 Auto-hang**: child tiles on room insides (`GALLERY.md` S5.1); tap opens the node.
 - [ ] **13.6 Host**: poster until entered, one live canvas, viewport-fill, dispose on leave.
-- [ ] **13.7 Plan layer in the 2D editor**: wall layer with height; rooms = closed, corridors
-      = lines; refuse corners sharper than 90 degrees.
+- [ ] **13.7 Plan layer in the 2D editor** (`EDITOR.md` E75): wall layer with height; rooms =
+      closed, corridors = lines; refuse corners sharper than 90 degrees.
 
 ## Docs and housekeeping (do alongside, not blocking)
 
@@ -381,12 +343,14 @@ Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
       what a node may override, the sanitiser's whitelist.
 - [ ] **H2 Update `attic/HISTORIC.md`** paths to the `attic/` prefix.
 - [ ] **H3 `DESIGN.md` S4.x vs PoC**: mark which parts the PoC replaces (done
-      for S4.1; do S4.2.1 `tiles` -> `nodes` (decided: node, not tile), S4.3 image pipeline, S4.5 editor).
+      for S4.1; do S4.2.1 `tiles` -> `nodes` (decided: node, not tile), S4.3 image pipeline; S4.5 editor now points to `EDITOR.md`).
 - [ ] **H4 Tests**: `bun test` for router/ingest/palette/i18n parity; hostile
       inputs (traversal, extension mismatch, oversize, zero byte, tool missing)
       (P S13).
 - [x] **H5 Resolve open questions** (P S15): all decided: SHA-256, upload formats
       (jpg/jpeg/png/heif/heic, HEIC extracted), baked JPEG without raising source quality (q99 only for non-JPEG sources; alpha: WebP/PNG), alpha on
       cutout, server-side clip, videos out, node naming, no handwriting.
+- [ ] **H7 Keep the companion docs in step**: `GRAPH.md`, `GALLERY.md`, `PLAN.md`,
+      `DESIGN.md` 4a/4.2.1/4.4/4.5 and this file must agree (decisions of 2026-10-22).
 - [ ] **H6 Commit hygiene**: commit `DESIGN.md`, `PLAN.md`, `TODO.md`,
       `CLAUDE.md` and the `attic/` move as separate commits.

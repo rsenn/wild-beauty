@@ -1,6 +1,6 @@
 # Project Status: legacy code ARCHIVED in `attic/`, rewrite in progress
 
-The original Next.js/Hasura implementation is a frozen historical artifact and lives in `attic/` (also pinned by the git tag and branch `before-rewrite`). The rewrite is a minimal PoC described in `PLAN.md`; library choices and the design source of truth are in `DESIGN.md`; `attic/HISTORIC.md` is the structural reference for the old code (its paths predate the move, read `components/…` as `attic/components/…`); `attic/README.md` is the old readme.
+The original Next.js/Hasura implementation is a frozen historical artifact and lives in `attic/` (also pinned by the git tag and branch `before-rewrite`). The rewrite is a minimal PoC described in `PLAN.md`; library choices and the design source of truth are in `DESIGN.md`; `TODO.md` is the working task list and the authority for the directory layout; `EDITOR.md` specifies the node editor (UX, node data, server, granular tasks E1-E97, incl. the colour palette and text boxes); `GRAPH.md` (graph view, transport, databases, visibility, groups, locks) and `GALLERY.md` (walkable 3D gallery node) are research and decision records for the work after the PoC; `opencv-imgproc.md` specifies the optional background-removal tool; `attic/HISTORIC.md` is the structural reference for the old code (its paths predate the move, read `components/…` as `attic/components/…`); `attic/README.md` is the old readme.
 
 ## Hard rule: no changes inside `attic/`
 

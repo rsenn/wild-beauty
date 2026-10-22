@@ -167,6 +167,15 @@ items_users (                   -- join table
 
 #### 4.2.1 Proposed new schema
 
+> **Update 2026-10-22.** `tiles` are called **nodes** now. The PoC schema is in
+> `PLAN.md` S8 (SQLite); it adds to `nodes`: `owner_id`, `visibility` (`hidden` |
+> `group` | `public`), `group_id` (one per node), `kind`, `x`, `y`, `pinned`, `tile`
+> (hash of the baked square raster), `rev`; `node_links.sort` orders `child` edges;
+> `node_photos.role` (`picture` | `texture`). Edge labels are a small vocabulary:
+> `child` (ordered), `sells`, `ref`. Groups get a `role` (`member` | `curator` |
+> `admin`). Reasons and measurements: `GRAPH.md`. The block below is the original
+> proposal and is kept for history.
+
 ```
 users        (id, username, email, password_hash, created_at, ...)
 groups       (id, name, created_at, ...)                             -- real DB entity, not content (S8 Q7)
@@ -198,6 +207,19 @@ Notes:
 
 ### 4.4 Graph Navigation
 
+> **Update 2026-10-22.** Decided in `GRAPH.md`: the graph is traversed **shallowly
+> from a root** (the viewer starts at a root and walks adjacent lists/trees to some
+> depth), so the API is a rooted, depth-limited neighbourhood fetch (2 ms and 3 KB
+> brotli at 1 M nodes in the database), not a whole-graph snapshot. Two views on the
+> same data: a **force graph** (Preact SVG + `d3-force`/`d3-zoom`/`d3-drag`, vendored)
+> to organise (move, pin, order, relink), and a **branch view** to navigate (a spine
+> of square tiles from top-centre to lower-left, children branching to the lower
+> right; tap a tile to zoom, lower-left walks the spine, right descends; filmstrip or
+> masonry for long runs). The shared landscape is itself a graph: an `overall-root`
+> with `user-profiles` and `featured`. The "rooted or whole graph" question below is
+> answered: rooted. Canvas/WebGL renderers (Sigma.js, cosmos.gl) are only a fallback
+> for a very large flat graph; Neo4j NVL is excluded by licence.
+
 - Model: nodes = tiles (with palette-derived color + thumbnail) plus entity nodes for `users`/`groups` (S7.4/S8 Q7); edges = `tile_links` rows, a general graph (cycles allowed, S8 Q1) with a required semantic `label` per edge (S8 Q2) the view can style/filter by.
 - Rendering: use `d3-force` for the physics simulation (battle-tested, replaces the 450-line hand-rolled `fd-graph.js`) with a canvas or SVG renderer - canvas recommended once the graph exceeds a few hundred nodes for performance. Since the frontend is Preact (S4.1), wire `d3-force` directly to a canvas/SVG Preact component rather than relying on a React-specific wrapper like `react-force-graph`.
 - Interaction: click a node to navigate/zoom into that tile (a CSS view-transition, replacing the old hand-computed `DOMMatrix` animation - the View Transitions API is framework-agnostic and fits a Preact/Astro stack better than a React-specific animation library), pan/zoom the canvas, optionally filter by author/tag/edge-label.
@@ -205,14 +227,31 @@ Notes:
 
 ### 4.5 Content Editor
 
-Keep the two-step flow (upload photos -> compose tile). Replace the old ad hoc `EditorStore.addField` dynamic-field system with a per-tile **layout editor** (decided - S8 Q8) plus a small kept-alongside named-field system (decided - S8 Q3), both stored on `tiles` (S4.2):
+Moved to `EDITOR.md` (UX specification, node data, server, task list). Decisions that
+stay valid and are carried over there: two-step flow (upload photos, then compose), a
+free layout editor with a curated set of 2-3 fonts and freely placed text boxes (font, colour,
+background with alpha or gradient, border radius; S2.3b there), a small derived colour palette
+(S2.3a), per-photo mask/blend/transform, and named structured fields kept alongside (S2.10 and
+S3.1 there);
+the old `EditorStore.addField` form and the raw `Id`/`Parent` overlay are dropped. Only one
+editor is open at a time (lock-protected).
 
-- **Typography**: the user picks one of a small, curated set of 2-3 fonts for the tile (not a free font picker) - keeps the visual identity coherent (S7.3) while giving some per-tile expression.
-- **Text placement**: the user arbitrarily places one or more paragraph/text blocks on the tile's canvas (free positioning, not a fixed title/body template) - closer to a minimal page-builder than a form. Stored in `tiles.layout`.
-- **Photo treatment**: each photo attached to the tile can be individually masked (clip to a shape), composited/blended (CSS `mix-blend-mode`/`mask-*` equivalents), transformed (position, scale, rotation), and animated - the user directly art-directs how their photos sit within the tile rather than getting a fixed slideshow-only presentation. Stored in `tiles.layout`.
-- **Structured fields**: separately from the visual layout, the user can still add named metadata fields (e.g. "Location: Berlin") - stored in `tiles.fields`, an ordered array of `{label, value}`, distinct from the free-form layout (S8 Q3).
-- This explicitly replaces the old raw `Id`/`Parent` debug-style card metadata (S7.6, S8 Q8) - the card's visible content is now entirely the user's own composed layout (plus any structured fields they chose to add), with no framework-generated ids/labels overlaid.
-- Implementation note: the layout editor is a real (small) canvas/layout engine, not a CSS-only concern - budget for a dedicated editor surface (e.g., an absolutely-positioned canvas with drag/resize handles, serialized to `tiles.layout` JSON) rather than treating it as a minor styling add-on to S2.4's old flow.
+## 4a. After the PoC (2026-10-22)
+
+Decided since the PoC plan; details and measurements in the named documents.
+
+- **Graph** (`GRAPH.md`): rooted shallow traversal; typical user ~100 nodes (4 albums,
+  20 projects, 50 ordered articles, 2 galleries (one public, one hidden), shop items
+  that `sells`-link to exhibits); SQLite for the PoC, PostgreSQL as the scale-out
+  step, no graph database needed; visibility `hidden`/`group`/`public` filtered in
+  the traversal; groups are invite-only with roles; edit rights for the owner and
+  group admins/curators; `featured` curated by a curators group; positions are
+  owner-defined; tiles are rasterised and cached on the server later.
+- **3D gallery** (`GALLERY.md`): three.js (MIT) loaded when a gallery is entered;
+  walls from polylines, rooms are closed polygons, corridors are lines, ramps at
+  most 1:12 with tilted walls, up to three texture photos (walls split-in-4 or
+  single, room floor, corridor floor), starfield sky, spot-lit pictures; one live
+  WebGL canvas at a time; version 1 is deliberately minimal.
 
 ## 5. Migration Considerations
 
@@ -358,6 +397,8 @@ a drop-shadow filter on every `a:hover`; `:focus { outline: none !important }`
 
 ## 8. Open Questions
 
+> 2026-10-22: Q1/Q2 are refined in `GRAPH.md` (edge labels are `child`, `sells`, `ref`; ordered children carry `sort`); Q6 hosting: SQLite for the PoC, PostgreSQL as the scale-out step (`GRAPH.md` S4); "tile" reads "node".
+
 All nine original questions are now resolved; only sub-questions raised while resolving them remain open (marked below). Kept as a historical decision log rather than deleted.
 
 1. **True DAG or general graph? - RESOLVED**: general graph, cycles allowed. No reachability check needed on `tile_links` writes; mutual cross-links between tiles (A "see also" B and B "see also" A) are treated as a normal pattern, not an error case.
@@ -400,7 +441,7 @@ Every QuickJS entry file starts with `import 'globals';` (the first spike omitte
 | `preact` (+ `preact/hooks`) | 10.29.8 | MIT | UI | Verified under Bun and qjsm. npm `latest` is already **11.0.1**; PoC pins the 10 line and re-tests on 11 later. Files `dist/preact.mjs`, `hooks/dist/hooks.mjs` |
 | `htm` | 3.1.1 | Apache-2.0 | `` html`...` `` templates bound to `h` | 1.2 KB `dist/htm.mjs`. Do not use `htm/preact/standalone` (bundles a second Preact copy) |
 | `preact-render-to-string` | 6.8.1 | MIT | SSR | `dist/index.mjs`; peer `preact >=10`. **Verified identical output under Bun and qjsm**, including attribute and text escaping. Its one bare import (`from"preact"`) is rewritten to `./preact.js` when vendoring |
-| `perfect-freehand` | 1.2.3 | MIT | ink-pen outline from pressure/speed samples | ~6 KB of real code, pure functions, ESM in `dist/esm`. Replaces the hand-written outline code planned in PLAN S11.4; smoothing and the speed model stay ours |
+| `perfect-freehand` | 1.2.3 | MIT | ink-pen outline from pressure/speed samples | ~6 KB of real code, pure functions, ESM in `dist/esm`. Replaces the hand-written outline code once planned for the pen (`EDITOR.md` S6); smoothing and the speed model stay ours |
 | `bezier-js` | 6.1.4 | MIT | hit-testing, nearest point, splitting, bounding boxes for the shape tool | native ESM (`src/bezier.js`), no dependencies |
 | ImageMagick | 6.9.12-98 (installed; command is `convert`, IM7 uses `magick`) | Apache-style | all pixel work: orient, resize, pad, strip, re-encode, palette | detected at start: `magick` else `convert`. **Palette needs no JS library** (and where `opencv-imgproc palette` from the qjs-opencv project is installed, the server uses it instead: dominant-colour grabber, `--count=8`, optional CIE76/CIE94/k-means distance; ImageMagick is the fallback and gives the weights): `convert f[0] -auto-orient -resize 128x128 -colors 8 -depth 8 -format %c histogram:info:-` printed an ordered histogram in ~0.1 s (weight, rgb, hex) - exactly the ordered `{hex, weight}` array S4.2.1 wants |
 | `mediainfo` | 24.01 (CLI) | BSD | media metadata, `--Output=JSON` | installed |
@@ -413,7 +454,7 @@ Every QuickJS entry file starts with `import 'globals';` (the first spike omitte
 | Router (~60 lines, `Request -> Response`) | Hono/Elysia/Express add a dependency for what `Bun.serve({ fetch })` plus a small route table does |
 | i18n (`t()`, interpolation) | Plurals and number/date formatting use `Intl` (available on Bun); `@messageformat/core` is more than three languages need |
 | One-Euro filter + arc-length resampler | ~40 lines; the npm `1eurofilter` is BSD-3 and adds nothing |
-| Pointer-events gestures (similarity transform from two pointers) | `@use-gesture/vanilla` (MIT, 39 KB) is generic and fights `touch-action`; our need is one function, specified in PLAN S11.3 |
+| Pointer-events gestures (similarity transform from two pointers) | `@use-gesture/vanilla` (MIT, 39 KB) is generic and fights `touch-action`; our need is one function, specified in `EDITOR.md` S6 |
 | Filmstrip reorder | `sortablejs` is 640 KB unpacked for one list; pointer events suffice |
 | Magic-byte sniffing | `file-type` pulls four dependencies; a table of ~15 signatures covers jpeg/png/webp/gif/avif/heic/tiff |
 | SHA-256 | `Bun.CryptoHasher`, no library |
@@ -430,7 +471,7 @@ Every QuickJS entry file starts with `import 'globals';` (the first spike omitte
 | `node-vibrant`, `colorthief`, `quantize` | Need pixel arrays decoded in JS; ImageMagick's histogram does the quantisation natively |
 | `@preact/signals` 2.11.3 | Not needed for the PoC; editor state is a plain store plus hooks. Revisit if redraw cost shows up |
 | `polygon-clipping` 0.15.7 | Boolean shape ops are not in the PoC (clipping is SVG `clipPath`) |
-| `paper`, `fabric`, `konva`, `tldraw` | Whole canvas frameworks; they replace rather than serve the node document model (PLAN S7) |
+| `paper`, `fabric`, `konva`, `tldraw` | Whole canvas frameworks; they replace rather than serve the node document model (`EDITOR.md` S3) |
 | `mediainfo.js` (wasm) | The CLI is installed and simpler |
 | Chrome Handwriting Recognition API as a dependency | Documented for Chrome OS, a single language (English) and a gesture model; feature-detect only. Gesture snapping uses the `$1`/`$P` recogniser written in-house (~80 lines) |
 | Tesseract.js | Wrong problem (printed OCR), large wasm |
@@ -445,6 +486,22 @@ tools/vendor.sh                  npm pack -> copy dist file -> sed bare imports 
 ```
 
 `vendor/VERSIONS` records package, version, licence and source URL per file. Licences present: MIT and Apache-2.0 (htm); keep each licence file beside its code.
+
+### 9.5b Libraries for after the PoC (not adopted yet)
+
+Researched 2026-10-22 (versions and licences from the npm registry and GitHub API;
+`GRAPH.md` S2, `GALLERY.md` S2.2). Vendored only when their milestone starts.
+
+| Library | Version | Licence | Used for |
+|---|---|---|---|
+| `d3-force`, `d3-zoom`, `d3-drag`, `d3-quadtree` | current | ISC | force graph (M12) |
+| three.js | 0.186.1 | MIT | 3D gallery (M13), loaded on enter |
+| `three-mesh-bvh`, `three-pathfinding` | 0.9.16 / 1.3.0 | MIT | only if stairs or tap-to-walk come |
+| `polygon-clipping` | 0.15.7 | MIT | polygon booleans if needed |
+| Sigma.js + graphology, cosmos.gl, Cytoscape.js | see `GRAPH.md` S2.1 | MIT | fallbacks for very large graphs |
+
+Rejected: Neo4j NVL (may only be used with Neo4j products), `clipper-lib` (BSL),
+Hyperfy (GPL-3.0), full social-VR stacks (Hubs).
 
 ### 9.6 Not verified (do before relying on it)
 

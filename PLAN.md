@@ -1,10 +1,16 @@
 # Wild Beauty - Rewrite Plan (minimal PoC)
 
-Status: draft, 2026-10-21. Supersedes the stack choices in `DESIGN.md` S4.1
+Status: draft, 2026-10-21, updated 2026-10-22 (graph and gallery decisions). Supersedes the stack choices in `DESIGN.md` S4.1
 (Astro, Postgres, Prisma, object storage, auth) **for the PoC only**; the data
 model ideas in `DESIGN.md` S4.2.1 (tiles - called **nodes** from now on -, photos, links, palette as an
 ordered array) and the visual language in S7 stay valid. The old code is
 frozen, see `CLAUDE.md` and Phase 0.
+
+Companion documents: `EDITOR.md` (the node editor: UX, data, server, tasks; the old
+S7 and S11.2-S11.6 moved there), and, for the work **after** the PoC:
+`GRAPH.md` (graph view, API, database, visibility, groups, locks), `GALLERY.md`
+(walkable 3D gallery as a node, version 1 scope), `opencv-imgproc.md` (optional
+background-removal tool), `TODO.md` (task list, M0-M13).
 
 ## 1. Scope
 
@@ -19,7 +25,10 @@ The PoC implements **one page, `/new`**, and everything it needs:
 7. two vector tools (ink pen, shape tool) and clip-path compositing
 8. saving a node: used photos move from `uploads/` to `data/` and into SQLite
 
-Out of scope: login/sessions (anyone can upload and create), the graph view,
+Items 4-8 are specified in `EDITOR.md`.
+
+Out of scope: login/sessions (anyone can upload and create), the graph view and
+the 3D gallery (designed in `GRAPH.md` / `GALLERY.md`, TODO M12-M13),
 browse pages, user/group tables, migration of the old data, **videos** (images
 only, anything else is rejected at upload), handwriting recognition.
 
@@ -40,6 +49,7 @@ still says "tile" in places; read it as "node".
 | SSR | `preact-render-to-string`; same component tree as the client |
 | Languages | de, fr, en; adding one = adding one JSON file |
 | Auth | none for the PoC; hard limits instead (size, count, type), see S9 |
+| After the PoC | graph view: Preact SVG + vendored `d3-force`/`d3-zoom`/`d3-drag`, rooted depth-limited API, one editor at a time (`GRAPH.md`); 3D gallery: vendored three.js loaded only when a gallery is entered (`GALLERY.md`) |
 | Tools | `mediainfo`, `exiv2` or `exiftool`, ImageMagick (`magick`, or `convert` on IM6 as installed here) for pixels, spawned with argv arrays, never via a shell |
 
 ### 2.1 Bun is the target; no runtime abstraction
@@ -114,8 +124,9 @@ server/                   modules the entry imports; created as they are needed
   config.js               paths, limits, tool names
   api/
     uploads.js            list / create / delete uploads, serve originals
-    nodes.js              create node, move photos to data/
+    nodes.js              node CRUD, bake (EDITOR.md S4); locks.js: node locks
     capabilities.js
+    graph.js              (M12) GET /api/graph, POST /api/graph/ops, node locks
     themes.js             GET /api/themes
   media/
     ingest.js             hash, extension, sidecar orchestration
@@ -125,30 +136,33 @@ server/                   modules the entry imports; created as they are needed
     imgproc.js            spawns `qjsm opencv-imgproc.js` (S10): cutout, clip; optional
     heif.js               HEIC/HEIF -> display jpg/png at ingest (S6.2 step 3b)
   db/
-    db.js                 helpers: open(), run(), get(), all(), tx()
+    db.js                 helpers: open(), run(), get(), all(), tx(); all SQL lives in server/db/
     schema.sql
+    graph.js              (M12) rooted neighbourhood query, ops, locks, visibility filter
 client/                   served as-is under /app/
   app.js                  hydrate entry
   html.js                 `html = htm.bind(h)`, shared by server and browser
   components/             Nav, UploadArea, UploadList, NodeEditor, Toolbar, Filmstrip, ...
   editor/
-    model.js              node document model (S7)
+    model.js              node document model (EDITOR.md S3)
     render.js             model -> SVG vnode tree (shared with SSR)
     gestures.js           pointer-events multitouch -> matrix
     pen.js                stroke capture, smoothing, width profile
     shapes.js             polyline / bezier editing
   i18n.js                 client t(), same JSON files
+  graph/                  (M12) GraphView (force graph), BranchView (spine + branches), ops client
+  gallery/                (M13) build.js (polylines -> meshes), scene, walking, auto-hang; three.js loaded on enter
 vendor/                   preact, hooks, htm, preact-render-to-string, ...; VERSIONS; served as /vendor/
 static/                   served as /static/
   css/layout.css          layout only, no colours (S16)
   themes/<id>.css         tokens only: kraft.css, blueprint.css, ...
   fonts/ img/             from the old assets
 locales/                  en.json de.json fr.json
-tools/                    vendor.sh, check-locales.js
+tools/                    vendor.sh, check-locales.js, gallery-walls.mjs, gallery-warp.mjs (benchmarks)
 docs/screenshots/         historic reference
 uploads/                  <hash>.<ext>, <hash>.json         (gitignored)
 data/                     photos/<hash>.<ext>, wb.sqlite3   (gitignored)
-PLAN.md DESIGN.md TODO.md CLAUDE.md   (old README.md and HISTORIC.md live in attic/)
+PLAN.md DESIGN.md TODO.md GRAPH.md GALLERY.md opencv-imgproc.md CLAUDE.md   (old README.md and HISTORIC.md live in attic/)
 ```
 
 `static/style.css`, `static/css/grid.css`, `static/css/react-*.css` and
@@ -179,7 +193,7 @@ documented shell snippet (`tools/vendor.sh`), checked in, and pinned by version.
 | `DELETE /api/uploads/:hash` | remove file and sidecar |
 | `GET /files/uploads/:hash.:ext` | original, used by the editor |
 | `GET /files/photos/:hash.:ext` | final stored photo |
-| `POST /api/nodes` | create node (S8) |
+| `GET/POST/PUT/DELETE /api/nodes[/:id]`, `POST/DELETE /api/nodes/:id/lock`, `GET /:lang/node/:id` | node CRUD, locks, read-only page (`EDITOR.md` S4.1) |
 | `POST /api/uploads/:hash/cutout` | optional: background removal and/or clip (job JSON body, S10); creates a derived upload; needs `qjsm` + qjs-opencv |
 
 `:hash` is validated against `^[0-9a-f]{64}$` before it touches a path.
@@ -251,32 +265,9 @@ Initial state travels as `<script type="application/json" id="boot">`.
 
 ## 7. Node document model
 
-A node is data, rendered by one interpreter, so SSR, the editor and later the
-viewer all draw the same thing. Stored as JSON in `nodes.doc`.
-
-```
-node = { v: 1, style: {...}, mode: 'free'|'slides'|'grid',
-         pages: [ page, ... ] }
-page = { id, duration?, steps: [ step, ... ] }      // step-sequencer
-step = one of
-  { op: 'photo',  id, photo: <hash>, m: [a,b,c,d,e,f],
-                  fit: 'extend'|'cover'|'free', opacity, blend, clip?: shapeId }
-  { op: 'stroke', id, pts: [[x,y,w],...], color, smooth }   // pen result
-  { op: 'shape',  id, path: 'M..C..Z', closed, fill, stroke, strokeWidth }
-  { op: 'clip',   target: photoStepId, shape: shapeId }     // set clip-path
-  { op: 'unclip', target: photoStepId }
-  { op: 'blend',  target, mode }
-  { op: 'transform', target, m, ease? }                      // animated move
-```
-
-- Coordinates live in a unit square (0..1000), independent of screen size.
-- The renderer maps steps to SVG: `<image>` with `transform`, `<clipPath>`
-  from shapes, `mix-blend-mode` via style, strokes as filled `<path>`.
-  SVG, not canvas, because it is SSR-able, resolution-independent and easy to
-  hit-test. If it gets slow with many strokes, rasterise finished pages.
-- "Free", "slide-show" and "grid" are different `mode`s over the same
-  steps (grid = auto-generated transforms, slides = one photo step per page).
-- Page N shows steps `0..k` of that page; the sequencer UI scrubs `k`.
+Moved to `EDITOR.md` S3 (document, steps, limits, files) and S5 (rendering).
+In short: a node is JSON in `nodes.doc` (`v`, `style`, `mode`, `pages` of `steps`) on
+a 0..1000 unit square, rendered by one SVG interpreter shared by SSR and client.
 
 ## 8. Database (SQLite, `data/wb.sqlite3`)
 
@@ -291,6 +282,8 @@ node_photos(node_id INT REFERENCES nodes, photo_hash TEXT REFERENCES photos,
 node_links(id INTEGER PRIMARY KEY, from_id INT, to_id INT, label TEXT NOT NULL,
            sort INT NOT NULL DEFAULT 0,        -- order among the children of from_id
            UNIQUE(from_id, to_id, label));     -- created now, unused by the PoC
+node_locks(node_id INTEGER PRIMARY KEY REFERENCES nodes, holder TEXT NOT NULL,
+           user_id INT, acquired_at INT, expires_at INT);   -- editor lock, EDITOR.md S2.8
 CREATE INDEX node_links_from ON node_links(from_id, sort);
 CREATE INDEX node_links_to   ON node_links(to_id);
 ```
@@ -301,7 +294,7 @@ PoC, written as NULL/defaults): `owner_id INT` (NULL until accounts exist),
 `public`), `group_id INT` (set when `group`; **one group per node** for now), `kind TEXT`
 (`node` | `list` | `album` | `gallery` | `shop`, a hint for the view, not a
 type system), `x REAL, y REAL, pinned INT` (position in the owner's space),
-`tile TEXT` (hash of the baked square raster of the rendered node, S8 below)
+`tile TEXT` (hash of the baked square raster of the rendered node, `EDITOR.md` S3.7)
 and `rev INT` (bumped on every change; ETag source). Groups come with
 accounts, not with the PoC: `groups(id, owner_id, name)` and
 `group_members(group_id, user_id, role TEXT NOT NULL DEFAULT 'member', PRIMARY KEY(group_id, user_id))`
@@ -320,38 +313,10 @@ projects" lists without extra tables.
 Names follow `DESIGN.md` S4.2.1 where they overlap, with `tile` renamed to
 `node` (decided, S15); `DESIGN.md` is updated when the PoC lands (TODO H3).
 
-### Saving a node (`POST /api/nodes`)
+### Saving a node
 
-Body: the node doc. In one transaction:
-1. validate the doc (size, step count, referenced hashes exist in `uploads/`
-   or `data/photos/`);
-2. for each used upload: **bake** into `data/photos/<hash>.<ext>`:
-   auto-orient, strip all metadata, resample to a max long edge (2048). The
-   encoding rule is **never raise the quality of a JPEG**:
-   - JPEG source (the upload itself, or the HEIC display file) with long edge
-     <= 2048: **no re-encode**, a lossless transform: `jpegtran -copy none`
-     with the EXIF orientation applied as `-rotate`/`-transpose`/`-flip`
-     (`-perfect`, else `-trim`), which also strips metadata;
-   - JPEG source that must be shrunk: re-encode with ImageMagick at the
-     source's own estimated quality (`identify -format %Q`, never higher; 90
-     if it cannot be estimated);
-   - any other opaque source (png, tiff, webp, gif, avif; the `display` file
-     of a HEIC is already a JPEG): JPEG at **quality 99** (`-quality 99`,
-     default 4:2:0);
-   - with an alpha channel (e.g. after a cutout): WebP q99 or PNG, never JPEG;
-   the baking source is the `display` file; the original crop/extend stays
-   a *non-destructive transform in the doc*, so editing later is lossless;
-   additionally a `<hash>.thumb.jpg` square rendition (the node **tile**: what
-   the graph and lists show, read-only; may later be rendered from the node's
-   SVG, see `GRAPH.md` S3.7) with the node's own
-   crop/extend applied for thumbnails (same quality rule: at most the
-   source's quality for JPEG sources, 99 otherwise);
-3. insert `photos`, `nodes`, `node_photos`;
-4. delete the upload and its sidecar only after the commit succeeded.
-
-If the process dies between 2 and 4 the photo exists in both places; the next
-start reconciles (anything in `data/photos` also in `uploads` is removed from
-`uploads`). Baking is idempotent.
+Moved to `EDITOR.md` S4 (validation, baking rules, quality rule, thumbnail rendition,
+commit, upload cleanup, crash reconcile, HTTP API).
 
 ## 9. Safety without accounts
 
@@ -391,10 +356,10 @@ Uses:
    (or WebP), never as JPEG. It is saved as a **new upload** (new SHA-256, `derivedFrom`
    and `op` in the sidecar) and appears in the upload list; the original stays.
 2. **Server-side clip**: a polygon or SVG path (the node doc's `shape`
-   steps, S7) is rasterised into a mask and applied as alpha. Used when a
+   steps, `EDITOR.md` S3) is rasterised into a mask and applied as alpha. Used when a
    *destructive* cut-out is wanted (derive a new photo), when baking the
-   square thumbnail rendition (S8), and for flat exports of a node. In the
-   editor, clipping stays non-destructive SVG `clipPath` (S11.6); the server
+   square thumbnail rendition (`EDITOR.md` S4), and for flat exports of a node. In the
+   editor, clipping stays non-destructive SVG `clipPath` (`EDITOR.md` S6); the server
    path exists for output that must not need an SVG renderer.
 3. Availability is detected once at start (`qjsm opencv-imgproc.js
    capabilities`) and reported in `/api/capabilities` as `imgproc`
@@ -424,60 +389,10 @@ Uses:
   the node doc.
 - Existing uploads are in the SSR HTML; the client adopts them.
 
-### 11.2 Node editor
-- Button "new node" (always enabled, with or without photos). Pressing it
-  mounts an editor **below** the upload area. **Only one editor is open at a
-  time** (decided 2026-10-22): every other rendering of a node (tile in a
-  list, graph, gallery) is read-only; opening a node for editing replaces the
-  current editor (asking to save when it has unsaved changes).
-- Layout: a square (`aspect-ratio: 1`) with `border: 1px solid`, a tool
-  column on the left and one on the right. The square has
-  `overflow: hidden; touch-action: none; contain: paint` so nothing escapes.
-- Left column: pen, shape, select/transform, clip, unclip. Right column:
-  undo/redo, page add/remove, delete node, save. (Final split decided while
-  building; the requirement is just "tools on both sides".)
-- Drag from an upload card (HTML5 drag, plus a pointer-based fallback for
-  touch where HTML5 drag is unreliable) onto the square creates a `photo`
-  step, initially `fit: extend`.
-- Film-strip: vertical, on the right of the square, only when the node has
-  more than one photo; click selects, drag reorders, scrolls with the page.
+### 11.2 - 11.6 Node editor, gestures, pen, shapes, clip
 
-### 11.3 Gestures (`gestures.js`)
-Pointer Events only. Track active pointers; one pointer = translate, two =
-pinch-zoom + rotate + translate, solved as the similarity transform that maps
-the two start points onto the two current points, composed onto the start
-matrix (so it stays stable and drift-free). Double tap or a button cycles
-`extend` -> `cover` ("zoom to fit all + crop") -> back. Wheel zoom and
-modifier-drag on desktop. Result is always a 6-number matrix in model space.
-
-### 11.4 Ink pen (`pen.js`)
-- Input: pointer samples `(x, y, pressure, t)`; mouse has no pressure, so
-  width then comes from speed alone.
-- Width model: `w = base * f(pressure) * g(speed)`, `g` decreasing with a
-  low-pass filter on speed so it does not flicker.
-- Smoothing: One-Euro filter on the points (adaptive: smooth when slow,
-  responsive when fast), then resample at fixed arc length (the "rudimentary
-  quantisation"), then output a closed outline polygon from left/right
-  offsets with round caps, as a filled path (the perfect-freehand approach,
-  written here, no dependency).
-- Stored as `stroke` with the already-smoothed points so replay is exact.
-- Handwriting recognition: **deferred past the PoC**. Possible later: `$1`/`$P`
-  to snap a scribbled circle/line/rect to a real shape, and the browser
-  Handwriting Recognition API where present (feature-detected).
-
-### 11.5 Shape tool (`shapes.js`)
-Click adds a vertex, click-drag pulls a symmetric bezier handle, Alt/second
-finger breaks symmetry, click first vertex closes. Output is an SVG path
-string. Toggles: open/closed, fill on/off, stroke width/colour. Vertices and
-handles are draggable after creation; Delete removes the vertex.
-
-### 11.6 Clip compositing
-"Clip": select a photo step, then a shape step -> emits `clip` (the shape
-becomes the photo's `clipPath`, the shape itself is no longer drawn).
-"Unclip": emits `unclip` and the shape reappears as a normal object. Blend
-mode and opacity per photo from a small popover. The photo keeps its own
-matrix; the clip is in node space, so moving the photo slides it *under*
-the clip (masking), which is the useful behaviour.
+Moved to `EDITOR.md` (UX S2, algorithms S6, tasks S9). Decided there and here:
+**one editor open at a time**, enforced in the client and by a server lock.
 
 ### 11.7 Multi-language
 - `locales/<code>.json`: flat keys, plurals via `Intl.PluralRules` (categories
@@ -501,16 +416,17 @@ Each milestone ends in something runnable and checkable.
 | 1b | Theming | `kraft` and `blueprint` themes, switcher, scoped theme, sanitiser tests (S16; TODO M2b) |
 | 2 | Upload | multi-file DnD with progress; files appear in `uploads/` with `<hash>.<ext>`; reload shows them (SSR); delete works |
 | 3 | Ingest | sidecar JSON with mediainfo + exif + palette; cards show extended previews with the two padding colours |
-| 4 | Node editor shell | "new node" mounts the square editor; photo drag-in; pinch/rotate/zoom; extend/cover toggle; per-node theme |
-| 5 | Save | node saved, photos baked into `data/photos`, rows in SQLite, uploads cleaned up, survives a crash between steps |
-| 6 | Film-strip + pages | strip appears at >1 photo, reorder; step-sequencer scrub; mode free/slides/grid |
-| 7 | Vector tools | pen with pressure/speed width; shape tool; clip/unclip |
+| 4 | Node editor shell (`EDITOR.md` phases C, D) | "new node" mounts the square editor; photo drag-in; pinch/rotate/zoom; extend/cover toggle; per-node theme |
+| 5 | Save (`EDITOR.md` phases B, G) | node saved, photos baked into `data/photos`, rows in SQLite, uploads cleaned up, survives a crash between steps |
+| 6 | Film-strip + pages (`EDITOR.md` phases D, E) | strip appears at >1 photo, reorder; step-sequencer scrub; mode free/slides/grid |
+| 7 | Vector tools (`EDITOR.md` phase F) | pen with pressure/speed width; shape tool; clip/unclip |
 | 8 | Extras | optional `imgproc` helper (cutout, clip; S10) and button |
+| 10 | 3D gallery node | `scene3d` document, builder, walking, auto-hang, enter/leave host (`GALLERY.md` S0b, TODO M13) |
 | 9 | Graph view | rooted neighbourhood API, SVG view with expand-on-demand, move/pin/order/relink, live updates (`GRAPH.md` S6; TODO M12) |
 
 Order is deliberate: SSR and the vendored-module setup are proven in M1,
 before UI work piles on top. `TODO.md` splits these into finer milestones
-(M0-M11) and is the working list.
+(M0-M13; the editor phases are `EDITOR.md` S9) and is the working list.
 
 ## 13. Testing
 
@@ -521,7 +437,7 @@ before UI work piles on top. `TODO.md` splits these into finer milestones
 - i18n: key-parity check across `locales/`.
 - Hostile inputs: path traversal in hash, extension mismatch, oversize body,
   zero-byte file, tool missing from `PATH`.
-- Client gestures: pure functions (`solveSimilarity(p0,q0,p1,q1)`, One-Euro,
+- Client gestures and the editor's pure code: see `EDITOR.md` S8. Pure functions (`solveSimilarity(p0,q0,p1,q1)`, One-Euro,
   resampler) unit-tested without a DOM; the rest checked by hand in a browser
   with touch emulation, and on a real phone for pressure and multitouch.
 
@@ -535,6 +451,9 @@ before UI work piles on top. `TODO.md` splits these into finer milestones
 | Pixel decoding without a library | ImageMagick subprocess is the one dependency; palette needs only 64x64 |
 | Pointer-event pressure differs by device | width model works from speed alone, pressure optional |
 | SVG performance with many strokes | rasterise finished pages, keep live strokes as SVG |
+| Graph view size | rooted depth-limited fetch (2 ms / 3 KB brotli at 1 M nodes, `GRAPH.md` S3.1b), not a whole-graph snapshot |
+| Many WebGL contexts | a 3D node is a poster until entered; one live canvas at a time (`GALLERY.md` S6) |
+| iPhone has no element Fullscreen API | viewport-fill mode, Fullscreen API only as enhancement (`GALLERY.md` S7.1) |
 
 ## 15. Decisions and open questions
 
@@ -594,7 +513,7 @@ Decided 2026-10-22 (domain information, details in `GRAPH.md`):
   starfield sky, art lighting, texture set (up to 3 photos marked `texture`: walls split-in-4 or single, room floor, optional corridor floor; user-editable convex quads), ramps as floor polygons with entry/exit height (slope <= 1:12, walls tilt), north fixed to the editor's top, pictures
   hung automatically on the inside of rooms only (rooms are closed polygons, corridors are lines, no corner sharper than 90 degrees; `GALLERY.md` S5.1); later games/VMs): poster until entered, one live context at a
   time, full-screen on enter; research and plan in `GALLERY.md`.
-- Tile rendering (raster of a node, S8) will be done **on the server and cached**,
+- Tile rendering (raster of a node, `EDITOR.md` S3.7) will be done **on the server and cached**,
   at a later point; not in the PoC.
 - "Reorder" and "relink" mean moving, pinning, ordering and adding edges; the
   user arranges part of the graph and the wider landscape of their space.
@@ -716,8 +635,9 @@ A node doc carries `style: { theme: "<id>", vars: { "--wb-accent": "#2a6" } }`.
 
 ### 16.7 Order of work
 TODO M2 builds `layout.css` plus `kraft.css` for the `/new` chrome; M2b adds
-loading, `blueprint`, the switcher, scoped themes and the sanitiser; M8 (8.3b)
-adds the per-node wrapper; M9 (9.2b) persists and re-validates it.
+loading, `blueprint`, the switcher, scoped themes and the sanitiser; the editor (EDITOR.md E17, E70)
+adds the per-node wrapper in the editor (EDITOR.md E70); saving persists and
+re-validates it (E26).
 
 ### 16.8 Not in the PoC
 Per-user theme storage (cookie only), `prefers-color-scheme` auto-switching,

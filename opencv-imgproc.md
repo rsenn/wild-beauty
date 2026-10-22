@@ -317,7 +317,7 @@ Applied in this order; every step has a neutral default; defaults shown.
 - `units:"px"`: shape coordinates are image pixels.
 - `units:"norm"`: 0..1 of width and height.
 - `units:"box"`: shape coordinates are inside `box` (default `[0,0,1000,1000]`,
-  the node space of `PLAN.md` S7) and are mapped to the whole image:
+  the node space of `EDITOR.md` S3) and are mapped to the whole image:
   `x_img = (x - box.x) / box.w * W`, `y_img = (y - box.y) / box.h * H`.
 - `matrix [a b c d e f]` is applied last: `x' = a*x + c*y + e`,
   `y' = b*x + d*y + f` (SVG `matrix()` convention). The server uses it to

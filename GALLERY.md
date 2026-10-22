@@ -1,8 +1,7 @@
 # GALLERY.md - walkable 3D galleries (and other canvas nodes) inside a node
 
 Status: research, revised 2026-10-22 with the scope decisions of S0a. Nothing is built. Related: `GRAPH.md` (node tiles S3.7,
-branch view S2.7, lock S5), `PLAN.md` S7 (node document model), S11 (vector
-editor), S16 (theming), `DESIGN.md`.
+branch view S2.7, lock S5), `EDITOR.md` (node document model, vector editor), S16 (theming), `DESIGN.md`.
 
 How to read the claims (same legend as `GRAPH.md`):
 
@@ -95,7 +94,7 @@ setting, WebGPU, WebXR, audio, stairs, multiplayer, game and VM nodes.
    more built in, much heavier), PlayCanvas (MIT), A-Frame (MIT, three.js with
    HTML tags) - S2.
 3. **Input data**: the gallery is a node whose document holds the **floor plan as
-   polylines** (the same `shape` steps the vector editor draws, `PLAN.md` S11.5)
+   polylines** (the same `shape` steps the vector editor draws, `EDITOR.md` S6)
    plus a small `style` block (wall, floor, sky: colour, gradient, texture atlas,
    tiling). Walls are extruded from the polylines (heights come from the wall layer); measured on this machine
    (S3.2): **200 polylines x 50 points (9 800 wall segments) -> 78 k triangles in
@@ -194,7 +193,7 @@ in the 0.186.1 package].
 ### 3.1 The document
 
 A gallery is a node (`kind: 'gallery'`) with a new document step type next to
-`photo`, `stroke`, `shape` (`PLAN.md` S7). Proposal (metres):
+`photo`, `stroke`, `shape` (`EDITOR.md` S3.1). Proposal (metres):
 
 ```json
 { "type": "scene3d", "kind": "gallery",
@@ -212,7 +211,7 @@ A gallery is a node (`kind: 'gallery'`) with a new document step type next to
 ```
 
 - `plan.walls` are the polylines the vector editor produces (a `shape` step is a
-  list of points, open or closed; `PLAN.md` S11.5) **on a "wall" layer with a
+  list of points, open or closed; `EDITOR.md` S6) **on a "wall" layer with a
   height property**. The wall layer is the only 3D-specific thing in the editor.
 - **Rooms** are closed wall polylines (`closed: true`); the floor of a room is
   its interior (type `room`), no separate floor polygon needed. **Corridors** are

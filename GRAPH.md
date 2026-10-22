@@ -1,7 +1,7 @@
 # GRAPH.md - graph rendering, graph transport, database options
 
 Status: research, revised 2026-10-22 with the domain information (shallow rooted traversal, one editor at a time, ~100 nodes per user). Nothing here is built; it feeds a later milestone
-(graph view) and decisions about the database. Related: `PLAN.md` S8 (current
+(graph view) and decisions about the database. Related: `GALLERY.md` (a node's tile can host a walkable 3D gallery), `PLAN.md` S8 (current
 SQLite schema, `node_links`), `DESIGN.md` S7.4 (graph look), S4.2 (old model),
 the screenshots `docs/screenshots/graph-mobile-{overview,zoomed}.jpg`.
 
@@ -408,8 +408,9 @@ Given S1.1 the proposal is: coordinates are **owner-defined, stored on the node
 in the owner's space** (`x, y, pinned`), viewers see the owner's arrangement;
 members of ordered lists are not placed by hand at all, they are laid out from
 `sort` (so only roots, lists, albums, galleries and free nodes carry
-coordinates); per-viewer overrides are not needed yet. Whether a shared node
-needs per-context positions (b) stays open (S5, question 5).
+coordinates); per-viewer overrides are not needed yet. Decided: positions are
+owner-defined, one per node (S5, question 5); a shared node with two parents has
+one position.
 
 Options: (1) run the force layout in every browser on load (1.5 s at 1k nodes,
 17 s at 10k: no); (2) store **x, y per node** (server-side or computed once and
@@ -594,7 +595,7 @@ provider; same tables; `Bun.sql`).
 | Switching cost later | | low (same SQL, `json_*` -> `jsonb_*`) | low | high (new model) | high |
 
 Proposal: **SQLite -> PostgreSQL**; evaluate a native graph engine only when a
-product requirement (S5, questions 1 and 4) shows it. Keep the door open by
+product requirement (S5, questions 1 and 10) shows it. Keep the door open by
 keeping every SQL statement in `server/db/` and avoiding SQLite-only features in
 anything but the graph snapshot query (which has a one-line Postgres equivalent).
 
@@ -639,7 +640,7 @@ time; per-user layout as in S1.1.
 
 | Step | What | Done when |
 |---|---|---|
-| G0 | Answer S5 questions 1-5 | decisions recorded here |
+| G0 | Decisions of 2026-10-22 (S5: shared landscape, visibility, edge kinds, positions, tiles, lock) | done; recorded here |
 | G1 | `GET /api/graph?root=&depth=` rooted neighbourhood (S3.1b): recursive CTE with visibility filter and child counts, windowed ordered children, ETag/304, brotli; `rev`, `owner_id`, `visibility`, `kind`, `x`, `y`, `pinned`, `tile` columns and `links.sort` | on a generated 10 000-user / 1 M-node database depth 2 answers in under 5 ms cold, `304` works |
 | G2 | `GraphView` (SVG): d3-force + d3-zoom + d3-drag vendored; tokens for node/edge/label; expand-on-demand; lists as windows; semantic zoom (colour, label, tile); SSR of the first paint from stored positions | looks like the screenshots on a phone; smooth at ~200 visible nodes |
 | G3 | Edit gestures: move and pin, order within a list (drag), relink (drag handle to target), delete edge; ops endpoint; undo; opening a node mounts the single editor | gestures work with touch and mouse; every change is an operation |
