@@ -7,10 +7,8 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { HASH, config } from '../config.js';
 import { sanitize } from '../../client/editor/theme.js';
-import { validate } from '../../client/editor/model.js';
+import { KINDS, validate } from '../../client/editor/model.js';
 import { getPhoto } from '../db/nodes.js';
-
-export const KINDS = ['node', 'list', 'album', 'gallery', 'shop'];
 
 // API error code and HTTP status per failure (EDITOR.md S2.11, S4.1)
 const STATUS = { too_large: 413, invalid: 400, missing_photo: 422 };

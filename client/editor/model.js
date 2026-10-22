@@ -42,6 +42,8 @@ export function unique(taken) {
 export const emptyNode = () => ({ v: VERSION, style: {}, mode: 'free', pages: [{ id: newId(), steps: [] }] });
 
 export const BLENDS = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten'];
+// what a node is for (a hint for views, EDITOR.md S2.9); lives next to the document, not in it
+export const KINDS = ['node', 'list', 'album', 'gallery', 'shop'];
 export const FITS = ['extend', 'cover', 'free'];
 export const FONTS = ['fixed', 'serif', 'sans'];
 export const ALIGNS = ['left', 'center', 'right'];
@@ -342,6 +344,19 @@ export function movePage(doc, pageId, index) {
 }
 
 export const setMode = (doc, mode) => (MODES.includes(mode) && mode !== doc.mode ? { ...doc, mode } : doc);
+
+// the stage ground: a colour, or null / '' to remove it
+export function setBg(doc, bg) {
+  if(bg === null || bg === '' || bg === undefined) {
+    if(doc.bg === undefined) return doc;
+
+    const { bg: gone, ...rest } = doc;
+
+    return rest;
+  }
+
+  return isFill(bg) && bg !== doc.bg ? { ...doc, bg } : doc;
+}
 
 export const setTitle = (doc, title) => (title === doc.title ? doc : { ...doc, title: String(title).slice(0, LIMITS.title) });
 

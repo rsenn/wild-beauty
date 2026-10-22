@@ -1,22 +1,29 @@
-import { useState } from '../../vendor/hooks.js';
+import { useEffect } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { Layout } from './Layout.js';
 import { UploadArea } from './UploadArea.js';
 import { NewNodeTile } from './NewNodeTile.js';
 import { NodeEditor } from './NodeEditor.js';
+import { NEW } from '../editor/store.js';
+import { editorStore, useEditor } from '../editor/useEditor.js';
 
 // /:lang/new: upload area, then the node editor once the "New node" tile has
-// opened it (E35; the open state moves to the editor store in E34)
+// opened it. Whether an editor is open lives in the editor store (E34).
 export const NewPage = () => {
   const { t } = useI18n();
-  const [editing, setEditing] = useState(false);
+  const { open: editing, target, openEditor, closeEditor } = useEditor();
+
+  // replacing an open editor asks first
+  useEffect(() => {
+    editorStore.setConfirm(() => window.confirm(t('editor.replace.confirm')));
+  }, [t]);
 
   return html`
     <${Layout} active="new" hrefFor=${code => `/${code}/new`}>
       <h1 class="wb-sr-only">${t('page.new.heading')}</h1>
-      <${UploadArea} canAdd=${editing} extra=${html`<${NewNodeTile} open=${editing} onToggle=${() => setEditing(!editing)} />`} />
-      ${editing && html`<${NodeEditor} onClose=${() => setEditing(false)} />`}
+      <${UploadArea} canAdd=${editing} extra=${html`<${NewNodeTile} open=${editing} onToggle=${() => (editing ? closeEditor() : openEditor(NEW))} />`} />
+      ${editing && html`<${NodeEditor} key=${target} target=${target} onClose=${closeEditor} />`}
     <//>
   `;
 };

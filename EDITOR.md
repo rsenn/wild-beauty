@@ -702,29 +702,29 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 ### Phase C - editor shell (C)
 
-- [ ] **E34 single-editor store** `editorStore`: one open editor, `open(id|new)`,
+- [x] **E34 single-editor store** `editorStore`: one open editor, `open(id|new)`,
       `close()`, replace-with-prompt hook. Done when opening a second request raises the prompt hook.
-- [ ] **E35 `NodeEditor` skeleton + "New node" button** in `NewPage`: mounts below the
+- [x] **E35 `NodeEditor` skeleton + "New node" button** in `NewPage`: mounts below the
       upload area, no photos needed. Done when the button opens/closes an empty frame.
       (Mockup exists: `NewNodeTile` as the last upload-grid cell, inert `NodeEditor` frame,
       open state in `NewPage`; E34 replaces the state, E36-E42 fill the frame.)
-- [ ] **E36 `Stage`**: square SVG `viewBox 0 0 1000 1000`, resize observer, pointer-to-unit
+- [x] **E36 `Stage`**: square SVG `viewBox 0 0 1000 1000`, resize observer, pointer-to-unit
       conversion `toUnits(event)`. Done when a click logs the right unit coordinates at two sizes.
-- [ ] **E37 tool columns**: buttons with token icons, tool state, keyboard keys, `aria-label`s.
+- [x] **E37 tool columns**: buttons with token icons, tool state, keyboard keys, `aria-label`s.
       Done when switching tools highlights the button and the cursor changes.
-- [ ] **E38 render the document in the stage** via `renderNode` (empty -> blank ground with
+- [x] **E38 render the document in the stage** via `renderNode` (empty -> blank ground with
       `bg`). Done when changing `bg` in the console redraws.
-- [ ] **E39 selection model + overlay**: tap selects the top-most step (hit test), outline
+- [x] **E39 selection model + overlay**: tap selects the top-most step (hit test), outline
       and handles drawn in an overlay `<g>`. Done when tapping two overlapping photos selects the upper.
-- [ ] **E40 history wiring**: all commands go through `dispatch(command)` that pushes history;
+- [x] **E40 history wiring**: all commands go through `dispatch(command)` that pushes history;
       undo/redo buttons and keys. Done when 10 actions can be undone and redone.
-- [ ] **E41 title field + properties popover** (title, kind; visibility/group disabled in
+- [x] **E41 title field + properties popover** (title, kind; visibility/group disabled in
       the PoC). Done when title edits are undoable.
-- [ ] **E42 context bar** (selection-dependent controls). Done when selecting a photo shows fit,
+- [x] **E42 context bar** (selection-dependent controls). Done when selecting a photo shows fit,
       opacity, blend, order, delete.
-- [ ] **E43 dirty tracking + draft** (`draft.js`): `localStorage` autosave 3 s, restore/discard
+- [x] **E43 dirty tracking + draft** (`draft.js`): `localStorage` autosave 3 s, restore/discard
       prompt, `beforeunload`. Done when a reload offers the draft and discarding clears it.
-- [ ] **E44 editor CSS tokens** in `layout.css`/`kraft.css` (columns, stage outline, handles,
+- [x] **E44 editor CSS tokens** in `layout.css`/`kraft.css` (columns, stage outline, handles,
       context bar). Done when no literal colour appears in `layout.css`.
 
 ### Phase D - photos (C)

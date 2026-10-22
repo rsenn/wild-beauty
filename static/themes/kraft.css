@@ -69,6 +69,15 @@
   --wb-card-gap: 8px;
   --wb-card-columns: 5;
   --wb-card-columns-wide: 8;
+  --wb-editor-tool-size: 44px;
+  --wb-editor-gap: 8px;
+  --wb-editor-outline: var(--wb-select);
+  --wb-editor-outline-width: 2px;
+  --wb-editor-handle-fill: #fff;
+  --wb-editor-handle-stroke: var(--wb-select);
+  --wb-editor-context-bg: rgb(255 255 255 / 0.5);
+  --wb-editor-popover-bg: #f2eadf;
+  --wb-editor-banner-bg: rgb(255 220 32 / 0.75);
   --wb-card-ground: rgb(255 255 255 / 0.4);
 
   /* depth */
@@ -102,6 +111,12 @@
   --wb-icon-delete: url(/static/img/icon-error.svg);
   --wb-icon-rotate: url(/static/img/icon-rotate.svg);
   --wb-icon-next: url(/static/img/arrow-next.svg);
+  --wb-icon-tool-select: url(/static/img/tool-select.svg);
+  --wb-icon-tool-pen: url(/static/img/tool-pen.svg);
+  --wb-icon-tool-shape: url(/static/img/tool-shape.svg);
+  --wb-icon-tool-clip: url(/static/img/tool-clip.svg);
+  --wb-icon-tool-unclip: url(/static/img/tool-unclip.svg);
+  --wb-icon-tool-text: url(/static/img/tool-text.svg);
 }
 
 @media (max-width: 375px) {

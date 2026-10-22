@@ -451,7 +451,7 @@ body {
   font-size: var(--wb-font-size-button);
 }
 
-/* node editor frame (EDITOR.md S2.2); mockup until E36-E42 */
+/* node editor frame (EDITOR.md S2.2); colours and sizes are tokens (E44) */
 .wb-editor {
   margin: calc(var(--wb-card-gap) * 2) 0;
   padding: 8px;
@@ -502,10 +502,53 @@ body {
 }
 
 .wb-editor-button {
-  min-width: 44px;
-  min-height: 44px;
+  min-width: var(--wb-editor-tool-size);
+  min-height: var(--wb-editor-tool-size);
   padding: 4px;
 }
+
+.wb-editor-tool {
+  position: relative;
+}
+
+.wb-editor-tool-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin: 0 auto;
+  background: currentcolor;
+  -webkit-mask: var(--wb-icon-tool) center / contain no-repeat;
+  mask: var(--wb-icon-tool) center / contain no-repeat;
+}
+
+.wb-editor-tool-select { --wb-icon-tool: var(--wb-icon-tool-select); }
+.wb-editor-tool-pen { --wb-icon-tool: var(--wb-icon-tool-pen); }
+.wb-editor-tool-shape { --wb-icon-tool: var(--wb-icon-tool-shape); }
+.wb-editor-tool-clip { --wb-icon-tool: var(--wb-icon-tool-clip); }
+.wb-editor-tool-unclip { --wb-icon-tool: var(--wb-icon-tool-unclip); }
+.wb-editor-tool-text { --wb-icon-tool: var(--wb-icon-tool-text); }
+
+.wb-editor-tool-key {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-size: var(--wb-font-size-small);
+  opacity: 0.7;
+}
+
+/* the active tool */
+.wb-editor-button[aria-pressed='true'] {
+  outline: var(--wb-select-width) solid var(--wb-select);
+  background: var(--wb-select-fill);
+}
+
+/* the cursor of the active tool, shown over the stage */
+.wb-editor-cursor-select { cursor: default; }
+.wb-editor-cursor-pen,
+.wb-editor-cursor-shape { cursor: crosshair; }
+.wb-editor-cursor-clip,
+.wb-editor-cursor-unclip { cursor: pointer; }
+.wb-editor-cursor-text { cursor: text; }
 
 .wb-editor-button:disabled {
   opacity: 0.5;
@@ -514,8 +557,8 @@ body {
 
 .wb-editor-body {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 44px;
-  gap: 8px;
+  grid-template-columns: var(--wb-editor-tool-size) minmax(0, 1fr) var(--wb-editor-tool-size);
+  gap: var(--wb-editor-gap);
   align-items: start;
   max-width: calc(90vmin + 2 * 44px + 16px);
   margin: 0 auto;
@@ -565,9 +608,9 @@ body {
   pointer-events: none;
 }
 
-.wb-editor-pen {
+/* the overlay only takes pointer events while a tool is active */
+.wb-editor-interactive {
   pointer-events: auto;
-  cursor: crosshair;
 }
 
 .wb-editor-stage-hint {
@@ -614,4 +657,96 @@ body {
   background: var(--wb-card-ground);
   border: var(--wb-border-width) solid var(--wb-ink);
   box-shadow: var(--wb-shadow-card);
+}
+
+/* selection overlay on the stage (E39) */
+.wb-editor-outline {
+  fill: none;
+  stroke: var(--wb-editor-outline);
+  stroke-width: var(--wb-editor-outline-width);
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.wb-editor-handle {
+  fill: var(--wb-editor-handle-fill);
+  stroke: var(--wb-editor-handle-stroke);
+  stroke-width: var(--wb-editor-outline-width);
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+/* context bar and its controls (E42) */
+.wb-editor-context-bar {
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  padding: 4px var(--wb-editor-gap);
+  background: var(--wb-editor-context-bg);
+  border-radius: var(--wb-radius-frame);
+}
+
+.wb-editor-group {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.wb-editor-field {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.wb-editor-chip {
+  min-height: 32px;
+  padding: 2px 8px;
+  font: inherit;
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border: 0;
+  border-radius: var(--wb-radius-button);
+  cursor: pointer;
+}
+
+.wb-editor-chip[aria-pressed='true'] {
+  outline: var(--wb-select-width) solid var(--wb-select);
+}
+
+.wb-editor-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* properties popover (E41) */
+.wb-editor-props {
+  position: relative;
+}
+
+.wb-editor-popover {
+  position: absolute;
+  z-index: 2;
+  top: 100%;
+  right: 0;
+  display: flex;
+  flex-flow: column nowrap;
+  gap: var(--wb-editor-gap);
+  min-width: 14em;
+  padding: var(--wb-editor-gap);
+  background: var(--wb-editor-popover-bg);
+  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
+  border-radius: var(--wb-radius-frame);
+  box-shadow: var(--wb-shadow-pop);
+}
+
+/* a stored draft was found (E43) */
+.wb-editor-banner {
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  margin: 0 0 var(--wb-editor-gap);
+  padding: 4px var(--wb-editor-gap);
+  background: var(--wb-editor-banner-bg);
+  border-radius: var(--wb-radius-frame);
 }
