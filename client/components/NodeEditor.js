@@ -19,6 +19,7 @@ import { editorStore } from '../editor/useEditor.js';
 import { swatches } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
 import { Filmstrip } from './Filmstrip.js';
+import { PageStrip } from './PageStrip.js';
 import { Palette } from './Palette.js';
 import { Properties } from './Properties.js';
 import { Stage } from './Stage.js';
@@ -74,20 +75,23 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [over, setOver] = useState(false);
   const [found, setFound] = useState(null); // a stored draft waiting for "restore" or "discard"
   const [scale, setScale] = useState(1);
+  const [current, setCurrent] = useState(0); // the page being edited
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
   const gesture = useRef(null); // { g, id } while a move/scale/rotate gesture runs
   const lastTap = useRef({ time: 0, id: null, at: null });
   const saved = useRef(hist.present); // the last saved snapshot: what "dirty" is measured against
   const { doc, kind } = hist.present;
-  const pageId = doc.pages[0].id;
-  const selectedStep = selected ? findStep(doc, selected)?.step : null;
+  const page = Math.min(current, doc.pages.length - 1); // undo can remove the page being shown
+  const pageId = doc.pages[page].id;
+  const located = selected ? findStep(doc, selected) : null;
+  const selectedStep = located?.page === page ? located.step : null; // a step of another page is not selected
   const dirty = isDirty(hist.present, saved.current);
 
   // always the current state for handlers registered once
   const latest = useRef();
 
-  latest.current = { snap: hist.present, doc, pageId, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
+  latest.current = { snap: hist.present, doc, page, pageId, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
 
   // every change of the node goes through here
   const dispatch = command => setHist(h => {
@@ -95,6 +99,26 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     return history.push(h, r.snap, r.key);
   });
+  // pages (E55): switching drops the selection, adding shows the new page, a
+  // page with steps is only removed after a yes
+  const switchPage = i => {
+    setCurrent(i);
+    setSelected(null);
+  };
+  const addPage = () => {
+    dispatch({ type: 'addPage' });
+    switchPage(latest.current.doc.pages.length);
+  };
+  const removePage = id => {
+    const victim = latest.current.doc.pages.find(p => p.id === id);
+
+    if(victim?.steps.length && !window.confirm(t('editor.page.remove.confirm'))) return;
+
+    const index = latest.current.doc.pages.indexOf(victim);
+
+    dispatch({ type: 'removePage', id });
+    switchPage(Math.min(index, latest.current.doc.pages.length - 2));
+  };
   const undo = () => setHist(history.undo);
   const redo = () => setHist(history.redo);
 
@@ -129,8 +153,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   // the selection through a matrix change: keys and the wheel
   const transformSelection = (id, sim) => {
-    const { doc } = latest.current;
-    const m = matrixOf(doc, id);
+    const { doc, page } = latest.current;
+    const m = matrixOf(doc, id, { page });
 
     if(m) dispatch({ type: 'setMatrix', id, m: multiply(sim, m) });
   };
@@ -143,12 +167,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       if(next) return setTool(next);
 
       const move = transformFor(e);
-      const { selected: id, doc } = latest.current;
+      const { selected: id, doc, page } = latest.current;
 
       if(move && id) {
         e.preventDefault();
 
-        const centre = centreOf(doc, id, { photos: hash => latest.current.photos[hash] }) ?? [500, 500];
+        const centre = centreOf(doc, id, { photos: hash => latest.current.photos[hash], page }) ?? [500, 500];
         const turn = aboutPoint(move.scale ?? 1, move.rotate ?? 0, centre);
 
         return transformSelection(id, multiply([1, 0, 0, 1, move.dx ?? 0, move.dy ?? 0], turn));
@@ -293,7 +317,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     // another finger joins the gesture that is running
     if(gesture.current) return gesture.current.g.down(e.pointerId, units);
 
-    const id = hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale });
+    const id = hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale, page });
 
     setSelected(id);
 
@@ -315,13 +339,13 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     lastTap.current = { time: e.timeStamp, id, at: units };
 
-    const m = matrixOf(doc, id);
+    const m = matrixOf(doc, id, { page });
 
     if(!m) return;
 
     const g = createGesture(m, { slop: SLOP_PX / scale });
 
-    g.down(e.pointerId, units, { alt: e.altKey, centre: centreOf(doc, id, { photos: hash => photos[hash] }) });
+    g.down(e.pointerId, units, { alt: e.altKey, centre: centreOf(doc, id, { photos: hash => photos[hash], page }) });
     gesture.current = { g, id };
   };
 
@@ -394,6 +418,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const inert = (key, label) => html`<button type="button" class=${'wb-editor-button wb-editor-' + key} disabled title=${t('editor.' + key)} aria-label=${t('editor.' + key)}>${label}</button>`;
 
   const action = key => {
+    if(key === 'page') return html`<button type="button" class="wb-editor-button wb-editor-add-page" onClick=${addPage} title=${t('editor.page.add')} aria-label=${t('editor.page.add')}>${t('editor.short.page')}</button>`;
+
     if(key === 'undo' || key === 'redo') {
       const can = key === 'undo' ? history.canUndo(hist) : history.canRedo(hist);
 
@@ -411,10 +437,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     </button>
   `;
 
-  const empty = doc.pages[0].steps.length === 0 && !live;
-  const outline = selectedStep && outlineOf(doc, selectedStep.id, { photos: hash => photos[hash] });
+  const empty = doc.pages[page].steps.length === 0 && !live;
+  const outline = selectedStep && outlineOf(doc, selectedStep.id, { photos: hash => photos[hash], page });
   const title = doc.title ?? '';
-  const strip = photoSteps(doc);
+  const strip = photoSteps(doc, page);
 
   // the palette (E54): shown while the pen or a stroke / shape is selected
   const paletteTargets = tool === 'pen' ? ['pen'] : selectedStep?.op === 'stroke' ? ['stroke'] : selectedStep?.op === 'shape' ? ['fill', 'outline'] : null;
@@ -449,7 +475,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <${Stage}
           label=${title || t('editor.stage')}
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
-          content=${renderNode(doc, { photos: hash => photos[hash] ?? null })}
+          content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page })}
           overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
           interactive=${tool === 'select' || tool === 'pen'}
           onPointer=${{ down, move, up, cancel: up, wheel }}
@@ -472,7 +498,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           </div>`
         : html`<${ContextBar} t=${t} step=${selectedStep} clipped=${selectedStep?.clip !== undefined} photo=${selectedStep && photos[selectedStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
-      <div class="wb-editor-pages">${inert('page.1', '1')}${inert('page.add', '+')}</div>
+      <${PageStrip} t=${t} doc=${doc} photos=${photos} current=${page} onSelect=${switchPage} onAdd=${addPage} onMove=${(id, to) => dispatch({ type: 'movePage', id, to })} onRemove=${removePage} />
     </section>
   `;
 };

@@ -35,6 +35,12 @@ function onDoc(doc, c) {
       return model.removeStep(doc, c.id);
     case 'moveStep':
       return model.moveStep(doc, c.id, c.to);
+    case 'addPage':
+      return model.addPage(doc, c.index);
+    case 'removePage':
+      return model.removePage(doc, c.id);
+    case 'movePage':
+      return model.movePage(doc, c.id, c.to);
     case 'movePhoto':
       return model.movePhoto(doc, c.id, c.to);
     case 'setFit':

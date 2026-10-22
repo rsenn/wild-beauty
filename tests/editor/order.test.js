@@ -89,3 +89,22 @@ describe('delete step', () => {
     expect(findStep(history.undo(h).present.doc, 'strok001')).toBeTruthy();
   });
 });
+
+describe('pages', () => {
+  test('two pages keep separate steps, and undo takes a page back', () => {
+    let h = run({ doc: emptyNode(), kind: 'node' }, [{ type: 'addPage' }]);
+    const [first, second] = h.present.doc.pages.map(p => p.id);
+
+    h = run(h.present, [{ type: 'addStep', page: first, step: stroke('strok001') }, { type: 'addStep', page: second, step: stroke('strok002') }]);
+    expect(h.present.doc.pages.map(p => p.steps.map(s => s.id))).toEqual([['strok001'], ['strok002']]);
+    expect(findStep(h.present.doc, 'strok002').page).toBe(1);
+
+    const moved = apply(h.present, { type: 'movePage', id: second, to: 0 }).snap.doc;
+
+    expect(moved.pages.map(p => p.steps[0].id)).toEqual(['strok002', 'strok001']);
+    expect(apply(h.present, { type: 'removePage', id: first }).snap.doc.pages.map(p => p.id)).toEqual([second]);
+    const lone = { doc: emptyNode(), kind: 'node' };
+
+    expect(apply(lone, { type: 'removePage', id: lone.doc.pages[0].id }).snap.doc.pages.length).toBe(1);
+  });
+});

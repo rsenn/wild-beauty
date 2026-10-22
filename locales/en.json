@@ -126,5 +126,11 @@
   "editor.target.stroke": "Stroke",
   "editor.target.fill": "Fill",
   "editor.target.outline": "Outline",
-  "editor.swatch": "Colour {hex}"
+  "editor.swatch": "Colour {hex}",
+  "editor.pages": "Pages",
+  "editor.page.n": "Page {n}",
+  "editor.page.left": "Move page earlier",
+  "editor.page.right": "Move page later",
+  "editor.page.remove": "Remove page",
+  "editor.page.remove.confirm": "This page has steps. Remove it anyway?"
 }

@@ -173,6 +173,11 @@ what is still needed moves into `layout.css`, the rest is dead (DESIGN.md H1).
 and response, every external command and every file written or removed
 (`server/log.js`); without it the server prints only its start line.
 
+Options (`server/cli.js`, `bun server.js --help`): `--port`/`-p`, `--host`/`-H` (env `PORT`,
+`HOST`), `--dev`, `--no-keys`. On a terminal the process supervises the server as a child:
+Ctrl+R (or `rs` + Enter) restarts it, Ctrl+C quits; without a terminal (tests, pipes,
+systemd) the server runs directly.
+
 No `package.json` scripts that build. Vendored files are copied once by a
 documented shell snippet (`tools/vendor.sh`), checked in, and pinned by version.
 `server.js` stays the entry even when `server/` grows.

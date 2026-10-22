@@ -1,4 +1,5 @@
 // Wild Beauty server entry (PLAN.md S6, TODO.md M1). Bun only.
+import { host, port } from './server/cli.js';
 import { resolve, sep } from 'node:path';
 import { html } from './client/html.js';
 import { App } from './client/components/App.js';
@@ -17,7 +18,6 @@ import { database } from './server/db/db.js';
 import { reconcile } from './server/node/reconcile.js';
 import { capabilities, detectTools } from './server/media/tools.js';
 
-const PORT = Number(process.env.PORT ?? 3000);
 // directories served as files: /static/ (assets), /app/ (browser modules),
 // /vendor/ (libraries); the modules are served as-is, no build step
 const ROOTS = {
@@ -208,6 +208,6 @@ async function logged(req) {
   return res;
 }
 
-const server = Bun.serve({ port: PORT, maxRequestBodySize: config.maxBytes, fetch: dev ? logged : route });
+const server = Bun.serve({ port, hostname: host, maxRequestBodySize: config.maxBytes, fetch: dev ? logged : route });
 
 console.log(`wild-beauty listening on ${server.url}${dev ? ' (dev logging on)' : ''}`);

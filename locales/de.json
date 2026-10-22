@@ -126,5 +126,11 @@
   "editor.target.stroke": "Strich",
   "editor.target.fill": "Füllung",
   "editor.target.outline": "Kontur",
-  "editor.swatch": "Farbe {hex}"
+  "editor.swatch": "Farbe {hex}",
+  "editor.pages": "Seiten",
+  "editor.page.n": "Seite {n}",
+  "editor.page.left": "Seite früher",
+  "editor.page.right": "Seite später",
+  "editor.page.remove": "Seite entfernen",
+  "editor.page.remove.confirm": "Diese Seite hat Schritte. Trotzdem entfernen?"
 }

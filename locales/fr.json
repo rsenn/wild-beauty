@@ -126,5 +126,11 @@
   "editor.target.stroke": "Trait",
   "editor.target.fill": "Remplissage",
   "editor.target.outline": "Contour",
-  "editor.swatch": "Couleur {hex}"
+  "editor.swatch": "Couleur {hex}",
+  "editor.pages": "Pages",
+  "editor.page.n": "Page {n}",
+  "editor.page.left": "Page plus tôt",
+  "editor.page.right": "Page plus tard",
+  "editor.page.remove": "Retirer la page",
+  "editor.page.remove.confirm": "Cette page a des étapes. La retirer quand même ?"
 }

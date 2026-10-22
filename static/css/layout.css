@@ -872,3 +872,59 @@ body {
 .wb-editor:focus {
   outline: none;
 }
+
+/* page strip (E55): thumbnails of the pages, the current one ringed */
+.wb-editor-pages {
+  align-items: flex-start;
+  overflow-x: auto;
+}
+
+.wb-editor-page-list {
+  display: flex;
+  gap: var(--wb-editor-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wb-editor-page {
+  flex: 0 0 auto;
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 4px;
+  width: 80px;
+}
+
+.wb-editor-page-pick {
+  position: relative;
+  padding: 0;
+  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
+  background: var(--wb-card-ground);
+  cursor: grab;
+}
+
+.wb-editor-page-current .wb-editor-page-pick {
+  outline: 3px solid var(--wb-select);
+}
+
+.wb-editor-page-thumb {
+  display: block;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.wb-editor-page-thumb svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wb-editor-page-number {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  padding: 0 4px;
+  background: var(--wb-editor-popover-bg);
+  color: var(--wb-ink);
+  font-size: 0.8em;
+}

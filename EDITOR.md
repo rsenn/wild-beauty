@@ -748,7 +748,7 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 ### Phase E - pages, steps, modes (C)
 
-- [ ] **E55 pages**: add/remove/reorder, current page, thumbnails. Done when two pages keep separate steps.
+- [x] **E55 pages**: add/remove/reorder, current page, thumbnails. Done when two pages keep separate steps.
 - [ ] **E56 step scrubber**: `k` slider, play button using `duration`. Done when scrubbing shows steps 0..k.
 - [ ] **E57 modes**: free / slides / grid switch and rendering. Done when `slides` shows one photo per page.
 - [ ] **E58 transform steps**: authoring while scrubbing back, animated playback with easing.
