@@ -4,6 +4,7 @@
 import { mkdtempSync, readdirSync, renameSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { config } from '../config.js';
+import { logFile } from '../log.js';
 import { run } from './run.js';
 
 const opts = { timeout: config.toolTimeoutMs };
@@ -39,6 +40,7 @@ export async function extractDisplay(file, hash) {
     const name = `${hash}.display.${ext}`;
 
     renameSync(resolve(work, picked), resolve(config.uploadsDir, name));
+    logFile('write', resolve(config.uploadsDir, name), 'display file from heif-convert');
 
     return name;
   } finally {

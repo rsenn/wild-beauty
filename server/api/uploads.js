@@ -6,6 +6,8 @@ import { resolve } from 'node:path';
 import { HASH, UPLOAD_FILE, config } from '../config.js';
 import { sniff } from '../media/sniff.js';
 import { extractDisplay } from '../media/heif.js';
+import { ingest, uploadPath } from '../media/ingest.js';
+import { logFile } from '../log.js';
 
 mkdirSync(config.tmpDir, { recursive: true });
 
@@ -29,8 +31,11 @@ const sidecarPath = hash => resolve(config.uploadsDir, `${hash}.json`);
 async function writeSidecar(record) {
   const tmp = resolve(config.tmpDir, `${crypto.randomUUID()}.json`);
 
-  await Bun.write(tmp, JSON.stringify(record));
+  const json = JSON.stringify(record);
+
+  await Bun.write(tmp, json);
   renameSync(tmp, sidecarPath(record.hash));
+  logFile('write', sidecarPath(record.hash), `${json.length} bytes`);
 }
 
 // POST /api/uploads: raw body, name in X-Filename
@@ -68,6 +73,7 @@ export async function createUpload(req) {
     }
 
     await writer.end();
+    logFile('write', tmp, `${size} bytes (temporary upload)`);
 
     if(size === 0) return fail(400, 'empty', 'empty file');
 
@@ -83,6 +89,7 @@ export async function createUpload(req) {
     if(existsSync(final) && existsSync(sidecarPath(hash))) return Response.json(await Bun.file(sidecarPath(hash)).json(), { status: 200 });
 
     renameSync(tmp, final);
+    logFile('write', final, `${size} bytes (moved from .tmp, ${type.mime})`);
 
     const record = { hash, ext: type.ext, display: file, name, size, mime: type.mime, uploadedAt: Date.now() };
 
@@ -91,10 +98,13 @@ export async function createUpload(req) {
 
       if(!record.display) {
         rmSync(final, { force: true });
+        logFile('rm', final, 'undecodable');
 
         return fail(422, 'undecodable', 'the image could not be decoded');
       }
     }
+
+    Object.assign(record, await ingest(final, uploadPath(record.display)));
 
     await writeSidecar(record);
 
@@ -106,6 +116,8 @@ export async function createUpload(req) {
     try {
       await writer.end();
     } catch {}
+
+    if(existsSync(tmp)) logFile('rm', tmp, 'temporary upload');
 
     rmSync(tmp, { force: true });
   }
@@ -131,7 +143,12 @@ export async function deleteUpload(hash) {
 
   if(!meta) return fail(404, 'not-found', 'no such upload');
 
-  for(const name of new Set([`${hash}.${meta.ext}`, meta.display, `${hash}.json`])) if(UPLOAD_FILE.test(name) || name === `${hash}.json`) rmSync(resolve(config.uploadsDir, name), { force: true });
+  for(const name of new Set([`${hash}.${meta.ext}`, meta.display, `${hash}.json`])) {
+    if(!UPLOAD_FILE.test(name) && name !== `${hash}.json`) continue;
+
+    logFile('rm', resolve(config.uploadsDir, name), 'delete upload');
+    rmSync(resolve(config.uploadsDir, name), { force: true });
+  }
 
   return new Response(null, { status: 204 });
 }

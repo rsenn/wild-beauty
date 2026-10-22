@@ -5,7 +5,9 @@ import { App } from './client/components/App.js';
 import { renderPage } from './server/ssr.js';
 import { DEFAULT_LANG, languageList, loadLocales, negotiate } from './server/i18n.js';
 import { config } from './server/config.js';
+import { dev, log } from './server/log.js';
 import { createUpload, deleteUpload, serveUpload } from './server/api/uploads.js';
+import { capabilities, detectTools } from './server/media/tools.js';
 
 const PORT = Number(process.env.PORT ?? 3000);
 // directories served as files: /static/ (assets), /app/ (browser modules),
@@ -18,6 +20,8 @@ const ROOTS = {
 
 const locales = loadLocales();
 const languages = languageList(locales);
+
+await detectTools();
 
 const text = (body, status) => new Response(body, { status, headers: { 'content-type': 'text/plain; charset=utf-8' } });
 
@@ -87,6 +91,8 @@ function route(req) {
 
   if(req.method !== 'GET' && req.method !== 'HEAD') return text('method not allowed\n', 405);
 
+  if(pathname === '/api/capabilities') return Response.json(capabilities({ languages: languages.map(l => l.code), limits: { maxBytes: config.maxBytes } }));
+
   if(pathname.startsWith('/files/uploads/')) {
     let name;
 
@@ -114,6 +120,27 @@ function route(req) {
   return text('not found\n', 404);
 }
 
-const server = Bun.serve({ port: PORT, maxRequestBodySize: config.maxBytes, fetch: route });
+// --dev or WB_DEV: one line per request and response (server/log.js)
+async function logged(req) {
+  const { pathname, search } = new URL(req.url);
+  const started = performance.now();
 
-console.log(`wild-beauty listening on ${server.url}`);
+  log('req', req.method, pathname + search, `content-length: ${req.headers.get('content-length') ?? '-'}`);
+
+  let res;
+
+  try {
+    res = await route(req);
+  } catch(e) {
+    log('error', req.method, pathname, e?.stack ?? e);
+    throw e;
+  }
+
+  log('res', res.status, req.method, pathname, `${Math.round(performance.now() - started)} ms`, `${res.headers.get('content-type') ?? '-'}`, `content-length: ${res.headers.get('content-length') ?? '-'}`);
+
+  return res;
+}
+
+const server = Bun.serve({ port: PORT, maxRequestBodySize: config.maxBytes, fetch: dev ? logged : route });
+
+console.log(`wild-beauty listening on ${server.url}${dev ? ' (dev logging on)' : ''}`);

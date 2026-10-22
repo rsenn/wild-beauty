@@ -155,6 +155,10 @@ PLAN.md DESIGN.md TODO.md CLAUDE.md   (old README.md and HISTORIC.md live in att
 `static/wasm.html` are leftovers of the old app: read them, do not link them;
 what is still needed moves into `layout.css`, the rest is dead (DESIGN.md H1).
 
+`bun server.js --dev` (or the environment variable `WB_DEV=1`) logs every request
+and response, every external command and every file written or removed
+(`server/log.js`); without it the server prints only its start line.
+
 No `package.json` scripts that build. Vendored files are copied once by a
 documented shell snippet (`tools/vendor.sh`), checked in, and pinned by version.
 `server.js` stays the entry even when `server/` grows.
@@ -215,7 +219,10 @@ One request per file, so the browser reports real byte progress (XHR
    colour). Parse, sort by weight, store the ordered `{hex, weight}` array
    `DESIGN.md` S4.2.1 asks for. No JS quantiser needed. Also store
    `padding: [hex, hex]`: the most dominant colour plus the next one far
-   enough from it in OKLab (own 15-line conversion).
+   enough from it in OKLab (own 15-line conversion; distance >= 0.12, else the
+   farthest; a one-colour image gets that colour twice). Transparent pixels
+   (alpha < 128) do not count. `width`/`height` are the size as displayed, EXIF
+   orientation applied (`orientation` keeps the raw 1-8).
    **Preferred source when `capabilities.imgproc` lists it**: `opencv-imgproc
    palette --in=<file> --count=8` (S10 use 5; `dominant_colors_grabber` through
    `cv.paletteGenerate`, one JSON line `{ ok, colors: ["#rrggbb", ...] }`, no weights
@@ -279,10 +286,34 @@ photos(hash TEXT PRIMARY KEY, ext TEXT, width INT, height INT, bytes INT,
 nodes(id INTEGER PRIMARY KEY, title TEXT, doc TEXT, palette TEXT,
       created_at INT, updated_at INT);
 node_photos(node_id INT REFERENCES nodes, photo_hash TEXT REFERENCES photos,
-            sort INT, PRIMARY KEY(node_id, photo_hash));
+            sort INT, role TEXT NOT NULL DEFAULT 'picture',  -- 'texture': not shown, used by the node's 3D scene
+            PRIMARY KEY(node_id, photo_hash));
 node_links(id INTEGER PRIMARY KEY, from_id INT, to_id INT, label TEXT NOT NULL,
+           sort INT NOT NULL DEFAULT 0,        -- order among the children of from_id
            UNIQUE(from_id, to_id, label));     -- created now, unused by the PoC
+CREATE INDEX node_links_from ON node_links(from_id, sort);
+CREATE INDEX node_links_to   ON node_links(to_id);
 ```
+
+Columns added to `nodes` for the graph view (`GRAPH.md`; all optional in the
+PoC, written as NULL/defaults): `owner_id INT` (NULL until accounts exist),
+`visibility TEXT NOT NULL DEFAULT 'public'` (`hidden` = owner only | `group` |
+`public`), `group_id INT` (set when `group`; **one group per node** for now), `kind TEXT`
+(`node` | `list` | `album` | `gallery` | `shop`, a hint for the view, not a
+type system), `x REAL, y REAL, pinned INT` (position in the owner's space),
+`tile TEXT` (hash of the baked square raster of the rendered node, S8 below)
+and `rev INT` (bumped on every change; ETag source). Groups come with
+accounts, not with the PoC: `groups(id, owner_id, name)` and
+`group_members(group_id, user_id, role TEXT NOT NULL DEFAULT 'member', PRIMARY KEY(group_id, user_id))`
+(`role`: `member` | `curator` | `admin`; invite-only: a member is added by invitation); index `group_members(user_id)`. Edge kinds
+(the `label` of `node_links`, decided): `child` (ordered by `sort`), `sells`, `ref`
+(`GRAPH.md` S1.2). **Who may edit** a node: its owner, or an `admin` or `curator` of its group (curators curate: they may change the node's links and order, `admin`s may also edit content and manage members). `overall-root` and `featured` belong to a **curators** group.
+
+The graph is **shallow and rooted**: a user sees their root and its
+neighbours to some depth, not the whole graph (`GRAPH.md` S1, S3). The graph
+API is therefore a depth-limited neighbourhood fetch, not a snapshot of all
+nodes. Child order (`sort`) is what makes "50 articles in sequence" and "20
+projects" lists without extra tables.
 
 `PRAGMA journal_mode=WAL; foreign_keys=ON`. Schema version in
 `PRAGMA user_version`, migrations as numbered statements in `schema.sql`.
@@ -310,7 +341,9 @@ Body: the node doc. In one transaction:
    - with an alpha channel (e.g. after a cutout): WebP q99 or PNG, never JPEG;
    the baking source is the `display` file; the original crop/extend stays
    a *non-destructive transform in the doc*, so editing later is lossless;
-   additionally a `<hash>.thumb.jpg` square rendition with the node's own
+   additionally a `<hash>.thumb.jpg` square rendition (the node **tile**: what
+   the graph and lists show, read-only; may later be rendered from the node's
+   SVG, see `GRAPH.md` S3.7) with the node's own
    crop/extend applied for thumbnails (same quality rule: at most the
    source's quality for JPEG sources, 99 otherwise);
 3. insert `photos`, `nodes`, `node_photos`;
@@ -393,7 +426,10 @@ Uses:
 
 ### 11.2 Node editor
 - Button "new node" (always enabled, with or without photos). Pressing it
-  mounts an editor **below** the upload area; several editors may stack.
+  mounts an editor **below** the upload area. **Only one editor is open at a
+  time** (decided 2026-10-22): every other rendering of a node (tile in a
+  list, graph, gallery) is read-only; opening a node for editing replaces the
+  current editor (asking to save when it has unsaved changes).
 - Layout: a square (`aspect-ratio: 1`) with `border: 1px solid`, a tool
   column on the left and one on the right. The square has
   `overflow: hidden; touch-action: none; contain: paint` so nothing escapes.
@@ -470,6 +506,7 @@ Each milestone ends in something runnable and checkable.
 | 6 | Film-strip + pages | strip appears at >1 photo, reorder; step-sequencer scrub; mode free/slides/grid |
 | 7 | Vector tools | pen with pressure/speed width; shape tool; clip/unclip |
 | 8 | Extras | optional `imgproc` helper (cutout, clip; S10) and button |
+| 9 | Graph view | rooted neighbourhood API, SVG view with expand-on-demand, move/pin/order/relink, live updates (`GRAPH.md` S6; TODO M12) |
 
 Order is deliberate: SSR and the vendored-module setup are proven in M1,
 before UI work piles on top. `TODO.md` splits these into finer milestones
@@ -524,13 +561,51 @@ Decided 2026-10-21:
   keep it when present and not sRGB.
 - `Bun.serve` upload bodies: verified, see S14 and `DESIGN.md` S9.6.
 
-Still open: nothing blocking M1.
+Decided 2026-10-22 (domain information, details in `GRAPH.md`):
+- Only **one node editor is open at a time**; all other tile views are read-only.
+- The graph is traversed **shallowly from a root**; the API fetches a rooted,
+  depth-limited neighbourhood and expands on demand.
+- A user typically owns ~100 nodes: ~4 albums (1 node each), ~20 projects, ~50
+  articles (ordered list), 2 galleries (one public, one hidden; 1 exhibit per
+  node), shop items (1 node each, linked to an exhibit).
+- The **landscape is shared across users** and is itself a rooted graph: one
+  **overall-root** node has a child `user-profiles` (an ordered list of `ref`
+  edges to each user's profile node, itself a direct child of that user's root)
+  and a child `featured` (a curated list whose entries are links to articles,
+  galleries and seller marketplaces). A new user is added to `user-profiles`;
+  there is no free placement of roots on a plane.
+- **Concurrent editing uses a lock**: one editor per node, enforced by a lock
+  (`node_locks(node_id PRIMARY KEY, user_id, expires_at)`), taken when the editor
+  opens, renewed by heartbeat, released on close/save, expired when the
+  heartbeat stops. The owner may break a lock.
+- Visibility has three levels: **owner only** (`hidden`), **an invite-only group**
+  (every member of the node's group), and **public**.
+- **Positions are owner-defined**, stored on the node.
+- Edge kinds: `child`, `sells`, `ref`. One `group_id` per node. A space/node is edited
+  by its **owner or by the admins of its group**; members and the public only read.
+- Two graph views on the same rooted data (`GRAPH.md` S2.7): the **force graph**
+  to organise, and a **branch view** to navigate (a spine of square tiles at
+  ~33 degrees from top-centre to lower-left, children branching to the lower right
+  at ~45 degrees, filmstrip/carousel or masonry for long runs or categories;
+  tap zooms a tile, lower-left walks the spine, right descends). Computed layout,
+  angles are theme tokens.
+- A node's tile may host a **live canvas** (walkable 3D gallery built from the
+  node's polylines: walls from a height layer of the 2D editor, floors of two types,
+  starfield sky, art lighting, texture set (up to 3 photos marked `texture`: walls split-in-4 or single, room floor, optional corridor floor; user-editable convex quads), ramps as floor polygons with entry/exit height (slope <= 1:12, walls tilt), north fixed to the editor's top, pictures
+  hung automatically on the inside of rooms only (rooms are closed polygons, corridors are lines, no corner sharper than 90 degrees; `GALLERY.md` S5.1); later games/VMs): poster until entered, one live context at a
+  time, full-screen on enter; research and plan in `GALLERY.md`.
+- Tile rendering (raster of a node, S8) will be done **on the server and cached**,
+  at a later point; not in the PoC.
+- "Reorder" and "relink" mean moving, pinning, ordering and adding edges; the
+  user arranges part of the graph and the wider landscape of their space.
+
+Still open: nothing blocking M1. Graph questions: `GRAPH.md` S5.
 
 ## 16. Theming
 
 ### 16.1 Goals
 - The whole UI is themable, and **a node can wear a theme different from the
-  page's**: two stacked editors, or a page full of nodes, each in its own look.
+  page's**: one editor, or a page full of read-only nodes, each in its own look.
 - Adding a theme = adding one CSS file. No component changes, no build.
 - A theme changes colour, wallpaper, type, borders, radii, shadows, icons, tab
   and button sizes. It does not change markup or layout structure.

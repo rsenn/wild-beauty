@@ -2,7 +2,7 @@ import { useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
-import { formatSize } from '../files.js';
+import { formatSize, paddingStyle } from '../files.js';
 
 // one file of the upload grid: thumbnail (whole photo "extend" or "crop"),
 // remove, rotate, select, upload state; the thumbnail is the local file until
@@ -25,7 +25,7 @@ export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry 
 
   return html`
     <li class=${cls}>
-      <div class="wb-card-box">
+      <div class="wb-card-box" style=${paddingStyle(item.record)}>
         <button type="button" class="wb-card-face" aria-pressed=${item.selected ? 'true' : 'false'} onClick=${onToggle} title=${item.file.name}>
           ${brokenSrc === src
             ? html`<span class="wb-card-nopreview">${t('upload.no-preview')}</span>`

@@ -191,23 +191,24 @@ woff2/woff/ttf. Fonts are served from `/static/`.
 
 ## M6 - Ingest: metadata and palette
 
-- [ ] **6.1 Tool detection** at start: `mediainfo`, `exiftool`/`exiv2`,
+- [x] **6.1 Tool detection** at start: `mediainfo`, `exiftool`/`exiv2`,
       `magick`/`convert`; `GET /api/capabilities`. Done when it lists what is
       installed here (`convert` IM6, `exiftool`, `mediainfo`).
-- [ ] **6.2 Probe**: `mediainfo --Output=JSON` and `exiftool -json -n` in
+- [x] **6.2 Probe**: `mediainfo --Output=JSON` and `exiftool -json -n` in
       parallel, each with timeout and output cap, argv arrays, `--` before the
       file (P S9). Done when a JPEG yields width, height, orientation.
-- [ ] **6.3 Palette**: `convert f[0] -auto-orient -resize 128x128 -colors 8
+- [x] **6.3 Palette**: `convert f[0] -auto-orient -resize 128x128 -colors 8
       -depth 8 -format %c histogram:info:-` -> ordered `{hex, weight}`; when
       `capabilities.imgproc` is present use `opencv-imgproc palette --in=<f>
       --count=8` instead (JSON `colors` hex list, argv form `--name=value`), falling
-      back to ImageMagick (also for weights); `padding`
+      back to ImageMagick (also for weights) (the imgproc path is task 11.1a; M6
+      is ImageMagick only); `padding`
       = 2 colours, second far from the first in OKLab (own 15 lines) (P S6.2 step
       5). Done when a unit test with a two-colour PNG returns both, weighted.
-- [ ] **6.4 Sidecar**: write `uploads/<hash>.json` (temp + rename) with
+- [x] **6.4 Sidecar**: write `uploads/<hash>.json` (temp + rename) with
       everything above; degrade to `errors: []` instead of rejecting. Upload
       response returns the sidecar. Done when the file appears next to the image.
-- [ ] **6.5 Cards use the palette**: extended preview gradient from the two
+- [x] **6.5 Cards use the palette**: extended preview gradient from the two
       `padding` colours (P S11.1). Done when a portrait photo shows colour
       padding left and right.
 
@@ -228,7 +229,8 @@ progress, metadata, palette, list, delete.**
 ## M8 - Node editor shell
 
 - [ ] **8.1 "New node" button** (`action-new.svg`) under the upload area;
-      mounts `NodeEditor` below it, several may stack. No photos needed.
+      mounts `NodeEditor` below it. **One editor at a time** (decided 2026-10-22):
+      opening another replaces it (ask to save when dirty). No photos needed.
 - [ ] **8.2 Square frame**: `aspect-ratio: 1`, 1px outline, tool columns left
       and right, `overflow: hidden; touch-action: none; contain: paint`.
 - [ ] **8.3 Node document model** `client/editor/model.js` (v1; photo steps
@@ -236,8 +238,9 @@ progress, metadata, palette, list, delete.**
       The model has `style: { theme, vars }` from the start (Theming rule).
 - [ ] **8.3b Per-node theme**: the editor frame and the rendered node sit in a
       wrapper with the node's `data-theme` and sanitised vars (2b.5); a theme
-      picker in the right tool column changes only that node. Done when two
-      stacked editors wear different themes at once.
+      picker in the right tool column changes only that node. Done when the
+      one editor and a read-only rendering of another node (tile) wear different
+      themes at once.
 - [ ] **8.4 Drag a card into the frame** (HTML5 drag plus pointer fallback) ->
       `photo` step, `fit: extend`.
 - [ ] **8.5 Gestures** `gestures.js`: one pointer translate, two pointers
@@ -250,12 +253,16 @@ progress, metadata, palette, list, delete.**
 ## M9 - Save a node
 
 - [ ] **9.1 SQLite schema** (`bun:sqlite`, WAL, `user_version`): photos, nodes,
-      node_photos, node_links (P S8). Done when the DB file is created at start.
+      node_photos, node_links (P S8), including the graph columns (`owner_id`,
+      `visibility`, `group_id`, `kind`, `x`, `y`, `pinned`, `tile`, `rev`), `node_links.sort` and
+      the indexes on `node_links(from_id, sort)` and `(to_id)`. All SQL lives in
+      `server/db/`. Done when the DB file is created at start.
 - [ ] **9.2 `POST /api/nodes`**: validate doc, bake used uploads into
       `data/photos/<hash>.<ext>` (auto-orient, strip, max 2048 edge; JPEG sources are never
       re-encoded at a higher quality: lossless `jpegtran` pass-through, or own `%Q` when
       shrunk; non-JPEG opaque sources JPEG q99; P S8) plus a
-      square thumbnail rendition (alpha photos baked as WebP/PNG, never JPEG), insert rows in one transaction, delete uploads only
+      square thumbnail rendition = the node **tile** (alpha photos baked as WebP/PNG,
+      never JPEG; who renders it: `GRAPH.md` S3.7), insert rows in one transaction, delete uploads only
       after commit; reconcile leftovers at start (P S8).
 - [ ] **9.2b Theme in the DB**: `nodes.doc` keeps `style.theme`; on save the
       sanitiser runs again and rejects unknown theme ids. Done when a node saved
@@ -296,6 +303,72 @@ progress, metadata, palette, list, delete.**
       the photo matrix) for a destructive cut-out and for the thumbnail rendition in
       9.2 (P S10 use 2).
 - [ ] **11.2 Handwriting recognition**: deferred past the PoC (decided 2026-10-21).
+
+## M12 - Graph view (after M9; design and numbers in `GRAPH.md`)
+
+- [x] **12.0 Decide** (2026-10-22): shared landscape, visibility owner/group/public,
+      positions owner-defined, server-side cached tiles later. Still open: `GRAPH.md`
+      S5 (edge kinds confirmation, who may link where, collaboration).
+- [ ] **12.1 Rooted neighbourhood API** `GET /api/graph?root=<id>&depth=<n>`: nodes
+      with child counts (`+N` badges), edges, `rev`, ETag/304, brotli; ordered
+      children windowed (`?offset=&limit=`); visibility filter in the traversal
+      (recursive CTE, measured ~2 ms/13 KB at 1 M nodes). Visible = owner, or
+      `public`, or `group` with the viewer in `group_members`; an edge is sent only
+      when both ends are visible. Done when a generated
+      10 000-user data set answers depth 2 in under 5 ms.
+- [ ] **12.2 Ops** `POST /api/graph/ops`: `link`, `unlink`, `move`, `pin`, `order`
+      (shift siblings), `retitle`; edge labels limited to `child`, `sells`, `ref`; one
+      transaction, bumps `rev`; permission check: owner or group admin.
+- [ ] **12.3 `GraphView`** (Preact SVG + vendored `d3-force`/`d3-zoom`/`d3-drag`):
+      tokens for node/edge/label, stored positions, expand-on-demand on tap, tiles
+      read-only, semantic zoom (colour -> label -> tile). Looks like
+      `docs/screenshots/graph-mobile-*.jpg`.
+- [ ] **12.3b Branch view** `BranchView` (GRAPH S2.7): computed layout (spine +
+      branches, angles from `--wb-branch-*` tokens), camera `transform` with CSS
+      transition, window fetch around the focus, tap = zoom a tile, lower-left =
+      walk the spine, right = descend, back = up; SSR of the first view. Done when
+      the 50-article list is walked end to end on a phone with only ~10 tiles in the
+      DOM at a time.
+- [ ] **12.3c Run presentations**: filmstrip/carousel and masonry (per category) as
+      alternatives to the straight spine, chosen by the list node.
+- [ ] **12.4 Edit gestures**: drag to move/pin, drag handle to relink, drag in a list to
+      reorder; open a node = the single editor (8.1).
+- [ ] **12.5 Live updates**: Bun WebSocket pub/sub of ops, `rev` gap -> refetch.
+- [ ] **12.6 Overall-root** (shared landscape): seed the `overall-root` node with
+      children `user-profiles` and `featured`; on sign-up create the user's root, a
+      profile node (direct child of the root) and append a `ref` edge to
+      `user-profiles` (`sort` = append). `featured` is curated by the
+      **curators** group (owner of `overall-root` and members with role `curator`); entries are `ref` edges to articles, galleries, marketplaces.
+      Both lists are windowed (paged by `offset`/`limit`), never sent whole. Done
+      when the view starts at `overall-root` and a user can walk to any public
+      profile in three taps.
+- [ ] **12.6b Node lock**: `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
+      `DELETE` (release), expiry after ~60 s without heartbeat, owner may break;
+      editor 8.1 takes the lock on open, shows "locked by <name>" read-only when
+      refused. Ops and saves are rejected without the lock.
+- [ ] **12.7 Groups** (with accounts): create group, invite/accept/leave, promote to
+      `admin`, set a node's visibility to `group` (one `group_id`); ops are allowed
+      for the owner and the admins of the node's group only; the cache key includes the viewer's
+      memberships.
+- [ ] **12.8 Server-side tiles** (later): rasterise a node on the server, cache by
+      `rev`, serve as the `tile`; until then the palette colour is the fallback.
+
+## M13 - Canvas nodes: 3D gallery, version 1 (`GALLERY.md` S0b, S10; after M10 and M12)
+
+Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
+
+- [ ] **13.1 Document**: `scene3d` step (plan, style, start), validation, sanitiser;
+      `node_photos.role` (`picture` | `texture`) and a "use as texture" toggle on
+      photo cards; texture photos are never hung.
+- [ ] **13.2 Builder** `client/gallery/build.js`: walls, room and corridor floors, ramps
+      (slope <= 1:12, walls tilt), texture set with default quads (`tools/gallery-warp.mjs`
+      is the prototype); unit-tested without a DOM.
+- [ ] **13.3 Scene**: vendored three.js loaded on enter, starfield, art lighting.
+- [ ] **13.4 Walking**: pointer lock + WASD, stick + drag-look, wall collision, floor height.
+- [ ] **13.5 Auto-hang**: child tiles on room insides (`GALLERY.md` S5.1); tap opens the node.
+- [ ] **13.6 Host**: poster until entered, one live canvas, viewport-fill, dispose on leave.
+- [ ] **13.7 Plan layer in the 2D editor**: wall layer with height; rooms = closed, corridors
+      = lines; refuse corners sharper than 90 degrees.
 
 ## Docs and housekeeping (do alongside, not blocking)
 
