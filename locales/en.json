@@ -182,5 +182,7 @@
   "editor.lock.lost": "The lock was lost (expired or broken). Your changes are kept as a draft; take the lock back to continue.",
   "editor.lock.gone": "This node no longer exists. Your changes are kept as a draft.",
   "editor.lock.break": "Break lock",
-  "editor.lock.retry": "Try again"
+  "editor.lock.retry": "Try again",
+  "nodes.saved": "Saved nodes",
+  "nodes.empty": "No photo"
 }

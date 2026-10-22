@@ -182,5 +182,7 @@
   "editor.lock.lost": "Die Sperre ging verloren (abgelaufen oder aufgehoben). Deine Änderungen bleiben als Entwurf erhalten; hole die Sperre zurück, um weiterzumachen.",
   "editor.lock.gone": "Dieser Node existiert nicht mehr. Deine Änderungen bleiben als Entwurf erhalten.",
   "editor.lock.break": "Sperre aufheben",
-  "editor.lock.retry": "Nochmal versuchen"
+  "editor.lock.retry": "Nochmal versuchen",
+  "nodes.saved": "Gespeicherte Nodes",
+  "nodes.empty": "Kein Foto"
 }

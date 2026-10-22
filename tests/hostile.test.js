@@ -160,7 +160,8 @@ describe('node documents', () => {
     expect((await send('POST', '/api/nodes', { body: '{nope', type: 'application/json' })).status).toBe(400);
     expect((await send('POST', '/api/nodes', { body: '', type: 'application/json' })).status).toBe(400);
     expect((await send('PATCH', '/api/nodes/1', { body: '{}' })).status).toBe(405);
-    expect((await send('GET', '/api/nodes', { type: null })).status).toBe(405);
+    expect((await send('PUT', '/api/nodes', { body: '{}' })).status).toBe(405);
+    expect((await send('GET', '/api/nodes', { type: null })).status).toBe(200); // the list of saved nodes (E68)
     expect((await send('GET', '/api/nodes/1e3', { type: null })).status).toBe(404);
     expect((await send('GET', '/api/nodes/-1', { type: null })).status).toBe(404);
     expect((await send('PUT', '/api/nodes/99', { body: { rev: 1, doc: doc() } })).status).toBe(404);

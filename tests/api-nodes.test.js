@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { config } from '../server/config.js';
 import { open } from '../server/db/db.js';
 import { addLink, getNode, getPhoto, nodePhotos } from '../server/db/nodes.js';
-import { createNode, deleteNodeRoute, mergePalettes, readNode, saveNew, updateNodeRoute } from '../server/api/nodes.js';
+import { createNode, deleteNodeRoute, listNodesRoute, mergePalettes, readNode, saveNew, updateNodeRoute } from '../server/api/nodes.js';
 import { servePhoto } from '../server/api/photos.js';
 import { run } from '../server/media/run.js';
 import { detectTools, imagemagick } from '../server/media/tools.js';
@@ -169,6 +169,20 @@ describe('GET /api/nodes/:id and /files/photos', () => {
 
     expect(again.status).toBe(304);
     expect(await again.text()).toBe('');
+  });
+
+  test('GET /api/nodes lists the saved nodes as tiles, newest first (E68)', async () => {
+    if(!ready) return;
+
+    const first = (await (await post({ doc: doc([photo('photo001', A)], { title: 'First' }) })).json()).id;
+    const second = (await (await post({ doc: doc([photo('photo001', A)], { title: 'Second' }) })).json()).id;
+    const res = await listNodesRoute(h);
+    const { nodes } = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(nodes.map(n => n.id).slice(0, 2)).toEqual([second, first]);
+    expect(nodes[0]).toEqual({ id: second, title: 'Second', kind: 'node', tile: A, updated_at: expect.any(Number) });
+    expect(Object.keys(nodes[0]).sort()).toEqual(['id', 'kind', 'tile', 'title', 'updated_at']); // no document, no rev
   });
 
   test('unknown or malformed ids are 404', async () => {

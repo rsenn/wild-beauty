@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 import { config } from '../config.js';
 import { log } from '../log.js';
 import { database } from '../db/db.js';
-import { deleteNode, deletePhoto, getNode, getPhoto, insertNode, nodePhotos, releaseLock, setNodePhotos, updateNode, upsertPhoto } from '../db/nodes.js';
+import { deleteNode, deletePhoto, getNode, listNodes, getPhoto, insertNode, nodePhotos, releaseLock, setNodePhotos, updateNode, upsertPhoto } from '../db/nodes.js';
 import { validateNode, photoLookup } from '../node/validate.js';
 import { bake } from '../media/bake.js';
 import { choosePadding } from '../media/color.js';
@@ -305,4 +305,15 @@ export async function deleteNodeRoute(idText, h, req) {
   const r = await removeNode(h ?? (await database()), Number(idText), { holder: session.holder });
 
   return r.status === 204 ? new Response(null, { status: 204 }) : reply(r.status, r.body);
+}
+
+// what a tile of the saved-nodes list shows (E68)
+export const tileOf = ({ id, title, kind, tile, updated_at }) => ({ id, title, kind, tile, updated_at });
+
+// the nodes that may be seen, newest first
+export const visibleNodes = h => listNodes(h).filter(node => canView(node, null)).map(tileOf);
+
+// GET /api/nodes -> 200 { nodes: [tile, ...] }
+export async function listNodesRoute(h) {
+  return Response.json({ nodes: visibleNodes(h ?? (await database())) }, { headers: { 'cache-control': 'no-cache' } });
 }

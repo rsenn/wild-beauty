@@ -9,7 +9,7 @@ import { config } from './server/config.js';
 import { dev, log } from './server/log.js';
 import { createUpload, deleteUpload, listUploads, readUploads, serveUpload } from './server/api/uploads.js';
 import { lockRoute } from './server/api/locks.js';
-import { createNode, deleteNodeRoute, readNode, updateNodeRoute } from './server/api/nodes.js';
+import { createNode, deleteNodeRoute, listNodesRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
 import { servePhoto } from './server/api/photos.js';
 import { photoInfos } from './server/node/view.js';
 import { canView } from './server/api/nodes.js';
@@ -100,6 +100,11 @@ async function page(lang, titleKey, extra, title) {
   });
 }
 
+// GET /:lang/new: the upload area, the editor and the saved nodes (E68)
+async function newPage(lang) {
+  return page(lang, 'page.title.new', { nodes: visibleNodes(await database()) });
+}
+
 // GET /:lang/node/:id: the saved node as a read-only page
 async function nodePage(lang, id) {
   const h = await database();
@@ -128,7 +133,7 @@ function route(req) {
 
   if(lock) return lockRoute(req, lock[1]);
 
-  if(pathname === '/api/nodes') return req.method === 'POST' ? createNode(req) : text('method not allowed\n', 405);
+  if(pathname === '/api/nodes') return req.method === 'POST' ? createNode(req) : req.method === 'GET' ? listNodesRoute() : text('method not allowed\n', 405);
 
   const node = /^\/api\/nodes\/([^/]+)$/.exec(pathname);
 
@@ -182,7 +187,7 @@ function route(req) {
 
   const m = /^\/([a-z]{2,3})\/new$/.exec(pathname);
 
-  if(m && locales.has(m[1])) return page(m[1], 'page.title.new');
+  if(m && locales.has(m[1])) return newPage(m[1]);
 
   return text('not found\n', 404);
 }

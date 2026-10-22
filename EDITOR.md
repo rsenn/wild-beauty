@@ -778,7 +778,7 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
       Done when a saved node reopens identically (pixel snapshot of the stage).
 - [x] **E67 lock client** (`lock.js`): take on open, 20 s heartbeat, release on close, lost-lock
       read-only state, banner and owner "break lock". Done when a second tab opens read-only.
-- [ ] **E68 saved nodes list** on `/new` (SSR, read-only tiles with "Edit"). Done when a saved node appears after reload.
+- [x] **E68 saved nodes list** on `/new` (SSR, read-only tiles with "Edit"). Done when a saved node appears after reload.
 - [ ] **E69 delete node** with confirm. Done when files and rows are gone.
 
 ### Phase H - theme, texture role, i18n, accessibility, devices

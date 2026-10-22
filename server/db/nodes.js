@@ -18,6 +18,9 @@ export function insertNode(h, { title = '', doc, palette, kind = 'node', now = D
 // the node with `doc` and `palette` parsed, or null
 export const getNode = (h, id) => node(h.get('SELECT * FROM nodes WHERE id = ?', id));
 
+// the saved nodes for a list of tiles, newest first: { id, title, kind, tile, updated_at }
+export const listNodes = (h, limit = 200) => h.all('SELECT id, title, kind, tile, updated_at FROM nodes ORDER BY updated_at DESC, id DESC LIMIT ?', limit);
+
 // Save a new title, doc and palette if the stored rev is still `rev`.
 // -> the new rev, or null when the node is gone or someone saved in between
 // (getNode tells the two apart).

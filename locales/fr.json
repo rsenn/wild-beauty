@@ -182,5 +182,7 @@
   "editor.lock.lost": "Le verrou a été perdu (expiré ou levé). Vos modifications sont gardées comme brouillon ; reprenez le verrou pour continuer.",
   "editor.lock.gone": "Ce nœud n'existe plus. Vos modifications sont gardées comme brouillon.",
   "editor.lock.break": "Lever le verrou",
-  "editor.lock.retry": "Réessayer"
+  "editor.lock.retry": "Réessayer",
+  "nodes.saved": "Nœuds enregistrés",
+  "nodes.empty": "Sans photo"
 }

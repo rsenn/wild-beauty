@@ -1006,3 +1006,42 @@ body {
 .wb-editor-head-fields {
   display: contents;
 }
+
+/* saved nodes (E68): the same grid as the upload cards, read-only tiles */
+.wb-saved-title {
+  margin: 16px 0 0;
+  font-size: var(--wb-font-size-lead);
+}
+
+.wb-saved-box {
+  overflow: hidden;
+}
+
+.wb-saved-thumb {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  text-decoration: none;
+  font-size: var(--wb-font-size-small);
+}
+
+.wb-saved-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wb-saved-name {
+  overflow: hidden;
+  font-size: var(--wb-font-size-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wb-saved-edit {
+  align-self: flex-start;
+}
