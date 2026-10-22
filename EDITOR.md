@@ -353,6 +353,7 @@ node = { v: 1,
          style: { theme?: string, vars?: { "--wb-...": string } },     // PLAN S16.6
          mode:  'free' | 'slides' | 'grid',
          bg?:   string,                                                  // stage ground colour
+         title?: string,                                                 // <= 200; copied to nodes.title on save; in the doc so title edits are undoable (E41)
          pages: [ page, ... ],                                           // 1..50
          fields?: [ { label, value } ],                                  // later
          scene?: scene3d }                                               // kind 'gallery', GALLERY S3.1
@@ -593,14 +594,14 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
       Done when two thousand ids are unique and the empty node validates.
 - [x] **E4 `model.validate`, structure**: `v`, `mode`, pages, step shapes, unknown `op`.
       Done when each malformed fixture returns its specific error code.
-- [ ] **E5 `model.validate`, references and limits**: dangling `clip/target/shape`,
+- [x] **E5 `model.validate`, references and limits**: dangling `clip/target/shape`,
       >500 steps, >2000 points, path too long, non-finite numbers.
-- [ ] **E6 `model` commands (pure)**: `addStep, updateStep, removeStep, moveStep(to front/back/index),
+- [x] **E6 `model` commands (pure)**: `addStep, updateStep, removeStep, moveStep(to front/back/index),
       addPage, removePage, movePage, setMode, setTitle`. Each returns a new document.
       Done when tests show the input is never mutated.
-- [ ] **E7 `model` photo commands**: `addPhoto(doc, hash, info)` (centres, fit extend),
+- [x] **E7 `model` photo commands**: `addPhoto(doc, hash, info)` (centres, fit extend),
       `setFit`, `setOpacity`, `setBlend`, `setClip/unclip` (removes dangling references on delete).
-- [ ] **E8 `history.js`**: `create, push, undo, redo, canUndo, canRedo`, max 100,
+- [x] **E8 `history.js`**: `create, push, undo, redo, canUndo, canRedo`, max 100,
       coalescing for slider drags. Done when undo after redo after undo restores exact snapshots.
 - [ ] **E9 `grid.js`**: `gridLayout(n, aspect)` -> matrices for the `grid` mode. Done
       when 1, 2, 5, 9 photos give non-overlapping cells.
