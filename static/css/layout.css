@@ -963,3 +963,18 @@ body {
   gap: 4px;
   margin-top: var(--wb-editor-gap);
 }
+
+/* shape tool (E60): the first vertex is where a click closes the shape */
+.wb-editor-handle-first {
+  stroke-width: 3px;
+}
+
+.wb-editor-hint {
+  font-size: var(--wb-font-size-small);
+  opacity: 0.7;
+}
+
+/* vertex editing (E61): the selected corner */
+.wb-editor-handle-selected {
+  fill: var(--wb-select);
+}

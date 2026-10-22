@@ -142,5 +142,13 @@
   "editor.mode.slides": "Slides",
   "editor.mode.grid": "Grid",
   "editor.slide.n": "Slide {n}",
-  "editor.mode.auto": "Slides and grid show the photos laid out automatically. Switch to Free to edit."
+  "editor.mode.auto": "Slides and grid show the photos laid out automatically. Switch to Free to edit.",
+  "editor.shape.hasFill": "Filled",
+  "editor.shape.hasStroke": "Outline",
+  "editor.shape.closed": "Closed",
+  "editor.shape.finish": "Finish",
+  "editor.shape.cancel": "Cancel",
+  "editor.shape.hint": "Click for a corner, drag to pull a curve, click the first corner to close.",
+  "editor.vertex.join": "Join handles",
+  "editor.vertex.delete": "Delete corner"
 }

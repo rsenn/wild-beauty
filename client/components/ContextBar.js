@@ -10,7 +10,7 @@ const Button = ({ label, onClick, pressed, disabled, children }) => html`<button
 
 const Color = ({ label, value, onInput }) => html`<label class="wb-editor-field">${label} <input type="color" value=${/^#[0-9a-f]{6}$/i.test(value ?? '') ? value : '#000000'} onInput=${e => onInput(e.target.value)} /></label>`;
 
-export const ContextBar = ({ t, step, clipped, photo, dispatch }) => {
+export const ContextBar = ({ t, step, vertex, onVertex, clipped, photo, dispatch }) => {
   if(!step) return html`<p class="wb-editor-context">${t('editor.context.empty')}</p>`;
 
   const id = step.id;
@@ -40,7 +40,15 @@ export const ContextBar = ({ t, step, clipped, photo, dispatch }) => {
   } else if(step.op === 'stroke') {
     controls = html`<${Color} label=${t('editor.stroke.color')} value=${step.color} onInput=${color => dispatch({ type: 'setColor', id, color })} />`;
   } else if(step.op === 'shape') {
+    const change = changes => dispatch({ type: 'updateShape', id, changes });
+    const tone = typeof step.stroke === 'string' ? step.stroke : typeof step.fill === 'string' ? step.fill : '#000000';
+
     controls = html`
+      <${Button} pressed=${step.fill !== undefined} onClick=${() => change({ fill: step.fill === undefined ? tone : null })}>${t('editor.shape.hasFill')}<//>
+      <${Button} pressed=${step.stroke !== undefined} onClick=${() => change({ stroke: step.stroke === undefined ? tone : null })}>${t('editor.shape.hasStroke')}<//>
+      <${Button} pressed=${step.closed} onClick=${() => change({ closed: !step.closed })}>${t('editor.shape.closed')}<//>
+      ${vertex?.broken && html`<${Button} onClick=${() => onVertex('join')}>${t('editor.vertex.join')}<//>`}
+      ${vertex && html`<${Button} disabled=${!vertex.canDelete} onClick=${() => onVertex('delete')}>${t('editor.vertex.delete')}<//>`}
       <${Color} label=${t('editor.shape.fill')} value=${step.fill} onInput=${color => dispatch({ type: 'setColor', id, field: 'fill', color })} />
       <${Color} label=${t('editor.shape.stroke')} value=${step.stroke} onInput=${color => dispatch({ type: 'setColor', id, field: 'stroke', color })} />
       <label class="wb-editor-field">${t('editor.shape.width')} <input type="range" min="0" max="60" value=${step.strokeWidth} onInput=${e => dispatch({ type: 'setStrokeWidth', id, value: Number(e.target.value) })} /></label>

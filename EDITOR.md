@@ -762,9 +762,9 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 - [x] **E59 pen tool UI**: pointer capture, live stroke in the overlay, commit on up, one history entry;
       colour and base width controls. Done when a stroke from a stylus differs in width from a mouse stroke.
-- [ ] **E60 shape tool UI**: add vertex, drag handle, close, open/closed, fill/stroke toggles.
+- [x] **E60 shape tool UI**: add vertex, drag handle, close, open/closed, fill/stroke toggles.
       Done when a heart can be drawn with curves.
-- [ ] **E61 vertex editing** (select/move/delete vertex, handle break). Done when moving a vertex keeps handles.
+- [x] **E61 vertex editing** (select/move/delete vertex, handle break). Done when moving a vertex keeps handles.
 - [ ] **E62 clip / unclip tools**. Done when a photo is masked by a circle and slides under it.
 - [ ] **E63 erase**: select + delete for strokes and shapes. Done when undo brings it back.
 

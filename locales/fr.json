@@ -142,5 +142,13 @@
   "editor.mode.slides": "Diapositives",
   "editor.mode.grid": "Grille",
   "editor.slide.n": "Diapositive {n}",
-  "editor.mode.auto": "Diapositives et grille disposent les photos automatiquement. Passez en Libre pour modifier."
+  "editor.mode.auto": "Diapositives et grille disposent les photos automatiquement. Passez en Libre pour modifier.",
+  "editor.shape.hasFill": "Rempli",
+  "editor.shape.hasStroke": "Contour",
+  "editor.shape.closed": "Fermé",
+  "editor.shape.finish": "Terminer",
+  "editor.shape.cancel": "Annuler",
+  "editor.shape.hint": "Cliquez pour un coin, glissez pour une courbe, cliquez sur le premier coin pour fermer.",
+  "editor.vertex.join": "Lier les poignées",
+  "editor.vertex.delete": "Supprimer le coin"
 }

@@ -142,5 +142,13 @@
   "editor.mode.slides": "Folien",
   "editor.mode.grid": "Raster",
   "editor.slide.n": "Folie {n}",
-  "editor.mode.auto": "Folien und Raster ordnen die Fotos automatisch an. Zum Bearbeiten auf Frei wechseln."
+  "editor.mode.auto": "Folien und Raster ordnen die Fotos automatisch an. Zum Bearbeiten auf Frei wechseln.",
+  "editor.shape.hasFill": "Gefüllt",
+  "editor.shape.hasStroke": "Kontur",
+  "editor.shape.closed": "Geschlossen",
+  "editor.shape.finish": "Fertig",
+  "editor.shape.cancel": "Abbrechen",
+  "editor.shape.hint": "Klick setzt eine Ecke, Ziehen formt eine Kurve, Klick auf die erste Ecke schliesst die Form.",
+  "editor.vertex.join": "Griffe verbinden",
+  "editor.vertex.delete": "Ecke löschen"
 }

@@ -1,5 +1,7 @@
 // The node document (EDITOR.md S3.1): constants, ids and the empty node.
 // Shared by the browser and the server, so no DOM and no Bun APIs.
+import { pathFromVertices, verticesFromPath } from './shapes.js';
+
 export const VERSION = 1;
 
 export const MODES = ['free', 'slides', 'grid'];
@@ -504,4 +506,46 @@ export function unclip(doc, stepId) {
   const { clip, ...rest } = at.step;
 
   return withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? rest : step)));
+}
+
+// Change a shape (E60): `fill` / `stroke` a colour, or null for none; `closed`
+// opens or closes the path (the vertices and handles stay).
+export function updateShape(doc, stepId, { fill, stroke, closed } = {}) {
+  const at = findStep(doc, stepId);
+
+  if(!at || at.step.op !== 'shape') return doc;
+
+  const next = { ...at.step };
+  const set = (key, value) => (value === null ? delete next[key] : value !== undefined && (next[key] = value));
+
+  if(fill !== undefined && fill !== null && !isColour(fill)) return doc;
+  if(stroke !== undefined && stroke !== null && !isColour(stroke)) return doc;
+
+  set('fill', fill);
+  set('stroke', stroke);
+
+  if(typeof closed === 'boolean' && closed !== at.step.closed) {
+    const parsed = verticesFromPath(at.step.path);
+
+    if(!parsed) return doc;
+
+    next.closed = closed;
+    next.path = pathFromVertices(parsed.vertices, closed);
+  }
+
+  return withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? next : step)));
+}
+
+// Replace the vertices of a shape (E61), the path follows. Fewer than two (open)
+// or three (closed) vertices, or a non-finite coordinate, change nothing.
+export function setVertices(doc, stepId, vertices) {
+  const at = findStep(doc, stepId);
+
+  if(!at || at.step.op !== 'shape' || !Array.isArray(vertices) || vertices.length < (at.step.closed ? 3 : 2) || vertices.length > LIMITS.points) return doc;
+
+  const ok = n => Number.isFinite(n) && Math.abs(n) <= LIMITS.number;
+
+  if(!vertices.every(v => ok(v.x) && ok(v.y) && [v.hin, v.hout].every(h => h === undefined || (Array.isArray(h) && h.length === 2 && h.every(ok))))) return doc;
+
+  return withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? { ...step, path: pathFromVertices(vertices, step.closed) } : step)));
 }

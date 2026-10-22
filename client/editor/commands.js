@@ -16,6 +16,7 @@ const KEYED = {
   setStrokeWidth: c => `strokeWidth:${c.id}`,
   setMatrix: c => `matrix:${c.id}`,
   recordMove: c => `matrix:${c.id}`,
+  setVertices: c => `vertices:${c.id}`,
 };
 
 // the colour fields of each op a setColor may write
@@ -66,6 +67,10 @@ function onDoc(doc, c) {
 
       return step && COLOUR_FIELDS[step.op]?.includes(field) && model.isColour(c.color) ? model.updateStep(doc, c.id, { [field]: c.color }) : doc;
     }
+    case 'setVertices':
+      return model.setVertices(doc, c.id, c.vertices);
+    case 'updateShape':
+      return model.updateShape(doc, c.id, c.changes);
     case 'recordMove':
       return model.recordMove(doc, c.id, c.m, c.k, c.ease);
     case 'setMatrix':

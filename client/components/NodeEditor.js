@@ -11,6 +11,8 @@ import { ADD_EVENT, takePending } from '../editor/pending.js';
 import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
 import { centreOf, hitTest, matrixOf, outlineOf } from '../editor/hit.js';
+import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../editor/vertexedit.js';
+import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { oneEuroPoint, resample, strokePath, strokeWidths } from '../editor/pen.js';
 import { photoSteps as allPhotoSteps, renderNode } from '../editor/render.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
@@ -35,6 +37,8 @@ import { Stage } from './Stage.js';
 // actions stay inert until their tasks.
 const ACTIONS = ['undo', 'redo', 'page', 'delete', 'save'];
 const SPACING = 4;
+const VERTEX_PX = 14; // how near a click picks a vertex or handle
+const CLOSE_PX = 14; // how near the first vertex a click closes the shape
 const HANDLE_PX = 10; // a selection handle's side on screen
 const TAP_PX = 12; // how far from a thin line still counts as a tap on it
 const SLOP_PX = 6; // a pointer must travel this far before a gesture moves the step
@@ -45,6 +49,28 @@ const round = (v, k) => Math.round(v * k) / k;
 // what the editor needs to draw an upload: where it is and how big
 const photoInfo = p => ({ href: `/files/uploads/${p.display}`, width: p.width, height: p.height, padding: p.padding, palette: Array.isArray(p.palette) ? p.palette.filter(c => /^#[0-9a-f]{6}$/i.test(c?.hex)).slice(0, 8) : [] });
 const isPayload = p => p && /^[0-9a-f]{64}$/.test(p.hash) && typeof p.display === 'string' && p.width > 0 && p.height > 0;
+
+// the vertices and bezier handles of the selected shape (E61)
+const VertexEdit = ({ geo, sel, scale }) => {
+  const side = HANDLE_PX / scale;
+
+  return html`<g class="wb-editor-vertices">
+    ${geo.flatMap(g => [g.hin && [g.p, g.hin], g.hout && [g.p, g.hout]].filter(Boolean)).map(([a, b]) => html`<line class="wb-editor-outline" x1=${a[0]} y1=${a[1]} x2=${b[0]} y2=${b[1]} /><circle class="wb-editor-handle" cx=${b[0]} cy=${b[1]} r=${side / 2} />`)}
+    ${geo.map(g => html`<rect class=${'wb-editor-handle' + (g.i === sel ? ' wb-editor-handle-selected' : '')} x=${g.p[0] - side / 2} y=${g.p[1] - side / 2} width=${side} height=${side} />`)}
+  </g>`;
+};
+
+// the shape being drawn: its path so far, its vertices and bezier handles
+const ShapeDraft = ({ draft, color, width, scale }) => {
+  const { path, handles, points } = preview(draft);
+  const side = HANDLE_PX / scale;
+
+  return html`<g class="wb-editor-shape-draft">
+    ${path && html`<path d=${path} fill="none" stroke=${color} stroke-width=${width} stroke-linecap="round" />`}
+    ${handles.map(([x, y, hx, hy]) => html`<line class="wb-editor-outline" x1=${x} y1=${y} x2=${hx} y2=${hy} /><circle class="wb-editor-handle" cx=${hx} cy=${hy} r=${side / 2} />`)}
+    ${points.map(([x, y], i) => html`<rect class=${'wb-editor-handle' + (i === 0 ? ' wb-editor-handle-first' : '')} x=${x - side / 2} y=${y - side / 2} width=${side} height=${side} />`)}
+  </g>`;
+};
 
 // the theme's own colours, the palette of a node without photos
 const themeColours = () => {
@@ -84,8 +110,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [playing, setPlaying] = useState(false);
   const [pos, setPos] = useState(0); // the fractional position while playing: a move part way through
   const [slide, setSlide] = useState(0); // the slide shown in `slides` mode
+  const [vsel, setVsel] = useState(null); // the selected vertex of the selected shape
+  const [shape, setShape] = useState(emptyDraft); // the shape being drawn (shape tool)
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
+  const vdrag = useRef(null); // a vertex or handle of the selected shape being dragged
+  const shaping = useRef(false); // a vertex of the shape being drawn is being pulled
   const inserted = useRef(null); // the last recorded move: { id, at }
   const gesture = useRef(null); // { g, id } while a move/scale/rotate gesture runs
   const lastTap = useRef({ time: 0, id: null, at: null });
@@ -108,7 +138,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // always the current state for handlers registered once
   const latest = useRef();
 
-  latest.current = { snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
+  latest.current = { tool, shape, vsel, editStep, snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
 
   // every change of the node goes through here
   const dispatch = command => setHist(h => {
@@ -258,12 +288,44 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     }
   };
 
+  // a new selection starts without a selected vertex
+  useEffect(() => setVsel(null), [selected]);
+
+  // corner operations on the selected vertex of the selected shape
+  const editVertex = op => {
+    const { editStep, vsel } = latest.current;
+    const parsed = editStep?.op === 'shape' && vsel !== null ? verticesOf(editStep) : null;
+
+    if(!parsed) return;
+
+    const vertices = op === 'delete' ? removeVertex(parsed.vertices, vsel, editStep.closed) : op === 'break' ? breakVertex(parsed.vertices, vsel) : joinVertex(parsed.vertices, vsel);
+
+    if(!vertices) return;
+
+    dispatch({ type: 'setVertices', id: editStep.id, vertices });
+
+    if(op === 'delete') setVsel(null);
+  };
+
+  // leaving the shape tool finishes an open shape that has two corners, else drops it
+  useEffect(() => {
+    if(tool !== 'shape' && latest.current.shape.vertices.length) commitShape(latest.current.shape);
+  }, [tool]);
+
   // keys: a tool key selects a tool; ctrl+z, ctrl+shift+z / ctrl+y, Delete
   useEffect(() => {
     const on = e => {
       const next = toolForKey(e);
 
       if(next) return setTool(next);
+
+      const drafting = latest.current.tool === 'shape' && latest.current.shape.vertices.length;
+
+      if(drafting && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if(e.key === 'Enter') return e.preventDefault(), commitShape(latest.current.shape);
+        if(e.key === 'Escape') return e.preventDefault(), setDraft(emptyDraft());
+        if(e.key === 'Backspace') return e.preventDefault(), setDraft(undoVertex(latest.current.shape));
+      }
 
       const move = transformFor(e);
       const { selected: id, doc, page } = latest.current;
@@ -293,7 +355,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
       if(action === 'undo') undo();
       else if(action === 'redo') redo();
-      else if(latest.current.selected && !latest.current.previewing) remove(latest.current.selected);
+      else if(latest.current.selected && !latest.current.previewing) {
+        if(latest.current.vsel !== null && latest.current.editStep?.op === 'shape') editVertex('delete');
+        else remove(latest.current.selected);
+      }
     };
 
     window.addEventListener('keydown', on);
@@ -403,6 +468,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   const down = (e, units) => {
     if(tool === 'select') return selectDown(e, units);
+    if(tool === 'shape') return shapeDown(units);
 
     stroke.current = { filter: oneEuroPoint(1.5, 0.01), samples: [] };
     move(e, units);
@@ -415,6 +481,21 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     // another finger joins the gesture that is running
     if(gesture.current) return gesture.current.g.down(e.pointerId, units);
+
+    // a vertex or handle of the selected shape comes before anything under it
+    const parsed = !previewing && editStep?.op === 'shape' ? verticesOf(editStep) : null;
+
+    if(parsed) {
+      const m = matrixOf(doc, editStep.id, { page });
+      const hit = m && hitVertex(geometry(parsed, m), units, VERTEX_PX / scale);
+
+      if(hit) {
+        setVsel(hit.index);
+        vdrag.current = { hit, base: parsed.vertices, from: units, m, id: editStep.id };
+
+        return;
+      }
+    }
 
     const id = hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale, page, upTo: scrubbed ? shown : undefined });
 
@@ -448,7 +529,40 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     gesture.current = { g, id };
   };
 
+  // shape tool: a press adds a vertex (or closes the shape on the first one),
+  // dragging pulls its handle
+  const setDraft = next => {
+    latest.current.shape = next;
+    setShape(next);
+  };
+  const shapeDown = units => {
+    const { shape, scale, doc } = latest.current;
+    const { draft, closed } = press(shape, units, { near: CLOSE_PX / scale });
+
+    if(closed) return commitShape(draft);
+
+    shaping.current = true;
+    setDraft(draft);
+  };
+  const commitShape = draft => {
+    const { doc, pageId, color, size } = latest.current;
+    const step = shapeStep(draft, unique(allIds(doc)), { color, width: Math.max(1, size / 3) });
+
+    shaping.current = false;
+    setDraft(emptyDraft());
+
+    if(step) dispatch({ type: 'addStep', page: pageId, step });
+  };
+
   const move = (e, [x, y]) => {
+    if(vdrag.current) {
+      const d = vdrag.current;
+
+      return dispatch({ type: 'setVertices', id: d.id, vertices: dragVertices(d.base, d.hit, d.m, d.from, [x, y], { alt: e.altKey }) });
+    }
+
+    if(shaping.current) return setDraft(pull(latest.current.shape, [x, y], { alt: e.altKey }));
+
     if(gesture.current) {
       const m = gesture.current.g.move(e.pointerId, [x, y]);
 
@@ -468,6 +582,19 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   };
 
   const up = e => {
+    if(vdrag.current) {
+      setHist(history.seal);
+      vdrag.current = null;
+
+      return;
+    }
+
+    if(shaping.current) {
+      shaping.current = false;
+
+      return;
+    }
+
     if(gesture.current) {
       // the last pointer up ends the gesture: it is one undo step
       if(gesture.current.g.up(e.pointerId) === 0) {
@@ -542,9 +669,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const outline = selectedStep && outlineOf(doc, selectedStep.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined });
   const title = doc.title ?? '';
   const strip = auto ? [] : photoSteps(doc, page);
+  const parsedShape = editStep?.op === 'shape' && tool === 'select' ? verticesOf(editStep) : null;
+  const vertexGeo = parsedShape && matrixOf(doc, editStep.id, { page }) ? geometry(parsedShape, matrixOf(doc, editStep.id, { page })) : null;
+  const vertexInfo = vertexGeo && vsel !== null && vertexGeo[vsel] ? { index: vsel, broken: vertexGeo[vsel].broken, canDelete: !!removeVertex(parsedShape.vertices, vsel, editStep.closed) } : null;
 
   // the palette (E54): shown while the pen or a stroke / shape is selected
-  const paletteTargets = tool === 'pen' ? ['pen'] : editStep?.op === 'stroke' ? ['stroke'] : editStep?.op === 'shape' ? ['fill', 'outline'] : null;
+  const paletteTargets = tool === 'pen' || tool === 'shape' ? ['pen'] : editStep?.op === 'stroke' ? ['stroke'] : editStep?.op === 'shape' ? ['fill', 'outline'] : null;
   const paletteTarget = paletteTargets && (paletteTargets.includes(aim) ? aim : paletteTargets[0]);
   const reference = editStep?.op === 'photo' ? editStep : strip[strip.length - 1];
   const paletteColours = paletteTargets && swatches(photos[reference?.photo]?.palette ?? [], themeColours()).all;
@@ -577,8 +707,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           label=${title || t('editor.stage')}
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
-          interactive=${!auto && (tool === 'select' || (tool === 'pen' && !previewing))}
+          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
+          interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
           onDragEnter=${e => accepts(e) && (e.preventDefault(), setOver(true))}
@@ -592,12 +722,20 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       </div>
       <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRemove=${remove} />
       </div>
-      ${tool === 'pen'
+      ${tool === 'shape'
+        ? html`<div class="wb-editor-pen-options">
+            <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
+            <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
+            <button type="button" class="wb-editor-chip" disabled=${shape.vertices.length < 2} onClick=${() => commitShape(shape)}>${t('editor.shape.finish')}</button>
+            <button type="button" class="wb-editor-chip" disabled=${!shape.vertices.length} onClick=${() => setDraft(emptyDraft())}>${t('editor.shape.cancel')}</button>
+            <span class="wb-editor-hint">${t('editor.shape.hint')}</span>
+          </div>`
+        : tool === 'pen'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
-        : html`<${ContextBar} t=${t} step=${editStep} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+        : html`<${ContextBar} t=${t} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       <${ModeSwitch} t=${t} mode=${mode} onMode=${setMode} />
       ${auto
