@@ -48,7 +48,7 @@ export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry 
         </button>
         <button type="button" class="wb-round wb-card-remove" onClick=${onRemove} title=${t('upload.remove')} aria-label=${t('upload.remove')}></button>
         <button type="button" class="wb-round wb-card-rotate" onClick=${onRotate} title=${t('upload.rotate')} aria-label=${t('upload.rotate')}></button>
-        <button type="button" class="wb-card-fit" onClick=${onFit} title=${t('upload.fit.toggle')} aria-label=${t('upload.fit.toggle')}>${t(item.fit === 'cover' ? 'upload.fit.crop' : 'upload.fit.extend')}</button>
+        <button type="button" class=${'wb-card-fit' + (item.fit === 'cover' ? ' wb-card-fit-cover' : '')} onClick=${onFit} title=${t(item.fit === 'cover' ? 'upload.fit.extend' : 'upload.fit.crop')} aria-label=${t('upload.fit.toggle')} aria-pressed=${item.fit === 'cover' ? 'true' : 'false'}>${t(item.fit === 'cover' ? 'upload.fit.crop' : 'upload.fit.extend')}</button>
         ${item.record && html`<button type="button" class="wb-card-add" onClick=${add} title=${t('upload.add')} aria-label=${t('upload.add')}>${t('upload.add.short')}</button>`}
         ${busy && html`<div class="wb-card-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow=${percent}><div class="wb-card-progress-bar" style=${`width: ${percent}%`}></div></div>`}
       </div>

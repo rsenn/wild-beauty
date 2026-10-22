@@ -286,16 +286,26 @@ body {
   font-size: var(--wb-font-size-small);
 }
 
-/* round icon buttons overlapping the top right corner */
-.wb-round {
+/* the icons scale with the card: a quarter of its width, 18-26px */
+.wb-card-box {
+  container-type: inline-size;
+  --wb-card-icon: clamp(18px, 24cqw, 26px);
+}
+
+/* round icon buttons down the right edge: remove, rotate, add */
+.wb-round,
+.wb-card-add {
   position: absolute;
   right: 2px;
-  width: 26px;
-  height: 26px;
+  width: var(--wb-card-icon);
+  height: var(--wb-card-icon);
   padding: 0;
+  cursor: pointer;
+}
+
+.wb-round {
   border: var(--wb-border-width) outset var(--wb-button-round-border);
   border-radius: var(--wb-radius-round);
-  cursor: pointer;
 }
 
 .wb-card-remove {
@@ -304,7 +314,7 @@ body {
 }
 
 .wb-card-rotate {
-  top: 30px;
+  top: calc(var(--wb-card-icon) + 4px);
   background: var(--wb-icon-rotate) center / 80% no-repeat, var(--wb-button-round-bg);
 }
 
@@ -316,42 +326,42 @@ body {
   border-style: inset;
 }
 
+/* "add to node": a bold green plus, as big as the rotate arrow */
+.wb-card-add {
+  top: calc(2 * var(--wb-card-icon) + 6px);
+  font-size: 0;
+  background: linear-gradient(var(--wb-add-ink), var(--wb-add-ink)) center / 80% 26% no-repeat, linear-gradient(var(--wb-add-ink), var(--wb-add-ink)) center / 26% 80% no-repeat;
+  border: 0;
+  filter: drop-shadow(0 0 1px var(--wb-button-round-border)) drop-shadow(0 0 1px var(--wb-button-round-border));
+}
+
+.wb-card-add:hover {
+  filter: drop-shadow(0 0 2px var(--wb-button-round-hover)) drop-shadow(0 0 1px var(--wb-ink));
+}
+
+/* the fit toggle: a small yellow corner triangle pointing out to the bottom left
+   while the photo can still be enlarged (whole), turned round once it fills */
 .wb-card-fit {
   position: absolute;
   bottom: 2px;
   left: 2px;
-  max-width: calc(100% - 4px);
-  padding: 1px 4px;
-  overflow: hidden;
-  font: inherit;
-  font-size: var(--wb-font-size-small);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--wb-accent-ink);
-  background: var(--wb-accent);
+  width: var(--wb-card-icon);
+  height: var(--wb-card-icon);
+  padding: 0;
+  font-size: 0;
+  background: var(--wb-fit-ink);
   border: 0;
+  clip-path: polygon(0 100%, 25% 15%, 85% 75%);
   cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.wb-card-fit-cover {
+  transform: rotate(180deg);
 }
 
 .wb-card-fit:hover {
-  background: var(--wb-accent-hover);
-}
-
-.wb-card-add {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 28px;
-  min-height: 28px;
-  font: inherit;
-  color: var(--wb-accent-ink);
-  background: var(--wb-accent);
-  border: 0;
-  cursor: pointer;
-}
-
-.wb-card-add:hover {
-  background: var(--wb-accent-hover);
+  background: var(--wb-fit-hover);
 }
 
 [draggable='true'] {

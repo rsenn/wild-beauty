@@ -576,7 +576,7 @@ to every theme and to the sanitiser whitelist.
 | shape | `--wb-radius-tab/-frame/-button/-round/-node`, `--wb-node-outline` | 0, 0, 5px, pill, 8px, 3px | `button` in `_app.js`; graph screenshot |
 | type | `--wb-font-ui`, `--wb-font-size`, `-small/-button/-label/-lead/-tab` | Fixed; 13px (14px at <=375px), 14, 16, 17, 22, 40 | `_app.js`, `nav.js`, `imageUpload.js` |
 | tabs | `--wb-tab-size/-size-open/-gap/-ease/-time/-glow` | 48px, 100px, 4px, `cubic-bezier(.165,.84,.44,1)`, 1s, white glow | `li.menu-item` in `nav.js` |
-| cards | `--wb-card-columns/-wide`, `--wb-card-gap`, `--wb-card-ground` | 5 (8 from 700px), 8px, 40% white | `.upload-item` 20%; the phone screenshots show 5 columns |
+| cards | `--wb-card-columns/-wide`, `--wb-card-gap`, `--wb-card-ground` | 4 (8 from 700px), 8px, 40% white | `.upload-item` 20%; the phone screenshots show 5 columns |
 | depth | `--wb-shadow-card/-select/-hover/-pop` | `0 0 4px .75`, `2px 2px 6px #000`, `0 2px 4px .5`, tooltip shadow | `imageUpload.js`, `style.css`, `_app.js` |
 | round buttons | `--wb-button-round-bg/-border/-hover` | `#ffffff60`, `#cdcdcd`, `#ffdc20c0` | `.image-button` |
 | raised buttons | `--wb-button-bg/-bg-active/-border` | grey gradient, reversed, `#555` | `button` in `_app.js` |
