@@ -1,5 +1,5 @@
 import { html } from '../html.js';
-import { BLENDS, FITS } from '../editor/model.js';
+import { BLENDS } from '../editor/model.js';
 import { Popover } from './Popover.js';
 
 // The context bar under the stage (EDITOR.md S2.2): the controls of what is
@@ -26,9 +26,7 @@ export const ContextBar = ({ t, step, vertex, onVertex, clipped, photo, dispatch
 
   if(step.op === 'photo') {
     controls = html`
-      <span class="wb-editor-group" role="group" aria-label=${t('editor.fit')}>
-        ${FITS.filter(fit => fit !== 'free' || step.fit === 'free').map(fit => html`<${Button} pressed=${step.fit === fit} disabled=${fit !== 'free' && !photo} onClick=${() => dispatch({ type: 'setFit', id, fit, info: photo })}>${t('editor.fit.' + fit)}<//>`)}
-      </span>
+      ${photo && photo.width !== photo.height && html`<label class="wb-editor-field">${t('editor.crop.' + (photo.width > photo.height ? 'x' : 'y'))} <input type="range" min="0" max="1" step="0.01" value=${step.crop ?? 0.5} onInput=${e => dispatch({ type: 'setCrop', id, crop: Number(e.target.value) })} /></label>`}
       <${Popover} label=${t('editor.look')}>
         <label class="wb-editor-field">${t('editor.opacity')} <input type="range" min="0" max="1" step="0.01" value=${step.opacity} onInput=${e => dispatch({ type: 'setOpacity', id, value: Number(e.target.value) })} /></label>
         <label class="wb-editor-field">${t('editor.blend')}

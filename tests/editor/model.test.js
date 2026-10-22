@@ -1,6 +1,6 @@
 // bun test: client/editor/model.js
 import { describe, expect, test } from 'bun:test';
-import { LIMITS, addPhoto, fitMatrix, setBlend, setClip, setFit, setOpacity, unclip, MODES, VERSION, addPage, addStep, allIds, emptyNode, findStep, movePage, moveStep, newId, removePage, removeStep, setMode, setTitle, unique, updateStep, validate } from '../../client/editor/model.js';
+import { LIMITS, addPhoto, cropWindow, migrateDoc, setCrop, setLayout, setBlend, setClip, setOpacity, unclip, MODES, VERSION, addPage, addStep, allIds, emptyNode, findStep, movePage, moveStep, newId, removePage, removeStep, setMode, setTitle, unique, updateStep, validate } from '../../client/editor/model.js';
 
 describe('ids', () => {
   test('8 base-36 characters, two thousand are distinct', () => {
@@ -266,37 +266,61 @@ describe('photo commands', () => {
   const base = () => freeze(addPhoto(withSteps(shapeStep), 'page0001', HASH, portrait, 'photo001'));
   const step = (doc, id) => findStep(doc, id).step;
 
-  test('addPhoto centres the photo, fit extend, and validates', () => {
+  test('addPhoto covers the stage with a centred crop, and validates', () => {
     const doc = base();
 
-    expect(step(doc, 'photo001')).toEqual({ op: 'photo', id: 'photo001', photo: HASH, m: [1, 0, 0, 1, 125, 0], fit: 'extend', opacity: 1, blend: 'normal' });
+    expect(step(doc, 'photo001')).toEqual({ op: 'photo', id: 'photo001', photo: HASH, m: [1, 0, 0, 1, 0, 0], crop: 0.5, opacity: 1, blend: 'normal' });
     expect(doc.pages[0].steps.at(-1).id).toBe('photo001');
     expect(validate(doc)).toEqual([]);
     expect(validate(addPhoto(doc, 'page0001', HASH, landscape))).toEqual([]);
     expect(addPhoto(doc, 'nopage01', HASH, portrait)).toBe(doc);
   });
 
-  test('fitMatrix: extend contains, cover fills the stage', () => {
-    expect(fitMatrix('extend', landscape)).toEqual([1, 0, 0, 1, 0, 125]);
-    expect(fitMatrix('extend', { width: 500, height: 500 })).toEqual([1, 0, 0, 1, 0, 0]);
-    expect(fitMatrix('free', landscape)).toBeNull();
-
-    // a 1000 x 750 local photo scaled by 4/3 covers 1000 x 1000, centred
-    const [k, , , , e, f] = fitMatrix('cover', landscape);
-
-    expect(k).toBeCloseTo(4 / 3, 12);
-    expect(1000 * k + 2 * e).toBeCloseTo(1000, 9);
-    expect(750 * k + 2 * f).toBeCloseTo(1000, 9);
+  test('cropWindow: the largest square, moved along the long edge', () => {
+    expect(cropWindow({ width: 400, height: 200 }, 0)).toEqual({ side: 200, x: 0, y: 0 });
+    expect(cropWindow({ width: 400, height: 200 }, 0.5)).toEqual({ side: 200, x: 100, y: 0 });
+    expect(cropWindow({ width: 400, height: 200 }, 1)).toEqual({ side: 200, x: 200, y: 0 });
+    expect(cropWindow({ width: 200, height: 400 }, 1)).toEqual({ side: 200, x: 0, y: 200 });
+    expect(cropWindow({ width: 300, height: 300 }, 1)).toEqual({ side: 300, x: 0, y: 0 });
+    expect(cropWindow({ width: 400, height: 200 }, 9).x).toBe(200); // clamped
   });
 
-  test('setFit resets the matrix, free keeps it', () => {
-    const moved = updateStep(base(), 'photo001', { m: [2, 0, 0, 2, 7, 7], fit: 'free' });
+  test('a new photo covers the stage with a centred crop; the crop can be set', () => {
+    const added = step(base(), 'photo001');
 
-    expect(step(setFit(moved, 'photo001', 'extend', portrait), 'photo001')).toMatchObject({ fit: 'extend', m: [1, 0, 0, 1, 125, 0] });
-    expect(step(setFit(moved, 'photo001', 'cover', portrait), 'photo001').fit).toBe('cover');
-    expect(step(setFit(base(), 'photo001', 'free', portrait), 'photo001')).toMatchObject({ fit: 'free', m: [1, 0, 0, 1, 125, 0] });
-    expect(setFit(moved, 'photo001', 'zoom', portrait)).toBe(moved);
+    expect(added).toMatchObject({ m: [1, 0, 0, 1, 0, 0], crop: 0.5 });
+    expect(step(setCrop(base(), 'photo001', 0.25), 'photo001').crop).toBe(0.25);
+    expect(step(setCrop(base(), 'photo001', 7), 'photo001').crop).toBe(1);
+    expect(setCrop(base(), 'photo001', NaN)).toEqual(base());
+    expect(validate(setCrop(base(), 'photo001', 0.25))).toEqual([]);
   });
+
+  test('setLayout: fill and gap, bad values change nothing', () => {
+    const d = base();
+
+    expect(setLayout(d, { fill: 'tight' }).layout).toEqual({ fill: 'tight' });
+    expect(setLayout(setLayout(d, { fill: 'tight' }), { gap: 3 }).layout).toEqual({ fill: 'tight', gap: 3 });
+    expect(setLayout(d, { fill: 'huge' })).toBe(d);
+    expect(setLayout(d, { gap: -1 })).toBe(d);
+    expect(validate(setLayout(d, { fill: 'tight', gap: 3 }))).toEqual([]);
+    expect(validate({ ...d, layout: { fill: 'x' } }).map(e => e.code)).toContain('bad_layout');
+  });
+
+  test('migrateDoc: a pre-crop photo shows the same picture through the square window', () => {
+    // 1000 x 500 photo (long edge 1000 locally), extend: centred, m = translate(0, 250)
+    const old = { ...base(), pages: [{ id: 'page0001', steps: [{ op: 'photo', id: 'photo001', photo: HASH, m: [1, 0, 0, 1, 0, 250], fit: 'extend', opacity: 1, blend: 'normal' }] }] };
+    const out = migrateDoc(old, () => ({ width: 2000, height: 1000 }));
+    const s = out.pages[0].steps[0];
+
+    expect(s.crop).toBe(0.5);
+    expect(s.fit).toBeUndefined();
+    // new unit = 500 old units / 1000; the window starts at old x = 250
+    expect(s.m).toEqual([0.5, 0, 0, 0.5, 250, 250]);
+    expect(validate(out)).toEqual([]);
+    expect(migrateDoc(out, () => ({ width: 2000, height: 1000 }))).toBe(out); // already converted
+    expect(migrateDoc(old, () => null)).toBe(old); // unknown photo
+  });
+
 
   test('opacity is clamped, blend is checked, only photos change', () => {
     const doc = base();

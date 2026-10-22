@@ -386,12 +386,17 @@ Uses:
   file afterwards), a progress bar, state (queued, uploading, processing,
   done, failed + retry), a delete button.
 - Concurrency 3. Cancel on delete while uploading (`xhr.abort()`).
-- **Extend by default**: the card/preview uses `object-fit: contain` over a
-  two-colour gradient background from `padding`, so the photo is shown whole
-  with colour padding immediately, even before the server answered (until the
-  palette arrives, a neutral ground). A per-photo toggle switches to
-  `cover` (crop). Nothing is rasterised yet; it is CSS, then a `fit` value in
-  the node doc.
+- **Square crop, always (design decision, supersedes "extend by default")**: every
+  photo is a square. The card shows the photo zoomed in so it fills the square
+  (`object-fit: cover`) and only part of it is visible; dragging the photo in the
+  card moves the crop window along the long axis (portrait: up/down, landscape:
+  left/right, square: nothing to move). The card says which way it can be panned: on
+  desktop by the mouse cursor (`ns-resize` / `ew-resize`), on touch by a small
+  double-arrow icon on the card. The chosen crop travels with the photo into the node
+  (`crop`, EDITOR.md S2.5). The fit/crop toggle (yellow corner triangle) is gone, and so
+  is the extend ground made from the `padding` colours; the `padding` palette stays
+  recorded for later use (themes, text backgrounds). Nothing is rasterised yet: CSS
+  for the card, a `crop` value in the node doc.
 - Existing uploads are in the SSR HTML; the client adopts them.
 
 ### 11.2 - 11.6 Node editor, gestures, pen, shapes, clip
@@ -576,7 +581,7 @@ to every theme and to the sanitiser whitelist.
 | shape | `--wb-radius-tab/-frame/-button/-round/-node`, `--wb-node-outline` | 0, 0, 5px, pill, 8px, 3px | `button` in `_app.js`; graph screenshot |
 | type | `--wb-font-ui`, `--wb-font-size`, `-small/-button/-label/-lead/-tab` | Fixed; 13px (14px at <=375px), 14, 16, 17, 22, 40 | `_app.js`, `nav.js`, `imageUpload.js` |
 | tabs | `--wb-tab-size/-size-open/-gap/-ease/-time/-glow` | 48px, 100px, 4px, `cubic-bezier(.165,.84,.44,1)`, 1s, white glow | `li.menu-item` in `nav.js` |
-| cards | `--wb-card-columns/-wide`, `--wb-card-gap`, `--wb-card-ground` | 4 (8 from 700px), 8px, 40% white | `.upload-item` 20%; the phone screenshots show 5 columns |
+| cards | `--wb-card-columns/-wide`, `--wb-card-gap`, `--wb-card-ground` | 3 (4 from 480px, 6 from 700px), 8px, 40% white | `.upload-item` 20%; the phone screenshots show 5 columns |
 | depth | `--wb-shadow-card/-select/-hover/-pop` | `0 0 4px .75`, `2px 2px 6px #000`, `0 2px 4px .5`, tooltip shadow | `imageUpload.js`, `style.css`, `_app.js` |
 | round buttons | `--wb-button-round-bg/-border/-hover` | `#ffffff60`, `#cdcdcd`, `#ffdc20c0` | `.image-button` |
 | raised buttons | `--wb-button-bg/-bg-active/-border` | grey gradient, reversed, `#555` | `button` in `_app.js` |

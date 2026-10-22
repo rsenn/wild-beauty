@@ -56,6 +56,8 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
   const down = event => {
     if(event.button > 0) return;
 
+    box.current?.focus({ preventScroll: true }); // keys go to the stage from here on
+
     svg.current.setPointerCapture?.(event.pointerId);
     wrap('down')(event);
   };

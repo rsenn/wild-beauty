@@ -124,7 +124,7 @@ There is never more than one editor. Opening a second replaces the first.
 | Select / transform | V | tap selects the top-most step under the pointer; drag moves; handles scale/rotate; gestures (S2.4) apply to the selection | tap on empty stage deselects; Delete removes the selection |
 | Ink pen | P | freehand strokes; width from pressure and speed | colour from the palette (S2.3a); base width slider; mouse has no pressure (speed only) |
 | Shape | S | click adds a vertex, click-drag pulls a symmetric bezier handle, Alt or second finger breaks symmetry, clicking the first vertex closes | toggles: open/closed, fill on/off, stroke colour and width; vertices and handles stay editable |
-| Clip | C | with a photo selected, tap a shape: the shape becomes that photo's clip path and stops being drawn | the clip is in stage space: moving the photo slides it *under* the clip |
+| Clip | C | with a photo selected, tap a shape: the shape becomes that photo's clip path and stops being drawn | **the mask moves with the photo** (decided 2026-10-23): moving, scaling or turning a clipped photo applies the same move to its mask shape (`commands.js` `withMask`), so the window stays where it is on the photo; to slide the picture under a fixed mask, unclip, move, clip again. A mask shared by several photos moves with whichever is moved |
 | Unclip | U | with a clipped photo selected: removes the clip, the shape reappears as a normal object | |
 | Text | T | places **text boxes**: font face, font colour, background colour (with alpha, or a gradient), border radius | S2.3b |
 | Wall layer (3D gallery) | W | marks the selected shape as a wall with a height; a closed wall is a room, an open one a wall/corridor line | only for `kind: gallery`; refuses corners sharper than 90 degrees (`GALLERY.md` S0b) |
@@ -267,7 +267,7 @@ fonts installed for fontconfig. Colour values use the sanitiser's patterns (`#rr
 | one pointer drag on a selected photo | translate |
 | two pointers on the stage | similarity transform (pinch zoom + rotate + translate) of the selection, solved from the two start and two current points and composed onto the start matrix (drift-free) |
 | mouse wheel over the stage | zoom the selection around the pointer (Shift: rotate) |
-| double-tap / double-click on a photo | cycle fit `extend` -> `cover` -> `free` |
+| double-tap / double-click on a photo | (was: cycle fit; with the square crop it resets the matrix to the photo's square cell) |
 | Alt+drag (desktop) | scale around the centre |
 | Delete / Backspace | delete the selection |
 | Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z or Ctrl+Y | undo, redo |
@@ -285,11 +285,18 @@ Every gesture ends in exactly **one history entry** (S2.6), so a pinch is one un
   works; a pointer-based "ghost" drag on touch, where HTML5 drag is unreliable),
   or press the card's "add to node" button (accessible path). Result: a `photo`
   step, `fit: extend`, centred.
-- **Fit modes.** `extend` (default): the whole photo, contained, over a ground
-  painted with the photo's two **padding colours** (`PLAN.md` S6.2, `server/media/color.js`);
-  `cover`: scaled to fill the stage and cropped; `free`: any matrix the user made
-  with gestures. Changing the fit resets the matrix to the mode's fit; gestures
-  switch to `free`.
+- **Square crop (decision, replaces the fit modes extend/cover/free).** A photo is
+  always clipped to a square: the largest square that fits the picture, whose
+  position along the long axis is `crop` (0..1, default 0.5 = centred; nothing to move
+  on a square photo). The crop is chosen **on the upload card** (drag the photo in the
+  card; the cursor shows `ns-resize`/`ew-resize`, on touch a small up-down or left-right
+  double-arrow icon sits on the card) and travels with the photo into the node, where
+  it can still be adjusted (non-destructive: the full photo is kept, the step stores
+  `crop`). The `extend` ground made from the padding colours, the fit toggle on the
+  card (yellow triangle) and the `fit` values `extend|cover|free` are removed; moving,
+  scaling and rotating a photo on the stage still change its matrix, as before. Old
+  documents with `fit` load with `crop: 0.5` (`fit: cover` and `free` keep their matrix).
+  Phases and tasks: E98-E103 (E103 waits for text boxes). Documents saved before the crop are converted when they are read from the database (`migrateDoc`).
 - **Order.** Steps are drawn in list order; "to front/back" moves a step. The
   film-strip lists photo steps in that order; dragging in the strip reorders them
   without changing strokes and shapes relative to each other.
@@ -321,7 +328,12 @@ Every gesture ends in exactly **one history entry** (S2.6), so a pinch is one un
   eases the step from its matrix at that point to the new one (`ease`: linear, in, out, inOut).
 - `mode: free`: the pages are what the author drew. `slides`: one photo step per
   page, auto-generated from the photo list, with simple transitions. `grid`:
-  photos auto-tiled in a grid, no manual transforms.
+  photos auto-tiled in a grid, no manual transforms. Both modes also take **text boxes**
+  (S2.3b) and have **layout options** (`doc.layout`): grid has `fill: 'tight'|'loose'`
+  (tight: as much of the stage as possible is covered, as little background as possible
+  shows; the cells grow, the gap shrinks to `gap`), `gap` and `columns` (auto or n); slides
+  has the transition and where a text box sits (own page or caption). Details and open
+  questions in S10 points 7-9.
 - Add/remove page buttons in the right column; pages reorder by drag in the
   sequencer. Removing a page with steps asks for confirmation.
 - `transform` steps animate a target step to a new matrix with an easing; they are
@@ -543,8 +555,8 @@ errors are `{error: <code>}` with the codes of S2.11.
   vnode; it is a pure function of the document, used by SSR (`/:lang/node/:id`, the
   tile rasteriser later), the editor stage, the film-strip thumbnails and the
   viewer.
-- Photo step -> `<g transform>` containing, for `extend`, a ground rect with the
-  photo's two padding colours, then `<image href>`; a clip is a `<clipPath>` in the
+- Photo step -> `<g transform>` containing the square-cropped `<image href>` (a nested
+  `<svg viewBox>` or `clip-path` cuts the square at `crop`; no ground rect any more); a clip is a `<clipPath>` in the
   page `<defs>` made from the shape path; `blend` is `mix-blend-mode` in `style`.
   Stroke -> filled `<path>` (the outline polygon). Shape -> `<path>`.
 - Mode `slides` shows one page per photo; `grid` lays photos out with
@@ -576,7 +588,7 @@ similarity (scale, rotation, translation) mapping the two start points onto the 
 current points; composed onto the start matrix. One pointer: translate only.
 
 **Clip.** `clip` sets `photo.clip = shapeId`; the shape stops being drawn; `unclip`
-reverses. The clip lives in stage space.
+reverses. The clip is a shape in stage space that follows its photo: a move of the photo is applied to the mask too.
 
 ---
 
@@ -740,7 +752,7 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 - [x] **E47 "add to node" card button** (no drag; opens an editor if none). Done when it works with keyboard only.
 - [x] **E48 move/scale/rotate gestures** on the selection: one pointer translate, two pointers
       similarity, wheel zoom, Alt-drag. Done when pinch on the emulator is stable without drift.
-- [x] **E49 fit modes**: extend/cover/free, double-tap cycle, ground from `padding`. Done when
+- [x] **E49 fit modes** (superseded by the square crop, E98-E101): extend/cover/free, double-tap cycle, ground from `padding`. Done when
       toggling shows the padding gradient and the cropped fill.
 - [x] **E50 opacity and blend popover**. Done when blend `multiply` visibly darkens an overlap.
 - [x] **E51 z-order** (`[ ]` keys, buttons). Done when a photo goes behind a stroke.
@@ -765,7 +777,7 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 - [x] **E60 shape tool UI**: add vertex, drag handle, close, open/closed, fill/stroke toggles.
       Done when a heart can be drawn with curves.
 - [x] **E61 vertex editing** (select/move/delete vertex, handle break). Done when moving a vertex keeps handles.
-- [x] **E62 clip / unclip tools**. Done when a photo is masked by a circle and slides under it.
+- [x] **E62 clip / unclip tools**. Done when a photo is masked by a circle (it was first built as a fixed window, the mask now moves with the photo).
 - [x] **E63 erase**: select + delete for strokes and shapes. Done when undo brings it back.
 
 ### Phase G - save, update, open, lock (C+S)
@@ -785,10 +797,10 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 - [ ] **E70 per-node theme picker** (after `TODO` M2b): wrapper changes; sanitiser on save. Done when the
       stage and the saved tile wear `blueprint` while the page wears `kraft`.
-- [x] **E71 texture role toggle** on upload cards and film-strip entries; `node_photos.role` saved.
+- [x] **E71 texture role toggle** in the editor (film-strip entries and the context bar; the upload cards have no texture button, decided 2026-10-23: which photos are textures is decided in the editor); `node_photos.role` saved.
       Done when a texture photo is not drawn as a picture.
 - [x] **E72 i18n**: all editor keys in `en`, `de`, `fr`; parity check passes. Done when `check-locales` is green.
-- [ ] **E73 keyboard and a11y pass**: every command reachable by keyboard, focus order, labels, `role=img`.
+- [x] **E73 keyboard and a11y pass**: every command reachable by keyboard, focus order, labels, `role=img`. PageDown/PageUp select steps (or pick the clip mask), `\` cycles corners, arrows move selection/corner/shape cursor, Space places a corner, Enter applies; a live region announces changes, the Keys popover lists them, focus returns to the opener on close. Pointer-only by design: the freehand pen and dragging curve handles.
       Done when the editor is usable without a pointer.
 - [ ] **E74 device checklist**: touch emulation, real phone pressure and multitouch, 360 px width, RTL.
       Done when each item is ticked in a short notes file.
@@ -844,6 +856,29 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [ ] **E97 IME, right-to-left and device pass for text** (Arabic/Hebrew sample, Japanese IME, mobile keyboard
       resize). Done when each sample can be typed, wrapped and saved.
 
+### Phase L - square photos and layout options (decided; implement after E73-E74)
+
+- [x] **E98 crop model**: upload record and photo step get `crop` (0..1, along the long axis); `fit` is dropped
+      from the schema (`validate` accepts old `fit`, `load` migrates it); `model.setCrop`; `addPhoto` takes the
+      card's crop. Done when a landscape and a portrait photo save and reload with their crop and an old node
+      with `fit: cover` still validates.
+- [x] **E99 renderer: square crop**: `renderNode` cuts each photo to its square at `crop`; ground rect and
+      `extend` removed; same output in SSR, editor, viewer and the thumbnail rendition. Done when snapshots show
+      a portrait and a landscape photo as squares at crop 0, 0.5, 1.
+- [x] **E100 upload card crop pan**: the card shows the square crop; once the card is selected, drag moves it (an unselected card scrolls the page) (pointer events, one
+      axis), `ns-resize`/`ew-resize` cursor on desktop, a double-arrow icon on touch, none for square photos;
+      keyboard: arrows on the focused card; the yellow fit triangle is removed; the card's "add" button is the HTML5 drag handle now (dragging the photo pans). Crops are remembered per hash in `localStorage` until uploads carry them. Done when dragging a portrait
+      card moves only vertically and the crop reaches the card's "add to node".
+- [x] **E101 crop in the editor**: the context bar of a selected non-square photo has a crop slider (left-right or
+      top-bottom), one undo step per drag; double-tap puts a photo back to covering the stage. Done when the crop of an added photo can be changed and
+      undone.
+- [x] **E102 grid layout options**: `doc.layout` `{ fill, gap, columns }`, `gridLayout(n, options)`;
+      `fill: 'tight'` covers as much of the stage as possible. Done when 5, 7 and 12 photos with `tight`
+      show less background than with `loose` (numbers in the test).
+- [ ] **E103 text boxes in grid and slides**: a text box is a cell of the grid (its own square or a spanning
+      cell) and a slide page or caption; options in the properties popover. Done when a node with 4 photos and
+      2 text boxes lays out in grid and in slides without overlaps. Needs E88+ (text boxes) first.
+
 ### Phase J - later (not scheduled)
 
 - [ ] **E79 text boxes**: now phase K (E88-E97).
@@ -855,6 +890,14 @@ Colour first (E84-E87 can start any time after E3), then text.
 ---
 
 ## 10. Open points
+
+7. **Crop zoom - DECIDED 2026-10-23**: no zoom. The crop window is always the largest square and is only
+   panned along the long axis (`crop` is one number). Scaling a photo up is done on the stage with its matrix.
+8. **Text box in grid mode - DECIDED 2026-10-23**: its own cell (size 1 or a span of 2), styled like any text
+   box: a card with background and border, or borderless and without background so it works as a caption
+   next to or between photos.
+9. **Grid `tight` - DECIDED 2026-10-23**: cells stay squares; the best column count (least wasted stage),
+   centred, gap as small as `gap`. Cells never stretch.
 
 1. **ICC profiles** (decided at E24): a non-sRGB profile is kept, an sRGB one or none is
    dropped. This `jpegtran` has no `-copy icc`, so the profile is put back with `exiftool`.

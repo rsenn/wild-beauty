@@ -7,7 +7,7 @@ export const NEW = 'new';
 
 // confirmReplace(current, next, { dirty }) -> boolean | Promise<boolean>
 export function createEditorStore({ confirmReplace = () => false } = {}) {
-  let state = { open: false, target: null, dirty: false };
+  let state = { open: false, target: null, dirty: false, used: [] };
   const listeners = new Set();
   let hook = confirmReplace;
 
@@ -38,7 +38,7 @@ export function createEditorStore({ confirmReplace = () => false } = {}) {
     // target again is a no-op that says yes; another one needs the hook's yes.
     async open(target) {
       if(!state.open) {
-        set({ open: true, target, dirty: false });
+        set({ open: true, target, dirty: false, used: [] });
 
         return true;
       }
@@ -51,7 +51,7 @@ export function createEditorStore({ confirmReplace = () => false } = {}) {
       // the editor may have changed while the prompt was up
       if(!ok || state.target !== current) return false;
 
-      set({ target, dirty: false });
+      set({ target, dirty: false, used: [] });
 
       return true;
     },
@@ -61,8 +61,13 @@ export function createEditorStore({ confirmReplace = () => false } = {}) {
       if(state.open && state.dirty !== !!dirty) set({ dirty: !!dirty });
     },
 
+    // the photos (hashes) the open editor's node uses, for the upload list
+    setUsed(used) {
+      if(state.open && (state.used.length !== used.length || state.used.some((h, i) => h !== used[i]))) set({ used });
+    },
+
     close() {
-      if(state.open) set({ open: false, target: null, dirty: false });
+      if(state.open) set({ open: false, target: null, dirty: false, used: [] });
     },
   };
 }

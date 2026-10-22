@@ -117,12 +117,12 @@ describe('aboutPoint', () => {
 
 describe('setMatrix', () => {
   const doc = (...steps) => ({ ...emptyNode(), pages: [{ id: 'page0001', steps }] });
-  const photo = { op: 'photo', id: 'photo001', photo: 'a'.repeat(64), m: I, fit: 'cover', opacity: 1, blend: 'normal' };
+  const photo = { op: 'photo', id: 'photo001', photo: 'a'.repeat(64), m: I, crop: 0.5, opacity: 1, blend: 'normal' };
   const stroke = { op: 'stroke', id: 'strok001', pts: [[1, 1, 2]], color: '#000000' };
   const m = [2, 0, 0, 2, 5, 6];
 
-  test('a photo takes it and becomes free', () => {
-    expect(findStep(setMatrix(doc(photo), 'photo001', m), 'photo001').step).toMatchObject({ m, fit: 'free' });
+  test('a photo takes it in its own matrix', () => {
+    expect(findStep(setMatrix(doc(photo), 'photo001', m), 'photo001').step).toMatchObject({ m });
   });
 
   test('a stroke gets one transform step, later calls update it', () => {

@@ -5,6 +5,29 @@
 // it. Pure: a command that changes nothing (unknown id, same value) returns
 // the same snapshot, which history.push then ignores.
 import * as model from './model.js';
+import { effective } from './render.js';
+import { invert, multiply } from './matrix.js';
+
+// A clipped photo and its mask move together (EDITOR.md S2.7): whatever takes
+// the photo from its matrix to `m`, the same move is applied to the clip
+// shape, so the window stays where it is on the photo. `move(doc, id, m)` does
+// the change for one step.
+function withMask(doc, id, m, move) {
+  const next = move(doc, id, m);
+  const at = model.findStep(doc, id);
+
+  if(next === doc || at?.step.op !== 'photo' || !Array.isArray(m)) return next;
+
+  const by = effective(doc.pages[at.page].steps).by;
+  const now = by.get(id);
+  const inverse = now?.clip && invert(now.m ?? at.step.m);
+
+  if(!inverse) return next;
+
+  const shape = by.get(now.clip)?.m ?? [1, 0, 0, 1, 0, 0];
+
+  return move(next, now.clip, multiply(multiply(m, inverse), shape));
+}
 
 // Commands that repeat while a control is dragged or typed into carry a key,
 // so history.push folds a run of them into one undo step.
@@ -17,6 +40,7 @@ const KEYED = {
   setMatrix: c => `matrix:${c.id}`,
   recordMove: c => `matrix:${c.id}`,
   setVertices: c => `vertices:${c.id}`,
+  setCrop: c => `crop:${c.id}`,
 };
 
 // the colour fields of each op a setColor may write
@@ -28,7 +52,7 @@ export const commandKey = command => KEYED[command.type]?.(command) ?? null;
 function onDoc(doc, c) {
   switch(c.type) {
     case 'addPhoto':
-      return model.addPhoto(doc, c.page ?? doc.pages[0].id, c.hash, c.info, c.id, c.role);
+      return model.addPhoto(doc, c.page ?? doc.pages[0].id, c.hash, c.info, c.id, c.role, c.crop);
     case 'addStep':
       return model.addStep(doc, c.page ?? doc.pages[0].id, c.step, c.index);
     case 'updateStep':
@@ -49,8 +73,10 @@ function onDoc(doc, c) {
       return model.movePage(doc, c.id, c.to);
     case 'movePhoto':
       return model.movePhoto(doc, c.id, c.to);
-    case 'setFit':
-      return model.setFit(doc, c.id, c.fit, c.info);
+    case 'setCrop':
+      return model.setCrop(doc, c.id, c.crop);
+    case 'setLayout':
+      return model.setLayout(doc, c.changes ?? {});
     case 'setOpacity':
       return model.setOpacity(doc, c.id, c.value);
     case 'setBlend':
@@ -74,9 +100,9 @@ function onDoc(doc, c) {
     case 'updateShape':
       return model.updateShape(doc, c.id, c.changes);
     case 'recordMove':
-      return model.recordMove(doc, c.id, c.m, c.k, c.ease);
+      return withMask(doc, c.id, c.m, (d, id, m) => model.recordMove(d, id, m, c.k, c.ease));
     case 'setMatrix':
-      return model.setMatrix(doc, c.id, c.m);
+      return withMask(doc, c.id, c.m, model.setMatrix);
     case 'setStrokeWidth': {
       const step = model.findStep(doc, c.id)?.step;
 

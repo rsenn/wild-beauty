@@ -4,7 +4,7 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { BLENDS, FITS, KINDS, MODES } from '../client/editor/model.js';
+import { BLENDS, KINDS, MODES } from '../client/editor/model.js';
 import { TOOLS } from '../client/editor/tools.js';
 import { SAVE_ERRORS } from '../client/editor/save.js';
 
@@ -43,7 +43,6 @@ describe('locales', () => {
   test('every key built from a list exists for each member', () => {
     const wanted = [
       ...BLENDS.map(b => 'editor.blend.' + b),
-      ...FITS.map(f => 'editor.fit.' + f),
       ...KINDS.map(k => 'editor.kind.' + k),
       ...MODES.map(m => 'editor.mode.' + m),
       ...TOOLS.map(t => 'editor.tool.' + t.id),
@@ -52,6 +51,7 @@ describe('locales', () => {
       ...SAVE_ERRORS.map(c => 'editor.save.error.' + c),
       'editor.save.error.generic',
       ...['clip', 'unclip', 'empty', 'pen', 'label'].map(c => 'editor.context.' + c),
+      ...['photo', 'stroke', 'shape', 'text'].map(o => 'editor.step.' + o),
     ];
 
     expect(wanted.filter(k => !(k in en))).toEqual([]);
@@ -59,7 +59,7 @@ describe('locales', () => {
 
   test('every string is non-empty and German and French are not English copies', () => {
     // short symbols, loanwords and names that are the same in every language
-    const SAME = new Set(['editor.short.undo', 'editor.short.redo', 'editor.short.page', 'editor.short.delete', 'upload.add.short', 'upload.state.uploading', 'page.title.node', 'editor.blend.normal', 'editor.kind.node', 'editor.kind.album', 'editor.kind.shop', 'editor.scrub.pause', 'nav.lang', 'upload.files.one', 'upload.files.other', 'editor.actions', 'editor.page.1', 'editor.visibility.public', 'editor.strip', 'editor.strip.photo', 'editor.pages', 'editor.page.n', 'editor.mode', 'editor.role.texture']);
+    const SAME = new Set(['editor.short.undo', 'editor.short.redo', 'editor.short.page', 'editor.short.delete', 'upload.add.short', 'upload.state.uploading', 'page.title.node', 'editor.blend.normal', 'editor.kind.node', 'editor.kind.album', 'editor.kind.shop', 'editor.scrub.pause', 'nav.lang', 'upload.files.one', 'upload.files.other', 'editor.actions', 'editor.page.1', 'editor.visibility.public', 'editor.strip', 'editor.strip.photo', 'editor.pages', 'editor.page.n', 'editor.mode', 'editor.role.texture', 'editor.step.text', 'editor.step.photo']);
 
     for(const code of ['en', 'de', 'fr']) for(const [k, v] of Object.entries(locale(code))) expect([code, k, v.trim() === '']).toEqual([code, k, false]);
 

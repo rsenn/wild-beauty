@@ -9,12 +9,8 @@ import { segments, verticesFromPath } from './shapes.js';
 
 const IDENTITY = [1, 0, 0, 1, 0, 0];
 
-// a photo's local size: its long edge scaled to the stage (EDITOR.md S2.1)
-function localSize({ width, height }) {
-  const k = 1000 / Math.max(width, height);
-
-  return [width * k, height * k];
-}
+// a photo's local space is the 1000 unit square of its crop (EDITOR.md S2.5)
+const localSize = () => [1000, 1000];
 
 // the polyline of a shape's path, curves sampled, through matrix `m`;
 // { points, closed } or null when the path is not one we write
@@ -165,6 +161,12 @@ export function outlineOf(doc, id, { photos = () => null, page = 0, upTo } = {})
   const [x0, x1, y0, y1] = [Math.min(...xs) - pad, Math.max(...xs) + pad, Math.min(...ys) - pad, Math.max(...ys) + pad];
 
   return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+}
+
+// the ids of the steps that can be selected on page `page`, in drawing order,
+// optionally only some ops (the keyboard walks through these)
+export function selectableIds(doc, { page = 0, upTo, ops } = {}) {
+  return drawn(doc, page, upTo).entries.filter(e => !ops || ops.includes(e.step.op)).map(e => e.step.id);
 }
 
 // the matrix a step is drawn with now (after its transform ops), or null when

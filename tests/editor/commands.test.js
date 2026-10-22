@@ -3,6 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import { apply, fingerprint } from '../../client/editor/commands.js';
 import * as history from '../../client/editor/history.js';
 import { emptyNode, findStep, validate } from '../../client/editor/model.js';
+import { effective } from '../../client/editor/render.js';
 
 const A = 'a'.repeat(64);
 const info = { width: 400, height: 300 };
@@ -27,9 +28,9 @@ describe('apply', () => {
     const id = 'photo001';
     const step = () => findStep(h.present.doc, id).step;
 
-    for(const c of [{ type: 'setFit', id, fit: 'cover', info }, { type: 'setOpacity', id, value: 0.4 }, { type: 'setBlend', id, mode: 'multiply' }]) h = history.push(h, apply(h.present, c).snap);
+    for(const c of [{ type: 'setCrop', id, crop: 0.2 }, { type: 'setOpacity', id, value: 0.4 }, { type: 'setBlend', id, mode: 'multiply' }]) h = history.push(h, apply(h.present, c).snap);
 
-    expect(step()).toMatchObject({ fit: 'cover', opacity: 0.4, blend: 'multiply' });
+    expect(step()).toMatchObject({ crop: 0.2, opacity: 0.4, blend: 'multiply' });
     expect(validate(h.present.doc)).toEqual([]);
   });
 
@@ -73,7 +74,7 @@ describe('history through commands', () => {
       { type: 'addStep', step: { op: 'stroke', id: 'strok001', pts: [[1, 1, 2]], color: '#000000' } },
       { type: 'setTitle', title: 'T' },
       { type: 'setBlend', id: 'photo001', mode: 'screen' },
-      { type: 'setFit', id: 'photo001', fit: 'cover', info },
+      { type: 'setCrop', id: 'photo001', crop: 0.9 },
       { type: 'moveStep', id: 'photo001', to: 'front' },
       { type: 'setKind', kind: 'list' },
       { type: 'setBg', color: '#102030' },
@@ -118,5 +119,42 @@ describe('history through commands', () => {
     expect(h.present.doc.title).toBe('One');
     expect(history.undo(h).present.doc.title).toBeUndefined();
     expect(history.redo(history.undo(h)).present.doc.title).toBe('One');
+  });
+});
+
+describe('a clipped photo and its mask', () => {
+  const clipped = () => {
+    let snap = fresh();
+
+    for(const c of [{ type: 'addPhoto', hash: A, info, id: 'photo001' }, { type: 'addStep', step: { op: 'shape', id: 'shape001', path: 'M100 100L300 100L300 300L100 300Z', closed: true, fill: '#ff0000', strokeWidth: 0 } }, { type: 'setClip', id: 'photo001', shape: 'shape001' }]) snap = apply(snap, c).snap;
+
+    return snap;
+  };
+  const eff = (snap, id) => effective(snap.doc.pages[0].steps).by.get(id)?.m;
+
+  test('setMatrix moves the mask by the same move', () => {
+    const snap = apply(clipped(), { type: 'setMatrix', id: 'photo001', m: [1, 0, 0, 1, 50, -20] }).snap;
+
+    expect(eff(snap, 'photo001')).toEqual([1, 0, 0, 1, 50, -20]);
+    expect(eff(snap, 'shape001')).toEqual([1, 0, 0, 1, 50, -20]);
+
+    // a second move is relative to the new place, a scale carries the mask with it
+    const scaled = apply(snap, { type: 'setMatrix', id: 'photo001', m: [2, 0, 0, 2, 50, -20] }).snap;
+
+    expect(eff(scaled, 'shape001')).toEqual([2, 0, 0, 2, 50, -20]);
+    expect(validate(scaled.doc)).toEqual([]);
+  });
+
+  test('an unclipped photo and a plain shape move alone', () => {
+    const plain = apply(clipped(), { type: 'unclip', id: 'photo001' }).snap;
+    const moved = apply(plain, { type: 'setMatrix', id: 'photo001', m: [1, 0, 0, 1, 9, 9] }).snap;
+
+    expect(eff(moved, 'shape001')).toBeUndefined();
+  });
+
+  test('a recorded move takes the mask along too', () => {
+    const snap = apply(clipped(), { type: 'recordMove', id: 'photo001', m: [1, 0, 0, 1, 30, 0], k: 3 }).snap;
+
+    expect(eff(snap, 'shape001')).toEqual([1, 0, 0, 1, 30, 0]);
   });
 });

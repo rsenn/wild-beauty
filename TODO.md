@@ -156,7 +156,7 @@ woff2/woff/ttf. Fonts are served from `/static/`.
       top-right, state (queued), selected state (thick `--wb-select` border and
       shadow). Dragover highlight. Directories ignored for now. Done when 10
       dropped photos show as 10 cards and selecting one gives the blue frame.
-- [x] **4.3 Extend preview (client-side)**: `object-fit: contain` over a
+- [x] **4.3 Extend preview (client-side)** (superseded: photos are always square crops, see 4.4 and `EDITOR.md` E98-E101): `object-fit: contain` over a
       neutral ground; toggle per card to `cover` (P S11.1). Colours come in M6.
       Done when the toggle flips one card without touching the others.
 
@@ -222,6 +222,9 @@ woff2/woff/ttf. Fonts are served from `/static/`.
       them (no flash). Done when a reload keeps the cards.
 - [x] **7.4 `DELETE /api/uploads/:hash`** removes image and sidecar; delete
       button on the card calls it. Done when the files vanish from `uploads/`.
+- [x] **4.4 Square crop on the upload card (decided)**: every card shows the photo zoomed in to a square;
+      dragging pans the crop along the long axis; cursor `ns-resize`/`ew-resize` on desktop, a double-arrow
+      icon on touch, nothing for square photos; the yellow fit triangle goes. Tasks in `EDITOR.md` E98-E103.
 - [ ] **7.5 Quota**: total `uploads/` size cap with a translated error (P S9).
 
 **First deliverable ends here (M1-M7): `/new` with design, i18n, drop zone,

@@ -10,7 +10,6 @@ import { database } from '../db/db.js';
 import { deleteNode, deletePhoto, getNode, listNodes, getPhoto, insertNode, nodePhotos, releaseLock, setNodePhotos, updateNode, upsertPhoto } from '../db/nodes.js';
 import { validateNode, photoLookup } from '../node/validate.js';
 import { bake } from '../media/bake.js';
-import { choosePadding } from '../media/color.js';
 import { identify } from '../media/probe.js';
 import { firstPhotoStep, thumbnail } from '../media/thumb.js';
 import { photoInfos } from '../node/view.js';
@@ -89,13 +88,13 @@ async function prepare(h, checked) {
     if(r.baked) bakedNow.push(hash);
   }
 
-  // the tile: first photo step, its padding from the photo's palette (best effort)
+  // the tile: first photo step (best effort)
   let tile = null;
   const step = firstPhotoStep(checked.doc);
 
   if(step) {
     const photo = getPhoto(h, step.photo);
-    const t = await thumbnail(resolve(config.photosDir, `${photo.hash}.${photo.ext}`), resolve(config.photosDir, `${photo.hash}.thumb.jpg`), { step, padding: choosePadding(photo.palette ?? []), bg: checked.doc.bg });
+    const t = await thumbnail(resolve(config.photosDir, `${photo.hash}.${photo.ext}`), resolve(config.photosDir, `${photo.hash}.thumb.jpg`), { step, bg: checked.doc.bg });
 
     if(t.ok) tile = photo.hash;
     else log('error', 'thumbnail', t.error);

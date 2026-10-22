@@ -106,7 +106,6 @@ describe('the whole path over HTTP', () => {
     expect(res.status).toBe(200);
     expect(page).toContain('<h1 class="wb-node-title">Sunset &lt;b></h1>');
     expect(page).toContain(`<image href="/files/photos/${hash}.jpg"`);
-    expect(page).toContain('<linearGradient');
     expect(page).toContain('<title>Wild Beauty - Sunset &lt;b&gt;</title>');
     expect(page).not.toContain('<b>');
     // the language links point at the same node

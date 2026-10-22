@@ -67,8 +67,9 @@
    * 700px up (layout.css reads these); the ground shows around a photo shown
    * whole ("extend") */
   --wb-card-gap: 8px;
-  --wb-card-columns: 4;
-  --wb-card-columns-wide: 8;
+  --wb-card-columns: 3;
+  --wb-card-columns-mid: 4;
+  --wb-card-columns-wide: 6;
   --wb-editor-tool-size: 44px;
   --wb-editor-gap: 8px;
   --wb-editor-outline: var(--wb-select);
@@ -90,8 +91,8 @@
   --wb-button-round-bg: #ffffff60;
   --wb-button-round-border: #cdcdcd;
   --wb-add-ink: #1fa23c;
-  --wb-fit-ink: #ffd21f;
-  --wb-fit-hover: #fff07a;
+  --wb-add-text: #fff;
+  --wb-pan-ink: #ffd21f;
   --wb-button-round-hover: #ffdc20c0;
 
   /* raised grey button (toolbar) */

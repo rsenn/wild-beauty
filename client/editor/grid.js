@@ -3,20 +3,33 @@
 // by the editor and the viewer.
 const STAGE = 1000;
 
-// space between cells and around the grid, in stage units
+// space between cells and, for a loose grid, around the grid, in stage units
 export const GAP = 10;
+
+// A tight grid (EDITOR.md S2.7) covers as much of the stage as possible: a small
+// gap between the cells and none around the grid.
+export const TIGHT_GAP = 4;
+
+// the grid options of a document: { gap, margin }
+export function gridOptions(layout = {}) {
+  const tight = layout.fill === 'tight';
+  const gap = Number.isFinite(layout.gap) ? layout.gap : tight ? TIGHT_GAP : GAP;
+
+  return { gap, margin: tight ? 0 : gap };
+}
 
 // the cells of an n-photo grid: [{ x, y, size }] in reading order. The column
 // count that gives the biggest cells wins (the wider layout on a tie); an
 // incomplete last row is centred, and the whole grid is centred on the stage.
-export function gridCells(n, gap = GAP) {
+export function gridCells(n, { gap = GAP, margin = gap } = {}) {
   if(!(n >= 1)) return [];
 
   let cols = 1;
   let size = 0;
 
   for(let c = 1; c <= n; c++) {
-    const s = Math.min((STAGE - gap * (c + 1)) / c, (STAGE - gap * (Math.ceil(n / c) + 1)) / Math.ceil(n / c));
+    const rows = Math.ceil(n / c);
+    const s = Math.min((STAGE - 2 * margin - gap * (c - 1)) / c, (STAGE - 2 * margin - gap * (rows - 1)) / rows);
 
     if(s >= size) {
       size = s;
@@ -38,18 +51,8 @@ export function gridCells(n, gap = GAP) {
   return cells;
 }
 
-// the matrix of each photo, [a,b,c,d,e,f]: photo i is shown whole (extend)
-// and centred in its cell. A photo's local space has its long edge scaled to
-// 1000, so every photo scales by size / 1000 and `aspect` (width / height of
-// the photo; one number for all, or one per photo; default square) only
-// decides the centring.
-export function gridLayout(n, aspect = 1, gap = GAP) {
-  return gridCells(n, gap).map(({ x, y, size }, i) => {
-    const a = (Array.isArray(aspect) ? aspect[i] : aspect) || 1;
-    const k = size / STAGE;
-    const w = a >= 1 ? STAGE : STAGE * a;
-    const h = a >= 1 ? STAGE / a : STAGE;
-
-    return [k, 0, 0, k, x + (size - w * k) / 2, y + (size - h * k) / 2];
-  });
+// the matrix of each photo, [a,b,c,d,e,f]: a photo's local space is its
+// 1000 unit square, so photo i only scales by size / 1000 into its cell
+export function gridLayout(n, layout) {
+  return gridCells(n, gridOptions(layout)).map(({ x, y, size }) => [size / STAGE, 0, 0, size / STAGE, x, y]);
 }

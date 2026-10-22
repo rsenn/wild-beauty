@@ -2,7 +2,7 @@
 // SSR, the editor stage, thumbnails and the viewer. Pure: everything it
 // needs comes from the document and the options.
 import { html } from '../html.js';
-import { fitMatrix, isColour, isTexture } from './model.js';
+import { cropWindow, isColour, isTexture } from './model.js';
 import { gridLayout } from './grid.js';
 import { lerpMatrix } from './matrix.js';
 import { ease } from './playback.js';
@@ -12,41 +12,27 @@ import { outline, outlinePath } from './pen.js';
 const STAGE = 1000;
 const HEX = /^#[0-9a-f]{3,8}$/i;
 
-// `photos(hash)` -> { href, width, height, padding?: [colour, colour] }, the
-// display size in pixels (orientation applied) and the padding colours
-// (server/media/color.js choosePadding); null when the photo is unknown.
-// A photo's local space has its long edge scaled to STAGE (EDITOR.md S2).
-function localSize({ width, height }) {
-  const k = STAGE / Math.max(width, height);
+// `photos(hash)` -> { href, width, height }, the display size in pixels
+// (orientation applied); null when the photo is unknown.
+// A photo's local space is the 1000 unit square of its crop window.
 
-  return [width * k, height * k];
-}
-
-// a `photo` step: `extend` first paints the stage ground, a gradient of the
-// two padding colours along the axis the photo leaves empty; then the image
-// under the step's matrix. Opacity and blend go to the image's style.
+// a `photo` step: the picture cut to its square at `crop` along the long
+// edge, under the step's matrix. Opacity and blend go to the group's style.
 export function renderPhoto(step, info) {
   if(!info || !(info.width > 0) || !(info.height > 0)) return null;
 
-  const [w, h] = localSize(info);
-  const pad = step.fit === 'extend' && info.padding?.length === 2 && info.padding.every(c => HEX.test(c)) ? info.padding : null;
-  const gradient = `ground-${step.id}`;
-  const vertical = w >= h; // a wide photo leaves bands above and below
+  const { side, x, y } = cropWindow(info, step.crop);
+  const k = STAGE / side; // photo pixels -> local units
   let style = step.opacity !== 1 ? `opacity:${step.opacity}` : '';
 
   if(step.blend && step.blend !== 'normal') style += `${style ? ';' : ''}mix-blend-mode:${step.blend}`;
 
+  // the nested <svg> cuts the square (its overflow is hidden)
   return html`<g data-step=${step.id} data-op="photo">
-    ${pad &&
-    html`<defs>
-        <linearGradient id=${gradient} x1="0" y1="0" x2=${vertical ? 0 : 1} y2=${vertical ? 1 : 0}>
-          <stop offset="0" stop-color=${pad[0]} />
-          <stop offset="1" stop-color=${pad[1]} />
-        </linearGradient>
-      </defs>
-      <rect x="0" y="0" width=${STAGE} height=${STAGE} fill=${`url(#${gradient})`} />`}
     <g transform=${`matrix(${step.m.join(' ')})`} style=${style || undefined}>
-      <image href=${info.href} x="0" y="0" width=${w} height=${h} preserveAspectRatio="none" />
+      <svg x="0" y="0" width=${STAGE} height=${STAGE} viewBox=${`0 0 ${STAGE} ${STAGE}`} overflow="hidden">
+        <image href=${info.href} x=${-x * k} y=${-y * k} width=${info.width * k} height=${info.height * k} preserveAspectRatio="none" />
+      </svg>
     </g>
   </g>`;
 }
@@ -160,23 +146,15 @@ function stepsOf(doc, { mode, page, upTo, photos }) {
     return shown;
   }
 
-  const all = photoSteps(doc).map(({ clip, ...step }) => ({ ...step, fit: 'extend' }));
-  const sizeOf = step => photos(step.photo);
+  const all = photoSteps(doc).map(({ clip, ...step }) => step);
 
   if(mode === 'slides') {
     const step = all[page];
-    const info = step && sizeOf(step);
 
-    return info ? [{ ...step, m: fitMatrix('extend', info) }] : [];
+    return step && photos(step.photo) ? [{ ...step, m: IDENTITY }] : [];
   }
 
-  const aspects = all.map(step => {
-    const info = sizeOf(step);
-
-    return info ? info.width / info.height : 1;
-  });
-
-  return gridLayout(all.length, aspects).map((m, i) => ({ ...all[i], fit: 'free', m }));
+  return gridLayout(all.length, doc.layout).map((m, i) => ({ ...all[i], m }));
 }
 
 // the document as an <svg> on the 0..1000 stage. `mode` defaults to the

@@ -224,6 +224,12 @@ body {
   list-style: none;
 }
 
+@media (min-width: 480px) {
+  .wb-cards {
+    grid-template-columns: repeat(var(--wb-card-columns-mid), minmax(0, 1fr));
+  }
+}
+
 @media (min-width: 700px) {
   .wb-cards {
     grid-template-columns: repeat(var(--wb-card-columns-wide), minmax(0, 1fr));
@@ -272,12 +278,23 @@ body {
   transition: transform 0.2s;
 }
 
-.wb-fit-contain {
-  object-fit: contain;
+/* the photo always fills the square; its crop slides along the long edge (EDITOR.md S2.5) */
+.wb-card-image {
+  object-fit: cover;
 }
 
-.wb-fit-cover {
-  object-fit: cover;
+.wb-card-pan-x .wb-card-face {
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+.wb-card-pan-y .wb-card-face {
+  cursor: ns-resize;
+  touch-action: pan-x;
+}
+
+.wb-card-used .wb-card-face {
+  cursor: default;
 }
 
 .wb-card-nopreview {
@@ -339,29 +356,34 @@ body {
   filter: drop-shadow(0 0 2px var(--wb-button-round-hover)) drop-shadow(0 0 1px var(--wb-ink));
 }
 
-/* the fit toggle: a small yellow corner triangle pointing out to the bottom left
-   while the photo can still be enlarged (whole), turned round once it fills */
-.wb-card-fit {
+/* a double arrow in the lower left corner says which way the crop can be moved;
+   shown where there is no mouse cursor to say it (touch), see the media query */
+.wb-card-pan {
+  display: none;
   position: absolute;
-  bottom: 2px;
-  left: 2px;
-  width: var(--wb-card-icon);
-  height: var(--wb-card-icon);
-  padding: 0;
-  font-size: 0;
-  background: var(--wb-fit-ink);
-  border: 0;
-  clip-path: polygon(0 100%, 25% 15%, 85% 75%);
-  cursor: pointer;
-  transition: transform 0.2s;
+  bottom: 3px;
+  left: 3px;
+  width: calc(var(--wb-card-icon) * 1.3);
+  height: calc(var(--wb-card-icon) * 0.7);
+  pointer-events: none;
+  background: var(--wb-pan-ink);
+  filter: drop-shadow(0 0 1px var(--wb-ink)) drop-shadow(0 0 1px var(--wb-ink));
 }
 
-.wb-card-fit-cover {
-  transform: rotate(180deg);
+.wb-card-pan-icon-x {
+  clip-path: polygon(0 50%, 28% 0, 28% 30%, 72% 30%, 72% 0, 100% 50%, 72% 100%, 72% 70%, 28% 70%, 28% 100%);
 }
 
-.wb-card-fit:hover {
-  background: var(--wb-fit-hover);
+.wb-card-pan-icon-y {
+  width: calc(var(--wb-card-icon) * 0.7);
+  height: calc(var(--wb-card-icon) * 1.3);
+  clip-path: polygon(50% 0, 100% 28%, 70% 28%, 70% 72%, 100% 72%, 50% 100%, 0 72%, 30% 72%, 30% 28%, 0 28%);
+}
+
+@media (pointer: coarse) {
+  .wb-card-pan {
+    display: block;
+  }
 }
 
 [draggable='true'] {
@@ -453,12 +475,23 @@ body {
 }
 
 .wb-new-node-plus {
-  font-size: 48px;
+  font-size: clamp(24px, 40cqw, 48px);
   line-height: 1;
 }
 
 .wb-new-node-label {
-  font-size: var(--wb-font-size-button);
+  font-size: clamp(10px, 12cqw, var(--wb-font-size-button));
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* never taller than the photo cards beside it: the tile keeps the square box
+   and its contents shrink with the card width */
+.wb-card-new > .wb-card-box {
+  height: auto;
+  min-height: 0;
+  padding: 4px;
+  overflow: hidden;
 }
 
 /* node editor frame (EDITOR.md S2.2); colours and sizes are tokens (E44) */
@@ -731,26 +764,6 @@ body {
 }
 
 @media (min-width: 700px) {
-  .wb-editor-work {
-    display: flex;
-    flex-flow: row nowrap;
-    gap: var(--wb-editor-gap);
-    align-items: flex-start;
-    justify-content: center;
-  }
-
-  .wb-editor-work .wb-editor-body {
-    flex: 1 1 auto;
-    margin: 0;
-  }
-
-  .wb-editor-strip {
-    flex-flow: column nowrap;
-    max-height: 90vmin;
-    margin: 0;
-    overflow: auto;
-  }
-
   .wb-editor-body {
     grid-template-columns: 56px minmax(0, 1fr) 56px;
     max-width: calc(90vmin + 2 * 56px + 16px);
@@ -1046,25 +1059,152 @@ body {
   align-self: flex-start;
 }
 
-/* texture role (E71): a checker toggle on the upload card, a dimmed film-strip entry */
-.wb-card-texture {
-  position: absolute;
-  right: 2px;
-  bottom: 2px;
-  width: var(--wb-card-icon);
-  height: var(--wb-card-icon);
-  padding: 0;
-  background: repeating-conic-gradient(var(--wb-ink) 0% 25%, var(--wb-button-round-bg) 0% 50%) 0 0 / 50% 50%;
-  border: var(--wb-border-width) outset var(--wb-button-round-border);
-  cursor: pointer;
-  opacity: 0.55;
-}
-
-.wb-card-texture-on {
-  opacity: 1;
-  outline: 2px solid var(--wb-select);
-}
-
+/* texture role (E71): chosen in the editor, shown as a dimmed film-strip entry */
 .wb-editor-strip-texture .wb-editor-strip-pick {
   opacity: 0.45;
+}
+
+/* keyboard use (E73): a visible focus everywhere in the editor, the cursor, the help list */
+.wb-editor :focus-visible,
+.wb-open-node :focus-visible,
+.wb-saved :focus-visible {
+  outline: 3px solid var(--wb-select);
+  outline-offset: 2px;
+}
+
+.wb-editor-stage:focus-visible {
+  outline-offset: -3px;
+}
+
+.wb-editor-candidate {
+  stroke-dasharray: 8 6;
+}
+
+.wb-editor-keylist {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  max-width: 26em;
+}
+
+.wb-editor-keylist dt {
+  margin: 0;
+}
+
+.wb-editor-keylist dd {
+  margin: 0;
+}
+
+.wb-editor-keylist kbd {
+  padding: 0 4px;
+  font: inherit;
+  border: 1px solid var(--wb-ink);
+  border-radius: 3px;
+}
+
+/* selection order: a small blue number in the upper left corner of a selected card */
+.wb-card-order {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  z-index: 1;
+  min-width: 1.4em;
+  padding: 0 4px;
+  font-size: var(--wb-font-size-button);
+  font-weight: bold;
+  line-height: 1.4em;
+  text-align: center;
+  color: var(--wb-select);
+  background: var(--wb-card-ground);
+  border: 1px solid var(--wb-select);
+  border-radius: var(--wb-radius-round);
+  pointer-events: none;
+}
+
+/* "add N selected" replaces the close tile while photos are selected */
+.wb-new-node-add,
+.wb-new-node-add:hover {
+  color: var(--wb-add-text);
+  background: var(--wb-add-ink);
+  border-style: var(--wb-frame-style);
+}
+
+.wb-new-node-arrow {
+  width: clamp(24px, 36cqw, 48px);
+  height: clamp(24px, 36cqw, 48px);
+  background: currentColor;
+  clip-path: polygon(35% 0, 65% 0, 65% 50%, 90% 50%, 50% 100%, 10% 50%, 35% 50%);
+}
+
+/* a photo the open node already uses: dimmed and shaded, nothing to do with it
+   until it is taken out of the node again */
+.wb-card-used .wb-card-image {
+  filter: grayscale(0.7) brightness(0.8);
+}
+
+.wb-card-used .wb-card-face {
+  cursor: default;
+}
+
+.wb-card-used .wb-card-add {
+  visibility: hidden;
+}
+
+/* landscape windows (desktop): the editor is never taller than the window.
+   The square stage is sized by the height that is left, and everything that
+   is not the stage (film-strip, context bar, palette, modes, scrubber,
+   pages) goes into a column beside it that scrolls on its own. */
+@media (min-width: 800px) and (orientation: landscape) {
+  .wb-editor {
+    --wb-editor-chrome: 112px; /* editor frame, margins and the head row */
+    max-height: calc(100dvh - 2 * var(--wb-card-gap));
+    overflow: auto;
+  }
+
+  .wb-editor-work {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: calc(var(--wb-editor-gap) * 2);
+    align-items: flex-start;
+  }
+
+  .wb-editor-work > .wb-editor-body {
+    flex: 0 1 auto;
+    width: calc(100dvh - var(--wb-editor-chrome) + 2 * 56px + 2 * var(--wb-editor-gap));
+    max-width: 62%;
+    margin: 0;
+  }
+
+  .wb-editor-side {
+    flex: 1 1 260px;
+    min-width: 0;
+    max-height: calc(100dvh - var(--wb-editor-chrome));
+    overflow: auto;
+  }
+
+  .wb-editor-side > :first-child {
+    margin-top: 0;
+  }
+}
+
+/* the key list opens under its button towards the left (the button sits at the
+   right edge) and scrolls instead of leaving the window */
+.wb-editor-keys .wb-editor-popover {
+  right: 0;
+  left: auto;
+  width: min(26em, calc(100vw - 32px));
+  max-height: calc(100dvh - 140px);
+  overflow: auto;
+}
+
+@media (max-width: 700px) {
+  .wb-editor-keys .wb-editor-popover {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-height: calc(100dvh - 32px);
+  }
 }

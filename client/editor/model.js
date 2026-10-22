@@ -46,7 +46,9 @@ export const emptyNode = () => ({ v: VERSION, style: {}, mode: 'free', pages: [{
 export const BLENDS = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten'];
 // what a node is for (a hint for views, EDITOR.md S2.9); lives next to the document, not in it
 export const KINDS = ['node', 'list', 'album', 'gallery', 'shop'];
+// the legacy `fit` of a photo step (before the square crop, EDITOR.md S2.5): only read to migrate
 export const FITS = ['extend', 'cover', 'free'];
+export const FILLS = ['loose', 'tight'];
 export const FONTS = ['fixed', 'serif', 'sans'];
 export const ALIGNS = ['left', 'center', 'right'];
 
@@ -70,7 +72,7 @@ const opt = check => Object.assign(v => v === undefined || check(v), { optional:
 
 // field checks per op; a field not listed is rejected
 const STEPS = {
-  photo: { id: isId, photo: isHash, m: isMatrix, fit: oneOf(FITS), opacity: isNumber, blend: oneOf(BLENDS), clip: opt(isId), role: opt(oneOf(['picture', 'texture'])) },
+  photo: { id: isId, photo: isHash, m: isMatrix, crop: opt(v => isNumber(v) && v >= 0 && v <= 1), fit: opt(oneOf(FITS)), opacity: isNumber, blend: oneOf(BLENDS), clip: opt(isId), role: opt(oneOf(['picture', 'texture'])) },
   stroke: { id: isId, pts: isPoints, color: isColour, smooth: opt(v => typeof v === 'boolean') },
   shape: { id: isId, path: isString, closed: v => typeof v === 'boolean', fill: opt(isFill), stroke: opt(isFill), strokeWidth: isNumber, wall: opt(v => isObject(v) && isNumber(v.height)) },
   clip: { target: isId, shape: isId },
@@ -105,6 +107,7 @@ function validateStructure(doc) {
   if(!isObject(doc.style) || (doc.style.theme !== undefined && !isString(doc.style.theme)) || (doc.style.vars !== undefined && !isObject(doc.style.vars))) errors.push({ code: 'bad_style', path: 'style' });
   if(!MODES.includes(doc.mode)) errors.push({ code: 'bad_mode', path: 'mode' });
   if(doc.bg !== undefined && !isFill(doc.bg)) errors.push({ code: 'bad_bg', path: 'bg' });
+  if(doc.layout !== undefined && !(isObject(doc.layout) && (doc.layout.fill === undefined || FILLS.includes(doc.layout.fill)) && (doc.layout.gap === undefined || (isNumber(doc.layout.gap) && doc.layout.gap >= 0 && doc.layout.gap <= 100)) && Object.keys(doc.layout).every(k => k === 'fill' || k === 'gap'))) errors.push({ code: 'bad_layout', path: 'layout' });
 
   if(doc.title !== undefined && !isString(doc.title)) errors.push({ code: 'bad_title', path: 'title' });
 
@@ -410,7 +413,7 @@ export const setMode = (doc, mode) => (MODES.includes(mode) && mode !== doc.mode
 
 // Set the matrix a step is drawn with (a gesture, a nudge). A `transform`
 // step that already targets it is updated; else a photo or text box takes it
-// in its own `m` (a photo becomes `free`: the matrix is no longer its fit);
+// in its own `m`;
 // else (strokes, shapes) a transform step is added at the end of the page.
 // A matrix that is not finite or beyond the document limits changes nothing.
 export function setMatrix(doc, stepId, m) {
@@ -424,8 +427,7 @@ export function setMatrix(doc, stepId, m) {
 
   if(t >= 0) return withSteps(doc, at.page, steps.map((step, i) => (i === t ? { ...step, m } : step)));
 
-  if(at.step.op === 'photo') return updateStep(doc, stepId, { m, fit: 'free' });
-  if(at.step.op === 'text') return updateStep(doc, stepId, { m });
+  if(at.step.op === 'photo' || at.step.op === 'text') return updateStep(doc, stepId, { m });
 
   return withSteps(doc, at.page, [...steps, { op: 'transform', target: stepId, m }]);
 }
@@ -451,28 +453,23 @@ export const setTitle = (doc, title) => (title === doc.title ? doc : { ...doc, t
 
 const STAGE = 1000;
 
-// the matrix of a fit mode. A photo's local space has its long edge scaled to
-// 1000, so `extend` only has to centre it; `cover` scales the short edge up
-// to the stage. `free` has no matrix of its own: null.
-export function fitMatrix(fit, { width, height }) {
-  const long = STAGE / Math.max(width, height);
-  const w = width * long;
-  const h = height * long;
+// A photo's local space is a square of 1000 units, the largest square of the
+// picture at the crop position (EDITOR.md S2.5); its matrix places that square
+// on the stage. A new photo covers the stage.
+const IDENTITY = [1, 0, 0, 1, 0, 0];
 
-  if(fit === 'extend') return [1, 0, 0, 1, (STAGE - w) / 2, (STAGE - h) / 2];
+// the square window into a photo: { side, x, y } in photo pixels, `crop` (0..1)
+// the position along the long edge (a square photo has nothing to move)
+export function cropWindow({ width, height }, crop = 0.5) {
+  const side = Math.min(width, height);
+  const at = clamp(Number.isFinite(crop) ? crop : 0.5, 0, 1);
 
-  if(fit === 'cover') {
-    const k = STAGE / Math.min(w, h);
-
-    return [k, 0, 0, k, (STAGE - w * k) / 2, (STAGE - h * k) / 2];
-  }
-
-  return null;
+  return width >= height ? { side, x: (width - side) * at, y: 0 } : { side, x: 0, y: (height - side) * at };
 }
 
-// a photo step on top of `pageId`, fit extend, centred
-export function addPhoto(doc, pageId, hash, info, id = unique(allIds(doc)), role) {
-  return addStep(doc, pageId, { op: 'photo', id, photo: hash, m: fitMatrix('extend', info), fit: 'extend', opacity: 1, blend: 'normal', ...(role === 'texture' && { role }) });
+// a photo step on top of `pageId`, covering the stage, crop centred unless given
+export function addPhoto(doc, pageId, hash, info, id = unique(allIds(doc)), role, crop) {
+  return addStep(doc, pageId, { op: 'photo', id, photo: hash, m: IDENTITY, crop: clamp(Number.isFinite(crop) ? crop : 0.5, 0, 1), opacity: 1, blend: 'normal', ...(role === 'texture' && { role }) });
 }
 
 // a texture photo is for the 3D scene: not drawn as a picture (EDITOR.md S2.5)
@@ -504,13 +501,52 @@ export function setRole(doc, stepId, role) {
 
 const updatePhoto = (doc, stepId, patch) => (findStep(doc, stepId)?.step.op === 'photo' ? updateStep(doc, stepId, patch) : doc);
 
-// `extend` and `cover` reset the matrix to the mode's fit; `free` keeps it
-export function setFit(doc, stepId, fit, info) {
-  if(!FITS.includes(fit)) return doc;
+// move the crop window of a photo along its long edge (0..1)
+export const setCrop = (doc, stepId, crop) => (Number.isFinite(crop) ? updatePhoto(doc, stepId, { crop: clamp(crop, 0, 1) }) : doc);
 
-  const m = fitMatrix(fit, info);
+// the grid options of the document: { fill: 'loose'|'tight', gap }
+export function setLayout(doc, changes) {
+  const layout = { ...doc.layout, ...changes };
 
-  return updatePhoto(doc, stepId, m ? { fit, m } : { fit });
+  if(layout.fill !== undefined && !FILLS.includes(layout.fill)) return doc;
+  if(layout.gap !== undefined && !(Number.isFinite(layout.gap) && layout.gap >= 0 && layout.gap <= 100)) return doc;
+
+  return JSON.stringify(layout) === JSON.stringify(doc.layout ?? {}) ? doc : { ...doc, layout };
+}
+
+// Documents from before the square crop: a photo step with `fit` and no `crop`
+// had a local space with its long edge scaled to 1000 (extend, cover) and is
+// converted so it shows the same picture through the new square window at the
+// centred crop. `infoOf(hash)` -> { width, height } | null; unknown photos are
+// left alone. Pure; returns the same object when nothing needs converting.
+export function migrateDoc(doc, infoOf) {
+  if(!Array.isArray(doc?.pages)) return doc;
+
+  let changed = false;
+  const pages = doc.pages.map(page => {
+    const steps = page.steps.map(step => {
+      if(step.op !== 'photo' || step.crop !== undefined) return step;
+
+      const info = infoOf(step.photo);
+
+      if(!info) return step;
+
+      const k = 1000 / Math.max(info.width, info.height);
+      const { side, x, y } = cropWindow(info);
+      const u = (side * k) / 1000; // new local unit in old local units
+      const [a, b, c, d, e, f] = step.m;
+      const [ox, oy] = [x * k, y * k];
+      const { fit: _, ...rest } = step;
+
+      changed = true;
+
+      return { ...rest, crop: 0.5, m: [a * u, b * u, c * u, d * u, a * ox + c * oy + e, b * ox + d * oy + f] };
+    });
+
+    return steps.some((step, i) => step !== page.steps[i]) ? { ...page, steps } : page;
+  });
+
+  return changed ? { ...doc, pages } : doc;
 }
 
 export const setOpacity = (doc, stepId, opacity) => (Number.isFinite(opacity) ? updatePhoto(doc, stepId, { opacity: clamp(opacity, 0, 1) }) : doc);

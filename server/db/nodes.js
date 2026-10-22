@@ -1,6 +1,8 @@
 // Node, photo and link queries (PLAN.md S8). Every function takes the handle
 // from db.js `open()` first. `doc` and `palette` are JSON in the database and
 // plain values here; time is Date.now() unless `now` is given.
+import { migrateDoc } from '../../client/editor/model.js';
+
 export const LABELS = ['child', 'ref', 'sells'];
 
 const json = value => (value === undefined || value === null ? null : JSON.stringify(value));
@@ -15,8 +17,15 @@ export function insertNode(h, { title = '', doc, palette, kind = 'node', now = D
   return { id: Number(lastInsertRowid), rev: 1 };
 }
 
-// the node with `doc` and `palette` parsed, or null
-export const getNode = (h, id) => node(h.get('SELECT * FROM nodes WHERE id = ?', id));
+// the node with `doc` and `palette` parsed, or null. A document from before the
+// square crop is converted on the way out (model.js migrateDoc).
+export function getNode(h, id) {
+  const found = node(h.get('SELECT * FROM nodes WHERE id = ?', id));
+
+  if(found?.doc) found.doc = migrateDoc(found.doc, hash => getPhoto(h, hash));
+
+  return found;
+}
 
 // the saved nodes for a list of tiles, newest first: { id, title, kind, tile, updated_at }
 export const listNodes = (h, limit = 200) => h.all('SELECT id, title, kind, tile, updated_at FROM nodes ORDER BY updated_at DESC, id DESC LIMIT ?', limit);

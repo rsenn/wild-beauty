@@ -6,9 +6,9 @@ describe('editor store', () => {
   test('starts closed; open opens, close closes', async () => {
     const s = createEditorStore();
 
-    expect(s.state).toEqual({ open: false, target: null, dirty: false });
+    expect(s.state).toEqual({ open: false, target: null, dirty: false, used: [] });
     expect(await s.open(NEW)).toBe(true);
-    expect(s.state).toEqual({ open: true, target: NEW, dirty: false });
+    expect(s.state).toEqual({ open: true, target: NEW, dirty: false, used: [] });
     s.close();
     expect(s.state.open).toBe(false);
     s.close(); // closing twice is fine
@@ -31,7 +31,7 @@ describe('editor store', () => {
     s.setDirty(true);
     expect(await s.open(2)).toBe(true);
     expect(asked).toEqual([[1, 2, { dirty: true }]]);
-    expect(s.state).toEqual({ open: true, target: 2, dirty: false });
+    expect(s.state).toEqual({ open: true, target: 2, dirty: false, used: [] });
   });
 
   test('a no keeps the current editor; the default hook says no', async () => {
@@ -40,7 +40,7 @@ describe('editor store', () => {
     await s.open(1);
     s.setDirty(true);
     expect(await s.open(2)).toBe(false);
-    expect(s.state).toEqual({ open: true, target: 1, dirty: true });
+    expect(s.state).toEqual({ open: true, target: 1, dirty: true, used: [] });
 
     s.setConfirm(async () => false);
     expect(await s.open(3)).toBe(false);
@@ -77,6 +77,6 @@ describe('editor store', () => {
     s.setConfirm(() => true);
     await s.open(1);
 
-    expect(seen).toEqual([{ open: true, target: NEW, dirty: false }, { open: true, target: NEW, dirty: true }, { open: false, target: null, dirty: false }]);
+    expect(seen).toEqual([{ open: true, target: NEW, dirty: false, used: [] }, { open: true, target: NEW, dirty: true, used: [] }, { open: false, target: null, dirty: false, used: [] }]);
   });
 });

@@ -2,18 +2,21 @@ import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
-import { ACCEPT, isImageFile } from '../files.js';
+import { ACCEPT, isImageFile, loadCrops, uploadPayload } from '../files.js';
 import { createQueue } from '../upload.js';
-import { SAVED_EVENT } from '../editor/pending.js';
+import { SAVED_EVENT, requestAdd } from '../editor/pending.js';
+import { useEditor } from '../editor/useEditor.js';
 import { UploadCard } from './UploadCard.js';
 
 // a file already on the server: the card needs only its name and size
-const existingItem = (record, index) => ({ id: index + 1, file: { name: record.name, size: record.size }, url: null, fit: 'contain', rotation: 0, selected: false, state: 'done', progress: 1, error: null, record });
+const existingItem = (record, index) => ({ id: index + 1, file: { name: record.name, size: record.size }, url: null, crop: loadCrops()[record.hash] ?? 0.5, rotation: 0, selected: false, state: 'done', progress: 1, error: null, record });
 
 // drop zone plus the grid of chosen files. The server renders the files already on disk
 // (boot.uploads) and the browser adopts them. Each file is uploaded as soon as
 // it is chosen. `extra` is a last grid cell (the "New node" tile).
 export const UploadArea = ({ extra = null }) => {
+  const { used } = useEditor();
+  const picked = useRef(0); // selection counter: the order photos were selected in
   const { t } = useI18n();
   const { limits, uploads = [] } = useBoot();
   const [items, setItems] = useState(() => uploads.map(existingItem));
@@ -46,7 +49,7 @@ export const UploadArea = ({ extra = null }) => {
   const add = files => {
     const images = [...files].filter(isImageFile);
 
-    const added = images.map(file => ({ id: nextId.current++, file, url: URL.createObjectURL(file), fit: 'contain', rotation: 0, selected: false, state: 'queued', progress: 0, error: null, record: null }));
+    const added = images.map(file => ({ id: nextId.current++, file, url: URL.createObjectURL(file), crop: 0.5, rotation: 0, selected: false, state: 'queued', progress: 0, error: null, record: null }));
 
     setIgnored(files.length - images.length);
     setItems(old => [...old, ...added]);
@@ -116,6 +119,20 @@ export const UploadArea = ({ extra = null }) => {
     e.target.value = '';
   };
 
+  // selected photos in selection order; only finished uploads can be added
+  const chosen = items.filter(item => item.selected && !(item.record && used.includes(item.record.hash))).sort((a, b) => a.selectedAt - b.selectedAt);
+  const order = new Map(chosen.map((item, i) => [item.id, i + 1]));
+  const ready = chosen.filter(item => item.record);
+
+  // all selected photos go to the editor in order and are deselected
+  const addSelected = () => {
+    for(const item of ready) requestAdd(uploadPayload(item.record, 'picture', item.crop));
+
+    const done = new Set(ready.map(item => item.id));
+
+    setItems(old => old.map(item => (done.has(item.id) ? { ...item, selected: false, selectedAt: 0 } : item)));
+  };
+
   return html`
     <section class="wb-upload">
       <div class=${'wb-drop' + (over ? ' wb-drop-over' : '')} onDragEnter=${dragEnter} onDragOver=${e => e.preventDefault()} onDragLeave=${dragLeave} onDrop=${drop}>
@@ -132,15 +149,16 @@ export const UploadArea = ({ extra = null }) => {
           item => html`<${UploadCard}
             key=${item.id}
             item=${item}
-            onToggle=${() => update(item.id, i => ({ selected: !i.selected }))}
+            order=${order.get(item.id)}
+            inNode=${!!item.record && used.includes(item.record.hash)}
+            onToggle=${() => update(item.id, i => ({ selected: !i.selected, selectedAt: i.selected ? 0 : ++picked.current }))}
             onRemove=${() => remove(item.id)}
             onRotate=${() => update(item.id, i => ({ rotation: (i.rotation + 90) % 360 }))}
-            onFit=${() => update(item.id, i => ({ fit: i.fit === 'contain' ? 'cover' : 'contain' }))}
-            onTexture=${() => update(item.id, i => ({ texture: !i.texture }))}
+            onCrop=${crop => update(item.id, () => ({ crop }))}
             onRetry=${() => start(item)}
           />`,
         )}
-        ${extra}
+        ${typeof extra === 'function' ? extra({ count: ready.length, addSelected }) : extra}
       </ul>
     </section>
   `;

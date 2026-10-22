@@ -14,9 +14,9 @@ const KINDS = {
 };
 
 const TOKENS = {
-  colour: 'wallpaper-color ink ink-soft accent accent-hover accent-ink button-round-bg button-round-border button-round-hover add-ink fit-ink fit-hover button-border card-ground danger drop-fill error-frame select select-fill tip-ink editor-outline editor-handle-fill editor-handle-stroke editor-context-bg editor-popover-bg editor-banner-bg',
+  colour: 'wallpaper-color ink ink-soft accent accent-hover accent-ink button-round-bg button-round-border button-round-hover add-ink pan-ink button-border card-ground danger drop-fill error-frame select select-fill tip-ink editor-outline editor-handle-fill editor-handle-stroke editor-context-bg editor-popover-bg editor-banner-bg',
   length: 'border-width frame-width select-width radius-tab radius-frame radius-button radius-round radius-node tab-size tab-size-open tab-gap card-gap logo-height font-size font-size-small font-size-button font-size-label font-size-lead font-size-tab editor-tool-size editor-gap editor-outline-width',
-  count: 'card-columns card-columns-wide',
+  count: 'card-columns card-columns-mid card-columns-wide',
   time: 'tab-time',
   image: 'wallpaper-image logo-image icon-upload icon-new icon-delete icon-rotate icon-next icon-tool-select icon-tool-pen icon-tool-shape icon-tool-clip icon-tool-unclip icon-tool-text',
   font: 'font-ui',

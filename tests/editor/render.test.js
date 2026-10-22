@@ -1,66 +1,60 @@
 // bun test: client/editor/render.js
 import { describe, expect, test } from 'bun:test';
 import { renderToString } from '../../vendor/preact-render-to-string.js';
-import { addPhoto, emptyNode, setFit } from '../../client/editor/model.js';
+import { addPhoto, emptyNode, setCrop } from '../../client/editor/model.js';
 import { renderNode, renderStage } from '../../client/editor/render.js';
 
 const hash = 'a'.repeat(64);
 const info = { href: '/files/uploads/a.jpg', width: 2000, height: 1000, padding: ['#112233', '#445566'] };
 const photos = h => (h === hash ? info : null);
 
-function oneStep(fit) {
+function oneStep(crop) {
   let doc = emptyNode();
 
   doc = { ...doc, pages: [{ id: 'page0001', steps: [] }] };
   doc = addPhoto(doc, 'page0001', hash, info, 'photo001');
 
-  return fit === 'cover' ? setFit(doc, 'photo001', 'cover', info) : doc;
+  return crop === undefined ? doc : setCrop(doc, 'photo001', crop);
 }
 
 const render = doc => renderToString(renderStage(doc, { photos }));
 
 describe('photo step', () => {
-  test('extend: ground gradient of the padding colours, then the image', () => {
-    const out = render(oneStep('extend'));
-
-    expect(out).toBe(
+  test('the picture is cut to a square at the crop, centred by default', () => {
+    expect(render(oneStep())).toBe(
       '<svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><g data-step="photo001" data-op="photo">' +
-        '<defs><linearGradient id="ground-photo001" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#112233"></stop><stop offset="1" stop-color="#445566"></stop></linearGradient></defs>' +
-        '<rect x="0" y="0" width="1000" height="1000" fill="url(#ground-photo001)"></rect>' +
-        '<g transform="matrix(1 0 0 1 0 250)"><image href="/files/uploads/a.jpg" x="0" y="0" width="1000" height="500" preserveAspectRatio="none"></image></g></g></svg>',
+        '<g transform="matrix(1 0 0 1 0 0)"><svg x="0" y="0" width="1000" height="1000" viewBox="0 0 1000 1000" overflow="hidden">' +
+        '<image href="/files/uploads/a.jpg" x="-500" y="0" width="2000" height="1000" preserveAspectRatio="none"></image></svg></g></g></svg>',
     );
   });
 
-  test('cover: no ground, the scaled matrix', () => {
-    const out = render(oneStep('cover'));
+  test('the crop moves the window along the long edge', () => {
+    expect(render(oneStep(0))).toContain('x="0" y="0" width="2000"');
+    expect(render(oneStep(1))).toContain('x="-1000"');
+  });
 
-    expect(out).not.toContain('linearGradient');
-    expect(out).toContain('matrix(2 0 0 2 -500 0)');
+  test('a tall photo is panned vertically', () => {
+    const tall = { ...info, width: 1000, height: 2000 };
+
+    expect(renderToString(renderStage(oneStep(1), { photos: () => tall }))).toContain('x="0" y="-1000" width="1000" height="2000"');
   });
 
   test('opacity and blend go to the style', () => {
-    const doc = oneStep('cover');
+    const doc = oneStep();
 
     doc.pages[0].steps[0] = { ...doc.pages[0].steps[0], opacity: 0.5, blend: 'multiply' };
     expect(render(doc)).toContain('style="opacity:0.5;mix-blend-mode:multiply"');
   });
 
-  test('a tall photo gets a horizontal gradient', () => {
-    const doc = oneStep('extend');
+  test('unknown photos are skipped', () => {
+    const doc = oneStep();
 
-    expect(renderToString(renderStage(doc, { photos: () => ({ ...info, width: 1000, height: 2000 }) }))).toContain('x2="1" y2="0"');
-  });
-
-  test('hostile padding colours are dropped, unknown photos skipped', () => {
-    const doc = oneStep('extend');
-
-    expect(renderToString(renderStage(doc, { photos: () => ({ ...info, padding: ['red"/><script>', '#000'] }) }))).not.toContain('script');
     expect(render({ ...doc, pages: [{ id: 'page0001', steps: [{ ...doc.pages[0].steps[0], photo: 'b'.repeat(64) }] }] })).not.toContain('<image');
   });
 });
 
 const pageOf = (...steps) => ({ ...emptyNode(), pages: [{ id: 'page0001', steps }] });
-const photo = { op: 'photo', id: 'photo001', photo: hash, m: [1, 0, 0, 1, 0, 0], fit: 'free', opacity: 1, blend: 'normal' };
+const photo = { op: 'photo', id: 'photo001', photo: hash, m: [1, 0, 0, 1, 0, 0], crop: 0.5, opacity: 1, blend: 'normal' };
 const shape = { op: 'shape', id: 'shape001', path: 'M0 0L500 0L500 500Z', closed: true, fill: '#ff0000', strokeWidth: 4 };
 
 describe('other ops', () => {
@@ -142,14 +136,13 @@ describe('pages, upTo and modes', () => {
     expect(ids(renderToString(renderStage(two, { page: 5 })))).toEqual([]);
   });
 
-  const photos3 = { ...emptyNode(), pages: [{ id: 'page0001', steps: [{ ...photo, id: 'photo001', fit: 'cover' }, stroke('strok001', 0), shape] }, { id: 'page0002', steps: [{ ...photo, id: 'photo002' }, { ...photo, id: 'photo003', clip: 'shape001' }] }] };
+  const photos3 = { ...emptyNode(), pages: [{ id: 'page0001', steps: [{ ...photo, id: 'photo001' }, stroke('strok001', 0), shape] }, { id: 'page0002', steps: [{ ...photo, id: 'photo002' }, { ...photo, id: 'photo003', clip: 'shape001' }] }] };
 
   test('slides: one photo per page, whole, nothing else', () => {
     const out = renderToString(renderStage(photos3, { photos, mode: 'slides', page: 1 }));
 
     expect(ids(out)).toEqual(['photo002']);
-    expect(out).toContain('matrix(1 0 0 1 0 250)');
-    expect(out).toContain('linearGradient');
+    expect(out).toContain('matrix(1 0 0 1 0 0)');
     expect(renderToString(renderStage(photos3, { photos, mode: 'slides', page: 9 }))).not.toContain('<image');
   });
 
@@ -159,7 +152,6 @@ describe('pages, upTo and modes', () => {
     expect(ids(out)).toEqual(['photo001', 'photo002', 'photo003']);
     expect(out).not.toContain('clip-path');
     expect(out).not.toContain('data-op="stroke"');
-    expect(out).not.toContain('linearGradient');
   });
 
   test('the document mode is the default', () => {
@@ -168,7 +160,7 @@ describe('pages, upTo and modes', () => {
 });
 
 describe('theme wrapper', () => {
-  const styled = style => renderToString(renderNode({ ...oneStep('extend'), style }, { photos }));
+  const styled = style => renderToString(renderNode({ ...oneStep(), style }, { photos }));
 
   test('wraps the stage, data-theme and vars', () => {
     const out = styled({ theme: 'blueprint', vars: { '--wb-accent': '#2a6', '--wb-radius-node': '8px' } });
@@ -178,7 +170,7 @@ describe('theme wrapper', () => {
 
   test('no style: a bare wrapper that inherits, the page theme as fallback', () => {
     expect(styled({})).toMatch(/^<div class="wb-node"><svg /);
-    expect(renderToString(renderNode(oneStep('extend'), { photos, theme: 'kraft' }))).toContain('data-theme="kraft"');
+    expect(renderToString(renderNode(oneStep(), { photos, theme: 'kraft' }))).toContain('data-theme="kraft"');
   });
 
   test('hostile vars are dropped', () => {

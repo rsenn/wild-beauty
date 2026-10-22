@@ -6,15 +6,15 @@ import { html } from '../html.js';
 // focus back to the button.
 let serial = 0;
 
-export const Popover = ({ label, class: className = '', children }) => {
+export const Popover = ({ label, class: className = '', align = 'left', children }) => {
   const [open, setOpen] = useState(false);
   const [id] = useState(() => `wb-pop-${++serial}`);
 
   return html`
-    <div class=${'wb-editor-props ' + className}>
+    <div class=${'wb-editor-props ' + className} onKeyDown=${e => open && e.key === 'Escape' && (e.stopPropagation(), setOpen(false), document.getElementById(id + '-button')?.focus())}>
       <button type="button" class="wb-editor-chip" id=${id + '-button'} aria-expanded=${open ? 'true' : 'false'} aria-controls=${id} onClick=${() => setOpen(!open)}>${label}</button>
       ${open &&
-      html`<div id=${id} class="wb-editor-popover wb-editor-popover-left" role="group" aria-label=${label} onKeyDown=${e => e.key === 'Escape' && (e.stopPropagation(), setOpen(false), document.getElementById(id + '-button')?.focus())}>${children}</div>`}
+      html`<div id=${id} class=${'wb-editor-popover wb-editor-popover-' + align} role="group" aria-label=${label}>${children}</div>`}
     </div>
   `;
 };

@@ -8,7 +8,6 @@ import { identify } from '../server/media/probe.js';
 import { run } from '../server/media/run.js';
 import { detectTools, imagemagick } from '../server/media/tools.js';
 import { firstPhotoStep, thumbnail } from '../server/media/thumb.js';
-import { fitMatrix } from '../client/editor/model.js';
 
 setDefaultTimeout(30000);
 
@@ -40,55 +39,36 @@ beforeAll(async () => {
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 describe('thumbnail', () => {
-  test('extend: square, the photo whole in the middle, padding colours above and below', async () => {
+  test('the square window fills the thumbnail, whatever the shape of the photo', async () => {
     if(!ready) return;
 
-    const step = { fit: 'extend', m: fitMatrix('extend', { width: 400, height: 200 }) };
-    const r = await thumbnail(path('wide.jpg'), path('t1.jpg'), { step, padding: ['#ff0000', '#0000ff'] });
+    const step = { crop: 0.5, m: [1, 0, 0, 1, 0, 0] };
+    const r = await thumbnail(path('wide.jpg'), path('t1.jpg'), { step });
     const info = await identify(path('t1.jpg'));
 
     expect(r.ok).toBe(true);
     expect([info.width, info.height]).toEqual([512, 512]);
-    expect(near(await pixel('t1.jpg', 256, 10), [255, 0, 0], 40)).toBe(true);
-    expect(near(await pixel('t1.jpg', 256, 500), [0, 0, 255], 40)).toBe(true);
-    expect(near(await pixel('t1.jpg', 256, 256), [0, 255, 0])).toBe(true);
-  });
+    for(const [x, y] of [[2, 2], [509, 2], [2, 509], [509, 509]]) expect(near(await pixel('t1.jpg', x, y), [0, 255, 0])).toBe(true);
 
-  test('a tall photo gets its padding left and right', async () => {
-    if(!ready) return;
-
-    const step = { fit: 'extend', m: fitMatrix('extend', { width: 200, height: 400 }) };
-
-    await thumbnail(path('tall.png'), path('t2.jpg'), { step, padding: ['#ff0000', '#0000ff'] });
-    expect(near(await pixel('t2.jpg', 10, 256), [255, 0, 0], 40)).toBe(true);
-    expect(near(await pixel('t2.jpg', 500, 256), [0, 0, 255], 40)).toBe(true);
-    expect(near(await pixel('t2.jpg', 256, 10), [0, 255, 0])).toBe(true);
-  });
-
-  test('cover fills the square, no padding', async () => {
-    if(!ready) return;
-
-    const step = { fit: 'cover', m: fitMatrix('cover', { width: 400, height: 200 }) };
-
-    await thumbnail(path('wide.jpg'), path('t3.jpg'), { step, padding: ['#ff0000', '#0000ff'] });
-    for(const [x, y] of [[2, 2], [509, 2], [2, 509], [509, 509]]) expect(near(await pixel('t3.jpg', x, y), [0, 255, 0])).toBe(true);
+    await thumbnail(path('tall.png'), path('t2.jpg'), { step: { crop: 0, m: [1, 0, 0, 1, 0, 0] } });
+    for(const [x, y] of [[2, 2], [509, 509]]) expect(near(await pixel('t2.jpg', x, y), [0, 255, 0])).toBe(true);
   });
 
   test('free: a matrix with rotation and scale, the document ground behind', async () => {
     if(!ready) return;
 
-    // quarter turn, half size: the photo covers x 500..750, y 250..750 of the stage
-    const step = { fit: 'free', m: [0, 0.5, -0.5, 0, 750, 250] };
+    // quarter turn, half size: the square covers x 250..750, y 250..750 of the stage
+    const step = { crop: 0.5, m: [0, 0.5, -0.5, 0, 750, 250] };
 
     await thumbnail(path('wide.jpg'), path('t4.jpg'), { step, bg: '#ffff00' });
     expect(near(await pixel('t4.jpg', 5, 500), [255, 255, 0])).toBe(true);
-    expect(near(await pixel('t4.jpg', 320, 256), [0, 255, 0])).toBe(true);
+    expect(near(await pixel('t4.jpg', 256, 256), [0, 255, 0])).toBe(true);
   });
 
   test('quality: a JPEG source is not exceeded, others get 99', async () => {
     if(!ready) return;
 
-    const step = { fit: 'cover', m: fitMatrix('cover', { width: 400, height: 200 }) };
+    const step = { crop: 0.5, m: [1, 0, 0, 1, 0, 0] };
     const jpeg = await thumbnail(path('wide.jpg'), path('t5.jpg'), { step });
     const png = await thumbnail(path('tall.png'), path('t6.jpg'), { step });
 
@@ -100,7 +80,7 @@ describe('thumbnail', () => {
   test('a custom size and a bad source', async () => {
     if(!ready) return;
 
-    const step = { fit: 'cover', m: fitMatrix('cover', { width: 400, height: 200 }) };
+    const step = { crop: 0.5, m: [1, 0, 0, 1, 0, 0] };
 
     await thumbnail(path('wide.jpg'), path('t7.jpg'), { step, size: 128 });
     expect((await identify(path('t7.jpg'))).width).toBe(128);

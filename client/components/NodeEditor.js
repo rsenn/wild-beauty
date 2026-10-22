@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { UPLOAD_MIME } from '../files.js';
-import { FITS, LIMITS, allIds, emptyNode, findStep, photoSteps, unique } from '../editor/model.js';
+import { LIMITS, allIds, emptyNode, findStep, photoSteps, unique } from '../editor/model.js';
 import { apply } from '../editor/commands.js';
 import { createGesture } from '../editor/gesture.js';
 import { aboutPoint } from '../editor/gestures.js';
@@ -12,13 +12,14 @@ import { deleteNode, errorKey, loadNode, saveNode } from '../editor/save.js';
 import { createLock } from '../editor/lock.js';
 import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
-import { centreOf, hitTest, matrixOf, outlineOf } from '../editor/hit.js';
+import { centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor/hit.js';
 import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../editor/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { oneEuroPoint, resample, strokePath, strokeWidths } from '../editor/pen.js';
 import { photoSteps as allPhotoSteps, renderNode } from '../editor/render.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
-import { DEFAULT_TOOL, TOOLS, toolForKey } from '../editor/tools.js';
+import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/keyboard.js';
+import { DEFAULT_TOOL, TOOLS, inField, toolForKey } from '../editor/tools.js';
 import { editorStore } from '../editor/useEditor.js';
 import { NEW } from '../editor/store.js';
 import { swatches } from '../editor/palette.js';
@@ -31,6 +32,7 @@ import { Palette } from './Palette.js';
 import { Scrubber } from './Scrubber.js';
 import { SlideStrip } from './SlideStrip.js';
 import { Properties } from './Properties.js';
+import { Popover } from './Popover.js';
 import { Stage } from './Stage.js';
 
 // Editor frame (EDITOR.md S2.2): title row, tool column, square stage, action
@@ -39,6 +41,8 @@ import { Stage } from './Stage.js';
 // one place that knows what is dirty. The page strip and the node-level
 // actions stay inert until their tasks.
 const ACTIONS = ['undo', 'redo', 'page', 'delete', 'save'];
+// the keys the help popover lists (EDITOR.md E73), each with `editor.keys.<name>`
+const KEYS = ['V P S C U T', 'PageDown PageUp', 'Escape', 'Arrows', '+ -', ', .', '[ ]', 'Delete', '\\', 'Space', 'Enter', 'Backspace', 'Ctrl+Z Ctrl+Y', 'Ctrl+S'];
 const SPACING = 4;
 const VERTEX_PX = 14; // how near a click picks a vertex or handle
 const CLOSE_PX = 14; // how near the first vertex a click closes the shape
@@ -52,6 +56,22 @@ const round = (v, k) => Math.round(v * k) / k;
 // what the editor needs to draw an upload: where it is and how big
 const photoInfo = p => ({ href: `/files/uploads/${p.display}`, width: p.width, height: p.height, padding: p.padding, palette: Array.isArray(p.palette) ? p.palette.filter(c => /^#[0-9a-f]{6}$/i.test(c?.hex)).slice(0, 8) : [] });
 const isPayload = p => p && /^[0-9a-f]{64}$/.test(p.hash) && typeof p.display === 'string' && p.width > 0 && p.height > 0;
+
+// the keyboard cursor of the shape tool (E73): a cross, Space places a corner there
+const KeyCursor = ({ at, scale }) => {
+  const r = (HANDLE_PX * 1.6) / scale;
+
+  return html`<g class="wb-editor-keycursor" aria-hidden="true">
+    <line class="wb-editor-outline" x1=${at[0] - r} y1=${at[1]} x2=${at[0] + r} y2=${at[1]} />
+    <line class="wb-editor-outline" x1=${at[0]} y1=${at[1] - r} x2=${at[0]} y2=${at[1] + r} />
+  </g>`;
+};
+
+// the shape the clip tool would use, chosen with PageDown / PageUp
+const Candidate = ({ outline }) => (outline ? html`<polygon class="wb-editor-outline wb-editor-candidate" points=${outline.map(p => p.join(',')).join(' ')} />` : null);
+
+// focus a dialog's first button when it appears (a stable function: once)
+const focusIt = el => el && el.focus();
 
 // the vertices and bezier handles of the selected shape (E61)
 const VertexEdit = ({ geo, sel, scale }) => {
@@ -121,10 +141,16 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [busy, setBusy] = useState(false); // a save is on its way
   const [saveError, setSaveError] = useState(null);
   const [savedId, setSavedId] = useState(null);
+  const quiet = useRef(false); // the next tool change was announced by its own message
+  const [announce, setAnnounce] = useState(''); // read out by screen readers
+  const [cursor, setCursor] = useState(null); // the keyboard cursor of the shape tool
+  const [candidate, setCandidate] = useState(null); // the shape the clip tool would use, chosen by key
+  const [opener] = useState(() => (typeof document === 'undefined' ? null : document.activeElement)); // where the focus goes back to on close
   const [vsel, setVsel] = useState(null); // the selected vertex of the selected shape
   const [shape, setShape] = useState(emptyDraft); // the shape being drawn (shape tool)
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
+  const latestT = useRef(t); // the handlers registered once speak the current language
   const lockRef = useRef(null);
   const loadingRef = useRef(target !== NEW);
   const remote = useRef(null); // { id, rev } once the node is on the server
@@ -153,9 +179,11 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // always the current state for handlers registered once
   const latest = useRef();
 
+  latestT.current = t;
+  const tr = (key, params) => latestT.current(key, params);
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
-  latest.current = { readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
+  latest.current = { cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
 
   // every change of the node goes through here
   const dispatch = command => latest.current?.readOnly || setHist(h => {
@@ -250,7 +278,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setK(null);
     setPlaying(false);
     setPhotos(old => ({ ...old, [payload.hash]: photoInfo(payload) }));
-    dispatch({ type: 'addPhoto', hash: payload.hash, info: payload, role: payload.role, page: latest.current.pageId, id: unique(allIds(latest.current.doc)) });
+    dispatch({ type: 'addPhoto', hash: payload.hash, info: payload, role: payload.role, crop: payload.crop, page: latest.current.pageId, id: unique(allIds(latest.current.doc)) });
   };
 
   const remove = id => {
@@ -467,6 +495,41 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(storage) clearDraft(storage, target);
   };
 
+  // what a screen reader is told: the selection, the tool, the corner
+  useEffect(() => {
+    const { doc: d, page: pg, shown: upTo } = latest.current;
+    const found = selected ? findStep(d, selected) : null;
+
+    if(!found) return setAnnounce(tr('editor.announce.none'));
+
+    const ids = selectableIds(d, { page: pg, upTo });
+
+    setAnnounce(tr('editor.announce.selected', { kind: tr('editor.step.' + found.step.op), n: ids.indexOf(selected) + 1, total: ids.length }));
+  }, [selected]);
+
+  useEffect(() => {
+    setCursor(null);
+    setCandidate(null);
+    if(quiet.current) return void (quiet.current = false);
+    setAnnounce(tr('editor.announce.tool', { tool: tr('editor.tool.' + tool) }));
+  }, [tool]);
+
+  useEffect(() => {
+    const parsed = vsel !== null && latest.current.editStep ? verticesOf(latest.current.editStep) : null;
+
+    if(parsed) setAnnounce(tr('editor.announce.vertex', { n: vsel + 1, total: parsed.vertices.length }));
+  }, [vsel]);
+
+  // the focus goes back to where the editor was opened from
+  useEffect(
+    () => () => {
+      const back = opener && opener !== document.body && document.contains(opener) ? opener : document.querySelector('main a:not(.wb-sr-only), main button, main input');
+
+      back?.focus?.({ preventScroll: true });
+    },
+    [],
+  );
+
   // a new selection starts without a selected vertex
   useEffect(() => setVsel(null), [selected]);
 
@@ -502,7 +565,99 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // keys: a tool key selects a tool; ctrl+z, ctrl+shift+z / ctrl+y, Delete
   useEffect(() => {
     const on = e => {
-      if(latest.current.readOnly) return;
+      if(latest.current.readOnly || !inEditor(e.target)) return;
+
+      const { tool: current, doc: d, page: pg, shown: upTo, selected: sel, editStep: step, vsel: vs, candidate: cand } = latest.current;
+      const plain = !e.ctrlKey && !e.metaKey && !e.altKey;
+      const draftingNow = current === 'shape' && latest.current.shape.vertices.length;
+
+      // PageDown / PageUp walk through the steps; in the clip tool, through the shapes that could mask
+      if(plain && !inField(e.target) && (e.key === 'PageDown' || e.key === 'PageUp')) {
+        e.preventDefault();
+
+        const dir = e.key === 'PageDown' ? 1 : -1;
+
+        if(current === 'clip' && step?.op === 'photo') {
+          const next = cycleId(selectableIds(d, { page: pg, ops: ['shape'] }), cand, dir);
+
+          setCandidate(next);
+          setAnnounce(next ? tr('editor.announce.candidate') : '');
+        } else {
+          setSelected(cycleId(selectableIds(d, { page: pg, upTo }), sel, dir));
+        }
+
+        return;
+      }
+
+      // \ walks through the corners of the selected shape
+      if(plain && !inField(e.target) && e.key === '\\' && step?.op === 'shape') {
+        const n = verticesOf(step)?.vertices.length ?? 0;
+
+        if(n) {
+          e.preventDefault();
+          setVsel(vs === null ? (e.shiftKey ? n - 1 : 0) : (vs + (e.shiftKey ? -1 : 1) + n) % n);
+        }
+
+        return;
+      }
+
+      // arrows move the selected corner instead of the whole shape
+      if(plain && !inField(e.target) && vs !== null && step?.op === 'shape' && /^Arrow/.test(e.key)) {
+        const parsed = verticesOf(step);
+        const m = matrixOf(d, step.id, { page: pg });
+        const by = e.shiftKey ? 10 : 1;
+        const [dx, dy] = { ArrowLeft: [-by, 0], ArrowRight: [by, 0], ArrowUp: [0, -by], ArrowDown: [0, by] }[e.key];
+
+        if(parsed && m) {
+          e.preventDefault();
+          dispatch({ type: 'setVertices', id: step.id, vertices: dragVertices(parsed.vertices, { kind: 'vertex', index: vs }, m, [0, 0], [dx, dy]) });
+        }
+
+        return;
+      }
+
+      // shape tool: arrows move the cursor, Space places a corner there
+      if(current === 'shape' && plain && !inField(e.target)) {
+        const at = latest.current.cursor ?? CURSOR_START;
+        const moved = moveCursor(at, e);
+
+        if(moved) {
+          e.preventDefault();
+          setCursor(moved);
+
+          return;
+        }
+
+        if(e.key === ' ' && e.target?.tagName !== 'BUTTON') {
+          e.preventDefault();
+          setCursor(at);
+          shapeDown(at);
+          shaping.current = false; // no pointer is down: nothing to pull
+          setAnnounce(tr('editor.announce.placed', { n: latest.current.shape.vertices.length }));
+
+          return;
+        }
+      }
+
+      // clip tool: Enter masks the selected photo with the chosen shape
+      if(current === 'clip' && e.key === 'Enter' && cand && step?.op === 'photo' && plain && e.target?.tagName !== 'BUTTON') {
+        e.preventDefault();
+        dispatch({ type: 'setClip', id: step.id, shape: cand });
+        setCandidate(null);
+        quiet.current = true;
+        setTool('select');
+        setAnnounce(tr('editor.announce.clipped'));
+
+        return;
+      }
+
+      // Escape with the select tool already active lets go of the selection
+      if(e.key === 'Escape' && current === 'select' && !draftingNow && !e.repeat && !inField(e.target)) {
+        setSelected(null);
+        setCandidate(null);
+
+        return;
+      }
 
       const next = toolForKey(e);
 
@@ -576,6 +731,13 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   useEffect(() => {
     editorStore.setDirty(dirty);
   }, [dirty]);
+
+  // the upload list greys out the photos this node already uses
+  const usedKey = [...new Set(doc.pages.flatMap(p => p.steps.filter(s => s.op === 'photo').map(s => s.photo)))].sort();
+
+  useEffect(() => {
+    editorStore.setUsed(usedKey);
+  }, [usedKey.join()]);
 
   // the draft follows the document every 3 s and when the page is hidden; a
   // clean editor has none. Nothing is written while an old draft is waiting.
@@ -673,7 +835,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   };
 
   // select tool: a tap selects, a drag moves the step, two fingers pinch it,
-  // Alt-drag turns and scales it about its centre, a double tap cycles the fit
+  // Alt-drag turns and scales it about its centre, a double tap puts a photo back to covering the stage
   const selectDown = (e, units) => {
     const { doc, photos, scale } = latest.current;
 
@@ -707,10 +869,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(!previewing && step.op === 'photo' && tap.id === id && e.timeStamp - tap.time < DOUBLE_TAP_MS && Math.hypot(units[0] - tap.at[0], units[1] - tap.at[1]) < DOUBLE_TAP_PX / scale) {
       lastTap.current = { time: 0, id: null, at: null };
 
-      const info = photos[step.photo];
-      const fit = FITS[(FITS.indexOf(step.fit) + 1) % FITS.length];
-
-      if(info) dispatch({ type: 'setFit', id, fit, info });
+      dispatch({ type: 'setMatrix', id, m: [1, 0, 0, 1, 0, 0] }); // back to covering the stage
 
       return;
     }
@@ -925,12 +1084,17 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   return html`
     <section id="wb-editor" class="wb-editor" tabindex="-1" aria-label=${t('editor.label')}>
+      <div class="wb-sr-only" role="status" aria-live="polite" aria-atomic="true">${announce}</div>
+      <p id="wb-editor-keys-hint" class="wb-sr-only">${t('editor.keys.hint')}</p>
       <div class="wb-editor-head">
         <label class="wb-editor-title" inert=${readOnly}>
           <span class="wb-sr-only">${t('editor.title.label')}</span>
           <input type="text" maxlength=${LIMITS.title} autocomplete="off" value=${title} placeholder=${t('editor.title.placeholder')} onInput=${e => dispatch({ type: 'setTitle', title: e.target.value })} />
         </label>
         <span class="wb-editor-head-fields" inert=${readOnly}><${Properties} t=${t} kind=${kind} bg=${doc.bg} dispatch=${dispatch} /></span>
+        <${Popover} label=${t('editor.keys')} class="wb-editor-keys" align="right">
+          <dl class="wb-editor-keylist">${KEYS.map(k => html`<dt><kbd>${k}</kbd></dt><dd>${t('editor.keys.' + k)}</dd>`)}</dl>
+        <//>
         <button type="button" class="wb-editor-close" onClick=${close}>${t('editor.close')}</button>
       </div>
       ${found &&
@@ -951,7 +1115,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       html`<div class="wb-editor-banner wb-editor-banner-error wb-editor-dialog" role="alertdialog" aria-labelledby="wb-conflict-title" aria-describedby="wb-conflict-text">
         <strong id="wb-conflict-title">${t('editor.conflict.title')}</strong>
         <span id="wb-conflict-text">${t('editor.conflict.text')}</span>
-        <button type="button" class="wb-editor-chip" disabled=${busy} onClick=${keepMine}>${t('editor.conflict.mine')}</button>
+        <button type="button" ref=${focusIt} class="wb-editor-chip" disabled=${busy} onClick=${keepMine}>${t('editor.conflict.mine')}</button>
         <button type="button" class="wb-editor-chip" disabled=${busy} onClick=${takeTheirs}>${t('editor.conflict.theirs')}</button>
         <button type="button" class="wb-editor-chip" onClick=${() => (setConflict(null), setSaveError(null))}>${t('editor.conflict.cancel')}</button>
       </div>`}
@@ -968,9 +1132,11 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <div class="wb-editor-tools" role="toolbar" aria-label=${t('editor.tools')}>${TOOLS.map(toolButton)}</div>
         <${Stage}
           label=${title || t('editor.stage')}
+          tabindex="0"
+          aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
+          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
@@ -983,8 +1149,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <//>
         <div class="wb-editor-actions" role="toolbar" aria-label=${t('editor.actions')}>${ACTIONS.map(action)}</div>
       </div>
+      <div class="wb-editor-side">
       <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />
-      </div>
       ${(tool === 'clip' || tool === 'unclip') && html`<p class="wb-editor-context" role="status">${t('editor.context.' + tool)}</p>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">
@@ -1001,7 +1167,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           </div>`
         : html`<${ContextBar} t=${t} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
-      <${ModeSwitch} t=${t} mode=${mode} onMode=${setMode} />
+      <${ModeSwitch} t=${t} mode=${mode} onMode=${setMode} layout=${doc.layout} onLayout=${changes => dispatch({ type: 'setLayout', changes })} />
       ${auto
         ? html`<p class="wb-editor-context" role="status">${t('editor.mode.auto')}</p>`
         : html`<${Scrubber} t=${t} count=${count} k=${shown} playing=${playing} onScrub=${scrub} onPlay=${togglePlay} />
@@ -1009,6 +1175,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       ${mode === 'slides'
         ? html`<${SlideStrip} t=${t} doc=${doc} photos=${photos} count=${slides} current=${Math.min(slide, Math.max(0, slides - 1))} onSelect=${setSlide} />`
         : mode === 'free' && html`<${PageStrip} t=${t} doc=${doc} photos=${photos} current=${page} onSelect=${switchPage} onAdd=${addPage} onMove=${(id, to) => dispatch({ type: 'movePage', id, to })} onRemove=${removePage} />`}
+      </div>
+      </div>
       </div>
     </section>
   `;
