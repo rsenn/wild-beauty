@@ -319,6 +319,28 @@ export function moveStep(doc, stepId, to) {
   return withSteps(doc, at.page, steps);
 }
 
+// Record a move at the scrubber position `k` (E58): a `transform` step goes
+// after the first k steps of the step's page, so playback animates the step to
+// `m` at that point. A move right after one of the same step is the same move
+// and only changes its matrix.
+export function recordMove(doc, stepId, m, k, ease = 'inOut') {
+  const at = findStep(doc, stepId);
+
+  if(!at || !['photo', 'stroke', 'shape', 'text'].includes(at.step.op) || !Array.isArray(m) || m.length !== 6 || !m.every(v => Number.isFinite(v) && Math.abs(v) <= LIMITS.number)) return doc;
+
+  const steps = doc.pages[at.page].steps;
+  const index = clamp(Math.trunc(k), at.index + 1, steps.length);
+
+  if(!Number.isFinite(index)) return doc;
+
+  const before = steps[index - 1];
+
+  if(before?.op === 'transform' && before.target === stepId) return withSteps(doc, at.page, steps.map((step, i) => (i === index - 1 ? { ...step, m } : step)));
+  if(steps.length >= LIMITS.steps) return doc;
+
+  return withSteps(doc, at.page, [...steps.slice(0, index), { op: 'transform', target: stepId, m, ease }, ...steps.slice(index)]);
+}
+
 // the photo steps of page `pageIndex` in draw order
 export const photoSteps = (doc, pageIndex = 0) => doc.pages[pageIndex].steps.filter(step => step.op === 'photo');
 
@@ -396,7 +418,7 @@ export function setMatrix(doc, stepId, m) {
   if(!['photo', 'stroke', 'shape', 'text'].includes(at.step.op)) return doc;
 
   const steps = doc.pages[at.page].steps;
-  const t = steps.findIndex(step => step.op === 'transform' && step.target === stepId);
+  const t = steps.findLastIndex(step => step.op === 'transform' && step.target === stepId); // the final move
 
   if(t >= 0) return withSteps(doc, at.page, steps.map((step, i) => (i === t ? { ...step, m } : step)));
 

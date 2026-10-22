@@ -15,6 +15,7 @@ const KEYED = {
   setColor: c => `color:${c.id}:${c.field ?? 'color'}`,
   setStrokeWidth: c => `strokeWidth:${c.id}`,
   setMatrix: c => `matrix:${c.id}`,
+  recordMove: c => `matrix:${c.id}`,
 };
 
 // the colour fields of each op a setColor may write
@@ -35,6 +36,8 @@ function onDoc(doc, c) {
       return model.removeStep(doc, c.id);
     case 'moveStep':
       return model.moveStep(doc, c.id, c.to);
+    case 'setMode':
+      return model.setMode(doc, c.mode);
     case 'addPage':
       return model.addPage(doc, c.index);
     case 'removePage':
@@ -63,6 +66,8 @@ function onDoc(doc, c) {
 
       return step && COLOUR_FIELDS[step.op]?.includes(field) && model.isColour(c.color) ? model.updateStep(doc, c.id, { [field]: c.color }) : doc;
     }
+    case 'recordMove':
+      return model.recordMove(doc, c.id, c.m, c.k, c.ease);
     case 'setMatrix':
       return model.setMatrix(doc, c.id, c.m);
     case 'setStrokeWidth': {

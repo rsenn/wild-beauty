@@ -938,3 +938,28 @@ body {
   color: var(--wb-ink);
   font-size: 0.8em;
 }
+
+/* step scrubber (E56): play button, slider, count */
+.wb-editor-scrubber {
+  display: flex;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  margin-top: var(--wb-editor-gap);
+}
+
+.wb-editor-scrubber input[type='range'] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.wb-editor-scrub-count {
+  min-width: 4em;
+  text-align: right;
+}
+
+/* mode switch (E57) */
+.wb-editor-modes {
+  display: flex;
+  gap: 4px;
+  margin-top: var(--wb-editor-gap);
+}

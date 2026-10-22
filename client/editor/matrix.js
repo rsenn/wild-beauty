@@ -34,3 +34,19 @@ export function fromSimilarity({ scale = 1, rotation = 0, tx = 0, ty = 0 }) {
 
 // the inverse of fromSimilarity for a matrix without shear or mirroring
 export const decompose = m => ({ scale: Math.hypot(m[0], m[1]), rotation: Math.atan2(m[1], m[0]), tx: m[4], ty: m[5] });
+
+// the matrix a fraction `t` of the way from `a` to `b`. Two similarities (what
+// gestures make) move smoothly: scale and translation linearly, rotation along
+// the shorter arc. Anything else is blended component by component.
+export function lerpMatrix(a, b, t) {
+  const similar = m => Math.abs(m[0] - m[3]) < 1e-9 && Math.abs(m[1] + m[2]) < 1e-9;
+
+  if(!similar(a) || !similar(b)) return a.map((v, i) => v + (b[i] - v) * t);
+
+  const [p, q] = [decompose(a), decompose(b)];
+  let turn = q.rotation - p.rotation;
+
+  turn -= Math.round(turn / (2 * Math.PI)) * 2 * Math.PI;
+
+  return fromSimilarity({ scale: p.scale + (q.scale - p.scale) * t, rotation: p.rotation + turn * t, tx: p.tx + (q.tx - p.tx) * t, ty: p.ty + (q.ty - p.ty) * t }).map(v => v + 0); // no -0
+}

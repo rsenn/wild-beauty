@@ -315,6 +315,10 @@ Every gesture ends in exactly **one history entry** (S2.6), so a pinch is one un
 
 - A node has one or more **pages**; page N shows its steps `0..k`. The scrubber
   sets `k` (also used for playback: press play, `k` advances by `duration`).
+  `duration` is in seconds (default half a second per step, at most 60); while the
+  scrubber is before the end only moving is possible: moving or turning a step there records a
+  `transform` step after the first `k` steps (a repeat right after only changes it), and playback
+  eases the step from its matrix at that point to the new one (`ease`: linear, in, out, inOut).
 - `mode: free`: the pages are what the author drew. `slides`: one photo step per
   page, auto-generated from the photo list, with simple transitions. `grid`:
   photos auto-tiled in a grid, no manual transforms.
@@ -749,14 +753,14 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 ### Phase E - pages, steps, modes (C)
 
 - [x] **E55 pages**: add/remove/reorder, current page, thumbnails. Done when two pages keep separate steps.
-- [ ] **E56 step scrubber**: `k` slider, play button using `duration`. Done when scrubbing shows steps 0..k.
-- [ ] **E57 modes**: free / slides / grid switch and rendering. Done when `slides` shows one photo per page.
-- [ ] **E58 transform steps**: authoring while scrubbing back, animated playback with easing.
+- [x] **E56 step scrubber**: `k` slider, play button using `duration`. Done when scrubbing shows steps 0..k.
+- [x] **E57 modes**: free / slides / grid switch and rendering. Done when `slides` shows one photo per page.
+- [x] **E58 transform steps**: authoring while scrubbing back, animated playback with easing.
       Done when a recorded move replays smoothly.
 
 ### Phase F - vector tools (C)
 
-- [ ] **E59 pen tool UI**: pointer capture, live stroke in the overlay, commit on up, one history entry;
+- [x] **E59 pen tool UI**: pointer capture, live stroke in the overlay, commit on up, one history entry;
       colour and base width controls. Done when a stroke from a stylus differs in width from a mouse stroke.
 - [ ] **E60 shape tool UI**: add vertex, drag handle, close, open/closed, fill/stroke toggles.
       Done when a heart can be drawn with curves.

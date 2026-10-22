@@ -12,15 +12,19 @@ import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
 import { centreOf, hitTest, matrixOf, outlineOf } from '../editor/hit.js';
 import { oneEuroPoint, resample, strokePath, strokeWidths } from '../editor/pen.js';
-import { renderNode } from '../editor/render.js';
+import { photoSteps as allPhotoSteps, renderNode } from '../editor/render.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
 import { DEFAULT_TOOL, TOOLS, toolForKey } from '../editor/tools.js';
 import { editorStore } from '../editor/useEditor.js';
 import { swatches } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
 import { Filmstrip } from './Filmstrip.js';
+import { clampK, durationOf, positionAt } from '../editor/playback.js';
+import { ModeSwitch } from './ModeSwitch.js';
 import { PageStrip } from './PageStrip.js';
 import { Palette } from './Palette.js';
+import { Scrubber } from './Scrubber.js';
+import { SlideStrip } from './SlideStrip.js';
 import { Properties } from './Properties.js';
 import { Stage } from './Stage.js';
 
@@ -76,22 +80,35 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [found, setFound] = useState(null); // a stored draft waiting for "restore" or "discard"
   const [scale, setScale] = useState(1);
   const [current, setCurrent] = useState(0); // the page being edited
+  const [k, setK] = useState(null); // steps of the page shown while scrubbing; null: all
+  const [playing, setPlaying] = useState(false);
+  const [pos, setPos] = useState(0); // the fractional position while playing: a move part way through
+  const [slide, setSlide] = useState(0); // the slide shown in `slides` mode
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
+  const inserted = useRef(null); // the last recorded move: { id, at }
   const gesture = useRef(null); // { g, id } while a move/scale/rotate gesture runs
   const lastTap = useRef({ time: 0, id: null, at: null });
   const saved = useRef(hist.present); // the last saved snapshot: what "dirty" is measured against
   const { doc, kind } = hist.present;
   const page = Math.min(current, doc.pages.length - 1); // undo can remove the page being shown
   const pageId = doc.pages[page].id;
+  const mode = doc.mode;
+  const auto = mode !== 'free'; // slides and grid lay the photos out themselves: nothing to edit
+  const slides = allPhotoSteps(doc).length;
+  const count = doc.pages[page].steps.length;
+  const shown = clampK(k, count);
+  const scrubbed = !auto && shown < count; // scrubbed back: moves are recorded as transform steps
+  const previewing = auto || scrubbed; // everything else is read-only there
   const located = selected ? findStep(doc, selected) : null;
-  const selectedStep = located?.page === page ? located.step : null; // a step of another page is not selected
+  const selectedStep = !auto && located?.page === page && located.index < shown ? located.step : null; // not one of another page, nor one not shown yet
+  const editStep = previewing ? null : selectedStep;
   const dirty = isDirty(hist.present, saved.current);
 
   // always the current state for handlers registered once
   const latest = useRef();
 
-  latest.current = { snap: hist.present, doc, page, pageId, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
+  latest.current = { snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
 
   // every change of the node goes through here
   const dispatch = command => setHist(h => {
@@ -99,9 +116,67 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     return history.push(h, r.snap, r.key);
   });
+  // the scrubber (E56): dragging the slider stops playback; play starts at the
+  // beginning unless the page is already part way
+  const scrub = value => {
+    setPlaying(false);
+    setK(value >= latest.current.count ? null : value);
+  };
+  const togglePlay = () => {
+    if(playing) return setPlaying(false);
+
+    const from = clampK(k, count) >= count ? 0 : clampK(k, count);
+
+    setK(from);
+    setPos(from);
+
+    setPlaying(true);
+  };
+
+  // playback: k follows the clock over the page's duration
+  useEffect(() => {
+    if(!playing) return;
+
+    const { doc, page } = latest.current;
+    const n = doc.pages[page].steps.length;
+    const seconds = durationOf(doc.pages[page], n);
+    const from = clampK(latest.current.k, n) >= n ? 0 : clampK(latest.current.k, n);
+    const started = performance.now() - (from / n) * seconds * 1000;
+    let frame;
+
+    const tick = now => {
+      const at = positionAt((now - started) / 1000, n, seconds);
+
+      if(at >= n) {
+        setK(null);
+        setPlaying(false);
+
+        return;
+      }
+
+      setPos(at);
+      setK(Math.floor(at));
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(frame);
+  }, [playing]);
+
+  // the mode switch (E57): a change of mode ends scrubbing and playback
+  const setMode = next => {
+    setPlaying(false);
+    setK(null);
+    setSelected(null);
+    dispatch({ type: 'setMode', mode: next });
+  };
+
   // pages (E55): switching drops the selection, adding shows the new page, a
   // page with steps is only removed after a yes
   const switchPage = i => {
+    setK(null);
+    setPlaying(false);
     setCurrent(i);
     setSelected(null);
   };
@@ -119,12 +194,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     dispatch({ type: 'removePage', id });
     switchPage(Math.min(index, latest.current.doc.pages.length - 2));
   };
-  const undo = () => setHist(history.undo);
-  const redo = () => setHist(history.redo);
+  const undo = () => ((inserted.current = null), setHist(history.undo));
+  const redo = () => ((inserted.current = null), setHist(history.redo));
 
   const addUpload = payload => {
     if(!isPayload(payload)) return;
 
+    setK(null);
+    setPlaying(false);
     setPhotos(old => ({ ...old, [payload.hash]: photoInfo(payload) }));
     dispatch({ type: 'addPhoto', hash: payload.hash, info: payload, page: latest.current.pageId, id: unique(allIds(latest.current.doc)) });
   };
@@ -153,10 +230,32 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   // the selection through a matrix change: keys and the wheel
   const transformSelection = (id, sim) => {
-    const { doc, page } = latest.current;
-    const m = matrixOf(doc, id, { page });
+    const { doc, page, scrubbed, shown } = latest.current;
+    const m = matrixOf(doc, id, { page, upTo: scrubbed ? shown : undefined });
 
-    if(m) dispatch({ type: 'setMatrix', id, m: multiply(sim, m) });
+    if(m) commitMatrix(id, multiply(sim, m));
+  };
+
+  // a new matrix for a step: at the end of the page it is the step's matrix, scrubbed
+  // back it is a move recorded at that point, and the scrubber follows it
+  const commitMatrix = (id, m) => {
+    const c = latest.current;
+
+    if(!c.scrubbed) return dispatch({ type: 'setMatrix', id, m });
+
+    // a move right after a recorded move of the same step only changes it; the
+    // document may not have re-rendered yet, so the last insertion is remembered too
+    const before = c.doc.pages[c.page].steps[c.shown - 1];
+    const again = (before?.op === 'transform' && before.target === id) || (inserted.current?.id === id && inserted.current.at === c.shown - 1);
+
+    dispatch({ type: 'recordMove', id, m, k: c.shown });
+
+    if(!again && c.doc.pages[c.page].steps.length < LIMITS.steps) {
+      inserted.current = { id, at: c.shown };
+      c.shown += 1; // the next event of the same gesture must see the new step
+      c.count += 1;
+      setK(c.shown);
+    }
   };
 
   // keys: a tool key selects a tool; ctrl+z, ctrl+shift+z / ctrl+y, Delete
@@ -180,10 +279,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
       const order = orderFor(e);
 
-      if(order && latest.current.selected) {
+      if(order && latest.current.selected && !latest.current.previewing) {
         e.preventDefault();
 
-        return dispatch({ type: 'moveStep', id: latest.current.selected, to: order });
+        return latest.current.previewing || dispatch({ type: 'moveStep', id: latest.current.selected, to: order });
       }
 
       const action = shortcutFor(e);
@@ -194,7 +293,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
       if(action === 'undo') undo();
       else if(action === 'redo') redo();
-      else if(latest.current.selected) remove(latest.current.selected);
+      else if(latest.current.selected && !latest.current.previewing) remove(latest.current.selected);
     };
 
     window.addEventListener('keydown', on);
@@ -317,7 +416,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     // another finger joins the gesture that is running
     if(gesture.current) return gesture.current.g.down(e.pointerId, units);
 
-    const id = hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale, page });
+    const id = hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale, page, upTo: scrubbed ? shown : undefined });
 
     setSelected(id);
 
@@ -326,7 +425,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     const step = findStep(doc, id).step;
     const tap = lastTap.current;
 
-    if(step.op === 'photo' && tap.id === id && e.timeStamp - tap.time < DOUBLE_TAP_MS && Math.hypot(units[0] - tap.at[0], units[1] - tap.at[1]) < DOUBLE_TAP_PX / scale) {
+    if(!previewing && step.op === 'photo' && tap.id === id && e.timeStamp - tap.time < DOUBLE_TAP_MS && Math.hypot(units[0] - tap.at[0], units[1] - tap.at[1]) < DOUBLE_TAP_PX / scale) {
       lastTap.current = { time: 0, id: null, at: null };
 
       const info = photos[step.photo];
@@ -339,13 +438,13 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     lastTap.current = { time: e.timeStamp, id, at: units };
 
-    const m = matrixOf(doc, id, { page });
+    const m = matrixOf(doc, id, { page, upTo: scrubbed ? shown : undefined });
 
     if(!m) return;
 
     const g = createGesture(m, { slop: SLOP_PX / scale });
 
-    g.down(e.pointerId, units, { alt: e.altKey, centre: centreOf(doc, id, { photos: hash => photos[hash], page }) });
+    g.down(e.pointerId, units, { alt: e.altKey, centre: centreOf(doc, id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined }) });
     gesture.current = { g, id };
   };
 
@@ -353,7 +452,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(gesture.current) {
       const m = gesture.current.g.move(e.pointerId, [x, y]);
 
-      if(m) dispatch({ type: 'setMatrix', id: gesture.current.id, m });
+      if(m) commitMatrix(gesture.current.id, m);
 
       return;
     }
@@ -373,6 +472,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       // the last pointer up ends the gesture: it is one undo step
       if(gesture.current.g.up(e.pointerId) === 0) {
         if(gesture.current.g.moved) setHist(history.seal);
+
+        inserted.current = null;
 
         gesture.current = null;
       }
@@ -438,19 +539,19 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   `;
 
   const empty = doc.pages[page].steps.length === 0 && !live;
-  const outline = selectedStep && outlineOf(doc, selectedStep.id, { photos: hash => photos[hash], page });
+  const outline = selectedStep && outlineOf(doc, selectedStep.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined });
   const title = doc.title ?? '';
-  const strip = photoSteps(doc, page);
+  const strip = auto ? [] : photoSteps(doc, page);
 
   // the palette (E54): shown while the pen or a stroke / shape is selected
-  const paletteTargets = tool === 'pen' ? ['pen'] : selectedStep?.op === 'stroke' ? ['stroke'] : selectedStep?.op === 'shape' ? ['fill', 'outline'] : null;
+  const paletteTargets = tool === 'pen' ? ['pen'] : editStep?.op === 'stroke' ? ['stroke'] : editStep?.op === 'shape' ? ['fill', 'outline'] : null;
   const paletteTarget = paletteTargets && (paletteTargets.includes(aim) ? aim : paletteTargets[0]);
-  const reference = selectedStep?.op === 'photo' ? selectedStep : strip[strip.length - 1];
+  const reference = editStep?.op === 'photo' ? editStep : strip[strip.length - 1];
   const paletteColours = paletteTargets && swatches(photos[reference?.photo]?.palette ?? [], themeColours()).all;
-  const paletteCurrent = paletteTarget === 'pen' ? color : paletteTarget === 'stroke' ? selectedStep.color : paletteTarget === 'fill' ? selectedStep.fill : paletteTarget === 'outline' ? selectedStep.stroke : null;
+  const paletteCurrent = paletteTarget === 'pen' ? color : paletteTarget === 'stroke' ? editStep.color : paletteTarget === 'fill' ? editStep.fill : paletteTarget === 'outline' ? editStep.stroke : null;
   const pick = hex => {
     if(paletteTarget === 'pen') setColor(hex);
-    else dispatch({ type: 'setColor', id: selectedStep.id, color: hex, ...(paletteTarget === 'fill' ? { field: 'fill' } : paletteTarget === 'outline' ? { field: 'stroke' } : {}) });
+    else dispatch({ type: 'setColor', id: editStep.id, color: hex, ...(paletteTarget === 'fill' ? { field: 'fill' } : paletteTarget === 'outline' ? { field: 'stroke' } : {}) });
   };
 
   return html`
@@ -475,9 +576,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <${Stage}
           label=${title || t('editor.stage')}
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
-          content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page })}
+          content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
           overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
-          interactive=${tool === 'select' || tool === 'pen'}
+          interactive=${!auto && (tool === 'select' || (tool === 'pen' && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
           onDragEnter=${e => accepts(e) && (e.preventDefault(), setOver(true))}
@@ -489,16 +590,23 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <//>
         <div class="wb-editor-actions" role="toolbar" aria-label=${t('editor.actions')}>${ACTIONS.map(action)}</div>
       </div>
-      <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${selectedStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRemove=${remove} />
+      <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRemove=${remove} />
       </div>
       ${tool === 'pen'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
-        : html`<${ContextBar} t=${t} step=${selectedStep} clipped=${selectedStep?.clip !== undefined} photo=${selectedStep && photos[selectedStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+        : html`<${ContextBar} t=${t} step=${editStep} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
-      <${PageStrip} t=${t} doc=${doc} photos=${photos} current=${page} onSelect=${switchPage} onAdd=${addPage} onMove=${(id, to) => dispatch({ type: 'movePage', id, to })} onRemove=${removePage} />
+      <${ModeSwitch} t=${t} mode=${mode} onMode=${setMode} />
+      ${auto
+        ? html`<p class="wb-editor-context" role="status">${t('editor.mode.auto')}</p>`
+        : html`<${Scrubber} t=${t} count=${count} k=${shown} playing=${playing} onScrub=${scrub} onPlay=${togglePlay} />
+            ${previewing && !playing && html`<p class="wb-editor-context" role="status">${t('editor.scrub.preview')}</p>`}`}
+      ${mode === 'slides'
+        ? html`<${SlideStrip} t=${t} doc=${doc} photos=${photos} count=${slides} current=${Math.min(slide, Math.max(0, slides - 1))} onSelect=${setSlide} />`
+        : mode === 'free' && html`<${PageStrip} t=${t} doc=${doc} photos=${photos} current=${page} onSelect=${switchPage} onAdd=${addPage} onMove=${(id, to) => dispatch({ type: 'movePage', id, to })} onRemove=${removePage} />`}
     </section>
   `;
 };

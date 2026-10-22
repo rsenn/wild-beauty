@@ -108,3 +108,14 @@ describe('pages', () => {
     expect(apply(lone, { type: 'removePage', id: lone.doc.pages[0].id }).snap.doc.pages.length).toBe(1);
   });
 });
+
+describe('mode', () => {
+  test('setMode switches and undoes; unknown modes change nothing', () => {
+    const start = { doc: emptyNode(), kind: 'node' };
+    const h = run(start, [{ type: 'setMode', mode: 'slides' }]);
+
+    expect(h.present.doc.mode).toBe('slides');
+    expect(history.undo(h).present.doc.mode).toBe(start.doc.mode);
+    expect(apply(start, { type: 'setMode', mode: 'bogus' }).snap.doc).toBe(start.doc);
+  });
+});

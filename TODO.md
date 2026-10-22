@@ -246,6 +246,15 @@ the lock lives in E31/E67.
 
 ## M11 - Optional extras
 
+- [ ] **11.x Option: NanoVG for faster graphics** (not needed yet). `../quickjs/qjs-nanovg/web/`
+      is NanoVG compiled with Emscripten on WebGL2 (`nanovg-web.{js,wasm}`, 195 KB wasm,
+      `nanovg.js` mirrors the native `nanovg` module, vector paths, fills, strokes, text).
+      Consider it if the SVG stage gets too slow: many steps or photos on a page, the
+      graph view (`GRAPH.md`) with many nodes, or smooth playback of big pages (E58). The
+      renderer (`client/editor/render.js`) would get a canvas backend next to the SVG one,
+      same step model; SSR, thumbnails and the viewer keep SVG. Measure first. Needs a
+      vendored copy under `vendor/` (served as-is, no build step).
+
 - [ ] **11.0 `opencv-imgproc.js` in qjs-opencv** (spec: `opencv-imgproc.md`; done in
       that project via the handoff prompt). Done when `qjsm opencv-imgproc.js
       capabilities` runs and the spec's acceptance tests pass.

@@ -4,6 +4,8 @@
 import { html } from '../html.js';
 import { fitMatrix, isColour } from './model.js';
 import { gridLayout } from './grid.js';
+import { lerpMatrix } from './matrix.js';
+import { ease } from './playback.js';
 import { sanitize, toAttr } from './theme.js';
 import { outline, outlinePath } from './pen.js';
 
@@ -141,7 +143,21 @@ function stepsOf(doc, { mode, page, upTo, photos }) {
   if(mode === 'free') {
     const steps = doc.pages[page]?.steps ?? [];
 
-    return upTo === undefined ? steps : steps.slice(0, Math.max(0, upTo));
+    if(upTo === undefined) return steps;
+
+    // a fractional `upTo` shows a transform step part way through its move
+    const whole = Number.isFinite(upTo) ? Math.max(0, Math.floor(upTo)) : 0;
+    const shown = steps.slice(0, whole);
+    const next = steps[whole];
+    const frac = upTo - whole;
+
+    if(frac > 0 && next?.op === 'transform') {
+      const from = effective(shown).by.get(next.target)?.m ?? [1, 0, 0, 1, 0, 0];
+
+      shown.push({ ...next, m: lerpMatrix(from, next.m, ease(next.ease, frac)) });
+    }
+
+    return shown;
   }
 
   const all = photoSteps(doc).map(({ clip, ...step }) => ({ ...step, fit: 'extend' }));

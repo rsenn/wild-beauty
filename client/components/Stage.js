@@ -39,6 +39,20 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
     if(units) onPointer[name]?.(event, units);
   };
 
+  // a pen reports more positions than frames: every coalesced one is a point of
+  // the stroke, so fast curves keep their shape
+  const moved = event => {
+    const all = event.getCoalescedEvents?.() ?? [];
+
+    if(all.length < 2) return wrap('move')(event);
+
+    for(const e of all) {
+      const units = eventUnits(svg.current, e);
+
+      if(units) onPointer.move?.(e, units);
+    }
+  };
+
   const down = event => {
     if(event.button > 0) return;
 
@@ -49,7 +63,7 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
   return html`
     <div ref=${box} class=${'wb-editor-stage' + (extra ? ' ' + extra : '')} role="img" aria-label=${label} ...${rest}>
       ${content}
-      <svg ref=${svg} class=${'wb-editor-overlay' + (interactive ? ' wb-editor-interactive' : '') + (className ? ' ' + className : '')} viewBox=${`0 0 ${STAGE} ${STAGE}`} onPointerDown=${interactive ? down : undefined} onPointerMove=${interactive ? wrap('move') : undefined} onPointerUp=${interactive ? wrap('up') : undefined} onPointerCancel=${interactive ? wrap('cancel') : undefined} onWheel=${interactive ? wrap('wheel') : undefined}>
+      <svg ref=${svg} class=${'wb-editor-overlay' + (interactive ? ' wb-editor-interactive' : '') + (className ? ' ' + className : '')} viewBox=${`0 0 ${STAGE} ${STAGE}`} onPointerDown=${interactive ? down : undefined} onPointerMove=${interactive ? moved : undefined} onPointerUp=${interactive ? wrap('up') : undefined} onPointerCancel=${interactive ? wrap('cancel') : undefined} onWheel=${interactive ? wrap('wheel') : undefined}>
         ${typeof overlay === 'function' ? overlay({ scale }) : overlay}
       </svg>
       ${children}

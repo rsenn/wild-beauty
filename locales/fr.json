@@ -132,5 +132,15 @@
   "editor.page.left": "Page plus tôt",
   "editor.page.right": "Page plus tard",
   "editor.page.remove": "Retirer la page",
-  "editor.page.remove.confirm": "Cette page a des étapes. La retirer quand même ?"
+  "editor.page.remove.confirm": "Cette page a des étapes. La retirer quand même ?",
+  "editor.scrub": "Étapes affichées",
+  "editor.scrub.play": "Lire",
+  "editor.scrub.pause": "Pause",
+  "editor.scrub.preview": "Seules les premières étapes sont affichées. Déplacez une photo ici pour enregistrer un mouvement, ou placez le curseur à la fin pour modifier.",
+  "editor.mode": "Mode",
+  "editor.mode.free": "Libre",
+  "editor.mode.slides": "Diapositives",
+  "editor.mode.grid": "Grille",
+  "editor.slide.n": "Diapositive {n}",
+  "editor.mode.auto": "Diapositives et grille disposent les photos automatiquement. Passez en Libre pour modifier."
 }

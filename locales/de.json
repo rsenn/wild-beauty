@@ -132,5 +132,15 @@
   "editor.page.left": "Seite früher",
   "editor.page.right": "Seite später",
   "editor.page.remove": "Seite entfernen",
-  "editor.page.remove.confirm": "Diese Seite hat Schritte. Trotzdem entfernen?"
+  "editor.page.remove.confirm": "Diese Seite hat Schritte. Trotzdem entfernen?",
+  "editor.scrub": "Angezeigte Schritte",
+  "editor.scrub.play": "Abspielen",
+  "editor.scrub.pause": "Pause",
+  "editor.scrub.preview": "Nur die ersten Schritte werden gezeigt. Ein Foto hier bewegen zeichnet eine Bewegung auf, oder den Regler ans Ende schieben zum Bearbeiten.",
+  "editor.mode": "Modus",
+  "editor.mode.free": "Frei",
+  "editor.mode.slides": "Folien",
+  "editor.mode.grid": "Raster",
+  "editor.slide.n": "Folie {n}",
+  "editor.mode.auto": "Folien und Raster ordnen die Fotos automatisch an. Zum Bearbeiten auf Frei wechseln."
 }

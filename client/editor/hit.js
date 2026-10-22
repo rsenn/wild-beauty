@@ -72,8 +72,9 @@ function inside(p, points) {
 // the steps of page `page` that are drawn, in drawing order, each with its
 // effective matrix and clip: [{ step, m, clip }]; `all` also has the shapes
 // that only serve as a clip, by id, for the clip test
-function drawn(doc, page) {
-  const steps = doc.pages[page]?.steps ?? [];
+function drawn(doc, page, upTo) {
+  const all = doc.pages[page]?.steps ?? [];
+  const steps = upTo === undefined ? all : all.slice(0, Math.max(0, Math.floor(upTo)));
   const { by, clips } = effective(steps);
   const entry = step => ({ step, m: by.get(step.id)?.m ?? IDENTITY, clip: by.get(step.id)?.clip });
   const entries = steps.filter(step => ['photo', 'stroke', 'shape'].includes(step.op) && !(step.op === 'shape' && clips.has(step.id))).map(entry);
@@ -125,8 +126,8 @@ function covers(entry, p, tolerance, { photos, steps }) {
 // The id of the top-most step under `point`, or null. `photos(hash)` gives
 // { width, height } of a photo (a photo without it cannot be hit); `tolerance`
 // widens thin lines, in units (the caller turns a finger's width into units).
-export function hitTest(doc, point, { photos = () => null, tolerance = 8, page = 0 } = {}) {
-  const { entries, all: steps } = drawn(doc, page);
+export function hitTest(doc, point, { photos = () => null, tolerance = 8, page = 0, upTo } = {}) {
+  const { entries, all: steps } = drawn(doc, page, upTo);
 
   for(let i = entries.length - 1; i >= 0; i--) if(covers(entries[i], point, tolerance, { photos, steps })) return entries[i].step.id;
 
@@ -136,8 +137,8 @@ export function hitTest(doc, point, { photos = () => null, tolerance = 8, page =
 // The outline of a step as four corners [[x, y] x 4] (a photo's turned
 // rectangle; the bounding box of a stroke or shape), or null when the step is
 // not drawn or unknown.
-export function outlineOf(doc, id, { photos = () => null, page = 0 } = {}) {
-  const entry = drawn(doc, page).entries.find(e => e.step.id === id);
+export function outlineOf(doc, id, { photos = () => null, page = 0, upTo } = {}) {
+  const entry = drawn(doc, page, upTo).entries.find(e => e.step.id === id);
 
   if(!entry) return null;
 
@@ -167,8 +168,8 @@ export function outlineOf(doc, id, { photos = () => null, page = 0 } = {}) {
 
 // the matrix a step is drawn with now (after its transform ops), or null when
 // it is not drawn
-export function matrixOf(doc, id, { page = 0 } = {}) {
-  return drawn(doc, page).entries.find(e => e.step.id === id)?.m ?? null;
+export function matrixOf(doc, id, { page = 0, upTo } = {}) {
+  return drawn(doc, page, upTo).entries.find(e => e.step.id === id)?.m ?? null;
 }
 
 // the centre of a step's outline: where keys and Alt-drag scale and turn it

@@ -132,5 +132,15 @@
   "editor.page.left": "Move page earlier",
   "editor.page.right": "Move page later",
   "editor.page.remove": "Remove page",
-  "editor.page.remove.confirm": "This page has steps. Remove it anyway?"
+  "editor.page.remove.confirm": "This page has steps. Remove it anyway?",
+  "editor.scrub": "Steps shown",
+  "editor.scrub.play": "Play",
+  "editor.scrub.pause": "Pause",
+  "editor.scrub.preview": "Showing the first steps only. Move a photo here to record a move, or slide to the end to edit.",
+  "editor.mode": "Mode",
+  "editor.mode.free": "Free",
+  "editor.mode.slides": "Slides",
+  "editor.mode.grid": "Grid",
+  "editor.slide.n": "Slide {n}",
+  "editor.mode.auto": "Slides and grid show the photos laid out automatically. Switch to Free to edit."
 }
