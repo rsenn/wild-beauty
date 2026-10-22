@@ -202,13 +202,50 @@ Per box (context bar, with the palette under it):
 
 | Property | Values | Notes |
 |---|---|---|
-| Font face | one of three, by id: `fixed` (Fixed, the pixel UI face, in `static/fonts` already), `caslon` (Libre Caslon), `opensans` (Open Sans) | ids, not CSS strings, so the sanitiser is a whitelist; the Caslon and Open Sans files (woff2, with their licences, believed OFL; to be checked) are added to `static/fonts` in task E90 |
+| Font face | one of three, by role id: `fixed` (Fixed, the pixel UI face, in `static/fonts` already), `serif` (a book face, see below), `sans` (a smooth geometric/grotesque sans, see below) | ids name the role, not the font file, so the sanitiser is a whitelist and the faces can change later without touching stored documents; the font files (woff2, with their licences) are added to `static/fonts` in task E90 |
 | Size | 8..400 units | in document units, scales with the stage |
 | Font colour | any colour incl. alpha | palette or picker |
 | Align | start / centre / end | logical, so it mirrors in right-to-left |
 | Background | none, **solid colour with alpha**, or **gradient** | gradient: linear (angle 0..360) or radial, 2 to 5 stops, each stop a colour with alpha taken from the palette or the picker |
 | Border radius | 0 .. half of the shorter side | in units; "pill" is the maximum |
 | Padding | 0..100 units | space between the box edge and the text |
+
+**Faces.** Three roles. `fixed` is the existing pixel UI face. `serif` should be a
+beautiful, artistic serif with the look of printed books; `sans` a slick, smooth sans in
+the Futura or Helvetica family. Futura and Helvetica themselves are commercial fonts
+and may not be embedded on a web page without a licence, so the plan is a free (OFL)
+face with the same character. Candidates, to be chosen before E90:
+
+| Role | First choice | Alternatives | Why |
+|---|---|---|---|
+| `serif` | **EB Garamond** (OFL) | Cormorant Garamond (finer, more display-like, delicate below ~14 px), Crimson Pro, Libre Baskerville | a Garamond revival: the classic book-page texture, real italics and several weights |
+| `sans` | **Jost** (OFL) | Inter or Albert Sans for a Helvetica-like neo-grotesque; Nimbus Sans is a Helvetica metric clone but has a more awkward licence | Jost is a Futura-inspired geometric sans: round, smooth, clean at any size |
+
+**Your shortlist (to decide later):** Urbanist, Sour Gummy, Nunito, Questrial, Square Peg,
+Radley, Habibi, Linden Hill, Forum. All are Google Fonts, believed to be OFL (to be
+checked in E90). Where they would fit:
+
+| Face | Kind | Fits role |
+|---|---|---|
+| Linden Hill | old-style book serif (Garamond-like) | `serif` |
+| Radley | book serif with some calligraphic flavour | `serif` |
+| Habibi | calligraphic serif, more decorative | `serif` |
+| Forum | classical Roman display serif, strongest in capitals and headings | `serif` or a display role |
+| Questrial | geometric sans, the closest of the list to Futura | `sans` |
+| Urbanist | smooth geometric sans, variable | `sans` |
+| Nunito | rounded sans, soft and friendly | `sans` |
+| Sour Gummy | playful rounded display face | needs an extra role (`display`) |
+| Square Peg | handwritten, scribble-like | needs an extra role (`hand`) |
+
+Sour Gummy and Square Peg do not fit "one serif, one sans"; choosing either means a
+fourth font id, which is cheap (the id list is a whitelist in `model.js` and the
+sanitiser) but should be a conscious decision. Choosing several serifs or sans is
+possible the same way, at the cost of more font files to load.
+
+Each needs a woff2 file with a Latin and Latin-Extended subset (German and French accents
+are required) and its licence file; a variable font is preferred so one file serves the
+weights. Fallback stacks end in `serif` / `sans-serif`, so a missing file never breaks a
+node, and the stored `lines` stay valid because wrapping is re-measured on edit only.
 
 **Rendering is native SVG, not `foreignObject`**, so any SVG rasteriser can draw a
 text-box node into a tile (librsvg/`rsvg-convert`, cairo, Inkscape or similar; none
@@ -370,7 +407,7 @@ step = one of
   { op: 'blend',     target, mode }
   { op: 'transform', target, m, ease? }
   { op: 'text',      id, text, lines, m, w, h, font, size, color, align,  // phase K, S2.3b
-                     padding, radius, bg?: fill }       // font: 'fixed'|'caslon'|'opensans'; lines: client-wrapped
+                     padding, radius, bg?: fill }       // font: 'fixed'|'serif'|'sans'; lines: client-wrapped
 fill     = colour | { type: 'linear'|'radial', angle?: 0..360,
                       stops: [ { c: colour, at: 0..1 }, ... ] }           // 2..5 stops
 colour   = '#rrggbb' | '#rrggbbaa' | 'rgb(...)' | 'hsl(...)'              // alpha allowed
@@ -605,11 +642,11 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
       coalescing for slider drags. Done when undo after redo after undo restores exact snapshots.
 - [x] **E9 `grid.js`**: `gridLayout(n, aspect)` -> matrices for the `grid` mode. Done
       when 1, 2, 5, 9 photos give non-overlapping cells.
-- [ ] **E10 `pen.js` One-Euro filter**: `oneEuro(minCutoff, beta)`. Done when a noisy
+- [x] **E10 `pen.js` One-Euro filter**: `oneEuro(minCutoff, beta)`. Done when a noisy
       line is visibly smoothed (test: variance drops) and a fast move is not lagged.
-- [ ] **E11 `pen.js` resampler and width model**: fixed arc-length resampling;
+- [x] **E11 `pen.js` resampler and width model**: fixed arc-length resampling;
       `width(pressure, speed)`. Done when output spacing is within 1% of the target.
-- [ ] **E12 `pen.js` outline**: vendor `perfect-freehand` (`tools/vendor.sh`, `vendor/VERSIONS`);
+- [x] **E12 `pen.js` outline**: vendor `perfect-freehand` (`tools/vendor.sh`, `vendor/VERSIONS`);
       points+widths -> outline polygon -> path string. Done when a straight stroke gives an outline
       of the right length with round caps.
 - [ ] **E13 `shapes.js`**: vendor `bezier-js`; `pathFromVertices`, `verticesFromPath`, vertex ops
@@ -785,9 +822,9 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [ ] **E89b line breaking** in `text.js`: `wrap(text, font, size, width)` using `canvas.measureText`
       (injectable measure function so it is unit-testable); stores `lines`. Done when a test with a fake
       fixed-width measure wraps at the right columns and keeps explicit newlines.
-- [ ] **E90 fonts**: add Libre Caslon and Open Sans (woff2 + licence files) next to Fixed in `static/fonts`,
-      declare in `stylesheet.css`, ids `fixed caslon opensans` in `text.js`, `font-display: swap`; check the
-      licences. Done when a box shows each face.
+- [ ] **E90 fonts**: add the `serif` and `sans` faces (woff2 + licence files; candidates in S2.3b "Faces")
+      next to Fixed in `static/fonts`, declare in `stylesheet.css`, ids `fixed serif sans` in `text.js`,
+      `font-display: swap`; check the licences. Done when a box shows each face.
 - [ ] **E91 text tool: create** (tap = default box, drag = sized box), in-place `textarea` overlay, commit/discard
       on Esc or tap outside, one history entry. Done when typing in a new box and undoing removes it.
 - [ ] **E92 text box handles**: move/scale/rotate by gesture, corner resize that re-wraps. Done when a resize keeps
@@ -819,7 +856,9 @@ Colour first (E84-E87 can start any time after E3), then text.
    profile? Decide at E24.
 2. **Undo across saves** is allowed (S2.6); confirm that is what you want.
 3. **Slides/grid transitions**: which simple transitions? (fade only, proposed.)
-4. **Fonts**: decided - Fixed, Libre Caslon, Open Sans. To check: licences and woff2 sources (E90).
+4. **Fonts**: roles decided - Fixed, one artistic book serif, one slick smooth sans (not Caslon/Open Sans
+   any more). The exact faces are open, see S2.3b "Faces" for the candidates; licences and woff2 sources are
+   checked in E90.
 5. **Palette thresholds** (washed out C < 0.05, dirty dark L < 0.35 and C < 0.09) need tuning on real photos.
 6. **Server-side tile rasteriser**: rsvg, cairo or Inkscape (only Inkscape is installed here); decide when
    E82 is built. Text is native SVG so any of them works.

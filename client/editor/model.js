@@ -43,7 +43,7 @@ export const emptyNode = () => ({ v: VERSION, style: {}, mode: 'free', pages: [{
 
 export const BLENDS = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten'];
 export const FITS = ['extend', 'cover', 'free'];
-export const FONTS = ['fixed', 'caslon', 'opensans'];
+export const FONTS = ['fixed', 'serif', 'sans'];
 export const ALIGNS = ['left', 'center', 'right'];
 
 // --- validate, structure (E4) ---------------------------------------------

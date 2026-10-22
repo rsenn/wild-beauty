@@ -26,7 +26,7 @@ export const NodeEditor = ({ onClose }) => {
       <div class="wb-editor-head">
         <label class="wb-editor-title">
           <span class="wb-sr-only">${t('editor.title.label')}</span>
-          <input type="text" maxlength="200" value=${title} placeholder=${t('editor.title.placeholder')} onInput=${e => setTitle(e.target.value)} />
+          <input type="text" maxlength="200" autocomplete="off" value=${title} placeholder=${t('editor.title.placeholder')} onInput=${e => setTitle(e.target.value)} />
         </label>
         <button type="button" class="wb-editor-close" onClick=${onClose}>${t('editor.close')}</button>
       </div>

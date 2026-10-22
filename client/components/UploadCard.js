@@ -4,6 +4,9 @@ import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { formatSize, paddingStyle } from '../files.js';
 
+// file name and size under the thumbnail are switched off for now
+const SHOW_FILE_INFO = false;
+
 // one file of the upload grid: thumbnail (whole photo "extend" or "crop"),
 // remove, rotate, select, upload state; the thumbnail is the local file until
 // the server has it, then the server's display file
@@ -36,8 +39,8 @@ export const UploadCard = ({ item, onToggle, onRemove, onRotate, onFit, onRetry 
         <button type="button" class="wb-card-fit" onClick=${onFit} title=${t('upload.fit.toggle')} aria-label=${t('upload.fit.toggle')}>${t(item.fit === 'cover' ? 'upload.fit.crop' : 'upload.fit.extend')}</button>
         ${busy && html`<div class="wb-card-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow=${percent}><div class="wb-card-progress-bar" style=${`width: ${percent}%`}></div></div>`}
       </div>
-      <span class="wb-card-name">${item.file.name}</span>
-      <span class="wb-card-size">${formatSize(item.file.size, lang)}</span>
+      ${SHOW_FILE_INFO && html`<span class="wb-card-name">${item.file.name}</span>`}
+      ${SHOW_FILE_INFO && html`<span class="wb-card-size">${formatSize(item.file.size, lang)}</span>`}
       ${status && html`<span class="wb-card-status" role=${item.state === 'failed' ? 'alert' : null}>${status}</span>`}
       ${item.state === 'failed' && item.error !== 'too-large' && html`<button type="button" class="wb-card-retry" onClick=${onRetry}>${t('upload.retry')}</button>`}
     </li>
