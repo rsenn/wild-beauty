@@ -585,13 +585,13 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 ### Phase A - model and pure code (C+S, no DOM, all unit-tested)
 
-- [ ] **E1 `matrix.js`**: `identity, multiply, invert, apply, fromSimilarity, decompose`.
+- [x] **E1 `matrix.js`**: `identity, multiply, invert, apply, fromSimilarity, decompose`.
       Done when tests cover identity/inverse/compose and a rotation by 90 degrees.
-- [ ] **E2 `gestures.solveSimilarity`**: two point pairs -> similarity; one pair ->
+- [x] **E2 `gestures.solveSimilarity`**: two point pairs -> similarity; one pair ->
       translate. Done when it maps both start points to the current ones within 1e-9.
-- [ ] **E3 `model.js` constants and ids**: version, limits, `newId()`, `emptyNode()`.
+- [x] **E3 `model.js` constants and ids**: version, limits, `newId()`, `emptyNode()`.
       Done when two thousand ids are unique and the empty node validates.
-- [ ] **E4 `model.validate`, structure**: `v`, `mode`, pages, step shapes, unknown `op`.
+- [x] **E4 `model.validate`, structure**: `v`, `mode`, pages, step shapes, unknown `op`.
       Done when each malformed fixture returns its specific error code.
 - [ ] **E5 `model.validate`, references and limits**: dangling `clip/target/shape`,
       >500 steps, >2000 points, path too long, non-finite numbers.
