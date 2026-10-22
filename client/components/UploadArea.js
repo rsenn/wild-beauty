@@ -10,8 +10,9 @@ import { UploadCard } from './UploadCard.js';
 const existingItem = (record, index) => ({ id: index + 1, file: { name: record.name, size: record.size }, url: null, fit: 'contain', rotation: 0, selected: false, state: 'done', progress: 1, error: null, record });
 
 // drop zone plus the grid of chosen files. The server renders the files already on disk
-// (boot.uploads) and the browser adopts them. Each file is uploaded as soon as it is chosen.
-export const UploadArea = () => {
+// (boot.uploads) and the browser adopts them. Each file is uploaded as soon as
+// it is chosen. `extra` is a last grid cell (the "New node" tile).
+export const UploadArea = ({ extra = null }) => {
   const { t } = useI18n();
   const { limits, uploads = [] } = useBoot();
   const [items, setItems] = useState(() => uploads.map(existingItem));
@@ -117,6 +118,7 @@ export const UploadArea = () => {
             onRetry=${() => start(item)}
           />`,
         )}
+        ${extra}
       </ul>
     </section>
   `;

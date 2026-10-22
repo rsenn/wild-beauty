@@ -391,3 +391,150 @@ body {
 .wb-card-retry:hover {
   background: var(--wb-accent-hover);
 }
+
+/* "New node" tile: the last cell of the upload grid */
+.wb-new-node {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 8px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: var(--wb-frame-width) var(--wb-frame-drag-style) var(--wb-ink);
+  border-radius: var(--wb-radius-frame);
+}
+
+.wb-new-node:hover,
+.wb-new-node-open {
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border-style: var(--wb-frame-style);
+}
+
+.wb-new-node:focus-visible {
+  outline: var(--wb-select-width) solid var(--wb-select);
+  outline-offset: 2px;
+}
+
+.wb-new-node-plus {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.wb-new-node-label {
+  font-size: var(--wb-font-size-button);
+}
+
+/* node editor frame (EDITOR.md S2.2); mockup until E36-E42 */
+.wb-editor {
+  margin: calc(var(--wb-card-gap) * 2) 0;
+  padding: 8px;
+  text-align: left;
+  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
+  border-radius: var(--wb-radius-frame);
+  background: var(--wb-card-ground);
+}
+
+.wb-editor-head {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.wb-editor-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.wb-editor-title input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 8px;
+  font: inherit;
+  color: inherit;
+  background: var(--wb-card-ground);
+  border: var(--wb-border-width) solid var(--wb-ink);
+  border-radius: var(--wb-radius-frame);
+}
+
+.wb-editor-close,
+.wb-editor-button {
+  font: inherit;
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border: 0;
+  border-radius: var(--wb-radius-frame);
+  cursor: pointer;
+}
+
+.wb-editor-close {
+  padding: 6px 12px;
+}
+
+.wb-editor-close:hover {
+  background: var(--wb-accent-hover);
+}
+
+.wb-editor-button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px;
+}
+
+.wb-editor-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.wb-editor-body {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 8px;
+  align-items: start;
+  max-width: calc(90vmin + 2 * 44px + 16px);
+  margin: 0 auto;
+}
+
+.wb-editor-tools,
+.wb-editor-actions {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 4px;
+}
+
+.wb-editor-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  background: var(--wb-card-ground);
+  border: var(--wb-border-width) solid var(--wb-ink);
+  box-shadow: var(--wb-shadow-card);
+}
+
+.wb-editor-stage-hint {
+  opacity: 0.6;
+}
+
+.wb-editor-context {
+  margin: 8px 0 0;
+  min-height: 1.4em;
+}
+
+.wb-editor-pages {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+@media (min-width: 700px) {
+  .wb-editor-body {
+    grid-template-columns: 56px minmax(0, 1fr) 56px;
+    max-width: calc(90vmin + 2 * 56px + 16px);
+  }
+}

@@ -603,7 +603,7 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
       `setFit`, `setOpacity`, `setBlend`, `setClip/unclip` (removes dangling references on delete).
 - [x] **E8 `history.js`**: `create, push, undo, redo, canUndo, canRedo`, max 100,
       coalescing for slider drags. Done when undo after redo after undo restores exact snapshots.
-- [ ] **E9 `grid.js`**: `gridLayout(n, aspect)` -> matrices for the `grid` mode. Done
+- [x] **E9 `grid.js`**: `gridLayout(n, aspect)` -> matrices for the `grid` mode. Done
       when 1, 2, 5, 9 photos give non-overlapping cells.
 - [ ] **E10 `pen.js` One-Euro filter**: `oneEuro(minCutoff, beta)`. Done when a noisy
       line is visibly smoothed (test: variance drops) and a fast move is not lagged.
@@ -669,6 +669,8 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
       `close()`, replace-with-prompt hook. Done when opening a second request raises the prompt hook.
 - [ ] **E35 `NodeEditor` skeleton + "New node" button** in `NewPage`: mounts below the
       upload area, no photos needed. Done when the button opens/closes an empty frame.
+      (Mockup exists: `NewNodeTile` as the last upload-grid cell, inert `NodeEditor` frame,
+      open state in `NewPage`; E34 replaces the state, E36-E42 fill the frame.)
 - [ ] **E36 `Stage`**: square SVG `viewBox 0 0 1000 1000`, resize observer, pointer-to-unit
       conversion `toUnits(event)`. Done when a click logs the right unit coordinates at two sizes.
 - [ ] **E37 tool columns**: buttons with token icons, tool state, keyboard keys, `aria-label`s.
