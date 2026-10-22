@@ -13,3 +13,7 @@ export function requestAdd(payload, target = globalThis.window) {
 
 // everything queued, oldest first; the queue is empty afterwards
 export const takePending = () => queue.splice(0);
+
+// fired on window after a node was saved: `detail.hashes` are the uploads it
+// used, which the server has taken over (the upload list drops them)
+export const SAVED_EVENT = 'wb:saved';

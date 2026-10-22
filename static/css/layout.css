@@ -978,3 +978,8 @@ body {
 .wb-editor-handle-selected {
   fill: var(--wb-select);
 }
+
+/* a failed save: the banner in the danger colour */
+.wb-editor-banner-error {
+  border-color: var(--wb-danger);
+}

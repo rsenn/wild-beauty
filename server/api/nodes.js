@@ -13,6 +13,7 @@ import { bake } from '../media/bake.js';
 import { choosePadding } from '../media/color.js';
 import { identify } from '../media/probe.js';
 import { firstPhotoStep, thumbnail } from '../media/thumb.js';
+import { photoInfos } from '../node/view.js';
 import { readUpload, removeUpload } from './uploads.js';
 import { lockedBody, lockedByOther } from './locks.js';
 import { sessionCookie, sessionFor } from '../session.js';
@@ -146,7 +147,8 @@ export const saveNew = (h, body) =>
     // after the commit the uploads are no longer needed
     for(const { hash } of checked.photos) await removeUpload(hash);
 
-    return { status: 201, body: created };
+    // the photos now live in data/photos: where they are, for the editor
+    return { status: 201, body: { ...created, photos: photoInfos(h, checked.doc) } };
   });
 
 // Replace the document of node `id` with `body` ({ doc, kind?, rev }) when
@@ -201,7 +203,7 @@ export const saveUpdate = (h, id, body, { holder = null, now = Date.now } = {}) 
     // saving ends the editing session: the lock is released
     if(holder) releaseLock(h, id, holder);
 
-    return { status: 200, body: { rev } };
+    return { status: 200, body: { rev, photos: photoInfos(h, checked.doc) } };
   });
 
 // Delete node `id`: the row, its photo rows, edges and lock go with it, then

@@ -4,6 +4,7 @@ import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { ACCEPT, isImageFile } from '../files.js';
 import { createQueue } from '../upload.js';
+import { SAVED_EVENT } from '../editor/pending.js';
 import { UploadCard } from './UploadCard.js';
 
 // a file already on the server: the card needs only its name and size
@@ -60,6 +61,26 @@ export const UploadArea = ({ extra = null }) => {
   };
 
   const update = (id, change) => setItems(old => old.map(item => (item.id === id ? { ...item, ...change(item) } : item)));
+
+  // a saved node took these uploads over: the cards go, the files are already gone
+  useEffect(() => {
+    const on = e => {
+      const hashes = new Set(e.detail?.hashes ?? []);
+
+      setItems(old => {
+        for(const item of old) if(item.record && hashes.has(item.record.hash)) {
+          queue.current.cancel(item.id);
+          if(item.url) URL.revokeObjectURL(item.url);
+        }
+
+        return old.filter(item => !(item.record && hashes.has(item.record.hash)));
+      });
+    };
+
+    window.addEventListener(SAVED_EVENT, on);
+
+    return () => window.removeEventListener(SAVED_EVENT, on);
+  }, []);
 
   const remove = id => {
     const gone = items.find(item => item.id === id);

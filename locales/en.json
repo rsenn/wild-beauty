@@ -152,5 +152,20 @@
   "editor.vertex.join": "Join handles",
   "editor.vertex.delete": "Delete corner",
   "editor.context.clip": "Select a photo, then tap the shape that should mask it.",
-  "editor.context.unclip": "Tap a masked photo to free it again."
+  "editor.context.unclip": "Tap a masked photo to free it again.",
+  "editor.saving": "Saving…",
+  "editor.save.retry": "Retry",
+  "editor.save.dismiss": "Dismiss",
+  "editor.saved": "Saved.",
+  "editor.saved.view": "Open node {id}",
+  "editor.save.error.invalid": "The node is not valid and could not be saved.",
+  "editor.save.error.too_large": "The node is too large to save.",
+  "editor.save.error.missing_photo": "A photo is missing on the server. Upload it again.",
+  "editor.save.error.bake_failed": "A photo could not be processed.",
+  "editor.save.error.conflict": "The node was changed elsewhere in the meantime.",
+  "editor.save.error.locked": "Someone else is editing this node.",
+  "editor.save.error.forbidden": "You may not change this node.",
+  "editor.save.error.not_found": "The node no longer exists.",
+  "editor.save.error.network": "Network error. Nothing was lost; try again.",
+  "editor.save.error.generic": "Saving failed."
 }

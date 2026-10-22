@@ -212,7 +212,11 @@ describe('PUT /api/nodes/:id', () => {
     const res = await put(id, { rev: 1, doc: doc([photo('photo001', A), photo('photo002', B)], { title: 'v2' }), kind: 'list' });
 
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ rev: 2 });
+    const saved = await res.json();
+
+    expect(saved.rev).toBe(2);
+    expect(Object.keys(saved.photos).sort()).toEqual([A, B].sort());
+    expect(saved.photos[A].href).toMatch(/^\/files\/photos\/[0-9a-f]{64}\.(jpg|png|webp)$/);
     expect(getNode(h, id)).toMatchObject({ rev: 2, title: 'v2', kind: 'list', tile: A });
     expect(nodePhotos(h, id).map(p => p.hash)).toEqual([A, B]);
   });

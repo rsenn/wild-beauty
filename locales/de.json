@@ -152,5 +152,20 @@
   "editor.vertex.join": "Griffe verbinden",
   "editor.vertex.delete": "Ecke löschen",
   "editor.context.clip": "Foto wählen, dann die Form antippen, die es maskieren soll.",
-  "editor.context.unclip": "Ein maskiertes Foto antippen, um es wieder freizugeben."
+  "editor.context.unclip": "Ein maskiertes Foto antippen, um es wieder freizugeben.",
+  "editor.saving": "Speichern…",
+  "editor.save.retry": "Nochmal",
+  "editor.save.dismiss": "Schliessen",
+  "editor.saved": "Gespeichert.",
+  "editor.saved.view": "Node {id} öffnen",
+  "editor.save.error.invalid": "Der Node ist ungültig und konnte nicht gespeichert werden.",
+  "editor.save.error.too_large": "Der Node ist zu gross zum Speichern.",
+  "editor.save.error.missing_photo": "Ein Foto fehlt auf dem Server. Bitte neu hochladen.",
+  "editor.save.error.bake_failed": "Ein Foto konnte nicht verarbeitet werden.",
+  "editor.save.error.conflict": "Der Node wurde inzwischen anderswo geändert.",
+  "editor.save.error.locked": "Jemand anderes bearbeitet diesen Node.",
+  "editor.save.error.forbidden": "Du darfst diesen Node nicht ändern.",
+  "editor.save.error.not_found": "Der Node existiert nicht mehr.",
+  "editor.save.error.network": "Netzwerkfehler. Nichts ging verloren, versuche es nochmal.",
+  "editor.save.error.generic": "Speichern fehlgeschlagen."
 }

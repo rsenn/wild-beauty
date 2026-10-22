@@ -770,7 +770,7 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 ### Phase G - save, update, open, lock (C+S)
 
-- [ ] **E64 Save button -> `POST`**: busy state, success clears dirty and sets `rev`, uploads leave
+- [x] **E64 Save button -> `POST`**: busy state, success clears dirty and sets `rev`, uploads leave
       the list, translated errors with retry. Done when a drawn node round-trips to the DB.
 - [ ] **E65 update -> `PUT`** with `rev`; conflict dialog (keep mine / take theirs / cancel).
       Done when two tabs produce the dialog.

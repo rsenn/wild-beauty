@@ -152,5 +152,20 @@
   "editor.vertex.join": "Lier les poignées",
   "editor.vertex.delete": "Supprimer le coin",
   "editor.context.clip": "Choisissez une photo, puis touchez la forme qui doit la masquer.",
-  "editor.context.unclip": "Touchez une photo masquée pour la libérer."
+  "editor.context.unclip": "Touchez une photo masquée pour la libérer.",
+  "editor.saving": "Enregistrement…",
+  "editor.save.retry": "Réessayer",
+  "editor.save.dismiss": "Fermer",
+  "editor.saved": "Enregistré.",
+  "editor.saved.view": "Ouvrir le nœud {id}",
+  "editor.save.error.invalid": "Le nœud n'est pas valide et n'a pas pu être enregistré.",
+  "editor.save.error.too_large": "Le nœud est trop grand pour être enregistré.",
+  "editor.save.error.missing_photo": "Une photo manque sur le serveur. Téléversez-la de nouveau.",
+  "editor.save.error.bake_failed": "Une photo n'a pas pu être traitée.",
+  "editor.save.error.conflict": "Le nœud a été modifié ailleurs entre-temps.",
+  "editor.save.error.locked": "Quelqu'un d'autre modifie ce nœud.",
+  "editor.save.error.forbidden": "Vous ne pouvez pas modifier ce nœud.",
+  "editor.save.error.not_found": "Le nœud n'existe plus.",
+  "editor.save.error.network": "Erreur réseau. Rien n'est perdu, réessayez.",
+  "editor.save.error.generic": "L'enregistrement a échoué."
 }

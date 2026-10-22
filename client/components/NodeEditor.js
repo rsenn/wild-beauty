@@ -7,7 +7,8 @@ import { apply } from '../editor/commands.js';
 import { createGesture } from '../editor/gesture.js';
 import { aboutPoint } from '../editor/gestures.js';
 import { multiply } from '../editor/matrix.js';
-import { ADD_EVENT, takePending } from '../editor/pending.js';
+import { ADD_EVENT, SAVED_EVENT, takePending } from '../editor/pending.js';
+import { errorKey, saveNode } from '../editor/save.js';
 import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
 import { centreOf, hitTest, matrixOf, outlineOf } from '../editor/hit.js';
@@ -110,10 +111,15 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [playing, setPlaying] = useState(false);
   const [pos, setPos] = useState(0); // the fractional position while playing: a move part way through
   const [slide, setSlide] = useState(0); // the slide shown in `slides` mode
+  const [busy, setBusy] = useState(false); // a save is on its way
+  const [saveError, setSaveError] = useState(null);
+  const [savedId, setSavedId] = useState(null);
   const [vsel, setVsel] = useState(null); // the selected vertex of the selected shape
   const [shape, setShape] = useState(emptyDraft); // the shape being drawn (shape tool)
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
+  const remote = useRef(null); // { id, rev } once the node is on the server
+  const saving = useRef(false);
   const vdrag = useRef(null); // a vertex or handle of the selected shape being dragged
   const shaping = useRef(false); // a vertex of the shape being drawn is being pulled
   const inserted = useRef(null); // the last recorded move: { id, at }
@@ -288,6 +294,40 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     }
   };
 
+  // Save (E64): POST the first time, PUT after. On success the editor is clean,
+  // its photos are the baked ones, and the upload list drops the uploads the
+  // node used; a failure keeps everything and offers a retry.
+  const save = async () => {
+    if(saving.current) return;
+
+    saving.current = true;
+    setBusy(true);
+    setSaveError(null);
+
+    const { snap } = latest.current;
+    const r = await saveNode(snap, remote.current);
+
+    saving.current = false;
+
+    if(!r.ok) {
+      setBusy(false);
+
+      return setSaveError(r);
+    }
+
+    remote.current = { id: r.id, rev: r.rev };
+    saved.current = snap;
+    setPhotos(old => Object.fromEntries([...Object.entries(old), ...Object.entries(r.photos).map(([hash, info]) => [hash, { ...old[hash], ...info }])]));
+    setSavedId(r.id);
+    setBusy(false);
+
+    const storage = browserStorage();
+
+    if(storage) clearDraft(storage, target);
+
+    window.dispatchEvent(new CustomEvent(SAVED_EVENT, { detail: { hashes: snap.doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo').map(step => step.photo)) } }));
+  };
+
   // a new selection starts without a selected vertex
   useEffect(() => setVsel(null), [selected]);
 
@@ -353,6 +393,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         e.preventDefault();
 
         return latest.current.previewing || dispatch({ type: 'moveStep', id: latest.current.selected, to: order });
+      }
+
+      if((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+
+        if(latest.current.dirty) save();
+
+        return;
       }
 
       const action = shortcutFor(e);
@@ -689,6 +737,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       return html`<button type="button" class=${'wb-editor-button wb-editor-' + key} disabled=${!can} onClick=${key === 'undo' ? undo : redo} title=${t('editor.' + key)} aria-label=${t('editor.' + key)}>${t('editor.short.' + key)}</button>`;
     }
 
+    if(key === 'save') return html`<button type="button" class="wb-editor-button wb-editor-save" disabled=${busy || !dirty} onClick=${save} title=${t('editor.save')} aria-label=${t('editor.save')}>${busy ? t('editor.saving') : t('editor.short.save')}</button>`;
+
     return inert(key, t('editor.short.' + key));
   };
 
@@ -735,6 +785,13 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <button type="button" class="wb-editor-chip" onClick=${restore}>${t('editor.draft.restore')}</button>
         <button type="button" class="wb-editor-chip" onClick=${discard}>${t('editor.draft.discard')}</button>
       </p>`}
+      ${saveError &&
+      html`<p class="wb-editor-banner wb-editor-banner-error" role="alert">
+        <span>${t(errorKey(saveError.code), { max: '1 MB' })}</span>
+        <button type="button" class="wb-editor-chip" disabled=${busy} onClick=${save}>${t('editor.save.retry')}</button>
+        <button type="button" class="wb-editor-chip" onClick=${() => setSaveError(null)}>${t('editor.save.dismiss')}</button>
+      </p>`}
+      ${savedId !== null && !dirty && !saveError && html`<p class="wb-editor-banner" role="status"><span>${t('editor.saved')}</span> <a href=${`/${lang}/node/${savedId}`}>${t('editor.saved.view', { id: savedId })}</a></p>`}
       <div class="wb-editor-work">
       <div class="wb-editor-body">
         <div class="wb-editor-tools" role="toolbar" aria-label=${t('editor.tools')}>${TOOLS.map(toolButton)}</div>
