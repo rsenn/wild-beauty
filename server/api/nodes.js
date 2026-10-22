@@ -283,7 +283,8 @@ const publicNode = ({ id, title, kind, doc, palette, tile, visibility, owner_id,
 // GET /api/nodes/:id -> 200 { node, rev }; the ETag is the rev, so a client
 // that has it gets 304
 export async function readNode(req, idText, h) {
-  const node = /^\d{1,15}$/.test(idText) ? getNode(h ?? (await database()), Number(idText)) : null;
+  const db = h ?? (await database());
+  const node = /^\d{1,15}$/.test(idText) ? getNode(db, Number(idText)) : null;
 
   if(!node) return fail(404, 'not_found');
   if(!canView(node, null)) return fail(403, 'forbidden');
@@ -293,7 +294,7 @@ export async function readNode(req, idText, h) {
 
   if(req.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers });
 
-  return Response.json({ node: publicNode(node), rev: node.rev }, { headers });
+  return Response.json({ node: publicNode(node), rev: node.rev, photos: photoInfos(db, node.doc) }, { headers });
 }
 
 // DELETE /api/nodes/:id -> 204

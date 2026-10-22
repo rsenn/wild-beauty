@@ -167,5 +167,20 @@
   "editor.save.error.forbidden": "Vous ne pouvez pas modifier ce nœud.",
   "editor.save.error.not_found": "Le nœud n'existe plus.",
   "editor.save.error.network": "Erreur réseau. Rien n'est perdu, réessayez.",
-  "editor.save.error.generic": "L'enregistrement a échoué."
+  "editor.save.error.generic": "L'enregistrement a échoué.",
+  "editor.conflict.title": "Modifié ailleurs",
+  "editor.conflict.text": "Ce nœud a été enregistré par quelqu'un d'autre, ou dans un autre onglet, après son ouverture.",
+  "editor.conflict.mine": "Garder la mienne",
+  "editor.conflict.theirs": "Prendre la leur",
+  "editor.conflict.cancel": "Annuler",
+  "editor.edit": "Modifier",
+  "editor.loading": "Chargement du nœud…",
+  "editor.load.error": "Le nœud n'a pas pu être chargé.",
+  "editor.open": "Ouvrir",
+  "editor.open.id": "Ouvrir un nœud enregistré, numéro",
+  "editor.lock.locked": "Ouvert en lecture seule : verrouillé par {holder} jusqu'à {time}.",
+  "editor.lock.lost": "Le verrou a été perdu (expiré ou levé). Vos modifications sont gardées comme brouillon ; reprenez le verrou pour continuer.",
+  "editor.lock.gone": "Ce nœud n'existe plus. Vos modifications sont gardées comme brouillon.",
+  "editor.lock.break": "Lever le verrou",
+  "editor.lock.retry": "Réessayer"
 }

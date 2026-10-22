@@ -8,7 +8,8 @@ import { createGesture } from '../editor/gesture.js';
 import { aboutPoint } from '../editor/gestures.js';
 import { multiply } from '../editor/matrix.js';
 import { ADD_EVENT, SAVED_EVENT, takePending } from '../editor/pending.js';
-import { errorKey, saveNode } from '../editor/save.js';
+import { errorKey, loadNode, saveNode } from '../editor/save.js';
+import { createLock } from '../editor/lock.js';
 import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
 import { centreOf, hitTest, matrixOf, outlineOf } from '../editor/hit.js';
@@ -19,6 +20,7 @@ import { photoSteps as allPhotoSteps, renderNode } from '../editor/render.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
 import { DEFAULT_TOOL, TOOLS, toolForKey } from '../editor/tools.js';
 import { editorStore } from '../editor/useEditor.js';
+import { NEW } from '../editor/store.js';
 import { swatches } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
 import { Filmstrip } from './Filmstrip.js';
@@ -111,6 +113,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [playing, setPlaying] = useState(false);
   const [pos, setPos] = useState(0); // the fractional position while playing: a move part way through
   const [slide, setSlide] = useState(0); // the slide shown in `slides` mode
+  const [lockState, setLockState] = useState({ state: 'idle', info: null }); // the lock on an open node (E67)
+  const [loading, setLoading] = useState(target !== NEW); // an existing node is read first (E66)
+  const [loadError, setLoadError] = useState(null);
+  const [conflict, setConflict] = useState(null); // { rev }: the node changed elsewhere (E65)
   const [busy, setBusy] = useState(false); // a save is on its way
   const [saveError, setSaveError] = useState(null);
   const [savedId, setSavedId] = useState(null);
@@ -118,6 +124,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [shape, setShape] = useState(emptyDraft); // the shape being drawn (shape tool)
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
+  const lockRef = useRef(null);
+  const loadingRef = useRef(target !== NEW);
   const remote = useRef(null); // { id, rev } once the node is on the server
   const saving = useRef(false);
   const vdrag = useRef(null); // a vertex or handle of the selected shape being dragged
@@ -144,10 +152,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // always the current state for handlers registered once
   const latest = useRef();
 
-  latest.current = { tool, shape, vsel, editStep, snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
+  const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
+
+  latest.current = { readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
 
   // every change of the node goes through here
-  const dispatch = command => setHist(h => {
+  const dispatch = command => latest.current?.readOnly || setHist(h => {
     const r = apply(h.present, command);
 
     return history.push(h, r.snap, r.key);
@@ -230,8 +240,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     dispatch({ type: 'removePage', id });
     switchPage(Math.min(index, latest.current.doc.pages.length - 2));
   };
-  const undo = () => ((inserted.current = null), setHist(history.undo));
-  const redo = () => ((inserted.current = null), setHist(history.redo));
+  const undo = () => latest.current.readOnly || ((inserted.current = null), setHist(history.undo));
+  const redo = () => latest.current.readOnly || ((inserted.current = null), setHist(history.redo));
 
   const addUpload = payload => {
     if(!isPayload(payload)) return;
@@ -257,11 +267,68 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(queued.length) document.getElementById('wb-editor')?.focus();
   };
 
-  useEffect(() => {
-    addQueued();
-    window.addEventListener(ADD_EVENT, addQueued);
+  // Open an existing node (E66): GET it, make it the saved state. Photos queued
+  // meanwhile (an upload card's "add") wait until it is in.
+  // the lock: taken when an existing node opens (or a new one was saved),
+  // renewed by the lock client, released on close and when the page goes
+  const startLock = id => {
+    if(lockRef.current) return;
 
-    return () => window.removeEventListener(ADD_EVENT, addQueued);
+    lockRef.current = createLock(id, {
+      onChange: change => {
+        setLockState(change);
+
+        // a refused save because of the lock is answered by the lock banner
+        if(change.state === 'held') setSaveError(e => (e?.code === 'locked' ? null : e));
+      },
+    });
+    lockRef.current.start();
+  };
+
+  useEffect(() => {
+    const release = () => lockRef.current?.stop();
+
+    window.addEventListener('pagehide', release);
+
+    return () => {
+      window.removeEventListener('pagehide', release);
+      release();
+    };
+  }, []);
+
+  const load = async () => {
+    loadingRef.current = true;
+    setLoading(true);
+    setLoadError(null);
+
+    const r = await loadNode(target);
+
+    if(!r.ok) {
+      setLoadError(r);
+      setLoading(false);
+
+      return;
+    }
+
+    remote.current = { id: r.id, rev: r.rev };
+    saved.current = r.snap;
+    setHist(history.create(r.snap));
+    setPhotos(old => ({ ...old, ...r.photos }));
+    loadingRef.current = false;
+    setLoading(false);
+    startLock(r.id);
+    setTimeout(addQueued, 0);
+  };
+
+  useEffect(() => {
+    const queued = () => loadingRef.current || addQueued();
+
+    if(target !== NEW) load();
+    else addQueued();
+
+    window.addEventListener(ADD_EVENT, queued);
+
+    return () => window.removeEventListener(ADD_EVENT, queued);
   }, []);
 
   // the selection through a matrix change: keys and the wheel
@@ -298,7 +365,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // its photos are the baked ones, and the upload list drops the uploads the
   // node used; a failure keeps everything and offers a retry.
   const save = async () => {
-    if(saving.current) return;
+    if(saving.current || latest.current.readOnly) return;
 
     saving.current = true;
     setBusy(true);
@@ -312,8 +379,15 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(!r.ok) {
       setBusy(false);
 
+      if(r.code === 'locked') lockRef.current?.retake();
+      if(r.code === 'conflict' && remote.current && Number.isInteger(r.rev)) setConflict({ rev: r.rev });
+
       return setSaveError(r);
     }
+
+    setConflict(null);
+
+    const first = !remote.current;
 
     remote.current = { id: r.id, rev: r.rev };
     saved.current = snap;
@@ -321,11 +395,43 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setSavedId(r.id);
     setBusy(false);
 
+    // a save releases the lock on the server: take it back (a new node gets one now)
+    if(first) startLock(r.id);
+    else lockRef.current?.retake();
+
     const storage = browserStorage();
 
     if(storage) clearDraft(storage, target);
 
     window.dispatchEvent(new CustomEvent(SAVED_EVENT, { detail: { hashes: snap.doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo').map(step => step.photo)) } }));
+  };
+
+  // the node changed elsewhere (E65): keep mine saves over it on the newer
+  // revision, take theirs replaces the editor with the stored node, cancel
+  // leaves everything as it is
+  const keepMine = () => {
+    remote.current = { ...remote.current, rev: conflict.rev };
+    setConflict(null);
+    save();
+  };
+  const takeTheirs = async () => {
+    const r = await loadNode(remote.current.id);
+
+    if(!r.ok) return setSaveError(r);
+
+    remote.current = { id: r.id, rev: r.rev };
+    saved.current = r.snap;
+    setHist(history.create(r.snap));
+    setPhotos(old => Object.fromEntries([...Object.entries(old), ...Object.entries(r.photos)]));
+    setSelected(null);
+    setK(null);
+    setCurrent(0);
+    setConflict(null);
+    setSaveError(null);
+
+    const storage = browserStorage();
+
+    if(storage) clearDraft(storage, target);
   };
 
   // a new selection starts without a selected vertex
@@ -363,6 +469,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // keys: a tool key selects a tool; ctrl+z, ctrl+shift+z / ctrl+y, Delete
   useEffect(() => {
     const on = e => {
+      if(latest.current.readOnly) return;
+
       const next = toolForKey(e);
 
       if(next) return setTool(next);
@@ -769,14 +877,25 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     else dispatch({ type: 'setColor', id: editStep.id, color: hex, ...(paletteTarget === 'fill' ? { field: 'fill' } : paletteTarget === 'outline' ? { field: 'stroke' } : {}) });
   };
 
+  if(loading || loadError)
+    return html`<section id="wb-editor" class="wb-editor" tabindex="-1" aria-label=${t('editor.label')}>
+      ${loading
+        ? html`<p class="wb-editor-context" role="status">${t('editor.loading')}</p>`
+        : html`<p class="wb-editor-banner wb-editor-banner-error" role="alert">
+            <span>${t(loadError.code === 'not_found' ? 'editor.save.error.not_found' : 'editor.load.error')}</span>
+            <button type="button" class="wb-editor-chip" onClick=${load}>${t('editor.save.retry')}</button>
+            <button type="button" class="wb-editor-chip" onClick=${onClose}>${t('editor.close')}</button>
+          </p>`}
+    </section>`;
+
   return html`
     <section id="wb-editor" class="wb-editor" tabindex="-1" aria-label=${t('editor.label')}>
       <div class="wb-editor-head">
-        <label class="wb-editor-title">
+        <label class="wb-editor-title" inert=${readOnly}>
           <span class="wb-sr-only">${t('editor.title.label')}</span>
           <input type="text" maxlength=${LIMITS.title} autocomplete="off" value=${title} placeholder=${t('editor.title.placeholder')} onInput=${e => dispatch({ type: 'setTitle', title: e.target.value })} />
         </label>
-        <${Properties} t=${t} kind=${kind} bg=${doc.bg} dispatch=${dispatch} />
+        <span class="wb-editor-head-fields" inert=${readOnly}><${Properties} t=${t} kind=${kind} bg=${doc.bg} dispatch=${dispatch} /></span>
         <button type="button" class="wb-editor-close" onClick=${close}>${t('editor.close')}</button>
       </div>
       ${found &&
@@ -785,13 +904,30 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <button type="button" class="wb-editor-chip" onClick=${restore}>${t('editor.draft.restore')}</button>
         <button type="button" class="wb-editor-chip" onClick=${discard}>${t('editor.draft.discard')}</button>
       </p>`}
-      ${saveError &&
+      ${readOnly &&
+      html`<p class="wb-editor-banner wb-editor-banner-error" role="alert">
+        <span>${lockState.state === 'lost'
+          ? t(lockState.info?.gone ? 'editor.lock.gone' : 'editor.lock.lost')
+          : t('editor.lock.locked', { holder: lockState.info?.holder ?? '?', time: lockState.info?.expires_at ? new Date(lockState.info.expires_at).toLocaleTimeString(lang) : '?' })}</span>
+        ${!lockState.info?.gone && html`<button type="button" class="wb-editor-chip" onClick=${() => lockRef.current?.breakLock()}>${t('editor.lock.break')}</button>
+        <button type="button" class="wb-editor-chip" onClick=${() => lockRef.current?.retake()}>${t('editor.lock.retry')}</button>`}
+      </p>`}
+      ${conflict &&
+      html`<div class="wb-editor-banner wb-editor-banner-error wb-editor-dialog" role="alertdialog" aria-labelledby="wb-conflict-title" aria-describedby="wb-conflict-text">
+        <strong id="wb-conflict-title">${t('editor.conflict.title')}</strong>
+        <span id="wb-conflict-text">${t('editor.conflict.text')}</span>
+        <button type="button" class="wb-editor-chip" disabled=${busy} onClick=${keepMine}>${t('editor.conflict.mine')}</button>
+        <button type="button" class="wb-editor-chip" disabled=${busy} onClick=${takeTheirs}>${t('editor.conflict.theirs')}</button>
+        <button type="button" class="wb-editor-chip" onClick=${() => (setConflict(null), setSaveError(null))}>${t('editor.conflict.cancel')}</button>
+      </div>`}
+      ${saveError && !conflict && !(readOnly && saveError.code === 'locked') &&
       html`<p class="wb-editor-banner wb-editor-banner-error" role="alert">
         <span>${t(errorKey(saveError.code), { max: '1 MB' })}</span>
         <button type="button" class="wb-editor-chip" disabled=${busy} onClick=${save}>${t('editor.save.retry')}</button>
         <button type="button" class="wb-editor-chip" onClick=${() => setSaveError(null)}>${t('editor.save.dismiss')}</button>
       </p>`}
       ${savedId !== null && !dirty && !saveError && html`<p class="wb-editor-banner" role="status"><span>${t('editor.saved')}</span> <a href=${`/${lang}/node/${savedId}`}>${t('editor.saved.view', { id: savedId })}</a></p>`}
+      <div class="wb-editor-frame" inert=${readOnly}>
       <div class="wb-editor-work">
       <div class="wb-editor-body">
         <div class="wb-editor-tools" role="toolbar" aria-label=${t('editor.tools')}>${TOOLS.map(toolButton)}</div>
@@ -838,6 +974,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       ${mode === 'slides'
         ? html`<${SlideStrip} t=${t} doc=${doc} photos=${photos} count=${slides} current=${Math.min(slide, Math.max(0, slides - 1))} onSelect=${setSlide} />`
         : mode === 'free' && html`<${PageStrip} t=${t} doc=${doc} photos=${photos} current=${page} onSelect=${switchPage} onAdd=${addPage} onMove=${(id, to) => dispatch({ type: 'movePage', id, to })} onRemove=${removePage} />`}
+      </div>
     </section>
   `;
 };

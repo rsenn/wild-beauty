@@ -772,11 +772,11 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 
 - [x] **E64 Save button -> `POST`**: busy state, success clears dirty and sets `rev`, uploads leave
       the list, translated errors with retry. Done when a drawn node round-trips to the DB.
-- [ ] **E65 update -> `PUT`** with `rev`; conflict dialog (keep mine / take theirs / cancel).
+- [x] **E65 update -> `PUT`** with `rev`; conflict dialog (keep mine / take theirs / cancel).
       Done when two tabs produce the dialog.
-- [ ] **E66 open existing node** (`GET`), fill the editor, replace-with-prompt when dirty.
+- [x] **E66 open existing node** (`GET`), fill the editor, replace-with-prompt when dirty.
       Done when a saved node reopens identically (pixel snapshot of the stage).
-- [ ] **E67 lock client** (`lock.js`): take on open, 20 s heartbeat, release on close, lost-lock
+- [x] **E67 lock client** (`lock.js`): take on open, 20 s heartbeat, release on close, lost-lock
       read-only state, banner and owner "break lock". Done when a second tab opens read-only.
 - [ ] **E68 saved nodes list** on `/new` (SSR, read-only tiles with "Edit"). Done when a saved node appears after reload.
 - [ ] **E69 delete node** with confirm. Done when files and rows are gone.

@@ -167,5 +167,20 @@
   "editor.save.error.forbidden": "Du darfst diesen Node nicht ändern.",
   "editor.save.error.not_found": "Der Node existiert nicht mehr.",
   "editor.save.error.network": "Netzwerkfehler. Nichts ging verloren, versuche es nochmal.",
-  "editor.save.error.generic": "Speichern fehlgeschlagen."
+  "editor.save.error.generic": "Speichern fehlgeschlagen.",
+  "editor.conflict.title": "Anderswo geändert",
+  "editor.conflict.text": "Dieser Node wurde nach dem Öffnen von jemand anderem oder in einem anderen Tab gespeichert.",
+  "editor.conflict.mine": "Meine behalten",
+  "editor.conflict.theirs": "Ihre übernehmen",
+  "editor.conflict.cancel": "Abbrechen",
+  "editor.edit": "Bearbeiten",
+  "editor.loading": "Node wird geladen…",
+  "editor.load.error": "Der Node konnte nicht geladen werden.",
+  "editor.open": "Öffnen",
+  "editor.open.id": "Gespeicherten Node öffnen, Nummer",
+  "editor.lock.locked": "Nur lesend geöffnet: gesperrt von {holder} bis {time}.",
+  "editor.lock.lost": "Die Sperre ging verloren (abgelaufen oder aufgehoben). Deine Änderungen bleiben als Entwurf erhalten; hole die Sperre zurück, um weiterzumachen.",
+  "editor.lock.gone": "Dieser Node existiert nicht mehr. Deine Änderungen bleiben als Entwurf erhalten.",
+  "editor.lock.break": "Sperre aufheben",
+  "editor.lock.retry": "Nochmal versuchen"
 }

@@ -4,6 +4,10 @@
 const COOKIE = 'wb-session';
 const TOKEN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
+// A browser tab names itself in `x-wb-tab`, so two tabs of one browser hold locks
+// as two holders (the cookie is shared by all of a browser's tabs).
+const TAB = /^[0-9a-f]{16}$/;
+
 const hash = text => new Bun.CryptoHasher('sha256').update(text).digest('hex');
 
 // -> { token, holder, fresh }: the session of the request, a new one (fresh)
@@ -13,7 +17,9 @@ export function sessionFor(req) {
   const given = cookie.find(([name]) => name === COOKIE)?.[1];
   const token = given && TOKEN.test(given) ? given : crypto.randomUUID();
 
-  return { token, holder: hash(token), fresh: token !== given };
+  const tab = req.headers.get('x-wb-tab');
+
+  return { token, holder: hash(tab && TAB.test(tab) ? `${token}:${tab}` : token), fresh: token !== given };
 }
 
 // the Set-Cookie value that stores the token

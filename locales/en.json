@@ -167,5 +167,20 @@
   "editor.save.error.forbidden": "You may not change this node.",
   "editor.save.error.not_found": "The node no longer exists.",
   "editor.save.error.network": "Network error. Nothing was lost; try again.",
-  "editor.save.error.generic": "Saving failed."
+  "editor.save.error.generic": "Saving failed.",
+  "editor.conflict.title": "Changed elsewhere",
+  "editor.conflict.text": "This node was saved by someone else, or in another tab, after you opened it.",
+  "editor.conflict.mine": "Keep mine",
+  "editor.conflict.theirs": "Take theirs",
+  "editor.conflict.cancel": "Cancel",
+  "editor.edit": "Edit",
+  "editor.loading": "Loading node…",
+  "editor.load.error": "The node could not be loaded.",
+  "editor.open": "Open",
+  "editor.open.id": "Open a saved node, number",
+  "editor.lock.locked": "Opened read-only: locked by {holder} until {time}.",
+  "editor.lock.lost": "The lock was lost (expired or broken). Your changes are kept as a draft; take the lock back to continue.",
+  "editor.lock.gone": "This node no longer exists. Your changes are kept as a draft.",
+  "editor.lock.break": "Break lock",
+  "editor.lock.retry": "Try again"
 }

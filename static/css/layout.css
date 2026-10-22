@@ -983,3 +983,26 @@ body {
 .wb-editor-banner-error {
   border-color: var(--wb-danger);
 }
+
+/* open a saved node by number (E66) */
+.wb-open-node {
+  display: flex;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  margin: var(--wb-editor-gap) 0;
+}
+
+.wb-open-node input {
+  width: 6em;
+}
+
+/* a read-only editor (E67): the locked parts do not react */
+.wb-editor-frame[inert],
+.wb-editor-title[inert],
+.wb-editor-head-fields[inert] {
+  opacity: 0.6;
+}
+
+.wb-editor-head-fields {
+  display: contents;
+}

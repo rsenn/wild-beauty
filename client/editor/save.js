@@ -1,3 +1,5 @@
+import { tabHeaders } from './tab.js';
+
 // Saving a node (EDITOR.md S2.8, S4, E64): POST a new one, PUT an open one
 // with the `rev` it was read at. `send` is fetch, injectable for tests.
 // -> { ok: true, id, rev, photos } | { ok: false, code, status, details }
@@ -10,7 +12,7 @@ export async function saveNode(snap, remote, send = globalThis.fetch) {
   let res;
 
   try {
-    res = await send(put ? `/api/nodes/${remote.id}` : '/api/nodes', { method: put ? 'PUT' : 'POST', headers: { 'content-type': 'application/json' }, body });
+    res = await send(put ? `/api/nodes/${remote.id}` : '/api/nodes', { method: put ? 'PUT' : 'POST', headers: tabHeaders({ 'content-type': 'application/json' }), body });
   } catch {
     return { ok: false, code: 'network', status: 0 };
   }
@@ -21,7 +23,7 @@ export async function saveNode(snap, remote, send = globalThis.fetch) {
     data = await res.json();
   } catch {}
 
-  if(!res.ok) return { ok: false, code: typeof data?.error === 'string' ? data.error : 'generic', status: res.status, details: data?.details };
+  if(!res.ok) return { ok: false, code: typeof data?.error === 'string' ? data.error : 'generic', status: res.status, details: data?.details, ...(Number.isInteger(data?.rev) && { rev: data.rev }) };
 
   const id = put ? remote.id : data?.id;
   const rev = data?.rev;
@@ -34,3 +36,26 @@ export async function saveNode(snap, remote, send = globalThis.fetch) {
 // the message key for an error code: editor.save.error.<code>, else generic
 export const SAVE_ERRORS = ['invalid', 'too_large', 'missing_photo', 'bake_failed', 'conflict', 'locked', 'forbidden', 'not_found', 'network'];
 export const errorKey = code => 'editor.save.error.' + (SAVE_ERRORS.includes(code) ? code : 'generic');
+
+// Read node `id` again (E65 "take theirs", E66 open).
+// -> { ok: true, id, rev, snap: { doc, kind }, photos } | { ok: false, code, status }
+export async function loadNode(id, send = globalThis.fetch) {
+  let res;
+
+  try {
+    res = await send(`/api/nodes/${id}`, { headers: { accept: 'application/json' }, cache: 'no-store' });
+  } catch {
+    return { ok: false, code: 'network', status: 0 };
+  }
+
+  let data = null;
+
+  try {
+    data = await res.json();
+  } catch {}
+
+  if(!res.ok) return { ok: false, code: typeof data?.error === 'string' ? data.error : 'generic', status: res.status };
+  if(!data?.node?.doc || !Number.isInteger(data.rev)) return { ok: false, code: 'generic', status: res.status };
+
+  return { ok: true, id, rev: data.rev, snap: { doc: data.node.doc, kind: data.node.kind }, photos: data.photos && typeof data.photos === 'object' ? data.photos : {} };
+}
