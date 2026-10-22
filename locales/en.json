@@ -184,5 +184,6 @@
   "editor.lock.break": "Break lock",
   "editor.lock.retry": "Try again",
   "nodes.saved": "Saved nodes",
-  "nodes.empty": "No photo"
+  "nodes.empty": "No photo",
+  "editor.delete.confirm": "Delete this node for good? Its photos go too, unless another node uses them. This cannot be undone."
 }

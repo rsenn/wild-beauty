@@ -8,7 +8,7 @@ import { createGesture } from '../editor/gesture.js';
 import { aboutPoint } from '../editor/gestures.js';
 import { multiply } from '../editor/matrix.js';
 import { ADD_EVENT, SAVED_EVENT, takePending } from '../editor/pending.js';
-import { errorKey, loadNode, saveNode } from '../editor/save.js';
+import { deleteNode, errorKey, loadNode, saveNode } from '../editor/save.js';
 import { createLock } from '../editor/lock.js';
 import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
@@ -113,6 +113,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [playing, setPlaying] = useState(false);
   const [pos, setPos] = useState(0); // the fractional position while playing: a move part way through
   const [slide, setSlide] = useState(0); // the slide shown in `slides` mode
+  const [nodeId, setNodeId] = useState(null); // the id once the node is on the server
   const [lockState, setLockState] = useState({ state: 'idle', info: null }); // the lock on an open node (E67)
   const [loading, setLoading] = useState(target !== NEW); // an existing node is read first (E66)
   const [loadError, setLoadError] = useState(null);
@@ -269,6 +270,36 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   // Open an existing node (E66): GET it, make it the saved state. Photos queued
   // meanwhile (an upload card's "add") wait until it is in.
+  // Delete the saved node (E69), after a yes: the server removes its rows, the
+  // photos nobody else uses and the thumbnail. Then the editor closes (on a node
+  // page, which would show a node that is gone, the page goes to /new).
+  const removeNode = async () => {
+    if(!remote.current || saving.current || latest.current.readOnly || !window.confirm(t('editor.delete.confirm'))) return;
+
+    saving.current = true;
+    setBusy(true);
+    setSaveError(null);
+
+    const r = await deleteNode(remote.current.id);
+
+    saving.current = false;
+    setBusy(false);
+
+    if(!r.ok) return setSaveError(r);
+
+    saved.current = latest.current.snap; // nothing left to lose: no leave prompt
+    editorStore.setDirty(false);
+
+    const storage = browserStorage();
+
+    if(storage) clearDraft(storage, target);
+
+    window.dispatchEvent(new CustomEvent(SAVED_EVENT, { detail: { hashes: [] } })); // the list of nodes changed
+
+    if(/\/node\/\d+$/.test(location.pathname)) location.assign(`/${lang}/new`);
+    else onClose();
+  };
+
   // the lock: taken when an existing node opens (or a new one was saved),
   // renewed by the lock client, released on close and when the page goes
   const startLock = id => {
@@ -311,6 +342,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     }
 
     remote.current = { id: r.id, rev: r.rev };
+    setNodeId(r.id);
     saved.current = r.snap;
     setHist(history.create(r.snap));
     setPhotos(old => ({ ...old, ...r.photos }));
@@ -393,6 +425,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     saved.current = snap;
     setPhotos(old => Object.fromEntries([...Object.entries(old), ...Object.entries(r.photos).map(([hash, info]) => [hash, { ...old[hash], ...info }])]));
     setSavedId(r.id);
+    setNodeId(r.id);
     setBusy(false);
 
     // a save releases the lock on the server: take it back (a new node gets one now)
@@ -844,6 +877,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
       return html`<button type="button" class=${'wb-editor-button wb-editor-' + key} disabled=${!can} onClick=${key === 'undo' ? undo : redo} title=${t('editor.' + key)} aria-label=${t('editor.' + key)}>${t('editor.short.' + key)}</button>`;
     }
+
+    if(key === 'delete') return html`<button type="button" class="wb-editor-button wb-editor-delete" disabled=${nodeId === null || busy || readOnly} onClick=${removeNode} title=${t('editor.delete')} aria-label=${t('editor.delete')}>${t('editor.short.delete')}</button>`;
 
     if(key === 'save') return html`<button type="button" class="wb-editor-button wb-editor-save" disabled=${busy || !dirty} onClick=${save} title=${t('editor.save')} aria-label=${t('editor.save')}>${busy ? t('editor.saving') : t('editor.short.save')}</button>`;
 

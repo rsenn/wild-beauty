@@ -59,3 +59,25 @@ export async function loadNode(id, send = globalThis.fetch) {
 
   return { ok: true, id, rev: data.rev, snap: { doc: data.node.doc, kind: data.node.kind }, photos: data.photos && typeof data.photos === 'object' ? data.photos : {} };
 }
+
+// Delete node `id` (E69). -> { ok: true } | { ok: false, code, status }; a node that
+// is already gone counts as deleted.
+export async function deleteNode(id, send = globalThis.fetch) {
+  let res;
+
+  try {
+    res = await send(`/api/nodes/${id}`, { method: 'DELETE', headers: tabHeaders() });
+  } catch {
+    return { ok: false, code: 'network', status: 0 };
+  }
+
+  if(res.ok || res.status === 404) return { ok: true };
+
+  let data = null;
+
+  try {
+    data = await res.json();
+  } catch {}
+
+  return { ok: false, code: typeof data?.error === 'string' ? data.error : 'generic', status: res.status };
+}

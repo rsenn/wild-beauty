@@ -184,5 +184,6 @@
   "editor.lock.break": "Sperre aufheben",
   "editor.lock.retry": "Nochmal versuchen",
   "nodes.saved": "Gespeicherte Nodes",
-  "nodes.empty": "Kein Foto"
+  "nodes.empty": "Kein Foto",
+  "editor.delete.confirm": "Diesen Node endgültig löschen? Seine Fotos werden mitgelöscht, ausser ein anderer Node braucht sie. Das kann nicht rückgängig gemacht werden."
 }

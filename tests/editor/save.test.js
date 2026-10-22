@@ -68,3 +68,20 @@ describe('conflicts and loading (E65)', () => {
     expect(await loadNode(3, async () => { throw new Error('x'); })).toMatchObject({ ok: false, code: 'network' });
   });
 });
+
+import { deleteNode } from '../../client/editor/save.js';
+
+describe('deleteNode (E69)', () => {
+  test('DELETE with the tab header; gone or already gone is ok; errors keep their code', async () => {
+    const calls = [];
+    const spy2 = status => async (url, init) => (calls.push({ url, init }), status === 204 ? new Response(null, { status }) : Response.json({ error: status === 423 ? 'locked' : 'nope' }, { status }));
+
+    expect(await deleteNode(4, spy2(204))).toEqual({ ok: true });
+    expect(calls[0].url).toBe('/api/nodes/4');
+    expect(calls[0].init.method).toBe('DELETE');
+    expect(calls[0].init.headers['x-wb-tab']).toMatch(/^[0-9a-f]{16}$/);
+    expect(await deleteNode(4, spy2(404))).toEqual({ ok: true });
+    expect(await deleteNode(4, spy2(423))).toEqual({ ok: false, code: 'locked', status: 423 });
+    expect(await deleteNode(4, async () => { throw new Error('x'); })).toEqual({ ok: false, code: 'network', status: 0 });
+  });
+});
