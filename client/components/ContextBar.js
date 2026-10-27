@@ -10,7 +10,7 @@ const Button = ({ label, onClick, pressed, disabled, children }) => html`<button
 
 const Color = ({ label, value, onInput }) => html`<label class="wb-editor-field">${label} <input type="color" value=${/^#[0-9a-f]{6}$/i.test(value ?? '') ? value : '#000000'} onInput=${e => onInput(e.target.value)} /></label>`;
 
-export const ContextBar = ({ t, step, vertex, onVertex, clipped, photo, dispatch }) => {
+export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, dispatch }) => {
   if(!step) return html`<p class="wb-editor-context">${t('editor.context.empty')}</p>`;
 
   const id = step.id;
@@ -48,6 +48,9 @@ export const ContextBar = ({ t, step, vertex, onVertex, clipped, photo, dispatch
       <${Button} pressed=${step.closed} onClick=${() => change({ closed: !step.closed })}>${t('editor.shape.closed')}<//>
       ${vertex?.broken && html`<${Button} onClick=${() => onVertex('join')}>${t('editor.vertex.join')}<//>`}
       ${vertex && html`<${Button} disabled=${!vertex.canDelete} onClick=${() => onVertex('delete')}>${t('editor.vertex.delete')}<//>`}
+      ${kind === 'gallery' && html`<${Button} pressed=${!!step.wall} onClick=${() => dispatch({ type: 'setWall', id, wall: step.wall ? null : {} })}>${t('editor.wall')}<//>`}
+      ${kind === 'gallery' && step.wall && html`<label class="wb-editor-field">${t('editor.wall.height')} <input type="number" min="0.5" max="10" step="0.1" value=${step.wall.height} onChange=${e => dispatch({ type: 'setWall', id, wall: { height: Number(e.target.value) } })} /></label>`}
+      ${kind === 'gallery' && step.wall && !step.closed && html`<label class="wb-editor-field">${t('editor.wall.width')} <input type="number" min="0.5" max="10" step="0.1" value=${step.wall.width} onChange=${e => dispatch({ type: 'setWall', id, wall: { width: Number(e.target.value) } })} /></label>`}
       <${Color} label=${t('editor.shape.fill')} value=${step.fill} onInput=${color => dispatch({ type: 'setColor', id, field: 'fill', color })} />
       <${Color} label=${t('editor.shape.stroke')} value=${step.stroke} onInput=${color => dispatch({ type: 'setColor', id, field: 'stroke', color })} />
       <label class="wb-editor-field">${t('editor.shape.width')} <input type="range" min="0" max="60" value=${step.strokeWidth} onInput=${e => dispatch({ type: 'setStrokeWidth', id, value: Number(e.target.value) })} /></label>

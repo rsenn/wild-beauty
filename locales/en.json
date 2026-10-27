@@ -110,6 +110,10 @@
   "editor.look": "Look",
   "editor.order.up": "Forward",
   "editor.order.down": "Backward",
+  "editor.panel": "Panel",
+  "editor.tab.select": "Select",
+  "editor.tab.photos": "Photos",
+  "editor.tab.sequence": "Sequence",
   "editor.strip": "Photos",
   "editor.strip.left": "Move earlier",
   "editor.strip.right": "Move later",
@@ -218,5 +222,11 @@
   "editor.layout.loose": "Loose",
   "editor.layout.tight": "Tight",
   "editor.layout.loose.hint": "A margin and a gap between the photos",
-  "editor.layout.tight.hint": "As much of the stage as possible is covered by photos"
+  "editor.layout.tight.hint": "As much of the stage as possible is covered by photos",
+  "editor.wall": "Wall",
+  "editor.wall.height": "Height (m)",
+  "editor.wall.width": "Width (m)",
+  "editor.wall.acute": "A wall may not have a corner sharper than 90 degrees (this one is {angle}).",
+  "editor.wall.gallery": "Walls only exist in a gallery node: set the kind to gallery first.",
+  "editor.keys.W": "The selected shape becomes a wall (gallery) or stops being one"
 }

@@ -21,6 +21,7 @@ import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
 import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/keyboard.js';
 import { DEFAULT_TOOL, TOOLS, inField, toolForKey } from '../editor/tools.js';
 import { editorStore } from '../editor/useEditor.js';
+import { acuteCorner } from '../editor/walls.js';
 import { NEW } from '../editor/store.js';
 import { swatches } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
@@ -42,7 +43,30 @@ import { Stage } from './Stage.js';
 // actions stay inert until their tasks.
 const ACTIONS = ['undo', 'redo', 'page', 'delete', 'save'];
 // the keys the help popover lists (EDITOR.md E73), each with `editor.keys.<name>`
-const KEYS = ['V P S C U T', 'PageDown PageUp', 'Escape', 'Arrows', '+ -', ', .', '[ ]', 'Delete', '\\', 'Space', 'Enter', 'Backspace', 'Ctrl+Z Ctrl+Y', 'Ctrl+S'];
+// why a command that changed nothing was a wall refusal, or null: { key, params }
+function wallRefusal(snap, command) {
+  const step = findStep(snap.doc, command.id)?.step;
+
+  if(step?.op !== 'shape') return null;
+
+  if(command.type === 'setWall' && command.wall !== null) {
+    if(snap.kind !== 'gallery') return { key: 'editor.wall.gallery' };
+
+    const parsed = verticesOf(step);
+    const acute = parsed && acuteCorner(parsed.vertices, step.closed);
+
+    return acute ? { key: 'editor.wall.acute', params: { angle: Math.round(acute.angle) } } : null;
+  }
+
+  if(!step.wall) return null;
+
+  const vertices = command.type === 'setVertices' ? command.vertices : command.type === 'updateShape' && typeof command.changes?.closed === 'boolean' ? verticesOf(step)?.vertices : null;
+  const acute = vertices && acuteCorner(vertices, command.type === 'updateShape' ? command.changes.closed : step.closed);
+
+  return acute ? { key: 'editor.wall.acute', params: { angle: Math.round(acute.angle) } } : null;
+}
+
+const KEYS = ['V P S C U T', 'PageDown PageUp', 'Escape', 'Arrows', '+ -', ', .', '[ ]', 'Delete', '\\', 'Space', 'Enter', 'Backspace', 'W', 'Ctrl+Z Ctrl+Y', 'Ctrl+S'];
 const SPACING = 4;
 const VERTEX_PX = 14; // how near a click picks a vertex or handle
 const CLOSE_PX = 14; // how near the first vertex a click closes the shape
@@ -120,6 +144,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const { t, lang } = useI18n();
   const [hist, setHist] = useState(() => history.create({ doc: emptyNode(), kind: 'node' }));
   const [photos, setPhotos] = useState({});
+  const [panelTab, setPanelTab] = useState('select'); // landscape: which panel section shows
   const [tool, setTool] = useState(DEFAULT_TOOL);
   const [selected, setSelected] = useState(null);
   const [color, setColor] = useState('#1a1a1a');
@@ -142,6 +167,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [saveError, setSaveError] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const quiet = useRef(false); // the next tool change was announced by its own message
+  const [wallNotice, setWallNotice] = useState(null); // the wall layer refused a change: { key, params }
   const [announce, setAnnounce] = useState(''); // read out by screen readers
   const [cursor, setCursor] = useState(null); // the keyboard cursor of the shape tool
   const [candidate, setCandidate] = useState(null); // the shape the clip tool would use, chosen by key
@@ -186,11 +212,28 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   latest.current = { cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size };
 
   // every change of the node goes through here
-  const dispatch = command => latest.current?.readOnly || setHist(h => {
-    const r = apply(h.present, command);
+  const dispatch = command => {
+    if(latest.current?.readOnly) return;
 
-    return history.push(h, r.snap, r.key);
-  });
+    // a wall that would get a corner sharper than 90 degrees is refused: say so
+    const was = latest.current?.snap;
+    const probe = was && apply(was, command);
+
+    if(probe && probe.snap === was) {
+      const problem = wallRefusal(was, command);
+
+      if(problem) {
+        setWallNotice(problem);
+        setAnnounce(tr(problem.key, problem.params));
+      }
+    } else if(wallNotice) setWallNotice(null);
+
+    setHist(h => {
+      const r = apply(h.present, command);
+
+      return history.push(h, r.snap, r.key);
+    });
+  };
   // the scrubber (E56): dragging the slider stops playback; play starts at the
   // beginning unless the page is already part way
   const scrub = value => {
@@ -570,6 +613,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       const { tool: current, doc: d, page: pg, shown: upTo, selected: sel, editStep: step, vsel: vs, candidate: cand } = latest.current;
       const plain = !e.ctrlKey && !e.metaKey && !e.altKey;
       const draftingNow = current === 'shape' && latest.current.shape.vertices.length;
+
+      // W: the selected shape becomes a wall of the gallery, or stops being one
+      if(plain && !inField(e.target) && !e.repeat && e.key.toLowerCase() === 'w' && current === 'select' && step?.op === 'shape') {
+        e.preventDefault();
+        dispatch({ type: 'setWall', id: step.id, wall: step.wall ? null : {} });
+
+        return;
+      }
 
       // PageDown / PageUp walk through the steps; in the clip tool, through the shapes that could mask
       if(plain && !inField(e.target) && (e.key === 'PageDown' || e.key === 'PageUp')) {
@@ -1083,7 +1134,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     </section>`;
 
   return html`
-    <section id="wb-editor" class="wb-editor" tabindex="-1" aria-label=${t('editor.label')}>
+    <section id="wb-editor" class="wb-editor" data-tab=${panelTab} tabindex="-1" aria-label=${t('editor.label')}>
       <div class="wb-sr-only" role="status" aria-live="polite" aria-atomic="true">${announce}</div>
       <p id="wb-editor-keys-hint" class="wb-sr-only">${t('editor.keys.hint')}</p>
       <div class="wb-editor-head">
@@ -1097,6 +1148,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <//>
         <button type="button" class="wb-editor-close" onClick=${close}>${t('editor.close')}</button>
       </div>
+      <div class="wb-editor-banners">
       ${found &&
       html`<p class="wb-editor-banner" role="status">
         <span>${t('editor.draft.found', { time: new Date(found.savedAt).toLocaleString(lang) })}</span>
@@ -1126,6 +1178,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <button type="button" class="wb-editor-chip" onClick=${() => setSaveError(null)}>${t('editor.save.dismiss')}</button>
       </p>`}
       ${savedId !== null && !dirty && !saveError && html`<p class="wb-editor-banner" role="status"><span>${t('editor.saved')}</span> <a href=${`/${lang}/node/${savedId}`}>${t('editor.saved.view', { id: savedId })}</a></p>`}
+      ${wallNotice && html`<p class="wb-editor-banner wb-editor-banner-error" role="alert"><span>${t(wallNotice.key, wallNotice.params)}</span> <button type="button" class="wb-editor-chip" onClick=${() => setWallNotice(null)}>${t('editor.save.dismiss')}</button></p>`}
+      </div>
+      <div class="wb-editor-tabs" role="tablist" aria-label=${t('editor.panel')}>${['select', 'photos', 'sequence'].map(id => html`<button type="button" role="tab" class="wb-editor-chip" aria-selected=${panelTab === id ? 'true' : 'false'} onClick=${() => setPanelTab(id)}>${t('editor.tab.' + id)}</button>`)}</div>
       <div class="wb-editor-frame" inert=${readOnly}>
       <div class="wb-editor-work">
       <div class="wb-editor-body">
@@ -1150,7 +1205,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <div class="wb-editor-actions" role="toolbar" aria-label=${t('editor.actions')}>${ACTIONS.map(action)}</div>
       </div>
       <div class="wb-editor-side">
-      <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />
+      <div class="wb-editor-sec" data-sec="photos">
+        <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />
+      </div>
+      <div class="wb-editor-sec" data-sec="select">
       ${(tool === 'clip' || tool === 'unclip') && html`<p class="wb-editor-context" role="status">${t('editor.context.' + tool)}</p>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">
@@ -1165,8 +1223,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
-        : html`<${ContextBar} t=${t} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
+      </div>
+      <div class="wb-editor-sec" data-sec="sequence">
       <${ModeSwitch} t=${t} mode=${mode} onMode=${setMode} layout=${doc.layout} onLayout=${changes => dispatch({ type: 'setLayout', changes })} />
       ${auto
         ? html`<p class="wb-editor-context" role="status">${t('editor.mode.auto')}</p>`
@@ -1175,6 +1235,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       ${mode === 'slides'
         ? html`<${SlideStrip} t=${t} doc=${doc} photos=${photos} count=${slides} current=${Math.min(slide, Math.max(0, slides - 1))} onSelect=${setSlide} />`
         : mode === 'free' && html`<${PageStrip} t=${t} doc=${doc} photos=${photos} current=${page} onSelect=${switchPage} onAdd=${addPage} onMove=${(id, to) => dispatch({ type: 'movePage', id, to })} onRemove=${removePage} />`}
+      </div>
       </div>
       </div>
       </div>

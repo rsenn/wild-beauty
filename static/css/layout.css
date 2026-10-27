@@ -496,12 +496,9 @@ body {
 
 /* node editor frame (EDITOR.md S2.2); colours and sizes are tokens (E44) */
 .wb-editor {
-  margin: calc(var(--wb-card-gap) * 2) 0;
+  margin: 0;
   padding: 8px;
   text-align: left;
-  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
-  border-radius: var(--wb-radius-frame);
-  background: var(--wb-card-ground);
 }
 
 .wb-editor-head {
@@ -599,23 +596,23 @@ body {
 }
 
 .wb-editor-body {
-  display: grid;
-  grid-template-columns: var(--wb-editor-tool-size) minmax(0, 1fr) var(--wb-editor-tool-size);
+  display: flex;
+  flex-flow: column nowrap;
   gap: var(--wb-editor-gap);
-  align-items: start;
-  max-width: calc(90vmin + 2 * 44px + 16px);
-  margin: 0 auto;
 }
 
+/* the tools are rows above and below the stage, wrapping; in landscape they
+   become the columns beside it (see the landscape block) */
 .wb-editor-tools,
 .wb-editor-actions {
   display: flex;
-  flex-flow: column nowrap;
+  flex-flow: row wrap;
   gap: 4px;
 }
 
 .wb-editor-stage {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;
@@ -761,13 +758,6 @@ body {
 .wb-editor-popover-left {
   right: auto;
   left: 0;
-}
-
-@media (min-width: 700px) {
-  .wb-editor-body {
-    grid-template-columns: 56px minmax(0, 1fr) 56px;
-    max-width: calc(90vmin + 2 * 56px + 16px);
-  }
 }
 
 .wb-node-title {
@@ -1151,40 +1141,171 @@ body {
   visibility: hidden;
 }
 
-/* landscape windows (desktop): the editor is never taller than the window.
-   The square stage is sized by the height that is left, and everything that
-   is not the stage (film-strip, context bar, palette, modes, scrubber,
-   pages) goes into a column beside it that scrolls on its own. */
-@media (min-width: 800px) and (orientation: landscape) {
+/* portrait: the stage is as wide as the screen. The editor frame gives up
+   its side border and padding and the page's side padding, and the head row
+   keeps its own. The tools are rows above and below the stage. */
+@media (orientation: portrait) {
   .wb-editor {
-    --wb-editor-chrome: 112px; /* editor frame, margins and the head row */
-    max-height: calc(100dvh - 2 * var(--wb-card-gap));
-    overflow: auto;
+    margin-right: -10px;
+    margin-left: -10px;
+    padding: 4px 0;
   }
 
-  .wb-editor-work {
-    display: flex;
-    flex-flow: row nowrap;
-    gap: calc(var(--wb-editor-gap) * 2);
-    align-items: flex-start;
+  .wb-editor-head,
+  .wb-editor-banner,
+  .wb-editor-strip,
+  .wb-editor-side {
+    padding-right: 8px;
+    padding-left: 8px;
   }
 
-  .wb-editor-work > .wb-editor-body {
-    flex: 0 1 auto;
-    width: calc(100dvh - var(--wb-editor-chrome) + 2 * 56px + 2 * var(--wb-editor-gap));
-    max-width: 62%;
+  .wb-editor-stage {
+    border-right-width: 0;
+    border-left-width: 0;
+    box-shadow: none;
+  }
+}
+
+/* the panel sections: all shown in portrait; the tab row is for landscape */
+.wb-editor-sec {
+  display: contents;
+}
+
+.wb-editor-tabs {
+  display: none;
+}
+
+/* landscape: the editor is a surface exactly one window high that does not
+   scroll (so the browser's address bar stays away). From the left: the
+   drawing tools, the square stage (as tall as the window), the actions, and
+   a panel that shows one section at a time (select, photos, sequence) and
+   scrolls inside itself. */
+@media (orientation: landscape) {
+  .wb-editor {
+    --wb-stage: min(calc(100dvh - 8px), calc(100vw - 420px));
+    --wb-strip: 52px;
+    display: grid;
+    grid-template-columns: var(--wb-strip) var(--wb-stage) var(--wb-strip) minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    column-gap: var(--wb-editor-gap);
+    row-gap: 4px;
+    align-content: start;
+    height: 100dvh;
+    margin-right: -10px;
+    margin-left: -10px;
+    padding: 4px var(--wb-editor-gap);
+    overflow: hidden;
+  }
+
+  .wb-editor-frame,
+  .wb-editor-work,
+  .wb-editor-body {
+    display: contents;
+  }
+
+  .wb-editor-head,
+  .wb-editor-tabs,
+  .wb-editor-banners,
+  .wb-editor-side {
+    grid-column: 4;
     margin: 0;
   }
 
-  .wb-editor-side {
-    flex: 1 1 260px;
-    min-width: 0;
-    max-height: calc(100dvh - var(--wb-editor-chrome));
-    overflow: auto;
+  .wb-editor-head {
+    grid-row: 1;
   }
 
-  .wb-editor-side > :first-child {
-    margin-top: 0;
+  .wb-editor-tabs {
+    display: flex;
+    grid-row: 2;
+    gap: 4px;
+  }
+
+  .wb-editor-tabs .wb-editor-chip {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-right: 4px;
+    padding-left: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wb-editor-tabs [aria-selected='true'] {
+    outline: var(--wb-select-width) solid var(--wb-select);
+  }
+
+  .wb-editor-banners {
+    grid-row: 3;
+  }
+
+  .wb-editor-side {
+    grid-row: 4;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .wb-editor-tools,
+  .wb-editor-actions {
+    flex-flow: column nowrap;
+    grid-row: 1 / span 4;
+    align-self: start;
+    height: var(--wb-stage);
+  }
+
+  .wb-editor-tools {
+    grid-column: 1;
+  }
+
+  .wb-editor-actions {
+    grid-column: 3;
+  }
+
+  .wb-editor-tools > *,
+  .wb-editor-actions > * {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 32px;
+  }
+
+  .wb-editor-stage {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    align-self: start;
+    width: var(--wb-stage);
+    height: var(--wb-stage);
+  }
+
+  .wb-editor-title {
+    flex: 1 1 8em;
+  }
+
+  .wb-editor-banner {
+    font-size: 0.85em;
+  }
+
+  .wb-editor-banner .wb-editor-chip {
+    min-height: 28px;
+    padding: 2px 8px;
+  }
+
+  /* one section at a time */
+  .wb-editor[data-tab='select'] .wb-editor-sec:not([data-sec='select']),
+  .wb-editor[data-tab='photos'] .wb-editor-sec:not([data-sec='photos']),
+  .wb-editor[data-tab='sequence'] .wb-editor-sec:not([data-sec='sequence']) {
+    display: none;
+  }
+
+  .wb-editor-sec {
+    display: block;
+  }
+}
+
+/* the key list is of no use without a keyboard */
+@media (pointer: coarse) {
+  .wb-editor-keys {
+    display: none;
   }
 }
 

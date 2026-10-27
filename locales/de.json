@@ -110,6 +110,10 @@
   "editor.look": "Aussehen",
   "editor.order.up": "Eine Ebene nach vorn",
   "editor.order.down": "Eine Ebene zurück",
+  "editor.panel": "Bereich",
+  "editor.tab.select": "Auswahl",
+  "editor.tab.photos": "Fotos",
+  "editor.tab.sequence": "Ablauf",
   "editor.strip": "Fotos",
   "editor.strip.left": "Früher",
   "editor.strip.right": "Später",
@@ -218,5 +222,11 @@
   "editor.layout.loose": "Locker",
   "editor.layout.tight": "Dicht",
   "editor.layout.loose.hint": "Rand und Abstand zwischen den Fotos",
-  "editor.layout.tight.hint": "Die Fotos füllen möglichst viel von der Bühne"
+  "editor.layout.tight.hint": "Die Fotos füllen möglichst viel von der Bühne",
+  "editor.wall": "Wand",
+  "editor.wall.height": "Höhe (m)",
+  "editor.wall.width": "Breite (m)",
+  "editor.wall.acute": "Eine Wand darf keine Ecke unter 90 Grad haben (diese hat {angle}).",
+  "editor.wall.gallery": "Wände gibt es nur in einem Galerie-Knoten: zuerst die Art auf Galerie stellen.",
+  "editor.keys.W": "Die gewählte Form wird zur Wand (Galerie) oder hört auf, eine zu sein"
 }

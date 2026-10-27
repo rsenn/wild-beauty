@@ -7,7 +7,7 @@ import { renderPage } from './server/ssr.js';
 import { DEFAULT_LANG, languageList, loadLocales, negotiate } from './server/i18n.js';
 import { config } from './server/config.js';
 import { dev, log } from './server/log.js';
-import { createUpload, deleteUpload, listUploads, readUploads, serveUpload } from './server/api/uploads.js';
+import { createUpload, deleteUpload, listUploads, readUploads, serveUpload, sweepUploads } from './server/api/uploads.js';
 import { lockRoute } from './server/api/locks.js';
 import { createNode, deleteNodeRoute, listNodesRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
 import { servePhoto } from './server/api/photos.js';
@@ -16,6 +16,7 @@ import { canView } from './server/api/nodes.js';
 import { getNode } from './server/db/nodes.js';
 import { database } from './server/db/db.js';
 import { reconcile } from './server/node/reconcile.js';
+import { sessionFor } from './server/session.js';
 import { capabilities, detectTools } from './server/media/tools.js';
 
 // directories served as files: /static/ (assets), /app/ (browser modules),
@@ -37,6 +38,12 @@ await detectTools();
 
   if(done.uploads.length || done.photos.length || done.files.length) log('reconcile', `${done.uploads.length} uploads, ${done.photos.length} photos, ${done.files.length} files removed`);
 }
+
+// uploads past their expiry go, at start and then every ten minutes
+const sweep = () => sweepUploads().then(gone => gone.length && log('sweep', `${gone.length} expired uploads removed`), () => {});
+
+await sweep();
+setInterval(sweep, 10 * 60 * 1000).unref();
 
 const text = (body, status) => new Response(body, { status, headers: { 'content-type': 'text/plain; charset=utf-8' } });
 
@@ -75,16 +82,16 @@ async function serveFile(pathname, method, prefix, root) {
 const listed = ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt }) => ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt });
 
 // what the client needs to translate: this language, plus English as fallback
-async function bootFor(lang, extra = {}) {
+async function bootFor(lang, extra = {}, owner = null) {
   const fallback = lang === DEFAULT_LANG ? {} : locales.get(DEFAULT_LANG);
 
-  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes }, uploads: extra.node ? [] : (await readUploads()).map(listed), ...extra };
+  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes }, uploads: extra.node ? [] : (await readUploads(owner)).map(listed), ...extra };
 }
 
 // `extra` adds to the boot JSON (the node page: `node` and `photos`);
 // `title` replaces the translated page title
-async function page(lang, titleKey, extra, title) {
-  const boot = await bootFor(lang, extra);
+async function page(lang, titleKey, extra, title, req) {
+  const boot = await bootFor(lang, extra, req ? sessionFor(req).owner : null);
   const body = renderPage(html`<${App} boot=${boot} />`, {
     lang,
     dir: boot.messages['meta.dir'],
@@ -101,8 +108,8 @@ async function page(lang, titleKey, extra, title) {
 }
 
 // GET /:lang/new: the upload area, the editor and the saved nodes (E68)
-async function newPage(lang) {
-  return page(lang, 'page.title.new', { nodes: visibleNodes(await database()) });
+async function newPage(lang, req) {
+  return page(lang, 'page.title.new', { nodes: visibleNodes(await database()) }, undefined, req);
 }
 
 // GET /:lang/node/:id: the saved node as a read-only page
@@ -124,7 +131,7 @@ function route(req) {
 
   if(pathname === '/api/uploads') {
     if(req.method === 'POST') return createUpload(req);
-    if(req.method === 'GET') return listUploads();
+    if(req.method === 'GET') return listUploads(req);
 
     return text('method not allowed\n', 405);
   }
@@ -143,7 +150,7 @@ function route(req) {
 
   const upload = /^\/api\/uploads\/([^/]+)$/.exec(pathname);
 
-  if(upload) return req.method === 'DELETE' ? deleteUpload(upload[1]) : text('method not allowed\n', 405);
+  if(upload) return req.method === 'DELETE' ? deleteUpload(upload[1], req) : text('method not allowed\n', 405);
 
   if(req.method !== 'GET' && req.method !== 'HEAD') return text('method not allowed\n', 405);
 
@@ -187,7 +194,7 @@ function route(req) {
 
   const m = /^\/([a-z]{2,3})\/new$/.exec(pathname);
 
-  if(m && locales.has(m[1])) return newPage(m[1]);
+  if(m && locales.has(m[1])) return newPage(m[1], req);
 
   return text('not found\n', 404);
 }

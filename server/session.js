@@ -19,11 +19,16 @@ export function sessionFor(req) {
 
   const tab = req.headers.get('x-wb-tab');
 
-  return { token, holder: hash(tab && TAB.test(tab) ? `${token}:${tab}` : token), fresh: token !== given };
+  // `owner` is per browser, not per tab: what a browser uploaded is shown to all its tabs
+  return { token, holder: hash(tab && TAB.test(tab) ? `${token}:${tab}` : token), owner: hash(`owner:${token}`), fresh: token !== given };
 }
 
 // the Set-Cookie value that stores the token
 export const sessionCookie = token => `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000`;
+
+// the same cookie with a lifetime of `ms`: uploads are kept that long, and the
+// browser forgets who it is at the same moment
+export const expiringCookie = (token, ms) => `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${Math.floor(ms / 1000)}; Expires=${new Date(Date.now() + ms).toUTCString()}`;
 
 // what is safe to show other people: the start of the hash
 export const holderLabel = holder => holder.slice(0, 8);

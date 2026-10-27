@@ -52,6 +52,15 @@ export function validateNode(body, { hasPhoto, themes } = {}) {
 
   if(!KINDS.includes(kind)) return fail('invalid', [{ code: 'bad_kind', path: 'kind' }]);
 
+  // the 3D settings and the wall layer belong to a gallery
+  if(kind !== 'gallery') {
+    if(body.doc.scene !== undefined) return fail('invalid', [{ code: 'scene_not_gallery', path: 'scene' }]);
+
+    const wall = body.doc.pages.flatMap((page, i) => page.steps.flatMap((step, j) => (step.wall ? [{ code: 'wall_not_gallery', path: `pages[${i}].steps[${j}].wall` }] : [])));
+
+    if(wall.length) return fail('invalid', wall);
+  }
+
   // the stored style is what the sanitiser lets through; an unknown theme id falls back to the page's
   const { theme, vars } = sanitize(body.doc.style);
   const style = { ...(theme && (!themes || themes.has(theme)) ? { theme } : {}), vars };

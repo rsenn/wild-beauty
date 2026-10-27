@@ -110,6 +110,10 @@
   "editor.look": "Aspect",
   "editor.order.up": "Avancer",
   "editor.order.down": "Reculer",
+  "editor.panel": "Panneau",
+  "editor.tab.select": "Sélection",
+  "editor.tab.photos": "Photos",
+  "editor.tab.sequence": "Séquence",
   "editor.strip": "Photos",
   "editor.strip.left": "Plus tôt",
   "editor.strip.right": "Plus tard",
@@ -218,5 +222,11 @@
   "editor.layout.loose": "Aéré",
   "editor.layout.tight": "Serré",
   "editor.layout.loose.hint": "Une marge et un espace entre les photos",
-  "editor.layout.tight.hint": "Les photos couvrent le plus possible de la scène"
+  "editor.layout.tight.hint": "Les photos couvrent le plus possible de la scène",
+  "editor.wall": "Mur",
+  "editor.wall.height": "Hauteur (m)",
+  "editor.wall.width": "Largeur (m)",
+  "editor.wall.acute": "Un mur ne peut pas avoir un angle inférieur à 90 degrés (celui-ci fait {angle}).",
+  "editor.wall.gallery": "Les murs n’existent que dans un nœud galerie : réglez d’abord le type sur galerie.",
+  "editor.keys.W": "La forme choisie devient un mur (galerie) ou cesse d’en être un"
 }

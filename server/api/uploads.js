@@ -8,6 +8,7 @@ import { sniff } from '../media/sniff.js';
 import { extractDisplay } from '../media/heif.js';
 import { ingest, uploadPath } from '../media/ingest.js';
 import { logFile } from '../log.js';
+import { expiringCookie, sessionFor } from '../session.js';
 
 mkdirSync(config.tmpDir, { recursive: true });
 
@@ -38,8 +39,27 @@ async function writeSidecar(record) {
   logFile('write', sidecarPath(record.hash), `${json.length} bytes`);
 }
 
+// what a client sees of a record: not who owns it
+const shown = ({ owners, ...record }) => record;
+
+// when a record expires: the last owner's expiry; records from before owners
+// existed have none and age from their upload
+const expiryOf = record => (record.owners ? Math.max(0, ...Object.values(record.owners)) : record.uploadedAt + config.uploadTtlMs);
+
+// the owner takes (or renews) the record for the whole lifetime
+async function claim(record, session) {
+  const live = Object.entries(record.owners ?? {}).filter(([, until]) => until > Date.now());
+
+  record.owners = { ...Object.fromEntries(live), [session.owner]: Date.now() + config.uploadTtlMs };
+  await writeSidecar(record);
+}
+
+// the reply for an upload: the record, and the cookie with the record's lifetime
+const uploaded = (record, status, session) => Response.json(shown(record), { status, headers: { 'set-cookie': expiringCookie(session.token, config.uploadTtlMs) } });
+
 // POST /api/uploads: raw body, name in X-Filename
 export async function createUpload(req) {
+  const session = sessionFor(req);
   const length = req.headers.get('content-length');
 
   if(length !== null && Number(length) > config.maxBytes) return fail(413, 'too-large', 'file too large');
@@ -86,7 +106,13 @@ export async function createUpload(req) {
     const final = resolve(config.uploadsDir, file);
 
     // same bytes again: keep the first copy and its record
-    if(existsSync(final) && existsSync(sidecarPath(hash))) return Response.json(await Bun.file(sidecarPath(hash)).json(), { status: 200 });
+    if(existsSync(final) && existsSync(sidecarPath(hash))) {
+      const known = await Bun.file(sidecarPath(hash)).json();
+
+      await claim(known, session);
+
+      return uploaded(known, 200, session);
+    }
 
     renameSync(tmp, final);
     logFile('write', final, `${size} bytes (moved from .tmp, ${type.mime})`);
@@ -106,9 +132,9 @@ export async function createUpload(req) {
 
     Object.assign(record, await ingest(final, uploadPath(record.display)));
 
-    await writeSidecar(record);
+    await claim(record, session);
 
-    return Response.json(record, { status: 201 });
+    return uploaded(record, 201, session);
   } catch {
     // client went away mid-upload or the disk failed
     return fail(500, 'upload-failed', 'upload failed');
@@ -124,16 +150,35 @@ export async function createUpload(req) {
 }
 
 // the sidecar records on disk, newest first; unreadable ones are skipped
-export async function readUploads() {
+async function readAll() {
   const names = readdirSync(config.uploadsDir).filter(n => n.endsWith('.json') && HASH.test(n.slice(0, -5)));
   const records = await Promise.all(names.map(n => Bun.file(resolve(config.uploadsDir, n)).json().catch(() => null)));
 
   return records.filter(r => r && r.hash).sort((a, b) => b.uploadedAt - a.uploadedAt);
 }
 
-// GET /api/uploads
-export async function listUploads() {
-  return Response.json(await readUploads());
+// the uploads of one owner (the `owner` of sessionFor), newest first
+export async function readUploads(owner) {
+  return (await readAll()).filter(r => r.owners?.[owner] > Date.now()).map(shown);
+}
+
+// GET /api/uploads: only what this browser's cookie uploaded, and not yet expired
+export async function listUploads(req) {
+  return Response.json(await readUploads(sessionFor(req).owner));
+}
+
+// remove every upload past its expiry; -> the hashes removed
+export async function sweepUploads() {
+  const gone = [];
+
+  for(const record of await readAll()) {
+    if(expiryOf(record) > Date.now()) continue;
+
+    await removeUpload(record.hash);
+    gone.push(record.hash);
+  }
+
+  return gone;
 }
 
 // GET /files/uploads/<hash>[.display].<ext>: only names that match UPLOAD_FILE
@@ -168,9 +213,19 @@ export async function removeUpload(hash) {
 // the sidecar record of an upload, or null
 export const readUpload = async hash => (HASH.test(hash) && existsSync(sidecarPath(hash)) ? Bun.file(sidecarPath(hash)).json().catch(() => null) : null);
 
-// DELETE /api/uploads/<hash>
-export async function deleteUpload(hash) {
+// DELETE /api/uploads/<hash>: the owner lets go; the files go with the last owner
+export async function deleteUpload(hash, req) {
   if(!HASH.test(hash)) return fail(400, 'bad-hash', 'invalid hash');
 
-  return (await removeUpload(hash)) ? new Response(null, { status: 204 }) : fail(404, 'not-found', 'no such upload');
+  const record = await readUpload(hash);
+  const owner = sessionFor(req).owner;
+
+  if(!record?.owners?.[owner]) return fail(404, 'not-found', 'no such upload');
+
+  delete record.owners[owner];
+
+  if(Object.values(record.owners).some(until => until > Date.now())) await writeSidecar(record);
+  else await removeUpload(hash);
+
+  return new Response(null, { status: 204 });
 }

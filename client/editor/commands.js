@@ -41,6 +41,7 @@ const KEYED = {
   recordMove: c => `matrix:${c.id}`,
   setVertices: c => `vertices:${c.id}`,
   setCrop: c => `crop:${c.id}`,
+  setWall: c => `wall:${c.id}`,
 };
 
 // the colour fields of each op a setColor may write
@@ -95,6 +96,8 @@ function onDoc(doc, c) {
 
       return step && COLOUR_FIELDS[step.op]?.includes(field) && model.isColour(c.color) ? model.updateStep(doc, c.id, { [field]: c.color }) : doc;
     }
+    case 'setWall':
+      return model.setWall(doc, c.id, c.wall);
     case 'setVertices':
       return model.setVertices(doc, c.id, c.vertices);
     case 'updateShape':
@@ -117,6 +120,9 @@ function onDoc(doc, c) {
 // the coalescing key for history.push
 export function apply(snap, command) {
   if(command.type === 'setKind') return { snap: model.KINDS.includes(command.kind) && command.kind !== snap.kind ? { ...snap, kind: command.kind } : snap, key: null };
+
+  // the wall layer only exists in a gallery (the kind lives next to the document)
+  if(command.type === 'setWall' && command.wall !== null && snap.kind !== 'gallery') return { snap, key: null };
 
   const doc = onDoc(snap.doc, command);
 

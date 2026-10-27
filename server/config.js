@@ -15,6 +15,8 @@ export const config = {
   tmpDir: resolve(uploads, '.tmp'),
   // Bun.serve rejects larger bodies with 413 before the handler runs
   maxBytes: 40 * 1024 * 1024,
+  // an upload (and the cookie that owns it) lives this long after its last upload
+  uploadTtlMs: Number(process.env.WB_UPLOAD_TTL_MS) || 7 * 24 * 3600 * 1000,
   // the pixel limit handed to ImageMagick when it decodes an upload
   toolTimeoutMs: 30000,
 };

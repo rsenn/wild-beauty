@@ -1,6 +1,8 @@
 // The node document (EDITOR.md S3.1): constants, ids and the empty node.
 // Shared by the browser and the server, so no DOM and no Bun APIs.
 import { pathFromVertices, verticesFromPath } from './shapes.js';
+import { acuteCorner, defaultWall, isWall } from './walls.js';
+import { textureHashes, validateScene } from './scene.js';
 
 export const VERSION = 1;
 
@@ -55,7 +57,7 @@ export const ALIGNS = ['left', 'center', 'right'];
 // --- validate, structure (E4) ---------------------------------------------
 // Types and shapes only; limits, numbers and references follow in `limits`.
 // validate(doc) -> [{ code, path }]; an empty list means valid. Codes:
-//   not_object  bad_version  bad_style  bad_mode  bad_bg  bad_title  bad_pages  bad_page
+//   not_object  bad_version  bad_style  bad_mode  bad_bg  bad_title  bad_scene  bad_layout  bad_pages  bad_page
 //   bad_steps   bad_step     unknown_op bad_id    bad_field
 
 const isObject = v => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -74,7 +76,7 @@ const opt = check => Object.assign(v => v === undefined || check(v), { optional:
 const STEPS = {
   photo: { id: isId, photo: isHash, m: isMatrix, crop: opt(v => isNumber(v) && v >= 0 && v <= 1), fit: opt(oneOf(FITS)), opacity: isNumber, blend: oneOf(BLENDS), clip: opt(isId), role: opt(oneOf(['picture', 'texture'])) },
   stroke: { id: isId, pts: isPoints, color: isColour, smooth: opt(v => typeof v === 'boolean') },
-  shape: { id: isId, path: isString, closed: v => typeof v === 'boolean', fill: opt(isFill), stroke: opt(isFill), strokeWidth: isNumber, wall: opt(v => isObject(v) && isNumber(v.height)) },
+  shape: { id: isId, path: isString, closed: v => typeof v === 'boolean', fill: opt(isFill), stroke: opt(isFill), strokeWidth: isNumber, wall: opt(isWall) },
   clip: { target: isId, shape: isId },
   unclip: { target: isId },
   blend: { target: isId, mode: oneOf(BLENDS) },
@@ -110,6 +112,7 @@ function validateStructure(doc) {
   if(doc.layout !== undefined && !(isObject(doc.layout) && (doc.layout.fill === undefined || FILLS.includes(doc.layout.fill)) && (doc.layout.gap === undefined || (isNumber(doc.layout.gap) && doc.layout.gap >= 0 && doc.layout.gap <= 100)) && Object.keys(doc.layout).every(k => k === 'fill' || k === 'gap'))) errors.push({ code: 'bad_layout', path: 'layout' });
 
   if(doc.title !== undefined && !isString(doc.title)) errors.push({ code: 'bad_title', path: 'title' });
+  if(doc.scene !== undefined) errors.push(...validateScene(doc.scene));
 
   if(!Array.isArray(doc.pages)) errors.push({ code: 'bad_pages', path: 'pages' });
   else
@@ -219,6 +222,13 @@ function validateLimits(doc) {
       }
     });
   });
+
+  // the textures of a scene are photos of this node that are marked as texture (every use)
+  for(const [i, hash] of textureHashes(doc.scene).entries()) {
+    const uses = doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo' && step.photo === hash));
+
+    if(!uses.length || !uses.every(step => step.role === 'texture')) errors.push({ code: 'dangling_ref', path: `scene.style.texture.images[${i}]` });
+  }
 
   if(photos.size > LIMITS.photos) errors.push({ code: 'too_many_photos', path: 'pages' });
   if(texts > LIMITS.textBoxes) errors.push({ code: 'too_many_text_boxes', path: 'pages' });
@@ -592,8 +602,14 @@ export function updateShape(doc, stepId, { fill, stroke, closed } = {}) {
 
     if(!parsed) return doc;
 
+    // a wall may not get a corner sharper than 90 degrees by being closed or opened
+    if(at.step.wall && acuteCorner(parsed.vertices, closed)) return doc;
+
     next.closed = closed;
     next.path = pathFromVertices(parsed.vertices, closed);
+
+    // a room has no width, a line has one
+    if(next.wall) next.wall = closed ? { height: next.wall.height } : { height: next.wall.height, width: next.wall.width ?? defaultWall(next).width };
   }
 
   return withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? next : step)));
@@ -610,5 +626,34 @@ export function setVertices(doc, stepId, vertices) {
 
   if(!vertices.every(v => ok(v.x) && ok(v.y) && [v.hin, v.hout].every(h => h === undefined || (Array.isArray(h) && h.length === 2 && h.every(ok))))) return doc;
 
+  if(at.step.wall && acuteCorner(vertices, at.step.closed)) return doc;
+
   return withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? { ...step, path: pathFromVertices(vertices, step.closed) } : step)));
+}
+
+// Flag a shape as a wall of the 3D gallery or take the flag off (`wall` null).
+// `wall` is { height, width? } (metres); missing fields get the defaults. A shape
+// with a corner sharper than 90 degrees is refused, so is a bad height or width.
+// Whether the node is a gallery is the command layer's business (commands.js).
+export function setWall(doc, stepId, wall) {
+  const at = findStep(doc, stepId);
+
+  if(!at || at.step.op !== 'shape') return doc;
+
+  if(wall === null) {
+    if(at.step.wall === undefined) return doc;
+
+    const { wall: _, ...rest } = at.step;
+
+    return withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? rest : step)));
+  }
+
+  const parsed = verticesFromPath(at.step.path);
+  const next = { ...defaultWall(at.step), ...(at.step.wall ?? {}), ...wall };
+
+  if(!parsed || !isWall(next) || acuteCorner(parsed.vertices, at.step.closed)) return doc;
+
+  if(at.step.closed) delete next.width;
+
+  return JSON.stringify(next) === JSON.stringify(at.step.wall) ? doc : withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? { ...step, wall: next } : step)));
 }
