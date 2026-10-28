@@ -155,3 +155,43 @@ describe('clipPolygon and cutPhoto commands', () => {
     expect(run(doc, { type: 'clipPolygon', id: 'photo001', polygon: [[0, 0]], shape: 'shape001', style })).toBe(doc);
   });
 });
+
+describe('duplicatePhoto command', () => {
+  const style = { color: '#336699', width: 4 };
+  const run = (doc, command) => apply({ doc, kind: 'node' }, command).snap.doc;
+  const start = () => {
+    const node = emptyNode();
+
+    return addPhoto(node, node.pages[0].id, HASH, info, 'photo001');
+  };
+
+  test('the copy sits right above the photo, one cascade step down and right', () => {
+    const next = run(start(), { type: 'duplicatePhoto', id: 'photo001', ids: ['photo002', 'shape002'] });
+
+    expect(findStep(next, 'photo002').index).toBe(findStep(next, 'photo001').index + 1);
+    expect(findStep(next, 'photo002').step.m).toEqual([1, 0, 0, 1, 100, 100]);
+    expect(findStep(next, 'photo001').step.m).toEqual([1, 0, 0, 1, 0, 0]);
+    expect(validate(next)).toEqual([]);
+  });
+
+  test('a clipped photo gets a clip shape of its own, moved along with the copy', () => {
+    let next = run(start(), { type: 'clipPolygon', id: 'photo001', polygon: [[100, 100], [900, 100], [500, 900]], shape: 'shape001', style });
+
+    next = run(next, { type: 'duplicatePhoto', id: 'photo001', ids: ['photo002', 'shape002'] });
+
+    expect(findStep(next, 'photo002').step.clip).toBe('shape002');
+    expect(findStep(next, 'photo001').step.clip).toBe('shape001');
+    expect(validate(next)).toEqual([]);
+
+    const [a, b] = ['photo001', 'photo002'].map(id => photoPolygon(next, id, { photos }));
+
+    expect(b.map(([x, y]) => [Math.round(x - 100), Math.round(y - 100)])).toEqual(a.map(([x, y]) => [Math.round(x), Math.round(y)]));
+  });
+
+  test('a photo that does not exist, or bad ids, change nothing', () => {
+    const doc = start();
+
+    expect(run(doc, { type: 'duplicatePhoto', id: 'nothing1', ids: ['a', 'b'] })).toBe(doc);
+    expect(run(doc, { type: 'duplicatePhoto', id: 'photo001', ids: ['a'] })).toBe(doc);
+  });
+});

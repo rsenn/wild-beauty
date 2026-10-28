@@ -477,9 +477,11 @@ export function cropWindow({ width, height }, crop = 0.5) {
   return width >= height ? { side, x: (width - side) * at, y: 0 } : { side, x: 0, y: (height - side) * at };
 }
 
-// a photo step on top of `pageId`, covering the stage, crop centred unless given
-export function addPhoto(doc, pageId, hash, info, id = unique(allIds(doc)), role, crop) {
-  return addStep(doc, pageId, { op: 'photo', id, photo: hash, m: IDENTITY, crop: clamp(Number.isFinite(crop) ? crop : 0.5, 0, 1), opacity: 1, blend: 'normal', ...(role === 'texture' && { role }) });
+// a photo step on top of `pageId`, covering the stage unless a matrix `m` is given, crop centred unless given
+export function addPhoto(doc, pageId, hash, info, id = unique(allIds(doc)), role, crop, m) {
+  const matrix = Array.isArray(m) && m.length === 6 && m.every(v => Number.isFinite(v) && Math.abs(v) <= LIMITS.number) ? m : IDENTITY;
+
+  return addStep(doc, pageId, { op: 'photo', id, photo: hash, m: matrix, crop: clamp(Number.isFinite(crop) ? crop : 0.5, 0, 1), opacity: 1, blend: 'normal', ...(role === 'texture' && { role }) });
 }
 
 // a texture photo is for the 3D scene: not drawn as a picture (EDITOR.md S2.5)

@@ -91,3 +91,20 @@ describe('nudge', () => {
     expect(nudge('sideways', centre)).toBeNull();
   });
 });
+
+describe('flip', () => {
+  const centre = [300, 400];
+
+  test('flipH mirrors left and right about the centre, flipV top and bottom', () => {
+    near(apply(nudge('flipH', centre), [200, 350]), [400, 350]);
+    near(apply(nudge('flipV', centre), [200, 350]), [200, 450]);
+    near(apply(nudge('flipH', centre), centre), centre);
+  });
+
+  test('flipping twice is the identity', () => {
+    const [a, b, c, d, e, f] = nudge('flipH', centre);
+    const twice = [a * a + c * b, b * a + d * b, a * c + c * d, b * c + d * d, a * e + c * f + e, b * e + d * f + f];
+
+    twice.forEach((v, i) => expect(v + 0).toBeCloseTo(IDENTITY[i], 6));
+  });
+});

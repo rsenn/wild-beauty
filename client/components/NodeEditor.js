@@ -15,6 +15,8 @@ import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDra
 import { centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor/hit.js';
 import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../editor/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
+import { cascade, photosOnPage } from '../editor/cascade.js';
+import { exportImage } from '../editor/export.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
 import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag } from '../editor/handles.js';
 import { photoPolygon } from '../editor/clipping.js';
@@ -197,7 +199,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [clipLine, setClipLine] = useState(null);
   const [coarse] = useState(() => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches);
   const handlePx = coarse ? HANDLE_PX_TOUCH : HANDLE_PX;
-  const [hint, setHint] = useState(''); // a short note in place of the clip tool's help text
+  const [hint, setHint] = useState('');
+  const [exporting, setExporting] = useState(false);
+  const [exportFailed, setExportFailed] = useState(false); // a short note in place of the clip tool's help text
   const latestT = useRef(t); // the handlers registered once speak the current language
   const lockRef = useRef(null);
   const loadingRef = useRef(target !== NEW);
@@ -337,13 +341,17 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const undo = () => latest.current.readOnly || ((inserted.current = null), setHist(history.undo));
   const redo = () => latest.current.readOnly || ((inserted.current = null), setHist(history.redo));
 
-  const addUpload = payload => {
+  // A photo lands as a half-stage square in a diagonal cascade (E112): `index` is
+  // the number of photos the page already has (a batch counts up, the document
+  // is not re-read between its photos), `batch` how many arrive together. One
+  // photo alone on an empty page covers the stage, as before.
+  const addUpload = (payload, { index = photosOnPage(latest.current.doc.pages[latest.current.page]), batch = 1 } = {}) => {
     if(!isPayload(payload)) return;
 
     setK(null);
     setPlaying(false);
     setPhotos(old => ({ ...old, [payload.hash]: photoInfo(payload) }));
-    dispatch({ type: 'addPhoto', hash: payload.hash, info: payload, role: payload.role, crop: payload.crop, page: latest.current.pageId, id: unique(allIds(latest.current.doc)) });
+    dispatch({ type: 'addPhoto', hash: payload.hash, info: payload, role: payload.role, crop: payload.crop, page: latest.current.pageId, id: unique(allIds(latest.current.doc)), m: index === 0 && batch === 1 ? undefined : cascade(index) });
   };
 
   const remove = id => {
@@ -356,7 +364,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const addQueued = () => {
     const queued = takePending();
 
-    queued.forEach(addUpload);
+    const start = photosOnPage(latest.current.doc.pages[latest.current.page]);
+
+    queued.forEach((payload, k) => addUpload(payload, { index: start + k, batch: queued.length }));
 
     if(queued.length) document.getElementById('wb-editor')?.focus();
   };
@@ -1189,6 +1199,40 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setHist(history.seal);
   };
 
+  // save the page on show as a picture (E125): the same drawing the viewer makes
+  const exportAs = async format => {
+    if(exporting) return;
+
+    setExporting(true);
+    setExportFailed(false);
+
+    try {
+      await exportImage(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page }, { format, background: typeof doc.bg === 'string' ? doc.bg : '#ffffff', title: doc.title });
+    } catch {
+      setExportFailed(true);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // duplicate the selected photo: the copy lands one cascade step down and right,
+  // selected, with a clip of its own (E126)
+  const duplicateSelection = () => {
+    const c = latest.current;
+    const id = c.selected;
+
+    if(!id || c.previewing || c.editStep?.op !== 'photo' || c.doc.pages[c.page].steps.length > LIMITS.steps - 2) return;
+
+    const taken = new Set(allIds(c.doc));
+    const copy = unique(taken);
+
+    taken.add(copy);
+    dispatch({ type: 'duplicatePhoto', id, ids: [copy, unique(taken)] });
+
+    setSelected(copy);
+    setHist(history.seal);
+  };
+
   // the wheel zooms the selection about the pointer, with Shift it turns it
   const wheel = (e, units) => {
     const { selected: id } = latest.current;
@@ -1270,6 +1314,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           <input type="text" maxlength=${LIMITS.title} autocomplete="off" value=${title} placeholder=${t('editor.title.placeholder')} onInput=${e => dispatch({ type: 'setTitle', title: e.target.value })} />
         </label>
         <span class="wb-editor-head-fields" inert=${readOnly}><${Properties} t=${t} kind=${kind} bg=${doc.bg} dispatch=${dispatch} /></span>
+        <${Popover} label=${t('editor.export')} class="wb-editor-export" align="right">
+          <button type="button" class="wb-editor-chip" disabled=${exporting} onClick=${() => exportAs('png')}>${t('editor.export.png')}</button>
+          <button type="button" class="wb-editor-chip" disabled=${exporting} onClick=${() => exportAs('jpg')}>${t('editor.export.jpg')}</button>
+          ${exporting && html`<p role="status">${t('editor.export.busy')}</p>`}
+          ${exportFailed && html`<p role="alert">${t('editor.export.error')}</p>`}
+        <//>
         <${Popover} label=${t('editor.keys')} class="wb-editor-keys" align="right">
           <dl class="wb-editor-keylist">${KEYS.map(k => html`<dt><kbd>${k}</kbd></dt><dd>${t('editor.keys.' + k)}</dd>`)}</dl>
         <//>
@@ -1350,7 +1400,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
-        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="sequence">

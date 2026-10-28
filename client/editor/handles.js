@@ -65,7 +65,7 @@ export function rotateDrag(base, centre, down, now) {
   return multiply(aboutPoint(1, turn, centre), base);
 }
 
-// the similarity of a button press about `centre`; kind: larger, smaller, left, right
+// the matrix of a button press about `centre`; kind: larger, smaller, left, right (similarities), flipH, flipV (mirrors)
 export function nudge(kind, centre) {
   switch(kind) {
     case 'larger':
@@ -76,6 +76,11 @@ export function nudge(kind, centre) {
       return aboutPoint(1, -STEP_TURN, centre);
     case 'right':
       return aboutPoint(1, STEP_TURN, centre);
+    // a mirror about the centre: left and right, or top and bottom, change places
+    case 'flipH':
+      return [-1, 0, 0, 1, 2 * centre[0], 0];
+    case 'flipV':
+      return [1, 0, 0, -1, 0, 2 * centre[1]];
     default:
       return null;
   }

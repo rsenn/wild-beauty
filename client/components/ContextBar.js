@@ -10,7 +10,7 @@ const Button = ({ label, onClick, pressed, disabled, children }) => html`<button
 
 const Color = ({ label, value, onInput }) => html`<label class="wb-editor-field">${label} <input type="color" value=${/^#[0-9a-f]{6}$/i.test(value ?? '') ? value : '#000000'} onInput=${e => onInput(e.target.value)} /></label>`;
 
-export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, dispatch }) => {
+export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, dispatch }) => {
   if(!step) return html`<p class="wb-editor-context">${t('editor.context.empty')}</p>`;
 
   const id = step.id;
@@ -22,8 +22,9 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, on
   `;
   // larger, smaller, turn left, turn right: the buttons for what a pinch does (E113)
   const nudges = onNudge && html`<span class="wb-editor-nudge" role="group" aria-label=${t('editor.nudge')}>
-    ${[['smaller', '\u2212'], ['larger', '+'], ['left', '\u21ba'], ['right', '\u21bb']].map(([name, glyph]) => html`<button type="button" class="wb-editor-chip wb-editor-nudge-btn" aria-label=${t('editor.nudge.' + name)} title=${t('editor.nudge.' + name)} onClick=${() => onNudge(name)}>${glyph}</button>`)}
+    ${[['smaller', '\u2212'], ['larger', '+'], ['left', '\u21ba'], ['right', '\u21bb'], ...(step.op === 'text' ? [] : [['flipH', '\u21c6'], ['flipV', '\u21c5']])].map(([name, glyph]) => html`<button type="button" class="wb-editor-chip wb-editor-nudge-btn" aria-label=${t('editor.nudge.' + name)} title=${t('editor.nudge.' + name)} onClick=${() => onNudge(name)}>${glyph}</button>`)}
   </span>`;
+  const duplicate = onDuplicate && step.op === 'photo' && html`<${Button} onClick=${onDuplicate}>${t('editor.duplicate')}<//>`;
   const remove = html`<${Button} onClick=${() => dispatch({ type: 'removeStep', id })}>${t('editor.step.delete')}<//>`;
 
   let controls;
@@ -61,5 +62,5 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, on
     `;
   }
 
-  return html`<div class="wb-editor-context wb-editor-context-bar" role="toolbar" aria-label=${t('editor.context.label')}>${controls}${nudges}${order}${remove}</div>`;
+  return html`<div class="wb-editor-context wb-editor-context-bar" role="toolbar" aria-label=${t('editor.context.label')}>${controls}${nudges}${duplicate}${order}${remove}</div>`;
 };

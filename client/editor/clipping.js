@@ -4,7 +4,8 @@
 import { effective } from './render.js';
 import { simplify } from './clipstroke.js';
 import { outlineOf, shapePoints } from './hit.js';
-import { addStep, findStep, removeStep, setClip } from './model.js';
+import { multiply } from './matrix.js';
+import { addStep, findStep, LIMITS, removeStep, setClip, setMatrix } from './model.js';
 import { pathFromVertices } from './shapes.js';
 
 const r = v => Math.round(v * 100) / 100;
@@ -84,4 +85,30 @@ export function cutPhoto(doc, id, pieces, ids, style) {
   next = setClip(next, id, ids[0]);
 
   return dropUnused(next, clip);
+}
+
+// Duplicate photo `id` (E126): the copy sits right above it, shifted by `offset`
+// units down and right (one cascade step), and is a photo of its own: a clip shape
+// is copied too (`ids` = [id of the copy, id of the copy's clip shape]), so
+// changing one does not change the other. Nothing when the page is full.
+export function duplicatePhoto(doc, id, ids, offset = 100) {
+  const at = findStep(doc, id);
+
+  if(at?.step.op !== 'photo' || ids?.length !== 2 || doc.pages[at.page].steps.length > LIMITS.steps - 2) return doc;
+
+  const pageId = doc.pages[at.page].id;
+  const by = effective(doc.pages[at.page].steps).by;
+  const shift = m => multiply([1, 0, 0, 1, offset, offset], m);
+  const { clip, ...base } = at.step;
+  const original = clip && findStep(doc, clip);
+  const copy = { ...base, id: ids[0], m: shift(by.get(id)?.m ?? at.step.m) };
+  let next = doc;
+
+  if(original) {
+    next = addStep(next, pageId, { ...original.step, id: ids[1] });
+    next = setMatrix(next, ids[1], shift(by.get(clip)?.m ?? [1, 0, 0, 1, 0, 0]));
+    copy.clip = ids[1];
+  }
+
+  return addStep(next, pageId, copy, findStep(next, id).index + 1);
 }

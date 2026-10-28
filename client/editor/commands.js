@@ -5,7 +5,7 @@
 // it. Pure: a command that changes nothing (unknown id, same value) returns
 // the same snapshot, which history.push then ignores.
 import * as model from './model.js';
-import { clipPolygon, cutPhoto } from './clipping.js';
+import { clipPolygon, cutPhoto, duplicatePhoto } from './clipping.js';
 import { effective } from './render.js';
 import { invert, multiply } from './matrix.js';
 
@@ -54,7 +54,7 @@ export const commandKey = command => KEYED[command.type]?.(command) ?? null;
 function onDoc(doc, c) {
   switch(c.type) {
     case 'addPhoto':
-      return model.addPhoto(doc, c.page ?? doc.pages[0].id, c.hash, c.info, c.id, c.role, c.crop);
+      return model.addPhoto(doc, c.page ?? doc.pages[0].id, c.hash, c.info, c.id, c.role, c.crop, c.m);
     case 'addStep':
       return model.addStep(doc, c.page ?? doc.pages[0].id, c.step, c.index);
     case 'updateStep':
@@ -91,6 +91,8 @@ function onDoc(doc, c) {
       return clipPolygon(doc, c.id, c.polygon, c.shape, c.style);
     case 'cutPhoto':
       return cutPhoto(doc, c.id, c.pieces, c.ids, c.style);
+    case 'duplicatePhoto':
+      return duplicatePhoto(doc, c.id, c.ids);
     case 'setTitle':
       return model.setTitle(doc, c.title);
     case 'setBg':
