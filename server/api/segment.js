@@ -14,15 +14,25 @@ const MAX_POINTS = 32;
 
 const fail = (status, code, message) => Response.json({ error: { code, message } }, { status });
 
-// the baked photo for a hash: data/photos/<hash>.<ext> (no thumbnails)
+// the image of a photo hash: the baked photo (data/photos/<hash>.<ext>) once the
+// node was saved, else the upload the editor shows (uploads/<hash>.display.<ext>,
+// or the original when it needed no display file)
 const photoFile = hash => {
-  try {
-    const name = readdirSync(config.photosDir).find(n => n.startsWith(`${hash}.`) && !n.includes('.thumb.'));
+  const find = (dir, test) => {
+    try {
+      const name = readdirSync(dir).find(test);
 
-    return name && resolve(config.photosDir, name);
-  } catch {
-    return null;
-  }
+      return name && resolve(dir, name);
+    } catch {
+      return null;
+    }
+  };
+
+  return (
+    find(config.photosDir, n => n.startsWith(`${hash}.`) && !n.includes('.thumb.')) ||
+    find(config.uploadsDir, n => n.startsWith(`${hash}.display.`)) ||
+    find(config.uploadsDir, n => new RegExp(`^${hash}\\.(jpe?g|png|webp)$`).test(n))
+  );
 };
 
 // [[x, y, label], ...] with x, y in 0..1 of the photo; null when malformed
@@ -82,7 +92,7 @@ export async function segmentRoute(req) {
   let proc;
 
   try {
-    proc = Bun.spawn(argv, { env: { PATH: process.env.PATH, LANG: 'C', HOME: '/tmp' }, stdin: 'ignore', stdout: 'pipe', stderr: 'ignore', killSignal: 'SIGKILL' });
+    proc = Bun.spawn(argv, { env: { PATH: process.env.PATH, LANG: 'C', HOME: process.env.HOME ?? '/tmp', ...(MODELS && { WB_MODELS_DIR: MODELS }) }, stdin: 'ignore', stdout: 'pipe', stderr: 'ignore', killSignal: 'SIGKILL' });
   } catch(e) {
     rmSync(out, { recursive: true, force: true });
     log('exec', `-> ${TOOL} failed to start: ${e.message}`);
