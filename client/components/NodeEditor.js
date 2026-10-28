@@ -84,7 +84,7 @@ function wallRefusal(snap, command) {
   return acute ? { key: 'editor.wall.acute', params: { angle: Math.round(acute.angle) } } : null;
 }
 
-const KEYS = ['V P S C U T', 'PageDown PageUp', 'Escape', 'Arrows', '+ -', ', .', '[ ]', 'Delete', '\\', 'Space', 'Enter', 'Backspace', 'W', 'Ctrl+Z Ctrl+Y', 'Ctrl+S'];
+const KEYS = ['V P S C U T', 'PageDown PageUp', 'Escape', 'Arrows', '+ -', ', .', '[ ]', 'Delete', '\\', 'Space', 'Enter', 'Backspace', 'W', 'I', 'Ctrl+Z Ctrl+Y', 'Ctrl+S'];
 const SPACING = 4;
 const VERTEX_PX = 14; // how near a click picks a vertex or handle
 const CLOSE_PX = 14; // how near the first vertex a click closes the shape
@@ -290,7 +290,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const tr = (key, params) => latestT.current(key, params);
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
-  latest.current = { cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing };
+  latest.current = { cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
 
   // every change of the node goes through here
   const dispatch = command => {
@@ -736,6 +736,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         return;
       }
 
+      // I: the dropper for the colour the palette or the selection is setting
+      if(plain && !e.shiftKey && !inField(e.target) && !e.repeat && e.key.toLowerCase() === 'i' && latest.current.dropFor) {
+        e.preventDefault();
+        latest.current.startDropper(latest.current.dropFor);
+
+        return;
+      }
+
       // PageDown / PageUp walk through the steps; in the clip tool, through the shapes that could mask
       if(plain && !inField(e.target) && (e.key === 'PageDown' || e.key === 'PageUp')) {
         e.preventDefault();
@@ -902,7 +910,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // has rested; only while something shows them (the palette, the properties)
   const [scenePal, setScenePal] = useState(null);
   const [propsOpen, setPropsOpen] = useState(false);
-  const wantsPalette = propsOpen || tool === 'pen' || tool === 'shape' || editStep?.op === 'stroke' || editStep?.op === 'shape';
+  const wantsPalette = propsOpen || editStep?.op === 'text' || tool === 'pen' || tool === 'shape' || editStep?.op === 'stroke' || editStep?.op === 'shape';
   const loaded = Object.keys(photos).length;
 
   useEffect(() => {
@@ -1714,7 +1722,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     const down = e => {
       const mine = dropper.current;
-      const svg = document.querySelector('.wb-editor-stage svg');
+      const svg = document.querySelector('.wb-editor-stage svg.wb-editor-overlay');
 
       if(!mine || !svg?.contains(e.target)) return stopDropper();
 
@@ -1922,12 +1930,17 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const paletteTargets = tool === 'pen' || tool === 'shape' ? ['pen'] : editStep?.op === 'stroke' ? ['stroke'] : editStep?.op === 'shape' ? ['fill', 'outline'] : null;
   const paletteTarget = paletteTargets && (paletteTargets.includes(aim) ? aim : paletteTargets[0]);
   const reference = editStep?.op === 'photo' ? editStep : strip[strip.length - 1];
-  const paletteColours = paletteTargets && swatches(scenePal ?? photos[reference?.photo]?.palette ?? [], themeColours()).all;
+  const pal = (paletteTargets || propsOpen || editStep?.op === 'text') && swatches(scenePal ?? photos[reference?.photo]?.palette ?? [], themeColours());
+  const usedNow = pal ? usedColours(doc).filter(hex => !pal.all.includes(hex)) : [];
   const paletteCurrent = paletteTarget === 'pen' ? color : paletteTarget === 'stroke' ? editStep.color : paletteTarget === 'fill' ? editStep.fill : paletteTarget === 'outline' ? editStep.stroke : null;
   const pick = hex => {
     if(paletteTarget === 'pen') setColor(hex);
     else dispatch({ type: 'setColor', id: editStep.id, color: hex, ...(paletteTarget === 'fill' ? { field: 'fill' } : paletteTarget === 'outline' ? { field: 'stroke' } : {}) });
   };
+
+  // the colour the dropper key sets: the palette's target, else the colour of a selected text box
+  latest.current.startDropper = startDropper;
+  latest.current.dropFor = paletteTarget ? pick : editStep?.op === 'text' ? hex => dispatch({ type: 'setColor', id: editStep.id, field: 'color', color: hex }) : null;
 
   if(loading || loadError)
     return html`<section id="wb-editor" class="wb-editor" tabindex="-1" aria-label=${t('editor.label')}>
@@ -1949,7 +1962,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           <span class="wb-sr-only">${t('editor.title.label')}</span>
           <input type="text" maxlength=${LIMITS.title} autocomplete="off" value=${title} placeholder=${t('editor.title.placeholder')} onInput=${e => dispatch({ type: 'setTitle', title: e.target.value })} />
         </label>
-        <span class="wb-editor-head-fields" inert=${readOnly}><${Properties} t=${t} kind=${kind} bg=${doc.bg} colours=${swatches(scenePal ?? photos[reference?.photo]?.palette ?? [], themeColours()).all} onOpen=${setPropsOpen} dispatch=${dispatch} /></span>
+        <span class="wb-editor-head-fields" inert=${readOnly}><${Properties} t=${t} kind=${kind} bg=${doc.bg} pal=${pal} used=${usedNow} dropper=${startDropper} onOpen=${setPropsOpen} dispatch=${dispatch} /></span>
         <${Popover} label=${t('editor.export')} class="wb-editor-export" align="right">
           <button type="button" class="wb-editor-chip" disabled=${exporting} onClick=${() => exportAs('png')}>${t('editor.export.png')}</button>
           <button type="button" class="wb-editor-chip" disabled=${exporting} onClick=${() => exportAs('jpg')}>${t('editor.export.jpg')}</button>
@@ -2025,7 +2038,6 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       ${tool === 'wand' && html`<div class="wb-editor-context"><button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'add' ? 'true' : 'false'} onClick=${() => setWandMode('add')}>${t('editor.wand.add')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'sub' ? 'true' : 'false'} onClick=${() => setWandMode('sub')}>${t('editor.wand.subtract')}</button>${wandPick && wandPick.count > 1 && html` <button type="button" class="wb-editor-chip" disabled=${wandPick.index <= 0} onClick=${() => wandStep(-1)}>${t('editor.nudge.smaller')}</button> <button type="button" class="wb-editor-chip" disabled=${wandPick.index >= wandPick.count - 1} onClick=${() => wandStep(1)}>${t('editor.nudge.larger')}</button>`}</div>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">
-            <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
             <button type="button" class="wb-editor-chip" disabled=${shape.vertices.length < 2} onClick=${() => commitShape(shape)}>${t('editor.shape.finish')}</button>
             <button type="button" class="wb-editor-chip" disabled=${!shape.vertices.length} onClick=${() => setDraft(emptyDraft())}>${t('editor.shape.cancel')}</button>
@@ -2033,11 +2045,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           </div>`
         : tool === 'pen'
         ? html`<div class="wb-editor-pen-options">
-            <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
-        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} onCutout=${removeBackground} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
-      ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} used=${usedColours(doc).filter(hex => !paletteColours.includes(hex))} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
+        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} pal=${pal} used=${usedNow} onCutout=${removeBackground} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+      ${paletteTargets && html`<${Palette} t=${t} pal=${pal} used=${usedNow} dropper=${startDropper} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">
         <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />

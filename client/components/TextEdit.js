@@ -20,7 +20,7 @@ export const TextEdit = ({ step, m, scale, label, onText, onDone, onGrip }) => {
     `width:${step.w}px`,
     `height:${step.h}px`,
     `padding:${pad}px`,
-    `font:${step.bold ? 700 : 400} ${step.size}px/1.2 ${(FONTS[step.font] ?? FONTS.sans).stack}`,
+    `font:${step.bold ? (FONTS[step.font] ?? FONTS.sans).bold : 400} ${step.size}px/1.2 ${(FONTS[step.font] ?? FONTS.sans).stack}`,
     `text-align:${step.align === 'center' ? 'center' : step.align === 'end' ? 'end' : 'start'}`,
     `caret-color:${step.color}`,
     `transform:matrix(${a * scale},${b * scale},${c * scale},${d * scale},${e * scale},${f * scale})`,

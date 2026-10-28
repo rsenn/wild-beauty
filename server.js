@@ -11,6 +11,7 @@ import { clearUploads, createUpload, deleteUpload, listUploads, readUploads, ser
 import { lockRoute } from './server/api/locks.js';
 import { createNode, deleteNodeRoute, listNodesRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
 import { manifestResponse, workerResponse } from './server/pwa.js';
+import { graphOf, graphRoute } from './server/api/graph.js';
 import { cutoutRoute } from './server/api/cutout.js';
 import { segmentRoute } from './server/api/segment.js';
 import { servePhoto } from './server/api/photos.js';
@@ -99,7 +100,7 @@ const listed = ({ hash, ext, display, name, size, mime, width, height, padding, 
 async function bootFor(lang, extra = {}, owner = null) {
   const fallback = lang === DEFAULT_LANG ? {} : locales.get(DEFAULT_LANG);
 
-  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes, uploadDays: Math.max(1, Math.round(config.uploadTtlMs / 86400000)) }, uploads: extra.node ? [] : (await readUploads(owner)).map(listed), ...extra };
+  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes, uploadDays: Math.max(1, Math.round(config.uploadTtlMs / 86400000)) }, uploads: extra.node || extra.graph ? [] : (await readUploads(owner)).map(listed), ...extra };
 }
 
 // `extra` adds to the boot JSON (the node page: `node` and `photos`);
@@ -126,6 +127,11 @@ async function newPage(lang, req) {
   return page(lang, 'page.title.new', { nodes: visibleNodes(await database()) }, undefined, req);
 }
 
+// GET /:lang/tree: the graph of the nodes (preliminary demo of GRAPH.md)
+async function treePage(lang, req) {
+  return page(lang, 'page.title.tree', { graph: graphOf(await database()) }, undefined, req);
+}
+
 // GET /:lang/node/:id: the saved node as a read-only page
 async function nodePage(lang, id) {
   const h = await database();
@@ -150,6 +156,8 @@ function route(req) {
 
     return text('method not allowed\n', 405);
   }
+
+  if(pathname === '/api/graph' || pathname === '/api/graph/ops') return graphRoute(req);
 
   if(pathname === '/api/segment') return req.method === 'POST' ? segmentRoute(req) : text('method not allowed\n', 405);
 
@@ -216,6 +224,10 @@ function route(req) {
   const viewed = /^\/([a-z]{2,3})\/node\/(\d{1,15})$/.exec(pathname);
 
   if(viewed && locales.has(viewed[1])) return nodePage(viewed[1], Number(viewed[2]));
+
+  const tree = /^\/([a-z]{2,3})\/tree$/.exec(pathname);
+
+  if(tree && locales.has(tree[1])) return treePage(tree[1], req);
 
   const m = /^\/([a-z]{2,3})\/new$/.exec(pathname);
 

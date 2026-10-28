@@ -1,7 +1,7 @@
 // bun test: client/color.js and client/editor/palette.js (E84-E86)
 import { describe, expect, test } from 'bun:test';
 import { distance, fromOklch, parseHex, formatHex, toOklch } from '../../client/color.js';
-import { complement, dominant, neutral, swatches, tetradicPair, triadic } from '../../client/editor/palette.js';
+import { contrast, complement, dominant, neutral, swatches, tetradicPair, triadic } from '../../client/editor/palette.js';
 
 const hueOf = hex => toOklch(hex)[2];
 const gap = (a, b) => {
@@ -87,5 +87,21 @@ describe('palette', () => {
       expect(all.length).toBe(8);
       for(const hex of all) expect(hex).toMatch(/^#[0-9a-f]{6}$/);
     }
+  });
+});
+
+describe('contrast swatches', () => {
+  test('stand out from a scene: far from its dominant colours, no repeats', () => {
+    const scene = pal('#2c5d2a', '#3f7d3a', '#1f4a20', '#6aa35f');
+    const out = contrast(scene);
+
+    expect(out.length).toBe(6);
+    expect(new Set(out).size).toBe(6);
+    for(const hex of out.slice(0, 3)) expect(Math.min(...scene.map(s => distance(s.hex, hex)))).toBeGreaterThan(0.15);
+    expect(swatches(scene).contrast).toEqual(out);
+  });
+
+  test('a dark scene gets light colours first', () => {
+    expect(contrast(pal('#000000', '#101010', '#202020'))[0]).toMatch(/^#(ffffff|[c-f])/i);
   });
 });

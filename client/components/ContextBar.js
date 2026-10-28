@@ -1,5 +1,6 @@
 import { html } from '../html.js';
 import { BLENDS } from '../editor/model.js';
+import { ColourPick } from './ColourPick.js';
 import { FONT_IDS } from '../editor/text.js';
 import { DEFAULT_EDGE, EDGE_STYLES } from '../editor/edge.js';
 import { Popover } from './Popover.js';
@@ -16,7 +17,7 @@ const Color = ({ t, label, value, onInput, dropper }) => html`<span class="wb-ed
   ${dropper && html`<button type="button" class="wb-editor-chip wb-editor-dropper" title=${t('editor.dropper')} aria-label=${t('editor.dropper')} onClick=${() => dropper(onInput)}>\u2316</button>`}
 </span>`;
 
-export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, onCopy, onCut, onPaste, onDropper, onCutout, cutting, onText, onEditText, dispatch }) => {
+export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, onCopy, onCut, onPaste, onDropper, onCutout, pal, used, cutting, onText, onEditText, dispatch }) => {
   if(!step) return html`<div class="wb-editor-context wb-editor-context-bar"><p>${t('editor.context.empty')}</p>${onPaste && html`<${Button} onClick=${onPaste}>${t('editor.paste')}<//>`}</div>`;
 
   const id = step.id;
@@ -62,14 +63,16 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, on
       <span role="group" aria-label=${t('editor.text.align')}>${['start', 'center', 'end'].map(a => html`<${Button} pressed=${step.align === a} onClick=${() => onText({ align: a })}>${t('editor.text.align.' + a)}<//>`)}</span>
       <label class="wb-editor-field">${t('editor.text.size')} <input type="range" min="8" max="300" step="1" value=${step.size} onInput=${e => onText({ size: Number(e.target.value) })} /></label>
       <label class="wb-editor-field">${t('editor.text.width')} <input type="range" min="80" max="1000" step="10" value=${step.w} onInput=${e => onText({ w: Number(e.target.value) })} /></label>
-      <${Color} t=${t} dropper=${onDropper} label=${t('editor.stroke.color')} value=${step.color} onInput=${color => dispatch({ type: 'setColor', id, field: 'color', color })} />
+      <${Popover} label=${t('editor.text.fill')}>
+        ${pal && html`<${ColourPick} t=${t} pal=${pal} used=${used} current=${step.color} dropper=${onDropper} onPick=${color => dispatch({ type: 'setColor', id, field: 'color', color })} />`}
+      <//>
       <${Popover} label=${t('editor.text.outline')}>
-        <${Color} t=${t} dropper=${onDropper} label=${t('editor.stroke.color')} value=${step.outline?.color ?? '#ffffff'} onInput=${color => onText({ outline: { color, width: step.outline?.width ?? Math.max(2, step.size / 12) } })} />
+        ${pal && html`<${ColourPick} t=${t} pal=${pal} used=${used} current=${step.outline?.color} dropper=${onDropper} onPick=${color => onText({ outline: { color, width: step.outline?.width ?? Math.max(2, step.size / 12) } })} />`}
         <label class="wb-editor-field">${t('editor.text.outline.width')} <input type="range" min="0" max="40" step="1" value=${step.outline?.width ?? 0} onInput=${e => onText({ outline: { color: step.outline?.color ?? '#ffffff', width: Number(e.target.value) } })} /></label>
       <//>
       <${Popover} label=${t('editor.text.background')}>
         <${Button} pressed=${step.bg !== undefined} onClick=${() => dispatch({ type: 'updateStep', id, patch: { bg: step.bg === undefined ? '#ffffffcc' : undefined } })}>${t('editor.text.background')}<//>
-        ${step.bg !== undefined && html`<${Color} t=${t} dropper=${onDropper} label=${t('editor.text.background')} value=${typeof step.bg === 'string' ? step.bg.slice(0, 7) : '#ffffff'} onInput=${color => dispatch({ type: 'setColor', id, field: 'bg', color })} />
+        ${step.bg !== undefined && html`${pal && html`<${ColourPick} t=${t} pal=${pal} used=${used} current=${step.bg} dropper=${onDropper} onPick=${color => dispatch({ type: 'setColor', id, field: 'bg', color })} />`}
         <label class="wb-editor-field">${t('editor.text.padding')} <input type="range" min="0" max="100" step="1" value=${step.padding ?? 0} onInput=${e => onText({ padding: Number(e.target.value) })} /></label>
         <label class="wb-editor-field">${t('editor.text.radius')} <input type="range" min="0" max="200" step="1" value=${step.radius ?? 0} onInput=${e => onText({ radius: Number(e.target.value) })} /></label>`}
       <//>

@@ -62,8 +62,8 @@ export function renderText(step, m = step.m) {
   return html`<g data-step=${step.id} data-op="text" transform=${matrix(m)}>
     ${bg?.defs && html`<defs>${bg.defs}</defs>`}
     ${bg && bg.paint !== 'none' && html`<rect x="0" y="0" width=${step.w} height=${step.h} rx=${step.radius ?? 0} fill=${bg.paint} />`}
-    ${out && html`<text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? 700 : 400} fill="none" text-anchor=${anchorOf(step.align)} stroke=${step.outline.color} stroke-width=${step.outline.width} stroke-linejoin="round" dominant-baseline="text-before-edge" style="white-space:pre" aria-hidden="true">${rows}</text>`}
-    <text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? 700 : 400} fill=${safeColour(step.color) ?? '#000000'} text-anchor=${anchorOf(step.align)} dominant-baseline="text-before-edge" style="white-space:pre">${rows}</text>
+    ${out && html`<text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? face.bold : 400} fill="none" text-anchor=${anchorOf(step.align)} stroke=${step.outline.color} stroke-width=${step.outline.width} stroke-linejoin="round" dominant-baseline="text-before-edge" style="white-space:pre" aria-hidden="true">${rows}</text>`}
+    <text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? face.bold : 400} fill=${safeColour(step.color) ?? '#000000'} text-anchor=${anchorOf(step.align)} dominant-baseline="text-before-edge" style="white-space:pre">${rows}</text>
   </g>`;
 }
 

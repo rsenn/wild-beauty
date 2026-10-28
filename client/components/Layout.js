@@ -4,8 +4,8 @@ import { Nav } from './Nav.js';
 import { navItems } from '../nav.js';
 
 // page chrome: logo, tab strip, content; `hrefFor(code)` is the same page in
-// another language
-export const Layout = ({ active, hrefFor, children }) => {
+// another language; `bleed` drops the side padding of the content
+export const Layout = ({ active, hrefFor, bleed, children }) => {
   const { t, lang } = useI18n();
 
   return html`
@@ -14,7 +14,7 @@ export const Layout = ({ active, hrefFor, children }) => {
         <a class="wb-logo" href="/" aria-label="Wild Beauty"></a>
         <${Nav} items=${navItems(t, lang)} active=${active} hrefFor=${hrefFor} />
       </header>
-      <main class="wb-content">${children}</main>
+      <main class=${bleed ? 'wb-content wb-content-bleed' : 'wb-content'}>${children}</main>
     </div>
   `;
 };

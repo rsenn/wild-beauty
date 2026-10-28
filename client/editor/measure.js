@@ -9,7 +9,7 @@ export function measureText(text, font, size, bold = false) {
 
   if(!context) return String(text).length * size * 0.55;
 
-  context.font = `${bold ? 700 : 400} ${size}px ${(FONTS[font] ?? FONTS.sans).stack}`;
+  context.font = `${bold ? (FONTS[font] ?? FONTS.sans).bold : 400} ${size}px ${(FONTS[font] ?? FONTS.sans).stack}`;
 
   return context.measureText(String(text)).width;
 }

@@ -109,12 +109,43 @@ export function derive(d) {
 
 const BASIC = ['#d33f2f', '#2f6fd3', '#2fa35a', '#e8b923'];
 
-// the node's own colours when it has no photo (theme tokens read by the caller)
+// colours that stand out from the picture: black, white and a hue wheel in a
+// light and a dark step, picked one at a time for the largest distance to the
+// scene's dominant colours and to those already picked
+const CANDIDATES = ['#000000', '#ffffff', ...[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].flatMap(h => [fromOklch([0.85, 0.17, h]), fromOklch([0.45, 0.17, h])])];
+
+export function contrast(scene, count = 6) {
+  const against = dominant(scene, 6);
+  const out = [];
+
+  for(let n = 0; n < count; n++) {
+    let best = null;
+    let far = -1;
+
+    for(const hex of CANDIDATES) {
+      if(out.includes(hex)) continue;
+
+      const gap = Math.min(...[...against, ...out].map(c => distance(c, hex)), 1);
+
+      if(gap > far) {
+        far = gap;
+        best = hex;
+      }
+    }
+
+    if(best) out.push(best);
+  }
+
+  return out;
+}
+
+// the node's own colours when it has no photo (theme tokens read by the caller);
+// `contrast` stands out from the scene whatever the swatches are
 export function swatches(palette, fallback = []) {
   const d = dominant(palette);
   const own = d.length ? d : dominant([...fallback, ...BASIC].map(hex => ({ hex })));
 
-  return derive(own);
+  return { ...derive(own), contrast: contrast(d.length ? palette : [...fallback, ...BASIC].map(hex => ({ hex }))) };
 }
 
 // the colours the node already uses (strokes, shapes, text, the ground), the

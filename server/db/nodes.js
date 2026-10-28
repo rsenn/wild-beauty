@@ -131,3 +131,16 @@ export const releaseLock = (h, id, holder) => h.run('DELETE FROM node_locks WHER
 
 // remove the lock whoever holds it; true when a row went
 export const breakLock = (h, id) => h.run('DELETE FROM node_locks WHERE node_id = ?', id).changes > 0;
+
+// --- graph view (GRAPH.md S3.5) --------------------------------------------
+
+// every node as the graph draws it: { id, title, kind, tile, x, y, pinned, color }
+export const graphNodes = h =>
+  h.all('SELECT id, title, kind, tile, x, y, pinned, palette FROM nodes ORDER BY id').map(({ palette, pinned, ...row }) => ({ ...row, pinned: !!pinned, color: parse(palette)?.[0]?.hex ?? null }));
+
+export const graphEdges = h => h.all('SELECT from_id AS "from", to_id AS "to", label FROM node_links ORDER BY from_id, sort, id');
+
+// the place of a node on the graph, optionally pinned there -> true when the node exists
+export const setPosition = (h, id, x, y, pinned) => h.run('UPDATE nodes SET x = ?, y = ?, pinned = COALESCE(?, pinned) WHERE id = ?', x, y, pinned === undefined ? null : pinned ? 1 : 0, id).changes > 0;
+
+export const setPinned = (h, id, pinned) => h.run('UPDATE nodes SET pinned = ? WHERE id = ?', pinned ? 1 : 0, id).changes > 0;

@@ -1,11 +1,12 @@
 import { useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { KINDS } from '../editor/model.js';
+import { ColourPick } from './ColourPick.js';
 
 // The properties popover above the stage (EDITOR.md S2.9): kind and stage
 // ground now; visibility and group are shown but fixed in the PoC (no
 // accounts); the theme joins with M2b.
-export const Properties = ({ t, kind, bg, colours = [], onOpen, dispatch }) => {
+export const Properties = ({ t, kind, bg, pal, used = [], dropper, onOpen, dispatch }) => {
   const [open, setOpenState] = useState(false);
   const setOpen = value => (setOpenState(value), onOpen?.(value));
 
@@ -24,13 +25,8 @@ export const Properties = ({ t, kind, bg, colours = [], onOpen, dispatch }) => {
           <select disabled><option>${t('editor.group.none')}</option></select>
         </label>
         <div class="wb-editor-field" role="group" aria-label=${t('editor.props.bg')}>${t('editor.props.bg')}
-          <span class="wb-editor-swatches">
-            ${[...new Set([...colours, '#000000', '#ffffff'])].map(hex => html`<button type="button" class="wb-editor-swatch" style=${`background:${hex}`} aria-pressed=${bg?.toLowerCase() === hex ? 'true' : 'false'} title=${t('editor.swatch', { hex })} aria-label=${t('editor.swatch', { hex })} onClick=${() => dispatch({ type: 'setBg', color: hex })}></button>`)}
-          </span>
+          ${pal && html`<${ColourPick} t=${t} pal=${pal} used=${used} current=${bg} dropper=${dropper} onPick=${color => dispatch({ type: 'setBg', color })} />`}
         </div>
-        <label class="wb-editor-field">${t('editor.props.bg.other')}
-          <input type="color" value=${/^#[0-9a-f]{6}$/i.test(bg ?? '') ? bg : '#ffffff'} onInput=${e => dispatch({ type: 'setBg', color: e.target.value })} />
-        </label>
         <button type="button" class="wb-editor-chip" disabled=${bg === undefined} onClick=${() => dispatch({ type: 'setBg', color: null })}>${t('editor.props.bg.clear')}</button>
       </div>`}
     </div>

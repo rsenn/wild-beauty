@@ -1531,3 +1531,191 @@ body {
   display: flex;
   gap: var(--wb-editor-gap, 4px);
 }
+
+/* graph view (GRAPH.md S2.7): a full-width drawing under a row of tools */
+.wb-graph-bar {
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  margin-bottom: var(--wb-editor-gap);
+}
+
+.wb-graph-hint {
+  min-width: 0;
+  margin-inline-start: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wb-graph {
+  display: block;
+  width: 100%;
+  height: calc(100vh - var(--wb-logo-height) - 4 * var(--wb-tab-gap) - 3em);
+  height: calc(100dvh - var(--wb-logo-height) - 4 * var(--wb-tab-gap) - 3em);
+  min-height: 280px;
+  touch-action: none;
+  user-select: none;
+}
+
+.wb-content-bleed {
+  padding: 0;
+}
+
+.wb-content-bleed .wb-graph-bar {
+  padding: 0 10px;
+}
+
+.wb-graph-edge line {
+  stroke: var(--wb-ink);
+  stroke-width: 2;
+}
+
+.wb-graph-edge .wb-graph-hit {
+  stroke: transparent;
+  stroke-width: 22;
+  cursor: pointer;
+}
+
+.wb-graph-edge.wb-selected line:not(.wb-graph-hit) {
+  stroke: var(--wb-accent);
+  stroke-width: 4;
+}
+
+.wb-graph-node {
+  cursor: grab;
+}
+
+.wb-graph-frame {
+  fill: none;
+  stroke: none;
+  stroke-width: 4;
+}
+
+.wb-graph-node.wb-selected .wb-graph-frame,
+.wb-graph-node.wb-linking .wb-graph-frame {
+  stroke: var(--wb-accent);
+}
+
+.wb-graph-title {
+  font-size: 15px;
+  font-weight: bold;
+  fill: var(--wb-ink);
+  pointer-events: none;
+}
+
+.wb-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* the shared colour selector (palette strip, properties, text popovers) */
+.wb-colour-pick {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 6px;
+  align-items: center;
+  max-width: 100%;
+}
+
+.wb-colour-pick .wb-editor-swatches {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 4px;
+}
+
+.wb-colour-pick .wb-editor-swatch {
+  width: 28px;
+  height: 28px;
+}
+
+.wb-colour-free {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* the tiny button for any colour: a colour wheel, the system picker behind it */
+.wb-colour-other {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
+  border-radius: 50%;
+}
+
+.wb-colour-other input {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+}
+
+/* several nodes at once: the group, its target, the drop preview */
+.wb-graph-node.wb-multi .wb-graph-frame {
+  stroke-width: 5;
+}
+
+.wb-graph-node.wb-target .wb-graph-frame {
+  stroke: var(--wb-select);
+  stroke-width: 7;
+}
+
+.wb-graph-preview {
+  stroke: var(--wb-select);
+  stroke-width: 3;
+  stroke-dasharray: 6 5;
+  pointer-events: none;
+}
+
+.wb-graph-bubble rect {
+  fill: var(--wb-ink);
+}
+
+.wb-graph-bubble text {
+  font-size: 13px;
+  fill: var(--wb-card-ground);
+}
+
+.wb-graph-count {
+  fill: var(--wb-select);
+}
+
+.wb-graph-bubble .wb-graph-count-text {
+  font-size: 13px;
+  font-weight: bold;
+  fill: var(--wb-ink);
+}
+
+.wb-graph-marquee {
+  fill: none;
+  stroke: var(--wb-select);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  pointer-events: none;
+}
+
+.wb-graph-hint-live {
+  font-weight: bold;
+}
+
+/* a group node: member tiles over a strip with its title and size */
+.wb-graph-slot {
+  fill: var(--wb-ink);
+  opacity: 0.12;
+}
+
+.wb-graph-strip {
+  fill: var(--wb-ink);
+}
+
+.wb-graph-strip-text {
+  font-size: 12px;
+  font-weight: bold;
+  fill: var(--wb-card-ground);
+  pointer-events: none;
+}
