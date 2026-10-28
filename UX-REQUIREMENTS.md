@@ -42,7 +42,8 @@ Testers' devices are unknown, so the design is device-agnostic:
 |---|---|---|
 | A1 | Uploads belong to the `wb-session` cookie; an upload and the cookie expire together (7 days, `WB_UPLOAD_TTL_MS`); the client sees only its own uploads | done, tested (`tests/uploads-owner.test.js`) |
 | A2 | Editor invariant to orientation: portrait = stage full width, tool rows above/below; landscape = stage square, full height, centred, tools column left, actions column right | done, not yet seen on a device |
-| A3 | Landscape: film-strip is an upright strip | tried, replaced (see H) |
+| A3 | Landscape: film-strip is an upright strip | tried, replaced by the tabbed panel (see H) |
+| A4 | Usage recording with who (owner / claude / tester), no consent notice (friends consented), report by script | done (`PLAN.md` S6.4, E107) |
 
 Follow-ups to ask (A1): show the expiry date to the user? "keep" button that renews?
 What if the cookie is lost (uploads unreachable until expiry)?

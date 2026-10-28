@@ -225,6 +225,7 @@ woff2/woff/ttf. Fonts are served from `/static/`.
 - [x] **4.4 Square crop on the upload card (decided)**: every card shows the photo zoomed in to a square;
       dragging pans the crop along the long axis; cursor `ns-resize`/`ew-resize` on desktop, a double-arrow
       icon on touch, nothing for square photos; the yellow fit triangle goes. Tasks in `EDITOR.md` E98-E103.
+- [x] **7.6 Ownership and expiry (2026-10-28)**: uploads belong to the `wb-session` cookie and expire with it; list and delete only for the owner (`EDITOR.md` E104, `PLAN.md` S6.2).
 - [ ] **7.5 Quota**: total `uploads/` size cap with a translated error (P S9).
 
 **First deliverable ends here (M1-M7): `/new` with design, i18n, drop zone,

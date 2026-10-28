@@ -193,7 +193,8 @@ documented shell snippet (`tools/vendor.sh`), checked in, and pinned by version.
 | `GET /app/*`, `/vendor/*`, `/static/*` | `client/`, `vendor/` and `static/` files, `Cache-Control` by extension |
 | `GET /api/themes` | list of `static/themes/*.css` (id, name) |
 | `GET /api/capabilities` | `{ imgproc, languages, limits, tools }` |
-| `GET /api/uploads` | list uploads with sidecar JSON |
+| `GET /api/uploads` | list the uploads of this browser (cookie `wb-session`) with sidecar JSON, expired ones left out |
+| `POST /api/events` | usage recording: batches of small events (S6.4) |
 | `POST /api/uploads` | one file per request, raw body, name in header |
 | `DELETE /api/uploads/:hash` | remove file and sidecar |
 | `GET /files/uploads/:hash.:ext` | original, used by the editor |
@@ -257,6 +258,15 @@ One request per file, so the browser reports real byte progress (XHR
 Failures at steps 4-5 degrade (sidecar gets `"errors": [...]`), they do not
 reject the upload.
 
+**Ownership and expiry (decided 2026-10-28).** An upload belongs to the `wb-session`
+cookie that sent it: the sidecar has `owners: { <hash of cookie>: <expiry ms> }`, never
+sent to clients. The same bytes sent again add the owner and renew the expiry. An upload
+lives `uploadTtlMs` (default 7 days, `WB_UPLOAD_TTL_MS`) after its last upload by an owner; the
+response sets the cookie with the same lifetime (`Max-Age`, `Expires`). `GET /api/uploads`, the
+boot JSON of `/:lang/new` and `DELETE` only concern the owner; the files go with the last
+owner. Expired uploads are removed at start and every ten minutes (`sweepUploads`); sidecars
+from before owners existed age from `uploadedAt` and are shown to nobody.
+
 ### 6.3 SSR of `/new`
 
 Minimal on purpose: the server renders the page chrome, the localized strings,
@@ -267,6 +277,15 @@ after a click. The upload list is rendered by the same `UploadList` component
 the client uses, so hydration is a no-op for it.
 
 Initial state travels as `<script type="application/json" id="boot">`.
+
+### 6.4 Usage recording (testing, 2026-10-28)
+
+`client/events.js` batches small events (taps by button name, orientation changes, errors,
+upload timings, rapid repeated taps, the stage touched) and posts them to `POST /api/events`;
+`server/events.js` appends them to `data/events/<date>.jsonl` with who sent them: `claude`
+(cookie `wb-who=claude` in the automated browser), `owner` (the client address, from
+`X-Forwarded-For`, is in `WB_OWNER_IPS`), else `tester-<4 characters of the cookie hash>`.
+No photo content, no typed text. `bun tools/events-report.js [who] [--days n]` summarises it.
 
 ## 7. Node document model
 

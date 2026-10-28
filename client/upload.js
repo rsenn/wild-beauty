@@ -1,3 +1,5 @@
+import { track } from './events.js';
+
 // Sending files to POST /api/uploads (PLAN.md S6.2, S11.1): one XMLHttpRequest
 // per file, because only XHR reports upload progress, and a small queue so
 // three run at a time.
@@ -8,12 +10,13 @@ const failure = code => Object.assign(new Error(code), { code });
 // -> { done: Promise<record>, abort() }; onProgress gets 0..1 of the bytes sent
 export function sendFile(file, { onProgress }) {
   const xhr = new XMLHttpRequest();
+  const began = performance.now();
   const done = new Promise((resolve, reject) => {
     xhr.open('POST', '/api/uploads');
     xhr.setRequestHeader('X-Filename', encodeURIComponent(file.name));
     xhr.setRequestHeader('Content-Type', 'application/octet-stream');
     xhr.upload.onprogress = e => e.lengthComputable && onProgress(e.loaded / e.total);
-    xhr.onerror = () => reject(failure('network'));
+    xhr.onerror = () => (track('upload', { ok: false, code: 'network', bytes: file.size }), reject(failure('network')));
     xhr.onabort = () => reject(failure('aborted'));
     xhr.onload = () => {
       let body = null;
@@ -22,7 +25,11 @@ export function sendFile(file, { onProgress }) {
         body = JSON.parse(xhr.responseText);
       } catch {}
 
-      if(xhr.status >= 200 && xhr.status < 300 && body) resolve(body);
+      const ok = xhr.status >= 200 && xhr.status < 300 && body;
+
+      track('upload', { ok: !!ok, status: xhr.status, bytes: file.size, ms: Math.round(performance.now() - began) });
+
+      if(ok) resolve(body);
       else reject(failure(body?.error?.code ?? STATUS[xhr.status] ?? 'generic'));
     };
     xhr.send(file);

@@ -17,6 +17,7 @@ import { getNode } from './server/db/nodes.js';
 import { database } from './server/db/db.js';
 import { reconcile } from './server/node/reconcile.js';
 import { sessionFor } from './server/session.js';
+import { peer, recordEvents } from './server/events.js';
 import { capabilities, detectTools } from './server/media/tools.js';
 
 // directories served as files: /static/ (assets), /app/ (browser modules),
@@ -136,6 +137,8 @@ function route(req) {
     return text('method not allowed\n', 405);
   }
 
+  if(pathname === '/api/events') return req.method === 'POST' ? recordEvents(req) : text('method not allowed\n', 405);
+
   const lock = /^\/api\/nodes\/([^/]+)\/lock$/.exec(pathname);
 
   if(lock) return lockRoute(req, lock[1]);
@@ -221,5 +224,7 @@ async function logged(req) {
 }
 
 const server = Bun.serve({ port, hostname: host, maxRequestBodySize: config.maxBytes, fetch: dev ? logged : route });
+
+peer.server = server;
 
 console.log(`wild-beauty listening on ${server.url}${dev ? ' (dev logging on)' : ''}`);

@@ -99,8 +99,9 @@ There is never more than one editor. Opening a second replaces the first.
 ```
 
 - The stage has `aspect-ratio: 1`, `overflow: hidden`, `touch-action: none`,
-  `contain: paint`, a 1 px outline token. Its size is the available width minus
-  the two tool columns (44 px each on a phone, 56 px on desktop), capped at 90 vmin.
+  `contain: paint`, a 1 px outline token. The editor has **no frame, background or margin**
+  of its own (decided 2026-10-28) and the layout follows the **orientation**, not a width
+  breakpoint (S2.2a).
 - Left column (tools, top to bottom): **V** select/transform, **P** ink pen,
   **S** shape, **C** clip, **U** unclip, **T** text boxes (S2.3b). Right column:
   undo, redo, add/remove page, theme (when themes exist), delete node, **Save**.
@@ -116,6 +117,26 @@ There is never more than one editor. Opening a second replaces the first.
   below on phones; only when the node holds more than one photo.
 - Phone portrait is the primary layout (360 px width must work); desktop adds hover
   states, wheel zoom, keyboard shortcuts and a wider stage.
+
+### 2.2a Orientation layouts (decided 2026-10-28, tried on a 360 x 669 phone)
+
+- **Portrait:** the stage is as wide as the screen (the editor goes edge to edge, the page's
+  side padding is cancelled). Order: title row, banners, tools as a row, stage, actions as a
+  row, film-strip, then the rest as before (context bar, palette, modes, scrubber, pages).
+- **Landscape:** a surface exactly one window high (`100dvh`) that does not scroll, so the
+  browser's address bar does not come back. From the left: the drawing tools (an upright
+  strip), the square stage (as tall as the window), the actions (an upright strip), and a
+  panel. The panel has the title row (title, properties, close), the banners and a tab row;
+  **one section at a time**: *select* (context bar, pen options, palette), *photos*
+  (film-strip), *sequence* (modes, scrubber, pages); it scrolls inside itself. Buttons in the
+  strips shrink to 32 px to fit the height. The editor is full bleed.
+- The shortcut-keys button is hidden when the pointer is coarse (touch).
+- Sizes follow measurement (`dvh`, orientation, free space), never a device guess: `100vh` is
+  wrong on phones (browser bar), 980 px was a missing viewport meta tag (see
+  `UX-REQUIREMENTS.md`, device measurements).
+- Not decided yet and listed in `UX-REQUIREMENTS.md`: two screens (uploads / editor), paged
+  uploads, drag across the screens, the three-depth model of sequence / composition /
+  animation.
 
 ### 2.3 Tools
 
@@ -305,6 +326,8 @@ Every gesture ends in exactly **one history entry** (S2.6), so a pinch is one un
 - **Texture photos.** For a 3D gallery, a photo can be marked **texture**; it is
   then not drawn as a picture and not hung (`GALLERY.md` S3.3). The toggle is on
   the upload card and in the film-strip entry.
+- **Uploads belong to a cookie** and expire with it (`PLAN.md` S6.2): the list only shows the
+  uploads of this browser.
 - **Upload cleanup.** After a successful save the used uploads leave the upload
   list (they now live baked in `data/photos/`).
 
@@ -878,6 +901,22 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [ ] **E103 text boxes in grid and slides**: a text box is a cell of the grid (its own square or a spanning
       cell) and a slide page or caption; options in the properties popover. Done when a node with 4 photos and
       2 text boxes lays out in grid and in slides without overlaps. Needs E88+ (text boxes) first.
+
+### Phase M - phone layouts, ownership, recording (2026-10-28)
+
+- [x] **E104 uploads owned by the cookie, with expiry** (`PLAN.md` S6.2): `owners`, `claim`, sweep, list and delete for
+      the owner, cookie with the upload lifetime. Done when two browsers see only their own uploads
+      (`tests/uploads-owner.test.js`).
+- [x] **E105 orientation layouts** (S2.2a): portrait full-width stage with tool rows; landscape one-window surface with tool
+      strips, stage and a three-tab panel; no frame, background or margin. Done on a 360 x 669 phone and a desktop.
+- [x] **E106 keys button hidden on touch.**
+- [x] **E107 usage recording** (`PLAN.md` S6.4): client events, `POST /api/events`, `data/events/*.jsonl`, `tools/events-report.js`.
+- [ ] **E108 device pass of the new layouts** on the phone in both orientations and 2-3 other browsers (part of E74).
+- [ ] **E109 read-only dimming in landscape** (the `inert` frame uses `display: contents`, so the opacity rule has no effect).
+- [ ] **E110 dark theme or dark-aware tokens** (the test phone prefers dark; the theme is light only).
+- [ ] **E111 upload expiry shown to the user** and a "keep" action (open, see `UX-REQUIREMENTS.md` A1).
+- [ ] The requirements of `UX-REQUIREMENTS.md` (B paged uploads and two screens, C freehand clip, D batch to nodes, E three
+      depths, F text box extensions) are **not tasks yet**: they are agreed one by one, then added here.
 
 ### Phase J - later (not scheduled)
 
