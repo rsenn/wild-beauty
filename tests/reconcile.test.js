@@ -115,6 +115,25 @@ describe('reconcile', () => {
     expect(photoDir()).toEqual([`${B}.jpg`]);
   });
 
+  test('the tile the editor drew is kept; a node whose tile file is gone shows its first photo again', async () => {
+    if(!ready) return;
+
+    await run([...imagemagick.convert, '-size', '64x64', 'gradient:green-white', resolve(root, 'tile.jpg')]);
+
+    const data = 'data:image/jpeg;base64,' + Buffer.from(await Bun.file(resolve(root, 'tile.jpg')).arrayBuffer()).toString('base64');
+    const kept = await (await saveNew(h, { doc: doc([photo('photo001', A)]), thumb: data })).body;
+    const tile = getNode(h, kept.id).tile;
+
+    expect(tile).not.toBe(A);
+    await reconcile(h);
+    expect(existsSync(resolve(config.photosDir, `${tile}.thumb.jpg`))).toBe(true);
+
+    rmSync(resolve(config.photosDir, `${tile}.thumb.jpg`));
+    expect((await reconcile(h)).tiles).toEqual([kept.id]);
+    expect(getNode(h, kept.id).tile).toBe(A);
+    expect(existsSync(resolve(config.photosDir, `${A}.thumb.jpg`))).toBe(true);
+  });
+
   test('a clean state is a no-op and a second run changes nothing', async () => {
     if(!ready) return;
 

@@ -48,6 +48,7 @@ const KEYED = {
   // the preview and the full-resolution outline of the magic wand are one undo step
   // the preview and the final cutout of a photo are one undo step
   // typing in a text box is one undo step until something else happens
+  resizeText: c => `resize:${c.id}`,
   updateText: c => (c.keyed ? `text:${c.id}:${c.keyed}` : null),
   setClipPolygons: c => `clipedit:${c.id}`,
   setEdge: c => `edge:${c.id}`,
@@ -77,6 +78,12 @@ function onDoc(doc, c) {
       return model.setEdge(doc, c.id, c.edge);
     case 'addText':
       return model.addText(doc, c.page ?? doc.pages[0].id, c);
+    case 'resizeText': {
+      // the box's width and wrapped lines, and its place when a left corner moved: one step
+      const next = model.updateText(doc, c.id, c.patch);
+
+      return Array.isArray(c.m) ? model.setMatrix(next, c.id, c.m) : next;
+    }
     case 'updateText':
       return model.updateText(doc, c.id, c.patch);
     case 'pasteSteps':

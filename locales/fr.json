@@ -245,7 +245,7 @@
   "editor.cut": "Couper",
   "editor.paste": "Coller",
   "editor.announce.copied": "Copié",
-  "editor.announce.cut": "Coupé",
+  "editor.announce.cutDone": "Coupé",
   "editor.announce.pasted": "Collé",
   "editor.announce.pasting": "Collage…",
   "editor.announce.pasteNothing": "Rien à coller",

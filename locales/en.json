@@ -245,7 +245,7 @@
   "editor.cut": "Cut",
   "editor.paste": "Paste",
   "editor.announce.copied": "Copied",
-  "editor.announce.cut": "Cut",
+  "editor.announce.cutDone": "Cut",
   "editor.announce.pasted": "Pasted",
   "editor.announce.pasting": "Pasting…",
   "editor.announce.pasteNothing": "Nothing to paste",

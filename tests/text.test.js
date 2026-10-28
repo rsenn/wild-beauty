@@ -86,3 +86,21 @@ describe('render and picking', () => {
     expect(outlineOf(doc, 'text0001')).toEqual([[100, 200], [400, 200], [400, 320], [100, 320]]);
   });
 });
+
+describe('resizing a box', () => {
+  test('one command changes the width, the lines and the place', async () => {
+    const { apply } = await import('../client/editor/commands.js');
+    const { emptyNode, findStep } = await import('../client/editor/model.js');
+    let snap = { doc: emptyNode(), kind: 'node' };
+    const page = snap.doc.pages[0].id;
+
+    snap = apply(snap, { type: 'addText', id: 'text0001', page, text: 'one two three', lines: ['one two three'], m: [1, 0, 0, 1, 100, 50], w: 600, h: 58, font: 'sans', size: 48, color: '#000000', align: 'start' }).snap;
+
+    const r = apply(snap, { type: 'resizeText', id: 'text0001', patch: { w: 300, lines: ['one two', 'three'], h: 115 }, m: [1, 0, 0, 1, 400, 50] });
+    const step = findStep(r.snap.doc, 'text0001').step;
+
+    expect(step).toMatchObject({ w: 300, h: 115, lines: ['one two', 'three'] });
+    expect(step.m[4]).toBe(400);
+    expect(r.key).toBe('resize:text0001');
+  });
+});

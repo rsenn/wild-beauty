@@ -6,7 +6,7 @@ import { LIMITS, allIds, emptyNode, findStep, photoSteps, unique } from '../edit
 import { apply } from '../editor/commands.js';
 import { createGesture } from '../editor/gesture.js';
 import { aboutPoint } from '../editor/gestures.js';
-import { multiply } from '../editor/matrix.js';
+import { apply as applyMatrix, invert, multiply } from '../editor/matrix.js';
 import { ADD_EVENT, SAVED_EVENT, takePending } from '../editor/pending.js';
 import { deleteNode, errorKey, loadNode, saveNode } from '../editor/save.js';
 import { createLock } from '../editor/lock.js';
@@ -20,7 +20,7 @@ import { documentThumb, exportImage, sceneCanvas, stepImage } from '../editor/ex
 import { boxOf, setContext, trackCommand } from '../events.js';
 import { TextEdit } from './TextEdit.js';
 import { measureText } from '../editor/measure.js';
-import { boxHeight, layout } from '../editor/text.js';
+import { LIMITS as TEXT_LIMITS, boxHeight, layout } from '../editor/text.js';
 import { classify, copyPayload, fromEvent, htmlFor, plainFor, readClipboard, writeClipboard } from '../editor/clipboard.js';
 import { sendFile } from '../upload.js';
 import { uploadPayload } from '../files.js';
@@ -238,6 +238,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [shape, setShape] = useState(emptyDraft); // the shape being drawn (shape tool)
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
+  const tdrag = useRef(null); // a corner of a text box being dragged in the text tool: { id, base, m, index }
   const hdrag = useRef(null); // a selection handle being dragged: { kind, id, base, pivot | centre, down }
   const [wandMode, setWandMode] = useState('add'); // what a wand tap means: add the area, or exclude it
   const [wandPick, setWandPick] = useState(null); // { index, count } of the candidate shown
@@ -1102,7 +1103,21 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   // a tap with the text tool: end the box being typed in; else edit the box under the tap, else make a new one there
   const textDown = units => {
-    const { doc, photos, scale, pageId, color: ink, page: at } = latest.current;
+    const { doc, photos, scale, pageId, color: ink, page: at, editStep: current, previewing: preview } = latest.current;
+
+    // a corner of the selected box: dragging it changes the box (its width, the text wraps again), not the text
+    if(!preview && current?.op === 'text') {
+      const o = outlineOf(doc, current.id, { photos: hash => photos[hash], page: at });
+      const set = o && handleSet(o, scale, handlePx);
+      const grip = set && hitHandle(set, units, (handlePx / 2 + (coarse ? 6 : 3)) / scale);
+      const m = matrixOf(doc, current.id, { page: at });
+
+      if(grip?.kind === 'corner' && m && invert(m)) {
+        tdrag.current = { id: current.id, base: current, m, index: grip.index };
+
+        return;
+      }
+    }
 
     if(latest.current.typing) return finishText();
 
@@ -1474,6 +1489,16 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   };
 
   const move = (e, [x, y]) => {
+    if(tdrag.current) {
+      const d = tdrag.current;
+      const local = applyMatrix(invert(d.m), [x, y]);
+      const right = d.index === 1 || d.index === 2;
+      const w = Math.min(TEXT_LIMITS.width[1], Math.max(TEXT_LIMITS.width[0], right ? local[0] : d.base.w - local[0]));
+      const { lines, h } = layout({ ...d.base, w }, measureFor(d.base.bold));
+
+      return dispatch({ type: 'resizeText', id: d.id, patch: { w, lines, h }, ...(right ? {} : { m: multiply(d.m, [1, 0, 0, 1, d.base.w - w, 0]) }) });
+    }
+
     if(hdrag.current) {
       const d = hdrag.current;
 
@@ -1521,6 +1546,13 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   };
 
   const up = e => {
+    if(tdrag.current) {
+      tdrag.current = null;
+      setHist(history.seal);
+
+      return;
+    }
+
     if(hdrag.current) {
       hdrag.current = null;
       setHist(history.seal);
@@ -1718,7 +1750,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       return false;
     }
 
-    setAnnounce(tr(cut ? 'editor.announce.cut' : 'editor.announce.copied'));
+    setAnnounce(tr(cut ? 'editor.announce.cutDone' : 'editor.announce.copied'));
 
     if(cut && !c.readOnly) remove(id);
 

@@ -13,7 +13,8 @@ import { resolve } from 'node:path';
 import { HASH, config } from '../config.js';
 import { logFile } from '../log.js';
 import { removeUpload } from '../api/uploads.js';
-import { deletePhoto } from '../db/nodes.js';
+import { deletePhoto, getNode, getPhoto } from '../db/nodes.js';
+import { firstPhotoStep, thumbnail } from '../media/thumb.js';
 
 const FILE = /^([0-9a-f]{64})\.(.+)$/;
 const TEMP = /\.tmp(\.|$)/;
@@ -45,11 +46,28 @@ export async function reconcile(h) {
       removed.photos.push(hash);
     }
 
-  // 3. baked files with no row, and temporary leftovers
+  // 3. baked files with no row, and temporary leftovers; the tile a node shows is
+  // named by the hash of the picture the editor drew, not by a photo, and stays
+  const tiles = new Set(h.all('SELECT tile FROM nodes WHERE tile IS NOT NULL').map(r => r.tile));
+
   for(const name of list(config.photosDir)) {
     const m = FILE.exec(name);
+    const tile = m && m[2] === 'thumb.jpg' && tiles.has(m[1]);
 
-    if(TEMP.test(name) || (m && !known.has(m[1])) || !m) rm(name);
+    if(TEMP.test(name) || (m && !known.has(m[1]) && !tile) || !m) rm(name);
+  }
+
+  // 4. a node whose tile file is gone shows the first photo again (best effort)
+  for(const { id, tile } of h.all('SELECT id, tile FROM nodes WHERE tile IS NOT NULL')) {
+    if(existsSync(resolve(config.photosDir, `${tile}.thumb.jpg`))) continue;
+
+    const node = getNode(h, id);
+    const step = node && firstPhotoStep(node.doc);
+    const photo = step && getPhoto(h, step.photo);
+    const made = photo && (await thumbnail(resolve(config.photosDir, `${photo.hash}.${photo.ext}`), resolve(config.photosDir, `${photo.hash}.thumb.jpg`), { step, bg: node.doc.bg }));
+
+    h.run('UPDATE nodes SET tile = ? WHERE id = ?', made?.ok ? photo.hash : null, id);
+    removed.tiles = [...(removed.tiles ?? []), id];
   }
 
   return removed;
