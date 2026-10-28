@@ -50,12 +50,12 @@ export function cleanPoints(points) {
   return out;
 }
 
-export function segmentArgs({ file, points, out, cache }) {
+export function segmentArgs({ file, points, out, cache, pick }) {
   const args = ['segment', '--in', file, '--units', 'norm', '--view-size', String(VIEW_SIZE), '--phases', 'preview,final'];
 
   for(const [x, y, label] of points) args.push('--point', `${x.toFixed(5)},${y.toFixed(5)},${label}`);
 
-  args.push('--out', resolve(out, 'cut.png'), '--cache-dir', cache, '--refine', 'none', '--candidates', '1');
+  args.push('--out', resolve(out, 'cut.png'), '--cache-dir', cache, '--refine', 'none', '--candidates', '3', '--pick', Number.isInteger(pick) && pick >= 0 && pick <= 2 ? String(pick) : 'best');
 
   if(MODELS) args.push('--models-dir', MODELS);
 
@@ -85,7 +85,7 @@ export async function segmentRoute(req) {
   mkdirSync(cache, { recursive: true });
   mkdirSync(out, { recursive: true });
 
-  const argv = [TOOL, ...segmentArgs({ file, points, out, cache })];
+  const argv = [TOOL, ...segmentArgs({ file, points, out, cache, pick: body.pick })];
 
   logCommand(argv);
 

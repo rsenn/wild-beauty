@@ -197,6 +197,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
   const hdrag = useRef(null); // a selection handle being dragged: { kind, id, base, pivot | centre, down }
+  const [wandPick, setWandPick] = useState(null); // { index, count } of the candidate shown
   const wand = useRef(null); // { id, points, controller } of the magic wand run
   const clipStroke = useRef(null); // { points } while a clip-tool stroke is drawn
   const [clipLine, setClipLine] = useState(null);
@@ -301,6 +302,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     wand.current?.controller?.abort();
     wand.current = null;
+    setWandPick(null);
   }, [tool]);
   useEffect(() => () => wand.current?.controller?.abort(), []);
 
@@ -1039,29 +1041,48 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     if(!uv) return;
 
-    const run = wand.current?.id === id ? wand.current : { id, points: [] };
+    const run = wand.current?.id === id ? wand.current : { id, photo: photo.photo, points: [] };
 
     run.points = [...run.points, [uv[0], uv[1], e?.altKey ? 0 : 1]];
+    run.pick = undefined;
+    wand.current = run;
+    runWand(run);
+  };
+  // send the run's taps (and the candidate chosen with bigger / smaller) to the server
+  const runWand = run => {
+    const { id } = run;
+
     run.controller?.abort();
     run.controller = new AbortController();
-    wand.current = run;
+    setWandPick(null);
 
     const apply = event => {
       const { doc: now, photos: info, page: here } = latest.current;
-      const corners2 = findStep(now, id) && outlineOf(now, id, { photos: hash => info[hash], page: here });
-      const polygon = corners2 && resultPolygon(event, corners2);
+      const corners = findStep(now, id) && outlineOf(now, id, { photos: hash => info[hash], page: here });
+      const polygon = corners && resultPolygon(event, corners);
 
       if(!polygon) return;
 
       const taken = new Set(allIds(now));
 
+      run.picked = event.picked;
+      setWandPick(Number.isInteger(event.picked) ? { index: event.picked, count: event.candidates?.length ?? 1 } : null);
       dispatch({ type: 'clipPolygon', id, polygon, shape: unique(taken), style: { color: latest.current.color, width: 1 }, wand: true });
       setAnnounce(tr('editor.announce.wand'));
     };
 
-    fetch('/api/segment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ photo: photo.photo, points: run.points }), signal: run.controller.signal })
+    fetch('/api/segment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ photo: run.photo, points: run.points, pick: run.pick }), signal: run.controller.signal })
       .then(res => (res.ok ? readLines(res.body, event => (event.event === 'result' && !event.ok ? setAnnounce(tr('editor.announce.wandFailed')) : apply(event))) : setAnnounce(tr('editor.announce.wandFailed'))))
       .catch(() => {});
+  };
+  // bigger / smaller: the next candidate mask of the last taps (part, object, whole)
+  const wandStep = delta => {
+    const run = wand.current;
+
+    if(!run || !wandPick) return;
+
+    run.pick = Math.max(0, Math.min(wandPick.count - 1, wandPick.index + delta));
+    runWand(run);
   };
   // clip tool: with a photo selected, tapping a shape makes it that photo's clip;
   // tapping a photo selects it. Unclip tool: tapping a clipped photo frees it.
@@ -1455,6 +1476,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       </div>
       <div class="wb-editor-sec" data-sec="select">
       ${(tool === 'clip' || tool === 'unclip' || tool === 'wand') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : t('editor.context.' + tool)}</p>`}
+      ${tool === 'wand' && wandPick && wandPick.count > 1 && html`<div class="wb-editor-context"><button type="button" class="wb-editor-chip" disabled=${wandPick.index <= 0} onClick=${() => wandStep(-1)}>${t('editor.nudge.smaller')}</button> <button type="button" class="wb-editor-chip" disabled=${wandPick.index >= wandPick.count - 1} onClick=${() => wandStep(1)}>${t('editor.nudge.larger')}</button></div>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
