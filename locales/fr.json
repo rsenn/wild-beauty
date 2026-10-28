@@ -99,6 +99,8 @@
   "editor.props.bg": "Arrière-plan",
   "editor.props.bg.other": "Autre couleur",
   "editor.palette.used": "Utilisées dans ce travail",
+  "editor.dropper": "Prélever une couleur dans l’image",
+  "editor.announce.dropper": "Touchez la scène pour prélever une couleur",
   "editor.props.bg.clear": "Sans arrière-plan",
   "editor.kind.node": "Pièce",
   "editor.kind.list": "Liste",

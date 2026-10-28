@@ -16,7 +16,7 @@ import { centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor
 import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../editor/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { cascade, photosOnPage } from '../editor/cascade.js';
-import { documentThumb, exportImage, stepImage } from '../editor/export.js';
+import { documentThumb, exportImage, sceneCanvas, stepImage } from '../editor/export.js';
 import { boxOf, setContext, trackCommand } from '../events.js';
 import { TextEdit } from './TextEdit.js';
 import { measureText } from '../editor/measure.js';
@@ -1633,6 +1633,68 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setHist(history.seal);
   };
 
+  // --- dropper (E133): the next tap on the stage gives its colour to `apply` ---
+  const [dropping, setDropping] = useState(false);
+  const dropper = useRef(null); // { apply, canvas }
+
+  const startDropper = async apply => {
+    const { doc: d, photos: p, page: at, readOnly } = latest.current;
+
+    if(readOnly) return;
+
+    dropper.current = { apply, canvas: null };
+    setDropping(true);
+    setAnnounce(tr('editor.announce.dropper'));
+
+    const mine = dropper.current;
+
+    try {
+      mine.canvas = await sceneCanvas(d, { photos: hash => p[hash] ?? null, page: at }, 1024, /^#[0-9a-f]{6}$/i.test(d.bg ?? '') ? d.bg : '#ffffff');
+    } catch {
+      if(dropper.current === mine) stopDropper();
+    }
+  };
+
+  const stopDropper = () => {
+    dropper.current = null;
+    setDropping(false);
+  };
+
+  useEffect(() => {
+    if(!dropping) return;
+
+    const down = e => {
+      const mine = dropper.current;
+      const svg = document.querySelector('.wb-editor-stage svg');
+
+      if(!mine || !svg?.contains(e.target)) return stopDropper();
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      if(!mine.canvas) return;
+
+      const r = svg.getBoundingClientRect();
+      const size = mine.canvas.width;
+      const x = Math.max(1, Math.min(size - 2, Math.round(((e.clientX - r.left) / r.width) * size)));
+      const y = Math.max(1, Math.min(size - 2, Math.round(((e.clientY - r.top) / r.height) * size)));
+      const px = mine.canvas.getContext('2d').getImageData(x - 1, y - 1, 3, 3).data;
+      const mean = c => Math.round([0, 1, 2, 3, 4, 5, 6, 7, 8].reduce((sum, i) => sum + px[i * 4 + c], 0) / 9);
+
+      mine.apply('#' + [0, 1, 2].map(c => mean(c).toString(16).padStart(2, '0')).join(''));
+      stopDropper();
+    };
+    const key = e => e.key === 'Escape' && (e.stopPropagation(), stopDropper());
+
+    window.addEventListener('pointerdown', down, true);
+    window.addEventListener('keydown', key, true);
+
+    return () => {
+      window.removeEventListener('pointerdown', down, true);
+      window.removeEventListener('keydown', key, true);
+    };
+  }, [dropping]);
+
   // --- clipboard (E131) ---
   const pasted = useRef(0); // pastes since the last copy: each lands a little further on
 
@@ -1830,7 +1892,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     </section>`;
 
   return html`
-    <section id="wb-editor" class="wb-editor" data-tab=${panelTab} tabindex="-1" aria-label=${t('editor.label')}>
+    <section id="wb-editor" class=${'wb-editor' + (dropping ? ' wb-editor-dropping' : '')} data-tab=${panelTab} tabindex="-1" aria-label=${t('editor.label')}>
       <div class="wb-sr-only" role="status" aria-live="polite" aria-atomic="true">${announce}</div>
       <p id="wb-editor-keys-hint" class="wb-sr-only">${t('editor.keys.hint')}</p>
       <div class="wb-editor-head">
@@ -1925,7 +1987,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
-        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onCutout=${removeBackground} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} onCutout=${removeBackground} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} used=${usedColours(doc).filter(hex => !paletteColours.includes(hex))} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">

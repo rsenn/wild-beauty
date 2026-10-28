@@ -802,7 +802,9 @@ body {
 
 .wb-node-view {
   aspect-ratio: 1;
-  width: min(100%, 90vmin);
+  /* header and title stay in view with the stage: only the edit button is below the fold */
+  width: min(100%, max(240px, calc(100vh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em)));
+  width: min(100%, max(240px, calc(100dvh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em)));
   margin: 0 auto;
   overflow: hidden;
   background: var(--wb-card-ground);
@@ -1469,4 +1471,16 @@ body {
 .wb-text-edit::selection {
   color: transparent;
   background: var(--wb-select-fill);
+}
+
+/* the dropper: a colour field's button, and the stage while it waits for a tap */
+.wb-editor-colour {
+  display: inline-flex;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+}
+
+.wb-editor-dropping .wb-editor-stage,
+.wb-editor-dropping .wb-editor-stage * {
+  cursor: crosshair;
 }

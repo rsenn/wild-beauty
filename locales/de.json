@@ -99,6 +99,8 @@
   "editor.props.bg": "Hintergrund",
   "editor.props.bg.other": "Andere Farbe",
   "editor.palette.used": "In diesem Werk verwendet",
+  "editor.dropper": "Farbe aus dem Bild nehmen",
+  "editor.announce.dropper": "Auf die Bühne tippen, um eine Farbe zu nehmen",
   "editor.props.bg.clear": "Kein Hintergrund",
   "editor.kind.node": "Werk",
   "editor.kind.list": "Liste",

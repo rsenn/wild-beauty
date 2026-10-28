@@ -99,6 +99,8 @@
   "editor.props.bg": "Background",
   "editor.props.bg.other": "Other colour",
   "editor.palette.used": "Used in this node",
+  "editor.dropper": "Take a colour from the picture",
+  "editor.announce.dropper": "Tap the stage to take a colour",
   "editor.props.bg.clear": "No background",
   "editor.kind.node": "Node",
   "editor.kind.list": "List",
