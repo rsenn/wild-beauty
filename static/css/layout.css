@@ -251,9 +251,37 @@ body {
   background: var(--wb-card-ground);
 }
 
+/* a picked card: a crimson and cream dashed border that slowly marches */
 .wb-card-selected > .wb-card-box {
-  outline: var(--wb-select-width) solid var(--wb-select);
   box-shadow: var(--wb-shadow-select);
+}
+
+.wb-card-selected > .wb-card-box::after {
+  --pick-a: var(--wb-pick, #8a0010);
+  --pick-b: var(--wb-pick-ground, #f4ecd8);
+  content: '';
+  position: absolute;
+  inset: -4px;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, var(--pick-a) 0 8px, var(--pick-b) 8px 16px) 0 0 / 100% 4px no-repeat,
+    repeating-linear-gradient(90deg, var(--pick-a) 0 8px, var(--pick-b) 8px 16px) 0 100% / 100% 4px no-repeat,
+    repeating-linear-gradient(0deg, var(--pick-a) 0 8px, var(--pick-b) 8px 16px) 0 0 / 4px 100% no-repeat,
+    repeating-linear-gradient(0deg, var(--pick-a) 0 8px, var(--pick-b) 8px 16px) 100% 0 / 4px 100% no-repeat;
+  animation: wb-march 1.2s linear infinite;
+}
+
+@keyframes wb-march {
+  to {
+    background-position: 16px 0, -16px 100%, 0 -16px, 100% 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-card-selected > .wb-card-box::after {
+    animation: none;
+  }
 }
 
 .wb-card-face {
@@ -1039,6 +1067,7 @@ body {
 }
 
 .wb-saved-name {
+  margin-top: 2px;
   overflow: hidden;
   font-size: var(--wb-font-size-small);
   text-overflow: ellipsis;
@@ -1093,22 +1122,24 @@ body {
   border-radius: 3px;
 }
 
-/* selection order: a small blue number in the upper left corner of a selected card */
+/* selection order: a solid disc as big as the round card buttons, upper left */
 .wb-card-order {
   position: absolute;
   top: 2px;
   left: 2px;
-  z-index: 1;
-  min-width: 1.4em;
-  padding: 0 4px;
-  font-size: var(--wb-font-size-button);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: var(--wb-card-icon);
+  height: var(--wb-card-icon);
+  font-size: calc(var(--wb-card-icon) * 0.6);
   font-weight: bold;
-  line-height: 1.4em;
-  text-align: center;
-  color: var(--wb-select);
-  background: var(--wb-card-ground);
-  border: 1px solid var(--wb-select);
+  line-height: 1;
+  color: var(--wb-pick-ink, #fff);
+  background: var(--wb-pick, #8a0010);
+  border: 2px solid var(--wb-pick-ground, #f4ecd8);
   border-radius: var(--wb-radius-round);
+  box-sizing: border-box;
   pointer-events: none;
 }
 

@@ -27,6 +27,10 @@
   /* selection and drag-over (blue), danger (red cross) */
   --wb-select: hsl(210 100% 55%);
   --wb-select-fill: hsl(210 100% 55% / 0.5);
+  /* picked upload cards (crimson and cream, readable on any photo) */
+  --wb-pick: #8a0010;
+  --wb-pick-ground: #f4ecd8;
+  --wb-pick-ink: #fff;
   --wb-drop-fill: rgb(0 122 255 / 0.15);
   --wb-danger: #f30208;
   --wb-error-frame: rgb(160 0 16);
@@ -106,7 +110,7 @@
 
   /* logo: drawn as a background of the header link */
   --wb-logo-image: url(/static/img/logo-transparent.png);
-  --wb-logo-height: 56px;
+  --wb-logo-height: var(--wb-tab-size-open); /* bottom edge in line with an opened tab */
 
   /* icons: absolute /static urls only, drawn by layout.css as background
    * images (delete and rotate are coloured, so no mask recolouring) */

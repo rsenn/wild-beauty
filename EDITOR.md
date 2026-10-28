@@ -915,6 +915,17 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [ ] **E109 read-only dimming in landscape** (the `inert` frame uses `display: contents`, so the opacity rule has no effect).
 - [ ] **E110 dark theme or dark-aware tokens** (the test phone prefers dark; the theme is light only).
 - [ ] **E111 upload expiry shown to the user** and a "keep" action (open, see `UX-REQUIREMENTS.md` A1).
+- [ ] **E112 first placement** (agreed): photos added from a batch in free mode arrive as a diagonal cascade of half-stage squares: photo i (0-based, also when added later) at (i mod 6) x 10 % of the stage in x and y plus 3 % per completed round (wrap-around), last on top; no spread button, no question; layer count on the page thumbnail (`UX-REQUIREMENTS.md` I2). Pure function `cascade(i)` in `client/editor/`, tested.
+- [ ] **E113 touch transform** (agreed 2026-10-28): corner handles 32 CSS px on `pointer: coarse` (desktop 10 px); round rotate handle above the selection and scale -/+, rotate left/right buttons in the context bar, on every device (I4).
+- [ ] **E114 simple clip**: clip tool with only a photo selected: freehand drawing closes into a polygon and becomes the clip; rectangle/ellipse choice in the context bar; shape-first clip stays (I5, C1; supersedes the open question in S2.3 Clip).
+- [ ] **E115 clip preview** (agreed): the clipped-away part ghosted (about 25 %, thin outline) only while the clip tool is active and a clipped photo is selected, also while dragging clip handles; otherwise WYSIWYG (I6).
+- [ ] **E116 edit clip in place** (agreed): clip tool + clipped photo = edit mode: outline with vertex handles, no unclip needed; mode switch replace / add / subtract for new closed strokes, wand taps and cell picks (default replace, agreed); unclip stays. Move switch on a clipped photo (agreed): both (default) / picture / window, applies to drag, pinch and the E113 buttons.
+- [ ] **E117 auto clip and cut out in the browser** (idea 2026-10-28): contour and grabCut via opencv.js WASM on a downscaled copy, result stored as a clip polygon; load on first use, working state and cancel. Server mirror in `opencv-imgproc.js` (`opencv-imgproc.md`). Needs a browser test with real photos first (`lib/opencv.js` was only checked by symbol search).
+- [ ] **E118 trimmed opencv.js build**: custom build (core + imgproc, needed functions only), separate `.wasm`, gzip, lazy load. The current `lib/opencv-5.0.js` is 16 MB (WASM 12 MB, 3.3 MB gzipped).
+- [ ] **E119 magic wand clip** (wanted): tap a point, `floodFill` with a tolerance control, the region contour becomes the clip.
+- [ ] **E120 Voronoi/Delaunay pick clip** (wanted): 6-24 seeds, tap cells to keep, their union is the clip polygon. Few cells on purpose (no tiny fragments).
+- [ ] **E121 freehand intent detection** (wanted, replaces a scissor tool): clip tool, photo selected: closing stroke = closed clip, edge-to-edge stroke = cut into two photo copies with one side each, anything else (not closed, or not exactly two crossings) = discarded with a hint, never auto-closed (agreed). Needs a polygon boolean routine (`client/editor/`, shared with combine clips).
+- [ ] **E122 multi-outline clip, split clip, colour segmentation clips** (wanted): a clip with several closed outlines; "split" makes one clip and photo copy per outline.
 - [ ] The requirements of `UX-REQUIREMENTS.md` (B paged uploads and two screens, C freehand clip, D batch to nodes, E three
       depths, F text box extensions) are **not tasks yet**: they are agreed one by one, then added here.
 
