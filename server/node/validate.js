@@ -28,6 +28,9 @@ export function photosOf(doc) {
         const known = by.get(step.photo);
 
         by.set(step.photo, known && known !== role ? 'picture' : role);
+
+        // the original behind a cutout stays with the node, so it can be restored
+        if(typeof step.orig === 'string' && !by.has(step.orig)) by.set(step.orig, 'picture');
       }
 
   return [...by].map(([hash, role]) => ({ hash, role }));

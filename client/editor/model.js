@@ -484,6 +484,19 @@ export function addPhoto(doc, pageId, hash, info, id = unique(allIds(doc)), role
   return addStep(doc, pageId, { op: 'photo', id, photo: hash, m: matrix, crop: clamp(Number.isFinite(crop) ? crop : 0.5, 0, 1), opacity: 1, blend: 'normal', ...(role === 'texture' && { role }) });
 }
 
+// Replace the image of photo step `stepId` by `hash` (a cutout of it). The first
+// image stays in `orig`, so it can be restored; `hash === orig` restores it.
+export function replacePhoto(doc, stepId, hash) {
+  const at = findStep(doc, stepId);
+
+  if(at?.step.op !== 'photo' || typeof hash !== 'string' || hash === at.step.photo) return doc;
+
+  const { orig, ...rest } = at.step;
+  const next = hash === orig ? rest : { ...rest, photo: hash, orig: orig ?? at.step.photo };
+
+  return withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? { ...next, photo: hash } : step)));
+}
+
 // a texture photo is for the 3D scene: not drawn as a picture (EDITOR.md S2.5)
 export const isTexture = step => step?.op === 'photo' && step.role === 'texture';
 

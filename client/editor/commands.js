@@ -44,6 +44,9 @@ const KEYED = {
   setCrop: c => `crop:${c.id}`,
   setWall: c => `wall:${c.id}`,
   // the preview and the full-resolution outline of the magic wand are one undo step
+  // the preview and the final cutout of a photo are one undo step
+  replacePhoto: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.id}` : null),
+  unclip: c => (c.wand ? `wand:${c.id}` : null),
   clipPolygon: c => (c.wand ? `wand:${c.id}` : null),
 };
 
@@ -63,6 +66,8 @@ function onDoc(doc, c) {
       return model.updateStep(doc, c.id, c.patch);
     case 'removeStep':
       return model.removeStep(doc, c.id);
+    case 'replacePhoto':
+      return model.replacePhoto(doc, c.id, c.hash);
     case 'moveStep':
       return model.moveStep(doc, c.id, c.to);
     case 'setRole':

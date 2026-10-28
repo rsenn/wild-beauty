@@ -10,7 +10,7 @@ const Button = ({ label, onClick, pressed, disabled, children }) => html`<button
 
 const Color = ({ label, value, onInput }) => html`<label class="wb-editor-field">${label} <input type="color" value=${/^#[0-9a-f]{6}$/i.test(value ?? '') ? value : '#000000'} onInput=${e => onInput(e.target.value)} /></label>`;
 
-export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, dispatch }) => {
+export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, onCutout, cutting, dispatch }) => {
   if(!step) return html`<p class="wb-editor-context">${t('editor.context.empty')}</p>`;
 
   const id = step.id;
@@ -40,6 +40,8 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, on
       <//>
       <${Button} pressed=${step.role === 'texture'} onClick=${() => dispatch({ type: 'setRole', id, role: step.role === 'texture' ? 'picture' : 'texture' })}>${t('editor.role.texture')}<//>
       ${clipped && html`<${Button} onClick=${() => dispatch({ type: 'unclip', id })}>${t('editor.tool.unclip')}<//>`}
+      ${onCutout && html`<${Button} disabled=${cutting} onClick=${onCutout}>${cutting ? t('editor.cutout.busy') : t('editor.cutout')}<//>`}
+      ${step.orig && html`<${Button} onClick=${() => dispatch({ type: 'replacePhoto', id, hash: step.orig })}>${t('editor.cutout.restore')}<//>`}
     `;
   } else if(step.op === 'stroke') {
     controls = html`<${Color} label=${t('editor.stroke.color')} value=${step.color} onInput=${color => dispatch({ type: 'setColor', id, color })} />`;

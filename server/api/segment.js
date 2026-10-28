@@ -3,9 +3,13 @@
 // back; closing the request kills the tool (a newer tap supersedes this one).
 // The tool may print a preview result first and a full-resolution one later.
 import { mkdirSync, readdirSync, rmSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import { HASH, config } from '../config.js';
 import { log, logCommand } from '../log.js';
+import { lines } from '../media/lines.js';
+import { sessionFor } from '../session.js';
+import { peer } from '../events.js';
+import { keepCookie, storeFile } from './uploads.js';
 
 const TOOL = process.env.WB_IMGPROC ?? 'opencv-imgproc';
 const MODELS = process.env.WB_MODELS_DIR;
@@ -17,7 +21,7 @@ const fail = (status, code, message) => Response.json({ error: { code, message }
 // the image of a photo hash: the baked photo (data/photos/<hash>.<ext>) once the
 // node was saved, else the upload the editor shows (uploads/<hash>.display.<ext>,
 // or the original when it needed no display file)
-const photoFile = hash => {
+export const photoFile = hash => {
   const find = (dir, test) => {
     try {
       const name = readdirSync(dir).find(test);
@@ -51,11 +55,11 @@ export function cleanPoints(points) {
 }
 
 export function segmentArgs({ file, points, out, cache, pick }) {
-  const args = ['segment', '--in', file, '--units', 'norm', '--view-size', String(VIEW_SIZE), '--phases', 'preview,final'];
+  const args = ['segment', '--in', file, '--units', 'norm', '--view-size', String(VIEW_SIZE), '--phases', 'preview,final', '--progress'];
 
   for(const [x, y, label] of points) args.push('--point', `${x.toFixed(5)},${y.toFixed(5)},${label}`);
 
-  args.push('--out', resolve(out, 'cut.png'), '--cache-dir', cache, '--refine', 'none', '--candidates', '3', '--pick', Number.isInteger(pick) && pick >= 0 && pick <= 2 ? String(pick) : 'best');
+  args.push('--out', resolve(out, 'cut.png'), '--cache-dir', cache, '--refine', 'guided', '--png', '3', '--candidates', '3', '--pick', Number.isInteger(pick) && pick >= 0 && pick <= 2 ? String(pick) : '2');
 
   if(MODELS) args.push('--models-dir', MODELS);
 
@@ -100,12 +104,54 @@ export async function segmentRoute(req) {
     return fail(503, 'no-tool', 'segmentation is not available');
   }
 
-  const clean = () => rmSync(out, { recursive: true, force: true });
+  // a slow final pass must not trip the server's idle timeout
+  peer.server?.timeout(req, 0);
+
+  const session = sessionFor(req);
+  const encoder = new TextEncoder();
+  let closed = false;
+
+  // the tool's lines go on as they are; after the final result the soft-edged cut
+  // is stored as an upload of the caller and announced as `derived`
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = text => {
+        if(!closed) controller.enqueue(encoder.encode(text));
+      };
+
+      try {
+        for await (const line of lines(proc.stdout)) {
+          send(line + '\n');
+
+          let event;
+
+          try {
+            event = JSON.parse(line);
+          } catch {
+            continue;
+          }
+
+          if(event.event !== 'result' || !event.ok || event.phase === 'preview' || !event.output?.path) continue;
+
+          const record = await storeFile(session, resolve(out, basename(event.output.path)), 'cut.png').catch(() => null);
+
+          if(record) send(JSON.stringify({ event: 'derived', phase: 'final', record }) + '\n');
+        }
+      } finally {
+        rmSync(out, { recursive: true, force: true });
+
+        if(!closed) controller.close();
+      }
+    },
+    cancel() {
+      closed = true;
+      proc.kill();
+    },
+  });
 
   req.signal.addEventListener('abort', () => proc.kill());
-  proc.exited.then(clean, clean);
 
-  return new Response(proc.stdout, { headers: { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store' } });
+  return new Response(stream, { headers: { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store', 'set-cookie': keepCookie(session) } });
 }
 
 export const toolAvailable = () => !!Bun.which(TOOL);

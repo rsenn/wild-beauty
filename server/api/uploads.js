@@ -149,6 +149,41 @@ export async function createUpload(req) {
   }
 }
 
+// the cookie that keeps the session's uploads for their whole lifetime
+export const keepCookie = session => expiringCookie(session.token, config.uploadTtlMs);
+
+// Store a file the server made itself (a cutout) as an upload of this session:
+// same record, same owner and lifetime as an upload from the browser. -> the
+// record as a client sees it, or null when the file is not an image.
+export async function storeFile(session, path, name) {
+  const bytes = new Uint8Array(await Bun.file(path).arrayBuffer());
+  const type = sniff(bytes.subarray(0, 32));
+
+  if(!type) return null;
+
+  const hash = new Bun.CryptoHasher('sha256').update(bytes).digest('hex');
+  const file = `${hash}.${type.ext}`;
+  const final = resolve(config.uploadsDir, file);
+
+  if(existsSync(final) && existsSync(sidecarPath(hash))) {
+    const known = await Bun.file(sidecarPath(hash)).json();
+
+    await claim(known, session);
+
+    return shown(known);
+  }
+
+  await Bun.write(final, bytes);
+  logFile('write', final, `${bytes.length} bytes (${name})`);
+
+  const record = { hash, ext: type.ext, display: file, name, size: bytes.length, mime: type.mime, uploadedAt: Date.now() };
+
+  Object.assign(record, await ingest(final, uploadPath(file)));
+  await claim(record, session);
+
+  return shown(record);
+}
+
 // the sidecar records on disk, newest first; unreadable ones are skipped
 async function readAll() {
   const names = readdirSync(config.uploadsDir).filter(n => n.endsWith('.json') && HASH.test(n.slice(0, -5)));

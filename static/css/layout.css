@@ -1246,6 +1246,7 @@ body {
 
   .wb-editor-head {
     grid-row: 1;
+    flex-wrap: wrap;
   }
 
   .wb-editor-tabs {
@@ -1310,8 +1311,9 @@ body {
     height: var(--wb-stage);
   }
 
+  /* the title stands on its own line, the buttons wrap below it */
   .wb-editor-title {
-    flex: 1 1 8em;
+    flex: 1 1 100%;
   }
 
   .wb-editor-banner {
@@ -1381,4 +1383,36 @@ body {
     min-width: 44px;
     min-height: 44px;
   }
+}
+
+/* where the server is working: a ring over the stage (magic wand, background removal) */
+.wb-busy-track,
+.wb-busy-arc {
+  fill: none;
+  stroke-width: 5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.wb-busy-track {
+  stroke: var(--wb-card-ground);
+  stroke-opacity: 0.85;
+}
+
+.wb-busy-arc {
+  stroke: var(--wb-select);
+  stroke-linecap: round;
+}
+
+.wb-busy-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wb-busy-spin 0.9s linear infinite;
+}
+
+@keyframes wb-busy-spin {
+  to { transform: rotate(270deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-busy-spin { animation: none; }
 }

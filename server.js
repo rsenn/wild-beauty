@@ -11,6 +11,7 @@ import { createUpload, deleteUpload, listUploads, readUploads, serveUpload, swee
 import { lockRoute } from './server/api/locks.js';
 import { createNode, deleteNodeRoute, listNodesRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
 import { manifestResponse, workerResponse } from './server/pwa.js';
+import { cutoutRoute } from './server/api/cutout.js';
 import { segmentRoute } from './server/api/segment.js';
 import { servePhoto } from './server/api/photos.js';
 import { photoInfos } from './server/node/view.js';
@@ -142,6 +143,8 @@ function route(req) {
   }
 
   if(pathname === '/api/segment') return req.method === 'POST' ? segmentRoute(req) : text('method not allowed\n', 405);
+
+  if(pathname === '/api/cutout') return req.method === 'POST' ? cutoutRoute(req) : text('method not allowed\n', 405);
 
   if(pathname === '/api/events') return req.method === 'POST' ? recordEvents(req) : text('method not allowed\n', 405);
 
