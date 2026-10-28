@@ -97,6 +97,8 @@
   "editor.props.visibility": "Visibility",
   "editor.props.group": "Group",
   "editor.props.bg": "Background",
+  "editor.props.bg.other": "Other colour",
+  "editor.palette.used": "Used in this node",
   "editor.props.bg.clear": "No background",
   "editor.kind.node": "Node",
   "editor.kind.list": "List",

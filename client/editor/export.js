@@ -41,7 +41,7 @@ export function fileName(title, format = 'png') {
   return `${base || 'wild-beauty'}.${(FORMATS[format] ?? FORMATS.png).ext}`;
 }
 
-const toDataUrl = blob =>
+const toDataUrlOf = blob =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -50,31 +50,51 @@ const toDataUrl = blob =>
     reader.readAsDataURL(blob);
   });
 
+// the images of a document are named by hash or are object urls, so what a url holds
+// never changes: each is read once (the clipboard, the tile and the palette all draw)
+const inlined = new Map();
+const inline = url => {
+  if(!inlined.has(url)) inlined.set(url, fetch(url).then(res => (res.ok ? res.blob() : Promise.reject(new Error(`photo ${res.status}`)))).then(toDataUrlOf).catch(e => (inlined.delete(url), Promise.reject(e))));
+
+  return inlined.get(url);
+};
+const toDataUrl = blob => toDataUrlOf(blob);
+
+// the page drawn on a `size` x `size` canvas; the ground colour of the document
+// under it when it has one, else transparent (`ground` gives a colour to use instead)
+export async function sceneCanvas(doc, options, size, ground) {
+  const svg = documentSvg(doc, options);
+  const data = new Map();
+
+  await Promise.all(imageUrls(svg).map(async url => data.set(url, await inline(url))));
+
+  const picture = new Image();
+
+  picture.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(withSize(inlineImages(svg, data), size));
+  await picture.decode();
+
+  const canvas = document.createElement('canvas');
+
+  canvas.width = canvas.height = size;
+
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  const fill = ground ?? (/^#[0-9a-f]{6}$/i.test(doc.bg ?? '') ? doc.bg : null);
+
+  if(fill) {
+    context.fillStyle = fill;
+    context.fillRect(0, 0, size, size);
+  }
+
+  context.drawImage(picture, 0, 0, size, size);
+
+  return canvas;
+}
+
 // The whole page as a small JPEG data url (the node's tile in the saved list);
 // null when it cannot be drawn.
 export async function documentThumb(doc, options, { size = 512, background = '#ffffff' } = {}) {
   try {
-    const svg = documentSvg(doc, options);
-    const data = new Map();
-
-    await Promise.all(imageUrls(svg).map(async url => data.set(url, await toDataUrl(await (await fetch(url)).blob()))));
-
-    const picture = new Image();
-
-    picture.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(withSize(inlineImages(svg, data), size));
-    await picture.decode();
-
-    const canvas = document.createElement('canvas');
-
-    canvas.width = canvas.height = size;
-
-    const context = canvas.getContext('2d');
-
-    context.fillStyle = /^#[0-9a-f]{6}$/i.test(doc.bg ?? '') ? doc.bg : background;
-    context.fillRect(0, 0, size, size);
-    context.drawImage(picture, 0, 0, size, size);
-
-    return canvas.toDataURL('image/jpeg', 0.85);
+    return (await sceneCanvas(doc, options, size, /^#[0-9a-f]{6}$/i.test(doc.bg ?? '') ? doc.bg : background)).toDataURL('image/jpeg', 0.85);
   } catch {
     return null;
   }
@@ -132,7 +152,7 @@ export async function exportImage(doc, options, { format = 'png', background = '
 // One step alone (the clipboard's image): its visible part on a transparent ground,
 // with its clip and moves, `px` pixels along the longer side. Rejects when it
 // cannot be drawn.
-export async function stepImage(doc, id, { photos, page = 0, px = 1600 } = {}) {
+export async function stepCanvas(doc, id, { photos, page = 0, px = 1600 } = {}) {
   const at = findStep(doc, id);
 
   if(!at) throw new Error('no step');
@@ -154,7 +174,7 @@ export async function stepImage(doc, id, { photos, page = 0, px = 1600 } = {}) {
   const svg = documentSvg(solo, { photos, page: 0 }).replace(/^<svg\b([^>]*?)viewBox="[^"]*"/, `<svg$1viewBox="${x} ${y} ${w} ${h}"`);
   const data = new Map();
 
-  await Promise.all(imageUrls(svg).map(async url => data.set(url, await toDataUrl(await (await fetch(url)).blob()))));
+  await Promise.all(imageUrls(svg).map(async url => data.set(url, await inline(url))));
 
   const picture = new Image();
 
@@ -165,7 +185,13 @@ export async function stepImage(doc, id, { photos, page = 0, px = 1600 } = {}) {
 
   canvas.width = Math.round(w * k);
   canvas.height = Math.round(h * k);
-  canvas.getContext('2d').drawImage(picture, 0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d', { willReadFrequently: true }).drawImage(picture, 0, 0, canvas.width, canvas.height);
+
+  return canvas;
+}
+
+export async function stepImage(doc, id, options) {
+  const canvas = await stepCanvas(doc, id, options);
 
   return new Promise((resolve, reject) => canvas.toBlob(b => (b ? resolve(b) : reject(new Error('no image'))), 'image/png'));
 }

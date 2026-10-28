@@ -116,3 +116,25 @@ export function swatches(palette, fallback = []) {
 
   return derive(own);
 }
+
+// the colours the node already uses (strokes, shapes, text, the ground), the
+// most used first, as lower-case '#rrggbb'; at most `count`
+export function usedColours(doc, count = 8) {
+  const seen = new Map();
+  const add = v => {
+    const hex = typeof v === 'string' && /^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(v) ? v.slice(0, 7).toLowerCase() : null;
+
+    if(hex) seen.set(hex, (seen.get(hex) ?? 0) + 1);
+  };
+
+  add(doc.bg);
+
+  for(const page of doc.pages)
+    for(const step of page.steps) {
+      if(step.op === 'stroke') add(step.color);
+      else if(step.op === 'shape') (add(step.fill), add(step.stroke));
+      else if(step.op === 'text') (add(step.color), add(step.bg), add(step.outline?.color));
+    }
+
+  return [...seen].sort((a, b) => b[1] - a[1]).slice(0, count).map(([hex]) => hex);
+}

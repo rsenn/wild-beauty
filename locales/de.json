@@ -97,6 +97,8 @@
   "editor.props.visibility": "Sichtbarkeit",
   "editor.props.group": "Gruppe",
   "editor.props.bg": "Hintergrund",
+  "editor.props.bg.other": "Andere Farbe",
+  "editor.palette.used": "In diesem Werk verwendet",
   "editor.props.bg.clear": "Kein Hintergrund",
   "editor.kind.node": "Werk",
   "editor.kind.list": "Liste",

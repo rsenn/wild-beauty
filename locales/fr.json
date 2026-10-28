@@ -97,6 +97,8 @@
   "editor.props.visibility": "Visibilité",
   "editor.props.group": "Groupe",
   "editor.props.bg": "Arrière-plan",
+  "editor.props.bg.other": "Autre couleur",
+  "editor.palette.used": "Utilisées dans ce travail",
   "editor.props.bg.clear": "Sans arrière-plan",
   "editor.kind.node": "Pièce",
   "editor.kind.list": "Liste",

@@ -24,6 +24,7 @@ import { boxHeight, layout } from '../editor/text.js';
 import { classify, copyPayload, fromEvent, htmlFor, plainFor, readClipboard, writeClipboard } from '../editor/clipboard.js';
 import { sendFile } from '../upload.js';
 import { uploadPayload } from '../files.js';
+import { scenePalette } from '../editor/scenepalette.js';
 import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
 import { photoPoint, readLines, resultPolygon } from '../editor/wand.js';
@@ -39,7 +40,7 @@ import { DEFAULT_TOOL, TOOLS, inField, toolForKey } from '../editor/tools.js';
 import { editorStore } from '../editor/useEditor.js';
 import { acuteCorner } from '../editor/walls.js';
 import { NEW } from '../editor/store.js';
-import { swatches } from '../editor/palette.js';
+import { swatches, usedColours } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
 import { Filmstrip } from './Filmstrip.js';
 import { clampK, durationOf, positionAt } from '../editor/playback.js';
@@ -895,6 +896,27 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   }, [dirty]);
 
   // the upload list greys out the photos this node already uses
+  // the colours of what is on the stage (E132), drawn small and counted once the document
+  // has rested; only while something shows them (the palette, the properties)
+  const [scenePal, setScenePal] = useState(null);
+  const [propsOpen, setPropsOpen] = useState(false);
+  const wantsPalette = propsOpen || tool === 'pen' || tool === 'shape' || editStep?.op === 'stroke' || editStep?.op === 'shape';
+  const loaded = Object.keys(photos).length;
+
+  useEffect(() => {
+    if(!wantsPalette) return;
+
+    let live = true;
+    const timer = setTimeout(() => {
+      scenePalette(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page }).then(p => live && setScenePal(p.length ? p : null));
+    }, 500);
+
+    return () => {
+      live = false;
+      clearTimeout(timer);
+    };
+  }, [wantsPalette, doc, loaded, page]);
+
   const usedKey = [...new Set(doc.pages.flatMap(p => p.steps.filter(s => s.op === 'photo').flatMap(s => [s.photo, s.orig].filter(Boolean))))].sort(); // a cutout's original counts as used
 
   useEffect(() => {
@@ -1789,7 +1811,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const paletteTargets = tool === 'pen' || tool === 'shape' ? ['pen'] : editStep?.op === 'stroke' ? ['stroke'] : editStep?.op === 'shape' ? ['fill', 'outline'] : null;
   const paletteTarget = paletteTargets && (paletteTargets.includes(aim) ? aim : paletteTargets[0]);
   const reference = editStep?.op === 'photo' ? editStep : strip[strip.length - 1];
-  const paletteColours = paletteTargets && swatches(photos[reference?.photo]?.palette ?? [], themeColours()).all;
+  const paletteColours = paletteTargets && swatches(scenePal ?? photos[reference?.photo]?.palette ?? [], themeColours()).all;
   const paletteCurrent = paletteTarget === 'pen' ? color : paletteTarget === 'stroke' ? editStep.color : paletteTarget === 'fill' ? editStep.fill : paletteTarget === 'outline' ? editStep.stroke : null;
   const pick = hex => {
     if(paletteTarget === 'pen') setColor(hex);
@@ -1816,7 +1838,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           <span class="wb-sr-only">${t('editor.title.label')}</span>
           <input type="text" maxlength=${LIMITS.title} autocomplete="off" value=${title} placeholder=${t('editor.title.placeholder')} onInput=${e => dispatch({ type: 'setTitle', title: e.target.value })} />
         </label>
-        <span class="wb-editor-head-fields" inert=${readOnly}><${Properties} t=${t} kind=${kind} bg=${doc.bg} dispatch=${dispatch} /></span>
+        <span class="wb-editor-head-fields" inert=${readOnly}><${Properties} t=${t} kind=${kind} bg=${doc.bg} colours=${swatches(scenePal ?? photos[reference?.photo]?.palette ?? [], themeColours()).all} onOpen=${setPropsOpen} dispatch=${dispatch} /></span>
         <${Popover} label=${t('editor.export')} class="wb-editor-export" align="right">
           <button type="button" class="wb-editor-chip" disabled=${exporting} onClick=${() => exportAs('png')}>${t('editor.export.png')}</button>
           <button type="button" class="wb-editor-chip" disabled=${exporting} onClick=${() => exportAs('jpg')}>${t('editor.export.jpg')}</button>
@@ -1904,7 +1926,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
         : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onCutout=${removeBackground} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
-      ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
+      ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} used=${usedColours(doc).filter(hex => !paletteColours.includes(hex))} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">
         <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />
