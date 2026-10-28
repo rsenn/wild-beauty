@@ -195,7 +195,8 @@ function route(req) {
   if(pathname === '/manifest.webmanifest') return manifestResponse();
   if(pathname === '/sw.js') return workerResponse();
 
-  if(pathname === '/') {
+  // the installed app starts here: the upload area and the editor, in the visitor's language
+  if(pathname === '/' || pathname === '/new') {
     const location = new URL(`/${negotiate(locales, { req })}/new`, req.url).href;
 
     return new Response(null, { status: 302, headers: { location, vary: 'Cookie, Accept-Language' } });

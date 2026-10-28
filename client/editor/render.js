@@ -8,6 +8,8 @@ import { lerpMatrix } from './matrix.js';
 import { ease } from './playback.js';
 import { sanitize, toAttr } from './theme.js';
 import { outline, outlinePath } from './pen.js';
+import { FONTS, LINE_HEIGHT, alignX, anchorOf } from './text.js';
+import { edgeShapes, pathOf } from './edge.js';
 
 const STAGE = 1000;
 const HEX = /^#[0-9a-f]{3,8}$/i;
@@ -27,13 +29,62 @@ export function renderPhoto(step, info) {
 
   if(step.blend && step.blend !== 'normal') style += `${style ? ';' : ''}mix-blend-mode:${step.blend}`;
 
+  // an edge decoration (torn, paper, rounded sticker) cuts the picture to its own outline
+  const cut = step.edge ? edgeShapes(step.edge).clip : null;
+  const cutId = `edge-${step.id}`;
+
   // the nested <svg> cuts the square (its overflow is hidden)
+  const picture = html`<svg x="0" y="0" width=${STAGE} height=${STAGE} viewBox=${`0 0 ${STAGE} ${STAGE}`} overflow="hidden">
+    <image href=${info.href} x=${-x * k} y=${-y * k} width=${info.width * k} height=${info.height * k} preserveAspectRatio="none" />
+  </svg>`;
+
   return html`<g data-step=${step.id} data-op="photo">
     <g transform=${`matrix(${step.m.join(' ')})`} style=${style || undefined}>
-      <svg x="0" y="0" width=${STAGE} height=${STAGE} viewBox=${`0 0 ${STAGE} ${STAGE}`} overflow="hidden">
-        <image href=${info.href} x=${-x * k} y=${-y * k} width=${info.width * k} height=${info.height * k} preserveAspectRatio="none" />
-      </svg>
+      ${cut && html`<defs><clipPath id=${cutId}><path d=${pathOf(cut)} /></clipPath></defs>`}
+      ${cut ? html`<g clip-path=${`url(#${cutId})`}>${picture}</g>` : picture}
     </g>
+  </g>`;
+}
+
+// a `text` step: the lines as <tspan>s, bold and outlined if asked, in its box
+export function renderText(step, m = step.m) {
+  const face = FONTS[step.font] ?? FONTS.sans;
+  const size = Number.isFinite(step.size) ? step.size : 48;
+  const pad = step.padding ?? 0;
+  const lines = Array.isArray(step.lines) && step.lines.length ? step.lines : String(step.text ?? '').split('\n');
+  const x = alignX(step.align, step.w, pad);
+  const out = step.outline && Number.isFinite(step.outline.width) && step.outline.width > 0 && safeColour(step.outline.color);
+  const bg = step.bg !== undefined ? paint(step.bg, `bg-${step.id}`) : null;
+
+  return html`<g data-step=${step.id} data-op="text" transform=${matrix(m)}>
+    ${bg?.defs && html`<defs>${bg.defs}</defs>`}
+    ${bg && bg.paint !== 'none' && html`<rect x="0" y="0" width=${step.w} height=${step.h} rx=${step.radius ?? 0} fill=${bg.paint} />`}
+    <text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? 700 : 400} fill=${safeColour(step.color) ?? '#000000'} text-anchor=${anchorOf(step.align)} stroke=${out ? step.outline.color : undefined} stroke-width=${out ? step.outline.width : undefined} stroke-linejoin="round" paint-order="stroke" dominant-baseline="text-before-edge" style="white-space:pre">
+      ${lines.map((line, i) => html`<tspan x=${x} y=${pad + i * size * LINE_HEIGHT + (size * (LINE_HEIGHT - 1)) / 2}>${line}</tspan>`)}
+    </text>
+  </g>`;
+}
+
+// what an edge decoration draws under a photo (shadow, rim, frame): shapes in
+// the photo's own space, and for a sticker with a clip, the clip's path stroked
+// as a rim (stage space, so it follows whatever the photo was cut to)
+export function renderEdgeUnder(step, m, clipShape, clipM) {
+  if(!step.edge || step.edge.style === 'plain') return null;
+
+  const { under, rim } = edgeShapes(step.edge);
+  const opacity = step.opacity !== 1 ? step.opacity : undefined;
+
+  if(step.edge.style === 'sticker' && clipShape && PATH.test(clipShape.path)) {
+    const k = Math.sqrt(Math.abs(m[0] * m[3] - m[1] * m[2]));
+
+    return html`<g data-edge=${step.id} opacity=${opacity}>
+      <path d=${clipShape.path} transform=${matrix(clipM ?? IDENTITY)} fill="#000000" stroke="#000000" stroke-opacity="0.28" fill-opacity="0.28" stroke-width=${2 * rim * k} stroke-linejoin="round" style=${`transform:translate(${8 * k}px, ${12 * k}px)`} />
+      <path d=${clipShape.path} transform=${matrix(clipM ?? IDENTITY)} fill="#fbfaf6" stroke="#fbfaf6" stroke-width=${2 * rim * k} stroke-linejoin="round" />
+    </g>`;
+  }
+
+  return html`<g data-edge=${step.id} transform=${matrix(m)} opacity=${opacity}>
+    ${under.map(u => html`<path d=${pathOf(u.points)} fill=${u.fill} fill-opacity=${u.opacity} />`)}
   </g>`;
 }
 
@@ -96,6 +147,9 @@ export function effective(steps) {
     switch(step.op) {
       case 'photo':
         by.set(step.id, { clip: step.clip, blend: step.blend, m: step.m });
+        break;
+      case 'text':
+        by.set(step.id, { m: step.m });
         break;
       case 'clip':
         state(step.target).clip = step.shape;
@@ -178,15 +232,19 @@ export function renderStage(doc, { photos = () => null, mode = doc.mode, page = 
         if(isTexture(step)) return null; // for the 3D scene, not a picture
 
         const out = renderPhoto({ ...step, m: st.m ?? step.m, blend: st.blend ?? step.blend }, photos(step.photo));
+        const clipShape = st.clip && shapes.get(st.clip);
+        const under = out && renderEdgeUnder(step, st.m ?? step.m, clipShape, clipShape && by.get(clipShape.id)?.m);
 
-        return out && st.clip && shapes.has(st.clip) ? html`<g clip-path=${`url(#clip-${st.clip})`}>${out}</g>` : out;
+        return out && clipShape ? html`${under}<g clip-path=${`url(#clip-${st.clip})`}>${out}</g>` : html`${under}${out}`;
       }
       case 'stroke':
         return renderStroke(step, st.m);
       case 'shape':
         return clips.has(step.id) ? null : renderShape(step, st.m);
+      case 'text':
+        return renderText(step, st.m);
       default:
-        return null; // clip, unclip, blend, transform act on others; text is phase K
+        return null; // clip, unclip, blend and transform act on others
     }
   };
 

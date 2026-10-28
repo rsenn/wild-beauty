@@ -6,6 +6,7 @@
 // the same snapshot, which history.push then ignores.
 import * as model from './model.js';
 import { clipPolygon, cutPhoto, duplicatePhoto } from './clipping.js';
+import { combineOutline, setClipPolygons, splitClip } from './multiclip.js';
 import { effective } from './render.js';
 import { invert, multiply } from './matrix.js';
 
@@ -45,6 +46,11 @@ const KEYED = {
   setWall: c => `wall:${c.id}`,
   // the preview and the full-resolution outline of the magic wand are one undo step
   // the preview and the final cutout of a photo are one undo step
+  // typing in a text box is one undo step until something else happens
+  updateText: c => (c.keyed ? `text:${c.id}:${c.keyed}` : null),
+  setClipPolygons: c => `clipedit:${c.id}`,
+  setEdge: c => `edge:${c.id}`,
+  setBox: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.id}` : null),
   replacePhoto: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.id}` : null),
   unclip: c => (c.wand ? `wand:${c.id}` : null),
   clipPolygon: c => (c.wand ? `wand:${c.id}` : null),
@@ -66,6 +72,14 @@ function onDoc(doc, c) {
       return model.updateStep(doc, c.id, c.patch);
     case 'removeStep':
       return model.removeStep(doc, c.id);
+    case 'setEdge':
+      return model.setEdge(doc, c.id, c.edge);
+    case 'addText':
+      return model.addText(doc, c.page ?? doc.pages[0].id, c);
+    case 'updateText':
+      return model.updateText(doc, c.id, c.patch);
+    case 'setBox':
+      return model.setBox(doc, c.id, c.box);
     case 'replacePhoto':
       return model.replacePhoto(doc, c.id, c.hash);
     case 'moveStep':
@@ -96,6 +110,12 @@ function onDoc(doc, c) {
       return model.unclip(doc, c.id);
     case 'clipPolygon':
       return clipPolygon(doc, c.id, c.polygon, c.shape, c.style);
+    case 'clipOutline':
+      return combineOutline(doc, c.id, c.polygon, c.mode, c.shape, c.style) ?? clipPolygon(doc, c.id, c.polygon, c.shape, c.style);
+    case 'setClipPolygons':
+      return setClipPolygons(doc, c.id, c.polygons);
+    case 'splitClip':
+      return splitClip(doc, c.id, c.ids);
     case 'cutPhoto':
       return cutPhoto(doc, c.id, c.pieces, c.ids, c.style);
     case 'duplicatePhoto':

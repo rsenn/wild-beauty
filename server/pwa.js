@@ -7,7 +7,7 @@ const manifest = {
   id: '/',
   name: 'Wild Beauty',
   short_name: 'Wild Beauty',
-  start_url: '/',
+  start_url: '/new',
   scope: '/',
   display: 'standalone',
   background_color: COLOR,

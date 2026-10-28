@@ -8,6 +8,8 @@ import { sniff } from '../media/sniff.js';
 import { extractDisplay } from '../media/heif.js';
 import { ingest, uploadPath } from '../media/ingest.js';
 import { logFile } from '../log.js';
+import { run } from '../media/run.js';
+import { imagemagick } from '../media/tools.js';
 import { expiringCookie, sessionFor } from '../session.js';
 
 mkdirSync(config.tmpDir, { recursive: true });
@@ -155,7 +157,7 @@ export const keepCookie = session => expiringCookie(session.token, config.upload
 // Store a file the server made itself (a cutout) as an upload of this session:
 // same record, same owner and lifetime as an upload from the browser. -> the
 // record as a client sees it, or null when the file is not an image.
-export async function storeFile(session, path, name) {
+export async function storeFile(session, path, name, { displayMax = 0 } = {}) {
   const bytes = new Uint8Array(await Bun.file(path).arrayBuffer());
   const type = sniff(bytes.subarray(0, 32));
 
@@ -178,7 +180,16 @@ export async function storeFile(session, path, name) {
 
   const record = { hash, ext: type.ext, display: file, name, size: bytes.length, mime: type.mime, uploadedAt: Date.now() };
 
-  Object.assign(record, await ingest(final, uploadPath(file)));
+  // a big image gets a smaller display copy (WebP keeps the alpha): the editor loads
+  // that one, which matters on a phone; the original stays for baking
+  if(displayMax > 0 && imagemagick.convert) {
+    const display = `${hash}.display.webp`;
+    const { code } = await run([...imagemagick.convert, `${final}[0]`, '-resize', `${displayMax}x${displayMax}>`, '-quality', '88', '-define', 'webp:alpha-quality=100', resolve(config.uploadsDir, display)], { timeout: 60000 });
+
+    if(code === 0) record.display = display;
+  }
+
+  Object.assign(record, await ingest(final, uploadPath(record.display)));
   await claim(record, session);
 
   return shown(record);

@@ -6,6 +6,7 @@ import { apply, invert } from './matrix.js';
 import { isTexture } from './model.js';
 import { effective } from './render.js';
 import { segments, verticesFromPath } from './shapes.js';
+import { polygonsFromPath, windingAt } from './multiclip.js';
 
 const IDENTITY = [1, 0, 0, 1, 0, 0];
 
@@ -74,7 +75,7 @@ function drawn(doc, page, upTo) {
   const steps = upTo === undefined ? all : all.slice(0, Math.max(0, Math.floor(upTo)));
   const { by, clips } = effective(steps);
   const entry = step => ({ step, m: by.get(step.id)?.m ?? IDENTITY, clip: by.get(step.id)?.clip });
-  const entries = steps.filter(step => ['photo', 'stroke', 'shape'].includes(step.op) && !isTexture(step) && !(step.op === 'shape' && clips.has(step.id))).map(entry);
+  const entries = steps.filter(step => ['photo', 'stroke', 'shape', 'text'].includes(step.op) && !isTexture(step) && !(step.op === 'shape' && clips.has(step.id))).map(entry);
 
   return { entries, all: new Map(steps.filter(step => step.op === 'shape').map(step => [step.id, entry(step)])) };
 }
@@ -93,15 +94,33 @@ function covers(entry, p, tolerance, { photos, steps }) {
     const [x, y] = apply(inverse, p);
 
     if(x < 0 || y < 0 || x > w || y > h) return false;
+    if(step.box && (x < step.box[0] || y < step.box[1] || x > step.box[2] || y > step.box[3])) return false;
 
     if(clip) {
       const shape = steps.get(clip);
-      const outline = shape && shapePoints(shape.step, shape.m);
+      const many = shape ? polygonsFromPath(shape.step.path) : [];
 
-      if(outline && !inside(p, outline.points)) return false;
+      // several outlines (E122): the non-zero rule, holes included
+      if(many.length > 1) {
+        if(!windingAt(many.map(poly => poly.map(q => apply(shape.m, q))), p)) return false;
+      } else {
+        const outline = shape && shapePoints(shape.step, shape.m);
+
+        if(outline && !inside(p, outline.points)) return false;
+      }
     }
 
     return true;
+  }
+
+  if(step.op === 'text') {
+    const inverse = invert(m);
+
+    if(!inverse) return false;
+
+    const [x, y] = apply(inverse, p);
+
+    return x >= 0 && y >= 0 && x <= step.w && y <= step.h;
   }
 
   if(step.op === 'stroke') {
@@ -131,11 +150,36 @@ export function hitTest(doc, point, { photos = () => null, tolerance = 8, page =
   return null;
 }
 
+// the box of a clipped photo's visible part, in its local space: [x0, y0, x1, y1]
+// or null when it has no usable clip
+function clippedBox(entry, steps, w, h) {
+  const own = entry.step.box;
+  const shape = entry.clip && steps.get(entry.clip);
+  const back = invert(entry.m);
+
+  if(!shape || !back) return own ?? null;
+
+  const many = polygonsFromPath(shape.step.path);
+  const lists = many.length > 1 ? many.map(poly => poly.map(q => apply(shape.m, q))) : [shapePoints(shape.step, shape.m)?.points ?? []];
+  const points = lists.flat().map(q => apply(back, q));
+
+  if(!points.length) return null;
+
+  const xs = points.map(q => q[0]);
+  const ys = points.map(q => q[1]);
+  const [bx0, by0, bx1, by1] = own ?? [0, 0, w, h];
+  const box = [Math.max(bx0, Math.min(...xs)), Math.max(by0, Math.min(...ys)), Math.min(bx1, Math.max(...xs)), Math.min(by1, Math.max(...ys))];
+
+  return box[2] > box[0] && box[3] > box[1] ? box : null;
+}
+
 // The outline of a step as four corners [[x, y] x 4] (a photo's turned
 // rectangle; the bounding box of a stroke or shape), or null when the step is
-// not drawn or unknown.
-export function outlineOf(doc, id, { photos = () => null, page = 0, upTo } = {}) {
-  const entry = drawn(doc, page, upTo).entries.find(e => e.step.id === id);
+// not drawn or unknown. With `clipped` a clipped photo's outline hugs the part
+// that is still visible (the selection box); otherwise it is the whole photo.
+export function outlineOf(doc, id, { photos = () => null, page = 0, upTo, clipped = false } = {}) {
+  const { entries, all } = drawn(doc, page, upTo);
+  const entry = entries.find(e => e.step.id === id);
 
   if(!entry) return null;
 
@@ -147,9 +191,12 @@ export function outlineOf(doc, id, { photos = () => null, page = 0, upTo } = {})
     if(!info) return null;
 
     const [w, h] = localSize(info);
+    const [x0, y0, x1, y1] = (clipped && clippedBox(entry, all, w, h)) || [0, 0, w, h];
 
-    return [[0, 0], [w, 0], [w, h], [0, h]].map(c => apply(m, c));
+    return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(c => apply(m, c));
   }
+
+  if(step.op === 'text') return [[0, 0], [step.w, 0], [step.w, step.h], [0, step.h]].map(c => apply(m, c));
 
   const points = step.op === 'stroke' ? step.pts.map(q => apply(m, [q[0], q[1]])) : shapePoints(step, m)?.points;
 
@@ -177,7 +224,7 @@ export function matrixOf(doc, id, { page = 0, upTo } = {}) {
 
 // the centre of a step's outline: where keys and Alt-drag scale and turn it
 export function centreOf(doc, id, options = {}) {
-  const outline = outlineOf(doc, id, options);
+  const outline = outlineOf(doc, id, { clipped: true, ...options });
 
   return outline && [outline.reduce((s, p) => s + p[0], 0) / outline.length, outline.reduce((s, p) => s + p[1], 0) / outline.length];
 }

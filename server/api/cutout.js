@@ -87,7 +87,7 @@ export async function cutoutRoute(req) {
           if(event.event === 'progress') send({ event: 'progress', phase: event.phase, percent: event.percent });
           else if(event.event === 'result' && event.ok) {
             const path = event.output?.path && resolve(out, basename(event.output.path));
-            const record = path && (await storeFile(session, path, 'cutout.png').catch(() => null));
+            const record = path && (await storeFile(session, path, 'cutout.png', { displayMax: 2048 }).catch(() => null));
 
             if(record) send({ event: 'derived', phase: event.phase ?? 'final', record });
           } else if(event.event === 'result') send({ event: 'error', code: event.error?.code ?? 'failed' });
@@ -108,5 +108,5 @@ export async function cutoutRoute(req) {
 
   req.signal.addEventListener('abort', () => proc.kill());
 
-  return new Response(stream, { headers: { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store', 'set-cookie': keepCookie(session) } });
+  return new Response(stream, { headers: { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store', 'x-accel-buffering': 'no', 'set-cookie': keepCookie(session) } });
 }

@@ -60,7 +60,7 @@ describe('validate, structure', () => {
       { op: 'unclip', target: 'abcd1234' },
       { op: 'blend', target: 'abcd1234', mode: 'multiply' },
       { op: 'transform', target: 'abcd1234', m: [1, 0, 0, 1, 5, 5], ease: 'linear' },
-      { op: 'text', id: 'text0001', text: 'hi', lines: ['hi'], m: [1, 0, 0, 1, 0, 0], w: 10, h: 5, font: 'fixed', size: 12, color: '#000000', align: 'left', padding: 1, radius: 0 },
+      { op: 'text', id: 'text0001', text: 'hi', lines: ['hi'], m: [1, 0, 0, 1, 0, 0], w: 10, h: 5, font: 'fixed', size: 12, color: '#000000', align: 'start', padding: 1, radius: 0 },
     ];
 
     expect(validate(withSteps(...steps))).toEqual([]);
@@ -98,7 +98,7 @@ describe('validate, structure', () => {
 describe('validate, references and limits', () => {
   const shape = (id = 'shape001', over = {}) => ({ op: 'shape', id, path: 'M0 0Z', closed: true, strokeWidth: 1, ...over });
   const stroke = (id, pts) => ({ op: 'stroke', id, pts, color: '#000000' });
-  const text = (id, over = {}) => ({ op: 'text', id, text: 'x', lines: ['x'], m: [1, 0, 0, 1, 0, 0], w: 1, h: 1, font: 'fixed', size: 1, color: '#000000', align: 'left', padding: 0, radius: 0, ...over });
+  const text = (id, over = {}) => ({ op: 'text', id, text: 'x', lines: ['x'], m: [1, 0, 0, 1, 0, 0], w: 1, h: 1, font: 'fixed', size: 12, color: '#000000', align: 'start', padding: 0, radius: 0, ...over });
   const id = n => n.toString(36).padStart(8, '0');
 
   test('references that resolve are fine', () => {

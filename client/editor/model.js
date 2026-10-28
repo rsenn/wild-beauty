@@ -3,6 +3,8 @@
 import { pathFromVertices, verticesFromPath } from './shapes.js';
 import { acuteCorner, defaultWall, isWall } from './walls.js';
 import { textureHashes, validateScene } from './scene.js';
+import { EDGE_STYLES } from './edge.js';
+import { DEFAULT_FONT, FONT_IDS, LIMITS as TEXT, clampSize, clampWidth } from './text.js';
 
 export const VERSION = 1;
 
@@ -51,8 +53,8 @@ export const KINDS = ['node', 'list', 'album', 'gallery', 'shop'];
 // the legacy `fit` of a photo step (before the square crop, EDITOR.md S2.5): only read to migrate
 export const FITS = ['extend', 'cover', 'free'];
 export const FILLS = ['loose', 'tight'];
-export const FONTS = ['fixed', 'serif', 'sans'];
-export const ALIGNS = ['left', 'center', 'right'];
+export const FONTS = FONT_IDS;
+export const ALIGNS = ['start', 'center', 'end'];
 
 // --- validate, structure (E4) ---------------------------------------------
 // Types and shapes only; limits, numbers and references follow in `limits`.
@@ -74,14 +76,14 @@ const opt = check => Object.assign(v => v === undefined || check(v), { optional:
 
 // field checks per op; a field not listed is rejected
 const STEPS = {
-  photo: { id: isId, photo: isHash, m: isMatrix, crop: opt(v => isNumber(v) && v >= 0 && v <= 1), fit: opt(oneOf(FITS)), opacity: isNumber, blend: oneOf(BLENDS), clip: opt(isId), role: opt(oneOf(['picture', 'texture'])) },
+  photo: { id: isId, photo: isHash, m: isMatrix, crop: opt(v => isNumber(v) && v >= 0 && v <= 1), fit: opt(oneOf(FITS)), opacity: isNumber, blend: oneOf(BLENDS), clip: opt(isId), role: opt(oneOf(['picture', 'texture'])), orig: opt(isHash), box: opt(v => Array.isArray(v) && v.length === 4 && v.every(n => isNumber(n) && n >= 0 && n <= 1000) && v[0] < v[2] && v[1] < v[3]), edge: opt(v => isObject(v) && EDGE_STYLES.includes(v.style) && isNumber(v.amount) && v.amount >= 0 && v.amount <= 1 && Number.isInteger(v.seed) && v.seed >= 0 && v.seed <= 1e9) },
   stroke: { id: isId, pts: isPoints, color: isColour, smooth: opt(v => typeof v === 'boolean') },
   shape: { id: isId, path: isString, closed: v => typeof v === 'boolean', fill: opt(isFill), stroke: opt(isFill), strokeWidth: isNumber, wall: opt(isWall) },
   clip: { target: isId, shape: isId },
   unclip: { target: isId },
   blend: { target: isId, mode: oneOf(BLENDS) },
   transform: { target: isId, m: isMatrix, ease: opt(isString) },
-  text: { id: isId, text: isString, lines: v => Array.isArray(v) && v.every(isString), m: isMatrix, w: isNumber, h: isNumber, font: oneOf(FONTS), size: isNumber, color: isColour, align: oneOf(ALIGNS), padding: isNumber, radius: isNumber, bg: opt(isFill) },
+  text: { id: isId, text: isString, lines: v => Array.isArray(v) && v.every(isString), m: isMatrix, w: isNumber, h: isNumber, font: oneOf(FONTS), size: isNumber, color: isColour, align: oneOf(ALIGNS), padding: isNumber, radius: isNumber, bg: opt(isFill), bold: opt(v => typeof v === 'boolean'), outline: opt(v => isObject(v) && isColour(v.color) && isNumber(v.width) && v.width >= 0 && v.width <= TEXT.outline[1]) },
 };
 
 function validateStep(step, path, errors) {
@@ -216,7 +218,10 @@ function validateLimits(doc) {
           break;
         case 'text':
           texts++;
-          if(step.text.length > LIMITS.textChars) errors.push({ code: 'text_too_long', path: `${at}.text` });
+          if(typeof step.text !== 'string' || step.text.length > LIMITS.textChars) errors.push({ code: 'text_too_long', path: `${at}.text` });
+          if(step.font !== undefined && !FONT_IDS.includes(step.font)) errors.push({ code: 'bad_font', path: `${at}.font` });
+          if(step.size !== undefined && !(step.size >= TEXT.size[0] && step.size <= TEXT.size[1])) errors.push({ code: 'bad_size', path: `${at}.size` });
+          if(step.lines !== undefined && !(Array.isArray(step.lines) && step.lines.length <= LIMITS.textChars && step.lines.every(line => typeof line === 'string'))) errors.push({ code: 'bad_lines', path: `${at}.lines` });
           if(step.bg !== undefined && !stopsOk(step.bg)) errors.push({ code: 'bad_stops', path: `${at}.bg` });
           break;
       }
@@ -491,10 +496,91 @@ export function replacePhoto(doc, stepId, hash) {
 
   if(at?.step.op !== 'photo' || typeof hash !== 'string' || hash === at.step.photo) return doc;
 
-  const { orig, ...rest } = at.step;
+  const { orig, box, ...rest } = at.step;
   const next = hash === orig ? rest : { ...rest, photo: hash, orig: orig ?? at.step.photo };
 
   return withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? { ...next, photo: hash } : step)));
+}
+
+// A text box (E91): `lines` are the client-wrapped lines of `text` and `h` the
+// box height they need; `w` the width. The box's local origin is its top-left
+// corner, `m` places it on the stage.
+export function addText(doc, pageId, { id = unique(allIds(doc)), text = '', lines, m, w, h, font, size, color, align } = {}) {
+  const matrix = Array.isArray(m) && m.length === 6 && m.every(v => Number.isFinite(v) && Math.abs(v) <= LIMITS.number) ? m : IDENTITY;
+  const step = {
+    op: 'text',
+    id,
+    text: String(text).slice(0, LIMITS.textChars),
+    lines: Array.isArray(lines) ? lines.map(String).slice(0, LIMITS.textChars) : [String(text)],
+    m: matrix,
+    w: clampWidth(w),
+    h: Number.isFinite(h) && h > 0 ? h : 60,
+    font: FONT_IDS.includes(font) ? font : DEFAULT_FONT,
+    size: clampSize(size),
+    color: isColour(color) ? color : '#1a1a1a',
+    align: ALIGNS.includes(align) ? align : 'start',
+    padding: 0,
+    radius: 0,
+  };
+
+  return addStep(doc, pageId, step);
+}
+
+// The fields of a text box that a patch may change, each checked; unknown
+// keys, wrong types and values out of range are dropped.
+const TEXT_FIELDS = {
+  text: v => (typeof v === 'string' ? v.slice(0, LIMITS.textChars) : undefined),
+  lines: v => (Array.isArray(v) && v.every(line => typeof line === 'string') ? v.slice(0, LIMITS.textChars) : undefined),
+  w: v => (Number.isFinite(v) ? clampWidth(v) : undefined),
+  h: v => (Number.isFinite(v) && v > 0 && v <= 20000 ? v : undefined),
+  size: v => (Number.isFinite(v) ? clampSize(v) : undefined),
+  font: v => (FONT_IDS.includes(v) ? v : undefined),
+  align: v => (ALIGNS.includes(v) ? v : undefined),
+  bold: v => (typeof v === 'boolean' ? v : undefined),
+  padding: v => (Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : undefined),
+  radius: v => (Number.isFinite(v) ? Math.min(1000, Math.max(0, v)) : undefined),
+  outline: v => (v === null ? null : isObject(v) && isColour(v.color) && Number.isFinite(v.width) ? { color: v.color, width: Math.min(TEXT.outline[1], Math.max(0, v.width)) } : undefined),
+};
+
+export function updateText(doc, stepId, patch) {
+  const at = findStep(doc, stepId);
+
+  if(at?.step.op !== 'text' || !isObject(patch)) return doc;
+
+  const next = {};
+
+  for(const [key, check] of Object.entries(TEXT_FIELDS)) if(key in patch) {
+    const value = check(patch[key]);
+
+    if(value !== undefined) next[key] = value;
+  }
+
+  return Object.keys(next).length ? updateStep(doc, stepId, next) : doc;
+}
+
+// The edge decoration of a photo (E123): style, amount 0..1 and the seed that
+// makes the same torn edge every time. `plain` removes it.
+export function setEdge(doc, stepId, edge) {
+  const at = findStep(doc, stepId);
+
+  if(at?.step.op !== 'photo' || !isObject(edge)) return doc;
+
+  if(edge.style === 'plain') {
+    const { edge: _drop, ...rest } = at.step;
+
+    return at.step.edge === undefined ? doc : updateStepReplace(doc, at, rest);
+  }
+
+  if(!EDGE_STYLES.includes(edge.style)) return doc;
+
+  const amount = Math.min(1, Math.max(0, Number.isFinite(edge.amount) ? edge.amount : 0.5));
+  const seed = Number.isInteger(edge.seed) ? Math.min(1e9, Math.max(0, edge.seed)) : 1;
+
+  return updateStep(doc, stepId, { edge: { style: edge.style, amount: Math.round(amount * 100) / 100, seed } });
+}
+
+function updateStepReplace(doc, at, step) {
+  return withSteps(doc, at.page, doc.pages[at.page].steps.map((s, i) => (i === at.index ? step : s)));
 }
 
 // a texture photo is for the 3D scene: not drawn as a picture (EDITOR.md S2.5)
@@ -527,7 +613,21 @@ export function setRole(doc, stepId, role) {
 const updatePhoto = (doc, stepId, patch) => (findStep(doc, stepId)?.step.op === 'photo' ? updateStep(doc, stepId, patch) : doc);
 
 // move the crop window of a photo along its long edge (0..1)
-export const setCrop = (doc, stepId, crop) => (Number.isFinite(crop) ? updatePhoto(doc, stepId, { crop: clamp(crop, 0, 1) }) : doc);
+export const setCrop = (doc, stepId, crop) => (Number.isFinite(crop) ? dropBox(updatePhoto(doc, stepId, { crop: clamp(crop, 0, 1) }), stepId) : doc);
+
+// the box of the visible part of a photo (alpha.js); null forgets it
+export function setBox(doc, stepId, box) {
+  const at = findStep(doc, stepId);
+
+  if(at?.step.op !== 'photo') return doc;
+
+  const { box: old, ...rest } = at.step;
+
+  return withSteps(doc, at.page, doc.pages[at.page].steps.map((step, i) => (i === at.index ? (Array.isArray(box) ? { ...rest, box } : rest) : step)));
+}
+
+// a moved crop window shows other pixels: the box no longer fits
+const dropBox = (doc, stepId) => setBox(doc, stepId, null);
 
 // the grid options of the document: { fill: 'loose'|'tight', gap }
 export function setLayout(doc, changes) {

@@ -133,7 +133,7 @@ export async function segmentRoute(req) {
 
           if(event.event !== 'result' || !event.ok || event.phase === 'preview' || !event.output?.path) continue;
 
-          const record = await storeFile(session, resolve(out, basename(event.output.path)), 'cut.png').catch(() => null);
+          const record = await storeFile(session, resolve(out, basename(event.output.path)), 'cut.png', { displayMax: 2048 }).catch(() => null);
 
           if(record) send(JSON.stringify({ event: 'derived', phase: 'final', record }) + '\n');
         }
@@ -151,7 +151,7 @@ export async function segmentRoute(req) {
 
   req.signal.addEventListener('abort', () => proc.kill());
 
-  return new Response(stream, { headers: { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store', 'set-cookie': keepCookie(session) } });
+  return new Response(stream, { headers: { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store', 'x-accel-buffering': 'no', 'set-cookie': keepCookie(session) } });
 }
 
 export const toolAvailable = () => !!Bun.which(TOOL);

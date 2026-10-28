@@ -593,6 +593,11 @@ body {
 .wb-editor-tool-pen { --wb-icon-tool: var(--wb-icon-tool-pen); }
 .wb-editor-tool-shape { --wb-icon-tool: var(--wb-icon-tool-shape); }
 .wb-editor-tool-clip { --wb-icon-tool: var(--wb-icon-tool-clip); }
+.wb-editor-undo { --wb-icon-tool: var(--wb-icon-tool-undo); }
+.wb-editor-redo { --wb-icon-tool: var(--wb-icon-tool-redo); }
+.wb-editor-add-page { --wb-icon-tool: var(--wb-icon-tool-page); }
+.wb-editor-delete { --wb-icon-tool: var(--wb-icon-tool-delete); }
+.wb-editor-save { --wb-icon-tool: var(--wb-icon-tool-save); }
 .wb-editor-tool-wand { --wb-icon-tool: var(--wb-icon-tool-wand); }
 .wb-editor-tool-unclip { --wb-icon-tool: var(--wb-icon-tool-unclip); }
 .wb-editor-tool-text { --wb-icon-tool: var(--wb-icon-tool-text); }
@@ -1403,6 +1408,31 @@ body {
   stroke-linecap: round;
 }
 
+.wb-busy-text,
+.wb-busy-label {
+  fill: var(--wb-ink);
+  paint-order: stroke;
+  stroke: var(--wb-card-ground);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  font-family: inherit;
+  pointer-events: none;
+}
+
+.wb-fresh {
+  animation: wb-fresh 0.5s ease-out;
+}
+
+@keyframes wb-fresh {
+  from { opacity: 0.45; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-fresh { animation: none; }
+}
+
 .wb-busy-spin {
   transform-box: fill-box;
   transform-origin: center;
@@ -1415,4 +1445,28 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .wb-busy-spin { animation: none; }
+}
+
+/* the text box being typed in: a transparent textarea over the drawn box */
+.wb-text-edit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  margin: 0;
+  overflow: hidden;
+  color: transparent;
+  resize: none;
+  background: transparent;
+  border: 0;
+  outline: 1px dashed var(--wb-select);
+  outline-offset: 0;
+  transform-origin: 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.wb-text-edit::selection {
+  color: transparent;
+  background: var(--wb-select-fill);
 }

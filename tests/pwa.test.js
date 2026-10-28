@@ -8,7 +8,7 @@ test('the manifest is installable', async () => {
 
   expect(res.headers.get('content-type')).toBe('application/manifest+json');
   expect(m.display).toBe('standalone');
-  expect(m.start_url).toBe('/');
+  expect(m.start_url).toBe('/new');
   expect(m.icons.some(i => i.sizes === '192x192')).toBe(true);
   expect(m.icons.some(i => i.sizes === '512x512' && !i.purpose)).toBe(true);
 });

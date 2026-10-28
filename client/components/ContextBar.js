@@ -1,5 +1,7 @@
 import { html } from '../html.js';
 import { BLENDS } from '../editor/model.js';
+import { FONT_IDS } from '../editor/text.js';
+import { DEFAULT_EDGE, EDGE_STYLES } from '../editor/edge.js';
 import { Popover } from './Popover.js';
 
 // The context bar under the stage (EDITOR.md S2.2): the controls of what is
@@ -10,7 +12,7 @@ const Button = ({ label, onClick, pressed, disabled, children }) => html`<button
 
 const Color = ({ label, value, onInput }) => html`<label class="wb-editor-field">${label} <input type="color" value=${/^#[0-9a-f]{6}$/i.test(value ?? '') ? value : '#000000'} onInput=${e => onInput(e.target.value)} /></label>`;
 
-export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, onCutout, cutting, dispatch }) => {
+export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, onCutout, cutting, onText, onEditText, dispatch }) => {
   if(!step) return html`<p class="wb-editor-context">${t('editor.context.empty')}</p>`;
 
   const id = step.id;
@@ -40,8 +42,33 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, on
       <//>
       <${Button} pressed=${step.role === 'texture'} onClick=${() => dispatch({ type: 'setRole', id, role: step.role === 'texture' ? 'picture' : 'texture' })}>${t('editor.role.texture')}<//>
       ${clipped && html`<${Button} onClick=${() => dispatch({ type: 'unclip', id })}>${t('editor.tool.unclip')}<//>`}
+      <${Popover} label=${t('editor.edge')}>
+        <span role="group" aria-label=${t('editor.edge')}>${EDGE_STYLES.map(style => html`<${Button} pressed=${(step.edge?.style ?? 'plain') === style} onClick=${() => dispatch({ type: 'setEdge', id, edge: { ...DEFAULT_EDGE, ...step.edge, style } })}>${t('editor.edge.' + style)}<//>`)}</span>
+        ${step.edge && html`<label class="wb-editor-field">${t('editor.edge.amount')} <input type="range" min="0" max="1" step="0.01" value=${step.edge.amount} onInput=${e => dispatch({ type: 'setEdge', id, edge: { ...step.edge, amount: Number(e.target.value) } })} /></label>
+        <${Button} onClick=${() => dispatch({ type: 'setEdge', id, edge: { ...step.edge, seed: Math.floor(Math.random() * 1e6) } })}>${t('editor.edge.reroll')}<//>`}
+      <//>
       ${onCutout && html`<${Button} disabled=${cutting} onClick=${onCutout}>${cutting ? t('editor.cutout.busy') : t('editor.cutout')}<//>`}
       ${step.orig && html`<${Button} onClick=${() => dispatch({ type: 'replacePhoto', id, hash: step.orig })}>${t('editor.cutout.restore')}<//>`}
+    `;
+  } else if(step.op === 'text') {
+    controls = html`
+      <${Button} onClick=${onEditText}>${t('editor.text.edit')}<//>
+      <span role="group" aria-label=${t('editor.text.font')}>${FONT_IDS.map(id => html`<${Button} pressed=${step.font === id} onClick=${() => onText({ font: id })}>${t('editor.font.' + id)}<//>`)}</span>
+      <${Button} pressed=${!!step.bold} onClick=${() => onText({ bold: !step.bold })}>${t('editor.text.bold')}<//>
+      <span role="group" aria-label=${t('editor.text.align')}>${['start', 'center', 'end'].map(a => html`<${Button} pressed=${step.align === a} onClick=${() => onText({ align: a })}>${t('editor.text.align.' + a)}<//>`)}</span>
+      <label class="wb-editor-field">${t('editor.text.size')} <input type="range" min="8" max="300" step="1" value=${step.size} onInput=${e => onText({ size: Number(e.target.value) })} /></label>
+      <label class="wb-editor-field">${t('editor.text.width')} <input type="range" min="80" max="1000" step="10" value=${step.w} onInput=${e => onText({ w: Number(e.target.value) })} /></label>
+      <${Color} label=${t('editor.stroke.color')} value=${step.color} onInput=${color => dispatch({ type: 'setColor', id, field: 'color', color })} />
+      <${Popover} label=${t('editor.text.outline')}>
+        <${Color} label=${t('editor.stroke.color')} value=${step.outline?.color ?? '#ffffff'} onInput=${color => onText({ outline: { color, width: step.outline?.width ?? Math.max(2, step.size / 12) } })} />
+        <label class="wb-editor-field">${t('editor.text.outline.width')} <input type="range" min="0" max="40" step="1" value=${step.outline?.width ?? 0} onInput=${e => onText({ outline: { color: step.outline?.color ?? '#ffffff', width: Number(e.target.value) } })} /></label>
+      <//>
+      <${Popover} label=${t('editor.text.background')}>
+        <${Button} pressed=${step.bg !== undefined} onClick=${() => dispatch({ type: 'updateStep', id, patch: { bg: step.bg === undefined ? '#ffffffcc' : undefined } })}>${t('editor.text.background')}<//>
+        ${step.bg !== undefined && html`<${Color} label=${t('editor.text.background')} value=${typeof step.bg === 'string' ? step.bg.slice(0, 7) : '#ffffff'} onInput=${color => dispatch({ type: 'setColor', id, field: 'bg', color })} />
+        <label class="wb-editor-field">${t('editor.text.padding')} <input type="range" min="0" max="100" step="1" value=${step.padding ?? 0} onInput=${e => onText({ padding: Number(e.target.value) })} /></label>
+        <label class="wb-editor-field">${t('editor.text.radius')} <input type="range" min="0" max="200" step="1" value=${step.radius ?? 0} onInput=${e => onText({ radius: Number(e.target.value) })} /></label>`}
+      <//>
     `;
   } else if(step.op === 'stroke') {
     controls = html`<${Color} label=${t('editor.stroke.color')} value=${step.color} onInput=${color => dispatch({ type: 'setColor', id, color })} />`;

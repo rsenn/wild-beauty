@@ -123,6 +123,11 @@
   --wb-icon-tool-pen: url(/static/img/tool-pen.svg);
   --wb-icon-tool-shape: url(/static/img/tool-shape.svg);
   --wb-icon-tool-clip: url(/static/img/tool-clip.svg);
+  --wb-icon-tool-undo: url(/static/img/tool-undo.svg);
+  --wb-icon-tool-redo: url(/static/img/tool-redo.svg);
+  --wb-icon-tool-page: url(/static/img/tool-page.svg);
+  --wb-icon-tool-delete: url(/static/img/tool-delete.svg);
+  --wb-icon-tool-save: url(/static/img/tool-save.svg);
   --wb-icon-tool-wand: url(/static/img/tool-wand.svg);
   --wb-icon-tool-unclip: url(/static/img/tool-unclip.svg);
   --wb-icon-tool-text: url(/static/img/tool-text.svg);

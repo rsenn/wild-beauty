@@ -25,7 +25,7 @@ export function renderPage(vnode, { lang, dir = 'ltr', title, theme = 'kraft', b
 <title>${esc(title)}</title>
 <link rel="icon" href="/static/img/favicon.png">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/img/pwa-192.png">
+<link rel="apple-touch-icon" href="/static/img/pwa-apple-180.png">
 <meta name="theme-color" content="#cdbfb0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
