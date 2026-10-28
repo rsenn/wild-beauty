@@ -1941,7 +1941,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <button type="button" class="wb-editor-chip" disabled=${busy} onClick=${save}>${t('editor.save.retry')}</button>
         <button type="button" class="wb-editor-chip" onClick=${() => setSaveError(null)}>${t('editor.save.dismiss')}</button>
       </p>`}
-      ${savedId !== null && !dirty && !saveError && html`<p class="wb-editor-banner" role="status"><span>${t('editor.saved')}</span> <a href=${`/${lang}/node/${savedId}`}>${t('editor.saved.view', { id: savedId })}</a></p>`}
+      ${savedId !== null && !dirty && !saveError && html`<p class="wb-editor-banner" role="status"><span>${t('editor.saved')} ${t('editor.saved.kept', { count: usedKey.length })}</span> <a href=${`/${lang}/node/${savedId}`}>${t('editor.saved.view', { id: savedId })}</a></p>`}
       ${wallNotice && html`<p class="wb-editor-banner wb-editor-banner-error" role="alert"><span>${t(wallNotice.key, wallNotice.params)}</span> <button type="button" class="wb-editor-chip" onClick=${() => setWallNotice(null)}>${t('editor.save.dismiss')}</button></p>`}
       </div>
       <div class="wb-editor-tabs" role="tablist" aria-label=${t('editor.panel')}>${['select', 'photos', 'sequence'].map(id => html`<button type="button" role="tab" class="wb-editor-chip" aria-selected=${panelTab === id ? 'true' : 'false'} onClick=${() => setPanelTab(id)}>${t('editor.tab.' + id)}</button>`)}</div>

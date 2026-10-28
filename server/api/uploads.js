@@ -1,7 +1,7 @@
 // Upload endpoints (PLAN.md S6.1, S6.2). One file per request, the raw
 // body streamed to disk while it is hashed; the file is then stored as
 // uploads/<sha256>.<ext> next to a sidecar uploads/<sha256>.json.
-import { existsSync, mkdirSync, readdirSync, renameSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { HASH, UPLOAD_FILE, config } from '../config.js';
 import { sniff } from '../media/sniff.js';
@@ -41,8 +41,8 @@ async function writeSidecar(record) {
   logFile('write', sidecarPath(record.hash), `${json.length} bytes`);
 }
 
-// what a client sees of a record: not who owns it
-const shown = ({ owners, ...record }) => record;
+// what a client sees of a record: not who owns it, but when it expires for them
+const shown = ({ owners, ...record }, owner) => (owner && owners?.[owner] ? { ...record, expiresAt: owners[owner] } : record);
 
 // when a record expires: the last owner's expiry; records from before owners
 // existed have none and age from their upload
@@ -57,7 +57,7 @@ async function claim(record, session) {
 }
 
 // the reply for an upload: the record, and the cookie with the record's lifetime
-const uploaded = (record, status, session) => Response.json(shown(record), { status, headers: { 'set-cookie': expiringCookie(session.token, config.uploadTtlMs) } });
+const uploaded = (record, status, session) => Response.json(shown(record, session.owner), { status, headers: { 'set-cookie': expiringCookie(session.token, config.uploadTtlMs) } });
 
 // POST /api/uploads: raw body, name in X-Filename
 export async function createUpload(req) {
@@ -172,7 +172,7 @@ export async function storeFile(session, path, name, { displayMax = 0 } = {}) {
 
     await claim(known, session);
 
-    return shown(known);
+    return shown(known, session.owner);
   }
 
   await Bun.write(final, bytes);
@@ -192,7 +192,7 @@ export async function storeFile(session, path, name, { displayMax = 0 } = {}) {
   Object.assign(record, await ingest(final, uploadPath(record.display)));
   await claim(record, session);
 
-  return shown(record);
+  return shown(record, session.owner);
 }
 
 // the sidecar records on disk, newest first; unreadable ones are skipped
@@ -205,7 +205,7 @@ async function readAll() {
 
 // the uploads of one owner (the `owner` of sessionFor), newest first
 export async function readUploads(owner) {
-  return (await readAll()).filter(r => r.owners?.[owner] > Date.now()).map(shown);
+  return (await readAll()).filter(r => r.owners?.[owner] > Date.now()).map(r => shown(r, owner));
 }
 
 // GET /api/uploads: only what this browser's cookie uploaded, and not yet expired
@@ -259,6 +259,14 @@ export async function removeUpload(hash) {
 // the sidecar record of an upload, or null
 export const readUpload = async hash => (HASH.test(hash) && existsSync(sidecarPath(hash)) ? Bun.file(sidecarPath(hash)).json().catch(() => null) : null);
 
+// the owner lets go of a record; the files go with the last owner
+async function release(record, owner) {
+  delete record.owners[owner];
+
+  if(Object.values(record.owners).some(until => until > Date.now())) await writeSidecar(record);
+  else await removeUpload(record.hash);
+}
+
 // DELETE /api/uploads/<hash>: the owner lets go; the files go with the last owner
 export async function deleteUpload(hash, req) {
   if(!HASH.test(hash)) return fail(400, 'bad-hash', 'invalid hash');
@@ -268,10 +276,66 @@ export async function deleteUpload(hash, req) {
 
   if(!record?.owners?.[owner]) return fail(404, 'not-found', 'no such upload');
 
-  delete record.owners[owner];
-
-  if(Object.values(record.owners).some(until => until > Date.now())) await writeSidecar(record);
-  else await removeUpload(hash);
+  await release(record, owner);
 
   return new Response(null, { status: 204 });
+}
+
+// DELETE /api/uploads, body { keep: [hash] }: the owner lets go of every upload
+// but the ones named (the photos of the open editor). -> 200 { removed: [hash] }
+export async function clearUploads(req) {
+  const owner = sessionFor(req).owner;
+  let body = {};
+
+  try {
+    body = await req.json();
+  } catch {}
+
+  const keep = new Set(Array.isArray(body?.keep) ? body.keep.filter(h => typeof h === 'string') : []);
+  const removed = [];
+
+  for(const record of await readAll()) {
+    if(!(record.owners?.[owner] > Date.now()) || keep.has(record.hash)) continue;
+
+    await release(record, owner);
+    removed.push(record.hash);
+  }
+
+  return Response.json({ removed });
+}
+
+const HOUR = 3600 * 1000;
+
+// files nobody can reach any more: an upload file with no record (a crash between the
+// two writes) and the leftovers of server jobs in the temporary folder, once they are
+// old enough not to be in use. -> the names removed
+export function sweepOrphans(now = Date.now()) {
+  const gone = [];
+  const old = (dir, name, age) => {
+    try {
+      return now - statSync(resolve(dir, name)).mtimeMs > age;
+    } catch {
+      return false;
+    }
+  };
+
+  for(const name of readdirSync(config.uploadsDir)) {
+    const hash = /^([0-9a-f]{64})\./.exec(name)?.[1];
+
+    if(hash && !existsSync(sidecarPath(hash)) && old(config.uploadsDir, name, HOUR)) {
+      logFile('rm', resolve(config.uploadsDir, name), 'orphan upload');
+      rmSync(resolve(config.uploadsDir, name), { force: true });
+      gone.push(name);
+    }
+  }
+
+  if(existsSync(config.tmpDir))
+    for(const name of readdirSync(config.tmpDir)) {
+      if(name === 'segment-cache' || !old(config.tmpDir, name, 24 * HOUR)) continue;
+
+      rmSync(resolve(config.tmpDir, name), { recursive: true, force: true });
+      gone.push(name);
+    }
+
+  return gone;
 }

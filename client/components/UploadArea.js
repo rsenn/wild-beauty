@@ -5,7 +5,9 @@ import { useBoot } from '../boot.js';
 import { ACCEPT, isImageFile, loadCrops, uploadPayload } from '../files.js';
 import { createQueue } from '../upload.js';
 import { SAVED_EVENT, requestAdd } from '../editor/pending.js';
+import { browserStorage, draftHashes } from '../editor/draft.js';
 import { useEditor } from '../editor/useEditor.js';
+import { SweepTile } from './SweepTile.js';
 import { UploadCard } from './UploadCard.js';
 
 // a file already on the server: the card needs only its name and size
@@ -133,6 +135,30 @@ export const UploadArea = ({ extra = null }) => {
     setItems(old => old.map(item => (done.has(item.id) ? { ...item, selected: false, selectedAt: 0 } : item)));
   };
 
+  // what a sweep leaves: the photos of the open editor and of stored drafts
+  const keep = new Set([...used, ...(browserStorage() ? draftHashes(browserStorage()) : [])]);
+  const sweepable = items.filter(item => item.record && !keep.has(item.record.hash)).length;
+  const held = items.filter(item => item.record && used.includes(item.record.hash)).length;
+  const [swept, setSwept] = useState(null);
+
+  const sweep = async () => {
+    try {
+      const res = await fetch('/api/uploads', { method: 'DELETE', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ keep: [...keep] }) });
+
+      if(!res.ok) throw new Error('sweep');
+
+      const { removed } = await res.json();
+      const gone = new Set(removed);
+
+      for(const item of latest.current) if(item.record && gone.has(item.record.hash)) URL.revokeObjectURL(item.url);
+
+      setItems(old => old.filter(item => !(item.record && gone.has(item.record.hash))));
+      setSwept(removed.length);
+    } catch {
+      setSwept(-1);
+    }
+  };
+
   // a photo the open node uses is not offered again; it comes back when the node drops it
   const shown = items.filter(item => !(item.record && used.includes(item.record.hash)));
 
@@ -145,6 +171,12 @@ export const UploadArea = ({ extra = null }) => {
         <input id="wb-file-input" class="wb-sr-only" type="file" multiple accept=${ACCEPT} onChange=${pick} />
         <label class="wb-button" for="wb-file-input">${t('upload.select')}</label>
       </div>
+      <p class="wb-upload-note wb-upload-retention">${t('upload.retention', { days: limits.uploadDays ?? 7 })}</p>
+      <details class="wb-upload-details">
+        <summary>${t('upload.retention.more')}</summary>
+        <ul>${['original', 'cookie', 'delete'].map(k => html`<li>${t('upload.retention.' + k)}</li>`)}</ul>
+      </details>
+      ${swept !== null && html`<p class="wb-upload-note" role="status">${swept < 0 ? t('upload.sweep.failed') : t('upload.sweep.done', { count: swept })}</p>`}
       ${ignored > 0 && html`<p class="wb-upload-note" role="status">${t('upload.ignored', { count: ignored })}</p>`}
       ${shown.length > 0 && html`<p class="wb-upload-count" role="status">${t('upload.files', { count: shown.length })}</p>`}
       <ul class="wb-cards">
@@ -162,6 +194,7 @@ export const UploadArea = ({ extra = null }) => {
           />`,
         )}
         ${typeof extra === 'function' ? extra({ count: ready.length, addSelected }) : extra}
+        ${sweepable > 0 && html`<${SweepTile} count=${sweepable} held=${held} onSweep=${sweep} />`}
       </ul>
     </section>
   `;

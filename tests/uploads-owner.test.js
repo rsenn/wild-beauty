@@ -106,4 +106,72 @@ describe('upload ownership', () => {
     await Bun.sleep(3200);
     expect(await (await a('/api/uploads')).json()).toEqual([]);
   });
+
+  test('the list says when each upload expires', async () => {
+    if(!ready) return;
+
+    const a = browser();
+    const record = await (await send(a, resolve(root, 'in.jpg'))).json();
+
+    expect(record.expiresAt).toBeGreaterThan(Date.now());
+    expect((await (await a('/api/uploads')).json())[0].expiresAt).toBe(record.expiresAt);
+  });
+
+  test('clearing lets go of everything but what is kept, for this browser only', async () => {
+    if(!ready) return;
+
+    const a = browser();
+    const b = browser();
+
+    await send(a, resolve(root, 'in.jpg'));
+    await run([...imagemagick.convert, '-size', '40x40', 'xc:green', resolve(root, 'two.jpg')]);
+    await send(a, resolve(root, 'two.jpg'));
+    await send(b, resolve(root, 'in.jpg'));
+
+    const mine = await (await a('/api/uploads')).json();
+
+    expect(mine.length).toBe(2);
+
+    const keep = mine[0].hash;
+    const res = await a('/api/uploads', { method: 'DELETE', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ keep: [keep] }) });
+    const { removed } = await res.json();
+
+    expect(removed).toEqual(mine.filter(r => r.hash !== keep).map(r => r.hash));
+    expect((await (await a('/api/uploads')).json()).map(r => r.hash)).toEqual([keep]);
+    expect((await (await b('/api/uploads')).json()).length).toBe(1);
+  });
+});
+
+describe('orphans', () => {
+  test('an upload file without a record and old job leftovers go, young ones stay', async () => {
+    const { config } = await import('../server/config.js');
+    const { sweepOrphans } = await import('../server/api/uploads.js');
+    const { mkdirSync, utimesSync, writeFileSync, existsSync } = await import('node:fs');
+    const dir = mkdtempSync(resolve(tmpdir(), 'wb-orphan-'));
+    const saved = { ...config };
+
+    Object.assign(config, { uploadsDir: resolve(dir, 'uploads'), tmpDir: resolve(dir, 'uploads/.tmp') });
+    mkdirSync(config.tmpDir, { recursive: true });
+
+    const hash = 'c'.repeat(64);
+    const old = new Date(Date.now() - 3 * 24 * 3600 * 1000);
+    const put = (path, date) => (writeFileSync(path, 'x'), date && utimesSync(path, date, date));
+
+    put(resolve(config.uploadsDir, `${hash}.jpg`), old);
+    put(resolve(config.uploadsDir, `${'d'.repeat(64)}.jpg`)); // young: a write in progress
+    put(resolve(config.tmpDir, 'job-old'), old);
+    put(resolve(config.tmpDir, 'job-new'));
+    mkdirSync(resolve(config.tmpDir, 'segment-cache'));
+    utimesSync(resolve(config.tmpDir, 'segment-cache'), old, old);
+
+    const gone = sweepOrphans();
+
+    expect(gone.sort()).toEqual([`${hash}.jpg`, 'job-old']);
+    expect(existsSync(resolve(config.tmpDir, 'job-new'))).toBe(true);
+    expect(existsSync(resolve(config.tmpDir, 'segment-cache'))).toBe(true);
+    expect(existsSync(resolve(config.uploadsDir, `${'d'.repeat(64)}.jpg`))).toBe(true);
+
+    Object.assign(config, saved);
+    rmSync(dir, { recursive: true, force: true });
+  });
 });

@@ -1484,3 +1484,51 @@ body {
 .wb-editor-dropping .wb-editor-stage * {
   cursor: crosshair;
 }
+
+/* what is kept and for how long (E111): the retention note, expiry badges, the sweep tile */
+.wb-upload-retention {
+  max-width: 60ch;
+}
+
+.wb-upload-details {
+  margin: 0 0 8px;
+  font-size: var(--wb-font-size-small, 0.9em);
+}
+
+.wb-upload-details ul {
+  margin: 4px 0 0;
+  padding-left: 1.2em;
+}
+
+.wb-card-expiry {
+  display: block;
+  font-size: var(--wb-font-size-small, 0.85em);
+  color: var(--wb-accent);
+}
+
+.wb-sweep {
+  display: flex;
+  flex-flow: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
+  background: transparent;
+  border: var(--wb-border-width) dashed var(--wb-ink);
+  color: var(--wb-ink);
+  font: inherit;
+}
+
+.wb-sweep-title {
+  font-weight: bold;
+}
+
+.wb-sweep-hint {
+  font-size: var(--wb-font-size-small, 0.85em);
+}
+
+.wb-sweep-buttons {
+  display: flex;
+  gap: var(--wb-editor-gap, 4px);
+}

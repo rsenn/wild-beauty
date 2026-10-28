@@ -65,3 +65,23 @@ export function clearDraft(storage, target) {
     storage.removeItem(draftKey(target));
   } catch {}
 }
+
+// the photos every stored draft of this browser still uses (originals of cutouts
+// too): an upload sweep must not take them
+export function draftHashes(storage) {
+  const out = new Set();
+
+  try {
+    for(let i = 0; i < storage.length; i++) {
+      const key = storage.key(i);
+
+      if(!key?.startsWith('wb-draft:')) continue;
+
+      for(const page of JSON.parse(storage.getItem(key))?.doc?.pages ?? [])
+        for(const step of page.steps ?? [])
+          if(step.op === 'photo') for(const hash of [step.photo, step.orig]) if(/^[0-9a-f]{64}$/.test(hash ?? '')) out.add(hash);
+    }
+  } catch {}
+
+  return out;
+}

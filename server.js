@@ -7,7 +7,7 @@ import { renderPage } from './server/ssr.js';
 import { DEFAULT_LANG, languageList, loadLocales, negotiate } from './server/i18n.js';
 import { config } from './server/config.js';
 import { dev, log } from './server/log.js';
-import { createUpload, deleteUpload, listUploads, readUploads, serveUpload, sweepUploads } from './server/api/uploads.js';
+import { clearUploads, createUpload, deleteUpload, listUploads, readUploads, serveUpload, sweepOrphans, sweepUploads } from './server/api/uploads.js';
 import { lockRoute } from './server/api/locks.js';
 import { createNode, deleteNodeRoute, listNodesRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
 import { manifestResponse, workerResponse } from './server/pwa.js';
@@ -44,7 +44,15 @@ await detectTools();
 }
 
 // uploads past their expiry go, at start and then every ten minutes
-const sweep = () => sweepUploads().then(gone => gone.length && log('sweep', `${gone.length} expired uploads removed`), () => {});
+const sweep = () => {
+  sweepUploads().then(gone => gone.length && log('sweep', `${gone.length} expired uploads removed`), () => {});
+
+  try {
+    const orphans = sweepOrphans();
+
+    if(orphans.length) log('sweep', `${orphans.length} orphaned files removed`);
+  } catch {}
+};
 
 await sweep();
 setInterval(sweep, 10 * 60 * 1000).unref();
@@ -85,13 +93,13 @@ async function serveFile(pathname, method, prefix, root) {
 }
 
 // the part of a sidecar record the cards use (no EXIF, no tool output)
-const listed = ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt }) => ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt });
+const listed = ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt, expiresAt }) => ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt, expiresAt });
 
 // what the client needs to translate: this language, plus English as fallback
 async function bootFor(lang, extra = {}, owner = null) {
   const fallback = lang === DEFAULT_LANG ? {} : locales.get(DEFAULT_LANG);
 
-  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes }, uploads: extra.node ? [] : (await readUploads(owner)).map(listed), ...extra };
+  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes, uploadDays: Math.max(1, Math.round(config.uploadTtlMs / 86400000)) }, uploads: extra.node ? [] : (await readUploads(owner)).map(listed), ...extra };
 }
 
 // `extra` adds to the boot JSON (the node page: `node` and `photos`);
@@ -138,6 +146,7 @@ function route(req) {
   if(pathname === '/api/uploads') {
     if(req.method === 'POST') return createUpload(req);
     if(req.method === 'GET') return listUploads(req);
+    if(req.method === 'DELETE') return clearUploads(req);
 
     return text('method not allowed\n', 405);
   }

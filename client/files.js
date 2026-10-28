@@ -59,3 +59,16 @@ export function formatSize(bytes, lang) {
 export const UPLOAD_MIME = 'application/x-wb-upload';
 
 export const uploadPayload = (record, role, crop) => ({ ...(role === 'texture' && { role }), hash: record.hash, display: record.display, width: record.width, height: record.height, padding: record.padding, palette: record.palette, ...(crop !== undefined && crop !== 0.5 && { crop }) });
+
+// What a card says about its expiry: null when it is far off, else { key, count? }
+// for the message. `expiresAt` is a time in ms, `now` too.
+export function expiryNote(expiresAt, now = Date.now()) {
+  const left = expiresAt - now;
+  const day = 24 * 3600 * 1000;
+
+  if(!Number.isFinite(left) || left <= 0 || left > 3 * day) return null;
+  if(left <= day) return { key: 'upload.expires.today' };
+  if(left <= 2 * day) return { key: 'upload.expires.tomorrow' };
+
+  return { key: 'upload.expires.days', count: Math.ceil(left / day) };
+}

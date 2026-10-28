@@ -46,7 +46,7 @@ Testers' devices are unknown, so the design is device-agnostic:
 | A4 | Usage recording with who (owner / claude / tester), no consent notice (friends consented), report by script | done (`PLAN.md` S6.4, E107) |
 | A4b | Richer recording (2026-10-28): tap with the control's box and position inside it, `miss` taps with the nearest control, whole pointer `gesture`s (30 Hz path, pressure, contact size, pointer count), editor `cmd` stream (type and id only), `layout` dump of all control boxes, an editor state snapshot (`st`) and open panels on each | done (`client/events.js`) |
 
-Follow-ups to ask (A1): show the expiry date to the user? "keep" button that renews?
+Follow-ups (A1), decided 2026-10-29: the retention is shown (note, expiry badges, sweep tile, saved banner; `EDITOR.md` E111); no "keep" button, saving into a work keeps a photo.
 What if the cookie is lost (uploads unreachable until expiry)?
 
 ---

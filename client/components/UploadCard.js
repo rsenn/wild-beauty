@@ -2,7 +2,7 @@ import { useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
-import { UPLOAD_MIME, cropPosition, formatSize, panAxis, saveCrop, uploadPayload } from '../files.js';
+import { UPLOAD_MIME, cropPosition, expiryNote, formatSize, panAxis, saveCrop, uploadPayload } from '../files.js';
 import { watchHold } from '../ghostdrag.js';
 import { requestAdd } from '../editor/pending.js';
 
@@ -20,6 +20,7 @@ export const UploadCard = ({ item, order, inNode, onToggle, onRemove, onRotate, 
   const busy = item.state === 'uploading' || item.state === 'processing';
   const cls = 'wb-card' + (item.selected ? ' wb-card-selected' : '') + ' wb-card-' + item.state + (inNode ? ' wb-card-used' : '');
   const percent = Math.round(item.progress * 100);
+  const expiry = item.record?.expiresAt && !inNode ? expiryNote(item.record.expiresAt) : null;
 
   const status = {
     queued: () => t('upload.state.queued'),
@@ -114,6 +115,7 @@ export const UploadCard = ({ item, order, inNode, onToggle, onRemove, onRotate, 
       </div>
       ${SHOW_FILE_INFO && html`<span class="wb-card-name">${item.file.name}</span>`}
       ${SHOW_FILE_INFO && html`<span class="wb-card-size">${formatSize(item.file.size, lang)}</span>`}
+      ${expiry && html`<span class="wb-card-expiry">${t(expiry.key, expiry.count ? { count: expiry.count } : {})}</span>`}
       ${status && html`<span class="wb-card-status" role=${item.state === 'failed' ? 'alert' : null}>${status}</span>`}
       ${item.state === 'failed' && item.error !== 'too-large' && html`<button type="button" class="wb-card-retry" onClick=${onRetry}>${t('upload.retry')}</button>`}
     </li>
