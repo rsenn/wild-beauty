@@ -133,6 +133,9 @@ export const UploadArea = ({ extra = null }) => {
     setItems(old => old.map(item => (done.has(item.id) ? { ...item, selected: false, selectedAt: 0 } : item)));
   };
 
+  // a photo the open node uses is not offered again; it comes back when the node drops it
+  const shown = items.filter(item => !(item.record && used.includes(item.record.hash)));
+
   return html`
     <section class="wb-upload">
       <div class=${'wb-drop' + (over ? ' wb-drop-over' : '')} onDragEnter=${dragEnter} onDragOver=${e => e.preventDefault()} onDragLeave=${dragLeave} onDrop=${drop}>
@@ -143,9 +146,9 @@ export const UploadArea = ({ extra = null }) => {
         <label class="wb-button" for="wb-file-input">${t('upload.select')}</label>
       </div>
       ${ignored > 0 && html`<p class="wb-upload-note" role="status">${t('upload.ignored', { count: ignored })}</p>`}
-      ${items.length > 0 && html`<p class="wb-upload-count" role="status">${t('upload.files', { count: items.length })}</p>`}
+      ${shown.length > 0 && html`<p class="wb-upload-count" role="status">${t('upload.files', { count: shown.length })}</p>`}
       <ul class="wb-cards">
-        ${items.map(
+        ${shown.map(
           item => html`<${UploadCard}
             key=${item.id}
             item=${item}

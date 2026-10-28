@@ -895,7 +895,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   }, [dirty]);
 
   // the upload list greys out the photos this node already uses
-  const usedKey = [...new Set(doc.pages.flatMap(p => p.steps.filter(s => s.op === 'photo').map(s => s.photo)))].sort();
+  const usedKey = [...new Set(doc.pages.flatMap(p => p.steps.filter(s => s.op === 'photo').flatMap(s => [s.photo, s.orig].filter(Boolean))))].sort(); // a cutout's original counts as used
 
   useEffect(() => {
     editorStore.setUsed(usedKey);
