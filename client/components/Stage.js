@@ -56,6 +56,16 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
   const down = event => {
     if(event.button > 0) return;
 
+    // a handle that must not take the focus from a field (the corner of a text box being typed in)
+    const units = eventUnits(svg.current, event);
+
+    if(units && onPointer.claim?.(event, units)) {
+      event.preventDefault();
+      svg.current.setPointerCapture?.(event.pointerId);
+
+      return;
+    }
+
     box.current?.focus({ preventScroll: true }); // keys go to the stage from here on
 
     svg.current.setPointerCapture?.(event.pointerId);

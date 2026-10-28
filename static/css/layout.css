@@ -1461,8 +1461,7 @@ body {
   resize: none;
   background: transparent;
   border: 0;
-  outline: 1px dashed var(--wb-select);
-  outline-offset: 0;
+  outline: 0; /* the selection outline and its handles frame the box */
   transform-origin: 0 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;

@@ -55,13 +55,15 @@ export function renderText(step, m = step.m) {
   const x = alignX(step.align, step.w, pad);
   const out = step.outline && Number.isFinite(step.outline.width) && step.outline.width > 0 && safeColour(step.outline.color);
   const bg = step.bg !== undefined ? paint(step.bg, `bg-${step.id}`) : null;
+  // the outline is its own layer under the letters: a colour emoji cannot be stroked and vanishes
+  // when the same <text> has a stroke, while the filled layer draws it as it is
+  const rows = lines.map((line, i) => html`<tspan x=${x} y=${pad + i * size * LINE_HEIGHT + (size * (LINE_HEIGHT - 1)) / 2}>${line}</tspan>`);
 
   return html`<g data-step=${step.id} data-op="text" transform=${matrix(m)}>
     ${bg?.defs && html`<defs>${bg.defs}</defs>`}
     ${bg && bg.paint !== 'none' && html`<rect x="0" y="0" width=${step.w} height=${step.h} rx=${step.radius ?? 0} fill=${bg.paint} />`}
-    <text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? 700 : 400} fill=${safeColour(step.color) ?? '#000000'} text-anchor=${anchorOf(step.align)} stroke=${out ? step.outline.color : undefined} stroke-width=${out ? step.outline.width : undefined} stroke-linejoin="round" paint-order="stroke" dominant-baseline="text-before-edge" style="white-space:pre">
-      ${lines.map((line, i) => html`<tspan x=${x} y=${pad + i * size * LINE_HEIGHT + (size * (LINE_HEIGHT - 1)) / 2}>${line}</tspan>`)}
-    </text>
+    ${out && html`<text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? 700 : 400} fill="none" text-anchor=${anchorOf(step.align)} stroke=${step.outline.color} stroke-width=${step.outline.width} stroke-linejoin="round" dominant-baseline="text-before-edge" style="white-space:pre" aria-hidden="true">${rows}</text>`}
+    <text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? 700 : 400} fill=${safeColour(step.color) ?? '#000000'} text-anchor=${anchorOf(step.align)} dominant-baseline="text-before-edge" style="white-space:pre">${rows}</text>
   </g>`;
 }
 

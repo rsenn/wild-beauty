@@ -71,7 +71,10 @@ describe('render and picking', () => {
     const out = renderToString(renderText(step));
 
     expect(out).toContain('<tspan');
-    expect(out.match(/<tspan/g)).toHaveLength(2);
+    // the outline is a layer of its own under the letters, so a colour emoji still shows
+    expect(out.match(/<tspan/g)).toHaveLength(4);
+    expect(out.match(/<text /g)).toHaveLength(2);
+    expect(out.match(/stroke=/g)).toHaveLength(1);
     expect(out).toContain('font-weight="700"');
     expect(out).toContain('stroke="#ffffff"');
     expect(out).toContain('text-anchor="middle"');

@@ -6,7 +6,7 @@ import { FONTS } from '../editor/text.js';
 // exactly over the box, so the caret and the selection are the browser's (IME and
 // right-to-left text work natively) while the drawn text under it is the box.
 // `scale` is screen pixels per stage unit. Esc and leaving the field end it.
-export const TextEdit = ({ step, m, scale, label, onText, onDone }) => {
+export const TextEdit = ({ step, m, scale, label, onText, onDone, onGrip }) => {
   const field = useRef(null);
 
   useEffect(() => {
@@ -35,6 +35,7 @@ export const TextEdit = ({ step, m, scale, label, onText, onDone }) => {
     spellcheck="false"
     aria-label=${label}
     onInput=${event => onText(event.target.value)}
+    onPointerDown=${onGrip}
     onBlur=${onDone}
     onKeyDown=${event => {
       event.stopPropagation();

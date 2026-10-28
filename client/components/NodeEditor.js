@@ -25,6 +25,7 @@ import { classify, copyPayload, fromEvent, htmlFor, plainFor, readClipboard, wri
 import { sendFile } from '../upload.js';
 import { uploadPayload } from '../files.js';
 import { scenePalette } from '../editor/scenepalette.js';
+import { eventUnits } from '../editor/stage.js';
 import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
 import { photoPoint, readLines, resultPolygon } from '../editor/wand.js';
@@ -1102,22 +1103,38 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const measureFor = bold => (text, font, size) => measureText(text, font, size, bold);
 
   // a tap with the text tool: end the box being typed in; else edit the box under the tap, else make a new one there
-  const textDown = units => {
-    const { doc, photos, scale, pageId, color: ink, page: at, editStep: current, previewing: preview } = latest.current;
+  // a corner of the selected text box, in the text tool: dragging it changes the box (its width,
+  // the text wraps again), not the text. Claimed before the stage takes the focus, so typing goes on.
+  const claimCorner = (e, units) => {
+    const { doc, photos, scale, page: at, editStep: current, previewing: preview, tool: now } = latest.current;
 
-    // a corner of the selected box: dragging it changes the box (its width, the text wraps again), not the text
-    if(!preview && current?.op === 'text') {
-      const o = outlineOf(doc, current.id, { photos: hash => photos[hash], page: at });
-      const set = o && handleSet(o, scale, handlePx);
-      const grip = set && hitHandle(set, units, (handlePx / 2 + (coarse ? 6 : 3)) / scale);
-      const m = matrixOf(doc, current.id, { page: at });
+    if(now !== 'text' || preview || current?.op !== 'text') return false;
 
-      if(grip?.kind === 'corner' && m && invert(m)) {
-        tdrag.current = { id: current.id, base: current, m, index: grip.index };
+    const o = outlineOf(doc, current.id, { photos: hash => photos[hash], page: at });
+    const set = o && handleSet(o, scale, handlePx);
+    const grip = set && hitHandle(set, units, (handlePx / 2 + (coarse ? 6 : 3)) / scale);
+    const m = matrixOf(doc, current.id, { page: at });
 
-        return;
-      }
+    if(grip?.kind !== 'corner' || !m || !invert(m)) return false;
+
+    tdrag.current = { id: current.id, base: current, m, index: grip.index };
+
+    return true;
+  };
+
+  // the typing field lies over the box and its corner handles: a press on one reaches here
+  const gripFromField = e => {
+    const svg = document.querySelector('.wb-editor-stage svg.wb-editor-overlay');
+    const units = svg && eventUnits(svg, e);
+
+    if(units && claimCorner(e, units)) {
+      e.preventDefault();
+      svg.setPointerCapture?.(e.pointerId);
     }
+  };
+
+  const textDown = units => {
+    const { doc, photos, scale, pageId, color: ink, page: at } = latest.current;
 
     if(latest.current.typing) return finishText();
 
@@ -1989,7 +2006,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
           overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} scale=${scale} px=${handlePx} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && !previewing))}
-          onPointer=${{ down, move, up, cancel: up, wheel }}
+          onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
           onDragEnter=${e => accepts(e) && (e.preventDefault(), setOver(true))}
           onDragOver=${e => accepts(e) && (e.preventDefault(), (e.dataTransfer.dropEffect = 'copy'))}
@@ -1997,7 +2014,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           onDrop=${drop}
         >
           ${empty && !typing && html`<span class="wb-editor-stage-hint">${t('editor.stage.hint')}</span>`}
-          ${typing && findStep(doc, typing)?.step.op === 'text' && html`<${TextEdit} step=${findStep(doc, typing).step} m=${matrixOf(doc, typing, { page }) ?? findStep(doc, typing).step.m} scale=${scale} label=${t('editor.text.edit')} onText=${value => changeText({ text: value }, 'text')} onDone=${finishText} />`}
+          ${typing && findStep(doc, typing)?.step.op === 'text' && html`<${TextEdit} step=${findStep(doc, typing).step} m=${matrixOf(doc, typing, { page }) ?? findStep(doc, typing).step.m} scale=${scale} label=${t('editor.text.edit')} onText=${value => changeText({ text: value }, 'text')} onDone=${finishText} onGrip=${gripFromField} />`}
         <//>
         <div class="wb-editor-actions" role="toolbar" aria-label=${t('editor.actions')}>${ACTIONS.map(action)}</div>
       </div>
