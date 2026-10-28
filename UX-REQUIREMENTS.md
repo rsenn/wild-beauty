@@ -190,6 +190,75 @@ I6 and I7.
 Decision (author): the shape-first clip (draw a bezier shape, then combine) stays as
 the expert path, as in Inkscape; the collage path is the freehand/simple-shape clip.
 
+## J. Collage artist: the complete wish list and what goes beyond (2026-10-29)
+
+Question: what would leave a collage artist with nothing left to wish for, and what
+could surpass that? Tools are by the artist's workflow. Status: all `wanted?` until
+picked. Column **needs**: `js` = plain JS, `cv` = opencv.js (12 MB WASM, lazy), `doc` =
+data model change, `phone` = a phone-specific problem to solve.
+
+### J1. Baseline (the expected toolbox)
+
+| # | Wish | Needs | Note |
+|---|---|---|---|
+| J1.1 | **Zoom and pan the stage view**, separate from transforming the selection | phone | today two fingers transform the selection; fine clipping needs a zoomed view. Likely a view-zoom button or a two-finger gesture when nothing is selected, plus a visible "fit view" button |
+| J1.2 | **Loupe / offset cursor** while drawing or dragging handles | phone | the finger hides the point being placed; a magnifier above the finger (clip outline, handle drag) |
+| J1.3 | Duplicate, flip horizontally/vertically | js | cheap, constantly used (mirror a piece, repeat a motif); not in the tool table today |
+| J1.4 | Multi-select and group (move, scale, rotate several together) | doc | a collage is rarely one photo at a time; group = a step container (touches E, the 3 depths) |
+| J1.5 | Layer list with drag reorder, hide, lock | js | the filmstrip is it partly; hide and lock are missing |
+| J1.6 | Align, distribute, snap to edges/centres/stage; snap guides | js | on the phone: snap only, no ruler UI |
+| J1.7 | **Torn edge, paper rim, soft edge, outline offset** of a clip | js | the collage look; "sticker" = white outline + shadow |
+| J1.8 | Drop shadow per piece (depth) | js | SVG filter in `render.js`, same output in editor and viewer |
+| J1.9 | Perspective / 4-corner warp, skew | doc | "warp" from the brainstorm; touch handles at the corners |
+| J1.10 | Photo adjustments: brightness, contrast, saturation, hue, black and white, duotone/tint | js | non-destructive values in the step |
+| J1.11 | Stage background: colour, paper/texture (texture role exists), size/aspect of the work | doc | today a square of 1000 units; portrait/landscape/square is a real choice for printing and posting |
+| J1.12 | Text as clip: the photo shows through letters | js | no opencv needed: this build has no FreeType (`putText` is a Hershey ASCII font only). An SVG clip path can hold `<text>`, so the browser draws the letters with the text boxes' fonts. For the server render the font must match, so **convert the letters to a path when the clip is made** (a small font library such as opentype.js, not yet checked for being vendored): the clip is then an ordinary polygon that the editor, viewer and server render identically with no font dependency (recommended). The alternative, keeping the text as text, needs the font installed on the server |
+| J1.13 | **Export as image** (PNG/JPG, share) | js | the artist wants the picture out; rasterise the SVG render in the browser, later the server (`opencv-imgproc.js` render) |
+| J1.14 | Save as copy, keep versions | doc | collage is trial and error; "branch before I try this" |
+
+### J2. Beyond: smart help from the photos
+
+| # | Wish | Needs | Note |
+|---|---|---|---|
+| J2.1 | **Auto cutout** (background removal) of one, several or all photos, with accept/refine (wand add/subtract) | cv | grabCut; the review step matters more than the algorithm |
+| J2.2 | **Cut apart foreground items**: connected parts of the cutout become separate clipped copies | cv | E122 |
+| J2.3 | **Auto-arrange by criterion**: dominant colour (rainbow order), brightness, size, aspect, colour clusters | cv/js | layouts: cascade, grid, ring, spiral, pile (random turns), treemap/mosaic packing, along a drawn line |
+| J2.4 | Colour harmony: match tone between photos, extract a palette, tint the background | cv/js | palette extraction already planned (`TODO.md` 11.1a) |
+| J2.5 | **Vector companions** generated from a photo: contour lines, silhouette fills (solid shadow shapes), posterised colour regions, halftone dots, hatching, low-poly Voronoi/Delaunay in the photo colours | cv/js | steps of op `shape`/`stroke`, so they stay editable and render the same on the server |
+| J2.6 | Repeat patterns: echo/trail copies with offset and turn, mirror symmetry (kaleidoscope), tiling | js | duplicate with a transform step |
+| J2.7 | **Style presets** per work: polaroid frame, torn paper, sticker, tape strips, cut-out letters | js | one tap, all pieces; presets are data (clip + shadow + rim), no new model |
+| J2.8 | "Surprise me": re-roll arrangement, rotation and style with a seed; undo steps back | js | for ideas, fun for demos; deterministic per seed |
+| J2.9 | Remove an object / fill (inpaint) | cv | may not be in the trimmed build; check availability before promising |
+| J2.10 | Magnetic lasso: freehand outline that snaps to edges (`Canny`/gradient) | cv | between freehand and wand; helpful on a phone |
+
+### J3. Observations
+
+- The **magic wand and the contour trace need no opencv.js** in a first version: a flood fill with tolerance on a downscaled canvas plus marching squares and polygon simplification is plain JS (about 150 lines). That avoids the 12 MB download for the demo; opencv.js comes with auto cutout (J2.1).
+- Cutting a photo apart (E121) and "cut apart foreground items" (J2.2) are the same operation: a polygon split, shared with the combine routine.
+- **J1.1 and J1.2 are the hidden risks on the phone**: without zoom and a loupe every clip is a coarse clip.
+- Everything in J1.7, J1.8, J1.12 and J2.7 is a value in the step (clip, shadow, rim), so the server and viewer render it from the same document (`render.js`).
+
+### J4. Background removal: what "good" means (author, 2026-10-29)
+
+- Plain grabCut from a rectangle (opencv.js demo `removeBackground`) is **not good
+  enough**: specks, leftover background, hard edges, no notion of an object.
+- Target quality: a clean subject cut like the superpixel article (a cat cut from a
+  blanket, soft natural edge). Candidates, to be compared on the author's own photos:
+  1. **Superpixel pick**: over-segment the photo into regions that follow its edges
+     (SLIC); the user taps or paints regions to keep; their union is the mask, traced to
+     a polygon. No model, no download, phone-friendly, works in plain JS or on the
+     server. Same interaction as the Voronoi/Delaunay pick (E120), with edge-following
+     cells instead of geometric ones.
+  2. **Salient-object model** (U2-Net, IS-Net, RMBG class) for one-button cutout.
+  3. **Tap-to-segment model** (SAM class): the wand that understands objects.
+  4. grabCut with cleanup and user scribbles, only as the fallback.
+- Where it runs: the photos live on the server, so the server can cut out the original
+  and return a polygon (no 12 MB opencv.js, no model download on the phone). The author
+  judges `opencv-imgproc.js` (spec only) not ready; the work belongs in qjs-opencv.
+- opencv.js here has `dnn` (readNetFromONNX, blobFromImage), but no FreeType, and
+  no `SuperpixelSLIC` (ximgproc is not in this build), so superpixels would be our own
+  plain-JS SLIC (about 150 lines) or `watershed` on the gradient.
+
 ## Walk-through order
 
 1. B1-B6 (screens and selection: everything else sits on it)
@@ -229,3 +298,5 @@ the expert path, as in Inkscape; the collage path is the freehand/simple-shape c
 - I10 agreed: after Save a short "Saved" notice with a **View** button; View opens in the **same tab** (never a new tab), the editor state is kept so Back returns to it. Not built yet.
 - I1 (blue border, agreed and built 2026-10-29): picked upload cards get a crimson and cream dashed border that slowly marches (static with `prefers-reduced-motion`) and a solid crimson disc with a bold light number, as big as the round card buttons (contrast at least 4.5:1). Crimson replaces blue on upload cards only; the stage selection stays blue. Tokens `--wb-pick`, `--wb-pick-ground`, `--wb-pick-ink` in `static/themes/kraft.css`.
 - Wording (agreed 2026-10-29): users do not see "node". What the user makes in the upload area and the editor is a **Werk / Werke** in German (neuter) and a **pièce** in French (feminine). "Knoten" stays only for the graph (Tree view, links between things); in French the graph word is proposed as **point** (edge: **lien**), not yet confirmed. The German word for "edge" is still open (not Rand, not Kante). English still says "node": open. Applied to `locales/de.json` and `locales/fr.json` (25 and 26 strings); `tests/locales.test.js` passes. Caveat: French "pièce" also means a room, which may collide with the gallery's rooms (walls, `GALLERY.md`).
+- I1 agreed and built (2026-10-29): with photos picked and the editor closed, the last tile reads "Create from n selected" (de "Neues Werk aus n Ausgewählten erstellen", fr "Créer une pièce avec n sélectionnées") and opens the editor with them in pick order (queued through `pending.js`; the existing listener in `NewPage.js` opens the editor). No photos picked: "+ New work" as before; editor open: "Add n selected" as before. Not yet seen on a screen.
+- Magic wand (agreed 2026-10-29): a **superpixel grow**, not a pixel flood fill. The photo is over-segmented into edge-following regions (own plain-JS SLIC on a downscaled copy, about 512 px; opencv.js is not needed); a tap seeds a region and the fill grows across neighbouring regions whose mean colour is within a tolerance. Leak control: stop at the last tolerance step before the area jumps (about 3x in one step), or when the region reaches the photo border or most of the picture; opening to cut thin necks; keep only the part holding the tap; drop specks, fill small holes; simplify and lightly smooth the outline into the clip polygon. Phone interaction: tap, then drag up/down to change the tolerance with a live preview (a slider as the visible button path); add / subtract mode (the clip mode switch) fixes a leak by tapping the leaked region; an **invert** button (tap the flat background, invert to get the subject). Honest limit: good for flat colours, poor for textured subjects like fur (those use superpixel painting or the model cutout, J4). Shares the region-picking tool and the superpixels with E120 and the J4 superpixel pick. Task E119 (revised).

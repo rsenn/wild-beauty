@@ -56,7 +56,7 @@ export const NewPage = () => {
   return html`
     <${Layout} active="new" hrefFor=${code => `/${code}/new`}>
       <h1 class="wb-sr-only">${t('page.new.heading')}</h1>
-      <${UploadArea} extra=${({ count, addSelected }) => html`<${NewNodeTile} open=${editing} count=${count} onAdd=${addSelected} onToggle=${() => (editing ? closeEditor() : openEditor(NEW))} />`} />
+      <${UploadArea} extra=${({ count, addSelected }) => html`<${NewNodeTile} open=${editing} count=${count} onAdd=${addSelected} onMake=${addSelected} onToggle=${() => (editing ? closeEditor() : openEditor(NEW))} />`} />
       <${SavedNodes} nodes=${nodes} editing=${editing ? target : null} onEdit=${id => openEditor(id)} />
       <form class="wb-open-node" onSubmit=${e => (e.preventDefault(), /^\d{1,15}$/.test(number) && openEditor(Number(number)))}>
         <label>${t('editor.open.id')} <input type="number" min="1" inputmode="numeric" value=${number} onInput=${e => setNumber(e.target.value)} /></label>

@@ -38,6 +38,7 @@
   "upload.error.upload-failed": "Échec de l'envoi",
   "editor.new": "Nouvelle pièce",
   "editor.addSelected": "Ajouter {count} sélectionnées",
+  "editor.makeFrom": "Créer une pièce avec {count} sélectionnées",
   "editor.close": "Fermer",
   "editor.label": "Éditeur de pièce",
   "editor.title.label": "Titre",

@@ -38,6 +38,7 @@
   "upload.error.upload-failed": "Upload failed",
   "editor.new": "New node",
   "editor.addSelected": "Add {count} selected",
+  "editor.makeFrom": "Create from {count} selected",
   "editor.close": "Close",
   "editor.label": "Node editor",
   "editor.title.label": "Title",
