@@ -12,6 +12,49 @@ and ends in something you can run or look at ("done when"). Do tasks in order;
 a milestone is finished when all its tasks are. Section references: `P` =
 PLAN.md, `D` = DESIGN.md.
 
+## Open threads (2026-10-29)
+
+Work that was started, offered or decided but not finished, so a detour does not lose it.
+Detail lives in `EDITOR.md` (E-numbers) and `UX-REQUIREMENTS.md`. Update this list when one closes.
+
+### Built, tests pass, never tried in a browser (do a pass first)
+- [ ] Tight selection box (`box`, clipped outline), cut-out box from the alpha scan.
+- [ ] Busy ring 80 % server / 20 % image download, "Refining..." label, fade of the sharp image.
+- [ ] Clipboard: copy, cut, paste (E131).
+- [ ] Scene palette, background swatches, used-colours row (E132), colour dropper (E133).
+- [ ] Upload retention note, expiry badges, sweep tile, orphan cleanup (E111).
+- [ ] Text box corner resize in the text tool; viewer layout (header and stage in one viewport).
+- [ ] Repaired node tiles after a restart (reconcile keeps drawn tiles); composite tiles need a re-save.
+- [ ] Spanish (`es`, "pieza") on a real screen.
+
+### Decided, not built
+- [ ] **E130 curved text baseline** (rules agreed). **E129 text as clip** (postponed).
+- [ ] **Magnetic lasso** replacing the wand: client side (edge map plus shortest path in a worker, clip polygon out). Needs your go.
+- [ ] Text tool: fixed-height box mode, fill editor (E94), palette for text colour (E95), server round trip (E96), IME and right-to-left (E97), text boxes in grid and slides (E103).
+- [ ] Clipboard: SVG out (PNG fallback) and in (as a raster), copying several steps at once.
+
+### Offered, waiting for an answer
+- [ ] Dropper for the pen colour and for Properties / Background; palette of a selected photo alone (`scenePalette(doc, options, id)` exists).
+- [ ] Server-side tile rendering (E82) so a tile does not need a re-save.
+
+### Small UX polish
+- [ ] E109 read-only dimming in landscape, E124 loupe, E110 dark theme, stage zoom, E74 / E108 device pass.
+
+### Server jobs and wand
+- [ ] E128 job cancel UI and blocking rules.
+- [ ] Wand follow-ups: `sam` for the final pass, choosing which subject Remove background keeps.
+
+### Language
+- [ ] One word for "node" / "work" in English (German says Werk, French pièce, Spanish pieza).
+- [ ] Verify Spanish with DeepL (needs `DEEPL_API_KEY`, target ES-419) and the tester.
+
+### Housekeeping
+- [ ] `gmon.out` is tracked and changes on every run: untrack it and add it to `.gitignore`.
+- [ ] Leftover test cut-outs in `uploads/` expire on their own (7 days).
+
+### Dropped on purpose
+- Panorama stitching (2026-10-29).
+
 ## Theming rule (applies to every task below)
 
 The whole UI is **themable, and a theme can change per content node**. So:
