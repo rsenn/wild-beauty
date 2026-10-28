@@ -2,7 +2,8 @@
 // uploads the node uses into data/photos, write the rows in one transaction,
 // and only after the commit delete the uploads. Errors are `{ error: <code> }`
 // with the codes of EDITOR.md S2.11.
-import { mkdirSync, rmSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { config } from '../config.js';
 import { log } from '../log.js';
@@ -67,9 +68,46 @@ const serial = fn => {
   return run;
 };
 
+// The tile the editor drew of the whole composition (a JPEG data url sent with the
+// save): written as <sha256>.thumb.jpg in the photos folder, the hash being the
+// tile's name. -> the hash, or null when it is no sound JPEG of a sane size.
+const THUMB = /^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/;
+
+async function storeTile(thumb) {
+  const found = typeof thumb === 'string' && thumb.length < 600000 && THUMB.exec(thumb);
+
+  if(!found) return null;
+
+  const bytes = Buffer.from(found[1], 'base64');
+
+  if(bytes.length < 200 || bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff) return null;
+
+  const hash = createHash('sha256').update(bytes).digest('hex');
+  const dest = resolve(config.photosDir, `${hash}.thumb.jpg`);
+  const tmp = `${dest}.tmp.jpg`;
+
+  mkdirSync(config.photosDir, { recursive: true });
+  writeFileSync(tmp, bytes);
+
+  const info = await identify(tmp);
+
+  if(info.error || info.width < 16 || info.height < 16 || info.width > 1024 || info.height > 1024) return (rmSync(tmp, { force: true }), null);
+
+  renameSync(tmp, dest);
+
+  return hash;
+}
+
+// a tile no node shows any more: its file goes, unless it is a photo's own thumbnail
+function dropTile(h, tile) {
+  if(!tile || getPhoto(h, tile) || h.get('SELECT 1 AS used FROM nodes WHERE tile = ?', tile)) return;
+
+  rmSync(resolve(config.photosDir, `${tile}.thumb.jpg`), { force: true });
+}
+
 // the validated body made ready to commit: every photo baked, the tile
 // written. -> { error: { status, body } } | { bakedNow, tile, palette }
-async function prepare(h, checked) {
+async function prepare(h, checked, thumb) {
   mkdirSync(config.photosDir, { recursive: true });
 
   // baking is idempotent and happens before the transaction: a crash leaves
@@ -88,9 +126,9 @@ async function prepare(h, checked) {
     if(r.baked) bakedNow.push(hash);
   }
 
-  // the tile: first photo step (best effort)
-  let tile = null;
-  const step = firstPhotoStep(checked.doc);
+  // the tile: what the editor drew, else the first photo step (best effort)
+  let tile = await storeTile(thumb);
+  const step = tile ? null : firstPhotoStep(checked.doc);
 
   if(step) {
     const photo = getPhoto(h, step.photo);
@@ -129,7 +167,7 @@ export const saveNew = (h, body) =>
 
     if(!checked.ok) return { status: checked.status, body: { error: checked.code, details: checked.errors } };
 
-    const ready = await prepare(h, checked);
+    const ready = await prepare(h, checked, body.thumb);
 
     if(ready.error) return ready.error;
 
@@ -171,7 +209,7 @@ export const saveUpdate = (h, id, body, { holder = null, now = Date.now } = {}) 
     if(!checked.ok) return { status: checked.status, body: { error: checked.code, details: checked.errors } };
 
     const before = nodePhotos(h, id).map(p => p.hash);
-    const ready = await prepare(h, checked);
+    const ready = await prepare(h, checked, body.thumb);
 
     if(ready.error) return ready.error;
 
@@ -192,6 +230,8 @@ export const saveUpdate = (h, id, body, { holder = null, now = Date.now } = {}) 
 
       return { status: 409, body: { error: 'conflict', rev: getNode(h, id)?.rev } };
     }
+
+    if(node.tile !== ready.tile) dropTile(h, node.tile);
 
     const kept = new Set(checked.photos.map(p => p.hash));
 
@@ -221,6 +261,7 @@ export const removeNode = (h, id, { holder = null, now = Date.now } = {}) =>
     const photos = nodePhotos(h, id).map(p => p.hash);
 
     h.tx(() => deleteNode(h, id));
+    dropTile(h, node.tile);
     dropUnused(h, photos);
 
     return { status: 204, body: null };

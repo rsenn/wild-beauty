@@ -54,6 +54,30 @@ beforeEach(async () => {
   }
 });
 
+describe('the tile drawn by the editor', () => {
+  test('a JPEG sent with the save becomes the tile; rubbish is ignored', async () => {
+    if(!ready) return;
+
+    const jpg = resolve(root, 'tile.jpg');
+
+    await run([...imagemagick.convert, '-size', '64x64', 'gradient:green-white', jpg]);
+
+    const data = 'data:image/jpeg;base64,' + Buffer.from(await Bun.file(jpg).arrayBuffer()).toString('base64');
+    const ok = await (await post({ doc: doc([photo('photo001', A)]), thumb: data })).json();
+    const tile = getNode(h, ok.id).tile;
+
+    expect(tile).toMatch(/^[0-9a-f]{64}$/);
+    expect(tile).not.toBe(A);
+    expect(existsSync(resolve(config.photosDir, `${tile}.thumb.jpg`))).toBe(true);
+
+    await upload(B, 'png', '-size', '100x100', 'xc:blue');
+
+    const bad = await (await post({ doc: doc([photo('photo001', B)]), thumb: 'data:image/jpeg;base64,AAAA' })).json();
+
+    expect(getNode(h, bad.id).tile).toBe(B);
+  });
+});
+
 describe('POST /api/nodes', () => {
   test('a node with two uploads is in the database, baked, and the uploads are gone', async () => {
     if(!ready) return;

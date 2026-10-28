@@ -4,6 +4,8 @@
 // parts are here; `exportImage` needs a browser.
 import renderToString from '../../vendor/preact-render-to-string.js';
 import { renderStage } from './render.js';
+import { findStep } from './model.js';
+import { outlineOf } from './hit.js';
 
 export const EXPORT_SIZE = 2000; // the picture's side in pixels
 const FORMATS = { png: { type: 'image/png', ext: 'png' }, jpg: { type: 'image/jpeg', ext: 'jpg', quality: 0.92 } };
@@ -47,6 +49,36 @@ const toDataUrl = blob =>
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(blob);
   });
+
+// The whole page as a small JPEG data url (the node's tile in the saved list);
+// null when it cannot be drawn.
+export async function documentThumb(doc, options, { size = 512, background = '#ffffff' } = {}) {
+  try {
+    const svg = documentSvg(doc, options);
+    const data = new Map();
+
+    await Promise.all(imageUrls(svg).map(async url => data.set(url, await toDataUrl(await (await fetch(url)).blob()))));
+
+    const picture = new Image();
+
+    picture.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(withSize(inlineImages(svg, data), size));
+    await picture.decode();
+
+    const canvas = document.createElement('canvas');
+
+    canvas.width = canvas.height = size;
+
+    const context = canvas.getContext('2d');
+
+    context.fillStyle = /^#[0-9a-f]{6}$/i.test(doc.bg ?? '') ? doc.bg : background;
+    context.fillRect(0, 0, size, size);
+    context.drawImage(picture, 0, 0, size, size);
+
+    return canvas.toDataURL('image/jpeg', 0.85);
+  } catch {
+    return null;
+  }
+}
 
 // Draw the document and give the user the file. `options` are the renderNode
 // options of the page on show (without `upTo`: the whole page), `background` the
@@ -95,4 +127,45 @@ export async function exportImage(doc, options, { format = 'png', background = '
   setTimeout(() => URL.revokeObjectURL(link.href), 10000);
 
   return blob;
+}
+
+// One step alone (the clipboard's image): its visible part on a transparent ground,
+// with its clip and moves, `px` pixels along the longer side. Rejects when it
+// cannot be drawn.
+export async function stepImage(doc, id, { photos, page = 0, px = 1600 } = {}) {
+  const at = findStep(doc, id);
+
+  if(!at) throw new Error('no step');
+
+  const source = doc.pages[at.page].steps;
+  const wanted = new Set([id, at.step.clip].filter(Boolean));
+  const steps = source.filter(step => wanted.has(step.id) || (step.op === 'transform' && wanted.has(step.target)));
+  const solo = { ...doc, mode: 'free', bg: undefined, pages: [{ ...doc.pages[at.page], steps }] };
+  const corners = outlineOf(solo, id, { photos, page: 0, clipped: true });
+
+  if(!corners) throw new Error('no outline');
+
+  const xs = corners.map(c => c[0]);
+  const ys = corners.map(c => c[1]);
+  const pad = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) * 0.03;
+  const [x, y] = [Math.min(...xs) - pad, Math.min(...ys) - pad];
+  const [w, h] = [Math.max(...xs) + pad - x, Math.max(...ys) + pad - y];
+  const k = px / Math.max(w, h);
+  const svg = documentSvg(solo, { photos, page: 0 }).replace(/^<svg\b([^>]*?)viewBox="[^"]*"/, `<svg$1viewBox="${x} ${y} ${w} ${h}"`);
+  const data = new Map();
+
+  await Promise.all(imageUrls(svg).map(async url => data.set(url, await toDataUrl(await (await fetch(url)).blob()))));
+
+  const picture = new Image();
+
+  picture.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(inlineImages(svg, data).replace(/^<svg\b/, `<svg width="${Math.round(w * k)}" height="${Math.round(h * k)}"`));
+  await picture.decode();
+
+  const canvas = document.createElement('canvas');
+
+  canvas.width = Math.round(w * k);
+  canvas.height = Math.round(h * k);
+  canvas.getContext('2d').drawImage(picture, 0, 0, canvas.width, canvas.height);
+
+  return new Promise((resolve, reject) => canvas.toBlob(b => (b ? resolve(b) : reject(new Error('no image'))), 'image/png'));
 }

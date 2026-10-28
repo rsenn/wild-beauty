@@ -12,8 +12,8 @@ const Button = ({ label, onClick, pressed, disabled, children }) => html`<button
 
 const Color = ({ label, value, onInput }) => html`<label class="wb-editor-field">${label} <input type="color" value=${/^#[0-9a-f]{6}$/i.test(value ?? '') ? value : '#000000'} onInput=${e => onInput(e.target.value)} /></label>`;
 
-export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, onCutout, cutting, onText, onEditText, dispatch }) => {
-  if(!step) return html`<p class="wb-editor-context">${t('editor.context.empty')}</p>`;
+export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, onCopy, onCut, onPaste, onCutout, cutting, onText, onEditText, dispatch }) => {
+  if(!step) return html`<div class="wb-editor-context wb-editor-context-bar"><p>${t('editor.context.empty')}</p>${onPaste && html`<${Button} onClick=${onPaste}>${t('editor.paste')}<//>`}</div>`;
 
   const id = step.id;
   const order = html`
@@ -91,5 +91,5 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, on
     `;
   }
 
-  return html`<div class="wb-editor-context wb-editor-context-bar" role="toolbar" aria-label=${t('editor.context.label')}>${controls}${nudges}${duplicate}${order}${remove}</div>`;
+  return html`<div class="wb-editor-context wb-editor-context-bar" role="toolbar" aria-label=${t('editor.context.label')}>${controls}${nudges}${duplicate}${onCopy && html`<${Button} onClick=${onCopy}>${t('editor.copy')}<//>`}${onCut && html`<${Button} onClick=${onCut}>${t('editor.cut')}<//>`}${onPaste && html`<${Button} onClick=${onPaste}>${t('editor.paste')}<//>`}${order}${remove}</div>`;
 };

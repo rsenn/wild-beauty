@@ -5,9 +5,9 @@ import { tabHeaders } from './tab.js';
 // -> { ok: true, id, rev, photos } | { ok: false, code, status, details }
 // where `code` is the server's error code ('invalid', 'too_large',
 // 'missing_photo', 'bake_failed', 'conflict', 'locked', ...) or 'network'.
-export async function saveNode(snap, remote, send = globalThis.fetch) {
+export async function saveNode(snap, remote, send = globalThis.fetch, { thumb } = {}) {
   const put = !!remote;
-  const body = JSON.stringify({ doc: snap.doc, kind: snap.kind, ...(put && { rev: remote.rev }) });
+  const body = JSON.stringify({ doc: snap.doc, kind: snap.kind, ...(put && { rev: remote.rev }), ...(thumb && { thumb }) });
 
   let res;
 

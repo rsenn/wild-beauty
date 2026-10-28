@@ -7,6 +7,7 @@
 import * as model from './model.js';
 import { clipPolygon, cutPhoto, duplicatePhoto } from './clipping.js';
 import { combineOutline, setClipPolygons, splitClip } from './multiclip.js';
+import { pasteSteps } from './clipboard.js';
 import { effective } from './render.js';
 import { invert, multiply } from './matrix.js';
 
@@ -78,6 +79,8 @@ function onDoc(doc, c) {
       return model.addText(doc, c.page ?? doc.pages[0].id, c);
     case 'updateText':
       return model.updateText(doc, c.id, c.patch);
+    case 'pasteSteps':
+      return pasteSteps(doc, c.page ?? doc.pages[0].id, c.payload, { shift: c.shift, ids: c.ids }).doc;
     case 'setBox':
       return model.setBox(doc, c.id, c.box);
     case 'replacePhoto':

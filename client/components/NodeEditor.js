@@ -16,11 +16,14 @@ import { centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor
 import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../editor/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { cascade, photosOnPage } from '../editor/cascade.js';
-import { exportImage } from '../editor/export.js';
+import { documentThumb, exportImage, stepImage } from '../editor/export.js';
 import { boxOf, setContext, trackCommand } from '../events.js';
 import { TextEdit } from './TextEdit.js';
 import { measureText } from '../editor/measure.js';
 import { boxHeight, layout } from '../editor/text.js';
+import { classify, copyPayload, fromEvent, htmlFor, plainFor, readClipboard, writeClipboard } from '../editor/clipboard.js';
+import { sendFile } from '../upload.js';
+import { uploadPayload } from '../files.js';
 import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
 import { photoPoint, readLines, resultPolygon } from '../editor/wand.js';
@@ -580,7 +583,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setSaveError(null);
 
     const { snap } = latest.current;
-    const r = await saveNode(snap, remote.current);
+    const thumb = await documentThumb(snap.doc, { photos: hash => latest.current.photos[hash], page: 0 });
+    const r = await saveNode(snap, remote.current, undefined, { thumb });
 
     saving.current = false;
 
@@ -1607,6 +1611,130 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setHist(history.seal);
   };
 
+  // --- clipboard (E131) ---
+  const pasted = useRef(0); // pastes since the last copy: each lands a little further on
+
+  // copy (or cut) the selected step: its picture, its words and itself
+  const copySelected = async cut => {
+    const c = latest.current;
+    const id = c.selected;
+    const payload = id && !c.previewing ? copyPayload(c.doc, id) : null;
+
+    if(!payload) return false;
+
+    pasted.current = 0;
+
+    try {
+      const png = await stepImage(c.doc, id, { photos: hash => c.photos[hash], page: c.page }).catch(() => null);
+
+      await writeClipboard({ png, html: htmlFor(payload), text: plainFor(payload) });
+    } catch {
+      setAnnounce(tr('editor.announce.clipboardDenied'));
+
+      return false;
+    }
+
+    setAnnounce(tr(cut ? 'editor.announce.cut' : 'editor.announce.copied'));
+
+    if(cut && !c.readOnly) remove(id);
+
+    return true;
+  };
+
+  // paste what `data` ({ html, text, files }) holds: a step of ours, an image, or words
+  const pasteData = async data => {
+    const c = latest.current;
+    const what = classify(data);
+
+    if(c.readOnly || c.previewing) return;
+    if(!what) return setAnnounce(tr('editor.announce.pasteNothing'));
+
+    const n = ++pasted.current;
+
+    if(what.kind === 'steps') {
+      const items = what.payload.items.filter(item => item.step?.op !== 'photo' || c.photos[item.step.photo]);
+      const taken = new Set(allIds(c.doc));
+
+      if(!items.length) return setAnnounce(tr('editor.announce.pasteNothing'));
+
+      const fresh = [];
+
+      for(let i = 0; i < items.length * 2; i++) {
+        const id = unique(taken);
+
+        taken.add(id);
+        fresh.push(id);
+      }
+
+      dispatch({ type: 'pasteSteps', page: c.pageId, payload: { ...what.payload, items }, shift: 50 * n, ids: fresh });
+      setSelected(fresh[0]);
+      setHist(history.seal);
+
+      return setAnnounce(tr('editor.announce.pasted'));
+    }
+
+    if(what.kind === 'image') {
+      setAnnounce(tr('editor.announce.pasting'));
+
+      try {
+        const record = await sendFile(new File([what.file], what.file.name || 'pasted.png', { type: what.file.type }), { onProgress: () => {} }).done;
+
+        addUpload(uploadPayload(record));
+        setAnnounce(tr('editor.announce.pasted'));
+      } catch {
+        setAnnounce(tr('editor.announce.pasteFailed'));
+      }
+
+      return;
+    }
+
+    const id = unique(new Set(allIds(c.doc)));
+    const base = { text: what.text, font: 'sans', size: 48, w: 600, bold: false, padding: 0 };
+    const { lines, h } = layout(base, measureFor(false));
+    const step = 30 * (n % 8);
+
+    dispatch({ type: 'addText', id, page: c.pageId, text: what.text, lines, m: [1, 0, 0, 1, 150 + step, 200 + step], w: base.w, h, font: base.font, size: base.size, color: c.color, align: 'start' });
+    setSelected(id);
+    setHist(history.seal);
+    setAnnounce(tr('editor.announce.pasted'));
+  };
+
+  // the paste button: ask the clipboard (the browser may ask the user once)
+  const pasteClipboard = async () => {
+    try {
+      await pasteData(await readClipboard());
+    } catch {
+      setAnnounce(tr('editor.announce.clipboardDenied'));
+    }
+  };
+
+  // Ctrl+C, X and V come as events; they are ours unless a field has the focus or text is selected
+  useEffect(() => {
+    const mine = e => !inField(e.target) && !window.getSelection?.()?.toString();
+    const copy = e => {
+      if(!mine(e) || !latest.current.selected) return;
+
+      e.preventDefault();
+      copySelected(e.type === 'cut');
+    };
+    const paste = e => {
+      if(inField(e.target)) return;
+
+      e.preventDefault();
+      pasteData(fromEvent(e.clipboardData));
+    };
+
+    document.addEventListener('copy', copy);
+    document.addEventListener('cut', copy);
+    document.addEventListener('paste', paste);
+
+    return () => {
+      document.removeEventListener('copy', copy);
+      document.removeEventListener('cut', copy);
+      document.removeEventListener('paste', paste);
+    };
+  }, []);
+
   // the wheel zooms the selection about the pointer, with Shift it turns it
   const wheel = (e, units) => {
     const { selected: id } = latest.current;
@@ -1775,7 +1903,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
-        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCutout=${removeBackground} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onCutout=${removeBackground} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">
