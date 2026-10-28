@@ -74,7 +74,9 @@ async function serveFile(pathname, method, prefix, root) {
 
   // the content type comes from the extension (Bun.file); set it explicitly
   // because Bun leaves it out of a HEAD response
-  const headers = { 'content-type': file.type, 'content-length': String(file.size) };
+  // in --dev the browser must not reuse its copy of a module or stylesheet it
+  // was served before an edit (no header means heuristic caching)
+  const headers = { 'content-type': file.type, 'content-length': String(file.size), ...(dev && { 'cache-control': 'no-cache' }) };
 
   return new Response(method === 'HEAD' ? null : file, { headers });
 }

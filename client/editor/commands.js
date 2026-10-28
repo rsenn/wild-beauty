@@ -5,6 +5,7 @@
 // it. Pure: a command that changes nothing (unknown id, same value) returns
 // the same snapshot, which history.push then ignores.
 import * as model from './model.js';
+import { clipPolygon, cutPhoto } from './clipping.js';
 import { effective } from './render.js';
 import { invert, multiply } from './matrix.js';
 
@@ -86,6 +87,10 @@ function onDoc(doc, c) {
       return model.setClip(doc, c.id, c.shape);
     case 'unclip':
       return model.unclip(doc, c.id);
+    case 'clipPolygon':
+      return clipPolygon(doc, c.id, c.polygon, c.shape, c.style);
+    case 'cutPhoto':
+      return cutPhoto(doc, c.id, c.pieces, c.ids, c.style);
     case 'setTitle':
       return model.setTitle(doc, c.title);
     case 'setBg':

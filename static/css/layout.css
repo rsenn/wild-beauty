@@ -257,8 +257,8 @@ body {
 }
 
 .wb-card-selected > .wb-card-box::after {
-  --pick-a: var(--wb-pick, #8a0010);
-  --pick-b: var(--wb-pick-ground, #f4ecd8);
+  --pick-a: var(--wb-pick);
+  --pick-b: var(--wb-pick-ground);
   content: '';
   position: absolute;
   inset: -4px;
@@ -1135,9 +1135,9 @@ body {
   font-size: calc(var(--wb-card-icon) * 0.6);
   font-weight: bold;
   line-height: 1;
-  color: var(--wb-pick-ink, #fff);
-  background: var(--wb-pick, #8a0010);
-  border: 2px solid var(--wb-pick-ground, #f4ecd8);
+  color: var(--wb-pick-ink);
+  background: var(--wb-pick);
+  border: 2px solid var(--wb-pick-ground);
   border-radius: var(--wb-radius-round);
   box-sizing: border-box;
   pointer-events: none;

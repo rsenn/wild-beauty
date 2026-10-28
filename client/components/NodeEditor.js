@@ -15,6 +15,8 @@ import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDra
 import { centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor/hit.js';
 import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../editor/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
+import { clipFromStroke } from '../editor/clipstroke.js';
+import { photoPolygon } from '../editor/clipping.js';
 import { oneEuroPoint, resample, strokePath, strokeWidths } from '../editor/pen.js';
 import { photoSteps as allPhotoSteps, renderNode } from '../editor/render.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
@@ -71,6 +73,7 @@ const SPACING = 4;
 const VERTEX_PX = 14; // how near a click picks a vertex or handle
 const CLOSE_PX = 14; // how near the first vertex a click closes the shape
 const HANDLE_PX = 10; // a selection handle's side on screen
+const CUT_REACH_PX = 28; // how near the border a clip stroke may end and still be taken to it
 const TAP_PX = 12; // how far from a thin line still counts as a tap on it
 const SLOP_PX = 6; // a pointer must travel this far before a gesture moves the step
 const DOUBLE_TAP_MS = 350;
@@ -92,6 +95,9 @@ const KeyCursor = ({ at, scale }) => {
 };
 
 // the shape the clip tool would use, chosen with PageDown / PageUp
+// the stroke being drawn with the clip tool
+const ClipLine = ({ points }) => html`<polyline class="wb-editor-outline" stroke-dasharray="6 4" points=${points.map(p => p.join(',')).join(' ')} />`;
+
 const Candidate = ({ outline }) => (outline ? html`<polygon class="wb-editor-outline wb-editor-candidate" points=${outline.map(p => p.join(',')).join(' ')} />` : null);
 
 // focus a dialog's first button when it appears (a stable function: once)
@@ -176,6 +182,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [shape, setShape] = useState(emptyDraft); // the shape being drawn (shape tool)
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
+  const clipStroke = useRef(null); // { points } while a clip-tool stroke is drawn
+  const [clipLine, setClipLine] = useState(null);
+  const [hint, setHint] = useState(''); // a short note in place of the clip tool's help text
   const latestT = useRef(t); // the handlers registered once speak the current language
   const lockRef = useRef(null);
   const loadingRef = useRef(target !== NEW);
@@ -594,6 +603,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   // leaving the shape tool finishes an open shape that has two corners, else drops it
   useEffect(() => {
+    setHint('');
+
     if(tool !== 'shape' && latest.current.shape.vertices.length) commitShape(latest.current.shape);
 
     // choosing unclip with a clipped photo already selected frees it at once
@@ -946,6 +957,19 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // clip tool: with a photo selected, tapping a shape makes it that photo's clip;
   // tapping a photo selects it. Unclip tool: tapping a clipped photo frees it.
   const maskDown = units => {
+    // with a photo selected the clip tool draws: a tap acts as before, a closing
+    // outline clips, a stroke across the photo cuts it in two (see clipUp)
+    if(tool === 'clip' && editStep?.op === 'photo') {
+      clipStroke.current = { points: [units] };
+      setHint('');
+      setClipLine([units]);
+
+      return;
+    }
+
+    maskTap(units);
+  };
+  const maskTap = units => {
     const { doc, photos, scale } = latest.current;
     const opts = { photos: hash => photos[hash], tolerance: TAP_PX / scale, page };
 
@@ -968,6 +992,41 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       dispatch({ type: 'unclip', id });
       setTool('select');
     }
+  };
+  const clipUp = () => {
+    const s = clipStroke.current;
+    const { doc, photos, scale, color, size, editStep: step } = latest.current;
+
+    clipStroke.current = null;
+    setClipLine(null);
+
+    if(!s || step?.op !== 'photo') return;
+
+    const found = clipFromStroke(s.points, photoPolygon(doc, step.id, { photos: hash => photos[hash] }), { tap: TAP_PX / scale, reach: CUT_REACH_PX / scale, close: (CLOSE_PX * 2) / scale });
+    const style = { color, width: Math.max(1, size / 3) };
+    const taken = new Set(allIds(doc));
+    const fresh = () => {
+      const id = unique(taken);
+
+      taken.add(id);
+
+      return id;
+    };
+
+    if(found.kind === 'tap') return maskTap(s.points[0]);
+
+    if(found.kind === 'closed') dispatch({ type: 'clipPolygon', id: step.id, polygon: found.polygon, shape: fresh(), style });
+    else if(found.kind === 'cut') dispatch({ type: 'cutPhoto', id: step.id, pieces: found.pieces, ids: [fresh(), fresh(), fresh()], style });
+    else {
+      setHint(tr('editor.clip.none'));
+      setAnnounce(tr('editor.clip.none'));
+
+      return;
+    }
+
+    quiet.current = true;
+    setTool('select');
+    setAnnounce(tr(found.kind === 'cut' ? 'editor.announce.cut' : 'editor.announce.clipped'));
   };
   const shapeDown = units => {
     const { shape, scale, doc } = latest.current;
@@ -996,6 +1055,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     }
 
     if(shaping.current) return setDraft(pull(latest.current.shape, [x, y], { alt: e.altKey }));
+
+    if(clipStroke.current) {
+      clipStroke.current.points.push([x, y]);
+
+      return setClipLine(clipStroke.current.points.slice());
+    }
 
     if(gesture.current) {
       const m = gesture.current.g.move(e.pointerId, [x, y]);
@@ -1028,6 +1093,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
       return;
     }
+
+    if(clipStroke.current) return clipUp();
 
     if(gesture.current) {
       // the last pointer up ends the gesture: it is one undo step
@@ -1191,7 +1258,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
+          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
@@ -1209,7 +1276,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />
       </div>
       <div class="wb-editor-sec" data-sec="select">
-      ${(tool === 'clip' || tool === 'unclip') && html`<p class="wb-editor-context" role="status">${t('editor.context.' + tool)}</p>`}
+      ${(tool === 'clip' || tool === 'unclip') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : t('editor.context.' + tool)}</p>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>

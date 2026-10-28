@@ -505,3 +505,194 @@ binding problem found (S2), and `TODO.md` lists what was not done.
 - Confirm EXIF orientation behaviour of `imread` on this build (the S2 note
   is about the standard OpenCV default; test with a rotated JPEG).
 - Decide whether `align` for `diff` is worth it (default off, may be cut).
+
+## 14. Handoff: model-based cutout and tap-to-segment for collage (2026-10-29)
+
+Audience: the implementer of `tools/opencv-imgproc.js` in qjs-opencv. Consumer: the
+Wild Beauty collage editor (`EDITOR.md`, `UX-REQUIREMENTS.md` J4). This section
+extends S5.1 (`cutout`, `method: "dnn"`) and adds two commands, `prepare` and
+`segment`. It replaces the thin "dnn" idea of S6.3.1 with the real requirement.
+
+### 14.1 Goal
+
+A collage artist cuts subjects out of photos and layers them. Quality bar: a clean
+subject cut with **soft, natural edges** (fur, hair, leaves), no specks, no leftover
+background, no coloured halo. Plain grabCut from a rectangle is **not** good enough
+(the opencv.js `removeBackground` demo is the example of what to beat).
+
+Two modes of operation:
+
+- **A. One-button cutout**: no user input; the main subject, or every separate
+  subject, is cut out (salient-object and matting models).
+- **B. Tap-to-segment**: the user taps the object (and may tap again to add or to
+  subtract); the model returns that object's mask (promptable model, SAM class).
+
+### 14.2 Output: pixels, not polylines
+
+A polygon cannot carry a soft edge, so the **primary output is an RGBA PNG** (alpha =
+the soft matte at the photo's full resolution, `trim`med to the subject). Polygons are
+only a secondary, optional output (S14.5) for the editor's vector edge effects
+(rim, shadow, torn edge), which need an outline. Never flatten the soft alpha into a
+binary mask. Colours at the edge must be **decontaminated** (no background colour
+bleeding into semi-transparent pixels): composite a result over saturated green and
+magenta to check.
+
+### 14.3 What OpenCV 5.x offers (checked in `~/Sources/opencv`, `~/Sources/opencv_contrib`)
+
+**Version caveat.** There is no 5.1 release. `~/Sources/opencv` is the `5.x`
+development branch (`5.1.0-dev`, 671 commits after the `5.0.0` tag, 2026-10-02);
+`~/Sources/opencv_contrib` is 25 commits after `5.0.0`. At the `5.0.0` tag the zoo
+has `u2netp`, `modnet`, `dexined` and `fcnresnet*`, but **not `sam`**: the SAM entry
+and its `segmentation.py` support are development-branch only. Decide, and write down
+in `capabilities`, whether the tool targets the release (5.0.0: Mode A works with
+`u2netp`/`modnet`, Mode B needs a model of our own wrapped by hand) or the dev branch
+(`sam` from the zoo). Whatever is chosen, name the exact commit/tag it was built from.
+
+**Build to use (decided 2026-10-29).** `/opt/opencv-5.0.0-x86_64` (the directory name
+is misleading) is already the dev branch: its libraries are `5.1.0`, built from
+opencv `5c09038eb4` (`5.0.0-671`) and opencv_contrib `1275703c` (`5.0.0-25`), with
+`OPENCV_ENABLE_NONFREE=ON`, and it contains `dnn`, `dnn_superres`, `alphamat`,
+`ximgproc`, `xphoto`, `saliency` and `photo` (checked 2026-10-29). No rebuild is
+planned; the sources in `~/Sources/opencv` are at the same commit. The SAM support in
+the zoo is only a sample (`samples/dnn/segmentation.py sam`) over the ordinary `dnn`
+API, so what remains to verify is whether the SAM ONNX files load and run in this
+build (S14.8, question 1).
+
+Use everything that helps; check each item by loading and running it, and report in
+`capabilities`:
+
+- **`dnn` with the new ONNX engine** (OpenCV 5.x). `samples/dnn/models.yml` is the
+  model zoo with urls and sha1: `u2netp` (320x320, salient object), `modnet`
+  (512x512, portrait matting, `alpha_matting.py`), `sam` (`vision_encoder.onnx` +
+  `prompt_encoder_mask_decoder.onnx` from Hugging Face `onnx-community/sam-vit-base-ONNX`,
+  1024x1024, `segmentation.py sam --point=x,y` shows the padding preprocessing and
+  the named decoder inputs), `fcnresnet*` (semantic classes), `dexined` (edges). The
+  OpenCV 4.x ONNX importer could not load most of these; the 5.x engine may (`sam`:
+  development branch only, see the caveat above). **First
+  task: report which of these load and run on this build** (the old S13 item).
+  Candidates beyond the zoo, if they load: IS-Net / DIS, BiRefNet, MobileSAM,
+  EfficientSAM, SAM 2 tiny (Hugging Face `onnx-community`).
+- **contrib `alphamat`** (information-flow matting from a trimap, `samples/` has
+  trimaps): refine the model's mask into a real matte in the unknown band.
+- **contrib `ximgproc`**: `guidedFilter` (upscale and sharpen a low-resolution mask
+  against the full-resolution photo; likely the best cheap refinement),
+  `fastGlobalSmootherFilter`, `weightedMedianFilter`, superpixels (`slic`, `seeds`,
+  `lsc`) for cleaning a mask along image edges.
+- **`photo` / contrib `xphoto` inpaint**: fill the hole left in the original (S14.4).
+- **contrib `dnn_superres`**: only if it beats `guidedFilter` for upscaling a mask
+  (try it, I expect it does not). Not needed for the photos themselves.
+- **contrib `saliency`**: classical spectral-residual saliency, no model. Useful only
+  as a zero-dependency fallback for `auto`; I expect it to be too weak for cutouts.
+- Non-free contrib algorithms are allowed, but none is needed for this.
+- **Licences.** Check each model before bundling (to my knowledge: U2-Net Apache-2.0,
+  SAM Apache-2.0, MODNet Apache-2.0 but portraits only, RMBG-1.4/2.0 non-commercial).
+  Never bundle weights; `capabilities` lists `licence` and `commercial` per model.
+
+### 14.4 Mode A: one-button cutout
+
+```
+opencv-imgproc.js cutout --in a.jpg --out cut.png --method dnn --dnn-model u2netp \
+    [--refine none|guided|matting] [--subjects largest|all] [--split-dir DIR] \
+    [--rest-out rest.png --rest-fill none|inpaint] [--min-area 0.01] \
+    [--trim --trim-pad 2] [--outline-out FILE.json --outline-epsilon 1.5]
+```
+
+(Job keys are the same names, S4.) Behaviour:
+
+1. Run the model at its input size, get a probability map, upscale it to the photo's
+   full resolution with `--refine guided` (default; `matting` = trimap from the
+   eroded/dilated mask, then `alphamat`, slower and better on fur).
+2. `--subjects largest` keeps the biggest connected part. `--subjects all` keeps every
+   part above `--min-area` (fraction of the photo); each becomes its **own** RGBA PNG,
+   `cut-1.png`, `cut-2.png`, ... in `--split-dir` (`--out` receives the union).
+3. `--rest-out`: the original with all cut subjects removed (alpha hole with the same
+   soft edge), or with `--rest-fill inpaint` the hole filled by inpainting.
+4. Everything is **trimmed** with its offset reported, so the editor can put each
+   piece back exactly where it was (S14.6).
+
+### 14.4b Mode B: tap-to-segment
+
+A promptable model has a heavy image encoder (run once per photo) and a light decoder
+(run per tap). A process per tap must not repeat the encoder, so there are two
+commands and a cache:
+
+```
+opencv-imgproc.js prepare --in a.jpg --model sam [--cache-dir DIR]
+opencv-imgproc.js segment --in a.jpg --model sam --point 640,410 [--point 90,300,0 ...]
+    [--box x,y,w,h] [--candidates 3] [--pick best|0|1|2] [--cache-dir DIR]
+    --out obj.png [--rest-out rest.png --rest-fill none|inpaint]
+    [--mask-out m.png] [--refine none|guided|matting] [--trim] [--outline-out F.json]
+```
+
+- `prepare` computes the encoder output and stores it in `--cache-dir`, keyed by
+  sha256(input bytes) + model name + model sha1; a second call is a no-op.
+  `segment` uses the cache, and computes it first if missing (reports
+  `cache: "hit"|"miss"` and the time).
+- `--point x,y[,label]`: label 1 = on the object (default), 0 = not the object. Repeat
+  for several. **Stateless**: the editor sends every point each time, so there is no
+  session between calls. `--box` is an optional rough box. Coordinates are pixels of the
+  EXIF-corrected photo; `--units norm` takes 0..1.
+- SAM returns several candidate masks (part, object, whole). `--candidates 3` writes
+  `obj-0.png` ... `obj-2.png` with their scores, and `--pick` chooses; the editor
+  offers "bigger / smaller" to step through them.
+- Latency targets (measure and report, adjust if unrealistic on the server CPU):
+  `prepare` seconds, `segment` with a warm cache under about 500 ms. If ViT-B is too
+  slow, try a smaller encoder (MobileSAM, EfficientSAM, SAM 2 tiny) when it loads.
+- `capabilities` gains `models: [{ name, kind: "salient"|"matting"|"promptable",
+  licence, commercial, loaded, unavailable, inputSize }]`.
+
+### 14.5 Result additions
+
+On top of S8, each output file is listed with its place in the original photo:
+
+```json
+"outputs": [
+  { "role": "cut",  "path": "cut-1.png", "bbox": {"x":620,"y":410,"w":900,"h":1300},
+    "offset": {"x":620,"y":410}, "coverage": 0.12, "score": 0.97 },
+  { "role": "rest", "path": "rest.png", "fill": "inpaint" }
+],
+"outlines": [ { "output": "cut-1.png", "polygon": [[x,y],...], "epsilon": 1.5 } ],
+"model": { "name": "u2netp", "licence": "Apache-2.0" },
+"timings": { "readMs": 40, "prepareMs": 0, "modelMs": 900, "refineMs": 120, "writeMs": 80 }
+```
+
+`outlines` is the alpha > 127 contour per cut, simplified (Douglas-Peucker with
+`epsilon`), in the coordinates of the **cut file** (so the editor draws rims and
+shadows from it, and may use it as a crisp clip when a soft edge is not wanted).
+
+### 14.6 How the editor uses it (so you know what the outputs are for)
+
+The editor never relies on a clip path alone. For one cut it **replaces** the photo
+step by two photo steps with the same matrix: the `rest` image underneath and each
+`cut` image on top, shifted by its `offset` (scaled by the photo's pixel-to-unit
+factor). Before the user moves anything the picture looks unchanged; moving a cut
+reveals the hole (or the inpainted background). The server registers `cut` and `rest`
+as derived uploads of the same owner (expiry as for uploads), with the original hash
+recorded as provenance. One undo step restores the original. A rough vector clip stays
+available for the cases where a crisp polygon is what the artist wants.
+
+### 14.7 Tests and acceptance
+
+- A small set of real photos with expected masks drawn by hand: flat background,
+  cluttered scene, fur (cat on a blanket), hair, a transparent or glossy object,
+  two separate subjects, a subject touching the border. Commit the list and sha1s,
+  not the large images.
+- Metrics: IoU against the hand mask; no halo (composite over green and magenta, the
+  fringe pixel count below a threshold); `--subjects all` returns the expected number
+  of parts; the original with `rest` and `cut` composited back equals the original
+  (difference under a threshold where alpha = 1).
+- `segment`: a point on the cat returns the cat; a second point with label 0 on the
+  blanket does not change it; a point on the blanket returns the blanket.
+- Report timings for a 12 MP photo on this machine, for each model and refinement.
+- Optional `--preview FILE`: the result composited over a checkerboard, green and
+  magenta side by side, for judging edges.
+
+### 14.8 Open questions for the implementer
+
+1. Which zoo and Hugging Face models load in the chosen OpenCV build (5.0.0 or the
+   5.x dev branch), which not (operator names)?
+2. `guided` against `matting` against `dnn_superres` for the matte: measured, on fur.
+3. Is a long-lived mode (`--serve`, JSON lines on stdin and stdout, models kept in
+   memory) worth it, if loading the models dominates a call?
+4. Is `rest-fill inpaint` good enough, or should the hole stay transparent only?
+5. Memory and time caps for 24 MP inputs (`maxPixels` stays 64 MP, S5).

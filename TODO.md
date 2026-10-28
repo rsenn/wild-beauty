@@ -226,7 +226,7 @@ woff2/woff/ttf. Fonts are served from `/static/`.
       dragging pans the crop along the long axis; cursor `ns-resize`/`ew-resize` on desktop, a double-arrow
       icon on touch, nothing for square photos; the yellow fit triangle goes. Tasks in `EDITOR.md` E98-E103.
 - [x] **7.6 Ownership and expiry (2026-10-28)**: uploads belong to the `wb-session` cookie and expire with it; list and delete only for the owner (`EDITOR.md` E104, `PLAN.md` S6.2).
-- [ ] **7.7 Collage use case (2026-10-28)**: first placement, touch transform handles, simple/freehand clip, clip preview, edit clip (`EDITOR.md` E112-E122, `UX-REQUIREMENTS.md` section I); E117/E118: auto clip and grabCut with opencv.js, trimmed build.
+- [ ] **7.7 Collage use case (2026-10-28)**: first placement, touch transform handles, simple/freehand clip, clip preview, edit clip (`EDITOR.md` E112-E126, `UX-REQUIREMENTS.md` section I); E117/E118: auto clip and grabCut with opencv.js, trimmed build.
 - [ ] **7.5 Quota**: total `uploads/` size cap with a translated error (P S9).
 
 **First deliverable ends here (M1-M7): `/new` with design, i18n, drop zone,

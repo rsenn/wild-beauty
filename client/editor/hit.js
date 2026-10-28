@@ -14,7 +14,7 @@ const localSize = () => [1000, 1000];
 
 // the polyline of a shape's path, curves sampled, through matrix `m`;
 // { points, closed } or null when the path is not one we write
-function shapePoints(step, m) {
+export function shapePoints(step, m) {
   const parsed = verticesFromPath(step.path);
 
   if(!parsed) return null;
