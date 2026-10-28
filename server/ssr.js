@@ -24,6 +24,11 @@ export function renderPage(vnode, { lang, dir = 'ltr', title, theme = 'kraft', b
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <link rel="icon" href="/static/img/favicon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/img/pwa-192.png">
+<meta name="theme-color" content="#cdbfb0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="/static/fonts/stylesheet.css">
 <link rel="stylesheet" href="/static/css/layout.css">
 <link rel="stylesheet" id="theme" href="/static/themes/${esc(theme)}.css">

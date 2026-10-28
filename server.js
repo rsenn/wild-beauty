@@ -10,6 +10,7 @@ import { dev, log } from './server/log.js';
 import { createUpload, deleteUpload, listUploads, readUploads, serveUpload, sweepUploads } from './server/api/uploads.js';
 import { lockRoute } from './server/api/locks.js';
 import { createNode, deleteNodeRoute, listNodesRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
+import { manifestResponse, workerResponse } from './server/pwa.js';
 import { segmentRoute } from './server/api/segment.js';
 import { servePhoto } from './server/api/photos.js';
 import { photoInfos } from './server/node/view.js';
@@ -187,6 +188,9 @@ function route(req) {
 
     return serveUpload(name, req.method);
   }
+
+  if(pathname === '/manifest.webmanifest') return manifestResponse();
+  if(pathname === '/sw.js') return workerResponse();
 
   if(pathname === '/') {
     const location = new URL(`/${negotiate(locales, { req })}/new`, req.url).href;

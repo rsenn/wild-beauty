@@ -9,3 +9,6 @@ const boot = JSON.parse(document.getElementById('boot').textContent);
 hydrate(html`<${App} boot=${boot} />`, document.getElementById('app'));
 
 startTracking();
+
+// installable app: a service worker that does not cache anything
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
