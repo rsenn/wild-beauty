@@ -10,7 +10,7 @@ const Button = ({ label, onClick, pressed, disabled, children }) => html`<button
 
 const Color = ({ label, value, onInput }) => html`<label class="wb-editor-field">${label} <input type="color" value=${/^#[0-9a-f]{6}$/i.test(value ?? '') ? value : '#000000'} onInput=${e => onInput(e.target.value)} /></label>`;
 
-export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, dispatch }) => {
+export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, dispatch }) => {
   if(!step) return html`<p class="wb-editor-context">${t('editor.context.empty')}</p>`;
 
   const id = step.id;
@@ -20,6 +20,10 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, di
     <${Button} onClick=${() => dispatch({ type: 'moveStep', id, to: 'down' })}>${t('editor.order.down')}<//>
     <${Button} onClick=${() => dispatch({ type: 'moveStep', id, to: 'back' })}>${t('editor.order.back')}<//>
   `;
+  // larger, smaller, turn left, turn right: the buttons for what a pinch does (E113)
+  const nudges = onNudge && html`<span class="wb-editor-nudge" role="group" aria-label=${t('editor.nudge')}>
+    ${[['smaller', '\u2212'], ['larger', '+'], ['left', '\u21ba'], ['right', '\u21bb']].map(([name, glyph]) => html`<button type="button" class="wb-editor-chip wb-editor-nudge-btn" aria-label=${t('editor.nudge.' + name)} title=${t('editor.nudge.' + name)} onClick=${() => onNudge(name)}>${glyph}</button>`)}
+  </span>`;
   const remove = html`<${Button} onClick=${() => dispatch({ type: 'removeStep', id })}>${t('editor.step.delete')}<//>`;
 
   let controls;
@@ -57,5 +61,5 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, di
     `;
   }
 
-  return html`<div class="wb-editor-context wb-editor-context-bar" role="toolbar" aria-label=${t('editor.context.label')}>${controls}${order}${remove}</div>`;
+  return html`<div class="wb-editor-context wb-editor-context-bar" role="toolbar" aria-label=${t('editor.context.label')}>${controls}${nudges}${order}${remove}</div>`;
 };

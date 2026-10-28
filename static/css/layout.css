@@ -1360,3 +1360,23 @@ body {
     max-height: calc(100dvh - 32px);
   }
 }
+
+/* larger / smaller / turn buttons of the context bar (E113): a finger-sized target */
+.wb-editor-nudge {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.wb-editor-nudge-btn {
+  min-width: 36px;
+  min-height: 36px;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+@media (pointer: coarse) {
+  .wb-editor-nudge-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

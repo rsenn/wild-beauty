@@ -16,6 +16,7 @@ import { centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor
 import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../editor/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
+import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag } from '../editor/handles.js';
 import { photoPolygon } from '../editor/clipping.js';
 import { oneEuroPoint, resample, strokePath, strokeWidths } from '../editor/pen.js';
 import { photoSteps as allPhotoSteps, renderNode } from '../editor/render.js';
@@ -72,7 +73,8 @@ const KEYS = ['V P S C U T', 'PageDown PageUp', 'Escape', 'Arrows', '+ -', ', .'
 const SPACING = 4;
 const VERTEX_PX = 14; // how near a click picks a vertex or handle
 const CLOSE_PX = 14; // how near the first vertex a click closes the shape
-const HANDLE_PX = 10; // a selection handle's side on screen
+const HANDLE_PX = 10; // a selection handle's side on screen (a pointer you can use for fine work)
+const HANDLE_PX_TOUCH = 32; // the same on a touch screen (E113)
 const CUT_REACH_PX = 28; // how near the border a clip stroke may end and still be taken to it
 const TAP_PX = 12; // how far from a thin line still counts as a tap on it
 const SLOP_PX = 6; // a pointer must travel this far before a gesture moves the step
@@ -136,13 +138,21 @@ const themeColours = () => {
   }
 };
 
-// the outline and corner handles of the selection, in the stage overlay
-const Selection = ({ outline, scale }) => {
-  const side = HANDLE_PX / scale;
+// where the handles of an outline are, for a handle `px` wide on screen
+const handleSet = (outline, scale, px) => ({ ...handlePoints(outline, { inset: px / 2 / scale, gap: (px * 1.8) / scale }), outline });
+
+// the outline and the handles of the selection, in the stage overlay: four corners
+// that scale and, with `grips`, a round handle above the top edge that turns
+const Selection = ({ outline, scale, px, grips }) => {
+  const side = px / scale;
+  const set = handleSet(outline, scale, px);
+  const top = [(outline[0][0] + outline[1][0]) / 2, (outline[0][1] + outline[1][1]) / 2];
 
   return html`<g class="wb-editor-selection">
     <polygon class="wb-editor-outline" points=${outline.map(p => p.join(',')).join(' ')} />
-    ${outline.map(([x, y]) => html`<rect class="wb-editor-handle" x=${x - side / 2} y=${y - side / 2} width=${side} height=${side} />`)}
+    ${set.corners.map(([x, y]) => html`<rect class="wb-editor-handle" x=${x - side / 2} y=${y - side / 2} width=${side} height=${side} />`)}
+    ${grips && html`<line class="wb-editor-outline" x1=${top[0]} y1=${top[1]} x2=${set.rotate[0]} y2=${set.rotate[1]} />`}
+    ${grips && html`<circle class="wb-editor-handle wb-editor-rotate" cx=${set.rotate[0]} cy=${set.rotate[1]} r=${side / 2} />`}
   </g>`;
 };
 
@@ -182,8 +192,11 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [shape, setShape] = useState(emptyDraft); // the shape being drawn (shape tool)
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
+  const hdrag = useRef(null); // a selection handle being dragged: { kind, id, base, pivot | centre, down }
   const clipStroke = useRef(null); // { points } while a clip-tool stroke is drawn
   const [clipLine, setClipLine] = useState(null);
+  const [coarse] = useState(() => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches);
+  const handlePx = coarse ? HANDLE_PX_TOUCH : HANDLE_PX;
   const [hint, setHint] = useState(''); // a short note in place of the clip tool's help text
   const latestT = useRef(t); // the handlers registered once speak the current language
   const lockRef = useRef(null);
@@ -904,6 +917,24 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     // another finger joins the gesture that is running
     if(gesture.current) return gesture.current.g.down(e.pointerId, units);
 
+    // a handle of the selection comes before anything under it: a corner scales
+    // about the opposite corner, the round one turns about the centre (E113)
+    if(!previewing && editStep) {
+      const set = (() => {
+        const o = outlineOf(doc, editStep.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined });
+
+        return o && handleSet(o, scale, handlePx);
+      })();
+      const grip = set && hitHandle(set, units, (handlePx / 2 + (coarse ? 6 : 3)) / scale);
+      const base = grip && matrixOf(doc, editStep.id, { page, upTo: scrubbed ? shown : undefined });
+
+      if(grip && base) {
+        hdrag.current = grip.kind === 'rotate' ? { kind: 'rotate', id: editStep.id, base, centre: set.centre, down: units } : { kind: 'scale', id: editStep.id, base, pivot: set.outline[(grip.index + 2) % 4], down: units };
+
+        return;
+      }
+    }
+
     // a vertex or handle of the selected shape comes before anything under it
     const parsed = !previewing && editStep?.op === 'shape' ? verticesOf(editStep) : null;
 
@@ -1048,6 +1079,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   };
 
   const move = (e, [x, y]) => {
+    if(hdrag.current) {
+      const d = hdrag.current;
+
+      return commitMatrix(d.id, d.kind === 'rotate' ? rotateDrag(d.base, d.centre, d.down, [x, y]) : scaleDrag(d.base, d.pivot, d.down, [x, y]));
+    }
+
     if(vdrag.current) {
       const d = vdrag.current;
 
@@ -1081,6 +1118,13 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   };
 
   const up = e => {
+    if(hdrag.current) {
+      hdrag.current = null;
+      setHist(history.seal);
+
+      return;
+    }
+
     if(vdrag.current) {
       setHist(history.seal);
       vdrag.current = null;
@@ -1127,6 +1171,22 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     const { doc, color } = latest.current;
 
     dispatch({ type: 'addStep', page: latest.current.pageId, step: { op: 'stroke', id: unique(allIds(doc)), pts, color, smooth: true } });
+  };
+
+  // the buttons of the context bar: larger, smaller, turn left or right about the
+  // centre of the selection, one undo step each (E113)
+  const nudgeSelection = kind => {
+    const c = latest.current;
+    const id = c.selected;
+
+    if(!id || c.previewing) return;
+
+    const sim = nudge(kind, centreOf(c.doc, id, { photos: hash => c.photos[hash], page: c.page }) ?? [500, 500]);
+
+    if(!sim) return;
+
+    transformSelection(id, sim);
+    setHist(history.seal);
   };
 
   // the wheel zooms the selection about the pointer, with Shift it turns it
@@ -1258,7 +1318,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} />`}`}
+          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
@@ -1290,7 +1350,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
-        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} swatches=${paletteColours} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="sequence">
