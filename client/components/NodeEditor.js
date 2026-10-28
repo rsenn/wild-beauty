@@ -17,6 +17,8 @@ import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, rem
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { cascade, photosOnPage } from '../editor/cascade.js';
 import { exportImage } from '../editor/export.js';
+import { boxOf, setContext, trackCommand } from '../events.js';
+import { photoPoint, readLines, resultPolygon } from '../editor/wand.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
 import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag } from '../editor/handles.js';
 import { photoPolygon } from '../editor/clipping.js';
@@ -195,6 +197,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
   const hdrag = useRef(null); // a selection handle being dragged: { kind, id, base, pivot | centre, down }
+  const wand = useRef(null); // { id, points, controller } of the magic wand run
   const clipStroke = useRef(null); // { points } while a clip-tool stroke is drawn
   const [clipLine, setClipLine] = useState(null);
   const [coarse] = useState(() => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches);
@@ -245,6 +248,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     const was = latest.current?.snap;
     const probe = was && apply(was, command);
 
+    trackCommand(command, probe ? probe.snap !== was : undefined);
+
     if(probe && probe.snap === was) {
       const problem = wallRefusal(was, command);
 
@@ -278,6 +283,27 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   };
 
   // playback: k follows the clock over the page's duration
+  // what usage events say about the editor at the moment of a tap or gesture
+  useEffect(() => {
+    setContext(() => {
+      const c = latest.current;
+      const stage = document.querySelector('.wb-editor-stage');
+
+      return { tool: c.tool, sel: c.editStep ? [c.editStep.op, c.editStep.id] : undefined, pg: c.page, pages: c.doc.pages.length, steps: c.doc.pages[c.page]?.steps.length, k: c.k, scale: Math.round(c.scale * 1000) / 1000, ro: c.readOnly || undefined, prev: c.previewing || undefined, stage: stage ? boxOf(stage) : undefined };
+    });
+
+    return () => setContext(null);
+  }, []);
+
+  // leaving the wand (or the editor) kills a run that is still going
+  useEffect(() => {
+    if(tool === 'wand') return;
+
+    wand.current?.controller?.abort();
+    wand.current = null;
+  }, [tool]);
+  useEffect(() => () => wand.current?.controller?.abort(), []);
+
   useEffect(() => {
     if(!playing) return;
 
@@ -338,8 +364,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     dispatch({ type: 'removePage', id });
     switchPage(Math.min(index, latest.current.doc.pages.length - 2));
   };
-  const undo = () => latest.current.readOnly || ((inserted.current = null), setHist(history.undo));
-  const redo = () => latest.current.readOnly || ((inserted.current = null), setHist(history.redo));
+  const undo = () => latest.current.readOnly || (trackCommand({ type: 'undo' }), (inserted.current = null), setHist(history.undo));
+  const redo = () => latest.current.readOnly || (trackCommand({ type: 'redo' }), (inserted.current = null), setHist(history.redo));
 
   // A photo lands as a half-stage square in a diagonal cascade (E112): `index` is
   // the number of photos the page already has (a batch counts up, the document
@@ -913,6 +939,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const down = (e, units) => {
     if(tool === 'select') return selectDown(e, units);
     if(tool === 'shape') return shapeDown(units);
+    if(tool === 'wand') return wandDown(e, units);
     if(tool === 'clip' || tool === 'unclip') return maskDown(units);
 
     stroke.current = { filter: oneEuroPoint(1.5, 0.01), samples: [] };
@@ -994,6 +1021,47 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const setDraft = next => {
     latest.current.shape = next;
     setShape(next);
+  };
+  // magic wand (E119): a tap sends the photo and all taps so far to the server;
+  // the outline that comes back (a quick one, later a sharper one) becomes the
+  // photo's clip. A new tap kills the run that is still going.
+  const wandDown = (e, units) => {
+    const { doc, photos, scale, editStep: step, page: at } = latest.current;
+    const id = step?.op === 'photo' ? step.id : hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale, page: at, ops: ['photo'] });
+    const photo = id && findStep(doc, id).step;
+
+    if(!photo) return;
+
+    setSelected(id);
+
+    const corners = outlineOf(doc, id, { photos: hash => photos[hash], page: at });
+    const uv = corners && photoPoint(corners, units);
+
+    if(!uv) return;
+
+    const run = wand.current?.id === id ? wand.current : { id, points: [] };
+
+    run.points = [...run.points, [uv[0], uv[1], e?.altKey ? 0 : 1]];
+    run.controller?.abort();
+    run.controller = new AbortController();
+    wand.current = run;
+
+    const apply = event => {
+      const { doc: now, photos: info, page: here } = latest.current;
+      const corners2 = findStep(now, id) && outlineOf(now, id, { photos: hash => info[hash], page: here });
+      const polygon = corners2 && resultPolygon(event, corners2);
+
+      if(!polygon) return;
+
+      const taken = new Set(allIds(now));
+
+      dispatch({ type: 'clipPolygon', id, polygon, shape: unique(taken), style: { color: latest.current.color, width: 1 }, wand: true });
+      setAnnounce(tr('editor.announce.wand'));
+    };
+
+    fetch('/api/segment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ photo: photo.photo, points: run.points }), signal: run.controller.signal })
+      .then(res => (res.ok ? readLines(res.body, event => (event.event === 'result' && !event.ok ? setAnnounce(tr('editor.announce.wandFailed')) : apply(event))) : setAnnounce(tr('editor.announce.wandFailed'))))
+      .catch(() => {});
   };
   // clip tool: with a photo selected, tapping a shape makes it that photo's clip;
   // tapping a photo selects it. Unclip tool: tapping a clipped photo frees it.
@@ -1369,7 +1437,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
           overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
-          interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip') && !previewing))}
+          interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
           onDragEnter=${e => accepts(e) && (e.preventDefault(), setOver(true))}
@@ -1386,7 +1454,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />
       </div>
       <div class="wb-editor-sec" data-sec="select">
-      ${(tool === 'clip' || tool === 'unclip') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : t('editor.context.' + tool)}</p>`}
+      ${(tool === 'clip' || tool === 'unclip' || tool === 'wand') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : t('editor.context.' + tool)}</p>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.color')} <input type="color" value=${color} onInput=${e => setColor(e.target.value)} /></label>

@@ -6,6 +6,7 @@ export const TOOLS = [
   { id: 'pen', key: 'P', cursor: 'crosshair' },
   { id: 'shape', key: 'S', cursor: 'crosshair' },
   { id: 'clip', key: 'C', cursor: 'pointer' },
+  { id: 'wand', key: 'W', cursor: 'crosshair' },
   { id: 'unclip', key: 'U', cursor: 'pointer' },
   { id: 'text', key: 'T', cursor: 'text' },
 ];

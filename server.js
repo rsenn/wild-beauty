@@ -10,6 +10,7 @@ import { dev, log } from './server/log.js';
 import { createUpload, deleteUpload, listUploads, readUploads, serveUpload, sweepUploads } from './server/api/uploads.js';
 import { lockRoute } from './server/api/locks.js';
 import { createNode, deleteNodeRoute, listNodesRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
+import { segmentRoute } from './server/api/segment.js';
 import { servePhoto } from './server/api/photos.js';
 import { photoInfos } from './server/node/view.js';
 import { canView } from './server/api/nodes.js';
@@ -138,6 +139,8 @@ function route(req) {
 
     return text('method not allowed\n', 405);
   }
+
+  if(pathname === '/api/segment') return req.method === 'POST' ? segmentRoute(req) : text('method not allowed\n', 405);
 
   if(pathname === '/api/events') return req.method === 'POST' ? recordEvents(req) : text('method not allowed\n', 405);
 

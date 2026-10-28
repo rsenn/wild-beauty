@@ -4,15 +4,17 @@
 // data/events/<date>.jsonl. Who: `claude` (the cookie wb-who=claude, set in the
 // automated browser), `owner` (an IP of WB_OWNER_IPS: localhost, the LAN
 // addresses and the public address of the owner's devices), else `tester-<id>`.
-import { appendFileSync, mkdirSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { config } from './config.js';
 import { sessionCookie, sessionFor } from './session.js';
 
 const dir = resolve(config.dataDir, 'events');
 const OWNER_IPS = new Set((process.env.WB_OWNER_IPS ?? '').split(',').map(s => s.trim()).filter(Boolean));
-const MAX_BODY = 64 * 1024;
-const MAX_EVENTS = 200;
+// gestures carry sampled paths, so batches are larger; a day's file is capped
+const MAX_BODY = 256 * 1024;
+const MAX_EVENTS = 400;
+const MAX_FILE = 100 * 1024 * 1024;
 
 // the server object of Bun.serve, for the peer address when no proxy header is there
 export const peer = { server: null };
@@ -57,9 +59,12 @@ export async function recordEvents(req) {
   const ctx = { who, sid: session.owner.slice(0, 8), ip: addressOf(req), ua: (req.headers.get('user-agent') ?? '').slice(0, 200) };
   const lines = events.filter(e => e && typeof e.type === 'string').map(e => JSON.stringify({ ts: Date.now(), ...ctx, ...e }) + '\n');
 
+  const file = resolve(dir, `${new Date().toISOString().slice(0, 10)}.jsonl`);
+
   if(lines.length) {
     mkdirSync(dir, { recursive: true });
-    appendFileSync(resolve(dir, `${new Date().toISOString().slice(0, 10)}.jsonl`), lines.join(''));
+
+    if(!existsSync(file) || statSync(file).size < MAX_FILE) appendFileSync(file, lines.join(''));
   }
 
   return new Response(null, { status: 204, headers });

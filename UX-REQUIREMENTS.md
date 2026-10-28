@@ -44,6 +44,7 @@ Testers' devices are unknown, so the design is device-agnostic:
 | A2 | Editor invariant to orientation: portrait = stage full width, tool rows above/below; landscape = stage square, full height, centred, tools column left, actions column right | done, not yet seen on a device |
 | A3 | Landscape: film-strip is an upright strip | tried, replaced by the tabbed panel (see H) |
 | A4 | Usage recording with who (owner / claude / tester), no consent notice (friends consented), report by script | done (`PLAN.md` S6.4, E107) |
+| A4b | Richer recording (2026-10-28): tap with the control's box and position inside it, `miss` taps with the nearest control, whole pointer `gesture`s (30 Hz path, pressure, contact size, pointer count), editor `cmd` stream (type and id only), `layout` dump of all control boxes, an editor state snapshot (`st`) and open panels on each | done (`client/events.js`) |
 
 Follow-ups to ask (A1): show the expiry date to the user? "keep" button that renews?
 What if the cookie is lost (uploads unreachable until expiry)?

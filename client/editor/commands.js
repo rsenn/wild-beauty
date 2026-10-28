@@ -43,6 +43,8 @@ const KEYED = {
   setVertices: c => `vertices:${c.id}`,
   setCrop: c => `crop:${c.id}`,
   setWall: c => `wall:${c.id}`,
+  // the preview and the full-resolution outline of the magic wand are one undo step
+  clipPolygon: c => (c.wand ? `wand:${c.id}` : null),
 };
 
 // the colour fields of each op a setColor may write

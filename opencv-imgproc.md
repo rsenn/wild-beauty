@@ -696,3 +696,181 @@ available for the cases where a crisp polygon is what the artist wants.
    memory) worth it, if loading the models dominates a call?
 4. Is `rest-fill inpaint` good enough, or should the hole stay transparent only?
 5. Memory and time caps for 24 MP inputs (`maxPixels` stays 64 MP, S5).
+
+## 15. As implemented: deviations from this spec (tool v1.2.0, 2026-10-28)
+
+Where this section and an earlier one disagree, this section is what the tool
+does. `tools/opencv-imgproc.js` in qjs-opencv; its tests are
+`tests/unittests/test_opencv_imgproc_tool.js` (13 tests, the model ones skip
+when the weights are missing).
+
+### 15.1 Output, all commands
+
+- **Every stdout line is NDJSON**, also `--help` and every error. Each line has
+  an `event`: `progress`, `log` or `result`. The last line is always the
+  `result` event (`ok: true` with the fields of S8/S14.5, or `ok: false` with
+  `error: {code, message}`); stderr stays empty. Exit codes are those of S9.
+- **`--progress`** (any command) prints `{event:"progress", stage, message,
+  percent}` at the checkpoints. `percent` never goes back and ends at 100 with
+  `stage: "done"`. Slow stages report sub-steps (strips of a big photo).
+- **PNG/WebP:** `--png 0..9` sets the compression level, `--webp lossless|1..100`
+  the WebP quality. (qjs-opencv `imwrite`/`imencode` take `{compression}` and
+  `{quality}` options now; the 3rd argument for a palette is `{palette}`.)
+
+### 15.2 `cutout`
+
+- **Only `method: "dnn"`** is offered (`capabilities.methods == ["dnn"]`).
+  grabCut, flood, chroma, threshold, kmeans, watershed, contour, diff, mask and
+  auto were dropped: the cut quality of Mode A needs a trained matte, and
+  `--method grabcut` is E_METHOD (exit 9). The S5/S6 tables above describe the
+  original plan; the options of S14.4 are what exists.
+- **Models:** `--dnn-model u2netp` (salient, 320x320, ~0.2 s). The model table is
+  inside the tool (`name`, files, sha1, licence), not a `<name>.json` sidecar
+  (S6.3.1 is not used); `capabilities.models[]` lists each with `loaded`.
+- **New options:**
+
+  | Option | Meaning |
+  |---|---|
+  | `--refine none\|guided\|matting` | matte refinement: ximgproc guided filter (default, radius 0.6% of the long edge, then a contrast steepening) or contrib `alphamat.infoFlow` on a trimap. Matting took 13 s (guided 1 s) and looked the same on the duck and on a long-hair cat: use `guided`. |
+  | `--edge-key auto\|none\|#rrggbb`, `--edge-strength 0..1`, `--edge-band N` | edge-only colour-to-alpha cleanup (`defringe`): inside a narrow band at the cut edge, pixels that match the local background (estimated, or the key colour) lose alpha. Removes dark/light rims. |
+  | `--rest-fill none\|inpaint\|fsr` | the rest image: `none` (default) leaves the hole transparent (alpha = 1 - subject union, soft), `inpaint` fills it with Telea at work size 1024 (0.5 s), `fsr` with xphoto frequency-selective reconstruction at work size 512 (13 s). Large holes look smeared with either. |
+  | `--preview FILE` | writes a checkerboard preview of the cut |
+
+- Foreground colours are estimated (blur fusion, Germer 2020), so the RGB of
+  edge pixels is decontaminated, not just the alpha.
+- Two subjects that touch are one connected component, so `--subjects all`
+  gives them as one subject; split them with `segment` taps.
+- Memory: the heavy float stages run strip-wise; a 12 MP photo takes 5.3 s and
+  1.1 GB, a 1 MP photo about 1 s and 0.4 GB.
+
+### 15.3 `prepare` and `segment` (Mode B)
+
+- **Models:** `--model mobilesam` (default) or `sam`.
+
+  | | encoder + decoder | cold `prepare` | RSS | cache file |
+  |---|---|---|---|---|
+  | `mobilesam` | 27 MB + 16 MB (Acly/MobileSAM onnx export; weights Apache-2.0, export MIT) | 1.3-2.4 s | 0.5 GB | 4 MB |
+  | `sam` (ViT-B) | 343 MB + 16 MB (HF export, Apache-2.0) | 8 s | 7.5 GB | 8 MB |
+
+  The two give masks of comparable quality on the test photos (duck in a hand,
+  flower, cats, a grey long-hair cat); `sam` is kept for photos where
+  mobilesam fails. Warm `prepare` is a 0.3 s no-op.
+- **Cache:** `--cache-dir` (env `WB_CACHE_DIR`, else `<repo>/cache`), key
+  `<sha256 of the input bytes>-<model>-<first 12 of the encoder sha1>.emb` plus
+  a `.json` meta file. A different model or weights file is a different key.
+- **Prompts:** `--point x,y[,label]` (repeatable, label 1 positive, 0
+  negative), `--units px|norm`. The decoders have **no box input**: `--box
+  x,y,w,h` is emulated by a positive tap at the box centre, then the candidate
+  whose extent overlaps the box best is picked (`boxIou` in the result).
+- **Candidates:** `--candidates 1..3` writes `<out>-0`, `-1`, `-2` next to
+  `--out`; `--out` itself is the picked one (`--pick best|0|1|2`). One tap gives
+  sub-part, part and whole subject. **The model's own score is not a quality
+  ranking** (a partial mask can outscore the whole subject), so an editor should
+  show the candidates and let the user choose; `best` is only the highest score.
+- **Latency:** `--preview-size N` runs the whole cut on a photo reduced to N px
+  (all coordinates in the result are then in those pixels, `scale` and
+  `original` say how to map back): 1024 on a 12 MP photo takes 0.8 s and 240 MB.
+  Warm `segment` at full 12 MP is 5.8 s for one candidate. For taps use the two
+  phases of S15.3b: a preview line first, the full-size line after.
+- The result of `segment` has the fields of S14.5 plus `cache` (`hit|miss`),
+  `model`, `refine`, `candidates[]` (`index`, `score`, `picked`, `path`,
+  `bbox`), `picked`, `best`, `prompts`, `scale`, `original`, `timings`.
+
+### 15.3b Two phases: `--view-size`, `--phases` (tool v1.3.0)
+
+For interactive taps. No resident worker: every call is one process, killing it
+at any moment is safe (see below).
+
+```
+opencv-imgproc segment --in photo.jpg --out wand.png --point 0.5,0.5 --units norm \
+    --cache-dir D --view-size 1024 --phases preview,final --refine none --candidates 1
+opencv-imgproc cutout  --in photo.jpg --out cut.png --view-size 1024 [--progress]
+```
+
+- `--view-size N` (long edge in px, default 1024 when `--phases` is given
+  without it) alone means `--phases preview,final`. `--phases` is `preview`,
+  `final` or `preview,final` (anything else: E_USAGE, exit 2). Without either
+  option there is one result line, as before. (`--preview-size N` without
+  `--phases` keeps its old meaning: one result at that size.)
+- Phase `preview` runs everything after the model (soft matte, refine, subjects,
+  edge, foreground colour, files) on a copy of the photo reduced to
+  `--view-size` and prints its result **at once** (every stdout line is
+  flushed). Phase `final` then runs the same pipeline at full size from the same
+  model output (`segment`: the same 256x256 candidate logits, so the decoder is
+  not run twice; `cutout`: the same u2netp matte) and prints the **last** line.
+  If the photo is not larger than `--view-size`, both phases are the same size.
+- Warm (embedding cache hit, mobilesam), 12 MP photo: the preview line arrives
+  0.6-0.7 s after the tool starts (0.87-0.94 s wall including process start),
+  the final line after about 5.5 s (`--refine none` or `guided` alike);
+  `segment` on a 1.2 MP photo: preview 0.8 s, final 1.15 s wall. `cutout`
+  preview on 12 MP: 1.2 s wall (the u2netp model load and run, 0.5 s, comes
+  first). `--cache-dir` must be the one `prepare` used (or the first
+  `segment` call fills it).
+- Each result line is a normal result (S8/S14.5) plus:
+
+  | Key | Meaning |
+  |---|---|
+  | `phase` | `"preview"` or `"final"` (also on an error result of a phased run) |
+  | `scale` | tier size / photo size (1 for final) |
+  | `original` | `{width, height}` of the photo |
+  | `view` | `{width, height}` of this tier's image (= the output size without `--trim`) |
+  | `bbox`, `offset`, `output.width/height` | in the pixels of this tier |
+  | `bboxNorm` | `bbox` as 0..1 of `view`, the same for both tiers |
+  | `outlines[]` | `{output, polygon, epsilon}` in the pixels of that output file (`output.width` x `output.height`); always present now, `--outline-out` only also writes them to a file |
+  | `timings.phaseMs` | time of this phase; `totalMs` counts from tool start |
+
+- Files: preview `<out stem>.preview.<ext>` (candidates `<stem>.preview-N.<ext>`,
+  `--mask-out` and `--outline-out` likewise `<name>.preview.<ext>`); final the
+  names you gave. `--rest-out`, `--preview` and `--split-dir` are final only.
+  The preview files stay on disk; the caller deletes the out dir.
+- `--progress`: events carry `phase`; `percent` runs 0-30 in `preview` and
+  30-100 in `final` and never goes back.
+- Kill safety: every output (images, json, cache files) is written to a temp name
+  `<file>.tmp-<pid>` and renamed, so a file under its final name is always
+  complete. A killed run can leave an orphan `.tmp-<pid>` (the cache dir sweeps
+  those older than 10 minutes). A run killed after the preview line leaves the
+  complete preview files and no final file.
+- `prepare` is unchanged (one result line; the cache survives on disk, atomic as
+  above): call it at upload time, `segment` then hits the cache.
+- Output: one result line per phase.
+
+  Example (the `segment` command above on a 3024x4032 photo, paths shortened, polygon cut):
+
+      {"event":"result","phase":"preview","ok":true,"command":"segment","scale":0.254,"original":{"width":3024,"height":4032},"view":{"width":768,"height":1024},"output":{"path":"wand.preview.png","format":"png","width":768,"height":1024,"hasAlpha":true},"bbox":{"x":0,"y":0,"w":768,"h":1024},"bboxNorm":{"x":0,"y":0,"w":1,"h":1},"offset":{"x":0,"y":0},"outlines":[{"output":"wand.preview.png","polygon":[[536,404],[522,404],[510,407],"..."],"epsilon":1.5}],"picked":1,"cache":"hit","model":"mobilesam","timings":{"prepareMs":16,"decodeMs":242,"subjectsMs":69,"colourMs":81,"writeMs":20,"totalMs":614,"phaseMs":191}}
+      {"event":"result","phase":"final","ok":true,"command":"segment","scale":1,"original":{"width":3024,"height":4032},"view":{"width":3024,"height":4032},"output":{"path":"wand.png","format":"png","width":3024,"height":4032,"hasAlpha":true},"bbox":{"x":0,"y":0,"w":3024,"h":4032},"bboxNorm":{"x":0,"y":0,"w":1,"h":1},"offset":{"x":0,"y":0},"outlines":[{"output":"wand.png","polygon":[[2112,1591],[2056,1591],[2053,1594],"..."],"epsilon":1.5}],"picked":1,"cache":"hit","model":"mobilesam","timings":{"prepareMs":16,"decodeMs":242,"subjectsMs":2373,"colourMs":1599,"writeMs":513,"totalMs":5149,"phaseMs":4535}}
+
+### 15.3c Directories of an installed copy
+
+A checkout (`tools/` beside `CMakeLists.txt`) uses `<repo>/models` and
+`<repo>/cache`. An installed copy (`<prefix>/bin/opencv-imgproc`) looks for the
+models in `$XDG_DATA_HOME/opencv-imgproc/models` (default
+`~/.local/share/opencv-imgproc/models`), then `/usr/local/share/opencv-imgproc/models`,
+then `/usr/share/opencv-imgproc/models`, and caches in
+`$XDG_CACHE_HOME/opencv-imgproc` (default `~/.cache/opencv-imgproc`).
+`--models-dir` / `WB_MODELS_DIR` and `--cache-dir` / `WB_CACHE_DIR` always win.
+The weights are never installed by the tool. A missing file is E_MODEL with
+`detail.modelsDir` naming the directory that was searched.
+
+### 15.4 Bindings used (qjs-opencv)
+
+`cv.ximgproc.guidedFilter` (not `cv.guidedFilter`), `cv.alphamat.infoFlow`,
+`cv.xphoto.inpaint`, `cv.dnn` `Net` with named inputs and `forward([names])`
+returning an array, `cv.hash.sha1/sha256` (cache keys, model checks),
+`cv.setRNGSeed`. `Mat.setTo(Scalar)` follows opencv.js. A third `imwrite` /
+`imencode` argument is a params array or an options object (`palette`,
+`transparent`, `compression`, `quality`, `params`, `delay`, `loop`).
+
+### 15.5 Checked, and not yet
+
+Checked on real photos: a duckling held in a hand, a 12 MP flower, a grey
+long-hair cat (fur, whiskers), two cats side by side, and a 12 MP photo of a
+can, a paper bag and a pastry on a bench (`cutout --subjects all --split-dir`
+gives the three as separate files in 7.5 s). Not checked: a subject touching
+the image border, the composite-back test of S14.7 on a coloured backdrop and
+hair on skin.
+Known weakness: the u2netp matte also takes dark parts of the scene that
+bridge to a subject (the can got a dark tail from the gap behind it, the pastry
+a grey strip above it); the `segment` masks of the same items are clean, so
+use taps when the backdrop has dark gaps. Thin fur or hair strands over a blurred background keep some
+background colour on their edge pixels with both `guided` and `matting`; a
+tap-based `segment` mask is cleaner there than the u2netp matte.
