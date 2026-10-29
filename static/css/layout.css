@@ -838,13 +838,21 @@ body {
   transition: width 0.7s ease, aspect-ratio 0.7s ease;
 }
 
-/* a gallery node once the visitor walks: the stage grows to the left and right and is no longer square */
+/* a gallery node once the visitor walks: the stage grows to the left and right and is no longer square.
+   Its height is the one the square has, so the menu bar, the node title and the stage fit the screen */
 .wb-gallery-wide {
-  --wb-wide: min(96vw, 1500px, calc((100dvh - 3em) * 16 / 9));
+  --wb-stage-h: max(240px, calc(100vh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em));
+  --wb-wide: min(96vw, 1500px, calc(var(--wb-stage-h) * 16 / 9));
 
   width: var(--wb-wide);
   margin-left: calc(50% - var(--wb-wide) / 2);
   aspect-ratio: 16 / 9;
+}
+
+@supports (height: 100dvh) {
+  .wb-gallery-wide {
+    --wb-stage-h: max(240px, calc(100dvh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em));
+  }
 }
 
 .wb-gallery-poster {
