@@ -13,7 +13,7 @@ import { validateNode, photoLookup } from '../node/validate.js';
 import { bake } from '../media/bake.js';
 import { identify } from '../media/probe.js';
 import { firstPhotoStep, thumbnail } from '../media/thumb.js';
-import { serverTile } from '../media/raster.js';
+import { needsRender, serverTile } from '../media/raster.js';
 import { photoInfos } from '../node/view.js';
 import { readUpload, removeUpload } from './uploads.js';
 import { lockedBody, lockedByOther } from './locks.js';
@@ -100,7 +100,7 @@ async function storeTile(thumb) {
 }
 
 // a tile no node shows any more: its file goes, unless it is a photo's own thumbnail
-function dropTile(h, tile) {
+export function dropTile(h, tile) {
   if(!tile || getPhoto(h, tile) || h.get('SELECT 1 AS used FROM nodes WHERE tile = ?', tile)) return;
 
   rmSync(resolve(config.photosDir, `${tile}.thumb.jpg`), { force: true });
@@ -137,10 +137,8 @@ async function prepare(h, checked, thumb) {
   // (E82), else the first photo step (best effort)
   let tile = await storeTile(thumb);
 
-  // photos alone keep the first photo's thumbnail; drawings, text and shapes get the real render
-  const steps = checked.doc.pages.flatMap(page => page.steps);
-
-  if(!tile && steps.some(st => st.op !== 'photo')) {
+  // a single plain photo keeps its own thumbnail; collages, drawings, text and shapes get the real render
+  if(!tile && needsRender(checked.doc)) {
     const r = await serverTile(checked.doc, hash => getPhoto(h, hash));
 
     if(r.ok) tile = r.hash;

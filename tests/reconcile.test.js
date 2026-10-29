@@ -76,7 +76,9 @@ describe('reconcile', () => {
     expect(uploadsLeft()).toEqual([]);
     expect(getNode(h, r.body.id)).not.toBeNull();
     expect(nodePhotos(h, r.body.id).length).toBe(2);
-    expect(photoDir()).toEqual([`${A}.jpg`, `${A}.thumb.jpg`, `${B}.jpg`]);
+    // the two baked photos and the tile of the node (a photo's own thumbnail or the rendered collage)
+    expect(photoDir().filter(n => !n.endsWith('.thumb.jpg'))).toEqual([`${A}.jpg`, `${B}.jpg`]);
+    expect(photoDir().filter(n => n.endsWith('.thumb.jpg')).length).toBe(1);
   });
 
   test('killed after baking, before the commit: the baked files and the row go, the upload stays', async () => {

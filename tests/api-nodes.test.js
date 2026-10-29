@@ -255,8 +255,20 @@ describe('PUT /api/nodes/:id', () => {
     expect(saved.rev).toBe(2);
     expect(Object.keys(saved.photos).sort()).toEqual([A, B].sort());
     expect(saved.photos[A].href).toMatch(/^\/files\/photos\/[0-9a-f]{64}\.(jpg|png|webp)$/);
-    expect(getNode(h, id)).toMatchObject({ rev: 2, title: 'v2', kind: 'list', tile: A });
+    expect(getNode(h, id)).toMatchObject({ rev: 2, title: 'v2', kind: 'list' });
+    expect(getNode(h, id).tile).toMatch(/^[0-9a-f]{64}$/);
     expect(nodePhotos(h, id).map(p => p.hash)).toEqual([A, B]);
+  });
+
+  test('a photo collage gets the rendered tile, a single photo its own thumbnail', async () => {
+    if(!ready || !Bun.which('rsvg-convert')) return;
+
+    const single = await create([photo('photo001', A)]);
+    const collage = await create([photo('photo001', A), photo('photo002', B, { blend: 'multiply' })]);
+
+    expect(getNode(h, single).tile).toBe(A);
+    expect(getNode(h, collage).tile).toMatch(/^[0-9a-f]{64}$/);
+    expect([A, B]).not.toContain(getNode(h, collage).tile);
   });
 
   test('only new uploads are baked, a kept photo is left alone', async () => {

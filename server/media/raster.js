@@ -11,8 +11,24 @@ import { renderStage } from '../../client/editor/render.js';
 import { firstLine, run } from './run.js';
 import { imagemagick, tools } from './tools.js';
 import { config } from '../config.js';
+import { isTexture } from '../../client/editor/model.js';
 
 export const SIZE = 512;
+
+// Does the tile of a document need the real render, or is a photo's own
+// thumbnail the right tile? Drawings, shapes and text always need it, and so does
+// a collage of photos: more than one on page 0 (a free node or a grid), or one
+// that is faded, blended or clipped. A slide show's tile is its first slide.
+export function needsRender(doc) {
+  const steps = doc.pages.flatMap(page => page.steps);
+
+  if(steps.some(step => step.op !== 'photo')) return true;
+  if(doc.mode === 'slides') return false;
+
+  const photos = (doc.pages[0]?.steps ?? []).filter(step => step.op === 'photo' && !isTexture(step));
+
+  return photos.length > 1 || photos.some(step => step.opacity < 1 || (step.blend ?? 'normal') !== 'normal' || step.clip);
+}
 
 // where fontconfig finds the text faces: the real home, not the sandbox one
 const fontEnv = () => ({ HOME: process.env.HOME ?? '/tmp' });
