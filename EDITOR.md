@@ -132,8 +132,7 @@ There is never more than one editor. Opening a second replaces the first.
   strips shrink to 32 px to fit the height. The editor is full bleed.
 - The shortcut-keys button is hidden when the pointer is coarse (touch).
 - Sizes follow measurement (`dvh`, orientation, free space), never a device guess: `100vh` is
-  wrong on phones (browser bar), 980 px was a missing viewport meta tag (see
-  `UX-REQUIREMENTS.md`, device measurements).
+  wrong on phones (browser bar), 980 px was a missing viewport meta tag (see S2.12, device measurements).
 - Not decided yet and listed in `UX-REQUIREMENTS.md`: two screens (uploads / editor), paged
   uploads, drag across the screens, the three-depth model of sequence / composition /
   animation.
@@ -452,6 +451,114 @@ Every gesture ends in exactly **one history entry** (S2.6), so a pinch is one un
 - RTL: the tool columns mirror with `dir` (logical properties in `layout.css`).
 
 ---
+
+### 2.12 Design record of the UX brainstorm (settled and built; moved from `UX-REQUIREMENTS.md`, 2026-10-29)
+
+What the brainstorm of 2026-10-27/29 settled and what the phone showed. The open items stayed in
+`UX-REQUIREMENTS.md`; the tasks are E104-E139 in S9.
+
+**Test devices** (measured 2026-10-27 with a probe page). The testers' devices are unknown, so the
+design is device-agnostic.
+
+- Phone: Android 10, Chrome 156, **360 x 669 CSS px** visible in portrait (screen 360 x 800, DPR 3,
+  1 cm = 38 CSS px). `100vh` = 725 but `100dvh` = 669: the browser bar takes 56 px, so `vh` would push
+  the bottom row off screen. `pointer: coarse`, `hover: none`; `any-pointer: fine` is also true (do not
+  use it to find a mouse). Dark preference set, no safe-area insets. (An early 980 x 1822 figure came
+  from a probe page without a viewport meta tag: wrong.)
+- Phone landscape: **725 x 280 CSS px** (`100vh` = 336 is wrong again). Desktop: 1920 x 1080.
+- Rules: layout follows measurement (orientation, free width and height), never a device guess; card
+  size has a touch minimum (3 columns of about 110 px on the phone, 6+ on a 1920 px desktop; columns =
+  floor(width / min card width)); the page size of the upload grid comes from the free space (resize
+  observer) and is capped; input follows capability (`pointer: coarse|fine`) and every gesture has a
+  visible button; `dvh`, not `vh`; risky features degrade gracefully.
+- Usage recording (E107): who (owner / claude / tester), no consent notice (friends consented); taps with
+  the control's box and position, `miss` taps with the nearest control, pointer `gesture`s (30 Hz path,
+  pressure, contact size, count), the editor `cmd` stream (type and id only), a `layout` dump of all
+  control boxes, a state snapshot and the open panels (`client/events.js`).
+
+**Landscape tryouts on the phone** (2026-10-27/28), why S2.2a looks as it does:
+
+1. Stage full height, tools left, actions right, film-strip upright, header in the right column: too
+   crammed, tools wrapped into a second column, Save cut off.
+2. Header and banners in the right column, actions as a wrapping row: the right column overflowed (the
+   draft banner alone took 200 px).
+3. Editor frame (black border), own background and margin removed on every target (the frame only
+   separated editor from uploads); editor full bleed, one window high: better, still crammed.
+4. Tools left, slim actions right, film-strip below the stage, panel on the right, editor taller than the
+   window: the page scrolls, the address bar comes back and the stage jumps. Not usable.
+
+Findings: Chrome Android shows and hides the address bar with *document* scrolling and the page cannot
+switch it off, so the editor is a fixed surface of the window (scrolling only inside its panel); buttons
+may shrink to about 32 CSS px in strips, below that they are hard to hit. Result: the tabbed panel of
+S2.2a.
+
+**Collage workflow** (first demo user; moving worked, scale/rotate and clip were the discoverability
+holes, each now has a button path next to the gesture):
+
+- Upload and pick (E111, I1): picked upload cards get a crimson and cream dashed border that slowly marches
+  (static with `prefers-reduced-motion`) and a solid crimson disc with a bold light number, as big as the
+  round card buttons (contrast at least 4.5:1). Tokens `--wb-pick`, `--wb-pick-ground`, `--wb-pick-ink`
+  in `kraft.css`; the stage selection stays blue. With photos picked and the editor closed the last tile
+  reads "Create from n selected" and opens the editor with them in pick order (`pending.js`).
+- First placement (E112): no spread button, no question; a batch arrives in free mode as a cascade of
+  half-stage squares, photo i at (i mod 6) x 10 % in x and y plus 3 % per completed round, last on top.
+  Switching mode is non-destructive (`setMode` changes only `doc.mode`).
+- Touch transform (E113): corner handles 32 px on `pointer: coarse` (desktop 10 px), a round rotate handle
+  above the selection, scale -/+ and rotate left/right buttons in the context bar on every device; pinch,
+  wheel and Alt+drag stay.
+- Clip (E114-E116, E121): the shape-first clip (bezier shape, then combine) stays as the expert path;
+  the collage path is the freehand clip. A stroke that closes becomes a clip, a stroke across the photo
+  cuts it in two, anything else is discarded with a hint, never auto-closed. The clipped-away part is
+  ghosted (about 25 %, thin outline) only while the clip tool is active and a clipped photo is selected;
+  otherwise the view is WYSIWYG. Clip tool + clipped photo = edit mode: vertex handles in place, no
+  unclip and re-clip; the mode switch (replace default / add / subtract) is explicit. The move switch on a
+  clipped photo is **both** (default) / **picture** (clip fixed) / **window** (clip moves), for drag, pinch
+  and the buttons.
+- Cut stroke is tolerant: it need not cross the border, both ends need only tend to it (each end inside is
+  extended along its heading to the border within about 24 screen px; `cutByStroke(poly, stroke, reach)` in
+  `client/editor/polygon.js`); a stroke at a corner is valid (nudged a hair to either side); a piece under
+  2 % of the photo (`MIN_PIECE`) is a slip and refused.
+- Edge decoration (E123): per photo `edge: { style, amount, seed }`, style **plain, paper, sticker, torn,
+  polaroid**. Rule: no effect that cannot be reproduced exactly on the server, so no CSS box-shadow or
+  browser filters, only geometry. The rim is the clip polygon (or the square crop) grown outward and drawn
+  behind the photo; torn displaces the polygon points with our own seeded PRNG; the shadow is two or three
+  offset copies in dark low-opacity fills (stepped, no real blur); polaroid is a white frame, thicker at the
+  bottom. Derived at render time by one pure function, so a later clip change updates rim and tear.
+- Save (I10): a short "Saved" notice with a View button; View opens in the same tab, the editor state is
+  kept so Back returns to it.
+- Also built and approved: duplicate and flip (E126), export as image (E125), the loupe (E124, waits for a
+  device).
+- Wording: users do not see "node"; what they make is a **Werk / Werke** (de, neuter), a **pièce** (fr).
+  "Knoten" stays for the graph only; French graph word proposed **point** (edge **lien**), not confirmed.
+  French "pièce" also means a room, which may collide with the gallery's rooms.
+
+**Server cutout** (E127, E128; tool contract `opencv-imgproc.md` S14, S4):
+
+- A cutout replaces the photo step by two photo steps with the same matrix: the `rest` image (original with
+  the hole, optionally inpainted) underneath and each `cut` image on top at its `offset`; several subjects
+  give several cut steps. The server registers both as **derived uploads** (same owner and expiry,
+  provenance = original hash); the original stays untouched; one undo step restores it. The tool returns
+  the alpha contour (`outlines`) so edge effects also work on a raster cut.
+- Jobs: one streaming request per job, the server starts the tool with `--progress` and forwards its NDJSON
+  lines (`event`, `command`, `stage`, `message`, `percent`, `elapsedMs`); Cancel aborts the request and the
+  server kills the tool (SIGTERM) and removes temp files. The status line shows stage and percent with an
+  always visible Cancel, the photo gets a pulsing dashed outline, one job at a time per editor.
+- While a job runs everything stays editable (move, scale, rotate the busy photo, opacity, blend, order, all
+  other photos, text, pen, pages, undo, save) except, on the busy photo only: delete, cut, clip / unclip /
+  edit clip, crop, role, duplicate, another job (`client/editor/job.js blocked`, with a short note). Undo
+  that removes the photo cancels the job; a save during the job stores the state before the result;
+  leaving the editor asks "Cancel the processing?"; the result is one history entry and is discarded with a
+  note if the photo's hash or crop changed meanwhile.
+- Wand: it uses only `opencv-imgproc.js` (tap-to-segment, `prepare` + `segment`), no wand engine in the
+  browser; so it needs the server and the first tap waits for `prepare`. Reason, experiment on the duckling
+  photo (960 x 1280, SLIC superpixels, colour grow in Lab): the yellow body grows cleanly and stops by
+  itself, but the orange beak and feet leak into the skin of the hand from tolerance 52 on; four taps with
+  hand-picked tolerances gave a usable silhouette with a jagged edge, fringes and one leak tendril. The
+  model cutout is far better. Add / subtract / invert and bigger / smaller (SAM candidates) stay.
+- opencv.js check: `lib/opencv.js` -> `opencv-5.0.js` is a WASM build embedded as base64 (JS 16.2 MB, WASM
+  12.0 MB, 3.3 MB gzipped); it contains grabCut, watershed, findContours, approxPolyDP, floodFill, kmeans,
+  Canny, morphologyEx, `dnn` (readNetFromONNX), but no FreeType and no `SuperpixelSLIC` (ximgproc is not in
+  this build). Trimmed build: E118.
 
 ## 3. Data specification
 
@@ -969,7 +1076,7 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [x] **E109 read-only dimming in landscape** (done 2026-10-29) (the `inert` frame uses `display: contents`, so the opacity rule has no effect).
 - [ ] **E110 dark theme or dark-aware tokens** (the test phone prefers dark; the theme is light only).
 - [x] **E111 upload retention shown to the user** (2026-10-29): a note under the drop zone (days kept, who sees what, what happens on save) with a details list; an expiry badge on a card when it has 3 days or less left; a sweep tile (`DELETE /api/uploads` with `keep`: the photos of the open editor and of stored drafts stay; asked once in place); the saved banner says how many photos are now kept and that the work is public. The server also removes orphaned upload files and old job leftovers (`sweepOrphans`, hourly with the expiry sweep). No "keep" button: saving into a work is the way to keep a photo.
-- [x] **E112 first placement** (agreed): photos added from a batch in free mode arrive as a diagonal cascade of half-stage squares: photo i (0-based, also when added later) at (i mod 6) x 10 % of the stage in x and y plus 3 % per completed round (wrap-around), last on top; no spread button, no question; layer count on the page thumbnail (`UX-REQUIREMENTS.md` I2). Pure function `cascade(i)` in `client/editor/`, tested. Done 2026-10-29: `client/editor/cascade.js` `cascade(i)` and `photosOnPage`, `addPhoto` takes a matrix (`model.js`, command `addPhoto` field `m`), `NodeEditor.addUpload` counts up through a batch. A single photo alone on an empty page still covers the stage (author did not decide; cascade starts with the second photo). Page-thumbnail layer count not built (the cascade shows the layers). Checked in a browser with two photos; 6 tests in `tests/cascade.test.js`.
+- [x] **E112 first placement** (agreed): photos added from a batch in free mode arrive as a diagonal cascade of half-stage squares: photo i (0-based, also when added later) at (i mod 6) x 10 % of the stage in x and y plus 3 % per completed round (wrap-around), last on top; no spread button, no question; layer count on the page thumbnail (S2.12). Pure function `cascade(i)` in `client/editor/`, tested. Done 2026-10-29: `client/editor/cascade.js` `cascade(i)` and `photosOnPage`, `addPhoto` takes a matrix (`model.js`, command `addPhoto` field `m`), `NodeEditor.addUpload` counts up through a batch. A single photo alone on an empty page still covers the stage (author did not decide; cascade starts with the second photo). Page-thumbnail layer count not built (the cascade shows the layers). Checked in a browser with two photos; 6 tests in `tests/cascade.test.js`.
 - [x] **E113 touch transform** (agreed 2026-10-28): corner handles 32 CSS px on `pointer: coarse` (desktop 10 px); round rotate handle above the selection and scale -/+, rotate left/right buttons in the context bar, on every device (I4). Done 2026-10-29: `client/editor/handles.js` (handle positions kept inside the stage, hit test, `scaleDrag` about the opposite corner, `rotateDrag` about the centre, `nudge` steps of 10 % and 15 degrees; 11 tests), corner handles are draggable and 32 px on `pointer: coarse` (10 px otherwise), the round turning handle above the top edge (moved inside the stage for a photo that fills it), the buttons smaller / larger / turn left / turn right in the context bar for every step type, one undo step per button press or drag. Checked in a desktop browser (button, corner drag, turning drag); the 32 px touch size is only the media query, not yet seen on the phone.
 - [ ] **E114 simple clip**: clip tool with only a photo selected: freehand drawing closes into a polygon and becomes the clip; rectangle/ellipse choice in the context bar; shape-first clip stays (I5, C1; supersedes the open question in S2.3 Clip).
 - [x] **E115 clip preview** (agreed): the clipped-away part ghosted (about 25 %, thin outline) only while the clip tool is active and a clipped photo is selected, also while dragging clip handles; otherwise WYSIWYG (I6).
@@ -981,13 +1088,13 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [ ] **E121 freehand intent detection** (wanted, replaces a scissor tool): clip tool, photo selected: closing stroke = closed clip, edge-to-edge stroke = cut into two photo copies with one side each, anything else (not closed, or not exactly two crossings) = discarded with a hint, never auto-closed (agreed). Cut is tolerant (author 2026-10-29): a stroke at a corner is valid (nudged to either side), a piece under 2 % (`MIN_PIECE`) is refused; `cutByStroke(poly, stroke, reach)` extends ends that tend to the border along their heading (reach about 24 px), so a photo fitted to the stage can be cut by a stroke wholly inside it. Step 1 done (2026-10-29): `client/editor/polygon.js` `splitByLine(poly, stroke)` (exactly two crossings, the part between inside and not tangled, a crossing at a vertex is ambiguous and gives null; tests in `tests/polygon.test.js`). Step 2 done (2026-10-29), wired into the clip tool: `client/editor/clipstroke.js` `clipFromStroke` classifies a stroke (tap / closed / cut / none; closing = about 300 degrees of turning and the end back near the start), `client/editor/clipping.js` `clipPolygon` and `cutPhoto` (commands `clipPolygon`, `cutPhoto`, one undo step each), `NodeEditor.js` draws the stroke live (dashed) and shows the hint "Close the shape, or draw across the photo" for anything else. Tapping a shape still masks as before. A cut makes a photo copy right above the original, each with the clip of one side; an old clip shape nobody uses any more is removed. Checked in a browser with a real stroke from edge to edge: two photos, two clips sharing the cut line. The closed loop is covered by tests (a loop could not be drawn with the test tool). Still to do: the polygon booleans for add/subtract clip modes, the clip-mode switch (replace/add/subtract), E115 ghost preview, E116 clip handles.
 - [x] **E122 multi-outline clip, split clip, colour segmentation clips** (wanted): a clip with several closed outlines; "split" makes one clip and photo copy per outline.
 - [x] **E123 edge decoration** (agreed 2026-10-29): `edge: { style: plain|paper|sticker|torn|polaroid, amount, seed }` on a photo step; pure `edgeShapes(step)` in `client/editor/` (polygon offset, seeded tear, stepped shadow), used by `render.js` so the editor, the viewer and the server render the same; validated in `validate.js`; Edge popover in the context bar (presets, size slider, new tear, all pieces). Polygons with fill and opacity only, no filters. Tests: same seed gives the same polygon, offset keeps the clip, `validate` bounds.
-- [ ] **E124 loupe** (approved 2026-10-29): a magnifier above the finger while drawing a clip or dragging a handle on touch (`UX-REQUIREMENTS.md` J1.2).
+- [ ] **E124 loupe** (approved 2026-10-29): a magnifier above the finger while drawing a clip or dragging a handle on touch (S2.12).
 - [x] **E125 export as image** (approved 2026-10-29): PNG/JPG of the work from the render, in the browser (SVG rasterised) and later on the server (`opencv-imgproc.js`); a button after Save (J1.13). Done 2026-10-29 (browser part): header button "Export" with PNG and JPG, `client/editor/export.js` (`documentSvg` = `renderStage` through the vendored preact-render-to-string, `inlineImages` because an SVG drawn as an image may not load files, `withSize` 2000 px, `exportImage` draws on a canvas and saves via a link, file name from the title; JPG paints the document background first). Checked in a browser without saving a file (a 2000 x 2000 PNG of 1.5 MB with the expected pixels). Still open: the server render of the same picture (`opencv-imgproc.js`), a share action, an export size choice, and an Export entry after Save. 7 tests in `tests/export.test.js`.
 - [x] **E126 duplicate and flip** (approved 2026-10-29): context bar buttons: duplicate a photo (offset by one cascade step), flip horizontally and vertically (J1.3). Done 2026-10-29: context bar button "Duplicate" (photos) and flip left-right / top-bottom buttons (photos, strokes, shapes; not text) next to the E113 buttons; `duplicatePhoto` in `client/editor/clipping.js` (command `duplicatePhoto`; the copy sits right above the photo, one cascade step down and right, selected, with a clip shape of its own; nothing when the page is full); flips are mirror matrices about the selection centre (`nudge('flipH'|'flipV')` in `handles.js`), one undo step each. Checked in a browser. Tests in `tests/clipstroke.test.js`, `tests/handles.test.js`.
-- [~] **E127 apply a server cutout** (first version built: Remove background button, `POST /api/cutout` streams `derived` uploads for the quick and the sharp cut, `replacePhoto` swaps the photo's image and keeps `orig` so Restore original works and the node keeps the original photo; one undo step; open: wand final pass as soft cut, choosing a subject): (proposal, `UX-REQUIREMENTS.md` J5, tool contract `opencv-imgproc.md` S14): command `cutout` replaces a photo step with a `rest` step and one `cut` step per subject at the same matrix plus offset; derived uploads with provenance on the server; one undo step; tap-to-segment preview with add/subtract/bigger-smaller. Blocked on the tool (`opencv-imgproc.js` models, `prepare`/`segment`).
+- [~] **E127 apply a server cutout** (first version built: Remove background button, `POST /api/cutout` streams `derived` uploads for the quick and the sharp cut, `replacePhoto` swaps the photo's image and keeps `orig` so Restore original works and the node keeps the original photo; one undo step; open: wand final pass as soft cut, choosing a subject): (proposal, S2.12, tool contract `opencv-imgproc.md` S14): command `cutout` replaces a photo step with a `rest` step and one `cut` step per subject at the same matrix plus offset; derived uploads with provenance on the server; one undo step; tap-to-segment preview with add/subtract/bigger-smaller. Blocked on the tool (`opencv-imgproc.js` models, `prepare`/`segment`).
 - [ ] **E129 text as clip** (postponed 2026-10-29): glyph outlines from the same font files the text uses (opentype.js, vendored), converted to one compound path when the clip is made (needs E122: several outlines, holes by even-odd), and used as the clip of a photo. Letters on a curved baseline (E130) are placed glyph by glyph along the curve.
 - [~] **E130 curved text baseline** (agreed 2026-10-29; slider version built, handles open): a `text` step may carry `curve: { p0, c0, c1, p1 }` (stage-local units); the text is drawn with `<textPath>`, one line only. Default is symmetric (one bend gesture: handles mirror each other), free handles are an advanced mode. Rules: total tangent turning at most 180 degrees; each handle points towards the other end and is no longer than the distance between the ends (no loops or cusps); radius of curvature at least 1.5 x font size (the text would collide on the inside); one bend only (no S) for now; text longer than the curve scales down to fit (minimum font size) instead of being cut off; the curve is not shorter than a fraction of the text; while dragging a handle is clamped to the nearest allowed position with a faint limit arc; snaps to straight within a few degrees; double-tap on a handle resets. No general warp (arch/wave envelopes) is planned. Check that the server's rasteriser draws `<textPath>` (thumbnails).
-- [~] **E128 server jobs: progress and cancel** (2026-10-29: the background removal has a Cancel button, the pure rule `client/editor/job.js blocked` refuses delete, cut, duplicate, clip, crop, role and replace on the photo while it runs, and the job is dropped when the photo is undone away; open: the wand job, a leave-editor confirm, one runner for both) (agreed 2026-10-29, `UX-REQUIREMENTS.md` J6): streaming NDJSON endpoint (server forwards `opencv-imgproc.js --progress`, aborts kill the tool), client job runner (`client/editor/job.js`: one job at a time, progress state, AbortController), status-line progress with Cancel, busy outline on the photo, a pure `busy(doc, job)` rule that disables the blocked commands on the target photo (delete, cut, clip, crop, role, duplicate, another job) while everything else stays editable; auto-cancel when the target is undone away; leave-editor confirm. Tests: the blocked-command rule, the stale-result check.
+- [~] **E128 server jobs: progress and cancel** (2026-10-29: the background removal has a Cancel button, the pure rule `client/editor/job.js blocked` refuses delete, cut, duplicate, clip, crop, role and replace on the photo while it runs, and the job is dropped when the photo is undone away; open: the wand job, a leave-editor confirm, one runner for both) (agreed 2026-10-29, S2.12): streaming NDJSON endpoint (server forwards `opencv-imgproc.js --progress`, aborts kill the tool), client job runner (`client/editor/job.js`: one job at a time, progress state, AbortController), status-line progress with Cancel, busy outline on the photo, a pure `busy(doc, job)` rule that disables the blocked commands on the target photo (delete, cut, clip, crop, role, duplicate, another job) while everything else stays editable; auto-cancel when the target is undone away; leave-editor confirm. Tests: the blocked-command rule, the stale-result check.
 - [ ] The requirements of `UX-REQUIREMENTS.md` (B paged uploads and two screens, C freehand clip, D batch to nodes, E three
       depths, F text box extensions) are **not tasks yet**: they are agreed one by one, then added here.
 
