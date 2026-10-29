@@ -18,7 +18,7 @@ import { collide } from './walk.js';
 export const PILOT = {
   cruise: 8, // metres per second
   fast: 1.5, // factor with shift
-  slow: 2.2, // metres per second, the approach and the walk
+  slow: 3, // metres per second, the approach over a floor
   turn: 1.1, // radians per second on a key at full deflection
   pitch: 0.9, // radians per second the nose follows the stick, at most (twice that)
   limit: 1.1, // the steepest the nose goes
@@ -26,7 +26,7 @@ export const PILOT = {
   flare: 3, // ... and near the floor
   approach: 7, // metres over the floor where the throttle comes back
   ground: 2.5, // metres over the floor ... the nose comes up (ground effect)
-  easy: 0.3, // radians: the steepest the nose goes low over a floor with the gear down
+  easy: 0.38, // radians: the steepest the nose goes low over a floor with the gear down
   sink: 2.6, // metres per second: the fastest touchdown that is a landing
   nose: -0.4, // the nose this low or lower at touchdown is a crash
   bank: 0.5, // radians at most
@@ -38,7 +38,7 @@ export const PILOT = {
   gear: 5.5, // seconds the gear takes to come down or go up
   notch: 1.1, // seconds a flap notch takes
   flaps: 3, // notches
-  medal: { sink: 1.2, roll: 0.12, nose: 0.2, flaps: 2 }, // a perfect landing: gentle, level, flaps out, no bounce on the way
+  medal: { sink: 1, roll: 0.12, nose: 0.2, flaps: 2 }, // a perfect landing: gentle, level, flaps out, no bounce on the way
   drag: [0.07, 0.06], // the share of the speed the gear (all the way down) and a flap notch take away
 };
 
@@ -47,6 +47,13 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 // the checklist of a landing worth a medal: gear down (it landed at all), the flaps out, no bounce
 // before, a gentle sink, wings level, the nose near level
 export const deserves = (t, o = PILOT) => t.bounced === 0 && t.flaps >= o.medal.flaps - 0.05 && t.sink <= o.medal.sink && Math.abs(t.roll) <= o.medal.roll && Math.abs(t.pitch) <= o.medal.nose;
+
+// the checklist the aids show, from the instruments: each item is 'ok', 'wait' (on its way) or 'no'
+export const checklist = (ins, o = PILOT) => ({
+  gear: ins.gear > 0.95 ? 'ok' : ins.gear > 0.02 ? 'wait' : 'no',
+  flaps: ins.flaps >= o.medal.flaps - 0.05 ? 'ok' : ins.flaps > 0.05 ? 'wait' : 'no',
+  slip: Math.abs(ins.slip) <= o.slip.out ? 'ok' : 'no',
+});
 
 // `from` is a pose of the camera { x, y, z, yaw, pitch, roll } in scene coordinates (z = -plan y)
 export function createPilot(built, from, o = PILOT) {

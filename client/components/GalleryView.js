@@ -66,12 +66,17 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
 
             if(!v) return;
 
-            const [ra, vs, speed] = el.children;
+            const [ra, vs, speed, list] = el.children;
             const sign = n => (n >= 0.05 ? '▲' : n <= -0.05 ? '▼' : '•');
 
             ra.textContent = `RA ${v.ra === null ? '--' : v.ra < 10 ? v.ra.toFixed(1) : Math.round(v.ra)} m`;
             vs.textContent = `VS ${sign(v.vs)} ${Math.abs(v.vs).toFixed(1)} m/s`;
             speed.textContent = `SPD ${Math.round(v.speed)} m/s`;
+
+            const mark = { ok: '✓', wait: '…', no: '✗' };
+            const c = v.check;
+
+            list.textContent = `GEAR ${mark[c.gear]}  FLAPS ${Math.round(v.flaps)}${mark[c.flaps]}  SLIP ${mark[c.slip]}`;
             el.dataset.warn = v.ra !== null && v.ra < 12 && v.vs < -2.4 ? 'sink' : ''; // a sink rate that is too much for the height left
           },
           onStick: v => {
@@ -245,7 +250,7 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
     <div class=${`wb-gallery${cover ? ' wb-gallery-fill' : ''}${overview && walking ? ' wb-gallery-wide' : ''}`} ref=${box} role="application" aria-label=${label}>
       ${state !== 'error' && html`<canvas ref=${canvas} class="wb-gallery-canvas" tabindex="0"></canvas>`}
       <div ref=${lens} class="wb-gallery-lens" aria-hidden="true" hidden></div>
-      <div ref=${aidsEl} class="wb-gallery-aids" aria-hidden="true" hidden><span></span><span></span><span></span></div>
+      <div ref=${aidsEl} class="wb-gallery-aids" aria-hidden="true" hidden><span></span><span></span><span></span><span></span></div>
       <div ref=${stickEl} class="wb-gallery-stick" aria-hidden="true" hidden><span></span><span></span></div>
       ${(!chrome || full) && html`<div class="wb-gallery-bar">
         ${state === 'live' && (chrome
@@ -255,7 +260,7 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
           ? html`<${IconButton} icon=${overview ? 'overview' : 'leave'} label=${t(overview ? 'gallery.overview' : 'gallery.leave')} onClick=${leave} />`
           : html`<button type="button" class="wb-editor-chip" onClick=${leave}>${t(overview ? 'gallery.overview' : 'gallery.leave')}</button>`)}
       </div>`}
-      ${overview && state === 'live' && !walking && html`<button type="button" class="wb-editor-chip wb-gallery-enter" onClick=${walk}>${t('gallery.enter')}</button>`}
+      ${overview && state === 'live' && !walking && !hud?.piloting && html`<button type="button" class="wb-editor-chip wb-gallery-enter" onClick=${walk}>${t('gallery.enter')}</button>`}
       ${state === 'loading' && html`<p class="wb-gallery-note" role="status">${t('gallery.loading')}</p>`}
       ${state === 'error' && html`<p class="wb-gallery-note" role="alert">${error}</p>`}
       ${state === 'live' && hud && hud.mode !== 'overview' && html`

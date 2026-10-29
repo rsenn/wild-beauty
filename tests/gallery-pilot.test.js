@@ -197,3 +197,13 @@ describe('sideslip', () => {
     expect(clean.landed).toBe(true);
   });
 });
+
+describe('checklist', () => {
+  test('gear, flaps and slip as the aids show them', async () => {
+    const { checklist } = await import('../client/gallery/pilot.js');
+
+    expect(checklist({ gear: 1, flaps: 3, slip: 0 })).toEqual({ gear: 'ok', flaps: 'ok', slip: 'ok' });
+    expect(checklist({ gear: 0.5, flaps: 1, slip: 0.4 })).toEqual({ gear: 'wait', flaps: 'wait', slip: 'no' });
+    expect(checklist({ gear: 0, flaps: 0, slip: 0 })).toEqual({ gear: 'no', flaps: 'no', slip: 'ok' });
+  });
+});

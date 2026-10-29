@@ -19,7 +19,7 @@
 import { autoPlan } from './autoplan.js';
 import { OVERVIEW, overviewPose, planBounds } from './overview.js';
 import { makeFlyby } from './flyby.js';
-import { PILOT, createPilot } from './pilot.js';
+import { PILOT, checklist, createPilot } from './pilot.js';
 import { makeSound } from './sound.js';
 import { createCallouts } from './callouts.js';
 import { makeVoice } from './voice.js';
@@ -340,7 +340,7 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
 
             if(onFlight && (aids += dt) >= 0.1) {
               aids = 0;
-              onFlight(ins);
+              onFlight({ ...ins, check: checklist(ins) });
             }
 
             if(pilot.landed) {
