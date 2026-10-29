@@ -9,6 +9,7 @@ HTM=3.1.1
 RENDER=6.8.1
 FREEHAND=1.2.3
 BEZIER=6.1.4
+THREE=0.186.1
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 out=$root/vendor
@@ -18,7 +19,7 @@ trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$out"
 cd "$tmp"
 
-for spec in preact@$PREACT htm@$HTM preact-render-to-string@$RENDER perfect-freehand@$FREEHAND bezier-js@$BEZIER; do
+for spec in preact@$PREACT htm@$HTM preact-render-to-string@$RENDER perfect-freehand@$FREEHAND bezier-js@$BEZIER three@$THREE; do
   npm pack "$spec" --silent >/dev/null
 done
 
@@ -38,6 +39,17 @@ cp "perfect-freehand-$FREEHAND/package/dist/esm/index.mjs" "$out/perfect-freehan
 mkdir -p "$out/bezier-js"
 cp "bezier-js-$BEZIER/package/src/"*.js "$out/bezier-js/"
 
+# three.js (lazy-loaded by the 3D gallery only). The package ships the builds
+# unminified, so minify them here (bun, which the project already needs); the pointer
+# lock add-on's bare "three" import is made relative
+mkdir -p "$out/three"
+for f in three.core three.module; do
+  bun build --no-bundle --minify "three-$THREE/package/build/$f.js" --outfile "$out/three/$f.js" >/dev/null
+done
+cp "three-$THREE/package/examples/jsm/controls/PointerLockControls.js" "$out/three/PointerLockControls.js"
+sed -i "s|from 'three'|from './three.module.js'|" "$out/three/PointerLockControls.js"
+cp "three-$THREE/package/LICENSE" "$out/LICENSE.three"
+
 sed -i 's|from"preact"|from"./preact.js"|' "$out/hooks.js" "$out/preact-render-to-string.js"
 
 cp "preact-$PREACT/package/LICENSE" "$out/LICENSE.preact"
@@ -55,4 +67,5 @@ htm  $HTM  Apache-2.0  htm.js  https://www.npmjs.com/package/htm/v/$HTM
 preact-render-to-string  $RENDER  MIT  preact-render-to-string.js  https://www.npmjs.com/package/preact-render-to-string/v/$RENDER
 perfect-freehand  $FREEHAND  MIT  perfect-freehand.js  https://www.npmjs.com/package/perfect-freehand/v/$FREEHAND
 bezier-js  $BEZIER  MIT  bezier-js/bezier.js  https://www.npmjs.com/package/bezier-js/v/$BEZIER
+three  $THREE  MIT  three/three.module.js  https://www.npmjs.com/package/three/v/$THREE
 EOT
