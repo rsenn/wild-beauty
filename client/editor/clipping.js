@@ -7,6 +7,7 @@ import { outlineOf, shapePoints } from './hit.js';
 import { multiply } from './matrix.js';
 import { addStep, findStep, LIMITS, removeStep, setClip, setMatrix } from './model.js';
 import { pathFromVertices } from './shapes.js';
+import { pathFromPolygons } from './multiclip.js';
 
 const r = v => Math.round(v * 100) / 100;
 
@@ -37,10 +38,11 @@ export function photoPolygon(doc, id, { photos = () => null } = {}) {
 }
 
 // a closed polygon as a shape step; it serves as a clip, so it is not drawn
+// (`polygon` may be a list of outlines: a clip of several outlines)
 const polygonStep = (polygon, id, { color = '#000000', width = 4 } = {}) => ({
   op: 'shape',
   id,
-  path: pathFromVertices(polygon.map(([x, y]) => ({ x: r(x), y: r(y) })), true),
+  path: Array.isArray(polygon[0][0]) ? pathFromPolygons(polygon) : pathFromVertices(polygon.map(([x, y]) => ({ x: r(x), y: r(y) })), true),
   closed: true,
   fill: color,
   stroke: color,
@@ -73,7 +75,7 @@ export function clipPolygon(doc, id, polygon, shape, style) {
 export function cutPhoto(doc, id, pieces, ids, style) {
   const at = findStep(doc, id);
 
-  if(at?.step.op !== 'photo' || pieces?.length !== 2 || ids?.length !== 3 || pieces.some(p => !Array.isArray(p) || p.length < 3)) return doc;
+  if(at?.step.op !== 'photo' || pieces?.length !== 2 || ids?.length !== 3 || pieces.some(p => !Array.isArray(p) || p.length < (Array.isArray(p[0]?.[0]) ? 1 : 3))) return doc;
 
   const pageId = doc.pages[at.page].id;
   const now = effective(doc.pages[at.page].steps).by.get(id);

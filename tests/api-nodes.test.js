@@ -148,11 +148,11 @@ describe('POST /api/nodes', () => {
     expect((await huge.json()).error).toBe('too_large');
   });
 
-  test('a photo-less node is fine and has no tile', async () => {
+  test('a photo-less node is fine and gets a server-rendered tile (E82)', async () => {
     const res = await post({ doc: doc([{ op: 'stroke', id: 'strok001', pts: [[1, 1, 2]], color: '#000000' }], { title: 'Ink' }) });
 
     expect(res.status).toBe(201);
-    expect(getNode(h, (await res.json()).id)).toMatchObject({ title: 'Ink', tile: null });
+    expect(getNode(h, (await res.json()).id)).toMatchObject({ title: 'Ink', tile: expect.stringMatching(/^[0-9a-f]{64}$/) });
   });
 });
 

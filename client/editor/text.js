@@ -75,8 +75,23 @@ export function firstBaseline(face, count, size, h) {
 // the height of a box with `count` lines
 export const boxHeight = (count, size, padding = 0) => Math.max(1, count) * size * LINE_HEIGHT + padding * 2;
 
-// the x of a line's start inside a box for an alignment (logical: `start` / `center` / `end`)
-export const alignX = (align, w, padding = 0) => (align === 'center' ? w / 2 : align === 'end' ? w - padding : padding);
+// Is the text right-to-left? The first strong letter decides, as for a textarea
+// with dir="auto" (Hebrew, Arabic, Syriac, Thaana and the presentation forms).
+const RTL = /[\u0590-\u08ff\ufb1d-\ufdff\ufe70-\ufefc]/u;
+const LTR = /\p{L}/u;
+
+export function isRtl(text) {
+  for(const ch of String(text ?? '')) {
+    if(RTL.test(ch)) return true;
+    if(LTR.test(ch)) return false;
+  }
+
+  return false;
+}
+
+// the x of a line's start inside a box for an alignment (logical: `start` / `center` / `end`);
+// in right-to-left text the start is the right edge
+export const alignX = (align, w, padding = 0, rtl = false) => (align === 'center' ? w / 2 : (align === 'end') !== rtl ? w - padding : padding);
 
 // the text-anchor for an alignment
 export const anchorOf = align => (align === 'center' ? 'middle' : align === 'end' ? 'end' : 'start');
@@ -88,5 +103,6 @@ export function layout(step, measure) {
   const w = clampWidth(step.w);
   const lines = wrap(step.text, text => measure(text, step.font ?? DEFAULT_FONT, size, step.bold), w - padding * 2);
 
-  return { lines, h: boxHeight(lines.length, size, padding) };
+  // a fixed box keeps its height, whatever the text needs
+  return { lines, h: step.fixed && Number.isFinite(step.h) && step.h > 0 ? step.h : boxHeight(lines.length, size, padding) };
 }

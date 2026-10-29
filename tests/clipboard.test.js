@@ -1,7 +1,7 @@
 // bun test: clipboard (EDITOR.md E131), the pure parts
 import { describe, expect, test } from 'bun:test';
 import { apply } from '../client/editor/commands.js';
-import { classify, copyPayload, htmlFor, pasteSteps, payloadFromHtml, plainFor } from '../client/editor/clipboard.js';
+import { classify, copyPayload, htmlFor, pasteSteps, payloadFromHtml, plainFor, svgFor } from '../client/editor/clipboard.js';
 import { emptyNode, findStep, validate } from '../client/editor/model.js';
 
 const HASH = 'a'.repeat(64);
@@ -83,5 +83,29 @@ describe('what a paste is', () => {
     expect(classify({ html: '<p>Hi&nbsp;<b>there</b></p>' })).toEqual({ kind: 'text', text: 'Hi there' });
     expect(classify({ text: '  words \n ' }).text).toBe('words');
     expect(classify({})).toBeNull();
+  });
+});
+
+describe('svg (E131 follow-up)', () => {
+  test('a text box copies as a standalone svg on its own box; a photo has none', () => {
+    const { doc } = start();
+    const svg = svgFor(copyPayload(doc, 'text0001'));
+
+    expect(svg).toContain('<svg');
+    expect(svg).toContain('viewBox="46.0 56.0');
+    expect(svg).toContain('width="');
+    expect(svg).toContain('Hello');
+    expect(svg).not.toContain('viewBox="0 0 1000 1000"');
+    expect(svgFor(copyPayload(doc, 'photo001'))).toBeNull();
+  });
+
+  test('pasted svg source and svg files are told apart from words', () => {
+    expect(classify({ text: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"></svg>' })).toEqual({ kind: 'svg', source: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"></svg>' });
+    expect(classify({ text: '<?xml version="1.0"?>\n<svg viewBox="0 0 1 1"/>' }).kind).toBe('svg');
+    expect(classify({ text: 'an <svgx> tag' }).kind).toBe('text');
+
+    const file = { type: 'image/svg+xml', name: 'a.svg' };
+
+    expect(classify({ files: [file] })).toEqual({ kind: 'image', file });
   });
 });

@@ -78,3 +78,17 @@ describe('photoLookup', () => {
     expect(has('../etc/passwd')).toBe(false);
   });
 });
+
+describe('text boxes (E96)', () => {
+  const box = (extra = {}) => ({ op: 'text', id: 'text0001', text: 'Hi', lines: ['Hi'], m: [1, 0, 0, 1, 10, 10], w: 300, h: 60, font: 'serif', size: 48, color: '#112233', align: 'start', padding: 0, radius: 0, ...extra });
+  const check = step => validateNode({ doc: doc([step]) }, { hasPhoto: () => true });
+
+  test('a stored text box passes, and so do a gradient-free background and an outline', () => {
+    expect(check(box()).ok).toBe(true);
+    expect(check(box({ bg: '#ffffffcc', outline: { color: '#ffffff', width: 4 } })).ok).toBe(true);
+  });
+
+  test('an injected font, colour or background string is refused', () => {
+    for(const extra of [{ font: 'x;background:url(//evil)' }, { color: 'red;position:fixed' }, { bg: 'url(javascript:alert(1))' }, { outline: { color: '</style><script>', width: 3 } }, { align: 'center;x' }]) expect(check(box(extra)).ok).toBe(false);
+  });
+});

@@ -21,7 +21,7 @@ import { boxOf, setContext, trackCommand } from '../events.js';
 import { TextEdit } from './TextEdit.js';
 import { measureText } from '../editor/measure.js';
 import { LIMITS as TEXT_LIMITS, boxHeight, layout } from '../editor/text.js';
-import { classify, copyPayload, fromEvent, htmlFor, plainFor, readClipboard, writeClipboard } from '../editor/clipboard.js';
+import { rasteriseSvg, svgFor, classify, copyPayload, fromEvent, htmlFor, plainFor, readClipboard, writeClipboard } from '../editor/clipboard.js';
 import { sendFile } from '../upload.js';
 import { uploadPayload } from '../files.js';
 import { scenePalette } from '../editor/scenepalette.js';
@@ -30,11 +30,13 @@ import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
 import { photoPoint, readLines, resultPolygon } from '../editor/wand.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
+import { contains } from '../editor/polygon.js';
 import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag } from '../editor/handles.js';
 import { photoPolygon } from '../editor/clipping.js';
 import { oneEuroPoint, resample, strokePath, strokeWidths } from '../editor/pen.js';
+import { blocked } from '../editor/job.js';
 import { photoSteps as allPhotoSteps, renderNode, renderPhoto, slideOf, slideView } from '../editor/render.js';
-import { clipPolygonsOf, insertOnEdge, nearestVertex, outlineCount } from '../editor/multiclip.js';
+import { clipPolygonsOf, cutOutlines, insertOnEdge, nearestVertex, outlineCount } from '../editor/multiclip.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
 import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/keyboard.js';
 import { DEFAULT_TOOL, TOOLS, inField, toolForKey } from '../editor/tools.js';
@@ -136,6 +138,14 @@ const Busy = ({ at, scale }) => {
 // the clip tool on a clipped photo (E115, E116): the clipped-away part ghosted at
 // a quarter strength with a thin outline of the whole photo, and a handle on
 // every vertex of the clip outline
+// clip outlines are coloured by nesting depth (how many other outlines contain
+// them) round the hue wheel, so they differ from the blue selection box
+const depthColour = (polys, i) => {
+  const depth = polys.filter((other, j) => j !== i && contains(other, polys[i][0])).length;
+
+  return `hsl(${(330 + depth * 70) % 360} 85% 45%)`;
+};
+
 const ClipGhost = ({ step, m, info, geo, scale, px }) => {
   const side = px / scale;
   const corners = m ? [[0, 0], [1000, 0], [1000, 1000], [0, 1000]].map(([x, y]) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]]) : null;
@@ -143,7 +153,11 @@ const ClipGhost = ({ step, m, info, geo, scale, px }) => {
   return html`<g class="wb-clip-ghost" pointer-events="none">
     ${info && m && renderPhoto({ ...step, m, clip: undefined, opacity: 0.25, blend: 'normal' }, info)}
     ${corners && html`<polygon class="wb-editor-outline" points=${corners.map(p => p.join(',')).join(' ')} />`}
-    ${geo.polys.map(poly => html`<polygon class="wb-editor-outline" points=${poly.map(p => p.join(',')).join(' ')} />${poly.map(([x, y]) => html`<rect class="wb-editor-handle" x=${x - side / 2} y=${y - side / 2} width=${side} height=${side} />`)}`)}
+    ${geo.polys.map((poly, i) => {
+      const colour = depthColour(geo.polys, i);
+
+      return html`<polygon class="wb-editor-outline" style=${`stroke:${colour}`} points=${poly.map(p => p.join(',')).join(' ')} />${poly.map(([x, y]) => html`<rect class="wb-editor-handle" style=${`stroke:${colour}`} x=${x - side / 2} y=${y - side / 2} width=${side} height=${side} />`)}`;
+    })}
   </g>`;
 };
 
@@ -293,7 +307,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const tr = (key, params) => latestT.current(key, params);
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
-  latest.current = { cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, slideInfo, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
+  latest.current = { cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
 
   // In slides mode a new drawing goes right after the slide's last drawing, and
   // a move in the stack stays between the photo and the next one: the slide a
@@ -319,6 +333,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // every change of the node goes through here
   const dispatch = raw => {
     if(latest.current?.readOnly) return;
+
+    // a photo whose background is being removed cannot be taken away or changed meanwhile
+    if(blocked(latest.current?.snap.doc, latest.current?.cutting, raw)) return setAnnounce(tr('editor.announce.busy'));
 
     const command = onSlide(raw, latest.current?.slideInfo);
 
@@ -938,20 +955,22 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [propsOpen, setPropsOpen] = useState(false);
   const wantsPalette = propsOpen || editStep?.op === 'text' || tool === 'pen' || tool === 'shape' || editStep?.op === 'stroke' || editStep?.op === 'shape';
   const loaded = Object.keys(photos).length;
+  const photoId = editStep?.op === 'photo' ? editStep.id : undefined;
 
   useEffect(() => {
     if(!wantsPalette) return;
 
     let live = true;
     const timer = setTimeout(() => {
-      scenePalette(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page }).then(p => live && setScenePal(p.length ? p : null));
+      // a selected photo offers its own colours (its visible part), else the page's
+      scenePalette(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page }, photoId).then(p => live && setScenePal(p.length ? p : null));
     }, 500);
 
     return () => {
       live = false;
       clearTimeout(timer);
     };
-  }, [wantsPalette, realDoc, loaded, page, slideNow]);
+  }, [wantsPalette, realDoc, loaded, page, slideNow, photoId]);
 
   const usedKey = [...new Set(doc.pages.flatMap(p => p.steps.filter(s => s.op === 'photo').flatMap(s => [s.photo, s.orig].filter(Boolean))))].sort(); // a cutout's original counts as used
 
@@ -1018,7 +1037,8 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   // closing a dirty editor asks; its draft stays so the work can be picked up again
   const close = () => {
-    if(dirty && !window.confirm(t('editor.close.confirm'))) return;
+    // a running server job is lost with the editor: ask even when nothing else is unsaved
+    if((dirty || cutting !== null || busyAt !== null) && !window.confirm(t(dirty ? 'editor.close.confirm' : 'editor.close.job'))) return;
 
     if(!dirty) {
       const storage = browserStorage();
@@ -1344,6 +1364,21 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   };
   // remove the background (E127): the server streams the cut twice, quick then sharp;
   // each is a new image for the same photo step, one undo step in all
+  // stop the running removal; what arrived so far stays (it is on the undo stack)
+  const cancelJob = () => {
+    cutRun.current?.abort();
+    cutRun.current = null;
+    wand.current?.controller?.abort();
+    setCutting(null);
+    setBusyAt(null);
+    setAnnounce(tr('editor.announce.jobCancelled'));
+  };
+
+  // the photo being worked on is gone (undone away): nothing to wait for
+  useEffect(() => {
+    if(cutting !== null && !findStep(hist.present.doc, cutting)) cancelJob();
+  }, [cutting, hist]);
+
   const removeBackground = async () => {
     const { editStep: step, readOnly } = latest.current;
 
@@ -1494,7 +1529,17 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     // adding or subtracting an outline is judged against the whole photo, not the part still clipped
     const reference = clipMode !== 'replace' && clipPolygonsOf(doc, step.id) ? outlineOf(doc, step.id, { photos: hash => photos[hash], page }) : photoPolygon(doc, step.id, { photos: hash => photos[hash] });
-    const found = clipFromStroke(s.points, reference, { tap: TAP_PX / scale, reach: CUT_REACH_PX / scale, close: (CLOSE_PX * 2) / scale });
+    const opts = { tap: TAP_PX / scale, reach: CUT_REACH_PX / scale, close: (CLOSE_PX * 2) / scale };
+    let found = clipFromStroke(s.points, reference, opts);
+
+    // a clip of several outlines (cut-out, wand): the stroke splits the outline it crosses
+    const outlines = clipPolygonsOf(doc, step.id);
+
+    if((found.kind === 'none' || found.kind === 'cut') && outlines?.polys.length > 1) {
+      const pieces = cutOutlines(outlines.polys, s.points, opts.reach);
+
+      if(pieces) found = { kind: 'cut', pieces };
+    }
     const style = { color, width: Math.max(1, size / 3) };
     const taken = new Set(allIds(doc));
     const fresh = () => {
@@ -1544,10 +1589,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       const d = tdrag.current;
       const local = applyMatrix(invert(d.m), [x, y]);
       const right = d.index === 1 || d.index === 2;
+      const bottom = d.index === 2 || d.index === 3;
       const w = Math.min(TEXT_LIMITS.width[1], Math.max(TEXT_LIMITS.width[0], right ? local[0] : d.base.w - local[0]));
-      const { lines, h } = layout({ ...d.base, w }, measureFor(d.base.bold));
+      // a fixed-height box follows the corner on both axes, an automatic one only in width
+      const h = d.base.fixed ? Math.min(20000, Math.max(Math.max(20, d.base.size), bottom ? local[1] : d.base.h - local[1])) : d.base.h;
+      const next = layout({ ...d.base, w, h }, measureFor(d.base.bold));
+      const shift = [1, 0, 0, 1, right ? 0 : d.base.w - w, d.base.fixed && !bottom ? d.base.h - next.h : 0];
 
-      return dispatch({ type: 'resizeText', id: d.id, patch: { w, lines, h }, ...(right ? {} : { m: multiply(d.m, [1, 0, 0, 1, d.base.w - w, 0]) }) });
+      return dispatch({ type: 'resizeText', id: d.id, patch: { w, lines: next.lines, h: next.h }, ...(shift[4] || shift[5] ? { m: multiply(d.m, shift) } : {}) });
     }
 
     if(hdrag.current) {
@@ -1794,7 +1843,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     try {
       const png = await stepImage(c.doc, id, { photos: hash => c.photos[hash], page: c.page }).catch(() => null);
 
-      await writeClipboard({ png, html: htmlFor(payload), text: plainFor(payload) });
+      await writeClipboard({ png, svg: svgFor(payload), html: htmlFor(payload), text: plainFor(payload) });
     } catch {
       setAnnounce(tr('editor.announce.clipboardDenied'));
 
@@ -1840,11 +1889,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       return setAnnounce(tr('editor.announce.pasted'));
     }
 
-    if(what.kind === 'image') {
+    if(what.kind === 'image' || what.kind === 'svg') {
       setAnnounce(tr('editor.announce.pasting'));
 
       try {
-        const record = await sendFile(new File([what.file], what.file.name || 'pasted.png', { type: what.file.type }), { onProgress: () => {} }).done;
+        // an SVG becomes a raster first: the server takes pictures, not markup
+        const asSvg = what.kind === 'svg' || what.file.type === 'image/svg+xml';
+        const file = asSvg ? new File([await rasteriseSvg(what.kind === 'svg' ? what.source : what.file)], 'pasted.png', { type: 'image/png' }) : new File([what.file], what.file.name || 'pasted.png', { type: what.file.type });
+        const record = await sendFile(file, { onProgress: () => {} }).done;
 
         addUpload(uploadPayload(record));
         setAnnounce(tr('editor.announce.pasted'));
@@ -2044,6 +2096,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
           overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} scale=${scale} px=${handlePx} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
+          loupe=${coarse && tool !== 'select' && tool !== 'wand'}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
@@ -2061,7 +2114,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       <div class="wb-editor-sec" data-sec="select">
       ${(tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : t('editor.context.' + tool)}</p>`}
       ${tool === 'clip' && clipGeo && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.clip.mode')}>${['replace', 'add', 'subtract'].map(mode => html`<button type="button" class="wb-editor-chip" aria-pressed=${clipMode === mode ? 'true' : 'false'} onClick=${() => setClipMode(mode)}>${t('editor.clip.' + mode)}</button>`)}${outlineCount(doc, editStep.id) > 1 && html` <button type="button" class="wb-editor-chip" onClick=${splitOutlines}>${t('editor.clip.split')}</button>`}</div>`}
-      ${tool === 'wand' && html`<div class="wb-editor-context"><button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'add' ? 'true' : 'false'} onClick=${() => setWandMode('add')}>${t('editor.wand.add')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'sub' ? 'true' : 'false'} onClick=${() => setWandMode('sub')}>${t('editor.wand.subtract')}</button>${wandPick && wandPick.count > 1 && html` <button type="button" class="wb-editor-chip" disabled=${wandPick.index <= 0} onClick=${() => wandStep(-1)}>${t('editor.nudge.smaller')}</button> <button type="button" class="wb-editor-chip" disabled=${wandPick.index >= wandPick.count - 1} onClick=${() => wandStep(1)}>${t('editor.nudge.larger')}</button>`}</div>`}
+      ${tool === 'wand' && html`<div class="wb-editor-context">${busyAt && html`<button type="button" class="wb-editor-chip" onClick=${cancelJob}>${t('editor.job.cancel')}</button> `}<button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'add' ? 'true' : 'false'} onClick=${() => setWandMode('add')}>${t('editor.wand.add')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'sub' ? 'true' : 'false'} onClick=${() => setWandMode('sub')}>${t('editor.wand.subtract')}</button>${wandPick && wandPick.count > 1 && html` <button type="button" class="wb-editor-chip" disabled=${wandPick.index <= 0} onClick=${() => wandStep(-1)}>${t('editor.nudge.smaller')}</button> <button type="button" class="wb-editor-chip" disabled=${wandPick.index >= wandPick.count - 1} onClick=${() => wandStep(1)}>${t('editor.nudge.larger')}</button>`}</div>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
@@ -2073,7 +2126,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
-        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} pal=${pal} used=${usedNow} onCutout=${removeBackground} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} pal=${pal} used=${usedNow} onCutout=${removeBackground} onCancelJob=${cancelJob} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       ${paletteTargets && html`<${Palette} t=${t} pal=${pal} used=${usedNow} dropper=${startDropper} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">

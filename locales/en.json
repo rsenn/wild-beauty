@@ -366,5 +366,12 @@
   "editor.flow.scroll": "Scroll",
   "editor.axis": "Direction",
   "editor.axis.h": "Horizontal",
-  "editor.axis.v": "Vertical"
+  "editor.axis.v": "Vertical",
+  "editor.cutout.cancel": "Cancel removal",
+  "editor.announce.busy": "The background of this photo is being removed: wait or cancel first",
+  "editor.text.fixed": "Fixed height",
+  "editor.job.cancel": "Cancel",
+  "editor.announce.jobCancelled": "Cancelled",
+  "editor.close.job": "A job on the server is still running and is lost when you close. Close anyway?",
+  "editor.text.curve": "Curve"
 }

@@ -366,5 +366,12 @@
   "editor.flow.scroll": "Desplazamiento",
   "editor.axis": "Dirección",
   "editor.axis.h": "Horizontal",
-  "editor.axis.v": "Vertical"
+  "editor.axis.v": "Vertical",
+  "editor.cutout.cancel": "Cancelar el recorte",
+  "editor.announce.busy": "Se está quitando el fondo de esta foto: espera o cancela primero",
+  "editor.text.fixed": "Altura fija",
+  "editor.job.cancel": "Cancelar",
+  "editor.announce.jobCancelled": "Cancelado",
+  "editor.close.job": "Hay un trabajo en el servidor que se perderá al cerrar. ¿Cerrar de todos modos?",
+  "editor.text.curve": "Curvatura"
 }

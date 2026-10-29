@@ -2,7 +2,7 @@
 // (PLAN.md S6.2 step 4, S6.1 /api/capabilities).
 import { run } from './run.js';
 
-const NAMES = ['mediainfo', 'exiftool', 'exiv2', 'magick', 'convert', 'identify', 'heif-convert', 'heif-info', 'jpegtran', 'qjsm'];
+const NAMES = ['mediainfo', 'exiftool', 'exiv2', 'magick', 'convert', 'identify', 'heif-convert', 'heif-info', 'jpegtran', 'qjsm', 'rsvg-convert'];
 
 // name -> absolute path or null
 export const tools = Object.fromEntries(NAMES.map(name => [name, null]));

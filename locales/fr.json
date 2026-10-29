@@ -366,5 +366,12 @@
   "editor.flow.scroll": "Défilement",
   "editor.axis": "Sens",
   "editor.axis.h": "Horizontale",
-  "editor.axis.v": "Verticale"
+  "editor.axis.v": "Verticale",
+  "editor.cutout.cancel": "Annuler le détourage",
+  "editor.announce.busy": "L’arrière-plan de cette photo est en cours de retrait : attendez ou annulez d’abord",
+  "editor.text.fixed": "Hauteur fixe",
+  "editor.job.cancel": "Annuler",
+  "editor.announce.jobCancelled": "Annulé",
+  "editor.close.job": "Une tâche tourne encore sur le serveur et sera perdue à la fermeture. Fermer quand même ?",
+  "editor.text.curve": "Courbe"
 }

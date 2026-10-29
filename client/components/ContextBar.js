@@ -2,6 +2,7 @@ import { html } from '../html.js';
 import { BLENDS } from '../editor/model.js';
 import { ColourPick } from './ColourPick.js';
 import { FONT_IDS } from '../editor/text.js';
+import { bendCurve, bendOf } from '../editor/curve.js';
 import { DEFAULT_EDGE, EDGE_STYLES } from '../editor/edge.js';
 import { Popover } from './Popover.js';
 
@@ -17,7 +18,7 @@ const Color = ({ t, label, value, onInput, dropper }) => html`<span class="wb-ed
   ${dropper && html`<button type="button" class="wb-editor-chip wb-editor-dropper" title=${t('editor.dropper')} aria-label=${t('editor.dropper')} onClick=${() => dropper(onInput)}>\u2316</button>`}
 </span>`;
 
-export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, onCopy, onCut, onPaste, onDropper, onCutout, pal, used, cutting, onText, onEditText, dispatch }) => {
+export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, onNudge, onDuplicate, onCopy, onCut, onPaste, onDropper, onCutout, onCancelJob, pal, used, cutting, onText, onEditText, dispatch }) => {
   if(!step) return html`<div class="wb-editor-context wb-editor-context-bar"><p>${t('editor.context.empty')}</p>${onPaste && html`<${Button} onClick=${onPaste}>${t('editor.paste')}<//>`}</div>`;
 
   const id = step.id;
@@ -52,7 +53,7 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, on
         ${step.edge && html`<label class="wb-editor-field">${t('editor.edge.amount')} <input type="range" min="0" max="1" step="0.01" value=${step.edge.amount} onInput=${e => dispatch({ type: 'setEdge', id, edge: { ...step.edge, amount: Number(e.target.value) } })} /></label>
         <${Button} onClick=${() => dispatch({ type: 'setEdge', id, edge: { ...step.edge, seed: Math.floor(Math.random() * 1e6) } })}>${t('editor.edge.reroll')}<//>`}
       <//>
-      ${onCutout && html`<${Button} disabled=${cutting} onClick=${onCutout}>${cutting ? t('editor.cutout.busy') : t('editor.cutout')}<//>`}
+      ${onCutout && (cutting ? html`<${Button} onClick=${onCancelJob}>${t('editor.cutout.cancel')}<//>` : html`<${Button} onClick=${onCutout}>${t('editor.cutout')}<//>`)}
       ${step.orig && html`<${Button} onClick=${() => dispatch({ type: 'replacePhoto', id, hash: step.orig })}>${t('editor.cutout.restore')}<//>`}
     `;
   } else if(step.op === 'text') {
@@ -60,6 +61,8 @@ export const ContextBar = ({ t, kind, step, vertex, onVertex, clipped, photo, on
       <${Button} onClick=${onEditText}>${t('editor.text.edit')}<//>
       <span role="group" aria-label=${t('editor.text.font')}>${FONT_IDS.map(id => html`<${Button} pressed=${step.font === id} onClick=${() => onText({ font: id })}>${t('editor.font.' + id)}<//>`)}</span>
       <${Button} pressed=${!!step.bold} onClick=${() => onText({ bold: !step.bold })}>${t('editor.text.bold')}<//>
+      <label class="wb-editor-field">${t('editor.text.curve')} <input type="range" min="-100" max="100" step="1" value=${Math.round(bendOf(step.curve) * 100)} onInput=${e => onText({ curve: bendCurve(step.w, Number(e.target.value) / 100, step.size) })} /></label>
+      <${Button} pressed=${!!step.fixed} onClick=${() => onText({ fixed: !step.fixed })}>${t('editor.text.fixed')}<//>
       <span role="group" aria-label=${t('editor.text.align')}>${['start', 'center', 'end'].map(a => html`<${Button} pressed=${step.align === a} onClick=${() => onText({ align: a })}>${t('editor.text.align.' + a)}<//>`)}</span>
       <label class="wb-editor-field">${t('editor.text.size')} <input type="range" min="8" max="300" step="1" value=${step.size} onInput=${e => onText({ size: Number(e.target.value) })} /></label>
       <label class="wb-editor-field">${t('editor.text.width')} <input type="range" min="80" max="1000" step="10" value=${step.w} onInput=${e => onText({ w: Number(e.target.value) })} /></label>

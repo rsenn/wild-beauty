@@ -5,7 +5,9 @@
 // image or the text. The pure parts are here, the browser calls at the end.
 import { LIMITS, addStep, allIds, findStep, isColour, setMatrix, unique, validate } from './model.js';
 import { FONTS } from './text.js';
-import { effective } from './render.js';
+import { effective, renderStage } from './render.js';
+import { outlineOf } from './hit.js';
+import { renderToString } from '../../vendor/preact-render-to-string.js';
 
 export const MARK = 'data-wb-clip';
 const KINDS = ['photo', 'text', 'stroke', 'shape'];
@@ -33,6 +35,30 @@ export function copyPayload(doc, id) {
 }
 
 const escape = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+// The first drawn step of a copy as a standalone SVG on its own bounding box, or
+// null (a photo has no vector form: it travels as the image). Other apps that take
+// `image/svg+xml` keep it editable.
+export function svgFor(payload) {
+  const item = payload.items.find(i => i.step.op !== 'photo');
+
+  if(!item) return null;
+
+  const step = { ...item.step, m: item.m };
+  const doc = { v: 1, mode: 'free', style: {}, pages: [{ id: 'clip0001', steps: [step] }] };
+  const corners = outlineOf(doc, step.id, { photos: () => null, page: 0 });
+
+  if(!corners) return null;
+
+  const xs = corners.map(c => c[0]);
+  const ys = corners.map(c => c[1]);
+  const pad = 4;
+  const [x, y] = [Math.min(...xs) - pad, Math.min(...ys) - pad];
+  const [w, h] = [Math.max(...xs) - x + pad, Math.max(...ys) - y + pad];
+  const svg = renderToString(renderStage(doc, { photos: () => null }));
+
+  return svg.replace('viewBox="0 0 1000 1000"', `viewBox="${x.toFixed(1)} ${y.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}" width="${Math.ceil(w)}" height="${Math.ceil(h)}"`);
+}
 
 // the text of a copy: a text box's words, nothing for the rest
 export const plainFor = payload => payload.items.filter(i => i.step.op === 'text').map(i => i.step.text).join('\n');
@@ -70,7 +96,9 @@ export function payloadFromHtml(text) {
 }
 
 // What a paste is: { kind: 'steps', payload } | { kind: 'image', file } |
-// { kind: 'text', text } | null. A step of ours comes first, then a picture, then words.
+// { kind: 'svg', source } | { kind: 'text', text } | null. A step of ours comes
+// first, then a picture, then SVG source, then words. An SVG file is an `image` too:
+// the caller turns it into a raster (`rasteriseSvg`) before it is uploaded.
 export function classify({ html = '', text = '', files = [] } = {}) {
   const payload = payloadFromHtml(html);
 
@@ -79,6 +107,8 @@ export function classify({ html = '', text = '', files = [] } = {}) {
   const file = [...files].find(f => /^image\//.test(f.type));
 
   if(file) return { kind: 'image', file };
+
+  if(/^\s*(<\?xml[^>]*>\s*)?<svg[\s>]/i.test(text)) return { kind: 'svg', source: text };
 
   const words = (text || html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ')).replace(/[ \t]+/g, ' ').trim();
 
@@ -135,8 +165,11 @@ export function pasteSteps(doc, pageId, payload, { shift = 50, known = () => tru
 
 // write `{ png, html, text }` (any may be missing) to the clipboard; rejects when
 // the browser refuses (no permission, no secure page, no user gesture)
-export async function writeClipboard({ png, html, text }) {
+export async function writeClipboard({ png, svg, html, text }) {
   const parts = {};
+
+  // not every browser can put SVG on the clipboard: ask first, the PNG stays
+  if(svg && typeof ClipboardItem !== 'undefined' && ClipboardItem.supports?.('image/svg+xml')) parts['image/svg+xml'] = new Blob([svg], { type: 'image/svg+xml' });
 
   if(png) parts['image/png'] = png;
   if(html) parts['text/html'] = new Blob([html], { type: 'text/html' });
@@ -162,4 +195,30 @@ export async function readClipboard() {
   }
 
   return out;
+}
+
+// An SVG (source text or a file) drawn into a PNG, at most `max` px on the long
+// side: what an upload takes. Rejects when the browser cannot draw it.
+export async function rasteriseSvg(source, max = 2048) {
+  const blob = typeof source === 'string' ? new Blob([source], { type: 'image/svg+xml' }) : source;
+  const url = URL.createObjectURL(blob);
+
+  try {
+    const img = new Image();
+
+    img.src = url;
+    await img.decode();
+
+    const side = Math.max(img.naturalWidth || 1024, img.naturalHeight || 1024);
+    const k = Math.min(max / side, Math.max(1, 1024 / side)); // a tiny icon grows to 1024, a huge one shrinks to `max`
+    const canvas = document.createElement('canvas');
+
+    canvas.width = Math.max(1, Math.round((img.naturalWidth || 1024) * k));
+    canvas.height = Math.max(1, Math.round((img.naturalHeight || 1024) * k));
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    return await new Promise((resolve, reject) => canvas.toBlob(b => (b ? resolve(b) : reject(new Error('svg'))), 'image/png'));
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }

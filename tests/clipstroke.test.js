@@ -195,3 +195,23 @@ describe('duplicatePhoto command', () => {
     expect(run(doc, { type: 'duplicatePhoto', id: 'photo001', ids: ['a'] })).toBe(doc);
   });
 });
+
+describe('cutting a clip of several outlines', () => {
+  const square = (x, y, s) => [[x, y], [x + s, y], [x + s, y + s], [x, y + s]];
+
+  test('splits the crossed outline, the others go to their side', async () => {
+    const { cutOutlines } = await import('../client/editor/multiclip.js');
+    const polys = [square(0, 0, 100), square(150, 20, 30), square(-60, 20, 30)];
+    const pieces = cutOutlines(polys, [[50, -10], [50, 110]], 20);
+
+    expect(pieces).not.toBeNull();
+    expect(pieces[0].length + pieces[1].length).toBe(4); // two halves + two untouched outlines
+    expect(pieces[0].length).toBe(2);
+  });
+
+  test('null when the stroke splits no outline', async () => {
+    const { cutOutlines } = await import('../client/editor/multiclip.js');
+
+    expect(cutOutlines([square(0, 0, 100), square(300, 0, 50)], [[200, -10], [200, 110]], 5)).toBeNull();
+  });
+});

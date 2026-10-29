@@ -1243,6 +1243,20 @@ body {
     display: contents;
   }
 
+  /* the locked frame has no box here (display: contents), so its dimming goes to what it holds (E109) */
+  .wb-editor-frame[inert] {
+    opacity: 1;
+  }
+
+  .wb-editor-frame[inert] button,
+  .wb-editor-frame[inert] input,
+  .wb-editor-frame[inert] select,
+  .wb-editor-frame[inert] .wb-editor-stage,
+  .wb-editor-frame[inert] .wb-editor-pages,
+  .wb-editor-frame[inert] .wb-editor-context {
+    opacity: 0.6;
+  }
+
   .wb-editor-head,
   .wb-editor-tabs,
   .wb-editor-banners,
@@ -1801,4 +1815,40 @@ body {
   align-items: center;
   justify-content: center;
   margin: var(--wb-editor-gap) auto 0;
+}
+
+/* the loupe above a finger while it places a point (E124) */
+.wb-loupe {
+  position: absolute;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--wb-card-ground);
+  border: var(--wb-border-width) solid var(--wb-ink);
+  border-radius: 50%;
+}
+
+.wb-loupe-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+.wb-loupe-inner > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.wb-loupe-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border: 1px solid var(--wb-select);
+  border-radius: 50%;
 }

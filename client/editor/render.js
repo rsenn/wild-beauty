@@ -8,8 +8,10 @@ import { lerpMatrix } from './matrix.js';
 import { ease } from './playback.js';
 import { sanitize, toAttr } from './theme.js';
 import { outline, outlinePath } from './pen.js';
-import { FONTS, LINE_HEIGHT, alignX, anchorOf, firstBaseline } from './text.js';
+import { FONTS, LINE_HEIGHT, alignX, anchorOf, firstBaseline, isRtl } from './text.js';
 import { edgeShapes, pathOf } from './edge.js';
+import { curvePath, fitSize, isCurve } from './curve.js';
+import { measureText } from './measure.js';
 
 const STAGE = 1000;
 const HEX = /^#[0-9a-f]{3,8}$/i;
@@ -52,7 +54,8 @@ export function renderText(step, m = step.m) {
   const size = Number.isFinite(step.size) ? step.size : 48;
   const pad = step.padding ?? 0;
   const lines = Array.isArray(step.lines) && step.lines.length ? step.lines : String(step.text ?? '').split('\n');
-  const x = alignX(step.align, step.w, pad);
+  const rtl = isRtl(lines.join('\n'));
+  const x = alignX(step.align, step.w, pad, rtl);
   const out = step.outline && Number.isFinite(step.outline.width) && step.outline.width > 0 && safeColour(step.outline.color);
   const bg = step.bg !== undefined ? paint(step.bg, `bg-${step.id}`) : null;
   // the outline is its own layer under the letters: a colour emoji cannot be stroked and vanishes
@@ -61,11 +64,32 @@ export function renderText(step, m = step.m) {
   const top = firstBaseline(face, lines.length, size, Number.isFinite(step.h) ? step.h : lines.length * size * LINE_HEIGHT + pad * 2) - face.asc * size;
   const rows = lines.map((line, i) => html`<tspan x=${x} y=${top + i * size * LINE_HEIGHT}>${line}</tspan>`);
 
+  // a fixed-height box clips its text
+  const clip = step.fixed ? `url(#textclip-${step.id})` : null;
+
+  if(step.curve && isCurve(step.curve)) return renderCurvedText(step, m, { face, size, rtl, out, bg });
+
   return html`<g data-step=${step.id} data-op="text" transform=${matrix(m)}>
-    ${bg?.defs && html`<defs>${bg.defs}</defs>`}
+    ${(bg?.defs || clip) && html`<defs>${bg?.defs}${clip && html`<clipPath id=${`textclip-${step.id}`}><rect x="0" y="0" width=${step.w} height=${step.h} /></clipPath>`}</defs>`}
     ${bg && bg.paint !== 'none' && html`<rect x="0" y="0" width=${step.w} height=${step.h} rx=${step.radius ?? 0} fill=${bg.paint} />`}
-    ${out && html`<text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? face.bold : 400} fill="none" text-anchor=${anchorOf(step.align)} stroke=${step.outline.color} stroke-width=${step.outline.width} stroke-linejoin="round" dominant-baseline="text-before-edge" style="white-space:pre" aria-hidden="true">${rows}</text>`}
-    <text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? face.bold : 400} fill=${safeColour(step.color) ?? '#000000'} text-anchor=${anchorOf(step.align)} dominant-baseline="text-before-edge" style="white-space:pre">${rows}</text>
+    ${out && html`<text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? face.bold : 400} fill="none" text-anchor=${anchorOf(step.align)} stroke=${step.outline.color} stroke-width=${step.outline.width} stroke-linejoin="round" dominant-baseline="text-before-edge" direction=${rtl ? 'rtl' : null} clip-path=${clip} style="white-space:pre;unicode-bidi:plaintext" aria-hidden="true">${rows}</text>`}
+    <text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? face.bold : 400} fill=${safeColour(step.color) ?? '#000000'} text-anchor=${anchorOf(step.align)} dominant-baseline="text-before-edge" direction=${rtl ? 'rtl' : null} clip-path=${clip} style="white-space:pre;unicode-bidi:plaintext">${rows}</text>
+  </g>`;
+}
+
+// text on a curved baseline (E130): one line along a <textPath>, scaled down to fit
+function renderCurvedText(step, m, { face, size, rtl, out, bg }) {
+  const text = (Array.isArray(step.lines) && step.lines.length ? step.lines : String(step.text ?? '').split('\n')).join(' ');
+  const fit = fitSize(size, measureText(text, step.font, size, step.bold), step.curve);
+  const id = `curve-${step.id}`;
+  const attrs = { 'font-family': face.stack, 'font-size': fit, 'font-weight': step.bold ? face.bold : 400, direction: rtl ? 'rtl' : null, 'text-anchor': 'middle', style: 'white-space:pre;unicode-bidi:plaintext' };
+  const run = html`<textPath href=${`#${id}`} startOffset="50%">${text}</textPath>`;
+
+  return html`<g data-step=${step.id} data-op="text" transform=${matrix(m)}>
+    <defs>${bg?.defs}<path id=${id} d=${curvePath(step.curve)} /></defs>
+    ${bg && bg.paint !== 'none' && html`<rect x="0" y="0" width=${step.w} height=${step.h} rx=${step.radius ?? 0} fill=${bg.paint} />`}
+    ${out && html`<text ...${attrs} fill="none" stroke=${step.outline.color} stroke-width=${step.outline.width} stroke-linejoin="round" aria-hidden="true">${run}</text>`}
+    <text ...${attrs} fill=${safeColour(step.color) ?? '#000000'}>${run}</text>
   </g>`;
 }
 

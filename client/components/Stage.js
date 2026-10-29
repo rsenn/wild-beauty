@@ -12,10 +12,11 @@ import { STAGE, eventUnits, pixelsPerUnit } from '../editor/stage.js';
 // `onPointer.wheel` too; the handler calls preventDefault when it uses it.
 //  interactive  the overlay takes pointer events (a tool is active)
 //  className    extra class on the overlay (cursor); `class` goes on the stage box
-export const Stage = ({ class: extra = '', label, content, overlay, interactive = false, className = '', onPointer = {}, onSize, children, ...rest }) => {
+export const Stage = ({ class: extra = '', label, content, overlay, interactive = false, loupe: wanted = false, className = '', onPointer = {}, onSize, children, ...rest }) => {
   const box = useRef(null);
   const svg = useRef(null);
   const [scale, setScale] = useState(1);
+  const [look, setLook] = useState(null); // where a finger is, in stage units, while the loupe shows
 
   useEffect(() => {
     if(!box.current || typeof ResizeObserver === 'undefined') return;
@@ -36,6 +37,9 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
   const wrap = name => event => {
     const units = eventUnits(svg.current, event);
 
+    // a finger hides the point it places: a magnifier shows it from above (E124)
+    if(wanted && event.pointerType !== 'mouse') setLook(name === 'up' || name === 'cancel' ? null : units ? { x: units[0], y: units[1] } : null);
+
     if(units) onPointer[name]?.(event, units);
   };
 
@@ -51,6 +55,11 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
 
       if(units) onPointer.move?.(e, units);
     }
+
+    const last = all[all.length - 1];
+    const at = last && eventUnits(svg.current, last);
+
+    if(wanted && at && event.pointerType !== 'mouse') setLook({ x: at[0], y: at[1] });
   };
 
   const down = event => {
@@ -78,7 +87,29 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
       <svg ref=${svg} class=${'wb-editor-overlay' + (interactive ? ' wb-editor-interactive' : '') + (className ? ' ' + className : '')} viewBox=${`0 0 ${STAGE} ${STAGE}`} onPointerDown=${interactive ? down : undefined} onPointerMove=${interactive ? moved : undefined} onPointerUp=${interactive ? wrap('up') : undefined} onPointerCancel=${interactive ? wrap('cancel') : undefined} onWheel=${interactive ? wrap('wheel') : undefined}>
         ${typeof overlay === 'function' ? overlay({ scale }) : overlay}
       </svg>
+      ${look && wanted && html`<${Loupe} look=${look} scale=${scale} content=${content} overlay=${overlay} />`}
       ${children}
     </div>
   `;
+};
+
+const LOUPE = 120; // the magnifier's diameter in pixels
+const ZOOM = 3;
+
+// A round magnifier above the finger (below it near the top edge): the stage
+// again, ZOOM times larger, centred on the point being placed.
+const Loupe = ({ look, scale, content, overlay }) => {
+  const side = STAGE * scale;
+  const x = look.x * scale;
+  const y = look.y * scale;
+  const below = y < LOUPE * 1.4;
+  const left = Math.min(Math.max(x, LOUPE / 2), Math.max(LOUPE / 2, side - LOUPE / 2));
+
+  return html`<div class="wb-loupe" aria-hidden="true" style=${`left:${left - LOUPE / 2}px;top:${below ? y + LOUPE * 0.45 : y - LOUPE * 1.45}px;width:${LOUPE}px;height:${LOUPE}px`}>
+    <div class="wb-loupe-inner" style=${`width:${side}px;height:${side}px;transform:translate(${LOUPE / 2 - x * ZOOM}px,${LOUPE / 2 - y * ZOOM}px) scale(${ZOOM})`}>
+      ${content}
+      <svg class="wb-editor-overlay" viewBox=${`0 0 ${STAGE} ${STAGE}`}>${typeof overlay === 'function' ? overlay({ scale }) : overlay}</svg>
+    </div>
+    <span class="wb-loupe-dot"></span>
+  </div>`;
 };

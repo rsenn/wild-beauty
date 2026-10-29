@@ -366,5 +366,12 @@
   "editor.flow.scroll": "Scrollen",
   "editor.axis": "Richtung",
   "editor.axis.h": "Waagrecht",
-  "editor.axis.v": "Senkrecht"
+  "editor.axis.v": "Senkrecht",
+  "editor.cutout.cancel": "Entfernen abbrechen",
+  "editor.announce.busy": "Der Hintergrund dieses Fotos wird entfernt: warten oder zuerst abbrechen",
+  "editor.text.fixed": "Feste Höhe",
+  "editor.job.cancel": "Abbrechen",
+  "editor.announce.jobCancelled": "Abgebrochen",
+  "editor.close.job": "Auf dem Server läuft noch ein Auftrag, er geht beim Schliessen verloren. Trotzdem schliessen?",
+  "editor.text.curve": "Bogen"
 }

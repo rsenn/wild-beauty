@@ -4,6 +4,7 @@ import { pathFromVertices, verticesFromPath } from './shapes.js';
 import { acuteCorner, defaultWall, isWall } from './walls.js';
 import { textureHashes, validateScene } from './scene.js';
 import { EDGE_STYLES } from './edge.js';
+import { isCurve } from './curve.js';
 import { DEFAULT_FONT, FONT_IDS, LIMITS as TEXT, clampSize, clampWidth } from './text.js';
 
 export const VERSION = 1;
@@ -86,7 +87,7 @@ const STEPS = {
   unclip: { target: isId },
   blend: { target: isId, mode: oneOf(BLENDS) },
   transform: { target: isId, m: isMatrix, ease: opt(isString) },
-  text: { id: isId, text: isString, lines: v => Array.isArray(v) && v.every(isString), m: isMatrix, w: isNumber, h: isNumber, font: oneOf(FONTS), size: isNumber, color: isColour, align: oneOf(ALIGNS), padding: isNumber, radius: isNumber, bg: opt(isFill), bold: opt(v => typeof v === 'boolean'), outline: opt(v => isObject(v) && isColour(v.color) && isNumber(v.width) && v.width >= 0 && v.width <= TEXT.outline[1]) },
+  text: { id: isId, text: isString, lines: v => Array.isArray(v) && v.every(isString), m: isMatrix, w: isNumber, h: isNumber, font: oneOf(FONTS), size: isNumber, color: isColour, align: oneOf(ALIGNS), padding: isNumber, radius: isNumber, bg: opt(isFill), bold: opt(v => typeof v === 'boolean'), fixed: opt(v => typeof v === 'boolean'), curve: opt(isCurve), outline: opt(v => isObject(v) && isColour(v.color) && isNumber(v.width) && v.width >= 0 && v.width <= TEXT.outline[1]) },
 };
 
 function validateStep(step, path, errors) {
@@ -540,6 +541,8 @@ const TEXT_FIELDS = {
   font: v => (FONT_IDS.includes(v) ? v : undefined),
   align: v => (ALIGNS.includes(v) ? v : undefined),
   bold: v => (typeof v === 'boolean' ? v : undefined),
+  curve: v => (v === null ? null : isCurve(v) ? v : undefined),
+  fixed: v => (typeof v === 'boolean' ? v : undefined), // the height stays as set; the text is clipped to the box
   padding: v => (Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : undefined),
   radius: v => (Number.isFinite(v) ? Math.min(1000, Math.max(0, v)) : undefined),
   outline: v => (v === null ? null : isObject(v) && isColour(v.color) && Number.isFinite(v.width) ? { color: v.color, width: Math.min(TEXT.outline[1], Math.max(0, v.width)) } : undefined),
@@ -558,7 +561,12 @@ export function updateText(doc, stepId, patch) {
     if(value !== undefined) next[key] = value;
   }
 
-  return Object.keys(next).length ? updateStep(doc, stepId, next) : doc;
+  if(!Object.keys(next).length) return doc;
+
+  const updated = updateStep(doc, stepId, next);
+
+  // a null curve removes the field instead of storing it
+  return next.curve === null ? withSteps(updated, at.page, updated.pages[at.page].steps.map(step => (step.id === stepId ? Object.fromEntries(Object.entries(step).filter(([k]) => k !== 'curve')) : step))) : updated;
 }
 
 // The edge decoration of a photo (E123): style, amount 0..1 and the seed that

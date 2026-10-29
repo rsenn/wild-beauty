@@ -3,7 +3,7 @@
 // non-zero rule, so no polygon boolean is needed: an outline wound the same
 // way as the first one ADDS to the clip (overlaps are united), an outline wound
 // the other way cuts a HOLE where it lies over an added one.
-import { area, contains } from './polygon.js';
+import { area, contains, cutByStroke } from './polygon.js';
 import { addStep, findStep, setClip } from './model.js';
 import { apply, invert } from './matrix.js';
 import { effective } from './render.js';
@@ -216,4 +216,37 @@ export function insertOnEdge(polys, p, tol) {
   next[best.poly].splice(best.after + 1, 0, best.point);
 
   return { polys: next, poly: best.poly, vertex: best.after + 1 };
+}
+
+// Cut a clip of several outlines along a stroke (E121 for E122 clips): the largest
+// outline the stroke splits in two (exactly two crossings) is split, every other
+// outline goes to the piece on its side of the stroke's chord. -> [polys, polys]
+// (each a list of outlines) or null when the stroke splits none.
+export function cutOutlines(polys, stroke, reach) {
+  if(!Array.isArray(polys) || polys.length < 2 || !Array.isArray(stroke) || stroke.length < 2) return null;
+
+  const order = polys.map((poly, i) => i).sort((a, b) => Math.abs(area(polys[b])) - Math.abs(area(polys[a])));
+
+  for(const i of order) {
+    const parts = cutByStroke(polys[i], stroke, reach);
+
+    if(!parts) continue;
+
+    const [a, b] = stroke[0];
+    const [c, d] = stroke[stroke.length - 1];
+    const side = poly => {
+      const m = poly.reduce(([x, y], q) => [x + q[0] / poly.length, y + q[1] / poly.length], [0, 0]);
+
+      return Math.sign((c - a) * (m[1] - b) - (d - b) * (m[0] - a));
+    };
+    const positive = area(polys[i]) > 0;
+    const out = [[wound(parts[0], positive)], [wound(parts[1], positive)]];
+    const first = side(parts[0]);
+
+    polys.forEach((poly, j) => j !== i && out[side(poly) === first ? 0 : 1].push(poly));
+
+    return out;
+  }
+
+  return null;
 }

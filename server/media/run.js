@@ -7,7 +7,7 @@ import { log, logCommand } from '../log.js';
 // Run an external tool: argv array (never a shell), minimal environment,
 // timeout and an output cap. Resolves { code, stdout, stderr }; code is null
 // when the tool was killed or could not be started.
-export async function run(argv, { timeout = 30000, maxOutput = 1 << 20, cwd } = {}) {
+export async function run(argv, { timeout = 30000, maxOutput = 1 << 20, cwd, env = {} } = {}) {
   let proc;
 
   logCommand(argv);
@@ -15,7 +15,7 @@ export async function run(argv, { timeout = 30000, maxOutput = 1 << 20, cwd } = 
   const started = performance.now();
 
   try {
-    proc = Bun.spawn(argv, { cwd, env: { PATH: process.env.PATH, LANG: 'C', HOME: '/tmp' }, stdin: 'ignore', stdout: 'pipe', stderr: 'pipe', timeout, killSignal: 'SIGKILL' });
+    proc = Bun.spawn(argv, { cwd, env: { PATH: process.env.PATH, LANG: 'C', HOME: '/tmp', ...env }, stdin: 'ignore', stdout: 'pipe', stderr: 'pipe', timeout, killSignal: 'SIGKILL' });
   } catch(e) {
     log('exec', `-> ${argv[0]} failed to start: ${e.message}`);
 

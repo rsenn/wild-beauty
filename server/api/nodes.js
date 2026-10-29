@@ -13,6 +13,7 @@ import { validateNode, photoLookup } from '../node/validate.js';
 import { bake } from '../media/bake.js';
 import { identify } from '../media/probe.js';
 import { firstPhotoStep, thumbnail } from '../media/thumb.js';
+import { serverTile } from '../media/raster.js';
 import { photoInfos } from '../node/view.js';
 import { readUpload, removeUpload } from './uploads.js';
 import { lockedBody, lockedByOther } from './locks.js';
@@ -126,8 +127,20 @@ async function prepare(h, checked, thumb) {
     if(r.baked) bakedNow.push(hash);
   }
 
-  // the tile: what the editor drew, else the first photo step (best effort)
+  // the tile: what the editor drew, else the whole page rasterised on the server
+  // (E82), else the first photo step (best effort)
   let tile = await storeTile(thumb);
+
+  // photos alone keep the first photo's thumbnail; drawings, text and shapes get the real render
+  const steps = checked.doc.pages.flatMap(page => page.steps);
+
+  if(!tile && steps.some(st => st.op !== 'photo')) {
+    const r = await serverTile(checked.doc, hash => getPhoto(h, hash));
+
+    if(r.ok) tile = r.hash;
+    else log('error', 'tile', r.error);
+  }
+
   const step = tile ? null : firstPhotoStep(checked.doc);
 
   if(step) {

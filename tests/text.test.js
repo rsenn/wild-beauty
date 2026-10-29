@@ -4,7 +4,7 @@ import { renderToString } from '../vendor/preact-render-to-string.js';
 import { addText, emptyNode, findStep, updateText, validate } from '../client/editor/model.js';
 import { renderText } from '../client/editor/render.js';
 import { hitTest, outlineOf } from '../client/editor/hit.js';
-import { FONTS, LINE_HEIGHT, boxHeight, firstBaseline, layout, wrap } from '../client/editor/text.js';
+import { FONTS, LINE_HEIGHT, alignX, boxHeight, firstBaseline, isRtl, layout, wrap } from '../client/editor/text.js';
 
 const measure = text => text.length * 10; // every character is 10 units wide
 const page = doc => doc.pages[0].id;
@@ -119,5 +119,30 @@ describe('vertical padding', () => {
         expect(first - face.cap * size).toBeCloseTo(h - last, 6);
         expect(first - face.cap * size).toBeGreaterThanOrEqual(pad);
       }
+  });
+});
+
+describe('right-to-left (E97)', () => {
+  const box = (text, extra = {}) => ({ id: 't1', text, lines: [text], m: [1, 0, 0, 1, 0, 0], w: 400, h: 60, font: 'sans', size: 40, color: '#000000', align: 'start', padding: 10, ...extra });
+
+  test('the first strong letter decides', () => {
+    expect(isRtl('שלום עולם')).toBe(true);
+    expect(isRtl('مرحبا')).toBe(true);
+    expect(isRtl('123 !? hello')).toBe(false);
+    expect(isRtl('  12 שלום')).toBe(true);
+    expect(isRtl('')).toBe(false);
+  });
+
+  test('start is the right edge in right-to-left text, and the text is drawn right-to-left', () => {
+    expect(alignX('start', 400, 10, true)).toBe(390);
+    expect(alignX('end', 400, 10, true)).toBe(10);
+    expect(alignX('start', 400, 10, false)).toBe(10);
+    expect(alignX('center', 400, 10, true)).toBe(200);
+
+    const svg = renderToString(renderText(box('שלום')));
+
+    expect(svg).toContain('direction="rtl"');
+    expect(svg).toContain('x="390"');
+    expect(renderToString(renderText(box('hello')))).not.toContain('direction=');
   });
 });
