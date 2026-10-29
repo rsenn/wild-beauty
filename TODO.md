@@ -46,6 +46,7 @@ State: all of the work below is committed and pushed (last: `d2ae0104`). The cam
 - [ ] **E110 dark theme**: the colours of a dark kraft (ground, ink, accent, cards) are not decided.
 - [ ] **One word for "node" / "work" in English** (German Werk, French pièce, Spanish pieza).
 - [ ] **E94 fill editor** (none / solid / linear / radial gradient, 2-5 stops, alpha) for the text background: the UI is not drawn.
+- [ ] **11.3 Image embeddings** (duplicates at upload, related nodes, search): runtime decided 2026-10-29 (DINOv2 via dnn), see M11.
 - [ ] **Magnetic lasso** replacing the wand: client side (edge map plus shortest path in a worker, clip polygon out). Needs your go.
 - [ ] Wand follow-ups: `sam` for the final pass, choosing which subject Remove background keeps.
 - [ ] Verify Spanish with DeepL (needs `DEEPL_API_KEY`, target ES-419) and the tester.
@@ -344,6 +345,26 @@ the lock lives in E31/E67.
 - [ ] **11.1c Server-side clip**: `clip` job from a `shape` step (polygon or SVG path +
       the photo matrix) for a destructive cut-out and for the thumbnail rendition
       (`EDITOR.md` E25; P S10 use 2).
+- [ ] **11.3 Image embeddings at ingest** (`opencv-imgproc.md` S16.5, S16.8, S16.10 item 1). One vector per
+      baked photo, stored with the photo row, for three uses: (a) duplicate and near-duplicate warning while
+      uploading and a "possible duplicate" list for a gallery (on 2026-10-29 this was done once by hand with a dHash
+      script over node 11 and 19 and found 3 pairs in 214 photos; a stored vector makes it routine and also finds
+      crops and re-exports a dHash misses); (b) "related nodes" in the graph view (`GRAPH.md`); (c) search by
+      content or text. Candidates: CLIP ViT-B/32 (MIT; text tower for search), DINOv2-small (Apache-2.0; similarity
+      only, better for duplicates).
+      **Decided 2026-10-29** (measured, `opencv-imgproc.md` S16.8b): DINOv2-small fp32 (Xenova/dinov2-small,
+      Apache-2.0, 84 MB, 384-d) through `opencv-imgproc` dnn; it loads and matches onnxruntime (cosine 0.9999) and
+      separates copies from other photos far better than CLIP (median 0.71 against 0.90). No onnxruntime, no CLIP for
+      now. int8 exports do not load in dnn. Text search (CLIP text tower, language question) stays open and is a
+      separate later task; weights live in the models folder, outside the repo, licence noted in the sidecar.
+      Steps: new tool command `embed --in FILE [--in FILE ...]` in qjs-opencv (batch, the model loads once; JSON line with
+      the vectors, model name and version, so old vectors can be told from new); table `photo_embeddings(hash, model, vec BLOB)`; computed after the bake in
+      `saveNew` / the ingest queue and by a backfill script for existing photos; `GET /api/photos/:hash/similar`
+      (cosine, top N, threshold); editor and upload list show the warning, never block an upload.
+      Done when: a re-saved, resized and slightly cropped copy of a test photo ranks first and an unrelated photo
+      scores clearly lower, a test fixes the threshold; the 3 known pairs of 2026-10-29 are all found; a photo
+      without a vector (tool or model missing) still uploads and the feature stays hidden, as with
+      `capabilities.imgproc`.
 - [ ] **11.2 Handwriting recognition**: deferred past the PoC (decided 2026-10-21).
 
 ## M12 - Graph view (after the editor's save phase; design and numbers in `GRAPH.md`)
