@@ -8,7 +8,7 @@ import { addLink, insertNode, linksFrom, listSuggestions, removeSuggestion } fro
 import { graphOf } from './graph.js';
 import { emptyNode } from '../../client/editor/model.js';
 import { roundPosition } from '../media/probe.js';
-import { placeTitle, titleFor } from './gazetteer.js';
+import { km, placeTitle, titleFor } from './gazetteer.js';
 import { resolveNames } from './municipality.js';
 
 export { GAZETTEER, RADIUS_KM, placeTitle } from './gazetteer.js';
@@ -17,10 +17,31 @@ const fail = (status, error) => Response.json({ error }, { status });
 
 const placesRoot = h => h.get("SELECT id FROM nodes WHERE title = 'places' AND kind = 'list'")?.id ?? null;
 
-const titled = (h, root, title) =>
-  linksFrom(h, root, 'child')
-    .map(l => h.get('SELECT id, title FROM nodes WHERE id = ?', l.id))
-    .find(n => n.title === title);
+const children = (h, root) => linksFrom(h, root, 'child').map(l => h.get('SELECT id, title FROM nodes WHERE id = ?', l.id));
+
+// a cell titled by its coordinates: "47.27, 8.01"
+const CELL = /^(-?\d+\.\d\d), (-?\d+\.\d\d)$/;
+
+// two cells that touch, diagonals too, are a little over 1.3 km apart at our latitudes
+const NEIGHBOUR_KM = 1.6;
+
+// The place below `root` for a title: the one of that title, or for a cell title the place of a
+// cell that touches it, so a village on a cell edge is one place, not two (GRAPH.md S1.5).
+function titled(h, root, title) {
+  const all = children(h, root);
+  const exact = all.find(n => n.title === title);
+  const cell = CELL.exec(title);
+
+  if(exact || !cell) return exact;
+
+  const at = { lat: Number(cell[1]), lon: Number(cell[2]) };
+
+  return all.find(n => {
+    const other = CELL.exec(n.title);
+
+    return other && km(at, { lat: Number(other[1]), lon: Number(other[2]) }) <= NEIGHBOUR_KM;
+  });
+}
 
 // -> { id, title } | { id: null, title } when no such place exists yet;
 // null when there is no `places` node (run tools/seed.js)
@@ -30,7 +51,9 @@ export function findPlace(h, pos, gazetteer) {
 
   if(root === null) return null;
 
-  return { id: titled(h, root, title)?.id ?? null, title };
+  const found = titled(h, root, title);
+
+  return { id: found?.id ?? null, title: found?.title ?? title };
 }
 
 // -> { id, title, created } | null without a `places` node
@@ -43,7 +66,7 @@ export function ensurePlace(h, pos, gazetteer) {
     const title = titleFor(h, pos, gazetteer);
     const found = titled(h, root, title);
 
-    if(found) return { id: found.id, title, created: false };
+    if(found) return { id: found.id, title: found.title, created: false };
 
     const { id } = insertNode(h, { title, kind: 'node', doc: { ...emptyNode(), title } });
 
@@ -55,17 +78,22 @@ export function ensurePlace(h, pos, gazetteer) {
 
 // The open place suggestions (GRAPH.md S1.5, EDITOR.md E140): saved nodes whose
 // photos were taken at a place the node is not linked to yet.
-// -> [{ node, title, lat, lon, place: { id|null, title } }]
-export function pendingSuggestions(h, gazetteer) {
+// -> [{ node, title, lat, lon, place: { id|null, title } }]. With `purge` the suggestions of a
+// node that is linked to the place already (made any way) are deleted, not only left out.
+export function pendingSuggestions(h, gazetteer, { purge = false } = {}) {
   const root = placesRoot(h);
 
   return listSuggestions(h).flatMap(({ node_id, title, lat, lon }) => {
     const name = titleFor(h, { lat, lon }, gazetteer);
     const place = root === null ? null : titled(h, root, name);
 
-    if(place && h.get("SELECT 1 AS ok FROM node_links WHERE from_id = ? AND to_id = ? AND label = 'at'", node_id, place.id)) return [];
+    if(place && h.get("SELECT 1 AS ok FROM node_links WHERE from_id = ? AND to_id = ? AND label = 'at'", node_id, place.id)) {
+      if(purge) removeSuggestion(h, node_id, lat, lon);
 
-    return [{ node: node_id, title, lat, lon, place: { id: place?.id ?? null, title: name } }];
+      return [];
+    }
+
+    return [{ node: node_id, title, lat, lon, place: { id: place?.id ?? null, title: place?.title ?? name } }];
   });
 }
 
@@ -101,7 +129,7 @@ export async function placesRoute(req, h, gazetteer, fetcher) {
     if(req.method === 'GET') {
       await resolveNames(h, listSuggestions(h), { fetcher });
 
-      return Response.json({ suggestions: pendingSuggestions(h, gazetteer) }, { headers: { 'cache-control': 'no-cache' } });
+      return Response.json({ suggestions: pendingSuggestions(h, gazetteer, { purge: true }) }, { headers: { 'cache-control': 'no-cache' } });
     }
 
     if(req.method !== 'POST') return fail(405, 'method_not_allowed');

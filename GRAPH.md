@@ -189,10 +189,23 @@ position.
 4. **Privacy.** An edge is visible only when both ends are (S1.2), so a public node
    linked to a public place would announce where it was made. Therefore an `at`
    edge is **owner-only until the owner publishes it** (a per-edge `visibility`,
-   default `hidden`; migration 4, with accounts). In the PoC, without accounts, the
+   default `hidden`; migration 5, with accounts). In the PoC, without accounts, the
    chip is shown but the edge stays out of the public graph view.
 5. **Dismissed suggestions are remembered** (per node and place) so the chip does not
    come back.
+6. **Housekeeping (decided 2026-10-29).**
+   - Places that a cell title names ("47.27, 8.01") are one place with the cells that touch
+     them (about 1.6 km, diagonals included), so a village on a cell edge does not split;
+     a place named by municipality or gazetteer is never snapped.
+   - Migration 4 renamed the places the old gazetteer had made ("Zürich") to `Zürich (ZH)`,
+     merging into an existing one where both existed.
+   - Nodes saved before migration 2 have **no suggestions and will not get any**: the
+     position was stripped from the baked photo (point 1), so nothing is left to read.
+     Uploading the original again brings it back.
+   - The chip (E137) is a prompt of the moment, its *Not now* is per browser. The panel
+     (E140) is the durable list: what was not linked in the editor is still there.
+   - A suggestion whose node is already linked to the place is deleted when the panel is
+     opened, so no row outlives its answer.
 
 
 ### 1.6 Swiss data sources (researched 2026-10-29)

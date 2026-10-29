@@ -387,7 +387,7 @@ the lock lives in E31/E67.
       when the view starts at `overall-root` and a user can walk to any public
       profile in three taps.
 - [~] **12.6a Seed** (2026-10-29, `GRAPH.md` S1.4): `tools/seed.js` makes `overall-root`, `art exhibition`, `fleamarket` and `places` with sample children; idempotent (found by title under the parent). `user-profiles` and `featured` stay with 12.6.
-- [ ] **12.6c Places** (`GRAPH.md` S1.5): `at` edges owner-only until published (migration 4, per-edge `visibility`, with accounts; migration 2 holds `place_suggestions`, 3 `place_names`); editor side is EDITOR.md E136-E140.
+- [ ] **12.6c Places** (`GRAPH.md` S1.5): `at` edges owner-only until published (migration 5, per-edge `visibility`, with accounts; migrations 2-4 hold `place_suggestions`, `place_names`, the rename); editor side is EDITOR.md E136-E140.
 - [ ] **12.6d Venues from KGS** (`GRAPH.md` S1.6): suggest the cultural objects near a place (KGS
       `identify`, with a tolerance in pixels, not metres) as candidates for `art exhibition`
       galleries; check the licence ("proprietary" in STAC) and whether `kgs_kategorie` can pick out
@@ -396,13 +396,12 @@ the lock lives in E31/E67.
       returns nothing from `identify`); try `SearchServer` with `origins=gazetteer` for named venues;
       evaluate the opendata.swiss museum sets, the MySwitzerland API (check it still exists) and
       swisscollections. Done when each is marked usable or dropped in `GRAPH.md` S1.6.
-- [ ] **12.6f Places housekeeping**: (a) places made before the municipality lookup are titled `Zürich`,
-      not `Zürich (ZH)`: rename them (a one-off script, or match both on lookup); (b) a position near
-      a cell edge can split one town into two places: snap to an existing place within ~1 km before
-      creating one; (c) nodes saved before migration 2 have no suggestions (only a new upload brings
-      one); (d) the chip's *Not now* (E137) is per browser and does not touch the server rows;
-      (e) a row stays in `place_suggestions` until answered or its node goes. Each needs a decision
-      before it is worth building.
+- [x] **12.6f Places housekeeping** (2026-10-29, `GRAPH.md` S1.5 point 6): (a) migration 4 renames the
+      places of the old gazetteer to `Name (KT)` and merges duplicates; (b) cell-titled places snap to a
+      cell that touches them (`titled()` in `server/api/places.js`); (c) decided: nodes saved before
+      migration 2 get no suggestions, the position is gone; (d) decided: the chip's *Not now* stays per
+      browser, the panel is the durable list; (e) answered suggestions are purged when the panel opens.
+      Tests: `tests/place-housekeeping.test.js`.
 - [ ] **12.6b Node lock**: `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
       `DELETE` (release), expiry after ~60 s without heartbeat, owner may break;
       the editor (`EDITOR.md` E67) takes the lock on open, shows "locked by <name>" read-only when

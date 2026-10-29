@@ -87,3 +87,34 @@ CREATE TABLE place_names (
   name TEXT,
   PRIMARY KEY (lat, lon)
 );
+
+-- migration 4
+-- Places made before the municipality lookup were titled by the offline
+-- gazetteer without the canton ("Zürich"); they are now "Zürich (ZH)". Where
+-- the new title already exists below `places` (made since), the `at` links go to
+-- it and the old node goes.
+CREATE TEMP TABLE place_rename (old_id INTEGER, new_title TEXT, dup_id INTEGER);
+
+INSERT INTO place_rename (old_id, new_title, dup_id)
+WITH r (old_title, new_title) AS (VALUES ('Zürich', 'Zürich (ZH)'), ('Bern', 'Bern (BE)'), ('Basel', 'Basel (BS)'), ('Genève', 'Genève (GE)'), ('Luzern', 'Luzern (LU)'))
+SELECT c.id, r.new_title,
+       (SELECT d.id FROM node_links l2 JOIN nodes d ON d.id = l2.to_id
+         WHERE l2.from_id = p.id AND l2.label = 'child' AND d.title = r.new_title)
+  FROM nodes p
+  JOIN node_links l ON l.from_id = p.id AND l.label = 'child'
+  JOIN nodes c ON c.id = l.to_id
+  JOIN r ON r.old_title = c.title
+ WHERE p.title = 'places' AND p.kind = 'list';
+
+UPDATE nodes
+   SET title = (SELECT new_title FROM place_rename WHERE old_id = nodes.id),
+       doc = json_set(doc, '$.title', (SELECT new_title FROM place_rename WHERE old_id = nodes.id))
+ WHERE id IN (SELECT old_id FROM place_rename WHERE dup_id IS NULL);
+
+UPDATE OR IGNORE node_links
+   SET to_id = (SELECT dup_id FROM place_rename WHERE old_id = node_links.to_id)
+ WHERE label = 'at' AND to_id IN (SELECT old_id FROM place_rename WHERE dup_id IS NOT NULL);
+
+DELETE FROM nodes WHERE id IN (SELECT old_id FROM place_rename WHERE dup_id IS NOT NULL);
+
+DROP TABLE place_rename;

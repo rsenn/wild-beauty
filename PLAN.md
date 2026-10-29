@@ -318,6 +318,7 @@ place_suggestions(node_id INT REFERENCES nodes ON DELETE CASCADE, lat REAL, lon 
                                                     -- node's photo, until linked or dismissed (GRAPH.md S1.5)
 place_names(lat REAL, lon REAL, name TEXT, PRIMARY KEY(lat, lon));  -- migration 3: municipality of a cell,
                                                     -- NULL outside Switzerland (GRAPH.md S1.5)
+-- migration 4 renames the places the offline gazetteer made without a canton ("Zürich" -> "Zürich (ZH)")
 CREATE INDEX node_links_from ON node_links(from_id, sort);
 CREATE INDEX node_links_to   ON node_links(to_id);
 ```

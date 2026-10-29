@@ -17,7 +17,7 @@ export const GAZETTEER = [
 export const RADIUS_KM = 5;
 
 // great-circle distance in km
-function km(a, b) {
+export function km(a, b) {
   const rad = d => (d * Math.PI) / 180;
   const h = Math.sin(rad(b.lat - a.lat) / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(rad(b.lon - a.lon) / 2) ** 2;
 
