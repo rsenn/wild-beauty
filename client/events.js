@@ -15,6 +15,8 @@ export function track(type, data = {}) {
   else timer ??= setTimeout(flush, 5000);
 }
 
+// `fetch` with keepalive survives the page closing too; a beacon is dropped by many
+// privacy extensions, so it is only the fallback
 function flush() {
   clearTimeout(timer);
   timer = null;
@@ -22,10 +24,13 @@ function flush() {
   if(!queue.length) return;
 
   const body = JSON.stringify({ events: queue.splice(0) });
+  const send = () => fetch('/api/events', { method: 'POST', body, keepalive: true, headers: { 'content-type': 'application/json' } }).catch(() => {});
 
   try {
-    if(!navigator.sendBeacon?.('/api/events', new Blob([body], { type: 'application/json' }))) fetch('/api/events', { method: 'POST', body, keepalive: true, headers: { 'content-type': 'application/json' } }).catch(() => {});
-  } catch {}
+    send();
+  } catch {
+    navigator.sendBeacon?.('/api/events', new Blob([body], { type: 'application/json' }));
+  }
 }
 
 const view = () => ({ w: innerWidth, h: innerHeight, orient: matchMedia('(orientation: portrait)').matches ? 'portrait' : 'landscape' });
