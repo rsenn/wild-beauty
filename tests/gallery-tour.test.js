@@ -158,6 +158,36 @@ describe('tour', () => {
     expect(walker.yaw).toBe(list[i + 1].yaw);
   });
 
+  test('round a corner it turns the short way, a quarter turn is not a 200 degree swing', () => {
+    const { tour, walker, list } = setup();
+    const wrap = d => ((((d % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
+    let corners = 0;
+
+    for(let i = 0; i < list.length - 1; i++) {
+      const direct = Math.abs(wrap(list[i + 1].yaw - list[i].yaw));
+      const near = Math.hypot(list[i + 1].x - list[i].x, list[i + 1].y - list[i].y) < 3;
+
+      if(!near || direct < 1) continue;
+
+      tour.snap(i);
+      tour.next();
+
+      let turned = 0;
+      let prev = walker.yaw;
+
+      for(let t = 0; t < 10 && tour.moving; t += 1 / 60) {
+        tour.step(1 / 60);
+        turned += Math.abs(wrap(walker.yaw - prev));
+        prev = walker.yaw;
+      }
+
+      expect(turned).toBeLessThan(direct + 0.05);
+      corners++;
+    }
+
+    expect(corners).toBeGreaterThan(0);
+  });
+
   test('a move takes between 0.8 and 6 seconds', () => {
     const { tour, list } = setup();
     const time = to => {

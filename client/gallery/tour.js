@@ -11,6 +11,7 @@ import { EYE } from './scene.js';
 export const TOUR = {
   glide: 1.4, // metres per second along a wall
   walk: 2.8, // across rooms
+  near: 3, // a walk this short turns straight to the picture, not along the path
   minTime: 0.8, // seconds a move takes at the least ...
   maxTime: 6, // ... and at the most
   turn: 7, // how fast the heading follows the path, 1/s
@@ -32,7 +33,7 @@ export function createTour(built, list, walker, o = TOUR) {
     zoom: 1,
     zoomTarget: 1,
   };
-  let move = null; // { points, lengths, length, duration, p, glide, yaw0, to }
+  let move = null; // { points, lengths, length, duration, p, direct, yaw0, to }
 
   // the walker's heading for a stretch of the path at arc length s
   const tangent = s => {
@@ -86,7 +87,11 @@ export function createTour(built, list, walker, o = TOUR) {
     const glide = r.points.length === 2 && Math.abs(delta(walker.yaw, to.yaw)) < 0.35;
     const length = lengths[lengths.length - 1];
 
-    move = { points: r.points, lengths, length, duration: Math.min(o.maxTime, Math.max(o.minTime, length / (glide ? o.glide : o.walk))), p: 0, glide, yaw0: walker.yaw, to };
+    // round a corner of a room the path is a few steps and its heading is
+    // meaningless (it made turns of 200 degrees for a quarter turn)
+    const direct = glide || length < o.near;
+
+    move = { points: r.points, lengths, length, duration: Math.min(o.maxTime, Math.max(o.minTime, length / (glide ? o.glide : o.walk))), p: 0, direct, yaw0: walker.yaw, to };
     Object.assign(tour, { index: i, moving: true, zoomTarget: 1 });
   };
 
@@ -140,7 +145,7 @@ export function createTour(built, list, walker, o = TOUR) {
 
     if(floor !== null) walker.eye += (floor + EYE - walker.eye) * k;
 
-    if(move.glide) {
+    if(move.direct) {
       walker.yaw = move.yaw0 + delta(move.yaw0, move.to.yaw) * e;
     } else {
       // face the way of the path, then turn to the picture in the last part
