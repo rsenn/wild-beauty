@@ -3,7 +3,7 @@
 // plain values here; time is Date.now() unless `now` is given.
 import { migrateDoc } from '../../client/editor/model.js';
 
-export const LABELS = ['child', 'ref', 'sells'];
+export const LABELS = ['child', 'ref', 'sells', 'at'];
 
 const json = value => (value === undefined || value === null ? null : JSON.stringify(value));
 const parse = text => (text === null || text === undefined ? null : JSON.parse(text));

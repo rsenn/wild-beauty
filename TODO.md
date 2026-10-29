@@ -371,6 +371,8 @@ the lock lives in E31/E67.
       Both lists are windowed (paged by `offset`/`limit`), never sent whole. Done
       when the view starts at `overall-root` and a user can walk to any public
       profile in three taps.
+- [~] **12.6a Seed** (2026-10-29, `GRAPH.md` S1.4): `tools/seed.js` makes `overall-root`, `art exhibition`, `fleamarket` and `places` with sample children; idempotent (found by title under the parent). `user-profiles` and `featured` stay with 12.6.
+- [ ] **12.6c Places** (`GRAPH.md` S1.5): `at` edges owner-only until published (migration 2, per-edge `visibility`, with accounts); editor side is EDITOR.md E136-E140.
 - [ ] **12.6b Node lock**: `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
       `DELETE` (release), expiry after ~60 s without heartbeat, owner may break;
       the editor (`EDITOR.md` E67) takes the lock on open, shows "locked by <name>" read-only when

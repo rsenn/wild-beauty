@@ -116,9 +116,10 @@ All edges are directed (`from` -> `to`), the label is a small vocabulary, not fr
 |---|---|---|---|
 | `child` | containment: the target is a member of the source list/album/gallery | yes (`sort`) | blog -> article 17; album -> photo node; gallery -> exhibit |
 | `sells` | an offer points at the thing sold | no | shop item -> gallery exhibit |
+| `at` | a node was made at / belongs to a place (S1.5); target is a node under `places`; no order | no | photo node -> place "Zürich" |
 | `ref` | any other reference ("see also"), possibly across users; ordered (`sort`) when the source is a list | list: yes | project -> related article; `user-profiles` -> profile; `featured` -> gallery |
 
-Decided 2026-10-22: these three. Candidates for later, only when a feature needs them: `cover` (list -> its
+Decided 2026-10-22: `child`, `sells`, `ref`; `at` added 2026-10-29 for places (S1.5). Candidates for later, only when a feature needs them: `cover` (list -> its
 representative node), `series` (project -> its next part), `reply` (comment).
 A node may have several `child` parents (an exhibit is also reachable from the
 shop). An edge is visible to a viewer only when **both** ends are visible to them
@@ -130,6 +131,56 @@ Edit rights: the **owner**, or an **admin or curator of the node's group** (`gro
 members and the public only read. Three visibility levels per node: **hidden** (owner only), **group** (every member of one
 invite-only group named on the node), **public**. Groups are owned by a user;
 membership is by invitation. This is a per-row filter in every traversal.
+
+### 1.4 Seeded structure (decided 2026-10-29)
+
+`tools/seed.js` creates the starting landscape; running it twice changes nothing
+(nodes are found by title below their parent). "Group" in this file means an
+**access group** (S1.3); the three below are **category nodes** (kind `list`) under
+the overall-root, not groups.
+
+```
+overall-root
+ +-- user-profiles, featured     (12.6)
+ +-- art exhibition   list  -child-> gallery -child-> exhibition (list, or kind gallery = 3D walk)
+ +-- fleamarket       list  -child-> seller -child-> item (kind shop)   (item -sells-> exhibit when it is one)
+ +-- places           list  -child-> place (one node per locality)
+```
+
+Seeded nodes are owned by nobody (`owner_id` NULL) and public; with accounts the
+admin user takes them over. The seed holds only the skeleton and a few sample places,
+real galleries, sellers and items come from users.
+
+### 1.5 Places and photo location (decided 2026-10-29)
+
+Interlinking nodes by where their photos were taken, without ever publishing a
+position.
+
+1. **The photo stays clean.** `bake` strips all metadata (EDITOR.md S4); a
+   published photo carries no GPS. The position is read once, at ingest, from the
+   EXIF that `probe.js` already puts in the sidecar, and is used only to *suggest* a
+   place. Camera captures in the app (`getUserMedia`, canvas) have no EXIF; a
+   capture through a file input may, and is treated like any upload. A location for
+   a camera photo is asked for with `navigator.geolocation` when the user turns on
+   "tag location", then it feeds the same suggestion. Stripping is the same on every
+   path.
+2. **Suggest, never auto-link.** The **node editor** shows a non-modal chip when a
+   photo of the open node has a position ("taken near Zürich - link to place") and
+   makes the edge only when accepted (`POST /api/graph/ops`, op `link`, label `at`).
+   The **graph editor** has the bulk form: a "suggest places" view listing every
+   node of the user with a pending suggestion, accept or dismiss each. Edges are
+   made in one place (the ops endpoint), whichever view asks.
+3. **Places are coarse.** A place node stands for a named locality or a rounded cell
+   (about 1 km); exact coordinates are never stored. Place nodes are found or
+   created below `places` when a suggestion is accepted. The sidecar position is
+   dropped from `uploads/` when the node is saved or the upload expires.
+4. **Privacy.** An edge is visible only when both ends are (S1.2), so a public node
+   linked to a public place would announce where it was made. Therefore an `at`
+   edge is **owner-only until the owner publishes it** (a per-edge `visibility`,
+   default `hidden`; migration 2, with accounts). In the PoC, without accounts, the
+   chip is shown but the edge stays out of the public graph view.
+5. **Dismissed suggestions are remembered** (per node and place) so the chip does not
+   come back.
 
 
 ---
@@ -616,7 +667,7 @@ time; per-user layout as in S1.1.
 3. ~~Visibility rules~~ **Decided**: hidden (owner only), invite-only group,
    public (S1.3); **one `group_id` per node** for now. A link to a node that other readers cannot see is
    simply not shown to them (decided).
-4. ~~Edge kinds~~ **Decided**: `child` (ordered), `sells`, `ref` (S1.2).
+4. ~~Edge kinds~~ **Decided**: `child` (ordered), `sells`, `ref`, `at` (S1.2, S1.5).
 5. ~~Positions~~ **Decided: owner-defined**, on the node (S3.5). Left: shared nodes
    with two parents have one position, not one per parent.
 6. ~~Collaboration~~ **Decided**: a space is edited by its owner or by the admins
