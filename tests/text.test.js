@@ -4,7 +4,7 @@ import { renderToString } from '../vendor/preact-render-to-string.js';
 import { addText, emptyNode, findStep, updateText, validate } from '../client/editor/model.js';
 import { renderText } from '../client/editor/render.js';
 import { hitTest, outlineOf } from '../client/editor/hit.js';
-import { boxHeight, layout, wrap } from '../client/editor/text.js';
+import { FONTS, LINE_HEIGHT, boxHeight, firstBaseline, layout, wrap } from '../client/editor/text.js';
 
 const measure = text => text.length * 10; // every character is 10 units wide
 const page = doc => doc.pages[0].id;
@@ -105,5 +105,19 @@ describe('resizing a box', () => {
     expect(step).toMatchObject({ w: 300, h: 115, lines: ['one two', 'three'] });
     expect(step.m[4]).toBe(400);
     expect(r.key).toBe('resize:text0001');
+  });
+});
+
+describe('vertical padding', () => {
+  test('the space above the capitals equals the space under the last baseline', () => {
+    for(const face of Object.values(FONTS))
+      for(const [count, size, pad] of [[1, 48, 0], [2, 60, 20], [5, 24, 8]]) {
+        const h = boxHeight(count, size, pad);
+        const first = firstBaseline(face, count, size, h);
+        const last = first + (count - 1) * size * LINE_HEIGHT;
+
+        expect(first - face.cap * size).toBeCloseTo(h - last, 6);
+        expect(first - face.cap * size).toBeGreaterThanOrEqual(pad);
+      }
   });
 });

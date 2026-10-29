@@ -6,10 +6,10 @@
 // the faces by role id; the ids name the role, not the file, so the faces can
 // change later without touching saved nodes. `stack` goes to the font-family.
 export const FONTS = {
-  fixed: { stack: 'Fixed, monospace', bold: 500 },
-  serif: { stack: '"EB Garamond", Garamond, Georgia, serif', bold: 700 },
-  sans: { stack: 'Jost, Futura, "Century Gothic", "Helvetica Neue", Arial, sans-serif', bold: 700 },
-  display: { stack: '"Archivo Black", Impact, "Arial Black", sans-serif', bold: 400 },
+  fixed: { stack: 'Fixed, monospace', bold: 500, asc: 0.75, desc: 0.25, cap: 0.703 },
+  serif: { stack: '"EB Garamond", Garamond, Georgia, serif', bold: 700, asc: 1.007, desc: 0.298, cap: 0.656 },
+  sans: { stack: 'Jost, Futura, "Century Gothic", "Helvetica Neue", Arial, sans-serif', bold: 700, asc: 1.07, desc: 0.375, cap: 0.703 },
+  display: { stack: '"Archivo Black", Impact, "Arial Black", sans-serif', bold: 400, asc: 0.878, desc: 0.21, cap: 0.703 },
 };
 
 export const FONT_IDS = Object.keys(FONTS);
@@ -58,6 +58,18 @@ export function wrap(text, measure, width) {
   }
 
   return lines;
+}
+
+// `asc`, `desc` and `cap` are the face's ascent, descent and capital height in
+// em (what the browser reports for the font file): the text is placed by them,
+// so the space above the capitals equals the space below the last baseline
+
+// The y of the first baseline in a box `h` high with `count` lines of `size`:
+// the block from the top of the first capitals to the last baseline is centred.
+export function firstBaseline(face, count, size, h) {
+  const ink = (Math.max(1, count) - 1) * size * LINE_HEIGHT + face.cap * size;
+
+  return (h - ink) / 2 + face.cap * size;
 }
 
 // the height of a box with `count` lines

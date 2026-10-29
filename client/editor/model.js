@@ -506,7 +506,7 @@ export function replacePhoto(doc, stepId, hash) {
 // A text box (E91): `lines` are the client-wrapped lines of `text` and `h` the
 // box height they need; `w` the width. The box's local origin is its top-left
 // corner, `m` places it on the stage.
-export function addText(doc, pageId, { id = unique(allIds(doc)), text = '', lines, m, w, h, font, size, color, align } = {}) {
+export function addText(doc, pageId, { id = unique(allIds(doc)), text = '', lines, m, w, h, font, size, color, align, index } = {}) {
   const matrix = Array.isArray(m) && m.length === 6 && m.every(v => Number.isFinite(v) && Math.abs(v) <= LIMITS.number) ? m : IDENTITY;
   const step = {
     op: 'text',
@@ -524,7 +524,7 @@ export function addText(doc, pageId, { id = unique(allIds(doc)), text = '', line
     radius: 0,
   };
 
-  return addStep(doc, pageId, step);
+  return addStep(doc, pageId, step, index);
 }
 
 // The fields of a text box that a patch may change, each checked; unknown

@@ -170,7 +170,7 @@
   "editor.mode.slides": "Diapositivas",
   "editor.mode.grid": "Cuadrícula",
   "editor.slide.n": "Diapositiva {n}",
-  "editor.mode.auto": "Las diapositivas y la cuadrícula muestran las fotos dispuestas automáticamente. Cambia a Libre para editar.",
+  "editor.mode.auto": "La cuadrícula ordena las fotos por sí sola. Cambia a Libre o Diapositivas para editar.",
   "editor.shape.hasFill": "Con relleno",
   "editor.shape.hasStroke": "Con contorno",
   "editor.shape.closed": "Cerrada",

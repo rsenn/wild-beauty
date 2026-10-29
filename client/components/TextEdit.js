@@ -1,6 +1,6 @@
 import { useEffect, useRef } from '../../vendor/hooks.js';
 import { html } from '../html.js';
-import { FONTS } from '../editor/text.js';
+import { FONTS, LINE_HEIGHT, firstBaseline } from '../editor/text.js';
 
 // The in-place editor of a text box (EDITOR.md E91): a transparent textarea laid
 // exactly over the box, so the caret and the selection are the browser's (IME and
@@ -16,10 +16,14 @@ export const TextEdit = ({ step, m, scale, label, onText, onDone, onGrip }) => {
 
   const [a, b, c, d, e, f] = m;
   const pad = step.padding ?? 0;
+  const face = FONTS[step.font] ?? FONTS.sans;
+  const lines = Math.max(1, (step.text ?? '').split('\n').length, step.lines?.length ?? 1);
+  // the textarea's first baseline lies half-leading + ascent under its content top: pad so it meets the drawn one
+  const topPad = Math.max(0, firstBaseline(face, lines, step.size, step.h) - face.asc * step.size - (step.size * (LINE_HEIGHT - face.asc - face.desc)) / 2);
   const style = [
     `width:${step.w}px`,
     `height:${step.h}px`,
-    `padding:${pad}px`,
+    `padding:${topPad}px ${pad}px ${pad}px`,
     `font:${step.bold ? (FONTS[step.font] ?? FONTS.sans).bold : 400} ${step.size}px/1.2 ${(FONTS[step.font] ?? FONTS.sans).stack}`,
     `text-align:${step.align === 'center' ? 'center' : step.align === 'end' ? 'end' : 'start'}`,
     `caret-color:${step.color}`,

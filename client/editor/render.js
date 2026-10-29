@@ -8,7 +8,7 @@ import { lerpMatrix } from './matrix.js';
 import { ease } from './playback.js';
 import { sanitize, toAttr } from './theme.js';
 import { outline, outlinePath } from './pen.js';
-import { FONTS, LINE_HEIGHT, alignX, anchorOf } from './text.js';
+import { FONTS, LINE_HEIGHT, alignX, anchorOf, firstBaseline } from './text.js';
 import { edgeShapes, pathOf } from './edge.js';
 
 const STAGE = 1000;
@@ -57,7 +57,9 @@ export function renderText(step, m = step.m) {
   const bg = step.bg !== undefined ? paint(step.bg, `bg-${step.id}`) : null;
   // the outline is its own layer under the letters: a colour emoji cannot be stroked and vanishes
   // when the same <text> has a stroke, while the filled layer draws it as it is
-  const rows = lines.map((line, i) => html`<tspan x=${x} y=${pad + i * size * LINE_HEIGHT + (size * (LINE_HEIGHT - 1)) / 2}>${line}</tspan>`);
+  // text-before-edge puts the ascent line at y: the first baseline minus the ascent
+  const top = firstBaseline(face, lines.length, size, Number.isFinite(step.h) ? step.h : lines.length * size * LINE_HEIGHT + pad * 2) - face.asc * size;
+  const rows = lines.map((line, i) => html`<tspan x=${x} y=${top + i * size * LINE_HEIGHT}>${line}</tspan>`);
 
   return html`<g data-step=${step.id} data-op="text" transform=${matrix(m)}>
     ${bg?.defs && html`<defs>${bg.defs}</defs>`}
@@ -177,6 +179,57 @@ export function effective(steps) {
 // show, whatever pages the author drew.
 export const photoSteps = doc => doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo' && !isTexture(step)));
 
+const DRAWN = ['stroke', 'shape', 'text'];
+
+// The slide `i` of the `slides` mode: the i-th picture photo and what the
+// author drew after it on its page, up to the next photo. -> { photo, owned,
+// page, pageId, at, end, insertAt } or null. `at` is the photo's index in its
+// page, `insertAt` where a new drawing goes (after the last one), so a drawing
+// stays on the slide of the photo before it.
+export function slideOf(doc, i) {
+  let n = 0;
+
+  for(let p = 0; p < doc.pages.length; p++) {
+    const steps = doc.pages[p].steps;
+
+    for(let at = 0; at < steps.length; at++) {
+      const photo = steps[at];
+
+      if(photo.op !== 'photo' || isTexture(photo) || n++ !== i) continue;
+
+      const owned = [];
+      let end = at + 1;
+      let last = at;
+
+      for(; end < steps.length; end++) {
+        const x = steps[end];
+
+        if(x.op === 'photo' && !isTexture(x)) break;
+
+        if(DRAWN.includes(x.op)) {
+          owned.push(x);
+          last = end;
+        }
+      }
+
+      return { photo, owned, page: p, pageId: doc.pages[p].id, at, end, insertAt: last + 1 };
+    }
+  }
+
+  return null;
+}
+
+// What the editor works on in slides mode: a document with the slide's
+// drawings alone on its first page (the page's id), everything else of the
+// document behind them so ids stay unique, as a `free` document: the photo is
+// not there to be picked, the drawings are.
+export function slideView(doc, info) {
+  const mine = new Set(info.owned);
+  const rest = doc.pages[info.page].steps.filter(step => !mine.has(step));
+
+  return { ...doc, mode: 'free', pages: [{ ...doc.pages[info.page], steps: info.owned }, { id: `~${info.pageId}`, steps: rest }, ...doc.pages.filter((_, p) => p !== info.page)] };
+}
+
 // the steps a mode shows. `free`: the first `upTo` steps of page `page` (all
 // when `upTo` is missing). `slides`: photo `page` alone, shown whole.
 // `grid`: every photo, tiled by gridLayout. Both start from the photo steps,
@@ -207,7 +260,7 @@ function stepsOf(doc, { mode, page, upTo, photos }) {
   if(mode === 'slides') {
     const step = all[page];
 
-    return step && photos(step.photo) ? [{ ...step, m: IDENTITY }] : [];
+    return step && photos(step.photo) ? [{ ...step, m: IDENTITY }, ...(slideOf(doc, page)?.owned ?? [])] : [];
   }
 
   return gridLayout(all.length, doc.layout).map((m, i) => ({ ...all[i], m }));

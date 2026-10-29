@@ -170,7 +170,7 @@
   "editor.mode.slides": "Diapositives",
   "editor.mode.grid": "Grille",
   "editor.slide.n": "Diapositive {n}",
-  "editor.mode.auto": "Diapositives et grille disposent les photos automatiquement. Passez en Libre pour modifier.",
+  "editor.mode.auto": "La grille dispose les photos elle-même. Passez à Libre ou Diapositives pour modifier.",
   "editor.shape.hasFill": "Rempli",
   "editor.shape.hasStroke": "Contour",
   "editor.shape.closed": "Fermé",

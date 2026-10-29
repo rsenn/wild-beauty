@@ -33,7 +33,7 @@ import { clipFromStroke } from '../editor/clipstroke.js';
 import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag } from '../editor/handles.js';
 import { photoPolygon } from '../editor/clipping.js';
 import { oneEuroPoint, resample, strokePath, strokeWidths } from '../editor/pen.js';
-import { photoSteps as allPhotoSteps, renderNode, renderPhoto } from '../editor/render.js';
+import { photoSteps as allPhotoSteps, renderNode, renderPhoto, slideOf, slideView } from '../editor/render.js';
 import { clipPolygonsOf, insertOnEdge, nearestVertex, outlineCount } from '../editor/multiclip.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
 import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/keyboard.js';
@@ -268,15 +268,18 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const gesture = useRef(null); // { g, id } while a move/scale/rotate gesture runs
   const lastTap = useRef({ time: 0, id: null, at: null });
   const saved = useRef(hist.present); // the last saved snapshot: what "dirty" is measured against
-  const { doc, kind } = hist.present;
-  const page = Math.min(current, doc.pages.length - 1); // undo can remove the page being shown
+  const { doc: realDoc, kind } = hist.present;
+  const mode = realDoc.mode;
+  const slides = allPhotoSteps(realDoc).length;
+  const slideNow = Math.min(slide, Math.max(0, slides - 1));
+  const slideInfo = mode === 'slides' ? slideOf(realDoc, slideNow) : null; // slides: the photo is laid out, the drawings after it are edited
+  const doc = slideInfo ? slideView(realDoc, slideInfo) : realDoc; // what the editor reads: the slide's drawings alone on page 0
+  const page = slideInfo ? 0 : Math.min(current, doc.pages.length - 1); // undo can remove the page being shown
   const pageId = doc.pages[page].id;
-  const mode = doc.mode;
-  const auto = mode !== 'free'; // slides and grid lay the photos out themselves: nothing to edit
-  const slides = allPhotoSteps(doc).length;
+  const auto = mode === 'grid' || (mode === 'slides' && !slideInfo); // the grid lays the photos out itself: nothing to edit
   const count = doc.pages[page].steps.length;
   const shown = clampK(k, count);
-  const scrubbed = !auto && shown < count; // scrubbed back: moves are recorded as transform steps
+  const scrubbed = !auto && !slideInfo && shown < count; // scrubbed back: moves are recorded as transform steps
   const previewing = auto || scrubbed; // everything else is read-only there
   const located = selected ? findStep(doc, selected) : null;
   const selectedStep = !auto && located?.page === page && located.index < shown ? located.step : null; // not one of another page, nor one not shown yet
@@ -290,11 +293,34 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const tr = (key, params) => latestT.current(key, params);
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
-  latest.current = { cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
+  latest.current = { cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, slideInfo, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
+
+  // In slides mode a new drawing goes right after the slide's last drawing, and
+  // a move in the stack stays between the photo and the next one: the slide a
+  // drawing belongs to is the photo before it
+  const onSlide = (command, info) => {
+    if(!info) return command;
+
+    if((command.type === 'addStep' || command.type === 'addText') && command.index === undefined) return { ...command, index: info.insertAt };
+
+    if(command.type === 'moveStep') {
+      const lo = info.at + 1;
+      const hi = info.insertAt - 1;
+      const real = latest.current.snap.doc.pages[info.page].steps;
+      const now = real.findIndex(step => step.id === command.id);
+      const to = command.to === 'front' ? hi : command.to === 'back' ? lo : command.to === 'up' ? Math.min(hi, now + 1) : command.to === 'down' ? Math.max(lo, now - 1) : command.to;
+
+      return { ...command, to };
+    }
+
+    return command;
+  };
 
   // every change of the node goes through here
-  const dispatch = command => {
+  const dispatch = raw => {
     if(latest.current?.readOnly) return;
+
+    const command = onSlide(raw, latest.current?.slideInfo);
 
     // a wall that would get a corner sharper than 90 degrees is refused: say so
     const was = latest.current?.snap;
@@ -918,14 +944,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     let live = true;
     const timer = setTimeout(() => {
-      scenePalette(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page }).then(p => live && setScenePal(p.length ? p : null));
+      scenePalette(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page }).then(p => live && setScenePal(p.length ? p : null));
     }, 500);
 
     return () => {
       live = false;
       clearTimeout(timer);
     };
-  }, [wantsPalette, doc, loaded, page]);
+  }, [wantsPalette, realDoc, loaded, page, slideNow]);
 
   const usedKey = [...new Set(doc.pages.flatMap(p => p.steps.filter(s => s.op === 'photo').flatMap(s => [s.photo, s.orig].filter(Boolean))))].sort(); // a cutout's original counts as used
 
@@ -1664,7 +1690,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setExportFailed(false);
 
     try {
-      await exportImage(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page }, { format, background: typeof doc.bg === 'string' ? doc.bg : '#ffffff', title: doc.title });
+      await exportImage(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page }, { format, background: typeof doc.bg === 'string' ? doc.bg : '#ffffff', title: doc.title });
     } catch {
       setExportFailed(true);
     } finally {
@@ -1787,7 +1813,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     const c = latest.current;
     const what = classify(data);
 
-    if(c.readOnly || c.previewing) return;
+    if(c.readOnly || c.previewing || c.slideInfo) return; // a paste lands at the end of a page: not on a slide
     if(!what) return setAnnounce(tr('editor.announce.pasteNothing'));
 
     const n = ++pasted.current;
@@ -1911,16 +1937,16 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   // every tool can be picked; the key is in the label and in aria-keyshortcuts
   const toolButton = ({ id, key }) => html`
-    <button type="button" class=${'wb-editor-button wb-editor-tool wb-editor-tool-' + id} aria-pressed=${tool === id ? 'true' : 'false'} aria-keyshortcuts=${key} onClick=${() => setTool(id)} title=${`${t('editor.tool.' + id)} (${key})`} aria-label=${t('editor.tool.' + id)}>
+    <button type="button" class=${'wb-editor-button wb-editor-tool wb-editor-tool-' + id} disabled=${!!slideInfo && ['clip', 'unclip', 'wand'].includes(id)} aria-pressed=${tool === id ? 'true' : 'false'} aria-keyshortcuts=${key} onClick=${() => setTool(id)} title=${`${t('editor.tool.' + id)} (${key})`} aria-label=${t('editor.tool.' + id)}>
       <span class="wb-editor-tool-icon" aria-hidden="true"></span>
       <span class="wb-editor-tool-key" aria-hidden="true">${key}</span>
     </button>
   `;
 
-  const empty = doc.pages[page].steps.length === 0 && !live;
+  const empty = !slideInfo && doc.pages[page].steps.length === 0 && !live;
   const outline = selectedStep && outlineOf(doc, selectedStep.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true });
   const title = doc.title ?? '';
-  const strip = auto ? [] : photoSteps(doc, page);
+  const strip = auto || slideInfo ? [] : photoSteps(doc, page);
   const parsedShape = editStep?.op === 'shape' && tool === 'select' ? verticesOf(editStep) : null;
   const clipGeo = tool === 'clip' && !previewing && editStep?.op === 'photo' ? clipPolygonsOf(doc, editStep.id) : null; // the clip outlines to ghost and edit
   const vertexGeo = parsedShape && matrixOf(doc, editStep.id, { page }) ? geometry(parsedShape, matrixOf(doc, editStep.id, { page })) : null;
@@ -2016,7 +2042,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           tabindex="0"
           aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
-          content=${renderNode(doc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? Math.min(slide, Math.max(0, slides - 1)) : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
+          content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
           overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} scale=${scale} px=${handlePx} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
@@ -2060,7 +2086,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         : html`<${Scrubber} t=${t} count=${count} k=${shown} playing=${playing} onScrub=${scrub} onPlay=${togglePlay} />
             ${previewing && !playing && html`<p class="wb-editor-context" role="status">${t('editor.scrub.preview')}</p>`}`}
       ${mode === 'slides'
-        ? html`<${SlideStrip} t=${t} doc=${doc} photos=${photos} count=${slides} current=${Math.min(slide, Math.max(0, slides - 1))} onSelect=${setSlide} />`
+        ? html`<${SlideStrip} t=${t} doc=${realDoc} photos=${photos} count=${slides} current=${Math.min(slide, Math.max(0, slides - 1))} onSelect=${setSlide} />`
         : mode === 'free' && html`<${PageStrip} t=${t} doc=${doc} photos=${photos} current=${page} onSelect=${switchPage} onAdd=${addPage} onMove=${(id, to) => dispatch({ type: 'movePage', id, to })} onRemove=${removePage} />`}
       </div>
       </div>

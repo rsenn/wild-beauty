@@ -170,7 +170,7 @@
   "editor.mode.slides": "Folien",
   "editor.mode.grid": "Raster",
   "editor.slide.n": "Folie {n}",
-  "editor.mode.auto": "Folien und Raster ordnen die Fotos automatisch an. Zum Bearbeiten auf Frei wechseln.",
+  "editor.mode.auto": "Das Raster ordnet die Fotos selbst an. Zum Bearbeiten auf Frei oder Folien wechseln.",
   "editor.shape.hasFill": "Gefüllt",
   "editor.shape.hasStroke": "Kontur",
   "editor.shape.closed": "Geschlossen",
