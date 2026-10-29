@@ -3,10 +3,12 @@ import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { REST, bounds, seed, settled, step } from '../graph/layout.js';
+import { fitHeight } from '../gallery/fit.js';
 import { Layout } from './Layout.js';
 import { PlaceSuggestions } from './PlaceSuggestions.js';
 
 const SIZE = 84;
+const FIT_PAD = 54; // world units round the outermost node centres in the fitted view (half a node is 42)
 const MAX_FIT = 1.8; // the fitted view never enlarges the nodes beyond this (150 px)
 const GAP = 1 / 3; // the gap between two nodes is at least this share of a node
 const SPREAD = [0.25, 2.5]; // links of 50 to 500 units against nodes of 84: enlarged up to four times against the links, shrunk to dots on long strings no further
@@ -222,11 +224,23 @@ export const GraphPage = () => {
       }
     }
 
-    const box = bounds(bodies.current);
+    el.style.height = `${fitHeight(el, { min: 280, gap: 8 })}px`; // the space left under the toolbar, so the graph is centred in what is seen
+
+    const box = bounds(bodies.current, FIT_PAD);
     const k = Math.min(el.clientWidth / box.w, el.clientHeight / box.h, MAX_FIT);
 
     setView({ k, x: (el.clientWidth - box.w * k) / 2 - box.x * k, y: (el.clientHeight - box.h * k) / 2 - box.y * k });
   };
+
+  // the address bar comes and goes, the phone turns: the view follows until the visitor pans or zooms
+  useEffect(() => {
+    const again = () => !touched.current && fit(true);
+    const target = globalThis.visualViewport ?? window;
+
+    target.addEventListener('resize', again);
+
+    return () => target.removeEventListener('resize', again);
+  }, []);
 
   const world = e => {
     const r = svg.current.getBoundingClientRect();

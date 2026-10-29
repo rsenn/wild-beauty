@@ -19,6 +19,10 @@
 import { autoPlan } from './autoplan.js';
 import { OVERVIEW, overviewPose, planBounds } from './overview.js';
 import { makeFlyby } from './flyby.js';
+import { PILOT, createPilot } from './pilot.js';
+import { makeSound } from './sound.js';
+import { createCallouts } from './callouts.js';
+import { makeVoice } from './voice.js';
 import { buildGallery } from './build.js';
 import { planFromDoc } from './fromdoc.js';
 import { controls } from './controls.js';
@@ -45,7 +49,24 @@ const SHARP = 4;
 // how fast the lens closes and opens, per second
 const LENS = { close: 5, open: 2 };
 
-export async function startGallery(canvas, { items, scene, doc, overview = false, onOpen, onLock, onLost, onState, onLens, onStick } = {}) {
+// taking the controls of the flyby: the field of view of the bird, seconds without input before the bird
+// glides back onto its path, seconds that glide takes
+const PILOT_FOV = 62;
+const PILOT_GRACE = 60; // a minute: the bird flies on by itself (levelled, throttled back low over a floor) and the visitor can stay in the flare
+const PILOT_REJOIN = 2.4;
+
+const wrapAngle = a => ((a + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
+const mixPose = (a, b, k) => ({
+  x: a.x + (b.x - a.x) * k,
+  y: a.y + (b.y - a.y) * k,
+  z: a.z + (b.z - a.z) * k,
+  yaw: a.yaw + wrapAngle(b.yaw - a.yaw) * k,
+  pitch: a.pitch + (b.pitch - a.pitch) * k,
+  roll: a.roll + (b.roll - a.roll) * k,
+  fov: a.fov + (b.fov - a.fov) * k,
+});
+
+export async function startGallery(canvas, { items, scene, doc, overview = false, onOpen, onLock, onLost, onState, onLens, onStick, onNote, onFlight } = {}) {
   if(!webgl()) throw new Error('webgl');
 
   // `?look=warm|walnut|stone` picks the surfaces of the auto plan (autoplan.js LOOKS)
@@ -70,10 +91,23 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
 
   if(overview) mode = 'overview';
 
+  // the visitor has the bird (pilot.js), the gear and the flaps (the running gag, sound.js)
+  let pilot = null;
+  let rejoin = null; // { t, from, now }: the bird glides back onto the flyby's path
+  let idle = 0;
+  let slipHeld = 0;
+  let aids = 0; // seconds since the instruments were last sent
+  let landing = null; // the pilot that has just landed
+  let noted = false; // the hint about the controls is given once
+  let gear = false;
+  let flaps = 0;
+  const sound = makeSound();
+  const voice = makeVoice();
+  const callouts = createCallouts(voice.say);
   const state = () => {
     const here = list[tour.index];
 
-    return { mode, index: tour.index, total: list.length, moving: tour.moving, zoomed: tour.zoomTarget > 1.05, title: here?.child?.title ?? '', canOpen: !!here?.child?.href };
+    return { mode, index: tour.index, total: list.length, moving: tour.moving, zoomed: tour.zoomTarget > 1.05, title: here?.child?.title ?? '', canOpen: !!here?.child?.href, piloting: !!pilot, gear, flaps };
   };
   const emit = () => {
     const now = state();
@@ -117,6 +151,34 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
     emit();
   };
   const command = name => {
+    if(mode === 'overview' && name === 'gear') {
+      gear = !gear;
+      idle = 0; // a switch is a control too
+      sound.gear(gear);
+      onNote?.(gear ? 'gear.down' : 'gear.up');
+      emit();
+
+      return;
+    }
+
+    if(mode === 'overview' && name === 'flaps') {
+      const from = flaps;
+
+      flaps = (flaps + 1) % (PILOT.flaps + 1);
+      idle = 0;
+      sound.flaps(flaps, from);
+      onNote?.(`flaps.${flaps}`);
+      emit();
+
+      return;
+    }
+
+    if(mode === 'overview' && name.startsWith('slip')) {
+      slipHeld = name === 'slipLeft' ? -1 : name === 'slipRight' ? 1 : 0; // the chips for touch hold it
+
+      return;
+    }
+
     if(mode === 'overview' && name !== 'walk') return;
 
     if(name === 'walk') {
@@ -125,7 +187,7 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
       target = 1;
       origin = lastFly && { ...lastFly };
       mode = list.length ? 'guide' : 'free';
-      input = attach();
+      pilot = rejoin = null;
       emit();
 
       return;
@@ -136,10 +198,14 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
       origin = null;
       flyT = 0; // the flyby starts at the bird's-eye view
       lastFly = null;
+      pilot = rejoin = null;
+      slipHeld = 0;
+      onFlight?.(null);
+      voice.cancel();
       mode = 'overview';
+      gear = false;
+      flaps = 0;
       tour.release();
-      input?.dispose();
-      input = null;
       if(document.pointerLockElement) document.exitPointerLock?.();
       emit();
 
@@ -166,9 +232,11 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
     onLock,
     onStick,
     onCommand: command,
-    onZoom: f => tour.zoomBy(f),
+    onZoom: f => mode !== 'overview' && tour.zoomBy(f),
     // a tap on a picture goes to it; on the one in front of you it zooms to fill the stage
     onTap: (x, y) => {
+      if(mode === 'overview') return;
+
       const hit = g.pick(x, y);
       const at = hit && hit.distance < 14 ? bySlot.get(hit.picture.userData.index) : null;
 
@@ -178,7 +246,7 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
       else guide(at.index);
     },
   });
-  let input = overview ? null : attach();
+  let input = attach();
 
   // the lens (vignette and a soft edge blur, drawn by the page over the canvas) closes while the camera
   // glides from picture to picture or flies down into the plan, and opens on arrival; it is
@@ -203,7 +271,6 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
     focus: () => focus, // the pictures near the visitor load, though the camera is far above
     onFrame(time, dt, camera, THREE) {
       const inp = input?.read() ?? { moving: false };
-
       if(mode === 'guide' && inp.moving) free();
 
       tour.step(dt); // the zoom, and the walk to a station
@@ -241,8 +308,79 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
         }
 
         if(fly) {
-          const q = (lastFly = fly.pose((flyT += dt)));
+          const moving = inp.moving || slipHeld !== 0;
 
+          idle = moving ? 0 : idle + dt;
+
+          // a touch, a key or a drag takes the controls and pauses the loop; let go and it glides back
+          if(moving && !pilot) {
+            pilot = createPilot(built, rejoin?.now ?? lastFly);
+            pilot.gear = gear ? 1 : 0;
+            pilot.flapsAt = flaps;
+            rejoin = null;
+            callouts.reset();
+            if(!noted) onNote?.('fly');
+            noted = true;
+          }
+
+          let q;
+
+          if(pilot) {
+            const [bounced, belly, skidded] = [pilot.bounced, pilot.belly, pilot.skidded];
+
+            pilot.step(dt, { ...inp, gear, flaps, slip: inp.slip || slipHeld });
+            if(pilot.skidded > skidded) onNote?.('skid');
+            else if(pilot.belly > belly) onNote?.('belly');
+            else if(pilot.bounced > bounced) onNote?.('bounce');
+
+            q = { ...pilot.pose(), fov: PILOT_FOV };
+            const ins = pilot.instruments();
+
+            callouts.step(dt, ins); // the radar altimeter's voice and the proximity warnings
+
+            if(onFlight && (aids += dt) >= 0.1) {
+              aids = 0;
+              onFlight(ins);
+            }
+
+            if(pilot.landed) {
+              // touched down: the visitor walks from here
+              walker.x = pilot.x;
+              walker.y = pilot.y;
+              walker.yaw = pilot.yaw;
+              walker.pitch = 0;
+              walker.eye = pilot.h;
+              lastFly = q;
+              landing = pilot;
+              pilot = null;
+              onFlight?.(null);
+              voice.cancel();
+              command('walk');
+              free();
+              if(landing.medal) {
+                sound.fanfare();
+                onNote?.('medal');
+              } else onNote?.('touchdown');
+            } else if(idle > PILOT_GRACE) {
+              rejoin = { t: 0, from: q, now: q };
+              pilot = null;
+              onFlight?.(null);
+              voice.cancel();
+            }
+          } else {
+            const base = fly.pose((flyT += dt));
+
+            if(rejoin) {
+              rejoin.t += dt / PILOT_REJOIN;
+
+              const k = Math.min(1, rejoin.t);
+
+              q = rejoin.now = mixPose(rejoin.from, base, k * k * (3 - 2 * k));
+              if(rejoin.t >= 1) rejoin = null;
+            } else q = base;
+          }
+
+          lastFly = q;
           camera.position.set(q.x, q.y, q.z);
           camera.rotation.set(q.pitch, -q.yaw, q.roll, 'YXZ');
           focus.copy(camera.position);
@@ -250,7 +388,7 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
         }
       }
 
-      if(g.world.trail) g.world.trail.paused = !!(flying && fly); // no footprints from a camera that flies
+      if(g.world.trail) g.world.trail.paused = !!(flying && fly) || !!pilot; // no footprints from a camera that flies
 
       if(Math.abs(camera.fov - fov) > 0.01) {
         camera.fov = fov;
@@ -281,6 +419,8 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
     state,
     dispose() {
       canvas.removeEventListener('webglcontextlost', lost);
+      sound.dispose();
+      voice.cancel();
       input?.dispose();
       g.dispose();
     },

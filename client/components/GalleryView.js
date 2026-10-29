@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
+import { Medal } from './Medal.js';
 import { useI18n } from '../i18n.js';
 import { fitHeight } from '../gallery/fit.js';
 import { IconButton } from './GalleryTools.js';
@@ -25,10 +26,15 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
   const [hud, setHud] = useState(null);
   const [walking, setWalking] = useState(false); // overview only: the visitor has flown down
   const [seen, setSeen] = useState(false); // the hint goes once the visitor has stepped or walked
+  const [note, setNote] = useState(null); // a short line from the bird (gear, flaps, touchdown), gone after a few seconds
+  const noteTimer = useRef(0);
+  const [medal, setMedal] = useState(false); // a perfect landing from the flyby
+  const medalTimer = useRef(0);
   const [help, setHelp] = useState(false); // the help note is open
   const box = useRef(null);
   const lens = useRef(null);
   const stickEl = useRef(null);
+  const aidsEl = useRef(null); // the flight aids, written straight into the page: they change ten times a second
   const canvas = useRef(null);
   const live = useRef(null);
   const entered = state === 'loading' || state === 'live';
@@ -51,6 +57,23 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
           doc,
           overview,
           onLock: setLocked,
+          onFlight: v => {
+            const el = aidsEl.current;
+
+            if(!el) return;
+
+            el.hidden = !v;
+
+            if(!v) return;
+
+            const [ra, vs, speed] = el.children;
+            const sign = n => (n >= 0.05 ? '▲' : n <= -0.05 ? '▼' : '•');
+
+            ra.textContent = `RA ${v.ra === null ? '--' : v.ra < 10 ? v.ra.toFixed(1) : Math.round(v.ra)} m`;
+            vs.textContent = `VS ${sign(v.vs)} ${Math.abs(v.vs).toFixed(1)} m/s`;
+            speed.textContent = `SPD ${Math.round(v.speed)} m/s`;
+            el.dataset.warn = v.ra !== null && v.ra < 12 && v.vs < -2.4 ? 'sink' : ''; // a sink rate that is too much for the height left
+          },
           onStick: v => {
             const el = stickEl.current;
 
@@ -67,8 +90,22 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
             put(knob, v.knob, v.r * 0.42);
           },
           onLens: v => lens.current && ((lens.current.style.opacity = v), (lens.current.hidden = v < 0.01)),
+          onNote: key => {
+            if(key === 'medal') {
+              setMedal(true);
+              clearTimeout(medalTimer.current);
+              medalTimer.current = setTimeout(() => setMedal(false), 7000);
+
+              return;
+            }
+
+            setNote(key);
+            clearTimeout(noteTimer.current);
+            noteTimer.current = setTimeout(() => setNote(null), key === 'fly' ? 6000 : 2600);
+          },
           onState: s => {
             setHud(s);
+            if(overview && s.mode !== 'overview') setWalking(true); // it touched down by itself
             if(s.index !== 0 || s.mode === 'free' || s.moving) setSeen(true);
           },
           onLost: () => {
@@ -208,6 +245,7 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
     <div class=${`wb-gallery${cover ? ' wb-gallery-fill' : ''}${overview && walking ? ' wb-gallery-wide' : ''}`} ref=${box} role="application" aria-label=${label}>
       ${state !== 'error' && html`<canvas ref=${canvas} class="wb-gallery-canvas" tabindex="0"></canvas>`}
       <div ref=${lens} class="wb-gallery-lens" aria-hidden="true" hidden></div>
+      <div ref=${aidsEl} class="wb-gallery-aids" aria-hidden="true" hidden><span></span><span></span><span></span></div>
       <div ref=${stickEl} class="wb-gallery-stick" aria-hidden="true" hidden><span></span><span></span></div>
       ${(!chrome || full) && html`<div class="wb-gallery-bar">
         ${state === 'live' && (chrome
@@ -231,6 +269,15 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
           <button type="button" class="wb-editor-chip" onClick=${() => live.current?.command('guide')}>${t(hud.mode === 'guide' ? 'gallery.free' : 'gallery.guide')}</button>
         </div>
       `}
+      ${medal && html`<${Medal} label=${t('gallery.fly.medal')} onClose=${() => setMedal(false)} />`}
+      ${overview && state === 'live' && !walking && note && html`<p class="wb-gallery-note wb-gallery-help" role="status">${t(`gallery.fly.${note}`)}</p>`}
+      ${overview && state === 'live' && !walking && hud?.piloting && html`
+        <div class="wb-gallery-hud" role="toolbar" aria-label=${t('gallery.fly.label')}>
+          <button type="button" class="wb-editor-chip" aria-pressed=${hud.flaps > 0} onClick=${() => live.current?.command('flaps')}>${t('gallery.fly.flaps')} ${hud.flaps}</button>
+          <button type="button" class="wb-editor-chip" aria-label=${t('gallery.fly.slip.left')} onPointerDown=${() => live.current?.command('slipLeft')} onPointerUp=${() => live.current?.command('slipOff')} onPointerLeave=${() => live.current?.command('slipOff')} onPointerCancel=${() => live.current?.command('slipOff')}>◀ ${t('gallery.fly.slip')}</button>
+          <button type="button" class="wb-editor-chip" aria-label=${t('gallery.fly.slip.right')} onPointerDown=${() => live.current?.command('slipRight')} onPointerUp=${() => live.current?.command('slipOff')} onPointerLeave=${() => live.current?.command('slipOff')} onPointerCancel=${() => live.current?.command('slipOff')}>${t('gallery.fly.slip')} ▶</button>
+          <button type="button" class="wb-editor-chip" aria-pressed=${hud.gear} onClick=${() => live.current?.command('gear')}>${t('gallery.fly.gear')}</button>
+        </div>`}
       ${inside && help && !locked && html`<p class="wb-gallery-note wb-gallery-help" role="status" onClick=${() => setHelp(false)}>${t(hud?.mode === 'free' ? 'gallery.help' : 'gallery.help.guide')}</p>`}
     </div>
   `;

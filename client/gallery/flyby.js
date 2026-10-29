@@ -25,17 +25,17 @@ export const FLYBY = {
   altitude: 24, // metres over the floor: the figure eight and the way between rooms
   reach: [15, 8.5], // half sizes of the figure eight, along the wall and away from it
   cruise: 10, // metres a second high up
-  bank: 0.42, // radians of roll in a turn, at most
+  bank: 0.3, // radians of roll in a turn, at most
   fov: 64, // field of view near the pictures, degrees
   safe: 0.7, // metres clear of the walls where the camera is lower than a wall
   wall: 3.4, // metres: the height up to which the walls count
   rate: 60, // poses a second in the table
-  gaze: 0.7, // seconds: how far the gaze is smoothed (the standard deviation, over two passes)
+  gaze: 0.95, // seconds: how far the gaze is smoothed (the standard deviation, over two passes)
   tilt: 1.7, // the steepest the gaze goes, as rise over run (about 60 degrees)
   roll: 0.5, // seconds: and the roll
   window: 9, // metres over which the speed is eased
   sway: 1, // the bird's sway, 0 for none
-  settle: 3.5, // seconds at each end of the loop that ease into the still bird's-eye view
+  settle: 5, // seconds at each end of the loop that ease into the still bird's-eye view
 };
 
 const TAU = Math.PI * 2;
@@ -121,9 +121,7 @@ function legOf(built, run, o) {
     const u = (k / samples) * TAU;
     const [x, y] = point(u);
 
-    const [ax, ay] = point(u + (TAU / samples) * 1.6); // the ground a little ahead, so the head does not whip round as it passes over the middle
-
-    ways.push(way(scene(x, y, o.altitude + 2.5 * Math.sin(u * 2)), scene(ax, ay, 0), o.cruise, 0.4, 46));
+    ways.push(way(scene(x, y, o.altitude + 2.5 * Math.sin(u * 2)), scene(centre[0], centre[1], 0), o.cruise, 0.9, 46));
   }
 
   return ways;
@@ -272,10 +270,10 @@ export function makeFlyby(built, list, bird, options = {}) {
     // a head is not turned straight down: the way the bird heads keeps the yaw, the pitch is capped
     const size = Math.hypot(x, z) + 0.25;
     const over = Math.hypot(look[0], look[2]);
-    const bearing = (Math.min(K[j], 0.6) * Math.min(1, over / 8)) / (over || 1); // right above the target its bearing swings: it counts for nothing there
+    const bearing = (K[j] * Math.min(1, over / 8)) / (over || 1); // right above the target its bearing swings: it counts for nothing there
 
-    x = h[0] / flat + look[0] * bearing;
-    z = h[2] / flat + look[2] * bearing;
+    x = (h[0] / flat) * (1 - K[j]) + look[0] * bearing;
+    z = (h[2] / flat) * (1 - K[j]) + look[2] * bearing;
 
     const turned = Math.hypot(x, z) || 1;
     const level = size;
