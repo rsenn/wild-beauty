@@ -4,7 +4,7 @@ import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { UPLOAD_MIME, cropPosition, expiryNote, formatSize, panAxis, saveCrop, uploadPayload } from '../files.js';
 import { watchHold } from '../ghostdrag.js';
-import { watchMouseRange } from '../cardrange.js';
+import { watchRange } from '../cardrange.js';
 import { requestAdd } from '../editor/pending.js';
 
 // file name and size under the thumbnail are switched off for now
@@ -37,12 +37,13 @@ export const UploadCard = ({ item, order, inNode, ranging, onRange, onToggle, on
   const down = e => {
     if(e.button > 0) return;
 
-    // no crop to pan: a mouse dragged over cards chooses the run from here to there
-    // (a finger holds the card instead, see `hold`)
+    // no crop to pan: a mouse dragged over cards, or a finger swiped sideways over
+    // them (up or down scrolls the page), chooses the run from here to there; holding
+    // a finger still picks the card up for the stage, see `hold`
     if(!pan.axis) {
-      if(e.pointerType !== 'mouse' || !item.record || inNode) return;
+      if(!item.record || inNode) return;
 
-      const watch = watchMouseRange(e, { update: to => onRange.update(item.id, to), end: to => onRange.end(item.id, to) });
+      const watch = watchRange(e, { update: to => onRange.update(item.id, to), end: to => onRange.end(item.id, to) });
 
       range.current = watch;
 

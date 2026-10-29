@@ -6,21 +6,29 @@ import { useI18n } from '../i18n.js';
 // poster; a button enters the walkable gallery in the same square, which can fill
 // the screen. Everything of the gallery (three.js too) is loaded on entering.
 //  items  what to hang (client/gallery/items.js)
+//  overview  a gallery node: the gallery is shown at once from above (overview.js), the
+//            button flies down into it, the stage widens and the visitor walks
 //  doc    the node's document: a gallery node's drawn walls make the plan (fromdoc.js)
 //  children  the poster, shown until entered
 //  wide      a poster that is not square (a list): the button goes above it, not over it
-export const GalleryView = ({ items, doc, label, wide = false, children }) => {
+export const GalleryView = ({ items, doc, label, overview = false, wide = false, children }) => {
   const { t } = useI18n();
   const [state, setState] = useState('poster'); // poster | loading | live | error
   const [fill, setFill] = useState(false);
   const [error, setError] = useState('');
   const [locked, setLocked] = useState(false);
   const [hud, setHud] = useState(null);
+  const [walking, setWalking] = useState(false); // overview only: the visitor has flown down
   const [seen, setSeen] = useState(false); // the hint goes once the visitor has stepped or walked
   const box = useRef(null);
   const canvas = useRef(null);
   const live = useRef(null);
   const entered = state === 'loading' || state === 'live';
+
+  // a gallery node shows its gallery at once; the poster stays for a browser without scripts
+  useEffect(() => {
+    if(overview) setState('loading');
+  }, []);
 
   // enter: import the session, start it on the canvas; leave: dispose it
   useEffect(() => {
@@ -33,6 +41,7 @@ export const GalleryView = ({ items, doc, label, wide = false, children }) => {
         startGallery(canvas.current, {
           items,
           doc,
+          overview,
           onLock: setLocked,
           onState: s => {
             setHud(s);
@@ -81,8 +90,20 @@ export const GalleryView = ({ items, doc, label, wide = false, children }) => {
     if(document.fullscreenElement) document.exitFullscreen();
 
     setCover(false);
-    setState('poster');
+
+    // back up above the gallery, the stage square again
+    if(overview) {
+      live.current?.command('overview');
+      setWalking(false);
+      setHud(h => h && { ...h, mode: 'overview' });
+    } else setState('poster');
   };
+  const walk = () => {
+    live.current?.command('walk');
+    setWalking(true);
+  };
+
+  if(overview && state === 'poster') return children;
 
   if(!entered && state !== 'error') {
     const enter = html`<button type="button" class=${`wb-editor-chip wb-gallery-enter${wide ? ' wb-gallery-enter-inline' : ''}`} onClick=${() => setState('loading')}>${t('gallery.enter')}</button>`;
@@ -98,15 +119,16 @@ export const GalleryView = ({ items, doc, label, wide = false, children }) => {
   }
 
   return html`
-    <div class=${`wb-gallery${cover ? ' wb-gallery-fill' : ''}`} ref=${box} role="application" aria-label=${label}>
+    <div class=${`wb-gallery${cover ? ' wb-gallery-fill' : ''}${overview && walking ? ' wb-gallery-wide' : ''}`} ref=${box} role="application" aria-label=${label}>
       ${state !== 'error' && html`<canvas ref=${canvas} class="wb-gallery-canvas" tabindex="0"></canvas>`}
       <div class="wb-gallery-bar">
         ${state === 'live' && html`<button type="button" class="wb-editor-chip" onClick=${toggleFull}>${t(full ? 'gallery.fullscreen.exit' : 'gallery.fullscreen')}</button>`}
-        <button type="button" class="wb-editor-chip" onClick=${leave}>${t('gallery.leave')}</button>
+        ${(!overview || walking) && html`<button type="button" class="wb-editor-chip" onClick=${leave}>${t(overview ? 'gallery.overview' : 'gallery.leave')}</button>`}
       </div>
+      ${overview && state === 'live' && !walking && html`<button type="button" class="wb-editor-chip wb-gallery-enter" onClick=${walk}>${t('gallery.enter')}</button>`}
       ${state === 'loading' && html`<p class="wb-gallery-note" role="status">${t('gallery.loading')}</p>`}
       ${state === 'error' && html`<p class="wb-gallery-note" role="alert">${error}</p>`}
-      ${state === 'live' && hud && html`
+      ${state === 'live' && hud && hud.mode !== 'overview' && html`
         <div class="wb-gallery-hud" role="toolbar" aria-label=${t('gallery.hud')}>
           ${hud.mode === 'guide' && html`
             <button type="button" class="wb-editor-chip" disabled=${hud.index <= 0} aria-label=${t('gallery.prev')} onClick=${() => live.current?.command('prev')}>◀</button>
@@ -117,7 +139,7 @@ export const GalleryView = ({ items, doc, label, wide = false, children }) => {
           <button type="button" class="wb-editor-chip" onClick=${() => live.current?.command('guide')}>${t(hud.mode === 'guide' ? 'gallery.free' : 'gallery.guide')}</button>
         </div>
       `}
-      ${state === 'live' && !locked && !seen && html`<p class="wb-gallery-note wb-gallery-help">${t(hud?.mode === 'free' ? 'gallery.help' : 'gallery.help.guide')}</p>`}
+      ${state === 'live' && (!overview || walking) && !locked && !seen && html`<p class="wb-gallery-note wb-gallery-help">${t(hud?.mode === 'free' ? 'gallery.help' : 'gallery.help.guide')}</p>`}
     </div>
   `;
 };

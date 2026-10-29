@@ -580,8 +580,8 @@ export async function enterScene(canvas, built, hung, options = {}) {
     const dt = before === null ? 0 : (time - before) / 1000;
 
     before = time;
-    options.onFrame?.(time, dt, camera);
-    world.update(camera.position, time / 1000);
+    options.onFrame?.(time, dt, camera, THREE);
+    world.update(options.focus?.() ?? camera.position, time / 1000); // `focus`: where the pictures to load are, when it is not where the camera is
     renderer.render(scene, camera);
   };
 

@@ -299,6 +299,7 @@ body {
   background: none;
   border: 0;
   cursor: grab;
+  touch-action: pan-y; /* a sideways swipe over cards chooses a run (cardrange.js); up and down scrolls */
 }
 
 .wb-card-image {
@@ -827,6 +828,19 @@ body {
   background: var(--wb-gallery-ground);
   border: var(--wb-border-width) solid var(--wb-ink);
   box-shadow: var(--wb-shadow-card);
+}
+
+.wb-gallery {
+  transition: width 0.7s ease, aspect-ratio 0.7s ease;
+}
+
+/* a gallery node once the visitor walks: the stage grows to the left and right and is no longer square */
+.wb-gallery-wide {
+  --wb-wide: min(96vw, 1500px, calc((100dvh - 3em) * 16 / 9));
+
+  width: var(--wb-wide);
+  margin-left: calc(50% - var(--wb-wide) / 2);
+  aspect-ratio: 16 / 9;
 }
 
 .wb-gallery-poster {

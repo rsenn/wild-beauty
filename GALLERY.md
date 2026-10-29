@@ -43,6 +43,7 @@ Dates are as of 2026-10-22.
   another; **no corner is sharper than 45 degrees** (interior angle between 45 and
   315 degrees; relaxed from 90 on 2026-10-29 for the room aid, EDITOR.md E136), and every wall run is long enough for at least 2-3 pictures
   before a corner (S5).
+- **Overview first** (2026-10-29): a `kind: gallery` node page shows its gallery at once from above, in real perspective (`client/gallery/overview.js`: the camera 58 degrees up, far enough back to show every wall); the pictures near the first station load meanwhile. "Walk through the 3D gallery" flies the camera down to the first picture (1.8 s, eased position, turn and field of view; `session.js` `blend`), the stage widens to 16:9 across the page (`.wb-gallery-wide`) and the guided tour starts; "Back to the overview" flies up and shrinks the stage. A browser without WebGL keeps the flat poster.
 - **Sequence children** (2026-10-29): a child node that is a slide show or a grid of two or more photos hangs **each of its photos** (thumbnails, the baked photo on zoom, titled `Title i/n`, all opening the child's page) instead of one tile. Order is deterministic: the children in edge order (`sort`, then id), the photos of a child in the node's own order, repeats and missing photos left out (`server/node/view.js` `galleryChild`, `client/gallery/items.js` `childItems`).
 - **Hanging**: automatic, on **one side of a wall only**: the inside of a room.
 - **North** is the top of the editor view; the owner cannot rotate it.

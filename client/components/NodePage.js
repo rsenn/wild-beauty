@@ -23,7 +23,7 @@ export const NodePage = () => {
   return html`
     <${Layout} active="" hrefFor=${code => `/${code}/node/${node.id}`}>
       <h1 class="wb-node-title">${title}</h1>
-      ${!editingThis && (galleryable(node, items) ? html`<${GalleryView} items=${items} doc=${node.kind === 'gallery' ? node.doc : undefined} label=${title}>${view}<//>` : view)}
+      ${!editingThis && (galleryable(node, items) ? html`<${GalleryView} items=${items} doc=${node.kind === 'gallery' ? node.doc : undefined} overview=${node.kind === 'gallery'} label=${title}>${view}<//>` : view)}
       ${!editingThis && html`<p><button type="button" class="wb-editor-chip wb-node-edit" onClick=${() => openEditor(node.id)}>${t('editor.edit')}</button></p>`}
       ${editingThis && html`<${NodeEditor} key=${target} target=${target} onClose=${closeEditor} />`}
     <//>

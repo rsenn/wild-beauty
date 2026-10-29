@@ -60,6 +60,20 @@ describe('createQueue', () => {
     expect(other.at(-1)).toBe('failed');
   });
 
+  test('a photo that could not be read is retried like a dropped connection', async () => {
+    const waits = [];
+    const answers = [fail('unreadable'), ok({ hash: 'a' })];
+    const states = [];
+    const queue = createQueue({ onChange: (id, patch) => states.push(patch.state), send: () => answers.shift(), wait: (ms, fn) => waits.push(fn) });
+
+    queue.add(1, 'a');
+    await tick();
+    waits.shift()();
+    await tick();
+
+    expect(states.at(-1)).toBe('done');
+  });
+
   test('cancel stops a file that waits for its next attempt', async () => {
     const waits = [];
     let sent = 0;

@@ -1,11 +1,13 @@
 // Dragging over the upload cards to choose a run of them (EDITOR.md E140). The
 // page scrolls by itself while the pointer is near the top or bottom edge, so a
-// run longer than the screen can be dragged out. A finger gets this through the
-// held "ghost" of ghostdrag.js, a mouse through watchMouseRange below.
+// run longer than the screen can be dragged out. A mouse drags from the card at
+// once; a finger swipes sideways (an up or down swipe is the page scrolling) or
+// holds the card (the "ghost" of ghostdrag.js); both go through watchRange below.
 
 export const EDGE_PX = 70; // how near the window's edge the page starts to scroll
 export const MAX_SPEED = 28; // px per frame at the very edge
 export const MOUSE_SLOP_PX = 6;
+export const TOUCH_SLOP_PX = 10; // a finger must go this far sideways, and further sideways than up or down
 
 // the id (as written in `data-card`) of the card under a screen point, or null
 export function cardAt(x, y, doc = globalThis.document) {
@@ -41,11 +43,12 @@ export function autoscroll(point, tick, win = globalThis.window) {
   return () => win.cancelAnimationFrame(frame);
 }
 
-// A mouse pressed on card `from`: once it has moved a few pixels it is a drag
-// over cards. `update(id)` hears the card under the pointer (null: none), `end(id)`
+// A pointer pressed on a card: once a mouse has moved a few pixels, or a finger a
+// few pixels more sideways than up or down, it is a drag over cards (a finger that
+// goes up or down first is scrolling the page: it is left alone). `update(id)` hears the card under the pointer (null: none), `end(id)`
 // the card it was let go on; a click that never became a drag reports nothing.
 // -> { dragged(): boolean, cancel() }
-export function watchMouseRange(event, { update, end }, win = globalThis.window) {
+export function watchRange(event, { update, end }, win = globalThis.window) {
   const doc = win.document;
   const id = event.pointerId;
   const from = [event.clientX, event.clientY];
@@ -53,6 +56,10 @@ export function watchMouseRange(event, { update, end }, win = globalThis.window)
   let active = false;
   let stop = null;
   let over = null;
+  const touch = event.pointerType !== 'mouse';
+
+  // once a finger drags over cards the page must not scroll under it
+  const hold = e => active && e.preventDefault();
 
   const look = () => {
     const now = cardAt(at[0], at[1], doc);
@@ -63,6 +70,7 @@ export function watchMouseRange(event, { update, end }, win = globalThis.window)
     win.removeEventListener('pointermove', move);
     win.removeEventListener('pointerup', up);
     win.removeEventListener('pointercancel', cancel);
+    win.removeEventListener('touchmove', hold);
     stop?.();
 
     if(active && commit) end(over);
@@ -73,7 +81,10 @@ export function watchMouseRange(event, { update, end }, win = globalThis.window)
 
     at = [e.clientX, e.clientY];
 
-    if(!active && Math.hypot(at[0] - from[0], at[1] - from[1]) < MOUSE_SLOP_PX) return;
+    const [dx, dy] = [Math.abs(at[0] - from[0]), Math.abs(at[1] - from[1])];
+
+    if(!active && touch && dy > TOUCH_SLOP_PX && dy >= dx) return finish(false); // scrolling
+    if(!active && (touch ? dx < TOUCH_SLOP_PX || dx <= dy : Math.hypot(dx, dy) < MOUSE_SLOP_PX)) return;
 
     if(!active) {
       active = true;
@@ -88,6 +99,7 @@ export function watchMouseRange(event, { update, end }, win = globalThis.window)
   win.addEventListener('pointermove', move);
   win.addEventListener('pointerup', up);
   win.addEventListener('pointercancel', cancel);
+  if(touch) win.addEventListener('touchmove', hold, { passive: false });
 
   return { dragged: () => active, cancel: () => finish(false) };
 }

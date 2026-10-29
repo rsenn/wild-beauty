@@ -11,10 +11,13 @@
 // hears { mode, index, total, moving, zoomed, title, canOpen } when it changes.
 //
 // `items` is items.js: [{ id, url, href? }]. A node without a drawn plan gets
-// the auto plan (autoplan.js). `doc` is the node's own document: its drawn walls
+// the auto plan (autoplan.js). `overview` starts above the gallery (overview.js);
+// command('walk') flies down to the first picture and command('overview') back up.
+// `doc` is the node's own document: its drawn walls
 // make the plan (fromdoc.js).
 
 import { autoPlan } from './autoplan.js';
+import { OVERVIEW, overviewPose, planBounds } from './overview.js';
 import { buildGallery } from './build.js';
 import { planFromDoc } from './fromdoc.js';
 import { controls } from './controls.js';
@@ -38,7 +41,7 @@ export function webgl() {
 // how many pictures keep their sharp image once zoomed in on
 const SHARP = 4;
 
-export async function startGallery(canvas, { items, scene, doc, onOpen, onLock, onLost, onState } = {}) {
+export async function startGallery(canvas, { items, scene, doc, overview = false, onOpen, onLock, onLost, onState } = {}) {
   if(!webgl()) throw new Error('webgl');
 
   // `?look=warm|walnut|stone` picks the surfaces of the auto plan (autoplan.js LOOKS)
@@ -53,6 +56,15 @@ export async function startGallery(canvas, { items, scene, doc, onOpen, onLock, 
   let shown = '';
 
   if(mode === 'guide') tour.snap(0);
+
+  // the bird's-eye view: `blend` is 0 above the plan and 1 at the visitor's eye,
+  // moving to `target` over FLY seconds
+  const FLY = 1.8;
+  let blend = overview ? 0 : 1;
+  let target = blend;
+  const bounds = planBounds(built.collision);
+
+  if(overview) mode = 'overview';
 
   const state = () => {
     const here = list[tour.index];
@@ -101,6 +113,31 @@ export async function startGallery(canvas, { items, scene, doc, onOpen, onLock, 
     emit();
   };
   const command = name => {
+    if(mode === 'overview' && name !== 'walk') return;
+
+    if(name === 'walk') {
+      if(mode !== 'overview') return;
+
+      target = 1;
+      mode = list.length ? 'guide' : 'free';
+      input = attach();
+      emit();
+
+      return;
+    }
+
+    if(name === 'overview') {
+      target = 0;
+      mode = 'overview';
+      tour.release();
+      input?.dispose();
+      input = null;
+      if(document.pointerLockElement) document.exitPointerLock?.();
+      emit();
+
+      return;
+    }
+
     const steps = { next: tour.next, prev: tour.prev, first: tour.first, last: tour.last };
 
     if(steps[name]) return mode === 'guide' && steps[name]();
@@ -116,7 +153,7 @@ export async function startGallery(canvas, { items, scene, doc, onOpen, onLock, 
     }
   };
 
-  const input = controls(canvas, {
+  const attach = () => controls(canvas, {
     mode: () => mode,
     onLock,
     onCommand: command,
@@ -132,21 +169,42 @@ export async function startGallery(canvas, { items, scene, doc, onOpen, onLock, 
       else guide(at.index);
     },
   });
+  let input = overview ? null : attach();
+  let focus = null;
+  let blended = null; // reused by the flight: { a, b, ea, eb }
   const g = await enterScene(canvas, built, hung, {
     tileUrl: item => item?.url ?? null,
     style: plan.style,
-    onFrame(time, dt, camera) {
-      const inp = input.read();
+    focus: () => focus, // the pictures near the visitor load, though the camera is far above
+    onFrame(time, dt, camera, THREE) {
+      const inp = input?.read() ?? { moving: false };
 
       if(mode === 'guide' && inp.moving) free();
 
       tour.step(dt); // the zoom, and the walk to a station
       if(mode === 'free') walker.step(dt, inp);
 
-      camera.position.set(walker.x, walker.eye, -walker.y);
+      focus ??= new THREE.Vector3();
+      focus.set(walker.x, walker.eye, -walker.y);
+      blend = target > blend ? Math.min(target, blend + dt / FLY) : Math.max(target, blend - dt / FLY);
+
+      camera.position.copy(focus);
       camera.rotation.set(walker.pitch, -walker.yaw, 0, 'YXZ');
 
-      const fov = tour.fov();
+      let fov = tour.fov();
+
+      if(blend < 1) {
+        // between the bird's-eye view and the visitor's eye: position, turn and field of view eased
+        const k = blend * blend * (3 - 2 * blend);
+        const view = overviewPose(bounds, camera.aspect);
+
+        blended ??= { a: new THREE.Quaternion(), b: new THREE.Quaternion(), e: new THREE.Euler(0, 0, 0, 'YXZ'), p: new THREE.Vector3() };
+        blended.a.copy(camera.quaternion);
+        blended.b.setFromEuler(blended.e.set(view.pitch, view.yaw, 0));
+        camera.quaternion.slerpQuaternions(blended.b, blended.a, k);
+        camera.position.lerpVectors(blended.p.set(view.x, view.y, view.z), focus, k);
+        fov = OVERVIEW.fov + (fov - OVERVIEW.fov) * k;
+      }
 
       if(Math.abs(camera.fov - fov) > 0.01) {
         camera.fov = fov;
@@ -169,7 +227,7 @@ export async function startGallery(canvas, { items, scene, doc, onOpen, onLock, 
     state,
     dispose() {
       canvas.removeEventListener('webglcontextlost', lost);
-      input.dispose();
+      input?.dispose();
       g.dispose();
     },
   };
