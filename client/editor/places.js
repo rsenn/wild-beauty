@@ -66,3 +66,25 @@ export async function linkPlace(nodeId, pos, fetcher = fetch) {
     return false;
   }
 }
+
+// the position the browser reports, rounded to ~1 km before it leaves the device
+// -> { lat, lon } | null (denied, unavailable, timed out: a quiet no-op, EDITOR.md E139)
+export function currentPosition(geo = globalThis.navigator?.geolocation, timeout = 8000) {
+  return new Promise(resolve => {
+    if(!geo) return resolve(null);
+
+    geo.getCurrentPosition(
+      ({ coords }) => resolve(snapPosition(coords.latitude, coords.longitude)),
+      () => resolve(null),
+      { timeout, maximumAge: 60000, enableHighAccuracy: false },
+    );
+  });
+}
+
+export function snapPosition(lat, lon) {
+  if(!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180 || (lat === 0 && lon === 0)) return null;
+
+  const r = v => Math.round(v * 100) / 100 + 0;
+
+  return { lat: r(lat), lon: r(lon) };
+}

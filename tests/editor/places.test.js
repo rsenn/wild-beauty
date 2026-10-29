@@ -1,6 +1,6 @@
 // bun test: client/editor/places.js (EDITOR.md E137)
 import { describe, expect, test } from 'bun:test';
-import { answerKey, linkPlace, nearPlace, positionsOf, readAnswered, remember } from '../../client/editor/places.js';
+import { answerKey, currentPosition, linkPlace, snapPosition, nearPlace, positionsOf, readAnswered, remember } from '../../client/editor/places.js';
 
 const H = n => String(n).repeat(64);
 const doc = (...hashes) => ({ pages: [{ steps: hashes.map(photo => ({ op: 'photo', photo })).concat([{ op: 'text' }]) }] });
@@ -72,5 +72,21 @@ describe('calls', () => {
     expect(calls).toEqual(['/api/places']);
     expect(await linkPlace(9, { lat: 1, lon: 1 }, async url => (url === '/api/places' ? ok({ id: 2 }) : { ok: false }))).toBe(false);
     expect(await linkPlace(9, { lat: 1, lon: 1 }, async () => { throw new Error('offline'); })).toBe(false);
+  });
+});
+
+describe('current position', () => {
+  const geo = (ok, coords) => ({ getCurrentPosition: (yes, no, options) => (ok ? yes({ coords }) : no({ code: 1 }), (geo.options = options)) });
+
+  test('rounded before it leaves the device; low accuracy is enough', async () => {
+    expect(await currentPosition(geo(true, { latitude: 47.37689, longitude: 8.54169 }))).toEqual({ lat: 47.38, lon: 8.54 });
+    expect(geo.options).toMatchObject({ enableHighAccuracy: false });
+  });
+
+  test('denied, missing or nonsense is null, never an error', async () => {
+    expect(await currentPosition(geo(false))).toBeNull();
+    expect(await currentPosition(null)).toBeNull();
+    expect(await currentPosition(geo(true, { latitude: 0, longitude: 0 }))).toBeNull();
+    expect(snapPosition(NaN, 1)).toBeNull();
   });
 });

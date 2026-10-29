@@ -18,6 +18,8 @@
   "upload.drop": "Glissez-déposez des images ici pour les envoyer",
   "upload.or": "Ou",
   "upload.select": "Choisir des images à envoyer",
+  "upload.camera": "Prendre une photo",
+  "upload.geotag": "Associer ma position à la photo",
   "upload.files.one": "{count} image",
   "upload.files.other": "{count} images",
   "upload.remove": "Retirer",

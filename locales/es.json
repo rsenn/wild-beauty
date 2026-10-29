@@ -18,6 +18,8 @@
   "upload.drop": "Arrastra y suelta imágenes aquí para subirlas",
   "upload.or": "O",
   "upload.select": "Seleccionar imágenes para subir",
+  "upload.camera": "Hacer una foto",
+  "upload.geotag": "Etiquetar la foto con mi ubicación",
   "upload.files.one": "{count} imagen",
   "upload.files.other": "{count} imágenes",
   "upload.remove": "Quitar",

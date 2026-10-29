@@ -8,13 +8,14 @@ const STATUS = { 413: 'too-large', 415: 'unsupported', 422: 'undecodable', 400: 
 const failure = code => Object.assign(new Error(code), { code });
 
 // -> { done: Promise<record>, abort() }; onProgress gets 0..1 of the bytes sent
-export function sendFile(file, { onProgress }) {
+export function sendFile(file, { onProgress, pos }) {
   const xhr = new XMLHttpRequest();
   const began = performance.now();
   const done = new Promise((resolve, reject) => {
     xhr.open('POST', '/api/uploads');
     xhr.setRequestHeader('X-Filename', encodeURIComponent(file.name));
     xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+    if(pos) xhr.setRequestHeader('X-Position', `${pos.lat},${pos.lon}`);
     xhr.upload.onprogress = e => e.lengthComputable && onProgress(e.loaded / e.total);
     xhr.onerror = () => (track('upload', { ok: false, code: 'network', bytes: file.size }), reject(failure('network')));
     xhr.onabort = () => reject(failure('aborted'));
@@ -46,8 +47,9 @@ export function createQueue({ concurrency = 3, onChange }) {
 
   const pump = () => {
     while(running.size < concurrency && waiting.length) {
-      const { id, file } = waiting.shift();
+      const { id, file, pos } = waiting.shift();
       const task = sendFile(file, {
+        pos,
         onProgress: progress => onChange(id, { state: progress >= 1 ? 'processing' : 'uploading', progress }),
       });
 
@@ -65,8 +67,8 @@ export function createQueue({ concurrency = 3, onChange }) {
   };
 
   return {
-    add(id, file) {
-      waiting.push({ id, file });
+    add(id, file, pos) {
+      waiting.push({ id, file, pos });
       onChange(id, { state: 'queued', progress: 0, error: null });
       pump();
     },

@@ -10,6 +10,7 @@ import { ingest, uploadPath } from '../media/ingest.js';
 import { logFile } from '../log.js';
 import { run } from '../media/run.js';
 import { imagemagick } from '../media/tools.js';
+import { roundPosition } from '../media/probe.js';
 import { expiringCookie, sessionFor } from '../session.js';
 
 mkdirSync(config.tmpDir, { recursive: true });
@@ -59,7 +60,15 @@ async function claim(record, session) {
 // the reply for an upload: the record, and the cookie with the record's lifetime
 const uploaded = (record, status, session) => Response.json(shown(record, session.owner), { status, headers: { 'set-cookie': expiringCookie(session.token, config.uploadTtlMs) } });
 
-// POST /api/uploads: raw body, name in X-Filename
+// the X-Position header "lat,lon" that the browser sends for a photo the user
+// tagged with their location (EDITOR.md E139) -> { lat, lon } rounded to ~1 km, or null
+export function cleanPosition(header) {
+  const m = /^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/.exec(header ?? '');
+
+  return m ? roundPosition(Number(m[1]), Number(m[2])) : null;
+}
+
+// POST /api/uploads: raw body, name in X-Filename, optional X-Position
 export async function createUpload(req) {
   const session = sessionFor(req);
   const length = req.headers.get('content-length');
@@ -68,6 +77,7 @@ export async function createUpload(req) {
   if(!req.body || length === '0') return fail(400, 'empty', 'empty file');
 
   const name = cleanName(req.headers.get('x-filename'));
+  const tagged = cleanPosition(req.headers.get('x-position'));
   const hasher = new Bun.CryptoHasher('sha256');
   const tmp = resolve(config.tmpDir, crypto.randomUUID());
   const writer = Bun.file(tmp).writer();
@@ -133,6 +143,9 @@ export async function createUpload(req) {
     }
 
     Object.assign(record, await ingest(final, uploadPath(record.display)));
+
+    // the camera's own EXIF position wins; the tag only fills a gap
+    record.pos ??= tagged;
 
     await claim(record, session);
 

@@ -4,6 +4,7 @@ import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { ACCEPT, isImageFile, loadCrops, uploadPayload } from '../files.js';
 import { createQueue } from '../upload.js';
+import { currentPosition } from '../editor/places.js';
 import { SAVED_EVENT, requestAdd } from '../editor/pending.js';
 import { browserStorage, draftHashes } from '../editor/draft.js';
 import { useEditor } from '../editor/useEditor.js';
@@ -24,6 +25,7 @@ export const UploadArea = ({ extra = null }) => {
   const [items, setItems] = useState(() => uploads.map(existingItem));
   const [ignored, setIgnored] = useState(0);
   const [over, setOver] = useState(false);
+  const [tagLocation, setTagLocation] = useState(false); // off until the user turns it on (EDITOR.md E139)
   const depth = useRef(0);
   const nextId = useRef(uploads.length + 1);
   const latest = useRef(items);
@@ -48,10 +50,10 @@ export const UploadArea = ({ extra = null }) => {
     for(const item of items) if(item.record && item.url) URL.revokeObjectURL(item.url);
   }, [items.map(item => item.record?.hash).join()]);
 
-  const add = files => {
+  const add = (files, pos = null) => {
     const images = [...files].filter(isImageFile);
 
-    const added = images.map(file => ({ id: nextId.current++, file, url: URL.createObjectURL(file), crop: 0.5, rotation: 0, selected: false, state: 'queued', progress: 0, error: null, record: null }));
+    const added = images.map(file => ({ id: nextId.current++, file, url: URL.createObjectURL(file), crop: 0.5, rotation: 0, selected: false, state: 'queued', progress: 0, error: null, record: null, pos }));
 
     setIgnored(files.length - images.length);
     setItems(old => [...old, ...added]);
@@ -62,7 +64,7 @@ export const UploadArea = ({ extra = null }) => {
   // too large for the server: fail at once instead of sending 40 MB for a 413
   const start = item => {
     if(item.file.size > limits.maxBytes) setItems(old => old.map(i => (i.id === item.id ? { ...i, state: 'failed', error: 'too-large' } : i)));
-    else queue.current.add(item.id, item.file);
+    else queue.current.add(item.id, item.file, item.pos);
   };
 
   const update = (id, change) => setItems(old => old.map(item => (item.id === id ? { ...item, ...change(item) } : item)));
@@ -120,6 +122,13 @@ export const UploadArea = ({ extra = null }) => {
     add(e.target.files);
     e.target.value = '';
   };
+  // a photo from the camera: the position is asked for now, only when "tag location" is on
+  const shoot = async e => {
+    const files = [...e.target.files];
+
+    e.target.value = '';
+    add(files, tagLocation ? await currentPosition() : null);
+  };
 
   // selected photos in selection order; only finished uploads can be added
   const chosen = items.filter(item => item.selected && !(item.record && used.includes(item.record.hash))).sort((a, b) => a.selectedAt - b.selectedAt);
@@ -170,6 +179,9 @@ export const UploadArea = ({ extra = null }) => {
         <p class="wb-drop-or">${t('upload.or')}</p>
         <input id="wb-file-input" class="wb-sr-only" type="file" multiple accept=${ACCEPT} onChange=${pick} />
         <label class="wb-button" for="wb-file-input">${t('upload.select')}</label>
+        <input id="wb-camera-input" class="wb-sr-only" type="file" accept="image/*" capture="environment" onChange=${shoot} />
+        <label class="wb-button" for="wb-camera-input">${t('upload.camera')}</label>
+        <label class="wb-upload-note"><input type="checkbox" checked=${tagLocation} onChange=${e => setTagLocation(e.target.checked)} /> ${t('upload.geotag')}</label>
       </div>
       <p class="wb-upload-note wb-upload-retention">${t('upload.retention', { days: limits.uploadDays ?? 7 })}</p>
       <details class="wb-upload-details">

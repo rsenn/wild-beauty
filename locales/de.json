@@ -18,6 +18,8 @@
   "upload.drop": "Bilder hierher ziehen und ablegen zum Hochladen",
   "upload.or": "Oder",
   "upload.select": "Bilder zum Hochladen auswählen",
+  "upload.camera": "Foto aufnehmen",
+  "upload.geotag": "Foto mit meinem Standort versehen",
   "upload.files.one": "{count} Bild",
   "upload.files.other": "{count} Bilder",
   "upload.remove": "Entfernen",
