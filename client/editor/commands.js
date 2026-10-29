@@ -55,7 +55,7 @@ const KEYED = {
   setBox: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.id}` : null),
   replacePhoto: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.id}` : null),
   unclip: c => (c.wand ? `wand:${c.id}` : null),
-  clipPolygon: c => (c.wand ? `wand:${c.id}` : null),
+  clipPolygon: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.id}` : null),
 };
 
 // the colour fields of each op a setColor may write

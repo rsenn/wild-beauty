@@ -218,35 +218,45 @@ export function insertOnEdge(polys, p, tol) {
   return { polys: next, poly: best.poly, vertex: best.after + 1 };
 }
 
-// Cut a clip of several outlines along a stroke (E121 for E122 clips): the largest
-// outline the stroke splits in two (exactly two crossings) is split, every other
-// outline goes to the piece on its side of the stroke's chord. -> [polys, polys]
-// (each a list of outlines) or null when the stroke splits none.
-export function cutOutlines(polys, stroke, reach) {
-  if(!Array.isArray(polys) || polys.length < 2 || !Array.isArray(stroke) || stroke.length < 2) return null;
+// The outline a stroke would split (E121 for E122 clips): the largest outline
+// it crosses in exactly two places, with its two parts. -> { i, parts } or null.
+export function crossedOutline(polys, stroke, reach) {
+  if(!Array.isArray(polys) || !Array.isArray(stroke) || stroke.length < 2) return null;
 
   const order = polys.map((poly, i) => i).sort((a, b) => Math.abs(area(polys[b])) - Math.abs(area(polys[a])));
 
   for(const i of order) {
     const parts = cutByStroke(polys[i], stroke, reach);
 
-    if(!parts) continue;
-
-    const [a, b] = stroke[0];
-    const [c, d] = stroke[stroke.length - 1];
-    const side = poly => {
-      const m = poly.reduce(([x, y], q) => [x + q[0] / poly.length, y + q[1] / poly.length], [0, 0]);
-
-      return Math.sign((c - a) * (m[1] - b) - (d - b) * (m[0] - a));
-    };
-    const positive = area(polys[i]) > 0;
-    const out = [[wound(parts[0], positive)], [wound(parts[1], positive)]];
-    const first = side(parts[0]);
-
-    polys.forEach((poly, j) => j !== i && out[side(poly) === first ? 0 : 1].push(poly));
-
-    return out;
+    if(parts) return { i, parts };
   }
 
   return null;
+}
+
+// Cut a clip of several outlines along a stroke: the crossed outline is split,
+// every other outline goes to the piece on its side of the stroke's chord.
+// -> [polys, polys] (each a list of outlines) or null when the stroke splits none.
+export function cutOutlines(polys, stroke, reach) {
+  if(!Array.isArray(polys) || polys.length < 2) return null;
+
+  const found = crossedOutline(polys, stroke, reach);
+
+  if(!found) return null;
+
+  const { i, parts } = found;
+  const [a, b] = stroke[0];
+  const [c, d] = stroke[stroke.length - 1];
+  const side = poly => {
+    const m = poly.reduce(([x, y], q) => [x + q[0] / poly.length, y + q[1] / poly.length], [0, 0]);
+
+    return Math.sign((c - a) * (m[1] - b) - (d - b) * (m[0] - a));
+  };
+  const positive = area(polys[i]) > 0;
+  const out = [[wound(parts[0], positive)], [wound(parts[1], positive)]];
+  const first = side(parts[0]);
+
+  polys.forEach((poly, j) => j !== i && out[side(poly) === first ? 0 : 1].push(poly));
+
+  return out;
 }

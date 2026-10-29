@@ -12,6 +12,7 @@ import { lockRoute } from './server/api/locks.js';
 import { createNode, deleteNodeRoute, listNodesRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
 import { manifestResponse, workerResponse } from './server/pwa.js';
 import { graphOf, graphRoute } from './server/api/graph.js';
+import { placesRoute } from './server/api/places.js';
 import { cutoutRoute } from './server/api/cutout.js';
 import { segmentRoute } from './server/api/segment.js';
 import { servePhoto } from './server/api/photos.js';
@@ -158,6 +159,8 @@ function route(req) {
   }
 
   if(pathname === '/api/graph' || pathname === '/api/graph/ops') return graphRoute(req);
+
+  if(pathname === '/api/places' || pathname === '/api/places/near') return placesRoute(req);
 
   if(pathname === '/api/segment') return req.method === 'POST' ? segmentRoute(req) : text('method not allowed\n', 405);
 

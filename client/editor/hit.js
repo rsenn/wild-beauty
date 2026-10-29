@@ -3,10 +3,11 @@
 // sees it: a step's matrix and clip after its transform/clip ops, shapes that
 // serve as a clip not drawn (render.js `effective`). Points are stage units.
 import { apply, invert } from './matrix.js';
-import { isTexture } from './model.js';
+import { cropWindow, isTexture } from './model.js';
 import { effective } from './render.js';
 import { segments, verticesFromPath } from './shapes.js';
 import { polygonsFromPath, windingAt } from './multiclip.js';
+import { opaqueAt, peekAlpha } from './alphamap.js';
 
 const IDENTITY = [1, 0, 0, 1, 0, 0];
 
@@ -96,6 +97,15 @@ function covers(entry, p, tolerance, { photos, steps }) {
     if(x < 0 || y < 0 || x > w || y > h) return false;
     if(step.box && (x < step.box[0] || y < step.box[1] || x > step.box[2] || y > step.box[3])) return false;
 
+    // transparent padding (a background removal) is not hit; a finger's width is tolerated
+    const alpha = info.href ? peekAlpha(info.href) : undefined;
+
+    if(alpha) {
+      const { side, x: ox, y: oy } = cropWindow(info, step.crop);
+
+      if(!opaqueAt(alpha, (ox + (x / 1000) * side) / info.width, (oy + (y / 1000) * side) / info.height, 2)) return false;
+    }
+
     if(clip) {
       const shape = steps.get(clip);
       const many = shape ? polygonsFromPath(shape.step.path) : [];
@@ -152,12 +162,25 @@ export function hitTest(doc, point, { photos = () => null, tolerance = 8, page =
 
 // the box of a clipped photo's visible part, in its local space: [x0, y0, x1, y1]
 // or null when it has no usable clip
-function clippedBox(entry, steps, w, h) {
-  const own = entry.step.box;
+function clippedBox(entry, steps, w, h, info) {
+  const [bx0, by0, bx1, by1] = entry.step.box ?? [0, 0, w, h];
+  let box = [bx0, by0, bx1, by1];
+
+  // the content of a picture with transparent padding, in local units
+  const alpha = info?.href ? peekAlpha(info.href) : undefined;
+
+  if(alpha) {
+    const { side, x: ox, y: oy } = cropWindow(info, entry.step.crop);
+    const [u0, v0, u1, v1] = alpha.box;
+    const local = [((u0 * info.width - ox) / side) * 1000, ((v0 * info.height - oy) / side) * 1000, ((u1 * info.width - ox) / side) * 1000, ((v1 * info.height - oy) / side) * 1000];
+
+    box = [Math.max(box[0], local[0]), Math.max(box[1], local[1]), Math.min(box[2], local[2]), Math.min(box[3], local[3])];
+  }
+
   const shape = entry.clip && steps.get(entry.clip);
   const back = invert(entry.m);
 
-  if(!shape || !back) return own ?? null;
+  if(!shape || !back) return box[2] > box[0] && box[3] > box[1] && (alpha || entry.step.box) ? box : null;
 
   const many = polygonsFromPath(shape.step.path);
   const lists = many.length > 1 ? many.map(poly => poly.map(q => apply(shape.m, q))) : [shapePoints(shape.step, shape.m)?.points ?? []];
@@ -167,10 +190,9 @@ function clippedBox(entry, steps, w, h) {
 
   const xs = points.map(q => q[0]);
   const ys = points.map(q => q[1]);
-  const [bx0, by0, bx1, by1] = own ?? [0, 0, w, h];
-  const box = [Math.max(bx0, Math.min(...xs)), Math.max(by0, Math.min(...ys)), Math.min(bx1, Math.max(...xs)), Math.min(by1, Math.max(...ys))];
+  const tight = [Math.max(box[0], Math.min(...xs)), Math.max(box[1], Math.min(...ys)), Math.min(box[2], Math.max(...xs)), Math.min(box[3], Math.max(...ys))];
 
-  return box[2] > box[0] && box[3] > box[1] ? box : null;
+  return tight[2] > tight[0] && tight[3] > tight[1] ? tight : null;
 }
 
 // The outline of a step as four corners [[x, y] x 4] (a photo's turned
@@ -191,7 +213,7 @@ export function outlineOf(doc, id, { photos = () => null, page = 0, upTo, clippe
     if(!info) return null;
 
     const [w, h] = localSize(info);
-    const [x0, y0, x1, y1] = (clipped && clippedBox(entry, all, w, h)) || [0, 0, w, h];
+    const [x0, y0, x1, y1] = (clipped && clippedBox(entry, all, w, h, info)) || [0, 0, w, h];
 
     return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(c => apply(m, c));
   }

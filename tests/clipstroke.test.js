@@ -215,3 +215,64 @@ describe('cutting a clip of several outlines', () => {
     expect(cutOutlines([square(0, 0, 100), square(300, 0, 50)], [[200, -10], [200, 110]], 5)).toBeNull();
   });
 });
+
+describe('the outline a stroke would split', () => {
+  const square = (x, y, s) => [[x, y], [x + s, y], [x + s, y + s], [x, y + s]];
+
+  test('is the largest outline crossed twice', async () => {
+    const { crossedOutline } = await import('../client/editor/multiclip.js');
+
+    expect(crossedOutline([square(200, 0, 40), square(0, 0, 100)], [[50, -10], [50, 110]], 20)?.i).toBe(1);
+    expect(crossedOutline([square(200, 0, 40), square(0, 0, 100)], [[120, -10], [120, 110]], 5)).toBeNull();
+  });
+});
+
+describe('cutting a cutout along its visible box', () => {
+  test('the outline of an unclipped photo with a box is the box, so a stroke across the box cuts it', () => {
+    let doc = emptyNode();
+    const info = { width: 1000, height: 1000, href: 'x' };
+
+    doc = addPhoto(doc, doc.pages[0].id, 'a'.repeat(64), info, 'p0000001');
+    doc = apply({ doc, kind: 'node' }, { type: 'setBox', id: 'p0000001', box: [300, 100, 700, 900] }).snap.doc;
+
+    const polygon = photoPolygon(doc, 'p0000001', { photos: () => info });
+    const xs = polygon.map(p => p[0]);
+
+    expect(Math.min(...xs)).toBeCloseTo(300);
+    expect(Math.max(...xs)).toBeCloseTo(700);
+
+    // a stroke from left of the box to right of it, both ends inside the photo square
+    const found = clipFromStroke([[100, 500], [500, 500], [900, 500]], polygon, { tap: 8, reach: 24, close: 20 });
+
+    expect(found.kind).toBe('cut');
+  });
+});
+
+describe('the outlines of a background removal become a multi-outline clip', () => {
+  test('outlinesToStage maps fractions to stage, drops specks, largest first', async () => {
+    const { outlinesToStage } = await import('../client/editor/clipping.js');
+    const info = { width: 1000, height: 1000 };
+    const big = [[0.1, 0.1], [0.4, 0.1], [0.4, 0.5], [0.1, 0.5]];
+    const bigger = [[0.5, 0.1], [0.9, 0.1], [0.9, 0.9], [0.5, 0.9]];
+    const speck = [[0.7, 0.01], [0.71, 0.01], [0.71, 0.02]];
+    const out = outlinesToStage([big, speck, bigger], info, 0.5, [1, 0, 0, 1, 0, 0]);
+
+    expect(out.length).toBe(2);
+    expect(out[0][0][0]).toBeCloseTo(500); // the larger outline first
+    expect(out.every(poly => area(poly) > 0)).toBe(true);
+    expect(outlinesToStage([], info, 0.5, [1, 0, 0, 1, 0, 0])).toBeNull();
+  });
+
+  test('clipPolygon takes a list of outlines: one clip shape of several subpaths', () => {
+    let doc = emptyNode();
+
+    doc = addPhoto(doc, doc.pages[0].id, 'a'.repeat(64), { width: 1000, height: 1000 }, 'p0000001');
+    doc = apply({ doc, kind: 'node' }, { type: 'clipPolygon', id: 'p0000001', polygon: [[[0, 0], [100, 0], [100, 100], [0, 100]], [[200, 200], [300, 200], [300, 300], [200, 300]]], shape: 's0000001', style: {} }).snap.doc;
+
+    const shape = findStep(doc, 's0000001').step;
+
+    expect(shape.path.match(/M/g).length).toBe(2);
+    expect(findStep(doc, 'p0000001').step.clip).toBe('s0000001');
+    expect(validate(doc).ok ?? true).toBeTruthy();
+  });
+});

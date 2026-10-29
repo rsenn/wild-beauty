@@ -28,15 +28,16 @@ import { scenePalette } from '../editor/scenepalette.js';
 import { eventUnits } from '../editor/stage.js';
 import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
+import { contentBox, loadAlpha } from '../editor/alphamap.js';
 import { photoPoint, readLines, resultPolygon } from '../editor/wand.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
 import { contains } from '../editor/polygon.js';
 import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag } from '../editor/handles.js';
-import { photoPolygon } from '../editor/clipping.js';
+import { outlinesToStage, photoPolygon } from '../editor/clipping.js';
 import { oneEuroPoint, resample, strokePath, strokeWidths } from '../editor/pen.js';
 import { blocked } from '../editor/job.js';
 import { photoSteps as allPhotoSteps, renderNode, renderPhoto, slideOf, slideView } from '../editor/render.js';
-import { clipPolygonsOf, cutOutlines, insertOnEdge, nearestVertex, outlineCount } from '../editor/multiclip.js';
+import { clipPolygonsOf, crossedOutline, cutOutlines, insertOnEdge, nearestVertex, outlineCount } from '../editor/multiclip.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
 import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/keyboard.js';
 import { DEFAULT_TOOL, TOOLS, inField, toolForKey } from '../editor/tools.js';
@@ -140,13 +141,14 @@ const Busy = ({ at, scale }) => {
 // every vertex of the clip outline
 // clip outlines are coloured by nesting depth (how many other outlines contain
 // them) round the hue wheel, so they differ from the blue selection box
-const depthColour = (polys, i) => {
+// the outline a cut stroke would split (`lit`) is brighter
+const depthColour = (polys, i, lit) => {
   const depth = polys.filter((other, j) => j !== i && contains(other, polys[i][0])).length;
 
-  return `hsl(${(330 + depth * 70) % 360} 85% 45%)`;
+  return `hsl(${(330 + depth * 70) % 360} ${lit ? 100 : 85}% ${lit ? 70 : 45}%)`;
 };
 
-const ClipGhost = ({ step, m, info, geo, scale, px }) => {
+const ClipGhost = ({ step, m, info, geo, scale, px, lit = -1 }) => {
   const side = px / scale;
   const corners = m ? [[0, 0], [1000, 0], [1000, 1000], [0, 1000]].map(([x, y]) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]]) : null;
 
@@ -154,12 +156,16 @@ const ClipGhost = ({ step, m, info, geo, scale, px }) => {
     ${info && m && renderPhoto({ ...step, m, clip: undefined, opacity: 0.25, blend: 'normal' }, info)}
     ${corners && html`<polygon class="wb-editor-outline" points=${corners.map(p => p.join(',')).join(' ')} />`}
     ${geo.polys.map((poly, i) => {
-      const colour = depthColour(geo.polys, i);
+      const colour = depthColour(geo.polys, i, i === lit);
 
       return html`<polygon class="wb-editor-outline" style=${`stroke:${colour}`} points=${poly.map(p => p.join(',')).join(' ')} />${poly.map(([x, y]) => html`<rect class="wb-editor-handle" style=${`stroke:${colour}`} x=${x - side / 2} y=${y - side / 2} width=${side} height=${side} />`)}`;
     })}
   </g>`;
 };
+
+// the select tool on a clipped photo: the clipped-away part ghosted at a quarter
+// strength, no handles (the clip tool has those)
+const ClippedAway = ({ step, m, info }) => (info && m ? html`<g class="wb-clip-ghost" pointer-events="none">${renderPhoto({ ...step, m, clip: undefined, opacity: 0.25, blend: 'normal' }, info)}</g>` : null);
 
 const Candidate = ({ outline }) => (outline ? html`<polygon class="wb-editor-outline wb-editor-candidate" points=${outline.map(p => p.join(',')).join(' ')} />` : null);
 
@@ -952,6 +958,18 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // the colours of what is on the stage (E132), drawn small and counted once the document
   // has rested; only while something shows them (the palette, the properties)
   const [scenePal, setScenePal] = useState(null);
+  const [, setAlphaReady] = useState(0);
+
+  // the transparent parts of the photos (clicks go through them, the selection box hugs the content)
+  useEffect(() => {
+    let live = true;
+
+    Object.values(photos).forEach(info => info?.href && loadAlpha(info.href).then(map => map && live && setAlphaReady(n => n + 1)));
+
+    return () => {
+      live = false;
+    };
+  }, [photos]);
   const [propsOpen, setPropsOpen] = useState(false);
   const wantsPalette = propsOpen || editStep?.op === 'text' || tool === 'pen' || tool === 'shape' || editStep?.op === 'stroke' || editStep?.op === 'shape';
   const loaded = Object.keys(photos).length;
@@ -1379,6 +1397,17 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(cutting !== null && !findStep(hist.present.doc, cutting)) cancelJob();
   }, [cutting, hist]);
 
+  // the subjects the server found become the photo's clip: one photo, one outline each
+  const clipToSubjects = (id, event, info) =>
+    // once the editor has drawn the new picture
+    setTimeout(() => {
+      const { doc: now, page: here } = latest.current;
+      const at = findStep(now, id);
+      const m = at && matrixOf(now, id, { page: here });
+      const polygon = at?.step.photo === event.record.hash && outlinesToStage(event.outlines, info, at.step.crop, m);
+
+      if(polygon) dispatch({ type: 'clipPolygon', id, polygon, shape: unique(new Set(allIds(now))), style: { color: latest.current.color, width: 1 }, cutout: true });
+    }, 60);
   const removeBackground = async () => {
     const { editStep: step, readOnly } = latest.current;
 
@@ -1415,6 +1444,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
               setPhotos(old => ({ ...old, [event.record.hash]: info }));
               dispatch({ type: 'replacePhoto', id, hash: event.record.hash, cutout: true });
               fitBox(id, event.record, info, { cutout: true });
+              clipToSubjects(id, event, info);
 
               if(event.phase === 'preview') setBusyAt(b => b && { ...b, label: tr('editor.busy.refining') });
               else fadeIn(id);
@@ -1518,6 +1548,30 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       setTool('select');
     }
   };
+  // after a cut, each piece's selection box hugs the content inside its clip (once, here)
+  const fitCutBoxes = (step, ids, pieces) => {
+    const info = latest.current.photos[step.photo];
+
+    if(!info?.href) return;
+
+    // the cut is in the document once the editor has drawn it
+    loadAlpha(info.href).then(map => setTimeout(() => {
+      const now = latest.current.doc;
+      const [first, second] = [step.id, ids[2]];
+
+      [first, second].forEach((photo, i) => {
+        const m = matrixOf(now, photo, { page });
+        const back = m && invert(m);
+
+        if(!back || findStep(now, photo)?.step.photo !== step.photo) return;
+
+        const polys = (Array.isArray(pieces[i][0][0]) ? pieces[i] : [pieces[i]]).map(poly => poly.map(q => applyMatrix(back, q)));
+        const box = contentBox(map, info, findStep(now, photo).step.crop, polys);
+
+        if(box) dispatch({ type: 'setBox', id: photo, box });
+      });
+    }, 60));
+  };
   const clipUp = () => {
     const s = clipStroke.current;
     const { doc, photos, scale, color, size, editStep: step } = latest.current;
@@ -1553,7 +1607,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(found.kind === 'tap') return maskTap(s.points[0]);
 
     if(found.kind === 'closed') dispatch({ type: 'clipOutline', id: step.id, polygon: found.polygon, mode: clipMode, shape: fresh(), style });
-    else if(found.kind === 'cut') dispatch({ type: 'cutPhoto', id: step.id, pieces: found.pieces, ids: [fresh(), fresh(), fresh()], style });
+    else if(found.kind === 'cut') {
+      const ids = [fresh(), fresh(), fresh()];
+
+      dispatch({ type: 'cutPhoto', id: step.id, pieces: found.pieces, ids, style });
+      fitCutBoxes(step, ids, found.pieces);
+    }
     else {
       setHint(tr('editor.clip.none'));
       setAnnounce(tr('editor.clip.none'));
@@ -2095,7 +2154,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} scale=${scale} px=${handlePx} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
+          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           loupe=${coarse && tool !== 'select' && tool !== 'wand'}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}

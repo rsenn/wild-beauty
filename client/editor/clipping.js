@@ -4,10 +4,11 @@
 import { effective } from './render.js';
 import { simplify } from './clipstroke.js';
 import { outlineOf, shapePoints } from './hit.js';
-import { multiply } from './matrix.js';
-import { addStep, findStep, LIMITS, removeStep, setClip, setMatrix } from './model.js';
+import { apply as multiplyPoint, multiply } from './matrix.js';
+import { addStep, cropWindow, findStep, LIMITS, removeStep, setClip, setMatrix } from './model.js';
 import { pathFromVertices } from './shapes.js';
-import { pathFromPolygons } from './multiclip.js';
+import { pathFromPolygons, wound } from './multiclip.js';
+import { area } from './polygon.js';
 
 const r = v => Math.round(v * 100) / 100;
 
@@ -34,7 +35,8 @@ export function photoPolygon(doc, id, { photos = () => null } = {}) {
     return first[0] === last[0] && first[1] === last[1] ? flat.slice(0, -1) : flat;
   }
 
-  return outlineOf(doc, id, { photos, page: at.page });
+  // an unclipped cutout is cut along its visible box (the whole square is mostly transparent)
+  return outlineOf(doc, id, { photos, page: at.page, clipped: true });
 }
 
 // a closed polygon as a shape step; it serves as a clip, so it is not drawn
@@ -62,7 +64,9 @@ function dropUnused(doc, shapeId) {
 export function clipPolygon(doc, id, polygon, shape, style) {
   const at = findStep(doc, id);
 
-  if(at?.step.op !== 'photo' || !Array.isArray(polygon) || polygon.length < 3) return doc;
+  const several = Array.isArray(polygon?.[0]?.[0]); // a list of outlines
+
+  if(at?.step.op !== 'photo' || !Array.isArray(polygon) || polygon.length < (several ? 1 : 3) || (several && polygon.some(poly => !Array.isArray(poly) || poly.length < 3))) return doc;
 
   const next = setClip(addStep(doc, doc.pages[at.page].id, polygonStep(polygon, shape, style)), id, shape);
 
@@ -113,4 +117,22 @@ export function duplicatePhoto(doc, id, ids, offset = 100) {
   }
 
   return addStep(next, pageId, copy, findStep(next, id).index + 1);
+}
+
+// The outlines of a background removal (fractions 0..1 of the new picture) as
+// stage polygons for a photo drawn as `info` ({ width, height }) with `crop` under
+// matrix `m`: specks are dropped, the largest comes first, all wound alike.
+// -> a list of polygons, or null when nothing is left.
+export function outlinesToStage(outlines, info, crop, m, minArea = 0.0004) {
+  if(!Array.isArray(outlines) || !info || !m) return null;
+
+  const { side, x: ox, y: oy } = cropWindow(info, crop);
+  const polys = outlines
+    .filter(poly => Array.isArray(poly) && poly.length >= 3)
+    .map(poly => poly.map(([u, v]) => multiplyPoint(m, [((u * info.width - ox) / side) * 1000, ((v * info.height - oy) / side) * 1000])))
+    .filter(poly => Math.abs(area(poly)) >= minArea * 1e6 * Math.abs(m[0] * m[3] - m[1] * m[2]))
+    .sort((a, b) => Math.abs(area(b)) - Math.abs(area(a)))
+    .map(poly => wound(poly, true));
+
+  return polys.length ? polys : null;
 }
