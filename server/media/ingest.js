@@ -22,6 +22,7 @@ export async function ingest(original, display) {
     hasAlpha,
     orientation,
     exif: exifResult.value ?? null,
+    pos: exifResult.pos ?? null, // rounded to ~1 km; the only place the GPS tags survive (GRAPH.md S1.5)
     mediainfo: media.value ?? null,
     palette: colors.value ?? [],
     padding: colors.value ? choosePadding(colors.value) : null,
