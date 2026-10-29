@@ -411,6 +411,7 @@
   "gallery.fullscreen": "Vollbild",
   "gallery.fullscreen.exit": "Vollbild beenden",
   "gallery.loading": "Die Galerie wird geladen ...",
+  "gallery.help.button": "Hilfe",
   "gallery.help": "Klicken, um sich umzusehen, W A S D oder Pfeiltasten zum Gehen, Umschalt zum Rennen. Auf dem Touchscreen: linker Daumen geht, rechter Daumen schaut, ein Bild antippen öffnet es.",
   "gallery.unsupported": "Dieser Browser kann die 3D-Galerie nicht anzeigen (kein WebGL).",
   "gallery.failed": "Die 3D-Galerie konnte nicht gestartet werden.",

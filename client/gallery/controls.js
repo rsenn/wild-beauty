@@ -9,10 +9,13 @@
 // Both: G toggles guide and free, + - and the wheel zoom. DOM only; `read()` hands
 // the walker the movement since the last call.
 //
-//   const c = controls(element, { mode, onTap, onCommand, onZoom, onLock })
+//   const c = controls(element, { mode, onTap, onCommand, onZoom, onLock, onStick })
 //   walker.step(dt, c.read());   c.dispose();
 // `onTap(x, y)` gets the point in -1..1 (up positive); `onCommand(name)` one of
-// next prev first last zoomIn zoomOut zoomReset open guide; `onZoom(factor)`.
+// next prev first last zoomIn zoomOut zoomReset open guide; `onZoom(factor)`;
+// `onStick(view)` the thumb stick to draw ({ x, y, r, knob } in pixels of the element) or null.
+
+import { createStick, radiusFor } from './stick.js';
 
 const KEYS = {
   forward: ['KeyW', 'ArrowUp'],
@@ -43,16 +46,19 @@ const GUIDE = {
 // in both modes
 const ALWAYS = { KeyG: 'guide', Equal: 'zoomIn', NumpadAdd: 'zoomIn', Minus: 'zoomOut', NumpadSubtract: 'zoomOut' };
 
-const LOOK = 0.0022; // radians per pixel of mouse or drag
-const STICK = 60; // pixels of drag that mean full speed
+const LOOK = 0.0022; // radians per pixel of mouse drag
+const LOOK_TOUCH = 0.0034; // and of a thumb
 const TAP = 10; // pixels a touch may move and still be a tap
 const TAP_MS = 300;
 const SWIPE = 50; // pixels, mostly sideways, within SWIPE_MS
 const SWIPE_MS = 700;
 const WHEEL = 0.0015; // zoom per wheel unit (exponent)
 
-export function controls(element, { mode = () => 'free', onTap, onCommand, onZoom, onLock } = {}) {
+export function controls(element, { mode = () => 'free', onTap, onCommand, onZoom, onLock, onStick } = {}) {
   const down = new Set();
+  const stick = createStick();
+  let stickId = null; // the pointer that works the stick
+  let before = performance.now();
   const touches = new Map(); // pointer id -> { role, x0, y0, x, y, t0, pinch }
   let look = [0, 0];
   let locked = false;
@@ -111,9 +117,16 @@ export function controls(element, { mode = () => 'free', onTap, onCommand, onZoo
       }
 
       const r = element.getBoundingClientRect();
+      const left = e.clientX < r.left + r.width * 0.55; // the stick has a little more than the left half
 
       element.setPointerCapture?.(e.pointerId);
-      touches.set(e.pointerId, { role: e.clientX < r.left + r.width / 2 ? 'stick' : 'look', x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, t0: performance.now(), pinch: false });
+      touches.set(e.pointerId, { role: left ? 'stick' : 'look', x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, t0: performance.now(), pinch: false });
+
+      if(left && stickId === null && mode() === 'free') {
+        stickId = e.pointerId;
+        stick.down(e.clientX - r.left, e.clientY - r.top, radiusFor(r.width, r.height));
+        onStick?.(stick.view());
+      }
 
       if(touches.size === 2) {
         for(const t of fingers()) t.pinch = true; // two fingers: a pinch, not a tap, swipe or step
@@ -131,7 +144,7 @@ export function controls(element, { mode = () => 'free', onTap, onCommand, onZoo
       t.x = e.clientX;
       t.y = e.clientY;
 
-      if(touches.size === 2) {
+      if(touches.size === 2 && stickId === null) {
         const now = apart();
 
         if(pinchFrom > 0 && now > 0) onZoom?.(now / pinchFrom);
@@ -141,13 +154,24 @@ export function controls(element, { mode = () => 'free', onTap, onCommand, onZoo
         return;
       }
 
-      if(t.role === 'look' && mode() === 'free') look = [look[0] + dx * LOOK, look[1] - dy * LOOK];
+      if(e.pointerId === stickId) {
+        const r = element.getBoundingClientRect();
+
+        stick.move(e.clientX - r.left, e.clientY - r.top);
+        onStick?.(stick.view());
+      } else if(t.role === 'look' && mode() === 'free') look = [look[0] + dx * LOOK_TOUCH, look[1] - dy * LOOK_TOUCH];
     }),
     ...['pointerup', 'pointercancel'].map(type =>
       on(element, type, e => {
         const t = touches.get(e.pointerId);
 
         touches.delete(e.pointerId);
+
+        if(e.pointerId === stickId) {
+          stickId = null;
+          stick.up();
+          onStick?.(null);
+        }
 
         if(type !== 'pointerup' || !t || t.pinch) return;
 
@@ -179,18 +203,21 @@ export function controls(element, { mode = () => 'free', onTap, onCommand, onZoo
     read() {
       let forward = holds('forward') - holds('back');
       let strafe = holds('right') - holds('left');
+      let turn = holds('turnRight') - holds('turnLeft');
+      let run = down.has('Shift');
+      const now = performance.now();
+      const pad = stick.read(Math.min(0.1, (now - before) / 1000));
+
+      before = now;
 
       if(mode() === 'free') {
-        for(const t of fingers()) {
-          if(t.role !== 'stick' || t.pinch) continue;
-
-          forward += Math.max(-1, Math.min(1, (t.y0 - t.y) / STICK));
-          strafe += Math.max(-1, Math.min(1, (t.x - t.x0) / STICK));
-        }
+        forward += pad.forward;
+        strafe += pad.strafe;
+        turn += pad.turn;
+        run ||= pad.run;
       }
 
-      const turn = holds('turnRight') - holds('turnLeft');
-      const out = { forward, strafe, turn, look, run: down.has('Shift'), moving: !!(forward || strafe || turn || look[0] || look[1]) };
+      const out = { forward, strafe, turn, look, run, moving: !!(forward || strafe || turn || look[0] || look[1]) };
 
       look = [0, 0];
 
@@ -198,6 +225,7 @@ export function controls(element, { mode = () => 'free', onTap, onCommand, onZoo
     },
     dispose() {
       for(const f of off) f();
+      onStick?.(null);
       if(document.pointerLockElement === element) document.exitPointerLock?.();
     },
   };

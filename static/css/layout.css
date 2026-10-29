@@ -28,6 +28,16 @@ body {
   min-height: 100vh;
 }
 
+/* a page without the logo: the tab strip stands alone, on the right, and the height the stages
+   subtract for the header is the strip's */
+.wb-page-bare {
+  --wb-logo-height: var(--wb-tab-size);
+}
+
+.wb-page-bare .wb-header {
+  justify-content: flex-end;
+}
+
 .wb-header {
   display: flex;
   flex-flow: row wrap;
@@ -803,6 +813,68 @@ body {
   left: 0;
 }
 
+/* the title row: the title, and right of it the gallery's icon buttons */
+.wb-node-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wb-tab-gap);
+}
+
+.wb-node-head .wb-node-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wb-gallery-tools,
+.wb-gallery-nav {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--wb-tab-gap);
+}
+
+/* the row under the stage: the edit button, and right of it the previous / next picture */
+.wb-node-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wb-tab-gap);
+  margin: 1em 0;
+}
+
+.wb-node-foot .wb-gallery-nav {
+  flex: 1;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.wb-node-foot .wb-gallery-count {
+  flex: 0 1 auto;
+  max-width: none;
+}
+
+.wb-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+.wb-icon-button svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .wb-node-title {
   margin: 8px 0;
   font-size: var(--wb-font-size-lead);
@@ -824,8 +896,8 @@ body {
 .wb-gallery {
   position: relative;
   aspect-ratio: 1;
-  width: min(100%, max(240px, calc(100vh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em)));
-  width: min(100%, max(240px, calc(100dvh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em)));
+  --wb-fit: calc(100vh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em); /* until GalleryView.js has measured it */
+  width: min(100%, max(240px, var(--wb-fit)));
   margin: 0 auto;
   overflow: hidden;
   color: var(--wb-gallery-ink);
@@ -841,7 +913,7 @@ body {
 /* a gallery node once the visitor walks: the stage grows to the left and right and is no longer square.
    Its height is the one the square has, so the menu bar, the node title and the stage fit the screen */
 .wb-gallery-wide {
-  --wb-stage-h: max(240px, calc(100vh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em));
+  --wb-stage-h: max(240px, var(--wb-fit));
   --wb-wide: min(96vw, 1500px, calc(var(--wb-stage-h) * 16 / 9));
 
   width: var(--wb-wide);
@@ -850,8 +922,20 @@ body {
 }
 
 @supports (height: 100dvh) {
-  .wb-gallery-wide {
-    --wb-stage-h: max(240px, calc(100dvh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em));
+  .wb-gallery {
+    --wb-fit: calc(100dvh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em);
+  }
+}
+
+/* a phone held upright: the stage fills the height between the title and the edit button
+   (GalleryView.js measures it into --wb-fit), so the page needs no scrolling */
+@media (orientation: portrait) and (max-width: 900px) {
+  .wb-gallery:not(.wb-gallery-fill):not(:fullscreen) {
+    width: 100%;
+    height: var(--wb-fit);
+    min-height: 240px;
+    margin-left: 0;
+    aspect-ratio: auto;
   }
 }
 
@@ -896,7 +980,9 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background: var(--wb-gallery-note);
+  color: var(--wb-gallery-label-ink);
+  background: var(--wb-gallery-label-ground);
+  border: 1px solid var(--wb-gallery-label-ink);
 }
 
 .wb-gallery-grid {
@@ -949,6 +1035,32 @@ body {
   backdrop-filter: blur(3px);
   -webkit-mask-image: radial-gradient(ellipse at center, transparent 38%, var(--wb-ink) 100%);
   mask-image: radial-gradient(ellipse at center, transparent 38%, var(--wb-ink) 100%);
+}
+
+/* the thumb stick on a touch screen: a ring where the thumb landed, a knob under it */
+.wb-gallery-stick {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.wb-gallery-stick[hidden] {
+  display: none;
+}
+
+.wb-gallery-stick span {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.wb-gallery-stick span:first-child {
+  border: 2px solid var(--wb-accent);
+  opacity: 0.55;
+}
+
+.wb-gallery-stick span:last-child {
+  background: var(--wb-accent);
+  opacity: 0.75;
 }
 
 .wb-gallery-lens[hidden] {

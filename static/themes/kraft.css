@@ -87,6 +87,8 @@
   --wb-gallery-ground: rgb(5 6 13);
   --wb-gallery-ink: rgb(255 255 255);
   --wb-gallery-note: rgb(0 0 0 / 0.55);
+  --wb-gallery-label-ground: rgb(255 255 255);
+  --wb-gallery-label-ink: rgb(0 0 0);
 
   /* depth */
   --wb-shadow-card: 0 0 4px rgb(0 0 0 / 0.75);

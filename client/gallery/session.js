@@ -18,6 +18,7 @@
 
 import { autoPlan } from './autoplan.js';
 import { OVERVIEW, overviewPose, planBounds } from './overview.js';
+import { makeFlyby } from './flyby.js';
 import { buildGallery } from './build.js';
 import { planFromDoc } from './fromdoc.js';
 import { controls } from './controls.js';
@@ -44,7 +45,7 @@ const SHARP = 4;
 // how fast the lens closes and opens, per second
 const LENS = { close: 5, open: 2 };
 
-export async function startGallery(canvas, { items, scene, doc, overview = false, onOpen, onLock, onLost, onState, onLens } = {}) {
+export async function startGallery(canvas, { items, scene, doc, overview = false, onOpen, onLock, onLost, onState, onLens, onStick } = {}) {
   if(!webgl()) throw new Error('webgl');
 
   // `?look=warm|walnut|stone` picks the surfaces of the auto plan (autoplan.js LOOKS)
@@ -122,6 +123,7 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
       if(mode !== 'overview') return;
 
       target = 1;
+      origin = lastFly && { ...lastFly };
       mode = list.length ? 'guide' : 'free';
       input = attach();
       emit();
@@ -131,6 +133,9 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
 
     if(name === 'overview') {
       target = 0;
+      origin = null;
+      flyT = 0; // the flyby starts at the bird's-eye view
+      lastFly = null;
       mode = 'overview';
       tour.release();
       input?.dispose();
@@ -159,6 +164,7 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
   const attach = () => controls(canvas, {
     mode: () => mode,
     onLock,
+    onStick,
     onCommand: command,
     onZoom: f => tour.zoomBy(f),
     // a tap on a picture goes to it; on the one in front of you it zooms to fill the stage
@@ -180,6 +186,15 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
   const calm = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   let lens = 0;
   let sent = -1;
+
+  // the flyby: before anyone walks in, the camera dives into the rooms and flies past the pictures
+  // (flyby.js), over and over; `lastFly` is where it was when the visitor chose to walk, the
+  // flight down starts from there
+  let fly = null; // the flight, false when the plan has no wall to fly along
+  let flyAspect = 0;
+  let flyT = 0;
+  let lastFly = null;
+  let origin = null; // the pose the flight between the sky and the walk starts from
   let focus = null;
   let blended = null; // reused by the flight: { a, b, ea, eb }
   const g = await enterScene(canvas, built, hung, {
@@ -206,15 +221,36 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
       if(blend < 1) {
         // between the bird's-eye view and the visitor's eye: position, turn and field of view eased
         const k = blend * blend * (3 - 2 * blend);
-        const view = overviewPose(bounds, camera.aspect);
+        const view = origin ?? { ...overviewPose(bounds, camera.aspect), fov: OVERVIEW.fov, roll: 0 };
 
         blended ??= { a: new THREE.Quaternion(), b: new THREE.Quaternion(), e: new THREE.Euler(0, 0, 0, 'YXZ'), p: new THREE.Vector3() };
         blended.a.copy(camera.quaternion);
-        blended.b.setFromEuler(blended.e.set(view.pitch, view.yaw, 0));
+        blended.b.setFromEuler(blended.e.set(view.pitch, -view.yaw, view.roll ?? 0));
         camera.quaternion.slerpQuaternions(blended.b, blended.a, k);
         camera.position.lerpVectors(blended.p.set(view.x, view.y, view.z), focus, k);
-        fov = OVERVIEW.fov + (fov - OVERVIEW.fov) * k;
+        fov = view.fov + (fov - view.fov) * k;
       }
+
+      // the flyby plays while the visitor is still above the plan
+      const flying = overview && mode === 'overview' && target === 0 && blend === 0 && !calm && fly !== false;
+
+      if(flying) {
+        if(!fly || Math.abs(camera.aspect - flyAspect) > 0.02) {
+          fly = makeFlyby(built, list, { ...overviewPose(bounds, camera.aspect), fov: OVERVIEW.fov }) ?? false;
+          flyAspect = camera.aspect;
+        }
+
+        if(fly) {
+          const q = (lastFly = fly.pose((flyT += dt)));
+
+          camera.position.set(q.x, q.y, q.z);
+          camera.rotation.set(q.pitch, -q.yaw, q.roll, 'YXZ');
+          focus.copy(camera.position);
+          fov = q.fov;
+        }
+      }
+
+      if(g.world.trail) g.world.trail.paused = !!(flying && fly); // no footprints from a camera that flies
 
       if(Math.abs(camera.fov - fov) > 0.01) {
         camera.fov = fov;

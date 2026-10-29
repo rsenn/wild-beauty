@@ -411,6 +411,7 @@
   "gallery.fullscreen": "Fullscreen",
   "gallery.fullscreen.exit": "Exit fullscreen",
   "gallery.loading": "Loading the gallery...",
+  "gallery.help.button": "Help",
   "gallery.help": "Click to look around, W A S D or arrow keys to walk, shift to run. On a touch screen: left thumb walks, right thumb looks, tap a picture to open it.",
   "gallery.unsupported": "This browser cannot show the 3D gallery (no WebGL).",
   "gallery.failed": "The 3D gallery could not be started.",

@@ -411,6 +411,7 @@
   "gallery.fullscreen": "Pantalla completa",
   "gallery.fullscreen.exit": "Salir de pantalla completa",
   "gallery.loading": "Cargando la galería...",
+  "gallery.help.button": "Ayuda",
   "gallery.help": "Haz clic para mirar alrededor, W A S D o las flechas para caminar, Mayús para correr. En pantalla táctil: el pulgar izquierdo camina, el derecho mira, toca un cuadro para abrirlo.",
   "gallery.unsupported": "Este navegador no puede mostrar la galería 3D (sin WebGL).",
   "gallery.failed": "No se pudo iniciar la galería 3D.",

@@ -4,7 +4,7 @@ import { useBoot } from '../boot.js';
 import { Layout } from './Layout.js';
 import { GalleryView } from './GalleryView.js';
 
-// /:lang/gallery ("Show"): every saved node with a tile as a picture, in a grid
+// /:lang/gallery ("Show", where / leads to, so the landing page with the logo): every saved node with a tile as a picture, in a grid
 // that works without JavaScript, and the 3D gallery of them all on a button
 export const GalleryPage = () => {
   const { t } = useI18n();
@@ -17,7 +17,7 @@ export const GalleryPage = () => {
   `;
 
   return html`
-    <${Layout} active="show" hrefFor=${code => `/${code}/gallery`}>
+    <${Layout} logo active="show" hrefFor=${code => `/${code}/gallery`}>
       <h1 class="wb-node-title">${t('gallery.title')}</h1>
       ${items.length ? html`<${GalleryView} items=${items} label=${t('gallery.title')} wide>${grid}<//>` : html`<p>${t('gallery.none')}</p>`}
     <//>

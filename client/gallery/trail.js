@@ -116,13 +116,20 @@ export function makeTrail(THREE, floorAt, { max = TRAIL.max } = {}) {
     side = -side;
   };
 
-  return {
+  const api = {
     mesh,
     material,
+    paused: false, // set while the camera is not a visitor walking
 
     // `position` the camera, `forward` where it looks (any length); lays a print each stride walked
     step(position, forward, time = 0) {
       material.uniforms.uTime.value = time;
+
+      if(api.paused) {
+        last = null;
+
+        return;
+      }
 
       const floor = floorAt(position.x, position.z);
 
@@ -174,4 +181,6 @@ export function makeTrail(THREE, floorAt, { max = TRAIL.max } = {}) {
       mesh.dispose?.();
     },
   };
+
+  return api;
 }
