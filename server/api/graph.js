@@ -5,6 +5,7 @@
 import { database } from '../db/db.js';
 import { LABELS, addLink, deleteNode, graphEdges, graphNodes, insertNode, removeLink, setPinned, setPosition } from '../db/nodes.js';
 import { canView } from './nodes.js';
+import { placeTitle } from './gazetteer.js';
 
 const MAX_OPS = 200;
 const MAX_TITLE = 200;
@@ -25,6 +26,13 @@ export function graphOf(h) {
   return { nodes, edges: graphEdges(h).filter(e => ids.has(e.from) && ids.has(e.to)) };
 }
 
+// the suggestions of `node` that the place node `to` stands for go (GRAPH.md S1.5)
+function dropAnswered(h, node, to) {
+  const title = h.get('SELECT title FROM nodes WHERE id = ?', to).title;
+
+  for(const s of h.all('SELECT lat, lon FROM place_suggestions WHERE node_id = ?', node)) if(placeTitle(s) === title) h.run('DELETE FROM place_suggestions WHERE node_id = ? AND lat = ? AND lon = ?', node, s.lat, s.lon);
+}
+
 // one operation -> true when it changed something, false when it was a no-op;
 // throws a short code on a malformed one
 export function applyOp(h, op) {
@@ -36,6 +44,10 @@ export function applyOp(h, op) {
     case 'link':
       if(!isId(op.from) || !isId(op.to) || op.from === op.to || !LABELS.includes(label)) throw new Error('bad_op');
       if(!h.get('SELECT 1 AS ok FROM nodes WHERE id = ?', op.from) || !h.get('SELECT 1 AS ok FROM nodes WHERE id = ?', op.to)) throw new Error('not_found');
+
+      // linking a node to a place answers its suggestion for that place, whichever view made the link
+      if(label === 'at') dropAnswered(h, op.from, op.to);
+
       // a link that exists stays where it is, unless `resort` moves it behind the others
       if(!op.resort && h.get('SELECT 1 AS ok FROM node_links WHERE from_id = ? AND to_id = ? AND label = ?', op.from, op.to, label)) return false;
 

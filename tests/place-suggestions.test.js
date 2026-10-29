@@ -7,6 +7,7 @@ import { config } from '../server/config.js';
 import { open } from '../server/db/db.js';
 import { addLink, addSuggestions, insertNode } from '../server/db/nodes.js';
 import { saveNew } from '../server/api/nodes.js';
+import { applyOp } from '../server/api/graph.js';
 import { pendingSuggestions, placesRoute } from '../server/api/places.js';
 import { run } from '../server/media/run.js';
 import { detectTools, imagemagick } from '../server/media/tools.js';
@@ -116,6 +117,22 @@ describe('answering in bulk', () => {
 
     addLink(h, a, zurich, 'at');
     expect(pendingSuggestions(h).map(s => s.node)).toEqual([b]);
+  });
+
+  test('an `at` link made any other way (the chip) answers its suggestion, not another one', () => {
+    const zurich = h.get("SELECT id FROM nodes WHERE title = 'Zürich'").id;
+    const bern = h.get("SELECT id FROM nodes WHERE title = 'Bern'").id;
+
+    addSuggestions(h, a, [{ lat: 46.95, lon: 7.45 }]);
+    applyOp(h, { op: 'link', from: a, to: zurich, label: 'at' });
+    expect(h.all('SELECT lat FROM place_suggestions WHERE node_id = ? ORDER BY lat', a)).toEqual([{ lat: 46.95 }]);
+
+    // the same link again, and a link of another label, change nothing more
+    expect(applyOp(h, { op: 'link', from: a, to: zurich, label: 'at' })).toBe(false);
+    applyOp(h, { op: 'link', from: b, to: bern, label: 'ref' });
+    expect(h.get('SELECT COUNT(*) AS n FROM place_suggestions').n).toBe(2);
+    applyOp(h, { op: 'link', from: a, to: bern, label: 'at' });
+    expect(h.get('SELECT COUNT(*) AS n FROM place_suggestions WHERE node_id = ?', a).n).toBe(0);
   });
 
   test('an unknown suggestion is a no-op, malformed input is a 400, no places node a 409', async () => {

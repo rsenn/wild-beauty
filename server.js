@@ -79,7 +79,7 @@ function filePath(pathname, prefix, root) {
   return file.startsWith(root + sep) ? file : null;
 }
 
-async function serveFile(pathname, method, prefix, root) {
+async function serveFile(pathname, method, prefix, root, since) {
   const path = filePath(pathname, prefix, root);
   const file = path && Bun.file(path);
 
@@ -87,15 +87,22 @@ async function serveFile(pathname, method, prefix, root) {
 
   // the content type comes from the extension (Bun.file); set it explicitly
   // because Bun leaves it out of a HEAD response
-  // in --dev the browser must not reuse its copy of a module or stylesheet it
-  // was served before an edit (no header means heuristic caching)
-  const headers = { 'content-type': file.type, 'content-length': String(file.size), ...(dev && { 'cache-control': 'no-cache' }) };
+  // The browser keeps its copy but asks again each time (modules are served as
+  // they are, with no fingerprint in the name): without this header it reuses a
+  // module for an unknown time, and an edited one is not seen. 304 when unchanged.
+  const modified = Math.floor(file.lastModified / 1000) * 1000;
+  const headers = { 'cache-control': 'no-cache', 'last-modified': new Date(modified).toUTCString() };
+
+  if(since && Date.parse(since) >= modified) return new Response(null, { status: 304, headers });
+
+  headers['content-type'] = file.type;
+  headers['content-length'] = String(file.size);
 
   return new Response(method === 'HEAD' ? null : file, { headers });
 }
 
-// the part of a sidecar record the cards use (no EXIF, no tool output)
-const listed = ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt, expiresAt }) => ({ hash, ext, display, name, size, mime, width, height, padding, uploadedAt, expiresAt });
+// the part of a sidecar record the cards use (no EXIF, no tool output; `pos` is the rounded place for the editor's chip)
+const listed = ({ hash, ext, display, name, size, mime, width, height, padding, pos, uploadedAt, expiresAt }) => ({ hash, ext, display, name, size, mime, width, height, padding, ...(pos && { pos }), uploadedAt, expiresAt });
 
 // what the client needs to translate: this language, plus English as fallback
 async function bootFor(lang, extra = {}, owner = null) {
@@ -222,7 +229,7 @@ function route(req) {
     return new Response(null, { status: 302, headers: { location, vary: 'Cookie, Accept-Language' } });
   }
 
-  for(const [prefix, root] of Object.entries(ROOTS)) if(pathname.startsWith(prefix)) return serveFile(pathname, req.method, prefix, root);
+  for(const [prefix, root] of Object.entries(ROOTS)) if(pathname.startsWith(prefix)) return serveFile(pathname, req.method, prefix, root, req.headers.get('if-modified-since'));
 
   const viewed = /^\/([a-z]{2,3})\/node\/(\d{1,15})$/.exec(pathname);
 

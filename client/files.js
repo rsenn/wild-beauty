@@ -58,7 +58,7 @@ export function formatSize(bytes, lang) {
 // what a dragged or "added" upload card tells the editor (EDITOR.md S2.5)
 export const UPLOAD_MIME = 'application/x-wb-upload';
 
-export const uploadPayload = (record, role, crop) => ({ ...(role === 'texture' && { role }), hash: record.hash, display: record.display, width: record.width, height: record.height, padding: record.padding, palette: record.palette, ...(crop !== undefined && crop !== 0.5 && { crop }) });
+export const uploadPayload = (record, role, crop) => ({ ...(role === 'texture' && { role }), hash: record.hash, display: record.display, width: record.width, height: record.height, padding: record.padding, palette: record.palette, ...(record.pos && { pos: record.pos }), ...(crop !== undefined && crop !== 0.5 && { crop }) });
 
 // What a card says about its expiry: null when it is far off, else { key, count? }
 // for the message. `expiresAt` is a time in ms, `now` too.
