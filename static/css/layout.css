@@ -939,6 +939,22 @@ body {
   user-select: none;
 }
 
+/* the lens: a vignette and a soft blur toward the edges while the camera glides from picture to picture */
+.wb-gallery-lens {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 48%, var(--wb-gallery-note) 100%);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  -webkit-mask-image: radial-gradient(ellipse at center, transparent 38%, var(--wb-ink) 100%);
+  mask-image: radial-gradient(ellipse at center, transparent 38%, var(--wb-ink) 100%);
+}
+
+.wb-gallery-lens[hidden] {
+  display: none;
+}
+
 .wb-gallery-bar {
   position: absolute;
   top: 8px;

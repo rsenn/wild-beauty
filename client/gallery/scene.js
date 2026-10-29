@@ -7,6 +7,10 @@
 // hang.js in plan coordinates.
 
 import { GROUPS } from './build.js';
+import { CONTACT, contactRamp, contactStrips } from './contact.js';
+import { makeDust, DUST } from './dust.js';
+import { makeClouds, makeMoon } from './horizon.js';
+import { makeTrail } from './trail.js';
 
 export const LIGHT = {
   ambient: 0.35, // dim: the walls recede, the pictures are lit
@@ -41,6 +45,9 @@ export const SKY = {
 };
 
 export const EYE = 1.6;
+
+// a phone or a tablet: fewer motes, simpler clouds
+const isCoarse = () => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
 
 const DEFAULT_STYLE = { wall: '#f3efe8', floor: '#cabaab', corridor: '#b9a68f' };
 
@@ -123,7 +130,7 @@ function placeholder(id = '') {
 // the walls, floors, pictures, lights and stars. `hung` is hang()'s `hung`:
 // [{ child: { id }, x, y, nx, ny, h, size }]. Options: `tileUrl(child)` -> url
 // or null, `style` (scene3d style). Returns { root, update(position), dispose() }.
-export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}, anisotropy = 1, loadTexture, loadImage, label, pixelRatio = 1 } = {}) {
+export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}, anisotropy = 1, loadTexture, loadImage, label, pixelRatio = 1, coarse = isCoarse() } = {}) {
   const root = new THREE.Group();
   const owned = []; // everything with a dispose()
   const own = x => (owned.push(x), x);
@@ -169,7 +176,31 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
     corridorFloor: style.corridor?.texture || style.corridor?.color ? material(colour(style.corridor?.color, DEFAULT_STYLE.corridor), style.corridor?.texture) : room,
   };
 
-  for(const g of ['wallN', 'wallE', 'wallS', 'wallW']) materials[g] = wall;
+  // the faces of the walls darken toward their foot (uv.y is the height over the base in
+  // metres); the top of a wall keeps the plain material
+  const foot = style.contact === false ? 0 : CONTACT.strength;
+  const grounded = m => {
+    if(!foot) return m;
+
+    m.onBeforeCompile = shader => {
+      shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying float vFoot;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvFoot = uv.y;');
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', '#include <common>\nvarying float vFoot;')
+        .replace('#include <map_fragment>', `#include <map_fragment>\ndiffuseColor.rgb *= 1.0 - ${foot.toFixed(3)} * exp(-vFoot / ${(CONTACT.height / 2).toFixed(3)});`);
+    };
+    m.customProgramCacheKey = () => 'wb-foot';
+
+    return m;
+  };
+  const faces = grounded(own(wall.clone()));
+
+  for(const g of ['wallN', 'wallE', 'wallS', 'wallW']) materials[g] = faces;
+
+  // a corridor without a surface for its walls has the walls of the rooms
+  const rough = style.corridorWall?.texture || style.corridorWall?.color ? material(colour(style.corridorWall?.color, DEFAULT_STYLE.wall), style.corridorWall?.texture) : null;
+
+  materials.corridorWall = rough ? grounded(own(rough.clone())) : faces;
+  materials.corridorTop = rough ?? wall;
 
   for(const name of GROUPS) {
     const d = built.groups[name];
@@ -477,6 +508,48 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
   })();
   const { stars } = sky;
 
+  // contact shadows: a soft strip on the floor along the foot of every wall that has floor in front of it
+  if(style.contact !== false) {
+    const strips = contactStrips(built);
+
+    if(strips.index.length) {
+      const geometry = own(new THREE.BufferGeometry());
+      const ramp = contactRamp();
+      const map = own(new THREE.DataTexture(ramp.data, ramp.width, ramp.height, THREE.RGBAFormat));
+
+      map.magFilter = map.minFilter = THREE.LinearFilter;
+      map.flipY = false;
+      map.needsUpdate = true;
+      geometry.setAttribute('position', new THREE.BufferAttribute(strips.position, 3));
+      geometry.setAttribute('uv', new THREE.BufferAttribute(strips.uv, 2));
+      geometry.setIndex(new THREE.BufferAttribute(strips.index, 1));
+
+      const material = own(new THREE.MeshBasicMaterial({ color: 0x000000, map, opacity: CONTACT.strength * 1.3, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
+      const mesh = new THREE.Mesh(geometry, material);
+
+      mesh.name = 'contact';
+      mesh.raycast = () => {};
+      root.add(mesh);
+    }
+  }
+
+  // dust in the spot lights
+  const dust = style.light?.dust === 0 ? null : makeDust(THREE, { spots: spots.length, count: style.light?.dust ?? (coarse ? DUST.coarse : DUST.count), pixelRatio });
+
+  if(dust) root.add(own(dust).points);
+
+  // the moon, and the clouds far below the bridges
+  const moon = style.sky?.moon === false ? null : makeMoon(THREE);
+  const clouds = style.sky?.clouds === false ? null : makeClouds(THREE, { coarse, direction: moon?.direction });
+
+  if(moon) root.add(own(moon).group, moon.light);
+  if(clouds) root.add(...own(clouds).layers);
+
+  // the footprints of the visitor
+  const trail = style.trail === false ? null : makeTrail(THREE, (x, z) => built.floorHeightAt(x, -z));
+
+  if(trail) root.add(own(trail).mesh);
+
   const lit = new Set(); // spots follow the visitor when they have moved this far
   const MOVED = 0.5;
 
@@ -491,6 +564,9 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
       stars.rotation.y = time * 0.004; // the sky turns, very slowly
     }
 
+    moon?.update(position, time);
+    clouds?.update(position, time);
+    dust?.tick(time ?? 0);
 
     if(position.distanceTo(last) < MOVED) return;
 
@@ -505,6 +581,7 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
       spot.position.copy(p.position).addScaledVector(n, LIGHT.front);
       spot.position.y += LIGHT.above;
       spot.target.position.copy(p.position);
+      dust?.place(i, spot.position, spot.target.position, time ?? 0);
     });
 
     for(const [d, p] of near) {
@@ -516,13 +593,16 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
     lit.clear();
   }
 
+  // call every frame with the camera position and where it looks: lays the footprints
+  const footsteps = (position, forward, time) => trail?.step(position, forward, time);
+
   function dispose() {
     for(const p of pictures) p.userData.state = 'disposed';
     for(const x of owned) x.dispose?.();
     for(const s of spots) s.dispose?.();
   }
 
-  return { root, pictures, spots, stars, update, upgrade, downgrade, dispose };
+  return { root, pictures, spots, stars, dust, moon, clouds, trail, footsteps, update, upgrade, downgrade, dispose };
 }
 
 // the picture under a point of the view (x, y in -1..1, up positive), or null:
@@ -575,6 +655,7 @@ export async function enterScene(canvas, built, hung, options = {}) {
     camera.updateProjectionMatrix();
   };
   const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(resize) : null;
+  const look = new THREE.Vector3();
   let before = null;
   const tick = time => {
     const dt = before === null ? 0 : (time - before) / 1000;
@@ -582,6 +663,7 @@ export async function enterScene(canvas, built, hung, options = {}) {
     before = time;
     options.onFrame?.(time, dt, camera, THREE);
     world.update(options.focus?.() ?? camera.position, time / 1000); // `focus`: where the pictures to load are, when it is not where the camera is
+    world.footsteps(camera.position, camera.getWorldDirection(look), time / 1000);
     renderer.render(scene, camera);
   };
 

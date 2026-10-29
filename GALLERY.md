@@ -442,6 +442,29 @@ The loop is `requestAnimationFrame`; render only while visible (`IntersectionObs
 
 ---
 
+## 4a. Atmosphere (2026-10-29)
+
+Small additions that make the rooms feel built and the bridges feel like bridges.
+All are shader or typed-array work with no textures to load; each can be left out
+in the scene style (`style.contact`, `style.light.dust`, `style.sky.moon`,
+`style.sky.clouds`, `style.trail` = `false`; `dust: 0`), and a phone (a coarse
+pointer) gets fewer motes and simpler clouds.
+
+| What | Where | How |
+|---|---|---|
+| **Contact shadows** | `contact.js`, `scene.js` | a soft strip on the floor along the foot of every wall face that has floor in front of it (faces looking into the void get none), and the wall material darkens toward its base (`uv.y` is the height over the base) |
+| **Dust in the spots** | `dust.js` | 420 motes (140 on a phone) in one `Points`; each belongs to a spot and the vertex shader places it in that spot's cone from three uniforms per spot, so a spot that moves to another picture costs no geometry; its dust fades in over 0.9 s; motes catch the light now and then |
+| **Moon** | `horizon.js` | a shaded disc with a halo on the stars' sphere, turning with the stars, and a cool directional light (0.32) from its direction |
+| **Clouds below** | `horizon.js` | two layers 9 m and 17 m under the floor, noise sampled at world coordinates so they pass by as you walk, moon-lit edges, fading with distance; the bird's-eye view shows the building standing over a sea of cloud |
+| **Footprints** | `trail.js` | a print every 0.66 m walked, left and right mirrored, in one ring of 480 instances that fade slowly; none in the bird's-eye view, none after a jump (a tour move). Walking backwards points the prints the way you look: a moonwalk |
+| **Lens** | `session.js`, `GalleryView.js`, `layout.css` | while the camera glides from picture to picture or flies down into the plan, a vignette and a soft blur toward the edges close over the canvas (a page overlay with `backdrop-filter`, so it does not depend on the colour handling of the renderer) and open again on arrival; off for `prefers-reduced-motion` |
+
+Not done: a true depth of field (blur by distance from the picture in focus)
+needs the scene rendered to a texture, and the sRGB handling of the shader
+materials (stars, dust, clouds write display values, the standard materials
+linear ones) differs between a render target and the canvas; it would be a
+follow-up with its own colour pass. The footprints are not kept between visits.
+
 ## 5. Pictures on walls = child nodes
 
 A gallery node has `child` edges to its exhibits (`GRAPH.md` S1.1, 1.2). Each

@@ -21,6 +21,7 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
   const [walking, setWalking] = useState(false); // overview only: the visitor has flown down
   const [seen, setSeen] = useState(false); // the hint goes once the visitor has stepped or walked
   const box = useRef(null);
+  const lens = useRef(null);
   const canvas = useRef(null);
   const live = useRef(null);
   const entered = state === 'loading' || state === 'live';
@@ -43,6 +44,7 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
           doc,
           overview,
           onLock: setLocked,
+          onLens: v => lens.current && ((lens.current.style.opacity = v), (lens.current.hidden = v < 0.01)),
           onState: s => {
             setHud(s);
             if(s.index !== 0 || s.mode === 'free' || s.moving) setSeen(true);
@@ -121,6 +123,7 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
   return html`
     <div class=${`wb-gallery${cover ? ' wb-gallery-fill' : ''}${overview && walking ? ' wb-gallery-wide' : ''}`} ref=${box} role="application" aria-label=${label}>
       ${state !== 'error' && html`<canvas ref=${canvas} class="wb-gallery-canvas" tabindex="0"></canvas>`}
+      <div ref=${lens} class="wb-gallery-lens" aria-hidden="true" hidden></div>
       <div class="wb-gallery-bar">
         ${state === 'live' && html`<button type="button" class="wb-editor-chip" onClick=${toggleFull}>${t(full ? 'gallery.fullscreen.exit' : 'gallery.fullscreen')}</button>`}
         ${(!overview || walking) && html`<button type="button" class="wb-editor-chip" onClick=${leave}>${t(overview ? 'gallery.overview' : 'gallery.leave')}</button>`}

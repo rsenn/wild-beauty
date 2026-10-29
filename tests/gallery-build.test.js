@@ -143,7 +143,7 @@ describe('buildGallery', () => {
     expect(b.floorHeightAt(24, 0.9)).toBeCloseTo(1);
     expect(b.floorHeightAt(12, 2)).toBeNull();
     expect(b.warnings).toEqual([]);
-    expect(Math.max(...b.groups.wallTop.position.filter((_, i) => i % 3 === 1))).toBeCloseTo(4.2);
+    expect(Math.max(...b.groups.corridorTop.position.filter((_, i) => i % 3 === 1))).toBeCloseTo(4.2);
   });
 
   test('a ramp steeper than 1:12 and a corner sharper than 45 degrees warn', () => {
@@ -180,8 +180,20 @@ describe('buildGallery', () => {
   });
 });
 
+describe('corridor walls', () => {
+  test('the walls of a corridor are groups of their own, those of a room stay where they were', () => {
+    const b = buildGallery({ plan: { walls: [{ points: [[0, 0], [8, 0], [8, 6], [0, 6]], closed: true }], corridors: [{ points: [[8, 3], [14, 3]] }], floors: [] } });
+    const count = g => b.groups[g].index.length / 6;
+
+    expect(count('corridorWall')).toBeGreaterThan(0); // the two sides and the end caps
+    expect(count('corridorTop')).toBe(2);
+    expect(['wallN', 'wallE', 'wallS', 'wallW'].reduce((n, g) => n + count(g), 0)).toBe(8); // the room: four walls, an inside and an outside face each
+    expect(count('wallTop')).toBe(4);
+  });
+});
+
 describe('corridor wall height', () => {
-  const top = c => Math.max(...buildGallery({ plan: { corridors: [{ points: [[0, 0], [8, 0]], ...c }] } }).groups.wallTop.position.filter((_, i) => i % 3 === 1));
+  const top = c => Math.max(...buildGallery({ plan: { corridors: [{ points: [[0, 0], [8, 0]], ...c }] } }).groups.corridorTop.position.filter((_, i) => i % 3 === 1));
 
   test('a corridor wall is as high as given, else full height', () => {
     expect(top({})).toBeCloseTo(3.2);

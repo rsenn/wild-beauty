@@ -7,6 +7,7 @@
 // z = -y, so north is -z. Groups:
 //   wallN wallE wallS wallW  wall faces by the compass direction they face
 //   wallTop                  the top of the walls
+//   corridorWall corridorTop the same for the walls of a corridor (a surface of its own)
 //   roomFloor corridorFloor  floors
 // Each group is { position, uv, index } (Float32Array, Float32Array, Uint32Array).
 // Wall uv: u metres along the wall, v metres above its base. Floor uv: the
@@ -21,7 +22,7 @@ export const CORRIDOR = { width: 2 };
 export const MAX_SLOPE = 1 / 12;
 export const MAX_TURN = 135;
 
-export const GROUPS = ['wallN', 'wallE', 'wallS', 'wallW', 'wallTop', 'roomFloor', 'corridorFloor'];
+export const GROUPS = ['wallN', 'wallE', 'wallS', 'wallW', 'wallTop', 'roomFloor', 'corridorFloor', 'corridorWall', 'corridorTop'];
 
 // growing vertex data for one material group
 class Group {
@@ -258,8 +259,11 @@ export function buildGallery(scene) {
     }
 
     if(c.walls !== false) {
-      wall(groups, left, false, h, c.wallHeight ?? WALL.height, t);
-      wall(groups, right, false, h, c.wallHeight ?? WALL.height, t);
+      // a corridor's walls go to their own groups, whichever way they face
+      const sides = { wallN: groups.corridorWall, wallE: groups.corridorWall, wallS: groups.corridorWall, wallW: groups.corridorWall, wallTop: groups.corridorTop };
+
+      wall(sides, left, false, h, c.wallHeight ?? WALL.height, t);
+      wall(sides, right, false, h, c.wallHeight ?? WALL.height, t);
       seg(left, false, t / 2);
       seg(right, false, t / 2);
     }

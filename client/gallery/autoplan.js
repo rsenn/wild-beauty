@@ -9,11 +9,12 @@ import { slots } from './hang.js';
 const tex = (name, tile, tint) => ({ color: `/static/textures/${name}/color.jpg`, roughness: `/static/textures/${name}/roughness.jpg`, tile, ...(tint && { tint }) });
 
 // named looks: warm = honey pine floors, plaster walls with a warm tint,
-// marble only on the bridges; walnut = dark herringbone; stone = marble and concrete
+// marble on the bridges, whose walls are gravel in every look; walnut = dark herringbone;
+// stone = marble and concrete
 export const LOOKS = {
-  warm: { floor: { texture: tex('woodfloor034', 1.5) }, wall: { texture: tex('plaster001', 2.5, '#fff0dc') }, corridor: { texture: tex('marble017', 2) } },
-  walnut: { floor: { texture: tex('woodfloor014', 1.5) }, wall: { texture: tex('plaster001', 2.5, '#fff0dc') }, corridor: { texture: tex('marble017', 2) } },
-  stone: { floor: { texture: tex('marble017', 2) }, wall: { texture: tex('concrete046', 3) } },
+  warm: { floor: { texture: tex('woodfloor034', 1.5) }, wall: { texture: tex('plaster001', 2.5, '#fff0dc') }, corridor: { texture: tex('marble017', 2) }, corridorWall: { texture: tex('gravel028', 0.8) } },
+  walnut: { floor: { texture: tex('woodfloor014', 1.5) }, wall: { texture: tex('plaster001', 2.5, '#fff0dc') }, corridor: { texture: tex('marble017', 2) }, corridorWall: { texture: tex('gravel028', 0.8) } },
+  stone: { floor: { texture: tex('marble017', 2) }, wall: { texture: tex('concrete046', 3) }, corridorWall: { texture: tex('gravel028', 0.8) } },
 };
 
 export const AUTO = {

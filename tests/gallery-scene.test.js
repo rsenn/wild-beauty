@@ -118,7 +118,34 @@ describe('textures', () => {
     expect(w.root.getObjectByName('wallN').material.map.url).toContain('plaster001');
     expect(w.root.getObjectByName('wallN').material.map.repeat.x).toBeCloseTo(1 / 2.5);
     expect(w.root.getObjectByName('wallN').material.color.getHexString()).toBe('fff0dc');
-    expect(w.root.getObjectByName('wallTop').material).toBe(w.root.getObjectByName('wallE').material);
+    expect(w.root.getObjectByName('wallN').material).toBe(w.root.getObjectByName('wallE').material); // the faces share one material, darker at the foot
+    expect(w.root.getObjectByName('wallTop').material.map).toBe(w.root.getObjectByName('wallE').material.map); // the top has the same plaster, plain
+  });
+
+  test('the walls of a corridor are gravel in every look, their top the same surface, plain', () => {
+    const pick = look => {
+      const plan = autoPlan(30, { look });
+      const w = makeWorld(THREE, buildGallery(plan), [], { style: plan.style, loadTexture: stub });
+      const mesh = name => w.root.getObjectByName(name);
+
+      return { side: mesh('corridorWall').material, top: mesh('corridorTop').material, room: mesh('wallN').material };
+    };
+    const warm = pick('warm');
+    const walnut = pick('walnut');
+
+    expect(warm.side.map.url).toContain('gravel028');
+    expect(warm.side.map.repeat.x).toBeCloseTo(1 / 0.8);
+    expect(warm.top.map).toBe(warm.side.map);
+    expect(warm.top.onBeforeCompile.toString()).not.toContain('vFoot');
+    expect(walnut.side.map.url).toContain('gravel028');
+    expect(warm.room.map.url).toContain('plaster001'); // the rooms keep their plaster
+  });
+
+  test('a corridor without a surface for its walls has the walls of the rooms', () => {
+    const plan = autoPlan(30);
+    const w = makeWorld(THREE, buildGallery(plan), [], { style: { ...plan.style, corridorWall: undefined }, loadTexture: stub });
+
+    expect(w.root.getObjectByName('corridorWall').material).toBe(w.root.getObjectByName('wallN').material);
   });
 
   test('looks: walnut and stone, and the ambient light is warm', () => {

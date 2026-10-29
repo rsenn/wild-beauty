@@ -41,7 +41,10 @@ export function webgl() {
 // how many pictures keep their sharp image once zoomed in on
 const SHARP = 4;
 
-export async function startGallery(canvas, { items, scene, doc, overview = false, onOpen, onLock, onLost, onState } = {}) {
+// how fast the lens closes and opens, per second
+const LENS = { close: 5, open: 2 };
+
+export async function startGallery(canvas, { items, scene, doc, overview = false, onOpen, onLock, onLost, onState, onLens } = {}) {
   if(!webgl()) throw new Error('webgl');
 
   // `?look=warm|walnut|stone` picks the surfaces of the auto plan (autoplan.js LOOKS)
@@ -170,6 +173,13 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
     },
   });
   let input = overview ? null : attach();
+
+  // the lens (vignette and a soft edge blur, drawn by the page over the canvas) closes while the camera
+  // glides from picture to picture or flies down into the plan, and opens on arrival; it is
+  // left out for a visitor who asks for less motion
+  const calm = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  let lens = 0;
+  let sent = -1;
   let focus = null;
   let blended = null; // reused by the flight: { a, b, ea, eb }
   const g = await enterScene(canvas, built, hung, {
@@ -209,6 +219,14 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
       if(Math.abs(camera.fov - fov) > 0.01) {
         camera.fov = fov;
         camera.updateProjectionMatrix();
+      }
+
+      if(onLens && !calm) {
+        const closing = tour.moving || (blend > 0 && blend < 1);
+
+        lens = closing ? Math.min(1, lens + dt * LENS.close) : Math.max(0, lens - dt * LENS.open);
+
+        if(Math.abs(lens - sent) > 0.004) onLens((sent = lens));
       }
 
       sharpen();
