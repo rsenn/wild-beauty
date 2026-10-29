@@ -58,3 +58,53 @@ export function gridCells(n, { gap = GAP, margin = gap, cols: fixed } = {}) {
 export function gridLayout(n, layout) {
   return gridCells(n, gridOptions(layout)).map(({ x, y, size }) => [size / STAGE, 0, 0, size / STAGE, x, y]);
 }
+
+// --- how the viewer shows a grid (EDITOR.md E135) ---------------------------
+
+export const FLOWS = ['fit', 'page', 'scroll'];
+export const AXES = ['h', 'v'];
+
+// The pages of a grid as the viewer shows them: [{ from, count, w, h, cells }]
+// in stage units, `cells` the squares of photos `from` .. `from + count`.
+//  fit     every photo on one square stage (what the editor shows)
+//  page    pages of cols x cols photos (3 x 3 when the columns are automatic)
+//  scroll  one long stage, `cols` photos across and as many rows as needed;
+//          axis `h` turns it: `cols` photos high, the columns follow
+export function gridPlan(n, layout = {}) {
+  const { gap, margin, cols } = gridOptions(layout);
+  const flow = FLOWS.includes(layout.flow) ? layout.flow : 'fit';
+  const axis = AXES.includes(layout.axis) ? layout.axis : flow === 'scroll' ? 'v' : 'h';
+
+  if(flow === 'fit' || !(n >= 1)) return { flow: 'fit', axis, pages: [{ from: 0, count: Math.max(0, n), w: STAGE, h: STAGE, cells: gridCells(n, { gap, margin, cols }) }] };
+
+  const lines = cols ?? 3;
+
+  if(flow === 'page') {
+    const per = lines * lines;
+    const all = gridCells(per, { gap, margin, cols: lines });
+    const pages = [];
+
+    for(let from = 0; from < n; from += per) {
+      const count = Math.min(per, n - from);
+
+      pages.push({ from, count, w: STAGE, h: STAGE, cells: all.slice(0, count) });
+    }
+
+    return { flow, axis, pages };
+  }
+
+  const size = (STAGE - 2 * margin - gap * (lines - 1)) / lines;
+  const along = Math.ceil(n / lines);
+  const length = 2 * margin + along * size + (along - 1) * gap;
+  const cells = Array.from({ length: n }, (_, i) => {
+    const a = margin + Math.floor(i / lines) * (size + gap);
+    const b = margin + (i % lines) * (size + gap);
+
+    return axis === 'v' ? { x: b, y: a, size } : { x: a, y: b, size };
+  });
+
+  return { flow, axis, pages: [{ from: 0, count: n, w: axis === 'v' ? STAGE : length, h: axis === 'v' ? length : STAGE, cells }] };
+}
+
+// the matrices of a page's cells, [a,b,c,d,e,f] like gridLayout
+export const cellMatrices = cells => cells.map(({ x, y, size }) => [size / STAGE, 0, 0, size / STAGE, x, y]);

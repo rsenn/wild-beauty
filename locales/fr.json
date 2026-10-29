@@ -352,5 +352,19 @@
   "graph.done.group": "Groupe de {n} pièces créé",
   "editor.layout.gap": "Espacement",
   "editor.layout.cols": "Colonnes",
-  "editor.layout.cols.auto": "Automatique"
+  "editor.layout.cols.auto": "Automatique",
+  "view.pages": "Pages",
+  "view.scroll": "Défilement",
+  "view.item": "{n} sur {count}",
+  "view.prev": "Précédent",
+  "view.next": "Suivant",
+  "view.of": "{n} / {count}",
+  "editor.flow": "Affichage",
+  "editor.flow.hint": "Comment le public voit la pièce",
+  "editor.flow.fit": "Tout",
+  "editor.flow.page": "Pages",
+  "editor.flow.scroll": "Défilement",
+  "editor.axis": "Sens",
+  "editor.axis.h": "Horizontale",
+  "editor.axis.v": "Verticale"
 }

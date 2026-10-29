@@ -1730,3 +1730,75 @@ body {
   fill: var(--wb-card-ground);
   pointer-events: none;
 }
+
+/* the viewer's flow (EDITOR.md E135): a track of stages that pages or scrolls */
+.wb-flow-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.wb-flow-h .wb-flow-track {
+  flex-flow: row nowrap;
+  overflow-y: hidden;
+}
+
+.wb-flow-v .wb-flow-track {
+  flex-flow: column nowrap;
+  overflow-x: hidden;
+}
+
+.wb-flow-page.wb-flow-h .wb-flow-track {
+  scroll-snap-type: x mandatory;
+}
+
+.wb-flow-page.wb-flow-v .wb-flow-track {
+  scroll-snap-type: y mandatory;
+}
+
+.wb-flow-item {
+  flex: none;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.wb-flow-item .wb-node,
+.wb-flow-item svg {
+  display: block;
+}
+
+.wb-flow-page .wb-flow-item,
+.wb-flow-page .wb-flow-item .wb-node {
+  width: 100%;
+  height: 100%;
+}
+
+.wb-flow-page .wb-flow-item svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* scrolling: the stages keep their shape and run on along the axis */
+.wb-flow-scroll.wb-flow-v .wb-flow-item,
+.wb-flow-scroll.wb-flow-v .wb-flow-item .wb-node,
+.wb-flow-scroll.wb-flow-v .wb-flow-item svg {
+  width: 100%;
+  height: auto;
+}
+
+.wb-flow-scroll.wb-flow-h .wb-flow-item,
+.wb-flow-scroll.wb-flow-h .wb-flow-item .wb-node,
+.wb-flow-scroll.wb-flow-h .wb-flow-item svg {
+  width: auto;
+  height: 100%;
+}
+
+.wb-flow-nav {
+  display: flex;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  justify-content: center;
+  margin: var(--wb-editor-gap) auto 0;
+}

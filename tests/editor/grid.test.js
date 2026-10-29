@@ -1,6 +1,6 @@
 // bun test: client/editor/grid.js
 import { describe, expect, test } from 'bun:test';
-import { GAP, gridCells, gridLayout, gridOptions } from '../../client/editor/grid.js';
+import { GAP, gridCells, gridLayout, gridOptions, gridPlan } from '../../client/editor/grid.js';
 import { setLayout, validate } from '../../client/editor/model.js';
 import { apply } from '../../client/editor/matrix.js';
 
@@ -102,5 +102,49 @@ describe('columns and spacing 0', () => {
     expect(setLayout(a, { cols: 99 })).toBe(a);
     expect(setLayout(a, { cols: 1.5 })).toBe(a);
     expect(validate(a).filter(e => e.code === 'bad_layout')).toEqual([]);
+  });
+});
+
+describe('flows (E135)', () => {
+  test('fit is the whole grid on the square stage, as before', () => {
+    const plan = gridPlan(5, {});
+
+    expect(plan).toMatchObject({ flow: 'fit', pages: [{ from: 0, count: 5, w: 1000, h: 1000 }] });
+    expect(plan.pages[0].cells).toEqual(gridCells(5, gridOptions({})));
+  });
+
+  test('pages hold cols x cols photos, the last one the rest, left to right', () => {
+    const plan = gridPlan(11, { flow: 'page', cols: 2 });
+
+    expect(plan.pages.map(p => [p.from, p.count])).toEqual([[0, 4], [4, 4], [8, 3]]);
+    expect(plan.pages[2].cells.length).toBe(3);
+    expect(plan.pages[2].cells[0]).toEqual(plan.pages[0].cells[0]); // the same cells as a full page
+    expect(gridPlan(10, { flow: 'page' }).pages.length).toBe(2); // automatic columns: 3 x 3
+    expect(plan.axis).toBe('h');
+  });
+
+  test('scroll: one long stage, cols across, rows as needed; axis h turns it', () => {
+    const v = gridPlan(7, { flow: 'scroll', cols: 3, gap: 10 }).pages[0];
+    const size = (1000 - 20 - 20) / 3;
+
+    expect(v.w).toBe(1000);
+    expect(v.h).toBeCloseTo(20 + 3 * size + 2 * 10, 6);
+    expect(v.cells[3]).toMatchObject({ x: 10, y: 10 + size + 10 });
+    expect(v.cells.every(c => Math.abs(c.size - size) < 1e-9)).toBe(true);
+
+    const h = gridPlan(7, { flow: 'scroll', cols: 3, gap: 10, axis: 'h' }).pages[0];
+
+    expect(h.h).toBe(1000);
+    expect(h.w).toBeCloseTo(v.h, 6);
+    expect(h.cells[3]).toMatchObject({ x: 10 + size + 10, y: 10 });
+  });
+
+  test('flow and axis are checked', () => {
+    const doc = { v: 1, mode: 'grid', pages: [{ id: 'p', steps: [] }], style: {} };
+
+    expect(setLayout(doc, { flow: 'scroll', axis: 'v' }).layout).toEqual({ flow: 'scroll', axis: 'v' });
+    expect(setLayout(doc, { flow: 'nope' })).toBe(doc);
+    expect(setLayout(doc, { axis: 'z' })).toBe(doc);
+    expect(validate(setLayout(doc, { flow: 'page' })).filter(e => e.code === 'bad_layout')).toEqual([]);
   });
 });

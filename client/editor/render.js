@@ -3,7 +3,7 @@
 // needs comes from the document and the options.
 import { html } from '../html.js';
 import { cropWindow, isColour, isTexture } from './model.js';
-import { gridLayout } from './grid.js';
+import { cellMatrices, gridLayout, gridPlan } from './grid.js';
 import { lerpMatrix } from './matrix.js';
 import { ease } from './playback.js';
 import { sanitize, toAttr } from './theme.js';
@@ -234,7 +234,7 @@ export function slideView(doc, info) {
 // when `upTo` is missing). `slides`: photo `page` alone, shown whole.
 // `grid`: every photo, tiled by gridLayout. Both start from the photo steps,
 // without clips, and give them the matrix of their layout.
-function stepsOf(doc, { mode, page, upTo, photos }) {
+function stepsOf(doc, { mode, page, upTo, photos, part }) {
   if(mode === 'free') {
     const steps = doc.pages[page]?.steps ?? [];
 
@@ -263,14 +263,23 @@ function stepsOf(doc, { mode, page, upTo, photos }) {
     return step && photos(step.photo) ? [{ ...step, m: IDENTITY }, ...(slideOf(doc, page)?.owned ?? [])] : [];
   }
 
+  // a `part` is a page of the viewer's flow, no part the whole grid on one stage
+  if(part !== undefined) {
+    const at = gridPlan(all.length, doc.layout).pages[part];
+
+    return at ? cellMatrices(at.cells).map((m, i) => ({ ...all[at.from + i], m })) : [];
+  }
+
   return gridLayout(all.length, doc.layout).map((m, i) => ({ ...all[i], m }));
 }
 
 // the document as an <svg> on the 0..1000 stage. `mode` defaults to the
 // document's own; `page` is the page index (free) or the photo index
 // (slides); `upTo` the number of steps shown (free).
-export function renderStage(doc, { photos = () => null, mode = doc.mode, page = 0, upTo } = {}) {
-  const steps = stepsOf(doc, { mode, page, upTo, photos });
+export function renderStage(doc, { photos = () => null, mode = doc.mode, page = 0, upTo, part } = {}) {
+  const steps = stepsOf(doc, { mode, page, upTo, photos, part });
+  const at = mode === 'grid' && part !== undefined ? gridPlan(photoSteps(doc).length, doc.layout).pages[part] : null; // a part of a long stage is not square
+  const [w, h] = at ? [at.w, at.h] : [STAGE, STAGE];
   const { by, clips } = effective(steps);
   const shapes = new Map(steps.filter(s => s.op === 'shape').map(s => [s.id, s]));
   const defs = [...clips].filter(id => shapes.has(id) && PATH.test(shapes.get(id).path)).map(id => {
@@ -303,9 +312,9 @@ export function renderStage(doc, { photos = () => null, mode = doc.mode, page = 
     }
   };
 
-  return html`<svg viewBox=${`0 0 ${STAGE} ${STAGE}`} xmlns="http://www.w3.org/2000/svg">
+  return html`<svg viewBox=${`0 0 ${w} ${h}`} xmlns="http://www.w3.org/2000/svg">
     ${defs.length > 0 && html`<defs>${defs}</defs>`}
-    ${doc.bg && HEX.test(doc.bg) && html`<rect x="0" y="0" width=${STAGE} height=${STAGE} fill=${doc.bg} />`}
+    ${doc.bg && HEX.test(doc.bg) && html`<rect x="0" y="0" width=${w} height=${h} fill=${doc.bg} />`}
     ${steps.map(draw)}
   </svg>`;
 }

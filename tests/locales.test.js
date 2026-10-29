@@ -59,7 +59,7 @@ describe('locales', () => {
 
   test('every string is non-empty and German and French are not English copies', () => {
     // short symbols, loanwords and names that are the same in every language
-    const SAME = new Set(['editor.short.undo', 'editor.short.redo', 'editor.short.page', 'editor.short.delete', 'upload.add.short', 'upload.state.uploading', 'page.title.node', 'editor.blend.normal', 'editor.kind.node', 'editor.kind.album', 'editor.kind.shop', 'editor.scrub.pause', 'nav.lang', 'upload.files.one', 'upload.files.other', 'editor.actions', 'editor.page.1', 'editor.visibility.public', 'editor.strip', 'editor.tab.photos', 'editor.strip.photo', 'editor.pages', 'editor.page.n', 'editor.mode', 'editor.role.texture', 'editor.step.text', 'editor.step.photo']);
+    const SAME = new Set(['editor.short.undo', 'editor.short.redo', 'editor.short.page', 'editor.short.delete', 'upload.add.short', 'upload.state.uploading', 'page.title.node', 'editor.blend.normal', 'editor.kind.node', 'editor.kind.album', 'editor.kind.shop', 'editor.scrub.pause', 'nav.lang', 'upload.files.one', 'upload.files.other', 'editor.actions', 'editor.page.1', 'editor.visibility.public', 'editor.strip', 'editor.tab.photos', 'editor.strip.photo', 'editor.pages', 'editor.page.n', 'editor.mode', 'editor.role.texture', 'editor.step.text', 'editor.step.photo', 'view.pages', 'view.of', 'editor.flow.page']);
 
     for(const code of ['en', 'de', 'fr']) for(const [k, v] of Object.entries(locale(code))) expect([code, k, v.trim() === '']).toEqual([code, k, false]);
 

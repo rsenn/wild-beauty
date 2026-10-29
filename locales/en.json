@@ -352,5 +352,19 @@
   "graph.done.group": "Made a group of {n} nodes",
   "editor.layout.gap": "Spacing",
   "editor.layout.cols": "Columns",
-  "editor.layout.cols.auto": "Auto"
+  "editor.layout.cols.auto": "Auto",
+  "view.pages": "Pages",
+  "view.scroll": "Scrolling",
+  "view.item": "{n} of {count}",
+  "view.prev": "Previous",
+  "view.next": "Next",
+  "view.of": "{n} / {count}",
+  "editor.flow": "Viewer",
+  "editor.flow.hint": "How the viewer shows the node",
+  "editor.flow.fit": "All",
+  "editor.flow.page": "Pages",
+  "editor.flow.scroll": "Scroll",
+  "editor.axis": "Direction",
+  "editor.axis.h": "Horizontal",
+  "editor.axis.v": "Vertical"
 }

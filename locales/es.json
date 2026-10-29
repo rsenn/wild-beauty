@@ -352,5 +352,19 @@
   "graph.done.group": "Grupo de {n} piezas creado",
   "editor.layout.gap": "Separación",
   "editor.layout.cols": "Columnas",
-  "editor.layout.cols.auto": "Automático"
+  "editor.layout.cols.auto": "Automático",
+  "view.pages": "Páginas",
+  "view.scroll": "Desplazamiento",
+  "view.item": "{n} de {count}",
+  "view.prev": "Anterior",
+  "view.next": "Siguiente",
+  "view.of": "{n} / {count}",
+  "editor.flow": "Vista",
+  "editor.flow.hint": "Cómo ve el público la pieza",
+  "editor.flow.fit": "Todo",
+  "editor.flow.page": "Páginas",
+  "editor.flow.scroll": "Desplazamiento",
+  "editor.axis": "Dirección",
+  "editor.axis.h": "Horizontal",
+  "editor.axis.v": "Vertical"
 }

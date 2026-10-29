@@ -352,5 +352,19 @@
   "graph.done.group": "Gruppe aus {n} Werken erstellt",
   "editor.layout.gap": "Abstand",
   "editor.layout.cols": "Spalten",
-  "editor.layout.cols.auto": "Automatisch"
+  "editor.layout.cols.auto": "Automatisch",
+  "view.pages": "Seiten",
+  "view.scroll": "Scrollen",
+  "view.item": "{n} von {count}",
+  "view.prev": "Zurück",
+  "view.next": "Weiter",
+  "view.of": "{n} / {count}",
+  "editor.flow": "Ansicht",
+  "editor.flow.hint": "Wie die Betrachtenden das Werk sehen",
+  "editor.flow.fit": "Alles",
+  "editor.flow.page": "Seiten",
+  "editor.flow.scroll": "Scrollen",
+  "editor.axis": "Richtung",
+  "editor.axis.h": "Waagrecht",
+  "editor.axis.v": "Senkrecht"
 }

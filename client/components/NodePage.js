@@ -1,10 +1,10 @@
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
-import { renderNode } from '../editor/render.js';
 import { useEditor } from '../editor/useEditor.js';
 import { Layout } from './Layout.js';
 import { NodeEditor } from './NodeEditor.js';
+import { NodeView } from './NodeView.js';
 
 // /:lang/node/:id: a saved node, read-only. The server renders it into the
 // HTML (no JavaScript needed to see it); the browser adopts the same markup
@@ -19,7 +19,7 @@ export const NodePage = () => {
   return html`
     <${Layout} active="" hrefFor=${code => `/${code}/node/${node.id}`}>
       <h1 class="wb-node-title">${title}</h1>
-      ${!editingThis && html`<div class="wb-node-view" role="img" aria-label=${title}>${renderNode(node.doc, { photos: hash => photos[hash] ?? null })}</div>`}
+      ${!editingThis && html`<${NodeView} doc=${node.doc} photos=${hash => photos[hash] ?? null} label=${title} />`}
       ${!editingThis && html`<p><button type="button" class="wb-editor-chip wb-node-edit" onClick=${() => openEditor(node.id)}>${t('editor.edit')}</button></p>`}
       ${editingThis && html`<${NodeEditor} key=${target} target=${target} onClose=${closeEditor} />`}
     <//>
