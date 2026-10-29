@@ -46,6 +46,7 @@ import { acuteCorner } from '../editor/walls.js';
 import { NEW } from '../editor/store.js';
 import { swatches, usedColours } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
+import { PlaceChip } from './PlaceChip.js';
 import { Filmstrip } from './Filmstrip.js';
 import { clampK, durationOf, positionAt } from '../editor/playback.js';
 import { ModeSwitch } from './ModeSwitch.js';
@@ -104,7 +105,7 @@ const round = (v, k) => Math.round(v * k) / k;
 // what the editor needs to draw an upload: where it is and how big
 // the share of the busy ring the server's work takes; the rest is loading the new image
 const SERVER_SHARE = 0.8;
-const photoInfo = p => ({ href: `/files/uploads/${p.display}`, width: p.width, height: p.height, padding: p.padding, palette: Array.isArray(p.palette) ? p.palette.filter(c => /^#[0-9a-f]{6}$/i.test(c?.hex)).slice(0, 8) : [] });
+const photoInfo = p => ({ href: `/files/uploads/${p.display}`, width: p.width, height: p.height, padding: p.padding, pos: p.pos ?? undefined, palette: Array.isArray(p.palette) ? p.palette.filter(c => /^#[0-9a-f]{6}$/i.test(c?.hex)).slice(0, 8) : [] });
 const isPayload = p => p && /^[0-9a-f]{64}$/.test(p.hash) && typeof p.display === 'string' && p.width > 0 && p.height > 0;
 
 // the keyboard cursor of the shape tool (E73): a cross, Space places a corner there
@@ -2186,6 +2187,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
           </div>`
         : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} pal=${pal} used=${usedNow} onCutout=${removeBackground} onCancelJob=${cancelJob} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+      <${PlaceChip} t=${t} doc=${doc} photos=${photos} nodeId=${nodeId} />
       ${paletteTargets && html`<${Palette} t=${t} pal=${pal} used=${usedNow} dropper=${startDropper} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">
