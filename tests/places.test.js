@@ -18,8 +18,8 @@ beforeEach(async () => {
 
 describe('place titles', () => {
   test('the gazetteer within 5 km, else the cell coordinates', () => {
-    expect(placeTitle(at(47.3769, 8.5417))).toBe('Zürich');
-    expect(placeTitle(at(47.4, 8.57))).toBe('Zürich');
+    expect(placeTitle(at(47.3769, 8.5417))).toBe('Zürich (ZH)');
+    expect(placeTitle(at(47.4, 8.57))).toBe('Zürich (ZH)');
     expect(placeTitle(at(47.2, 8.0), [])).toBe('47.20, 8.00');
     expect(placeTitle(at(47.2, 8.0))).toBe('47.20, 8.00');
   });
@@ -40,7 +40,7 @@ describe('ensurePlace', () => {
     const before = linksFrom(h, root, 'child').length;
     const zurich = ensurePlace(h, at(47.38, 8.54));
 
-    expect(zurich).toMatchObject({ title: 'Zürich', created: false });
+    expect(zurich).toMatchObject({ title: 'Zürich (ZH)', created: false });
     expect(linksFrom(h, root, 'child').length).toBe(before);
 
     const fresh = ensurePlace(h, at(10.5, 20.5));
@@ -72,7 +72,7 @@ describe('routes', () => {
     const count = () => h.get('SELECT COUNT(*) AS n FROM nodes').n;
     const n = count();
 
-    expect(await (await get('lat=47.3769&lon=8.5417')).json()).toMatchObject({ title: 'Zürich', id: expect.any(Number) });
+    expect(await (await get('lat=47.3769&lon=8.5417')).json()).toMatchObject({ title: 'Zürich (ZH)', id: expect.any(Number) });
     expect(await (await get('lat=10.5&lon=20.5')).json()).toEqual({ id: null, title: '10.50, 20.50' });
     expect(count()).toBe(n);
   });

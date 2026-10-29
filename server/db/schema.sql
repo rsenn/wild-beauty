@@ -76,3 +76,14 @@ CREATE TABLE place_suggestions (
   lon     REAL NOT NULL,
   PRIMARY KEY (node_id, lat, lon)
 );
+
+-- migration 3
+-- The municipality a rounded position (the 0.01 degree cell) lies in, as the
+-- federal geoportal told us (GRAPH.md S1.5), so a place is named once and
+-- found again without a request. name NULL: the cell is outside Switzerland.
+CREATE TABLE place_names (
+  lat  REAL NOT NULL,
+  lon  REAL NOT NULL,
+  name TEXT,
+  PRIMARY KEY (lat, lon)
+);

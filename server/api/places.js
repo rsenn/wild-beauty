@@ -8,7 +8,8 @@ import { addLink, insertNode, linksFrom, listSuggestions, removeSuggestion } fro
 import { graphOf } from './graph.js';
 import { emptyNode } from '../../client/editor/model.js';
 import { roundPosition } from '../media/probe.js';
-import { placeTitle } from './gazetteer.js';
+import { placeTitle, titleFor } from './gazetteer.js';
+import { resolveNames } from './municipality.js';
 
 export { GAZETTEER, RADIUS_KM, placeTitle } from './gazetteer.js';
 
@@ -25,7 +26,7 @@ const titled = (h, root, title) =>
 // null when there is no `places` node (run tools/seed.js)
 export function findPlace(h, pos, gazetteer) {
   const root = placesRoot(h);
-  const title = placeTitle(pos, gazetteer);
+  const title = titleFor(h, pos, gazetteer);
 
   if(root === null) return null;
 
@@ -39,7 +40,7 @@ export function ensurePlace(h, pos, gazetteer) {
 
     if(root === null) return null;
 
-    const title = placeTitle(pos, gazetteer);
+    const title = titleFor(h, pos, gazetteer);
     const found = titled(h, root, title);
 
     if(found) return { id: found.id, title, created: false };
@@ -59,7 +60,7 @@ export function pendingSuggestions(h, gazetteer) {
   const root = placesRoot(h);
 
   return listSuggestions(h).flatMap(({ node_id, title, lat, lon }) => {
-    const name = placeTitle({ lat, lon }, gazetteer);
+    const name = titleFor(h, { lat, lon }, gazetteer);
     const place = root === null ? null : titled(h, root, name);
 
     if(place && h.get("SELECT 1 AS ok FROM node_links WHERE from_id = ? AND to_id = ? AND label = 'at'", node_id, place.id)) return [];
@@ -90,13 +91,19 @@ const MAX_ANSWERS = 200;
 // a position from a query or a body, snapped to the 1 km grid, or null
 const positionOf = ({ lat, lon }) => (typeof lat === 'string' || typeof lat === 'number' ? roundPosition(Number(lat), Number(lon)) : null);
 
-export async function placesRoute(req, h, gazetteer) {
+// `fetcher` replaces fetch for the municipality lookup (tests)
+export async function placesRoute(req, h, gazetteer, fetcher) {
   h ??= await database();
 
   const url = new URL(req.url);
 
   if(url.pathname === '/api/places/suggestions') {
-    if(req.method === 'GET') return Response.json({ suggestions: pendingSuggestions(h, gazetteer) }, { headers: { 'cache-control': 'no-cache' } });
+    if(req.method === 'GET') {
+      await resolveNames(h, listSuggestions(h), { fetcher });
+
+      return Response.json({ suggestions: pendingSuggestions(h, gazetteer) }, { headers: { 'cache-control': 'no-cache' } });
+    }
+
     if(req.method !== 'POST') return fail(405, 'method_not_allowed');
 
     let body;
@@ -108,6 +115,9 @@ export async function placesRoute(req, h, gazetteer) {
     }
 
     if(!Array.isArray(body?.ops) || body.ops.length > MAX_ANSWERS) return fail(400, 'bad_request');
+
+    // name the places before the transaction, which cannot wait for a request
+    await resolveNames(h, body.ops.filter(op => op?.op === 'accept' && Number.isFinite(op.lat) && Number.isFinite(op.lon)), { fetcher });
 
     try {
       h.tx(() => {
@@ -124,6 +134,8 @@ export async function placesRoute(req, h, gazetteer) {
     const pos = positionOf(Object.fromEntries(url.searchParams));
 
     if(!pos) return fail(400, 'bad_position');
+
+    await resolveNames(h, [pos], { fetcher });
 
     const found = findPlace(h, pos, gazetteer);
 
@@ -142,6 +154,8 @@ export async function placesRoute(req, h, gazetteer) {
     const pos = body && typeof body === 'object' ? positionOf(body) : null;
 
     if(!pos) return fail(400, 'bad_position');
+
+    await resolveNames(h, [pos], { fetcher });
 
     const place = ensurePlace(h, pos, gazetteer);
 

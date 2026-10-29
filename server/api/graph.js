@@ -5,7 +5,7 @@
 import { database } from '../db/db.js';
 import { LABELS, addLink, deleteNode, graphEdges, graphNodes, insertNode, removeLink, setPinned, setPosition } from '../db/nodes.js';
 import { canView } from './nodes.js';
-import { placeTitle } from './gazetteer.js';
+import { titleFor } from './gazetteer.js';
 
 const MAX_OPS = 200;
 const MAX_TITLE = 200;
@@ -30,7 +30,7 @@ export function graphOf(h) {
 function dropAnswered(h, node, to) {
   const title = h.get('SELECT title FROM nodes WHERE id = ?', to).title;
 
-  for(const s of h.all('SELECT lat, lon FROM place_suggestions WHERE node_id = ?', node)) if(placeTitle(s) === title) h.run('DELETE FROM place_suggestions WHERE node_id = ? AND lat = ? AND lon = ?', node, s.lat, s.lon);
+  for(const s of h.all('SELECT lat, lon FROM place_suggestions WHERE node_id = ?', node)) if(titleFor(h, s) === title) h.run('DELETE FROM place_suggestions WHERE node_id = ? AND lat = ? AND lon = ?', node, s.lat, s.lon);
 }
 
 // one operation -> true when it changed something, false when it was a no-op;

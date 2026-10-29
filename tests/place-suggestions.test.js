@@ -89,7 +89,7 @@ describe('answering in bulk', () => {
 
   test('lists each with the place it would link to', async () => {
     expect((await (await get()).json()).suggestions).toEqual([
-      { node: a, title: 'Market day', lat: 47.38, lon: 8.54, place: { id: expect.any(Number), title: 'Zürich' } },
+      { node: a, title: 'Market day', lat: 47.38, lon: 8.54, place: { id: expect.any(Number), title: 'Zürich (ZH)' } },
       { node: b, title: 'Hike', lat: 10.5, lon: 20.5, place: { id: null, title: '10.50, 20.50' } },
     ]);
   });
@@ -100,7 +100,7 @@ describe('answering in bulk', () => {
     const at = h.all("SELECT l.from_id AS f, n.title FROM node_links l JOIN nodes n ON n.id = l.to_id WHERE l.label = 'at' ORDER BY l.from_id");
 
     expect(res.status).toBe(200);
-    expect(at).toEqual([{ f: a, title: 'Zürich' }, { f: b, title: '10.50, 20.50' }]);
+    expect(at).toEqual([{ f: a, title: 'Zürich (ZH)' }, { f: b, title: '10.50, 20.50' }]);
     expect(body.suggestions).toEqual([]);
     expect(body.graph.edges.filter(e => e.label === 'at').length).toBe(2);
   });
@@ -113,15 +113,15 @@ describe('answering in bulk', () => {
   });
 
   test('a node already linked to the place is not suggested again', () => {
-    const zurich = h.get("SELECT id FROM nodes WHERE title = 'Zürich'").id;
+    const zurich = h.get("SELECT id FROM nodes WHERE title = 'Zürich (ZH)'").id;
 
     addLink(h, a, zurich, 'at');
     expect(pendingSuggestions(h).map(s => s.node)).toEqual([b]);
   });
 
   test('an `at` link made any other way (the chip) answers its suggestion, not another one', () => {
-    const zurich = h.get("SELECT id FROM nodes WHERE title = 'Zürich'").id;
-    const bern = h.get("SELECT id FROM nodes WHERE title = 'Bern'").id;
+    const zurich = h.get("SELECT id FROM nodes WHERE title = 'Zürich (ZH)'").id;
+    const bern = h.get("SELECT id FROM nodes WHERE title = 'Bern (BE)'").id;
 
     addSuggestions(h, a, [{ lat: 46.95, lon: 7.45 }]);
     applyOp(h, { op: 'link', from: a, to: zurich, label: 'at' });

@@ -24,8 +24,8 @@ const LANDSCAPE = [
     ]],
   ]],
   ['places', 'list', [
-    ['Zürich', 'node'],
-    ['Bern', 'node'],
+    ['Zürich (ZH)', 'node'],
+    ['Bern (BE)', 'node'],
   ]],
 ];
 

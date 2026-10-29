@@ -156,3 +156,14 @@ export function addSuggestions(h, nodeId, positions) {
 export const listSuggestions = h => h.all('SELECT s.node_id, n.title, s.lat, s.lon FROM place_suggestions s JOIN nodes n ON n.id = s.node_id ORDER BY s.node_id, s.lat, s.lon');
 
 export const removeSuggestion = (h, nodeId, lat, lon) => h.run('DELETE FROM place_suggestions WHERE node_id = ? AND lat = ? AND lon = ?', nodeId, lat, lon).changes > 0;
+
+// --- place names (GRAPH.md S1.5) -----------------------------------------------
+
+// the cached municipality of a cell: a string, null (outside Switzerland) or undefined (not asked yet)
+export function getPlaceName(h, { lat, lon }) {
+  const row = h.get('SELECT name FROM place_names WHERE lat = ? AND lon = ?', lat, lon);
+
+  return row ? row.name : undefined;
+}
+
+export const setPlaceName = (h, { lat, lon }, name) => h.run('INSERT OR REPLACE INTO place_names (lat, lon, name) VALUES (?, ?, ?)', lat, lon, name);
