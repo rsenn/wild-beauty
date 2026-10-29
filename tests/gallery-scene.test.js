@@ -197,6 +197,89 @@ describe('canvases and name plates', () => {
   });
 });
 
+describe('sharp pictures when zoomed in', () => {
+  const asked = [];
+  const loadImage = (url, ok) => (asked.push(url), ok(Object.assign(new THREE.Texture(), { image: { width: 2000, height: 1000 } })));
+  const make = n => {
+    const plan = autoPlan(n);
+
+    return makeWorld(THREE, buildGallery(plan), hang(plan, Array.from({ length: n }, (_, i) => ({ id: 'c' + i, url: '/t' + i, full: '/big' + i }))).hung, { tileUrl: c => c.url, loadImage });
+  };
+
+  test('upgrade swaps in the sharper image, keeps its proportions; downgrade gives the tile back', () => {
+    const w = make(6);
+    const p = w.pictures[0];
+
+    w.update(new THREE.Vector3(8, 1.6, -5)); // the tile loads
+    const tile = p.userData.material.map;
+
+    expect(tile).not.toBeNull();
+
+    w.upgrade(0);
+    expect(asked).toContain('/big0');
+    expect(p.userData.material.map).not.toBe(tile);
+    expect(p.userData.face.scale.y / p.userData.face.scale.x).toBeCloseTo(0.5); // a 2:1 photo
+
+    w.upgrade(0);
+    expect(asked.filter(u => u === '/big0').length).toBe(1); // once
+
+    w.downgrade(0);
+    expect(p.userData.material.map).toBe(tile);
+    w.upgrade(0);
+    expect(asked.filter(u => u === '/big0').length).toBe(2); // can be asked for again
+  });
+
+  test('a picture without a sharper image is left as it is', () => {
+    const w = make(6);
+
+    w.pictures[1].userData.child.full = undefined;
+    w.upgrade(1);
+    expect(asked).not.toContain('/big1');
+  });
+});
+
+describe('the sky', () => {
+  const sky = () => world(5).w;
+  const attr = (w, name) => w.root.getObjectByName('stars').geometry.attributes[name];
+
+  test('stars are shader points of varied brightness, size and colour, few of them bright', () => {
+    const w = sky();
+    const bright = Array.from(attr(w, 'aBright').array);
+    const size = Array.from(attr(w, 'aSize').array);
+    const tint = attr(w, 'aTint');
+
+    expect(w.stars.material.isShaderMaterial).toBe(true);
+    expect(bright.length).toBe(2000);
+    expect(Math.min(...bright)).toBeGreaterThan(0);
+    expect(Math.max(...bright)).toBeLessThanOrEqual(1);
+    expect(bright.filter(b => b > 0.7).length).toBeLessThan(bright.length * 0.1);
+    expect(new Set(size.map(v => Math.round(v))).size).toBeGreaterThan(4);
+    expect(new Set(Array.from(tint.array).map(v => v.toFixed(2))).size).toBeGreaterThan(3);
+  });
+
+  test('a part of the stars lies in a band: a great circle holds far more than chance', () => {
+    const w = sky();
+    const pos = attr(w, 'position').array;
+    const axis = new THREE.Vector3(0.35, 0.8, 0.5).normalize();
+    const near = Array.from({ length: pos.length / 3 }, (_, i) => Math.abs(new THREE.Vector3(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]).normalize().dot(axis)) < 0.2);
+    const share = near.filter(Boolean).length / near.length;
+
+    expect(share).toBeGreaterThan(0.35); // chance would be 0.2
+  });
+
+  test('the same seed gives the same sky; the twinkle follows the time, the sky turns', () => {
+    const a = attr(sky(), 'position').array;
+    const b = attr(sky(), 'position').array;
+    const w = sky();
+
+    expect(Array.from(a)).toEqual(Array.from(b));
+    w.update(new THREE.Vector3(0, 1.6, 0), 12.5);
+    expect(w.stars.material.uniforms.uTime.value).toBe(12.5);
+    expect(w.stars.rotation.y).not.toBe(0);
+    expect(w.root.getObjectByName('dome').position.y).toBe(1.6);
+  });
+});
+
 describe('startPose', () => {
   test('eye height over the floor, look 90 is east', () => {
     const p = startPose({ x: 6, y: 4, look: 90, h: 0.5 });
@@ -209,5 +292,29 @@ describe('startPose', () => {
 
     expect([p.x, p.y, p.z]).toEqual([6, 2.1, -4]);
     expect(dir.x).toBeCloseTo(1);
+  });
+});
+
+describe('tile loading queue', () => {
+  test('at most 3 tiles in flight, the nearest first, the next one starts when one is done', () => {
+    const pending = [];
+    const loadImage = (url, ok) => pending.push({ url, ok });
+    const plan = autoPlan(12);
+    const w = makeWorld(THREE, buildGallery(plan), hang(plan, Array.from({ length: 12 }, (_, i) => ({ id: 'c' + i, url: '/t' + i }))).hung, { tileUrl: c => c.url, loadImage });
+    const at = new THREE.Vector3(8, 1.6, -5);
+
+    w.update(at);
+    expect(pending.length).toBe(3);
+
+    const nearest = w.pictures.map(p => [p.position.distanceToSquared(at), p.userData.child.url]).sort((a, b) => a[0] - b[0]).slice(0, 3).map(([, url]) => url);
+
+    expect(pending.map(p => p.url).sort()).toEqual([...nearest].sort());
+
+    w.update(at);
+    expect(pending.length).toBe(3); // nothing more while all three are on their way
+
+    pending[0].ok(Object.assign(new THREE.Texture(), { image: { width: 10, height: 10 } }));
+    w.update(at); // standing still: the finished tile makes room for the next
+    expect(pending.length).toBe(4);
   });
 });

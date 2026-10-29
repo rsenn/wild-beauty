@@ -17,7 +17,8 @@ export const LIGHT = {
   reach: 9, // metres a spot reaches
   above: 1.4, // spot height over the picture centre
   front: 1.3, // spot distance in front of the picture
-  load: 25, // metres within which a picture's tile is fetched
+  load: 80, // metres within which a picture's tile is fetched, nearest first
+  parallel: 3, // tiles fetched at once: the nearest are not queued behind far ones
 };
 
 // the canvas: how far it stands off the wall (an inch), its shadow, and the name
@@ -26,7 +27,18 @@ export const DEPTH = 0.04;
 export const SHADOW = { opacity: 0.5, spread: 1.5, drop: 0.04 };
 export const PLATE = { width: 0.6, height: 0.17, below: 0.2 };
 
-export const SKY = { stars: 2000, seed: 17, radius: 500, tint: '#ffffff', ground: 0x05060d };
+export const SKY = {
+  stars: 2000,
+  seed: 17,
+  radius: 500,
+  tint: '#ffffff',
+  ground: 0x05060d,
+  band: 0.4, // share of the stars in the Milky Way band
+  glow: 50, // big faint points that make the band glow
+  twinkle: 0.35, // how much a dim star flickers (atmospheric scintillation)
+  zenith: 0x02030a, // the sky overhead, and at the horizon a faint lift
+  horizon: 0x161a2c,
+};
 
 export const EYE = 1.6;
 
@@ -111,7 +123,7 @@ function placeholder(id = '') {
 // the walls, floors, pictures, lights and stars. `hung` is hang()'s `hung`:
 // [{ child: { id }, x, y, nx, ny, h, size }]. Options: `tileUrl(child)` -> url
 // or null, `style` (scene3d style). Returns { root, update(position), dispose() }.
-export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}, anisotropy = 1, loadTexture, label } = {}) {
+export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}, anisotropy = 1, loadTexture, loadImage, label, pixelRatio = 1 } = {}) {
   const root = new THREE.Group();
   const owned = []; // everything with a dispose()
   const own = x => (owned.push(x), x);
@@ -189,8 +201,9 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
   );
   const plateBlank = own(new THREE.MeshBasicMaterial({ color: 0xe9e3d8 }));
   const loader = new THREE.TextureLoader();
+  const image = loadImage ?? ((url, ok, bad) => loader.load(url, ok, undefined, bad)); // a picture's file, as a texture
   const draw = label ?? drawLabel;
-  const pictures = hung.map(p => {
+  const pictures = hung.map((p, index) => {
     const group = new THREE.Group();
     const mat = own(new THREE.MeshBasicMaterial({ color: new THREE.Color().setHSL(placeholder(p.child?.id), 0.3, 0.55) }));
     const face = new THREE.Mesh(box, [side, side, side, side, mat, side]);
@@ -214,7 +227,7 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
     group.position.set(p.x, p.h, -p.y);
     group.rotation.y = Math.atan2(p.nx, -p.ny);
     group.name = `picture:${p.child?.id ?? ''}`;
-    group.userData = { child: p.child, material: mat, face, cast, plate, title, size: p.size, state: 'idle' };
+    group.userData = { index, child: p.child, material: mat, face, cast, plate, title, size: p.size, state: 'idle' };
     root.add(group);
 
     return group;
@@ -240,7 +253,27 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
     plate.material.needsUpdate = true;
   };
 
+  // a photo keeps its proportions inside the square it hangs in; the shadow and
+  // the plate follow its edges
+  const fit = (picture, texture) => {
+    const { width, height } = texture.image ?? {};
+
+    if(!width || !height) return;
+
+    const a = width / height;
+    const { size, face, cast, plate } = picture.userData;
+    const [w, h] = [size * Math.min(1, a), size * Math.min(1, 1 / a)];
+
+    face.scale.set(w, h, DEPTH);
+    cast.scale.set(w * SHADOW.spread, h * SHADOW.spread, 1);
+    plate?.position.setY(-h / 2 - PLATE.below);
+  };
+
+  const last = new THREE.Vector3(Infinity, 0, 0); // where the visitor was when the nearest pictures were last chosen
+
   // a tile is fetched when the visitor comes near (low cost far away)
+  let inflight = 0;
+
   const fetch = picture => {
     const url = tileUrl(picture.userData.child);
 
@@ -248,30 +281,68 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
 
     if(!url) return;
 
-    loader.load(url, texture => {
+    inflight++;
+
+    image(url, texture => {
+      inflight--;
+      last.set(Infinity, 0, 0); // a standing visitor still gets the next tile
+
       if(picture.userData.state === 'disposed') return texture.dispose();
 
       texture.colorSpace = THREE.SRGBColorSpace;
-
-      // a photo keeps its proportions inside the square it hangs in; the
-      // shadow and the plate follow its edges
-      const { width, height } = texture.image ?? {};
-
-      if(width && height) {
-        const a = width / height;
-        const { size, face, cast, plate } = picture.userData;
-        const [w, h] = [size * Math.min(1, a), size * Math.min(1, 1 / a)];
-
-        face.scale.set(w, h, DEPTH);
-        cast.scale.set(w * SHADOW.spread, h * SHADOW.spread, 1);
-        plate?.position.setY(-h / 2 - PLATE.below);
-      }
+      fit(picture, texture);
 
       picture.userData.material.map = own(texture);
       picture.userData.material.color.set(0xffffff);
       picture.userData.material.needsUpdate = true;
       picture.userData.state = 'loaded';
+    }, () => {
+      inflight--;
+      last.set(Infinity, 0, 0);
+      picture.userData.state = 'failed'; // keeps its colour; the visitor can reload
     });
+  };
+
+  // the sharper image of a picture (its `child.full`), loaded when the visitor
+  // zooms in on it; `downgrade` gives the memory back and shows the tile again
+  const upgrade = index => {
+    const u = pictures[index]?.userData;
+    const url = u?.child?.full;
+
+    if(!url || u.big || u.state === 'disposed') return;
+
+    u.big = 'loading';
+
+    image(
+      url,
+      texture => {
+        if(u.state === 'disposed' || u.big !== 'loading') return texture.dispose();
+
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = anisotropy;
+        fit(pictures[index], texture);
+
+        u.thumb = u.material.map;
+        u.big = own(texture);
+        u.material.map = texture;
+        u.material.color.set(0xffffff);
+        u.material.needsUpdate = true;
+      },
+      () => u.big === 'loading' && (u.big = null),
+    );
+  };
+  const downgrade = index => {
+    const u = pictures[index]?.userData;
+
+    if(!u?.big) return;
+
+    if(u.big !== 'loading') {
+      u.material.map = u.thumb ?? null;
+      u.material.needsUpdate = true;
+      u.big.dispose();
+    }
+
+    u.big = null;
   };
 
   // art lighting: a warm spot on each of the nearest pictures, a dim ambient
@@ -286,40 +357,140 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
 
   root.add(ambient);
 
-  // the starfield: points on a sphere that follows the visitor
-  const stars = (() => {
+  // the sky: a dome with a faint glow at the horizon, and the starfield on it, both
+  // following the visitor. Stars are soft discs of varied brightness, size and
+  // colour temperature (few bright ones), a part of them in a Milky Way band, and
+  // each one flickers a little (scintillation, stronger for the dim ones).
+  const sky = (() => {
     const rnd = random(style.sky?.seed ?? SKY.seed);
     const n = style.sky?.stars ?? SKY.stars;
+    const bandN = Math.round(n * SKY.band);
+    const glowN = Math.min(SKY.glow, bandN);
     const position = new Float32Array(n * 3);
+    const size = new Float32Array(n);
+    const bright = new Float32Array(n);
+    const phase = new Float32Array(n);
+    const tint = new Float32Array(n * 3);
+    const gauss = () => Math.sqrt(-2 * Math.log(rnd() || 1e-9)) * Math.cos(rnd() * Math.PI * 2);
+    // the band: a great circle around a tilted axis
+    const axis = new THREE.Vector3(0.35, 0.8, 0.5).normalize();
+    const u = new THREE.Vector3(1, 0, 0).cross(axis).normalize();
+    const v = axis.clone().cross(u);
+    const base = new THREE.Color(style.sky?.tint ?? SKY.tint);
+    const temperature = () => {
+      const r = rnd();
+
+      return r < 0.25 ? [0.72, 0.82, 1] : r < 0.78 ? [1, 1, 1] : r < 0.93 ? [1, 0.92, 0.78] : [1, 0.78, 0.62]; // blue, white, yellow, orange
+    };
 
     for(let i = 0; i < n; i++) {
-      const z = rnd() * 2 - 1;
-      const a = rnd() * Math.PI * 2;
-      const r = Math.sqrt(1 - z * z);
+      const inBand = i < bandN;
+      let d;
 
-      position.set([r * Math.cos(a) * SKY.radius, z * SKY.radius, r * Math.sin(a) * SKY.radius], i * 3);
+      if(inBand) {
+        const a = rnd() * Math.PI * 2;
+        const lat = gauss() * 0.16;
+
+        d = u.clone().multiplyScalar(Math.cos(a)).addScaledVector(v, Math.sin(a)).addScaledVector(axis, lat).normalize();
+      } else {
+        const z = rnd() * 2 - 1;
+        const a = rnd() * Math.PI * 2;
+        const r = Math.sqrt(1 - z * z);
+
+        d = new THREE.Vector3(r * Math.cos(a), z, r * Math.sin(a));
+      }
+
+      const glow = inBand && i < glowN;
+      const b = glow ? 0.09 : inBand ? 0.25 + 0.4 * rnd() ** 2 : 0.4 + 0.6 * rnd() ** 4;
+
+      position.set([d.x * SKY.radius, d.y * SKY.radius, d.z * SKY.radius], i * 3);
+      bright[i] = b;
+      size[i] = glow ? 70 + 70 * rnd() : (inBand ? 1.6 : 2.2) + 3.4 * b;
+      phase[i] = rnd();
+      tint.set(temperature().map((c, k) => c * [base.r, base.g, base.b][k]), i * 3);
     }
 
     const geometry = own(new THREE.BufferGeometry());
 
     geometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
+    geometry.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+    geometry.setAttribute('aBright', new THREE.BufferAttribute(bright, 1));
+    geometry.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
+    geometry.setAttribute('aTint', new THREE.BufferAttribute(tint, 3));
 
-    const points = new THREE.Points(geometry, own(new THREE.PointsMaterial({ color: style.sky?.tint ?? SKY.tint, size: 1.6, sizeAttenuation: false, fog: false, depthWrite: false })));
+    const material = own(
+      new THREE.ShaderMaterial({
+        uniforms: { uTime: { value: 0 }, uScale: { value: pixelRatio }, uTwinkle: { value: SKY.twinkle } },
+        vertexShader: `
+          uniform float uTime; uniform float uScale; uniform float uTwinkle;
+          attribute float aSize; attribute float aBright; attribute float aPhase; attribute vec3 aTint;
+          varying vec3 vColor; varying float vAlpha;
+          void main() {
+            // two sines at unrelated rates per star: an irregular flicker, small for bright stars
+            float tw = 0.5 * sin(uTime * (2.1 + aPhase * 1.3) + aPhase * 40.0) + 0.5 * sin(uTime * (4.3 + aPhase * 2.1) + aPhase * 17.0);
+            float k = 1.0 + uTwinkle * (1.15 - aBright) * tw;
+            vColor = aTint;
+            vAlpha = aBright * k;
+            gl_PointSize = aSize * (0.88 + 0.24 * k) * uScale;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }`,
+        fragmentShader: `
+          varying vec3 vColor; varying float vAlpha;
+          void main() {
+            float d = length(gl_PointCoord - 0.5) * 2.0;
+            float a = 1.0 - smoothstep(0.15, 1.0, d); // a bright core, a soft edge
+            gl_FragColor = vec4(vColor, min(1.0, a * vAlpha * 1.6));
+          }`,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+    const points = new THREE.Points(geometry, material);
 
     points.frustumCulled = false;
+    points.renderOrder = -1;
     points.name = 'stars';
     root.add(points);
 
-    return points;
-  })();
+    // the dome behind the stars: near black overhead, a faint lift toward the horizon
+    const dome = new THREE.Mesh(
+      own(new THREE.SphereGeometry(SKY.radius * 1.1, 24, 12)),
+      own(
+        new THREE.ShaderMaterial({
+          uniforms: { uZenith: { value: new THREE.Color(SKY.zenith) }, uHorizon: { value: new THREE.Color(SKY.horizon) } },
+          vertexShader: 'varying float vY; void main() { vY = normalize(position).y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+          fragmentShader: 'uniform vec3 uZenith; uniform vec3 uHorizon; varying float vY; void main() { gl_FragColor = vec4(mix(uHorizon, uZenith, pow(clamp(abs(vY) * 1.6, 0.0, 1.0), 0.6)), 1.0); }',
+          side: THREE.BackSide,
+          depthWrite: false,
+          depthTest: false,
+        }),
+      ),
+    );
 
-  const last = new THREE.Vector3(Infinity, 0, 0);
+    dome.frustumCulled = false;
+    dome.renderOrder = -2;
+    dome.name = 'dome';
+    root.add(dome);
+
+    return { stars: points, dome, material };
+  })();
+  const { stars } = sky;
+
   const lit = new Set(); // spots follow the visitor when they have moved this far
   const MOVED = 0.5;
 
-  // call every frame with the camera position
-  function update(position) {
+  // call every frame with the camera position and the time in seconds (the
+  // twinkle and the turn of the sky)
+  function update(position, time) {
     stars.position.copy(position);
+    sky.dome.position.copy(position);
+
+    if(time !== undefined) {
+      sky.material.uniforms.uTime.value = time;
+      stars.rotation.y = time * 0.004; // the sky turns, very slowly
+    }
+
 
     if(position.distanceTo(last) < MOVED) return;
 
@@ -339,7 +510,7 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
     for(const [d, p] of near) {
       if(d > LIGHT.load * LIGHT.load) break;
       letter(p);
-      if(p.userData.state === 'idle') fetch(p);
+      if(p.userData.state === 'idle' && inflight < LIGHT.parallel) fetch(p);
     }
 
     lit.clear();
@@ -351,7 +522,7 @@ export function makeWorld(THREE, built, hung, { tileUrl = () => null, style = {}
     for(const s of spots) s.dispose?.();
   }
 
-  return { root, pictures, spots, stars, update, dispose };
+  return { root, pictures, spots, stars, update, upgrade, downgrade, dispose };
 }
 
 // the picture under a point of the view (x, y in -1..1, up positive), or null:
@@ -385,7 +556,7 @@ export async function enterScene(canvas, built, hung, options = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(70, 1, 0.05, 1000);
-  const world = makeWorld(THREE, built, hung, { anisotropy: Math.min(8, renderer.capabilities.getMaxAnisotropy()), ...options });
+  const world = makeWorld(THREE, built, hung, { anisotropy: Math.min(8, renderer.capabilities.getMaxAnisotropy()), pixelRatio: Math.min(globalThis.devicePixelRatio || 1, 2), ...options });
   const pose = startPose(built.start);
 
   scene.background = new THREE.Color(SKY.ground);
@@ -410,7 +581,7 @@ export async function enterScene(canvas, built, hung, options = {}) {
 
     before = time;
     options.onFrame?.(time, dt, camera);
-    world.update(camera.position);
+    world.update(camera.position, time / 1000);
     renderer.render(scene, camera);
   };
 

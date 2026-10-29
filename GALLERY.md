@@ -40,13 +40,18 @@ Dates are as of 2026-10-22.
   **offers to make it seamless**; joins that still show (a curved wall crossing a
   compass boundary) get a short **cross-fade** (S3.3).
 - **Rooms are closed polygons, corridors are lines** that lead from one room into
-  another; **no corner is sharper than 90 degrees** (interior angle between 90 and
-  270 degrees), and every wall run is long enough for at least 2-3 pictures
+  another; **no corner is sharper than 45 degrees** (interior angle between 45 and
+  315 degrees; relaxed from 90 on 2026-10-29 for the room aid, EDITOR.md E136), and every wall run is long enough for at least 2-3 pictures
   before a corner (S5).
+- **Sequence children** (2026-10-29): a child node that is a slide show or a grid of two or more photos hangs **each of its photos** (thumbnails, the baked photo on zoom, titled `Title i/n`, all opening the child's page) instead of one tile. Order is deterministic: the children in edge order (`sort`, then id), the photos of a child in the node's own order, repeats and missing photos left out (`server/node/view.js` `galleryChild`, `client/gallery/items.js` `childItems`).
 - **Hanging**: automatic, on **one side of a wall only**: the inside of a room.
 - **North** is the top of the editor view; the owner cannot rotate it.
 - **Diagonal walls**: no shearing of textures; the textures are expected to be
   (nearly) **seamless** (S3.3).
+- **Works may move** (2026-10-29, design only): a hung work is a still canvas by default,
+  or an **overhead projector** with a slide show, or a **machine** (Tinguely / Luginbuehl
+  style) as a vector animation. The tour (guided walk) still never advances by itself;
+  the works move on their own (S5.2).
 
 ---
 
@@ -239,8 +244,9 @@ A gallery is a node (`kind: 'gallery'`) with a new document step type next to
   is no floor (void down to the sky): the owner draws the floor. If no floors are
   given, the outline of a closed wall polyline is used as one `room`.
 - **Corner rule** (decided): rooms are closed polygons whose interior angles are
-  between 90 and 270 degrees. The editor refuses to close a corner sharper than
-  90 degrees. That bounds the mitre length of a wall joint (at 90 degrees the mitre
+  between 45 and 315 degrees (was 90..270; relaxed 2026-10-29: the room aid turns by
+  0, 45, 90 and 135 degrees). The editor refuses to close a corner sharper than
+  45 degrees. That bounds the mitre length of a wall joint (at 90 degrees the mitre
   tip is 1.41 half-thicknesses from the corner), so joints need no special case,
   and keeps every wall run usable for hanging (S5).
 - An opening (door, passage) is just a **gap between two wall polylines**; no door
@@ -482,6 +488,78 @@ Consequences:
   hung for viewers who may not see them (the following ones move up).
 - Shop items linked by `sells` edges can show a small price tag beside the picture.
 
+### 5.2 Moving works (decided 2026-10-29 as design; not built, TODO 13.12-13.15)
+
+A hung work is a still canvas by default. A node may say it is something else
+(`doc.motion`, `EDITOR.md` S3.1); the gallery then hangs it differently. The tour
+(guided walk, S4) is unchanged: it never advances by itself, only the works move.
+The tile, the poster, the graph and the link grid always show the **rest pose** (the
+first slide, the machine at time 0); only the live 3D scene animates.
+
+**Kinds**
+
+| `motion.kind` | What hangs | Source in the node | Settings |
+|---|---|---|---|
+| none (default) | the canvas of S5.1 | the node's tile | - |
+| `projector` | an **overhead projector** and a screen | the node's picture photos in page order (at least two), as in `slides` mode | `dwell` seconds per slide (default 6), `fade` seconds of cross-fade (default 1.2), `shuffle` |
+| `machine` | a canvas whose picture is **animated** | the node's page 0, with **motors** (`EDITOR.md` S2.3c) on its steps | `speed` factor (default 1), `start`: `always` or `tap` |
+
+**Projector.** Two things are hung. The **screen** is a frameless rectangle flush with
+the wall (a projection has no depth and no shadow), a little brighter than a canvas,
+with a soft glow on the wall around it; it shows the slides, cross-fading by a shader
+between two textures, and the next slide is fetched while the current one shows. The
+**projector** is a simple prop (a low trolley, a glass stage, a head on an arm, a
+mirror: boxes and a cylinder, no textures) standing on the floor 3.2 m in front of
+the screen and 0.8 m off its axis, so the station (2.5 m, on axis) stays clear. A
+faint additive cone with a few dust motes runs from its head to the screen. The prop has a
+circle in the collision list (radius 0.35 m). **A projector takes two slots** in the hang order (the screen, and
+the next one is skipped, so its place on the wall stays free for the beam to be seen
+against). Keystone distortion is ignored (decided: the slides stay rectangular). When
+zoomed in, the current slide is swapped for its sharp image (S4, `large`).
+
+**Machine.** The work stays a canvas on the wall, but its texture is redrawn: a pure
+function `motionAt(doc, page, t)` (`EDITOR.md` S5) gives every moving step a matrix
+and an opacity for time `t`, and `client/gallery/machine.js` draws page 0 with the
+2D canvas API into a `CanvasTexture`:
+
+- Steps are z-ordered as in the editor. A run of steps without a motor and not under
+  one (a **static layer**) is drawn once into an offscreen bitmap; each frame draws
+  the static layers and, between them, the moving steps. Typical machine: one
+  background photo, five or six moving parts.
+- Photo steps use `drawImage` with the matrix, clips use `Path2D(path)`, `blend` maps to
+  `globalCompositeOperation` (multiply, screen, overlay, darken, lighten), strokes
+  are filled polygons, shapes `Path2D`, text boxes `fillText` on their box. Curved
+  text (`textPath`) has no canvas counterpart: it is drawn once into a static layer
+  (it does not move with a motor; the editor says so).
+- Time is the gallery clock in seconds times `speed`, so all machines in one gallery
+  keep their phase across visits to a station. `start: 'tap'`: the machine stands
+  until the visitor taps its picture, again to stop it (a Tinguely "press the
+  button" work); a tap on a machine therefore does what it says instead of the guided
+  walk's "go to this picture", **once the visitor is at its station** (a tap from
+  elsewhere still goes to the station first).
+- **Budget.** Only the nearest two machines within 12 m **and in view** animate, at
+  20 frames per second at 1024 px; the others show their rest pose. Zoomed in on one,
+  it runs at 30 frames per second at 1600 px. A hidden tab or a lost context pauses
+  everything. One draw per frame costs a few milliseconds on a phone for the usual
+  six moving parts [?: not measured], which is why the cap is two.
+
+**Safety.** Nothing flashes: a `blink` motor has a period of at least 0.5 s, the
+cross-fade of a projector is at least 0.3 s, so no work flashes more than three
+times a second (WCAG 2.3.1). With `prefers-reduced-motion` every moving work shows
+its rest pose and the HUD says "motion off" with a button that starts it for this
+visit.
+
+**Guided walk.** A station in front of a moving work is the same station; zooming
+in works the same (the machine's canvas grows to 1600 px, the projector shows the
+sharp slide). Next and previous go by work, never by slide: the slide show is the
+work's own behaviour, not the tour's. The Open button leads to the node's own page,
+where the slides or the animation play in the normal viewer.
+
+**Not decided / later:** sound (a Tinguely clatter, tied to `speed`, only after a tap, off
+by default); a machine as a shallow box with parts at different depths (a shadow
+box); a projector that throws on a wall without a screen frame at an angle (keystone);
+a real 3D machine (this is a vector animation by decision).
+
 ---
 
 ## 6. Many canvases, one live context
@@ -574,7 +652,10 @@ drawing order; stars only. Revisit after the first version works:
 3. Seamless tooling and its threshold (S3.3), the quad editor.
 4. Moon/gradient in the sky; audio; large galleries (texture LOD); mobile floor
    (lowest phone at 30 fps); game/VM nodes and their sandbox; multiplayer.
-5. **Verification debt**: frame rate on a phone (numbers here are CPU only); the
+5. Moving works (S5.2): sound; a shadow box for machines; keystone for the
+   projector; whether two projectors may share a wall; the cost of a machine frame on
+   a phone (cap of two animated machines is a guess).
+6. **Verification debt**: frame rate on a phone (numbers here are CPU only); the
    spot light budget; Hyperfy/Hubs not run; WebGPU usage percentages.
 
 ---
@@ -589,6 +670,14 @@ drawing order; stars only. Revisit after the first version works:
 | Q4 | Walk: pointer lock + WASD, stick + drag-look, circle-segment collision, floor height | cannot walk through a wall on desktop or phone |
 | Q5 | Auto-hang child nodes (S5.1) with tiles; tap to approach/open | the exhibits of a test gallery appear in edge order |
 | Q6 | Enter/leave host: poster, one live context, dispose, context loss, viewport-fill | enter and leave 20 times without leaking contexts |
+
+After version 1 (moving works, S5.2; editor side `EDITOR.md` phase N):
+
+| Step | What | Done when |
+|---|---|---|
+| Q7 | `projector.js`: prop, beam, screen, cross-fade shader, two-slot rule, collision circle | a slide node shows a projector throwing its photos, one slide at a time |
+| Q8 | `machine.js`: canvas renderer over `motionAt`, static layers, the budget of two, tap to start | a node with motors turns on the wall at 20 frames per second, the rest still |
+| Q9 | motion budget, reduced motion, no flashing, hidden-tab pause | with the system setting on, every moving work stands still |
 
 Later (not scheduled): the deferred list of S0b.
 

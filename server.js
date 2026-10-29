@@ -9,14 +9,14 @@ import { config } from './server/config.js';
 import { dev, log } from './server/log.js';
 import { clearUploads, createUpload, deleteUpload, listUploads, readUploads, serveUpload, sweepOrphans, sweepUploads } from './server/api/uploads.js';
 import { lockRoute } from './server/api/locks.js';
-import { createNode, deleteNodeRoute, listNodesRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
+import { createNode, deleteNodeRoute, largeRoute, listNodesRoute, putLargeRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
 import { manifestResponse, workerResponse } from './server/pwa.js';
 import { graphOf, graphRoute } from './server/api/graph.js';
 import { placesRoute } from './server/api/places.js';
 import { cutoutRoute } from './server/api/cutout.js';
 import { segmentRoute } from './server/api/segment.js';
 import { servePhoto } from './server/api/photos.js';
-import { photoInfos } from './server/node/view.js';
+import { galleryChild, photoInfos } from './server/node/view.js';
 import { nodeItems } from './client/gallery/items.js';
 import { canView } from './server/api/nodes.js';
 import { getNode, linksFrom } from './server/db/nodes.js';
@@ -158,7 +158,7 @@ async function nodePage(lang, id) {
   const children = linksFrom(h, id, 'child').flatMap(({ id: to }) => {
     const child = getNode(h, to);
 
-    return child && canView(child, null) ? [{ id: child.id, title: child.title, tile: child.tile }] : [];
+    return child && canView(child, null) ? [galleryChild(h, child)] : [];
   });
   const shown = { id: node.id, title: node.title, kind: node.kind, doc: node.doc, rev: node.rev, children };
   const title = `${locales.get(lang)['page.title.node'] ?? 'Wild Beauty'} - ${node.title || locales.get(lang)['node.untitled'] || ''}`;
@@ -192,6 +192,10 @@ function route(req) {
   if(lock) return lockRoute(req, lock[1]);
 
   if(pathname === '/api/nodes') return req.method === 'POST' ? createNode(req) : req.method === 'GET' ? listNodesRoute() : text('method not allowed\n', 405);
+
+  const large = /^\/api\/nodes\/([^/]+)\/large$/.exec(pathname);
+
+  if(large) return req.method === 'GET' || req.method === 'HEAD' ? largeRoute(large[1]) : req.method === 'PUT' ? putLargeRoute(req, large[1]) : text('method not allowed\n', 405);
 
   const node = /^\/api\/nodes\/([^/]+)$/.exec(pathname);
 

@@ -8,7 +8,7 @@ import { createGesture } from '../editor/gesture.js';
 import { aboutPoint } from '../editor/gestures.js';
 import { apply as applyMatrix, invert, multiply } from '../editor/matrix.js';
 import { ADD_EVENT, SAVED_EVENT, takePending } from '../editor/pending.js';
-import { deleteNode, errorKey, loadNode, saveNode } from '../editor/save.js';
+import { deleteNode, errorKey, loadNode, saveLarge, saveNode } from '../editor/save.js';
 import { createLock } from '../editor/lock.js';
 import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
@@ -16,7 +16,7 @@ import { centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor
 import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../editor/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { cascade, photosOnPage } from '../editor/cascade.js';
-import { documentThumb, exportImage, sceneCanvas, stepImage } from '../editor/export.js';
+import { documentLarge, documentThumb, exportImage, sceneCanvas, stepImage } from '../editor/export.js';
 import { boxOf, setContext, trackCommand } from '../events.js';
 import { TextEdit } from './TextEdit.js';
 import { measureText } from '../editor/measure.js';
@@ -43,6 +43,7 @@ import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/keyboard.
 import { DEFAULT_TOOL, TOOLS, inField, toolForKey } from '../editor/tools.js';
 import { editorStore } from '../editor/useEditor.js';
 import { acuteCorner } from '../editor/walls.js';
+import { STEP, canClose, corridorOf, corridorStep, roomsOf, snapVertex, wallOf } from '../editor/roomaid.js';
 import { NEW } from '../editor/store.js';
 import { swatches, usedColours } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
@@ -183,6 +184,15 @@ const VertexEdit = ({ geo, sel, scale }) => {
   </g>`;
 };
 
+// the grid of the room aid: one line per step (the room a hung work takes)
+const AidGrid = ({ scale }) => {
+  const lines = [];
+
+  for(let at = 0; at <= 1000; at += STEP) lines.push(`M${at} 0V1000M0 ${at}H1000`);
+
+  return html`<path class="wb-editor-aidgrid" d=${lines.join('')} fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-width=${1 / scale} pointer-events="none" />`;
+};
+
 // the shape being drawn: its path so far, its vertices and bezier handles
 const ShapeDraft = ({ draft, color, width, scale }) => {
   const { path, handles, points } = preview(draft);
@@ -258,6 +268,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [opener] = useState(() => (typeof document === 'undefined' ? null : document.activeElement)); // where the focus goes back to on close
   const [vsel, setVsel] = useState(null); // the selected vertex of the selected shape
   const [shape, setShape] = useState(emptyDraft); // the shape being drawn (shape tool)
+  const [roomAid, setRoomAid] = useState(false); // gallery room aid (E136): quantised rooms, pen strokes between rooms become corridors
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
   const tdrag = useRef(null); // a corner of a text box being dragged in the text tool: { id, base, m, index }
@@ -314,7 +325,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const tr = (key, params) => latestT.current(key, params);
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
-  latest.current = { cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
+  latest.current = { aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
 
   // In slides mode a new drawing goes right after the slide's last drawing, and
   // a move in the stack stays between the photo and the next one: the slide a
@@ -636,7 +647,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setSaveError(null);
 
     const { snap } = latest.current;
-    const thumb = await documentThumb(snap.doc, { photos: hash => latest.current.photos[hash], page: 0 });
+    const drawn = { photos: hash => latest.current.photos[hash], page: 0 };
+    const thumb = await documentThumb(snap.doc, drawn);
+    const large = await documentLarge(snap.doc, drawn);
     const r = await saveNode(snap, remote.current, undefined, { thumb });
 
     saving.current = false;
@@ -656,6 +669,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     remote.current = { id: r.id, rev: r.rev };
     saved.current = snap;
+    saveLarge(r.id, large);
     setPhotos(old => Object.fromEntries([...Object.entries(old), ...Object.entries(r.photos).map(([hash, info]) => [hash, { ...old[hash], ...info }])]));
     setSavedId(r.id);
     setNodeId(r.id);
@@ -1626,17 +1640,34 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setAnnounce(tr(found.kind === 'cut' ? 'editor.announce.cut' : 'editor.announce.clipped'));
   };
   const shapeDown = units => {
-    const { shape, scale, doc } = latest.current;
-    const { draft, closed } = press(shape, units, { near: CLOSE_PX / scale });
+    const { shape, scale, doc, aid } = latest.current;
+    const near = CLOSE_PX / scale;
+    const [first] = shape.vertices;
+
+    if(aid) {
+      if(shape.vertices.length >= 3 && Math.hypot(units[0] - first.x, units[1] - first.y) <= near) {
+        if(canClose(shape.vertices)) return commitShape({ ...shape, closed: true });
+
+        setHint(tr('editor.roomaid.acute'));
+        setAnnounce(tr('editor.roomaid.acute'));
+
+        return;
+      }
+
+      units = snapVertex(shape.vertices, units);
+    }
+
+    const { draft, closed } = press(shape, units, { near });
 
     if(closed) return commitShape(draft);
 
-    shaping.current = true;
+    shaping.current = !aid; // the room aid draws straight lines: no handle is pulled
     setDraft(draft);
   };
   const commitShape = draft => {
-    const { doc, pageId, color, size } = latest.current;
-    const step = shapeStep(draft, unique(allIds(doc)), { color, width: Math.max(1, size / 3) });
+    const { doc, pageId, color, size, aid } = latest.current;
+    const made = shapeStep(draft, unique(allIds(doc)), { color, width: Math.max(1, size / 3) });
+    const step = made && aid ? wallOf(made) : made;
 
     shaping.current = false;
     setDraft(emptyDraft());
@@ -1767,6 +1798,19 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     let points = resample(s.samples, spacing);
 
     while(points.length > LIMITS.points) points = resample(s.samples, (spacing *= 1.5));
+
+    // gallery room aid: a stroke from one room into another is a corridor
+    if(latest.current.aid) {
+      const { doc, pageId, color, page } = latest.current;
+      const corridor = corridorOf(s.samples.map(p => [p[0], p[1]]), roomsOf(doc.pages[page]?.steps ?? []));
+
+      if(corridor) {
+        dispatch({ type: 'addStep', page: pageId, step: corridorStep(corridor, unique(allIds(doc)), color) });
+        setAnnounce(tr('editor.announce.corridor'));
+
+        return;
+      }
+    }
 
     const widths = strokeWidths(points, latest.current.size);
     const pts = points.map((p, i) => [round(p[0], 10), round(p[1], 10), round(widths[i], 100)]);
@@ -2155,7 +2199,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
+          overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           loupe=${coarse && tool !== 'select' && tool !== 'wand'}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
@@ -2180,11 +2224,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
             <button type="button" class="wb-editor-chip" disabled=${shape.vertices.length < 2} onClick=${() => commitShape(shape)}>${t('editor.shape.finish')}</button>
             <button type="button" class="wb-editor-chip" disabled=${!shape.vertices.length} onClick=${() => setDraft(emptyDraft())}>${t('editor.shape.cancel')}</button>
-            <span class="wb-editor-hint">${t('editor.shape.hint')}</span>
+            ${kind === 'gallery' && html`<button type="button" class="wb-editor-chip" aria-pressed=${roomAid ? 'true' : 'false'} onClick=${() => setRoomAid(on => !on)}>${t('editor.roomaid')}</button>`}
+            <span class="wb-editor-hint">${roomAid && kind === 'gallery' ? hint || t('editor.roomaid.hint') : t('editor.shape.hint')}</span>
           </div>`
         : tool === 'pen'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>
+            ${kind === 'gallery' && html`<button type="button" class="wb-editor-chip" aria-pressed=${roomAid ? 'true' : 'false'} onClick=${() => setRoomAid(on => !on)}>${t('editor.roomaid')}</button>`}
+            ${roomAid && kind === 'gallery' && html`<span class="wb-editor-hint">${t('editor.roomaid.pen')}</span>`}
           </div>`
         : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} pal=${pal} used=${usedNow} onCutout=${removeBackground} onCancelJob=${cancelJob} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       <${PlaceChip} t=${t} doc=${doc} photos=${photos} nodeId=${nodeId} />

@@ -37,6 +37,16 @@ export async function saveNode(snap, remote, send = globalThis.fetch, { thumb } 
 export const SAVE_ERRORS = ['invalid', 'too_large', 'missing_photo', 'bake_failed', 'conflict', 'locked', 'forbidden', 'not_found', 'network'];
 export const errorKey = code => 'editor.save.error.' + (SAVE_ERRORS.includes(code) ? code : 'generic');
 
+// Hand the server the large render of a saved node (see putLargeRoute). Best
+// effort: the server draws its own when this fails. -> boolean
+export async function saveLarge(id, blob, send = globalThis.fetch) {
+  try {
+    return !!blob && (await send(`/api/nodes/${id}/large`, { method: 'PUT', headers: tabHeaders({ 'content-type': 'image/jpeg' }), body: blob })).ok;
+  } catch {
+    return false;
+  }
+}
+
 // Read node `id` again (E65 "take theirs", E66 open).
 // -> { ok: true, id, rev, snap: { doc, kind }, photos } | { ok: false, code, status }
 export async function loadNode(id, send = globalThis.fetch) {

@@ -152,6 +152,38 @@ There is never more than one editor. Opening a second replaces the first.
 
 Photos have no tool: they are added by dropping (S2.5) and edited with Select.
 
+### 2.3c Motors: moving parts (decided 2026-10-29; phase N, not built)
+
+A step can be given a **motor**: it then moves by itself, forever, as long as the work is
+shown live (the editor's preview, the viewer, the 3D gallery, `GALLERY.md` S5.2). This
+is for machines in the manner of Tinguely and Luginbuehl: cut-out photos and shapes that
+turn, swing, slide and pulse, linked so that an arm follows a wheel. It is a vector
+animation, not a recording: the data is a few numbers per part.
+
+- **Where.** With a step selected, the context bar (S2.2) shows a **Motor** section:
+  chips for the kind (none, **rotate**, **swing**, **slide**, **pulse**, **blink**),
+  sliders for the **period** (0.2 to 600 s, logarithmic, shown as seconds or
+  "per minute"), the **amplitude** (swing: degrees, default 20; slide: stage units;
+  pulse: percent; not used for rotate) and the **phase** (0 to 1, a small dial). Blink
+  has a period of at least 0.5 s.
+- **Pivot.** For rotate and swing a dot on the stage marks the pivot (default the
+  centre of the step); drag it onto the axle. For slide an arrow marks the direction.
+- **Parent.** A **Link to** button then a tap on another moving step makes this step's
+  motion ride on that one's (a crank on a wheel, a hand on an arm). At most four deep, no
+  loops (the picker greys out steps that would close one). **Unlink** removes it.
+- **Preview.** A play button next to the scrubber runs all motors on the stage
+  (independent of the scrubber and of page playback); selection handles follow the
+  moving part's rest pose, so editing stays possible while it plays. It stops on
+  any edit that is not a motor change, and does not start with `prefers-reduced-motion`.
+- **Rules.** A motor belongs to a step of its page; moving or transforming the step edits
+  its rest pose, the motor acts around it. Deleting the step deletes its motors; deleting a
+  parent re-links its children to nothing. At most 60 motors per node. Only page 0 is
+  animated in the 3D gallery; the 2D viewer animates every page that has motors.
+- **Hung as.** The node properties (S2.9) carry the choice between still, projector and
+  machine; a node with motors offers **machine**, a node of two or more picture
+  photos offers **projector** (S2.9).
+- Undo and redo treat a motor change as one command like any other (S2.6).
+
 ### 2.3a Colour palette
 
 A small palette is shown in the editor (under the context bar) whenever the active
@@ -393,6 +425,7 @@ Every gesture ends in exactly **one history entry** (S2.6), so a pinch is one un
 | Visibility | `hidden` (owner only), `group`, `public` | with accounts only; in the PoC the field is shown disabled with `public` |
 | Group | one group | only when visibility is `group`; with accounts only |
 | Theme | theme id + sanitised overrides | needs M2b; the stage and tile wear it |
+| Hung as | `still` (default), `projector`, `machine` | how the 3D gallery hangs this node (`GALLERY.md` S5.2); `projector` needs two or more picture photos and has `dwell` (2 to 60 s, default 6), `fade` (0.3 to 5 s, default 1.2) and `shuffle`; `machine` needs at least one motor (S2.3c) and has `speed` (0.1 to 4, default 1) and `start` (`always` or `tap`); stored as `doc.motion` |
 | Position | x, y, pinned | set in the graph view, not here |
 | Links | add/remove `child` / `ref` / `sells` edges to other nodes | search-and-pick; ordered `child` edges get a drag handle (graph/ops are `GRAPH.md` 12.2) |
 
@@ -432,7 +465,10 @@ node = { v: 1,
          title?: string,                                                 // <= 200; copied to nodes.title on save; in the doc so title edits are undoable (E41)
          pages: [ page, ... ],                                           // 1..50
          fields?: [ { label, value } ],                                  // later
-         scene?: scene3d }                                               // kind 'gallery', GALLERY S3.1
+         scene?: scene3d,                                                // kind 'gallery', GALLERY S3.1
+         motion?: motion }                                               // how the 3D gallery hangs it, S2.3c, GALLERY S5.2
+motion = { kind: 'projector', dwell?: 2..60, fade?: 0.3..5, shuffle?: boolean }
+       | { kind: 'machine',   speed?: 0.1..4, start?: 'always'|'tap' }   // absent = a still canvas
 page = { id, duration?: number, steps: [ step, ... ] }                   // 0..500 steps
 step = one of
   { op: 'photo',     id, photo: <sha256>, m: [a,b,c,d,e,f],
@@ -447,6 +483,10 @@ step = one of
   { op: 'transform', target, m, ease? }
   { op: 'text',      id, text, lines, m, w, h, font, size, color, align,  // phase K, S2.3b
                      padding, radius, bg?: fill }       // font: 'fixed'|'serif'|'sans'; lines: client-wrapped
+  { op: 'motor',     target: stepId, kind: 'rotate'|'swing'|'slide'|'pulse'|'blink',
+                     period: 0.2..600, phase?: 0..1, amp?: number,        // phase 0; amp: swing degrees (20),
+                     around?: [x, y], axis?: [dx, dy], parent?: stepId,   // slide stage units, pulse 0..1 (0.1)
+                     ease?: 'sine'|'linear' }                             // phase N, S2.3c; blink: period >= 0.5
 fill     = colour | { type: 'linear'|'radial', angle?: 0..360,
                       stops: [ { c: colour, at: 0..1 }, ... ] }           // 2..5 stops
 colour   = '#rrggbb' | '#rrggbbaa' | 'rgb(...)' | 'hsl(...)'              // alpha allowed
@@ -469,6 +509,10 @@ Rules:
   <= 20 000 characters, <= 40 photos per node, colours matching the sanitiser
   patterns, `title` <= 200, text box <= 2000 characters, <= 100 text boxes per
   node, gradients <= 5 stops, `font` an id from the curated list.
+- A `motor` targets a step of the same page (`photo`, `shape`, `stroke` or `text`);
+  `parent` names another motor's target, at most four deep, no cycles; at most 60 motors per node, at most one per
+  target; `around` and `axis` finite and within the stage; `motion.kind: 'projector'` needs at least two picture
+  photos, `'machine'` at least one motor, else the field is rejected.
 - Unknown `op`s are rejected on save and ignored on render (forward compatibility
   for old viewers).
 
@@ -587,6 +631,16 @@ errors are `{error: <code>}` with the codes of S2.11.
 - The wrapper is `<div data-theme=ID style="sanitised vars">` in SSR and browser.
 - Selection handles, guides and the pen's live stroke are an editor overlay `<g>`
   above the rendered node, never part of it.
+- **Motion** (S2.3c). `client/editor/motion.js` exports the pure
+  `motionAt(doc, pageIndex, t) -> Map(stepId -> { m, opacity })` for the steps that
+  move: the motor's matrix (rotation or swing around `around`, a slide along `axis`, a
+  scale about the centre, an opacity wave) times the parent's, then times the step's own
+  matrix `m`. It is periodic in each period, deterministic and has no DOM; time is in
+  seconds. `renderNode(doc, { ..., time })` applies it: with a `time` the moving steps
+  get their matrix and opacity, without one (SSR, the tile rasteriser, thumbnails) the
+  document is drawn at rest, so tiles never depend on motors. The 3D gallery's canvas
+  renderer (`GALLERY.md` S5.2) calls the same function, so the viewer and the gallery
+  agree.
 
 ---
 
@@ -850,7 +904,7 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [x] **E86 `palette.js` derived colours**: tetradic pair choice and complements T1/T2, triadic completion R,
       neutral N, achromatic rule, gamut clamp. Done when tests check T1/T2 are exactly 180 degrees from
       their sources, R is 120 degrees from both when E1/E2 are 120 apart, and every result is inside sRGB.
-- [ ] **E87 `Palette.js` + `ColorPicker.js` components** (swatch grid, long-press picker with hex and alpha).
+- [x] **E87 `Palette.js` + `ColorPicker.js` components** (swatch grid, long-press picker with hex and alpha). Done 2026-10-29 as the shared `ColourPick.js`: swatches (picture, contrast, used), colour wheel, dropper, and with `alpha` an opacity slider and a hex field (#rrggbb or #rrggbbaa); the text colour, outline and background use it with alpha.
       Done when the picker returns `#rrggbbaa` and works with touch and keyboard.
 - [x] **E88 model: `text` step + `fill`/`colour` validation** (`model.validate`, sanitiser patterns, limits of
       S3.1). Done when invalid fills, too many stops and unknown fonts are rejected.
@@ -872,7 +926,7 @@ Colour first (E84-E87 can start any time after E3), then text.
       live and is one undo step on release.
 - [ ] **E94 `FillEditor.js`**: none / solid / linear / radial, angle control, 2-5 stops with position, each stop
       from the palette or picker with alpha. Done when a three-stop gradient with a transparent end is saved.
-- [ ] **E95 palette targets for text**: font colour and background take colours from the palette. Done when a
+- [x] **E95 palette targets for text** (done 2026-10-29 with E87): font colour and background take colours from the palette. Done when a
       swatch tap sets the text colour and a long-press sets a background with alpha.
 - [ ] **E96 server round trip**: text boxes survive `POST`/`GET`, the sanitiser runs on render. Done when a stored
       box with an injected `font` or `bg` string is dropped.
@@ -912,7 +966,7 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [x] **E106 keys button hidden on touch.**
 - [x] **E107 usage recording** (`PLAN.md` S6.4): client events, `POST /api/events`, `data/events/*.jsonl`, `tools/events-report.js`.
 - [ ] **E108 device pass of the new layouts** on the phone in both orientations and 2-3 other browsers (part of E74).
-- [ ] **E109 read-only dimming in landscape** (the `inert` frame uses `display: contents`, so the opacity rule has no effect).
+- [x] **E109 read-only dimming in landscape** (done 2026-10-29) (the `inert` frame uses `display: contents`, so the opacity rule has no effect).
 - [ ] **E110 dark theme or dark-aware tokens** (the test phone prefers dark; the theme is light only).
 - [x] **E111 upload retention shown to the user** (2026-10-29): a note under the drop zone (days kept, who sees what, what happens on save) with a details list; an expiry badge on a card when it has 3 days or less left; a sweep tile (`DELETE /api/uploads` with `keep`: the photos of the open editor and of stored drafts stay; asked once in place); the saved banner says how many photos are now kept and that the work is public. The server also removes orphaned upload files and old job leftovers (`sweepOrphans`, hourly with the expiry sweep). No "keep" button: saving into a work is the way to keep a photo.
 - [x] **E112 first placement** (agreed): photos added from a batch in free mode arrive as a diagonal cascade of half-stage squares: photo i (0-based, also when added later) at (i mod 6) x 10 % of the stage in x and y plus 3 % per completed round (wrap-around), last on top; no spread button, no question; layer count on the page thumbnail (`UX-REQUIREMENTS.md` I2). Pure function `cascade(i)` in `client/editor/`, tested. Done 2026-10-29: `client/editor/cascade.js` `cascade(i)` and `photosOnPage`, `addPhoto` takes a matrix (`model.js`, command `addPhoto` field `m`), `NodeEditor.addUpload` counts up through a batch. A single photo alone on an empty page still covers the stage (author did not decide; cascade starts with the second photo). Page-thumbnail layer count not built (the cascade shows the layers). Checked in a browser with two photos; 6 tests in `tests/cascade.test.js`.
@@ -937,12 +991,33 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [ ] The requirements of `UX-REQUIREMENTS.md` (B paged uploads and two screens, C freehand clip, D batch to nodes, E three
       depths, F text box extensions) are **not tasks yet**: they are agreed one by one, then added here.
 
+### Phase N - moving works (decided 2026-10-29; after phase K; gallery side `GALLERY.md` S5.2, TODO 13.12-13.15)
+
+- [ ] **E141 `motor` step and `doc.motion`** in `model.js` and `validate` (client and server) with the limits and rules
+      of S3.1: kinds, ranges, one motor per target, parents on the same page, depth and cycles, `motion.kind` against
+      what the node holds. Done when bad motors are rejected and good ones round-trip through save and load.
+- [ ] **E142 `motionAt(doc, pageIndex, t)`** (`client/editor/motion.js`, pure): rotate, swing, slide, pulse, blink, pivots,
+      parent chains, rest pose at `t` 0 for rotate and slide. Done when tests show periodicity, a crank riding a wheel,
+      the pivot staying fixed and the matrix order (motor times parent times `m`).
+- [ ] **E143 `renderNode` takes `time`**; the editor stage previews it (play button, `requestAnimationFrame`, stops on other
+      edits, off with reduced motion); tiles and SSR stay at rest. Done when a node with a motor turns on the stage and
+      its tile is the same with or without the motor.
+- [ ] **E144 motor UI** (S2.3c): the Motor section (kind chips, period, amplitude, phase), the pivot dot, the link picker,
+      commands with undo and redo, deleting a step or parent. Done when a wheel with a linked arm can be built on a phone.
+- [ ] **E145 "Hung as" in the node properties** (S2.9): the choice, the projector and machine settings, stored as
+      `doc.motion`. Done when a slide node can be made a projector and a node with motors a machine, and the offer
+      follows what the node holds.
+- [ ] **E146 viewer playback**: the 2D node page animates motors and the projector's slides (the same pure functions),
+      stops with reduced motion. Done when `/:lang/node/:id` of a machine moves.
+
 ### Phase J - later (not scheduled)
 
 - [ ] **E79 text boxes**: now phase K (E88-E97).
 - [ ] **E80 fields** (`fields` list in the properties popover).
 - [ ] **E81 cutout and server-side clip buttons** (`opencv-imgproc.md`, only with `capabilities.imgproc`).
 - [ ] **E82 server-side tile rasterisation** (`G` S3.7) replacing the thumbnail rendition.
+- [x] **E82b browser-rendered large tile** (2026-10-29): the server's librsvg render differs from the browser's (fonts, blends, text boxes), so after a save the editor draws the page at 1600 px (`documentLarge`, the same canvas path as the tile) and PUTs the JPEG to `/api/nodes/:id/large` (`putLargeRoute`, `saveLarge`), kept as `<tile>.large.jpg`. The server's own render (`serverTile`) stays only as the fallback for nodes saved before; they get the exact picture on their next save. Done when a collage zoomed in the 3D gallery equals the editor stage.
+- [x] **E136 room aid for gallery nodes** (2026-10-29): in a `kind: gallery` node the shape and pen tools get a "Room aid" chip (`roomaid.js`, `NodeEditor.js` `roomAid`). While on, a grid of one **step** (picture 1.3 m + gap 1.6 m = 2.9 m = 40 stage units, `STEP`) is drawn; the shape tool draws straight lines only (no handle is pulled) and puts the first vertex on the grid and every further vertex a whole number of steps (at least one) from the last, on the nearest heading of 0, +-45, +-90 or +-135 degrees against the edge before (the first edge: one of 8 compass directions); clicking the first vertex closes the room only when the closing edge is on one of the 8 headings and no corner is sharper than 45 degrees; a finished shape is flagged `wall` (closed = room). A pen stroke that starts inside one room and ends inside another becomes a **corridor** (`corridorOf`): the stroke simplified and snapped like a room, extended up to 4 steps into the second room, an open `wall` shape drawn 2 m wide (`strokeWidth` = 2 m in stage units); any other stroke stays ink. The wall rule is relaxed from 90 to 45 degrees (`walls.js` `MIN_CORNER`, `build.js` `MAX_TURN` 135). The 3D gallery builds from these shapes (`client/gallery/fromdoc.js`, TODO 13.1): corridors are cut back to the room walls and the walls get doorways as wide as the corridor. Open: the scale is the constant `UNITS_PER_METRE`, `scene.scale` is not stored yet.
 - [ ] **E83 `$1`/`$P` shape snapping**, handwriting recognition.
 
 ---

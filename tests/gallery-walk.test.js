@@ -13,15 +13,34 @@ describe('galleryItems', () => {
     const node = { children: [{ id: 4, title: 'a', tile: 'aa' }, { id: 5, title: 'b', tile: null }, { id: 6, title: 'c', tile: 'cc' }], doc: doc([photo('x')]) };
 
     expect(galleryItems(node, 'de')).toEqual([
-      { id: 'n4', title: 'a', url: '/files/photos/aa.thumb.jpg', href: '/de/node/4' },
-      { id: 'n6', title: 'c', url: '/files/photos/cc.thumb.jpg', href: '/de/node/6' },
+      { id: 'n4', title: 'a', url: '/files/photos/aa.thumb.jpg', full: '/api/nodes/4/large', href: '/de/node/4' },
+      { id: 'n6', title: 'c', url: '/files/photos/cc.thumb.jpg', full: '/api/nodes/6/large', href: '/de/node/6' },
     ]);
+  });
+
+  test('a child that is a sequence of images hangs every photo in its own order, between its siblings', () => {
+    const seq = [{ hash: 'p1', href: '/files/photos/p1.jpg' }, { hash: 'p2', href: '/files/photos/p2.png' }, { hash: 'p3', href: '/files/photos/p3.jpg' }];
+    const node = { children: [{ id: 4, title: 'a', tile: 'aa' }, { id: 5, title: 'Roses', tile: 'rr', photos: seq }, { id: 6, title: 'c', tile: null }], doc: doc([]) };
+    const items = galleryItems(node, 'fr');
+
+    expect(items.map(i => i.id)).toEqual(['n4', 'n5:p1', 'n5:p2', 'n5:p3']);
+    expect(items[2]).toEqual({ id: 'n5:p2', title: 'Roses 2/3', url: '/files/photos/p2.thumb.jpg', full: '/files/photos/p2.png', href: '/fr/node/5' });
+    expect(galleryItems(node, 'fr')).toEqual(items); // same order every time
   });
 
   test('a node without children hangs its own photos, once each, no textures', () => {
     const node = { doc: doc([photo('a'), photo('b'), photo('a'), photo('c', { role: 'texture' })]) };
 
     expect(galleryItems(node).map(i => i.url)).toEqual(['/files/photos/' + 'a'.repeat(8) + '.thumb.jpg', '/files/photos/' + 'b'.repeat(8) + '.thumb.jpg']);
+  });
+
+  test('a node\'s own photos carry the baked photo as the sharper picture', () => {
+    const node = { doc: doc([photo('a'), photo('b')]) };
+    const photos = hash => (hash === 'a'.repeat(8) ? { href: `/files/photos/${hash}.jpg` } : null);
+    const [a, b] = galleryItems(node, 'en', photos);
+
+    expect(a.full).toBe(`/files/photos/${'a'.repeat(8)}.jpg`);
+    expect(b.full).toBeUndefined();
   });
 
   test('offered for lists and slide shows with two pictures, not for a single collage', () => {
@@ -39,8 +58,8 @@ describe('nodeItems', () => {
     const nodes = [{ id: 9, title: 'Nine', tile: 'aa' }, { id: 8, title: 'Group', tile: null }, { id: 7, title: '', tile: 'bb' }];
 
     expect(nodeItems(nodes, 'fr')).toEqual([
-      { id: 'n9', title: 'Nine', url: '/files/photos/aa.thumb.jpg', href: '/fr/node/9' },
-      { id: 'n7', title: '', url: '/files/photos/bb.thumb.jpg', href: '/fr/node/7' },
+      { id: 'n9', title: 'Nine', url: '/files/photos/aa.thumb.jpg', full: '/api/nodes/9/large', href: '/fr/node/9' },
+      { id: 'n7', title: '', url: '/files/photos/bb.thumb.jpg', full: '/api/nodes/7/large', href: '/fr/node/7' },
     ]);
   });
 });

@@ -146,7 +146,7 @@ describe('buildGallery', () => {
     expect(Math.max(...b.groups.wallTop.position.filter((_, i) => i % 3 === 1))).toBeCloseTo(4.2);
   });
 
-  test('a ramp steeper than 1:12 and a corner sharper than 90 degrees warn', () => {
+  test('a ramp steeper than 1:12 and a corner sharper than 45 degrees warn', () => {
     const steep = buildGallery({ plan: { corridors: [{ points: [[0, 0], [10, 0]], h0: 0, h1: 1 }] } });
     const sharp = buildGallery({ plan: { walls: [{ points: [[0, 0], [10, 0], [1, 2]], closed: true }] } });
 

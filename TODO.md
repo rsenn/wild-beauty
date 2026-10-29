@@ -417,7 +417,7 @@ the lock lives in E31/E67.
 
 Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
 
-- [ ] **13.1 Document**: `scene3d` step (plan, style, start), validation, sanitiser; photo
+- [~] **13.1 Document**: `scene3d` step (plan, style, start), validation, sanitiser; done 2026-10-29: `client/gallery/fromdoc.js` `planFromDoc` turns a gallery node's drawn `wall` shapes into the scene (stage units -> metres, y flipped, transforms applied, corridors cut back to the room walls, doorways cut in the walls, rooms counter-clockwise), used by `startGallery` for `kind: gallery` nodes before the auto plan (`tests/gallery-fromdoc.test.js`, fixture node 9); open: `scale`/`start` editing; photo
       role toggle (`EDITOR.md` E71, E76, E77); texture photos are never hung.
 - [~] **13.2 Builder** `client/gallery/build.js`: walls, room and corridor floors, ramps
       (slope <= 1:12, walls tilt), texture set with default quads (`tools/gallery-warp.mjs`
@@ -457,6 +457,32 @@ Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
       photo in the graph and the gallery. `needsRender` (`server/media/raster.js`) now also covers photo-only collages
       (several photos on page 0, or one faded, blended or clipped); `bun tools/retile.js [--dry] [--force] [ids]`
       (`server/node/retile.js`) re-renders the stale ones, the node itself untouched. Run it once after deploying.
+- [x] **13.11 Guided walk** (`stations.js`, `route.js` A* over the floor, `tour.js`, `controls.js` modes, `session.js`,
+      HUD in `GalleryView.js`): the gallery starts guided at picture 1; arrows / Space / swipe / buttons go to the next or
+      previous picture (a sideways glide along a wall, a routed walk across corners, doors and corridors), wheel / pinch /
+      Up-Down zoom (field of view, 70 to 10 degrees), a tap on a picture goes to it and the next tap zooms to fill the stage,
+      Open is a button, W A S D or Q E hand over to free walking, G or the button back. Zoomed in, the picture is swapped for
+      a sharper one (`GET /api/nodes/:id/large`: the baked photo, or a 1600 px render cached as `<tile>.large.jpg`; 4 stay
+      loaded). No automatic slide show (decided). Sky: shader stars with twinkle, colour temperatures and a Milky Way band.
+- [ ] **13.12 Moving works, design** (decided 2026-10-29): a hung work may be an overhead projector with a slide show or a
+      machine (Tinguely / Luginbuehl style) as a vector animation, besides the still canvas. Recorded in `GALLERY.md` S5.2
+      (kinds, prop, canvas renderer, budget, safety, guided walk), S9 and S10 (Q7-Q9), and in `EDITOR.md` S2.3c (motors),
+      S2.9 (Hung as), S3.1 (`motor` step, `doc.motion`), S5 (`motionAt`) and phase N (E141-E146). The tour itself never advances
+      by itself (decided). Done when 13.13-13.15 and E141-E146 are done.
+- [ ] **13.13 Projector** (`client/gallery/projector.js`, Q7): the prop (trolley, glass stage, head, mirror), the faint cone
+      with dust, the screen flush with the wall, a cross-fade shader between two slide textures, the next slide fetched
+      while one shows; pure `slideAt(t, n, dwell, fade, shuffleSeed) -> { from, to, mix }`; a projector takes two slots
+      (`hang.js`) and a collision circle (`build.js`); `items.js` carries `slides`; zoomed in the sharp slide. Done when a slide
+      node shows its photos one by one with the fade, and `tests/` cover `slideAt`, the two-slot rule and the collision.
+- [ ] **13.14 Machine canvas** (`client/gallery/machine.js`, Q8; needs E141-E142): `CanvasTexture` redrawn from `motionAt`;
+      static layers baked offscreen; photo, shape, stroke and text steps, clips by `Path2D`, `blend` by
+      `globalCompositeOperation`; curved text stays static; `start: 'tap'` toggles on a tap at the station; the nearest two
+      within 12 m and in view run at 20 fps and 1024 px, zoomed in 30 fps and 1600 px, the rest show the rest pose. Done
+      when a node with motors turns on the wall and `tests/` cover the layer grouping, the frame scheduler and the budget
+      choice without a DOM.
+- [ ] **13.15 Motion safety and budget** (Q9): `prefers-reduced-motion` shows the rest pose with a HUD "motion off" button;
+      no blink faster than 0.5 s and no cross-fade shorter than 0.3 s (WCAG 2.3.1); a hidden tab or a lost context pauses.
+      Done when the system setting stands every moving work still, in a browser test.
 - [ ] **13.7 Plan layer in the 2D editor** (`EDITOR.md` E75): wall layer with height; rooms =
       closed, corridors = lines; refuse corners sharper than 90 degrees.
 

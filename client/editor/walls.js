@@ -1,13 +1,13 @@
 // The wall layer of the 3D gallery (EDITOR.md S2.3, GALLERY.md S3.1): a shape
 // step flagged `wall: { height, width? }`. A closed wall is a room, an open one
 // a line (a corridor, `width` metres wide). Rooms and lines may not have a
-// corner sharper than 90 degrees. Pure functions; the commands and the editor
+// corner sharper than 45 degrees. Pure functions; the commands and the editor
 // use them to refuse a wall that breaks the rule.
 import { verticesFromPath } from './shapes.js';
 
 export const WALL_HEIGHT = 3.2; // metres
 export const CORRIDOR_WIDTH = 2; // metres
-export const MIN_CORNER = 90; // degrees
+export const MIN_CORNER = 45; // degrees (the room aid turns by 0, 45, 90, 135)
 export const LIMITS = { height: [0.5, 10], width: [0.5, 10] };
 
 const within = ([lo, hi], v) => Number.isFinite(v) && v >= lo && v <= hi;
@@ -27,7 +27,7 @@ export function cornerAngle(a, b, c) {
   return (Math.acos(Math.max(-1, Math.min(1, (ux * vx + uy * vy) / (lu * lv)))) * 180) / Math.PI;
 }
 
-// The first corner sharper than 90 degrees of a room (closed) or a line (open;
+// The first corner sharper than 45 degrees of a room (closed) or a line (open;
 // its two ends are no corners), as { vertex, angle }, or null. The interior
 // angle of a room is then between 90 and 270 degrees, which is the same thing.
 export function acuteCorner(vertices, closed) {

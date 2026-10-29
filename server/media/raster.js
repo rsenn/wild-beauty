@@ -78,9 +78,10 @@ export async function rasterise(doc, dest, { page = 0, size = SIZE, photoInfo, d
 }
 
 // the tile of a document: page 0 rasterised, written as <sha256>.thumb.jpg in
-// the photos folder (the name is the hash of the file, like the editor's tile).
+// the photos folder (the name is the hash of the file, like the editor's tile), or
+// as `name` in the folder when one is given (a larger render of a tile).
 // -> { ok: true, hash } | { error }
-export async function serverTile(doc, photoInfo, { dir = config.photosDir, size = SIZE } = {}) {
+export async function serverTile(doc, photoInfo, { dir = config.photosDir, size = SIZE, name } = {}) {
   if(!imagemagick.convert) return { error: 'raster: ImageMagick not installed' };
 
   const base = resolve(dir, `tile-${process.pid}-${Date.now().toString(36)}`);
@@ -95,7 +96,7 @@ export async function serverTile(doc, photoInfo, { dir = config.photosDir, size 
 
     const hash = createHash('sha256').update(readFileSync(`${base}.jpg`)).digest('hex');
 
-    renameSync(`${base}.jpg`, resolve(dir, `${hash}.thumb.jpg`));
+    renameSync(`${base}.jpg`, resolve(dir, name ?? `${hash}.thumb.jpg`));
 
     return { ok: true, hash };
   } finally {

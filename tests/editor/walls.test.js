@@ -19,7 +19,7 @@ describe('corners', () => {
   test('a rectangle and an L shape are fine, a sharp wedge is refused', () => {
     expect(acuteCorner(square, true)).toBeNull();
     expect(acuteCorner(pts([0, 0], [100, 0], [100, 50], [50, 50], [50, 100], [0, 100]), true)).toBeNull(); // reflex corner, 270 inside
-    expect(acuteCorner(pts([0, 0], [100, 0], [20, 30]), true)).toMatchObject({ vertex: 0 });
+    expect(acuteCorner(pts([0, 0], [100, 0], [20, 10]), true)).toMatchObject({ vertex: 0 });
   });
 
   test('a line: its ends are no corners', () => {
@@ -57,12 +57,12 @@ describe('the setWall command', () => {
   });
 
   test('an acute corner is refused, for the flag, for a vertex move and for opening or closing', () => {
-    const wedge = gallery(shape('wedge001', pts([0, 0], [100, 0], [20, 30]), true));
+    const wedge = gallery(shape('wedge001', pts([0, 0], [100, 0], [20, 10]), true));
 
     expect(apply(wedge, { type: 'setWall', id: 'wedge001', wall: {} }).snap).toBe(wedge);
 
     let snap = apply(gallery(shape('room0001', square, true)), { type: 'setWall', id: 'room0001', wall: {} }).snap;
-    const squashed = pts([0, 0], [100, 0], [100, 10], [0, 100]);
+    const squashed = pts([0, 0], [100, 0], [100, 100], [95, 5]);
 
     expect(apply(snap, { type: 'setVertices', id: 'room0001', vertices: squashed }).snap).toBe(snap);
     expect(apply(snap, { type: 'setVertices', id: 'room0001', vertices: pts([0, 0], [120, 0], [120, 100], [0, 100]) }).snap).not.toBe(snap);

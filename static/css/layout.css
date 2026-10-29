@@ -849,6 +849,27 @@ body {
   transform: none;
 }
 
+.wb-gallery-hud {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  left: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.wb-gallery-count {
+  max-width: 60%;
+  padding: 4px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--wb-gallery-note);
+}
+
 .wb-gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -900,7 +921,7 @@ body {
 .wb-gallery-note {
   position: absolute;
   right: 8px;
-  bottom: 8px;
+  bottom: 56px;
   left: 8px;
   margin: 0;
   padding: 6px 10px;

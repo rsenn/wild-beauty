@@ -3,7 +3,7 @@
 // and only after the commit delete the uploads. Errors are `{ error: <code> }`
 // with the codes of EDITOR.md S2.11.
 import { createHash } from 'node:crypto';
-import { mkdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { config } from '../config.js';
 import { log } from '../log.js';
@@ -103,7 +103,7 @@ async function storeTile(thumb) {
 export function dropTile(h, tile) {
   if(!tile || getPhoto(h, tile) || h.get('SELECT 1 AS used FROM nodes WHERE tile = ?', tile)) return;
 
-  rmSync(resolve(config.photosDir, `${tile}.thumb.jpg`), { force: true });
+  for(const name of [`${tile}.thumb.jpg`, `${tile}.large.jpg`]) rmSync(resolve(config.photosDir, name), { force: true });
 }
 
 // the validated body made ready to commit: every photo baked, the tile
@@ -354,6 +354,81 @@ export async function readNode(req, idText, h) {
   if(req.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers });
 
   return Response.json({ node: publicNode(node), rev: node.rev, photos: photoInfos(db, node.doc) }, { headers });
+}
+
+// the size of a large render of a tile (zooming in on a picture in the 3D gallery)
+export const LARGE = 1600;
+const rendering = new Map(); // tile -> the render under way, so a crowd asks the renderer once
+
+// the largest push of a browser's own large render (bytes of a JPEG)
+export const MAX_LARGE = 6 * 1024 * 1024;
+
+// PUT /api/nodes/:id/large (image/jpeg) -> 204: the large render the editor drew
+// of the node it just saved, kept as <tile>.large.jpg: the pixels the user saw
+// in the editor, so the server's own render stays a fallback for nodes saved
+// before. 409 when the node has no tile or needs none (a plain photo).
+export async function putLargeRoute(req, idText, h) {
+  const db = h ?? (await database());
+  const node = /^\d{1,15}$/.test(idText) ? getNode(db, Number(idText)) : null;
+
+  if(!node) return fail(404, 'not_found');
+  if(!canEdit(node, null)) return fail(403, 'forbidden');
+  if((req.headers.get('content-type') ?? '').toLowerCase() !== 'image/jpeg') return fail(415, 'invalid');
+  if(Number(req.headers.get('content-length') ?? 0) > MAX_LARGE) return fail(413, 'too_large');
+  if(!node.tile || !needsRender(node.doc) || getPhoto(db, node.tile)) return fail(409, 'no_tile');
+
+  const bytes = Buffer.from(await req.arrayBuffer());
+
+  if(bytes.length > MAX_LARGE) return fail(413, 'too_large');
+  if(bytes.length < 200 || bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff) return fail(400, 'invalid');
+
+  const dest = resolve(config.photosDir, `${node.tile}.large.jpg`);
+  const tmp = `${dest}.tmp.jpg`;
+
+  writeFileSync(tmp, bytes);
+
+  const info = await identify(tmp);
+
+  if(info.error || info.width < 256 || info.height < 256 || info.width > 4096 || info.height > 4096) return (rmSync(tmp, { force: true }), fail(400, 'invalid'));
+
+  renameSync(tmp, dest);
+
+  return new Response(null, { status: 204 });
+}
+
+// GET /api/nodes/:id/large -> 302 to the picture to show when zoomed in: a node of
+// one plain photo is that photo, the file as baked; any other node is rendered at
+// LARGE once, kept as <tile>.large.jpg and served from /files/photos/ for good.
+// `render` is injected by the tests.
+export async function largeRoute(idText, h, { render = serverTile } = {}) {
+  const db = h ?? (await database());
+  const node = /^\d{1,15}$/.test(idText) ? getNode(db, Number(idText)) : null;
+
+  if(!node) return fail(404, 'not_found');
+  if(!canView(node, null)) return fail(403, 'forbidden');
+
+  const go = to => new Response(null, { status: 302, headers: { location: to, 'cache-control': 'no-cache' } });
+
+  if(!needsRender(node.doc)) {
+    const step = firstPhotoStep(node.doc);
+    const photo = step && getPhoto(db, step.photo);
+
+    return photo ? go(`/files/photos/${photo.hash}.${photo.ext}`) : fail(404, 'no_photo');
+  }
+
+  if(!node.tile) return fail(404, 'no_tile');
+
+  const name = `${node.tile}.large.jpg`;
+
+  if(!existsSync(resolve(config.photosDir, name))) {
+    if(!rendering.has(node.tile)) rendering.set(node.tile, render(node.doc, hash => getPhoto(db, hash), { size: LARGE, name }).finally(() => rendering.delete(node.tile)));
+
+    const r = await rendering.get(node.tile);
+
+    if(!r.ok) return fail(503, 'render_failed', r.error);
+  }
+
+  return go(`/files/photos/${name}`);
 }
 
 // DELETE /api/nodes/:id -> 204

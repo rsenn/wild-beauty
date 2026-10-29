@@ -100,6 +100,18 @@ export async function documentThumb(doc, options, { size = 512, background = '#f
   }
 }
 
+// The whole page as a large JPEG blob (the zoomed picture of the node in the 3D
+// gallery): what the editor draws, pixel for pixel; null when it cannot be drawn.
+export async function documentLarge(doc, options, { size = 1600, background = '#ffffff' } = {}) {
+  try {
+    const canvas = await sceneCanvas(doc, options, size, /^#[0-9a-f]{6}$/i.test(doc.bg ?? '') ? doc.bg : background);
+
+    return await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+  } catch {
+    return null;
+  }
+}
+
 // Draw the document and give the user the file. `options` are the renderNode
 // options of the page on show (without `upTo`: the whole page), `background` the
 // colour behind a JPG (it has no transparency). Rejects when anything fails.

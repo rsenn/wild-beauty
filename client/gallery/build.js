@@ -19,7 +19,7 @@ export const CORRIDOR = { width: 2 };
 
 // steepest ramp (rise over length) and sharpest corner (turn in degrees)
 export const MAX_SLOPE = 1 / 12;
-export const MAX_TURN = 90;
+export const MAX_TURN = 135;
 
 export const GROUPS = ['wallN', 'wallE', 'wallS', 'wallW', 'wallTop', 'roomFloor', 'corridorFloor'];
 
