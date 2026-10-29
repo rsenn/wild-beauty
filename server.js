@@ -160,7 +160,7 @@ function route(req) {
 
   if(pathname === '/api/graph' || pathname === '/api/graph/ops') return graphRoute(req);
 
-  if(pathname === '/api/places' || pathname === '/api/places/near') return placesRoute(req);
+  if(pathname === '/api/places' || pathname === '/api/places/near' || pathname === '/api/places/suggestions') return placesRoute(req);
 
   if(pathname === '/api/segment') return req.method === 'POST' ? segmentRoute(req) : text('method not allowed\n', 405);
 

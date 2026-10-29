@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 import { config } from '../config.js';
 import { log } from '../log.js';
 import { database } from '../db/db.js';
-import { deleteNode, deletePhoto, getNode, listNodes, getPhoto, insertNode, nodePhotos, releaseLock, setNodePhotos, updateNode, upsertPhoto } from '../db/nodes.js';
+import { addSuggestions, deleteNode, deletePhoto, getNode, listNodes, getPhoto, insertNode, nodePhotos, releaseLock, setNodePhotos, updateNode, upsertPhoto } from '../db/nodes.js';
 import { validateNode, photoLookup } from '../node/validate.js';
 import { bake } from '../media/bake.js';
 import { identify } from '../media/probe.js';
@@ -114,8 +114,14 @@ async function prepare(h, checked, thumb) {
   // baking is idempotent and happens before the transaction: a crash leaves
   // a photo in both places, which the next start reconciles (E27)
   const bakedNow = [];
+  const positions = [];
 
   for(const { hash } of checked.photos) {
+    // an upload's position is kept only as a suggestion for the owner (GRAPH.md S1.5)
+    const pos = (await readUpload(hash))?.pos;
+
+    if(pos) positions.push(pos);
+
     const r = await bakePhoto(h, hash);
 
     if(r.error) {
@@ -151,7 +157,7 @@ async function prepare(h, checked, thumb) {
     else log('error', 'thumbnail', t.error);
   }
 
-  return { bakedNow, tile, palette: mergePalettes(checked.photos.map(p => getPhoto(h, p.hash).palette)) };
+  return { bakedNow, positions, tile, palette: mergePalettes(checked.photos.map(p => getPhoto(h, p.hash).palette)) };
 }
 
 // the baked files and the row of photos no node uses: -> the hashes removed
@@ -188,6 +194,7 @@ export const saveNew = (h, body) =>
       const node = insertNode(h, { title: checked.title, doc: checked.doc, palette: ready.palette, kind: checked.kind });
 
       setNodePhotos(h, node.id, checked.photos);
+      addSuggestions(h, node.id, ready.positions);
 
       if(ready.tile) h.run('UPDATE nodes SET tile = ? WHERE id = ?', ready.tile, node.id);
 
@@ -233,6 +240,7 @@ export const saveUpdate = (h, id, body, { holder = null, now = Date.now } = {}) 
 
       h.run('UPDATE nodes SET kind = ?, tile = ? WHERE id = ?', checked.kind, ready.tile, id);
       setNodePhotos(h, id, checked.photos);
+      addSuggestions(h, id, ready.positions);
 
       return next;
     });

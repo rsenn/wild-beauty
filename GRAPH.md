@@ -173,11 +173,14 @@ position.
 3. **Places are coarse.** A place node stands for a named locality or a rounded cell
    (about 1 km); exact coordinates are never stored. Place nodes are found or
    created below `places` when a suggestion is accepted. The sidecar position is
-   dropped from `uploads/` when the node is saved or the upload expires.
+   dropped from `uploads/` when the node is saved or the upload expires. At save the rounded positions of the node's uploads are kept as
+   **suggestions** in `place_suggestions(node_id, lat, lon)` (migration 2) until the owner
+   links or dismisses them in the graph editor (`/api/places/suggestions`); a row goes with
+   its answer or with its node, and nothing else stores a position.
 4. **Privacy.** An edge is visible only when both ends are (S1.2), so a public node
    linked to a public place would announce where it was made. Therefore an `at`
    edge is **owner-only until the owner publishes it** (a per-edge `visibility`,
-   default `hidden`; migration 2, with accounts). In the PoC, without accounts, the
+   default `hidden`; migration 3, with accounts). In the PoC, without accounts, the
    chip is shown but the edge stays out of the public graph view.
 5. **Dismissed suggestions are remembered** (per node and place) so the chip does not
    come back.

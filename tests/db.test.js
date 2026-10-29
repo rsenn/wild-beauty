@@ -25,7 +25,7 @@ describe('open', () => {
 
     expect(existsSync(file)).toBe(true);
     expect(h.get('PRAGMA user_version').user_version).toBe(h.version);
-    expect(h.all("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name").map(r => r.name)).toEqual(['node_links', 'node_locks', 'node_photos', 'nodes', 'photos']);
+    expect(h.all("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name").map(r => r.name)).toEqual(['node_links', 'node_locks', 'node_photos', 'nodes', 'photos', 'place_suggestions']);
     expect(h.get('PRAGMA journal_mode').journal_mode).toBe('wal');
     expect(h.get('PRAGMA foreign_keys').foreign_keys).toBe(1);
     h.close();

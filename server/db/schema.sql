@@ -65,3 +65,14 @@ CREATE TABLE node_locks (
   acquired_at INTEGER NOT NULL,
   expires_at  INTEGER NOT NULL
 );
+
+-- migration 2
+-- A place a saved node's photo was taken near, kept until the owner links or
+-- dismisses it (GRAPH.md S1.5). Only the position rounded to ~1 km, and only
+-- for the owner; a row goes when it is answered or its node goes.
+CREATE TABLE place_suggestions (
+  node_id INTEGER NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
+  lat     REAL NOT NULL,
+  lon     REAL NOT NULL,
+  PRIMARY KEY (node_id, lat, lon)
+);

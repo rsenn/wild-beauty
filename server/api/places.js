@@ -4,7 +4,8 @@
 // coordinates, only the title. GET /api/places/near?lat=&lon= looks it up
 // without creating anything, POST /api/places { lat, lon } finds or creates it.
 import { database } from '../db/db.js';
-import { addLink, insertNode, linksFrom } from '../db/nodes.js';
+import { addLink, insertNode, linksFrom, listSuggestions, removeSuggestion } from '../db/nodes.js';
+import { graphOf } from './graph.js';
 import { emptyNode } from '../../client/editor/model.js';
 import { roundPosition } from '../media/probe.js';
 
@@ -81,6 +82,41 @@ export function ensurePlace(h, pos, gazetteer) {
   });
 }
 
+// The open place suggestions (GRAPH.md S1.5, EDITOR.md E140): saved nodes whose
+// photos were taken at a place the node is not linked to yet.
+// -> [{ node, title, lat, lon, place: { id|null, title } }]
+export function pendingSuggestions(h, gazetteer) {
+  const root = placesRoot(h);
+
+  return listSuggestions(h).flatMap(({ node_id, title, lat, lon }) => {
+    const name = placeTitle({ lat, lon }, gazetteer);
+    const place = root === null ? null : titled(h, root, name);
+
+    if(place && h.get("SELECT 1 AS ok FROM node_links WHERE from_id = ? AND to_id = ? AND label = 'at'", node_id, place.id)) return [];
+
+    return [{ node: node_id, title, lat, lon, place: { id: place?.id ?? null, title: name } }];
+  });
+}
+
+// one answer: { op: 'accept' | 'dismiss', node, lat, lon } -> true when a suggestion was answered
+export function answerSuggestion(h, op, gazetteer) {
+  if(!op || !['accept', 'dismiss'].includes(op.op) || !Number.isSafeInteger(op.node) || !Number.isFinite(op.lat) || !Number.isFinite(op.lon)) throw new Error('bad_op');
+
+  if(!h.get('SELECT 1 AS ok FROM place_suggestions WHERE node_id = ? AND lat = ? AND lon = ?', op.node, op.lat, op.lon)) return false;
+
+  if(op.op === 'accept') {
+    const place = ensurePlace(h, { lat: op.lat, lon: op.lon }, gazetteer);
+
+    if(!place) throw new Error('no_places_root');
+
+    addLink(h, op.node, place.id, 'at', h.get('SELECT COALESCE(MAX(sort), -1) + 1 AS n FROM node_links WHERE from_id = ?', op.node).n);
+  }
+
+  return removeSuggestion(h, op.node, op.lat, op.lon);
+}
+
+const MAX_ANSWERS = 200;
+
 // a position from a query or a body, snapped to the 1 km grid, or null
 const positionOf = ({ lat, lon }) => (typeof lat === 'string' || typeof lat === 'number' ? roundPosition(Number(lat), Number(lon)) : null);
 
@@ -88,6 +124,31 @@ export async function placesRoute(req, h, gazetteer) {
   h ??= await database();
 
   const url = new URL(req.url);
+
+  if(url.pathname === '/api/places/suggestions') {
+    if(req.method === 'GET') return Response.json({ suggestions: pendingSuggestions(h, gazetteer) }, { headers: { 'cache-control': 'no-cache' } });
+    if(req.method !== 'POST') return fail(405, 'method_not_allowed');
+
+    let body;
+
+    try {
+      body = await req.json();
+    } catch {
+      return fail(400, 'bad_json');
+    }
+
+    if(!Array.isArray(body?.ops) || body.ops.length > MAX_ANSWERS) return fail(400, 'bad_request');
+
+    try {
+      h.tx(() => {
+        for(const op of body.ops) answerSuggestion(h, op, gazetteer);
+      });
+    } catch(e) {
+      return e.message === 'no_places_root' ? fail(409, 'no_places_root') : fail(400, 'bad_op');
+    }
+
+    return Response.json({ suggestions: pendingSuggestions(h, gazetteer), graph: graphOf(h) });
+  }
 
   if(req.method === 'GET' && url.pathname === '/api/places/near') {
     const pos = positionOf(Object.fromEntries(url.searchParams));

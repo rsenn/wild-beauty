@@ -4,12 +4,13 @@ import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { REST, bounds, seed, settled, step } from '../graph/layout.js';
 import { Layout } from './Layout.js';
+import { PlaceSuggestions } from './PlaceSuggestions.js';
 
 const SIZE = 84;
 const MAX_FIT = 1.8; // the fitted view never enlarges the nodes beyond this (150 px)
 const GAP = 1 / 3; // the gap between two nodes is at least this share of a node
 const SPREAD = [0.25, 2.5]; // links of 50 to 500 units against nodes of 84: enlarged up to four times against the links, shrunk to dots on long strings no further
-const DASH = { child: null, ref: '10 6', sells: '2 6' };
+const DASH = { child: null, ref: '10 6', sells: '2 6', at: '1 5' };
 const COMPACT = 0.3; // a carried group is gathered to this share of its spread
 
 // the node size the visitor chose is kept in this browser
@@ -73,6 +74,7 @@ export const GraphPage = () => {
   const [note, setNote] = useState(null);
   const [linking, setLinking] = useState(null);
   const [error, setError] = useState(false);
+  const [places, setPlaces] = useState(false); // the place suggestions panel (EDITOR.md E140)
   const bodies = useRef(new Map());
   const alpha = useRef(1);
   const svg = useRef(null);
@@ -621,9 +623,11 @@ export const GraphPage = () => {
         <button type="button" class="wb-editor-chip" disabled=${!picked || !picked.pinned} onClick=${async () => keep(await send([{ op: 'pin', id: picked.id, pinned: false }]))}>${t('graph.unpin')}</button>
         <a class=${`wb-editor-chip wb-graph-open${picked ? '' : ' wb-disabled'}`} href=${picked ? `/${lang}/node/${picked.id}` : null} aria-disabled=${picked ? null : 'true'}>${t('graph.open')}</a>
         <button type="button" class="wb-editor-chip" disabled=${!note?.undo} onClick=${undo}>${t('graph.undo')}</button>
+        <button type="button" class="wb-editor-chip" aria-pressed=${places ? 'true' : 'false'} onClick=${() => setPlaces(!places)}>${t('graph.places')}</button>
         <button type="button" class="wb-editor-chip" onClick=${() => ((touched.current = false), fit(true))}>${t('graph.fit')}</button>
         <span class=${`wb-graph-hint${carry ? ' wb-graph-hint-live' : ''}`} role="status">${hint}</span>
       </div>
+      ${places && html`<${PlaceSuggestions} t=${t} onGraph=${keep} onClose=${() => setPlaces(false)} />`}
       <svg ref=${svg} class="wb-graph" role="group" aria-label=${t('graph.label')} onPointerDown=${e => down(e, null)} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up}>
         <defs><filter id="wb-g-shadow" x="-10%" y="-10%" width="125%" height="125%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-opacity="0.55" /></filter></defs>
         <g transform=${`translate(${view.x} ${view.y}) scale(${view.k})`}>

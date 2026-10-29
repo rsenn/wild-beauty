@@ -144,3 +144,15 @@ export const graphEdges = h => h.all('SELECT from_id AS "from", to_id AS "to", l
 export const setPosition = (h, id, x, y, pinned) => h.run('UPDATE nodes SET x = ?, y = ?, pinned = COALESCE(?, pinned) WHERE id = ?', x, y, pinned === undefined ? null : pinned ? 1 : 0, id).changes > 0;
 
 export const setPinned = (h, id, pinned) => h.run('UPDATE nodes SET pinned = ? WHERE id = ?', pinned ? 1 : 0, id).changes > 0;
+
+// --- place suggestions (GRAPH.md S1.5) ---------------------------------------
+
+// remember the rounded positions of the photos a node was saved with
+export function addSuggestions(h, nodeId, positions) {
+  for(const { lat, lon } of positions) h.run('INSERT OR IGNORE INTO place_suggestions (node_id, lat, lon) VALUES (?, ?, ?)', nodeId, lat, lon);
+}
+
+// every open suggestion: { node_id, title, lat, lon }
+export const listSuggestions = h => h.all('SELECT s.node_id, n.title, s.lat, s.lon FROM place_suggestions s JOIN nodes n ON n.id = s.node_id ORDER BY s.node_id, s.lat, s.lon');
+
+export const removeSuggestion = (h, nodeId, lat, lon) => h.run('DELETE FROM place_suggestions WHERE node_id = ? AND lat = ? AND lon = ?', nodeId, lat, lon).changes > 0;
