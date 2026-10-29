@@ -1658,6 +1658,19 @@ body {
   align-items: center;
 }
 
+/* opacity slider and hex field of the colour selector */
+.wb-colour-alpha {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 4px 8px;
+  align-items: center;
+}
+
+.wb-colour-hex {
+  width: 9ch;
+  font-family: monospace;
+}
+
 /* the tiny button for any colour: a colour wheel, the system picker behind it */
 .wb-colour-other {
   display: inline-block;

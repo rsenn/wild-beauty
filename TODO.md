@@ -65,6 +65,18 @@ State: everything below "Built, waiting for a device" and "Closed today" is in t
 ### Dropped on purpose
 - Panorama stitching (2026-10-29).
 
+## From the usage log (2026-10-28, `bun tools/events-sessions.js`)
+
+Candidates, from your long session (about 27,000 events, 14 editing sessions on a phone, 360 px wide):
+
+- [ ] **Remove button on upload cards is 25 x 25 px** (`Entfernen`): 59 taps, 13 rage taps (13 = 22 %), the most of any control. Make it at least 44 px (or a swipe / long press).
+- [ ] **Undo is too fine-grained**: in the first session 43 % of all actions were undo, 17 of 21 undos came right after another undo, 4 rage taps on Undo. Ideas: undo-all / hold to repeat, or fewer steps per undo (group a gesture and what it changed).
+- [ ] **Uploads fail a lot**: 12 of 39 upload events failed (5 of 8 in the first session). Find out why (size, network, timeout), add a retry that keeps the card.
+- [ ] **Missed taps cluster at the right edge** (x > 270 of 360 px, all heights, 112 of 143 misses): something is expected there that is not (scroll bar, the tool column, the edge swipe?). Check which control sits there.
+- [ ] **Event log is 90 % `setMatrix`** (24,255 of 27,270 lines, about 40 moves per drag): log one summary per drag instead (start, end, steps, duration), the file shrinks from 12 MB to well under 1 MB per day.
+- [ ] Gestures are cancelled 17-54 % of the time on touch (the browser took the gesture over: scroll or zoom): check `touch-action` on the stage and the page strip.
+- [ ] Crop: 64 `setCrop` commands in one session and 13 taps on the crop hint, the crop slide is fiddly on a phone; maybe a bigger grab area.
+
 ## Theming rule (applies to every task below)
 
 The whole UI is **themable, and a theme can change per content node**. So:
