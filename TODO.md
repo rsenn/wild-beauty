@@ -16,39 +16,42 @@ PLAN.md, `D` = DESIGN.md.
 
 Work that was started, offered or decided but not finished, so a detour does not lose it.
 Detail lives in `EDITOR.md` (E-numbers) and `UX-REQUIREMENTS.md`. Update this list when one closes.
-State: everything below "Built, waiting for a device" and "Closed today" is in the working tree and not yet committed, except what is marked committed.
+State: all of the work below is committed and pushed (last: `d2ae0104`). The camera / place work (E137, E139) is done in another session and not listed here.
 
 ### Closed today (2026-10-29)
-- [x] E128: Cancel for the background removal and for the wand job, `job.js blocked` rule, auto-cancel when the photo is undone away, leave-editor confirm while a job runs.
-- [x] E96 server round trip: tests that a text box passes the validator and that an injected font, colour, background or alignment is refused.
-- [x] E97 right-to-left: the first strong letter decides the direction, start is the right edge, `direction` and `unicode-bidi` on the SVG text; the textarea already used `dir="auto"`. Open: a real Arabic / Hebrew sample and a Japanese IME on a device.
-- [x] Text tool: fixed-height box (`fixed`, corner drag changes both axes, text clipped to the box).
-- [x] Clipboard: SVG out for text, strokes and shapes (when the browser takes `image/svg+xml`, PNG stays), SVG in (source text or file, rasterised before upload).
-- [x] Palette of a selected photo alone (it feeds Properties / Background when a photo is selected).
-- [x] E109 read-only dimming in landscape.
-- [x] `gmon.out` untracked and ignored.
-- [x] Committed earlier today: graph demo and group nodes, shared colour selector, dropper everywhere, node-size rules, raster spacing and columns, drawings and text in slides (E133), text padding (E134), viewer flows (E135).
+- [x] E128 jobs (Cancel, `job.js blocked`, auto-cancel, leave confirm); E96 round trip tests; E97 right-to-left; fixed-height text box; SVG clipboard in and out; palette of a selected photo; E109 landscape dimming.
+- [x] Committed earlier: graph demo and group nodes, shared colour selector with dropper, node-size rules, raster spacing and columns, drawings and text in slides (E133), text padding (E134, confirmed on the live site), viewer flows (E135).
+- [x] Colour selector: opacity slider and hex field (text colour, outline, background); E87 and E95 closed.
+- [x] E130 curved text, slider version (see below).
+- [x] E82 server rasteriser, first version (see below).
+- [x] Clip tool: a background removal makes the subject outlines the photo's multi-outline clip (one photo, one outline each); a cut across a multi-outline clip splits the crossed outline (the others go to their side); that outline lights up while drawing; clip outlines are coloured by nesting depth; the select tool ghosts what a clip cuts away; an unclipped cutout is cut along its visible box.
+- [x] Tight selection: clicks go through transparent padding (alpha map), the box hugs the content, and each piece of a cut gets its own box once, at cut time.
+- [x] Usage recording works again (`fetch` with keepalive instead of `sendBeacon`, which privacy extensions drop); `tools/events-sessions.js` reports the heavy sessions, findings in the next section.
 
 ### Built, waiting for a device (tests pass, never seen on real hardware)
-- [ ] E124 loupe (`Stage.js`): shown only on `pointer: coarse` while a finger draws or drags in the pen, shape, clip, unclip and text tools; not tried on a phone. Not shown for the select tool's handle drags yet (needs a flag from the editor).
-- [ ] Real system clipboard, a real phone (touch, swipe, keyboard), Firefox, very large photos, a real cut-out job and wand job, the viewer's touch swipe, the SVG clipboard formats in other apps.
-- [ ] Composite node tiles need a re-save for nodes saved before the tile existed (E82 removes that).
+- [ ] E124 loupe (`Stage.js`): shown only on `pointer: coarse` while a finger draws or drags in the pen, shape, clip, unclip and text tools; not on a phone yet. Not shown for the select tool's handle drags (needs a flag from the editor).
+- [ ] Not tried in a browser: the multi-outline cut and its highlight, the cutout outlines as clip, the alpha hit test, per-piece boxes after a cut, the select-tool ghost, the opacity slider and hex field.
+- [ ] Real system clipboard, a real phone (touch, swipe, keyboard), Firefox, very large photos, a real cut-out and wand job, the viewer's touch swipe, SVG clipboard formats in other apps, Arabic / Hebrew text and a Japanese IME.
+- [ ] Composite node tiles need a re-save for nodes saved before E82 existed.
+
+### Open, can be built
+- [~] **E130 curved text**: drag handles on the stage, double-tap reset, the faint limit arc, the curve following width changes; browser check of the slider.
+- [~] **E82 server tiles**: photo-only documents with several photos and group nodes still use the first photo's thumbnail; the fonts directory should be a config/setup step (production needs the TTFs in `~/.fonts`, `fc-cache -f`); `latin-ext` subsets not installed; curved text goes through Inkscape (librsvg draws no `<textPath>`).
+- [ ] **Usage-log items** (next section): 25 px remove button, undo granularity, upload failures, right-edge missed taps, log only a summary per drag, touch gesture cancels, crop grab area.
+- [ ] Tight box is the clip's bounding box limited to the picture's content; a smaller box inside a clip could be refined later if needed.
+- [ ] Two reports exist: `tools/events-report.js` (E107) and `tools/events-sessions.js`; merge them.
 
 ### Needs a specification before it can be built
-- [ ] **Bug: cut after background removal / wand (reported 2026-10-29)**: a photo with a multi-outline clip (2-3 outlines) cannot be cut any more with the clip tool. Likely cause: `cutByStroke` needs exactly two crossings, a stroke across several outlines gives more (`NodeEditor.js` ~1518 passes all outlines as the reference). Needs a rule: which outline(s) does a cut split, and where do the untouched outlines go. Not fixed yet.
-- [~] **E82 server-side tile rendering** (2026-10-29: `server/media/raster.js` renders the document SVG through `rsvg-convert`, curved text (`<textPath>`, which librsvg does not draw) through Inkscape; photos referenced by file name from a temp SVG in the photos folder; fonts as TTF in `~/.fonts/wild-beauty` (converted from the woff2 files, `fc-cache -f`; the server passes the real `HOME` to fontconfig); `serverTile` used on save when the editor sent no tile and the doc has drawings, text or shapes. Open: photo-only multi-photo docs and group nodes still use the first photo's thumbnail; fonts dir should be a config/setup step (production host needs the TTFs too); `latin-ext` subsets not installed.)
-- [ ] **Copy several steps at once** needs selecting several steps first (Shift-tap, box select, "select all"?), which the editor does not have; the clipboard payload already holds up to 8 items.
+- [ ] **Copy several steps at once**: needs selecting several steps first (Shift-tap, box select, "select all"?); the clipboard payload already holds up to 8 items.
 - [ ] **E110 dark theme**: the colours of a dark kraft (ground, ink, accent, cards) are not decided.
 - [ ] **One word for "node" / "work" in English** (German Werk, French pièce, Spanish pieza).
-- [ ] **E94 fill editor** (none / solid / linear / radial gradient, 2-5 stops with alpha) for the text background: the UI is not drawn yet; E95 is covered by the shared selector.
+- [ ] **E94 fill editor** (none / solid / linear / radial gradient, 2-5 stops, alpha) for the text background: the UI is not drawn.
 - [ ] **Magnetic lasso** replacing the wand: client side (edge map plus shortest path in a worker, clip polygon out). Needs your go.
 - [ ] Wand follow-ups: `sam` for the final pass, choosing which subject Remove background keeps.
 - [ ] Verify Spanish with DeepL (needs `DEEPL_API_KEY`, target ES-419) and the tester.
 
 ### Decided, not built (large)
-- [ ] **Tight selection box** (asked 2026-10-29): selection box and handles of a clipped / cut / background-removed photo shrink to the bounding box of its visible content (clip polygon bbox; alpha scan, threshold ~8 %, cached per hash, for uncut cutouts). Display and hit-test only, the stored photo is unchanged.
-- [~] **E130 curved text baseline** (built 2026-10-29: `client/editor/curve.js`, `<textPath>` in `render.js`, Curve slider in the context bar, `curve` validated; open: drag handles on the stage, double-tap reset, limit arc, curve follows width changes; browser check pending) (rules agreed in `EDITOR.md`): `curve` on a text step, `<textPath>`, one bend, limits and snapping, drag handles.
-- [ ] E74 / E108 device pass, stage zoom (postponed by the author: the loupe covers it), E114 simple clip, the `UX-REQUIREMENTS.md` list.
+- [ ] E74 / E108 device pass, stage zoom (postponed: the loupe covers it), E114 simple clip, the `UX-REQUIREMENTS.md` list.
 - [ ] **E129 text as clip** (postponed).
 
 ### Postponed (decided 2026-10-29): grid and viewer follow-ups
@@ -56,11 +59,11 @@ State: everything below "Built, waiting for a device" and "Closed today" is in t
 - [ ] Viewer: page dots, autoplay, swipe indicator, remembering the page across reloads.
 - [ ] Editor preview of the viewer flow (the editor stage shows everything at once).
 - [ ] Text boxes and drawings in the grid (cells of their own); drawings in slides are built (E133).
-- [ ] Graph: composite thumbnail for group nodes in the saved list (server-side, with E82), rename a group in the graph, add or remove members by drag, group of groups, owner checks on `/api/graph`.
+- [ ] Graph: composite thumbnail for group nodes in the saved list (with E82), rename a group in the graph, add or remove members by drag, group of groups, owner checks on `/api/graph`.
 
 ### Housekeeping
 - [ ] Leftover test cut-outs in `uploads/` expire on their own (7 days).
-- [ ] Restart the dev server on port 3001 to see the work of the last day (it started before the graph page and the viewer flows).
+- [ ] Restart the dev server on port 3001 (and deploy the live site) to see the latest work.
 
 ### Dropped on purpose
 - Panorama stitching (2026-10-29).
