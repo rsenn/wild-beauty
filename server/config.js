@@ -23,5 +23,6 @@ export const config = {
 
 export const HASH = /^[0-9a-f]{64}$/;
 
-// names under uploads/ that may be served: <hash>.<ext> or <hash>.display.<jpg|png>
-export const UPLOAD_FILE = /^([0-9a-f]{64})(\.display)?\.(jpg|png|webp|gif|avif|heic|heif|tiff)$/;
+// names under uploads/ that may be served: <hash>.<ext>, <hash>.display.<ext> or
+// <hash>.card.jpg (the small preview of an upload card, made when first asked for)
+export const UPLOAD_FILE = /^([0-9a-f]{64})(\.display|\.card)?\.(jpg|png|webp|gif|avif|heic|heif|tiff)$/;

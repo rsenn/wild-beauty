@@ -214,6 +214,23 @@ body {
   text-align: left;
 }
 
+.wb-quickadd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.wb-quickadd-button {
+  cursor: pointer;
+}
+
+.wb-quickadd-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 /* grid of cards */
 .wb-cards {
   display: grid;
@@ -251,8 +268,8 @@ body {
   background: var(--wb-card-ground);
 }
 
-/* a picked card: a crimson and cream dashed border that slowly marches; a card a
-   drag is over right now has it too */
+/* a picked card: a crimson and cream dashed border (it used to march; 20 picked
+   cards animating at once made a phone crawl); a card a drag is over right now has it too */
 .wb-card-selected > .wb-card-box,
 .wb-card-ranging > .wb-card-box {
   box-shadow: var(--wb-shadow-select);
@@ -272,19 +289,6 @@ body {
     repeating-linear-gradient(90deg, var(--pick-a) 0 8px, var(--pick-b) 8px 16px) 0 100% / 100% 4px no-repeat,
     repeating-linear-gradient(0deg, var(--pick-a) 0 8px, var(--pick-b) 8px 16px) 0 0 / 4px 100% no-repeat,
     repeating-linear-gradient(0deg, var(--pick-a) 0 8px, var(--pick-b) 8px 16px) 100% 0 / 4px 100% no-repeat;
-  animation: wb-march 1.2s linear infinite;
-}
-
-@keyframes wb-march {
-  to {
-    background-position: 16px 0, -16px 100%, 0 -16px, 100% 16px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wb-card-selected > .wb-card-box::after {
-    animation: none;
-  }
 }
 
 .wb-card-face {

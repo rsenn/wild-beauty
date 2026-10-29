@@ -164,3 +164,36 @@ describe('the small picture of a photo', () => {
     expect((await servePhoto(`${A}.small.png`, new Request('http://x/'))).status).toBe(404);
   });
 });
+
+describe('the preview of an upload card', () => {
+  test('made from the upload when first asked for, small, kept, and removed with the upload', async () => {
+    const { serveUpload, removeUpload } = await import('../server/api/uploads.js');
+    const saved = config.uploadsDir;
+    const dir = resolve(root, 'uploads');
+    const hash = 'd'.repeat(64);
+
+    mkdirSync(dir, { recursive: true });
+    config.uploadsDir = dir;
+
+    try {
+      await detectTools();
+      Bun.spawnSync(['convert', '-size', '4000x3000', 'gradient:red-blue', resolve(dir, `${hash}.jpg`)]);
+      writeFileSync(resolve(dir, `${hash}.json`), JSON.stringify({ hash, ext: 'jpg', display: `${hash}.jpg`, owners: {} }));
+
+      const res = await serveUpload(`${hash}.card.jpg`, 'GET');
+
+      expect(res.status).toBe(200);
+
+      const info = await identify(resolve(dir, `${hash}.card.jpg`));
+
+      expect([info.width, info.height]).toEqual([480, 360]);
+      expect((await serveUpload(`${'e'.repeat(64)}.card.jpg`, 'GET')).status).toBe(404); // no such upload
+      expect((await serveUpload(`${hash}.card.png`, 'GET')).status).toBe(404);
+
+      await removeUpload(hash);
+      expect(existsSync(resolve(dir, `${hash}.card.jpg`))).toBe(false);
+    } finally {
+      config.uploadsDir = saved;
+    }
+  });
+});

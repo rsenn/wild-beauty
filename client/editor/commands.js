@@ -35,6 +35,7 @@ function withMask(doc, id, m, move) {
 // Commands that repeat while a control is dragged or typed into carry a key,
 // so history.push folds a run of them into one undo step.
 const KEYED = {
+  addPhotos: c => (c.batch ? `addphotos:${c.batch}` : null),
   setOpacity: c => `opacity:${c.id}`,
   setTitle: () => 'title',
   setBg: () => 'bg',
@@ -66,6 +67,10 @@ export const commandKey = command => KEYED[command.type]?.(command) ?? null;
 // the document part of a command
 function onDoc(doc, c) {
   switch(c.type) {
+    // a batch of photos at once: one render, and (with `batch`) one undo step however
+    // many arrive, see KEYED; each is { hash, info, id, role?, crop?, m? }
+    case 'addPhotos':
+      return (c.photos ?? []).reduce((d, p) => model.addPhoto(d, c.page ?? d.pages[0].id, p.hash, p.info, p.id, p.role, p.crop, p.m), doc);
     case 'addPhoto':
       return model.addPhoto(doc, c.page ?? doc.pages[0].id, c.hash, c.info, c.id, c.role, c.crop, c.m);
     case 'addStep':

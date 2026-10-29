@@ -9,6 +9,7 @@ import { extractDisplay } from '../media/heif.js';
 import { ingest, uploadPath } from '../media/ingest.js';
 import { logFile } from '../log.js';
 import { run } from '../media/run.js';
+import { smallImage } from '../media/thumb.js';
 import { imagemagick } from '../media/tools.js';
 import { roundPosition } from '../media/probe.js';
 import { expiringCookie, sessionFor } from '../session.js';
@@ -240,11 +241,36 @@ export async function sweepUploads() {
   return gone;
 }
 
-// GET /files/uploads/<hash>[.display].<ext>: only names that match UPLOAD_FILE
-export function serveUpload(name, method) {
-  if(!UPLOAD_FILE.test(name)) return new Response('not found\n', { status: 404 });
+// the long edge of an upload card's preview: the card is 106 px wide, and 3x on a phone
+export const CARD_EDGE = 480;
+const carding = new Map();
 
-  const file = Bun.file(resolve(config.uploadsDir, name));
+// <hash>.card.jpg: made from the upload's display file the first time a card asks
+// for it (one run per upload however many ask), then it is a file like any other.
+// A card shows a 106 px square; the original is a 12 megapixel photo of 3 to 8 MB,
+// and a page of cards decoding those is what made the upload page crawl.
+async function makeCard(hash, dest) {
+  const record = await readUpload(hash);
+  const source = record && UPLOAD_FILE.test(record.display) ? resolve(config.uploadsDir, record.display) : null;
+
+  if(!source || !existsSync(source)) return false;
+
+  if(!carding.has(hash)) carding.set(hash, smallImage(source, dest, { size: CARD_EDGE }).finally(() => carding.delete(hash)));
+
+  return !!(await carding.get(hash)).ok;
+}
+
+// GET /files/uploads/<hash>[.display|.card].<ext>: only names that match UPLOAD_FILE
+export async function serveUpload(name, method) {
+  const m = UPLOAD_FILE.exec(name);
+
+  if(!m) return new Response('not found\n', { status: 404 });
+
+  const path = resolve(config.uploadsDir, name);
+
+  if(m[2] === '.card' && m[3] === 'jpg' && !existsSync(path) && !(await makeCard(m[1], path))) return new Response('not found\n', { status: 404 });
+
+  const file = Bun.file(path);
 
   // content-addressed: the bytes behind a name never change
   const headers = { 'content-type': file.type, 'cache-control': 'public, max-age=31536000, immutable', 'x-content-type-options': 'nosniff' };
@@ -259,7 +285,7 @@ export async function removeUpload(hash) {
 
   if(!meta) return false;
 
-  for(const name of new Set([`${hash}.${meta.ext}`, meta.display, `${hash}.json`])) {
+  for(const name of new Set([`${hash}.${meta.ext}`, meta.display, `${hash}.card.jpg`, `${hash}.json`])) {
     if(!UPLOAD_FILE.test(name) && name !== `${hash}.json`) continue;
 
     logFile('rm', resolve(config.uploadsDir, name), 'delete upload');

@@ -8,6 +8,7 @@ import { createGesture } from '../editor/gesture.js';
 import { aboutPoint } from '../editor/gestures.js';
 import { apply as applyMatrix, invert, multiply } from '../editor/matrix.js';
 import { ADD_EVENT, SAVED_EVENT, takePending } from '../editor/pending.js';
+import { QuickAdd } from './QuickAdd.js';
 import { deleteNode, errorKey, loadNode, saveLarge, saveNode } from '../editor/save.js';
 import { createLock } from '../editor/lock.js';
 import * as history from '../editor/history.js';
@@ -492,6 +493,35 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setPlaying(false);
     setPhotos(old => ({ ...old, [payload.hash]: photoInfo(payload) }));
     dispatch({ type: 'addPhoto', hash: payload.hash, info: payload, role: payload.role, crop: payload.crop, page: latest.current.pageId, id: unique(allIds(latest.current.doc)), m: index === 0 && batch === 1 ? undefined : cascade(index) });
+  };
+
+  // "Add photos" (E141): a batch from the file picker lands in one step, in the order
+  // chosen, in the cascade of E112 (a single photo on an empty page still covers the stage)
+  const addMany = (payloads, { batch }) => {
+    const valid = payloads.filter(isPayload);
+    const { doc, pageId, page } = latest.current;
+
+    if(!valid.length) return;
+
+    const taken = new Set(allIds(doc));
+    const start = photosOnPage(doc.pages[page]);
+    const lone = start === 0 && valid.length === 1 && !batch;
+
+    setK(null);
+    setPlaying(false);
+    setPhotos(old => ({ ...old, ...Object.fromEntries(valid.map(p => [p.hash, photoInfo(p)])) }));
+    dispatch({
+      type: 'addPhotos',
+      batch,
+      page: pageId,
+      photos: valid.map((p, k) => {
+        const id = unique(taken);
+
+        taken.add(id);
+
+        return { hash: p.hash, info: p, role: p.role, crop: p.crop, id, m: lone ? undefined : cascade(start + k) };
+      }),
+    });
   };
 
   const remove = id => {
@@ -2238,6 +2268,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       ${paletteTargets && html`<${Palette} t=${t} pal=${pal} used=${usedNow} dropper=${startDropper} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">
+        <${QuickAdd} t=${t} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} />
         <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />
       </div>
       <div class="wb-editor-sec" data-sec="sequence">

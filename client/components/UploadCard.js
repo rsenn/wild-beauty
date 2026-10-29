@@ -17,7 +17,11 @@ export const UploadCard = ({ item, order, inNode, ranging, onRange, onToggle, on
   const { t, lang } = useI18n();
   const { limits } = useBoot();
   const [brokenSrc, setBrokenSrc] = useState(null);
-  const src = item.record ? `/files/uploads/${item.record.display}` : item.url;
+  const [cardFailed, setCardFailed] = useState(false);
+  // a small preview made by the server (server/api/uploads.js makeCard): the card is
+  // 106 px wide and the photo 12 megapixels; while it uploads there is no picture (decoding
+  // the local file of every card was what made the page crawl); the display file is the fallback
+  const src = item.record ? (cardFailed ? `/files/uploads/${item.record.display}` : `/files/uploads/${item.record.hash}.card.jpg`) : null;
   const busy = item.state === 'uploading' || item.state === 'processing';
   const cls = 'wb-card' + (item.selected ? ' wb-card-selected' : '') + ' wb-card-' + item.state + (inNode ? ' wb-card-used' : '') + (ranging ? ' wb-card-ranging' : '');
   const percent = Math.round(item.progress * 100);
@@ -117,9 +121,11 @@ export const UploadCard = ({ item, order, inNode, ranging, onRange, onToggle, on
     <li class=${cls + (pan.axis ? ' wb-card-pan-' + pan.axis : '')} data-card=${item.id} onPointerDown=${hold}>
       <div class="wb-card-box">
         <button type="button" class="wb-card-face" aria-pressed=${item.selected ? 'true' : 'false'} disabled=${inNode} onClick=${() => (range.current?.dragged() ? (range.current = null) : !suppress.current && onToggle())} onPointerDown=${down} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up} onKeyDown=${key} title=${inNode ? t('upload.used') : pan.axis ? t('upload.crop.hint.' + pan.axis) : item.file.name}>
-          ${brokenSrc === src
+          ${!src
+            ? null
+            : brokenSrc === src
             ? html`<span class="wb-card-nopreview">${t('upload.no-preview')}</span>`
-            : html`<img class="wb-card-image" style=${`transform: rotate(${item.rotation}deg); object-position: ${cropPosition(item.record, item.crop)}`} src=${src} alt=${item.file.name} draggable="false" onError=${() => setBrokenSrc(src)} />`}
+            : html`<img class="wb-card-image" style=${`transform: rotate(${item.rotation}deg); object-position: ${cropPosition(item.record, item.crop)}`} src=${src} alt=${item.file.name} draggable="false" onError=${() => (cardFailed ? setBrokenSrc(src) : setCardFailed(true))} />`}
         </button>
         <button type="button" class="wb-round wb-card-remove" onClick=${onRemove} title=${t('upload.remove')} aria-label=${t('upload.remove')}></button>
         <button type="button" class="wb-round wb-card-rotate" onClick=${onRotate} title=${t('upload.rotate')} aria-label=${t('upload.rotate')}></button>
