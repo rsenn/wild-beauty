@@ -169,7 +169,7 @@ function dropUnused(h, hashes) {
 
     h.tx(() => deletePhoto(h, hash));
 
-    for(const name of [`${hash}.${photo.ext}`, `${hash}.thumb.jpg`]) rmSync(resolve(config.photosDir, name), { force: true });
+    for(const name of [`${hash}.${photo.ext}`, `${hash}.thumb.jpg`, `${hash}.small.jpg`]) rmSync(resolve(config.photosDir, name), { force: true });
 
     gone.push(hash);
   }

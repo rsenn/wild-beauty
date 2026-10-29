@@ -22,6 +22,7 @@
   "upload.geotag": "Associer ma position à la photo",
   "upload.files.one": "{count} image",
   "upload.files.other": "{count} images",
+  "upload.select.hint": "Astuce : glissez sur plusieurs images pour toutes les choisir (sur téléphone : appuyez longuement sur l'une, puis glissez).",
   "upload.remove": "Retirer",
   "upload.rotate": "Pivoter",
   "upload.no-preview": "Pas d'aperçu",

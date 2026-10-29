@@ -27,7 +27,7 @@ export function galleryable(node, items = galleryItems(node)) {
 export function childItems(c, lang = 'en') {
   const href = `/${lang}/node/${c.id}`;
 
-  if(c.photos?.length > 1) return c.photos.map(({ hash, href: full }, i) => ({ id: `n${c.id}:${hash}`, title: `${c.title ?? ''} ${i + 1}/${c.photos.length}`.trim(), url: thumb(hash), full, href }));
+  if(c.photos?.length > 1) return c.photos.map(({ hash, href: full }, i) => ({ id: `n${c.id}:${hash}`, title: `${c.title ?? ''} ${i + 1}/${c.photos.length}`.trim(), url: `/files/photos/${hash}.small.jpg`, full, href }));
 
   return [{ id: 'n' + c.id, title: c.title, url: thumb(c.tile), full: large(c.id), href }];
 }

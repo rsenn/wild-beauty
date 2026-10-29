@@ -22,6 +22,7 @@
   "upload.geotag": "Foto mit meinem Standort versehen",
   "upload.files.one": "{count} Bild",
   "upload.files.other": "{count} Bilder",
+  "upload.select.hint": "Tipp: über mehrere Bilder ziehen, um alle zu wählen (am Handy: eines gedrückt halten, dann ziehen).",
   "upload.remove": "Entfernen",
   "upload.rotate": "Drehen",
   "upload.no-preview": "Keine Vorschau",

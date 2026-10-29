@@ -22,6 +22,7 @@
   "upload.geotag": "Etiquetar la foto con mi ubicación",
   "upload.files.one": "{count} imagen",
   "upload.files.other": "{count} imágenes",
+  "upload.select.hint": "Consejo: arrastre sobre varias imágenes para elegirlas todas (en el móvil: mantenga pulsada una y arrastre).",
   "upload.remove": "Quitar",
   "upload.rotate": "Girar",
   "upload.no-preview": "Sin vista previa",

@@ -6,8 +6,8 @@
 //
 // Where a corridor meets a room, the corridor is cut back to the wall of the room
 // and the wall gets a doorway as wide as the corridor: a room with doorways is a
-// set of open wall polylines running counter-clockwise (hang.js hangs on their
-// left, the inside), a room without one a closed polygon.
+// set of open wall polylines, a room without one a closed polygon. Walls are
+// handed over clockwise (autoplan.js `clockwise`) so the guided tour goes right.
 // Pure, no DOM. -> a scene3d document, or null when the node has no walls.
 
 import { apply } from '../editor/matrix.js';
@@ -15,7 +15,7 @@ import { matrixOf } from '../editor/hit.js';
 import { UNITS_PER_METRE } from '../editor/roomaid.js';
 import { verticesFromPath } from '../editor/shapes.js';
 import { CORRIDOR_WIDTH, WALL_HEIGHT } from '../editor/walls.js';
-import { LOOKS } from './autoplan.js';
+import { LOOKS, clockwise } from './autoplan.js';
 import { contains } from '../editor/polygon.js';
 import { clean, signedArea } from './line.js';
 
@@ -228,7 +228,7 @@ export function planFromDoc(doc) {
 
   const polys = rooms.map(r => r.pts);
   const corridors = lines.map(l => ({ ...l, pts: trimCorridor(l.pts, polys) })).filter(c => c.pts.length >= 2);
-  const walls = rooms.flatMap(room => cutRoom(room.pts, corridors.map(c => ({ points: c.pts, width: c.width }))).map(w => ({ ...w, height: room.height })));
+  const walls = rooms.flatMap(room => clockwise(cutRoom(room.pts, corridors.map(c => ({ points: c.pts, width: c.width })))).map(w => ({ ...w, height: room.height })));
   const scene = doc.scene ?? {};
 
   return {

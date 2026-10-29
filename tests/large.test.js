@@ -10,6 +10,7 @@ import { insertNode, upsertPhoto } from '../server/db/nodes.js';
 import { largeRoute, putLargeRoute } from '../server/api/nodes.js';
 import { servePhoto } from '../server/api/photos.js';
 import { detectTools } from '../server/media/tools.js';
+import { identify } from '../server/media/probe.js';
 
 const A = 'a'.repeat(64);
 const B = 'b'.repeat(64);
@@ -140,5 +141,26 @@ describe('putLargeRoute', () => {
     expect((await put(node([photo('x', B)], B), jpeg)).status).toBe(409);
     expect((await put(node([photo('x', A), photo('y', B)]), jpeg)).status).toBe(409);
     expect(existsSync(resolve(config.photosDir, `${'f'.repeat(64)}.large.jpg`))).toBe(false);
+  });
+});
+
+describe('the small picture of a photo', () => {
+  test('made from the baked photo when first asked for, in proportion, then served for good', async () => {
+    await detectTools();
+
+    const src = resolve(config.photosDir, `${A}.jpg`);
+
+    Bun.spawnSync(['convert', '-size', '1600x800', 'gradient:red-blue', src]);
+
+    const res = await servePhoto(`${A}.small.jpg`, new Request('http://x/'));
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toContain('immutable');
+
+    const info = await identify(resolve(config.photosDir, `${A}.small.jpg`));
+
+    expect([info.width, info.height]).toEqual([640, 320]);
+    expect((await servePhoto(`${B}.small.jpg`, new Request('http://x/'))).status).toBe(404); // no such photo
+    expect((await servePhoto(`${A}.small.png`, new Request('http://x/'))).status).toBe(404);
   });
 });

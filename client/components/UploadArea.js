@@ -4,6 +4,7 @@ import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { ACCEPT, isImageFile, loadCrops, uploadPayload } from '../files.js';
 import { createQueue } from '../upload.js';
+import { choose, rangeBetween } from '../uploadselect.js';
 import { currentPosition } from '../editor/places.js';
 import { SAVED_EVENT, requestAdd } from '../editor/pending.js';
 import { browserStorage, draftHashes } from '../editor/draft.js';
@@ -20,6 +21,7 @@ const existingItem = (record, index) => ({ id: index + 1, file: { name: record.n
 export const UploadArea = ({ extra = null }) => {
   const { used } = useEditor();
   const picked = useRef(0); // selection counter: the order photos were selected in
+  const [ranging, setRanging] = useState(() => new Set()); // the cards a drag is over right now, not chosen yet
   const { t } = useI18n();
   const { limits, uploads = [] } = useBoot();
   const [items, setItems] = useState(() => uploads.map(existingItem));
@@ -171,6 +173,21 @@ export const UploadArea = ({ extra = null }) => {
   // a photo the open node uses is not offered again; it comes back when the node drops it
   const shown = items.filter(item => !(item.record && used.includes(item.record.hash)));
 
+  // dragging over cards (cardrange.js, E140): the run from the card pressed to the
+  // card under the pointer is marked while the drag lasts and chosen when it ends,
+  // on top of what is chosen already
+  const range = {
+    update: (from, to) => setRanging(new Set(to === null ? [] : rangeBetween(shown, from, to).map(String))),
+    end: (from, to) => {
+      const ids = to === null ? [] : rangeBetween(shown, from, to);
+
+      setRanging(new Set());
+      setItems(old => choose(old, ids, picked.current));
+      picked.current += ids.length;
+    },
+  };
+  const finished = shown.filter(item => item.record).length;
+
   return html`
     <section class="wb-upload">
       <div class=${'wb-drop' + (over ? ' wb-drop-over' : '')} onDragEnter=${dragEnter} onDragOver=${e => e.preventDefault()} onDragLeave=${dragLeave} onDrop=${drop}>
@@ -191,6 +208,7 @@ export const UploadArea = ({ extra = null }) => {
       ${swept !== null && html`<p class="wb-upload-note" role="status">${swept < 0 ? t('upload.sweep.failed') : t('upload.sweep.done', { count: swept })}</p>`}
       ${ignored > 0 && html`<p class="wb-upload-note" role="status">${t('upload.ignored', { count: ignored })}</p>`}
       ${shown.length > 0 && html`<p class="wb-upload-count" role="status">${t('upload.files', { count: shown.length })}</p>`}
+      ${finished > 1 && html`<p class="wb-upload-note">${t('upload.select.hint')}</p>`}
       <ul class="wb-cards">
         ${shown.map(
           item => html`<${UploadCard}
@@ -198,6 +216,8 @@ export const UploadArea = ({ extra = null }) => {
             item=${item}
             order=${order.get(item.id)}
             inNode=${!!item.record && used.includes(item.record.hash)}
+            ranging=${ranging.has(String(item.id))}
+            onRange=${range}
             onToggle=${() => update(item.id, i => ({ selected: !i.selected, selectedAt: i.selected ? 0 : ++picked.current }))}
             onRemove=${() => remove(item.id)}
             onRotate=${() => update(item.id, i => ({ rotation: (i.rotation + 90) % 360 }))}

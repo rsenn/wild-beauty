@@ -2,8 +2,12 @@
 // E46). HTML5 drag-and-drop does not fire for a finger on most phones, so a
 // card also listens for a press-and-hold with a pointer: after HOLD_MS without
 // moving it picks the card up as a "ghost" picture under the finger; letting
-// go over the editor stage drops it there. Scrolling still works, because only
+// go over the editor stage drops it there. Let go over another card instead and
+// the run of cards from the held one to that one is chosen (`range`, cardrange.js);
+// near the top or bottom edge the page scrolls by itself meanwhile. Scrolling still works, because only
 // a held press (not a swipe) turns into a drag.
+import { autoscroll, cardAt } from './cardrange.js';
+
 export const HOLD_MS = 350;
 export const SLOP_PX = 10;
 const STAGE_SELECTOR = '.wb-editor-stage';
@@ -17,8 +21,10 @@ export function stageAt(x, y, doc = globalThis.document) {
 //  event    the pointerdown (touch and pen only; a mouse has real drag-and-drop)
 //  image    the card's picture URL, for the ghost
 //  onDrop   called once with the stage element when it is dropped there
+//  range    { update(id|null), end(id|null) }: the card under the finger while held, and
+//           where it was let go when that was not the stage
 // -> cancel(): stop watching (the card was removed)
-export function watchHold(event, { image, onDrop }, { win = globalThis.window, hold = HOLD_MS } = {}) {
+export function watchHold(event, { image, onDrop, range }, { win = globalThis.window, hold = HOLD_MS } = {}) {
   if(event.pointerType === 'mouse') return () => {};
 
   const doc = win.document;
@@ -29,6 +35,8 @@ export function watchHold(event, { image, onDrop }, { win = globalThis.window, h
   let ghost = null;
   let timer = null;
   let over = null;
+  let card = null; // the card under the finger
+  let stop = null; // the page's own scrolling
 
   const mark = stage => {
     if(over === stage) return;
@@ -43,6 +51,12 @@ export function watchHold(event, { image, onDrop }, { win = globalThis.window, h
 
     ghost.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
     mark(stageAt(x, y, doc));
+
+    if(range) {
+      const now = over ? null : cardAt(x, y, doc);
+
+      if(now !== card) range.update((card = now));
+    }
   };
 
   // a drag in progress must not scroll the page
@@ -55,13 +69,16 @@ export function watchHold(event, { image, onDrop }, { win = globalThis.window, h
     win.removeEventListener('pointercancel', cancel);
     win.removeEventListener('touchmove', stopScroll);
     mark(null);
+    stop?.();
 
     const target = ghost && drop ? stageAt(x, y, doc) : null;
+    const held = !!ghost;
 
     ghost?.remove();
     ghost = null;
 
     if(target) onDrop(target);
+    else if(range && held) drop ? range.end(card) : range.update(null);
   };
 
   function move(e) {
@@ -91,6 +108,7 @@ export function watchHold(event, { image, onDrop }, { win = globalThis.window, h
     ghost.alt = '';
     doc.body.append(ghost);
     place();
+    if(range) stop = autoscroll(() => [x, y], place, win);
   }, hold);
 
   return () => finish(false);

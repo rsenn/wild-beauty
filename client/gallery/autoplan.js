@@ -57,6 +57,11 @@ function room(x0, doors, o) {
   return walls;
 }
 
+// the walls of a room as the guided tour should walk them: clockwise seen from
+// above with the pictures on the right of each open run (the inside), so that
+// "next" takes the visitor to the right, the way one reads (hang.js `side`)
+export const clockwise = pieces => [...pieces].reverse().map(w => ({ ...w, points: [...w.points].reverse(), ...(!w.closed && { side: 'right' }) }));
+
 // the plan of n rooms in a row
 function row(n, o) {
   const walls = [];
@@ -66,7 +71,7 @@ function row(n, o) {
   for(let i = 0; i < n; i++) {
     const x0 = i * (o.width + o.corridor);
 
-    walls.push(...room(x0, { west: i > 0, east: i < n - 1 }, o));
+    walls.push(...clockwise(room(x0, { west: i > 0, east: i < n - 1 }, o)));
     floors.push({ type: 'room', points: [[x0, 0], [x0 + o.width, 0], [x0 + o.width, o.depth], [x0, o.depth]] });
 
     if(i < n - 1) {

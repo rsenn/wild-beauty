@@ -4,6 +4,7 @@ import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { UPLOAD_MIME, cropPosition, expiryNote, formatSize, panAxis, saveCrop, uploadPayload } from '../files.js';
 import { watchHold } from '../ghostdrag.js';
+import { watchMouseRange } from '../cardrange.js';
 import { requestAdd } from '../editor/pending.js';
 
 // file name and size under the thumbnail are switched off for now
@@ -12,13 +13,13 @@ const SHOW_FILE_INFO = false;
 // one file of the upload grid: thumbnail (whole photo "extend" or "crop"),
 // remove, rotate, select, upload state; the thumbnail is the local file until
 // the server has it, then the server's display file
-export const UploadCard = ({ item, order, inNode, onToggle, onRemove, onRotate, onCrop, onRetry }) => {
+export const UploadCard = ({ item, order, inNode, ranging, onRange, onToggle, onRemove, onRotate, onCrop, onRetry }) => {
   const { t, lang } = useI18n();
   const { limits } = useBoot();
   const [brokenSrc, setBrokenSrc] = useState(null);
   const src = item.record ? `/files/uploads/${item.record.display}` : item.url;
   const busy = item.state === 'uploading' || item.state === 'processing';
-  const cls = 'wb-card' + (item.selected ? ' wb-card-selected' : '') + ' wb-card-' + item.state + (inNode ? ' wb-card-used' : '');
+  const cls = 'wb-card' + (item.selected ? ' wb-card-selected' : '') + ' wb-card-' + item.state + (inNode ? ' wb-card-used' : '') + (ranging ? ' wb-card-ranging' : '');
   const percent = Math.round(item.progress * 100);
   const expiry = item.record?.expiresAt && !inNode ? expiryNote(item.record.expiresAt) : null;
 
@@ -34,7 +35,19 @@ export const UploadCard = ({ item, order, inNode, onToggle, onRemove, onRotate, 
   const pan = item.selected ? panAxis(item.record, item.rotation) : { axis: null, sign: 1 };
   const drag = useRef(null);
   const down = e => {
-    if(!pan.axis || e.button > 0) return;
+    if(e.button > 0) return;
+
+    // no crop to pan: a mouse dragged over cards chooses the run from here to there
+    // (a finger holds the card instead, see `hold`)
+    if(!pan.axis) {
+      if(e.pointerType !== 'mouse' || !item.record || inNode) return;
+
+      const watch = watchMouseRange(e, { update: to => onRange.update(item.id, to), end: to => onRange.end(item.id, to) });
+
+      range.current = watch;
+
+      return;
+    }
 
     drag.current = { x: e.clientX, y: e.clientY, crop: item.crop, moved: false, size: e.currentTarget.getBoundingClientRect().width };
     e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -66,6 +79,7 @@ export const UploadCard = ({ item, order, inNode, onToggle, onRemove, onRotate, 
       setTimeout(() => (suppress.current = false), 0);
     }
   };
+  const range = useRef(null);
   const latestCrop = useRef(item.crop);
   const suppress = useRef(false);
 
@@ -96,12 +110,12 @@ export const UploadCard = ({ item, order, inNode, onToggle, onRemove, onRotate, 
   // the "add to node" button: opens an editor if none is open
   const add = () => requestAdd(uploadPayload(item.record, 'picture', item.crop));
   // a finger cannot HTML5-drag: holding the card picks it up instead
-  const hold = e => item.record && !inNode && watchHold(e, { image: src, onDrop: () => add() });
+  const hold = e => item.record && !inNode && watchHold(e, { image: src, onDrop: () => add(), range: { update: to => onRange.update(item.id, to), end: to => onRange.end(item.id, to) } });
 
   return html`
-    <li class=${cls + (pan.axis ? ' wb-card-pan-' + pan.axis : '')} onPointerDown=${hold}>
+    <li class=${cls + (pan.axis ? ' wb-card-pan-' + pan.axis : '')} data-card=${item.id} onPointerDown=${hold}>
       <div class="wb-card-box">
-        <button type="button" class="wb-card-face" aria-pressed=${item.selected ? 'true' : 'false'} disabled=${inNode} onClick=${() => !suppress.current && onToggle()} onPointerDown=${down} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up} onKeyDown=${key} title=${inNode ? t('upload.used') : pan.axis ? t('upload.crop.hint.' + pan.axis) : item.file.name}>
+        <button type="button" class="wb-card-face" aria-pressed=${item.selected ? 'true' : 'false'} disabled=${inNode} onClick=${() => (range.current?.dragged() ? (range.current = null) : !suppress.current && onToggle())} onPointerDown=${down} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up} onKeyDown=${key} title=${inNode ? t('upload.used') : pan.axis ? t('upload.crop.hint.' + pan.axis) : item.file.name}>
           ${brokenSrc === src
             ? html`<span class="wb-card-nopreview">${t('upload.no-preview')}</span>`
             : html`<img class="wb-card-image" style=${`transform: rotate(${item.rotation}deg); object-position: ${cropPosition(item.record, item.crop)}`} src=${src} alt=${item.file.name} draggable="false" onError=${() => setBrokenSrc(src)} />`}

@@ -33,7 +33,7 @@ export const photoFile = hash => {
   };
 
   return (
-    find(config.photosDir, n => n.startsWith(`${hash}.`) && !n.includes('.thumb.')) ||
+    find(config.photosDir, n => n.startsWith(`${hash}.`) && !n.includes('.thumb.') && !n.includes('.small.')) ||
     find(config.uploadsDir, n => n.startsWith(`${hash}.display.`)) ||
     find(config.uploadsDir, n => new RegExp(`^${hash}\\.(jpe?g|png|webp)$`).test(n))
   );

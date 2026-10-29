@@ -24,7 +24,7 @@ describe('galleryItems', () => {
     const items = galleryItems(node, 'fr');
 
     expect(items.map(i => i.id)).toEqual(['n4', 'n5:p1', 'n5:p2', 'n5:p3']);
-    expect(items[2]).toEqual({ id: 'n5:p2', title: 'Roses 2/3', url: '/files/photos/p2.thumb.jpg', full: '/files/photos/p2.png', href: '/fr/node/5' });
+    expect(items[2]).toEqual({ id: 'n5:p2', title: 'Roses 2/3', url: '/files/photos/p2.small.jpg', full: '/files/photos/p2.png', href: '/fr/node/5' });
     expect(galleryItems(node, 'fr')).toEqual(items); // same order every time
   });
 

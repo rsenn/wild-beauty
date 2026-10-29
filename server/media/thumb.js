@@ -59,3 +59,23 @@ export async function thumbnail(src, dest, { step, bg, size = SIZE }) {
 
   return { ok: true, quality };
 }
+
+// The picture a gallery hangs for one photo of a sequence: `<hash>.small.jpg`, the
+// whole photo (its proportions kept) at most `size` px on the long side, made
+// from the baked photo `src` the first time it is asked for. -> { ok } | { error }
+export async function smallImage(src, dest, { size = 640 } = {}) {
+  if(!imagemagick.convert) return { error: 'small: ImageMagick not installed' };
+
+  const tmp = `${dest}.tmp.jpg`;
+  const { code, stderr } = await run([...imagemagick.convert, ...LIMITS, `${src}[0]`, '-auto-orient', '-resize', `${size}x${size}>`, '-background', '#ffffff', '-alpha', 'remove', '-alpha', 'off', '-sampling-factor', '4:2:0', '-strip', '-quality', '82', tmp], { timeout: 60000 });
+
+  if(code !== 0) {
+    rmSync(tmp, { force: true });
+
+    return { error: `small: convert: ${firstLine(stderr)}` };
+  }
+
+  renameSync(tmp, dest);
+
+  return { ok: true };
+}

@@ -70,3 +70,27 @@ describe('cutRoom and trimCorridor', () => {
     expect(trimCorridor([[5, 5], [5, -5]], [])).toEqual([[5, 5], [5, -5]]);
   });
 });
+
+describe('the guided order goes to the right', () => {
+  test('neighbouring pictures on a wall follow each other to the right of a visitor facing the wall', async () => {
+    const { autoPlan } = await import('../client/gallery/autoplan.js');
+
+    for(const plan of [autoPlan(12), planFromDoc(node9.doc)]) {
+      const all = slots(plan);
+      let pairs = 0;
+
+      for(let i = 0; i + 1 < all.length; i++) {
+        const [a, b] = [all[i], all[i + 1]];
+
+        if(a.nx !== b.nx || a.ny !== b.ny) continue;
+
+        const right = [-a.ny, a.nx]; // right of someone looking along -n (the picture faces +n)
+
+        expect((b.x - a.x) * right[0] + (b.y - a.y) * right[1]).toBeGreaterThan(0);
+        pairs++;
+      }
+
+      expect(pairs).toBeGreaterThan(5);
+    }
+  });
+});

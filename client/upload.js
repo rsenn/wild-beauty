@@ -39,26 +39,52 @@ export function sendFile(file, { onProgress, pos }) {
   return { done, abort: () => xhr.abort() };
 }
 
-// `onChange(id, patch)` reports { state, progress, record, error }; states:
+// A dropped connection is common on a phone (the signal fades, the browser pauses
+// the page): the file is sent again, up to RETRIES times, after a growing pause. A
+// file the server already stored is recognised by its hash, so a retry of an upload
+// that only lost its reply costs nothing. After a drop only one file goes at a time,
+// until one has got through.
+export const RETRIES = 4;
+export const pause = attempt => 1500 * attempt * attempt;
+
+// `onChange(id, patch)` reports { state, progress, record, error, attempt }; states:
 // queued, uploading, processing (bytes sent, server still working), done, failed
-export function createQueue({ concurrency = 3, onChange }) {
+// `send` and `wait` are injectable for the tests.
+export function createQueue({ concurrency = 3, onChange, send = sendFile, wait = (ms, fn) => setTimeout(fn, ms) }) {
   const waiting = [];
   const running = new Map();
+  const retrying = new Map(); // id -> timer, a file waiting for its next attempt
+  let limit = concurrency;
 
   const pump = () => {
-    while(running.size < concurrency && waiting.length) {
-      const { id, file, pos } = waiting.shift();
-      const task = sendFile(file, {
+    while(running.size < limit && waiting.length) {
+      const { id, file, pos, attempt = 0 } = waiting.shift();
+      const task = send(file, {
         pos,
         onProgress: progress => onChange(id, { state: progress >= 1 ? 'processing' : 'uploading', progress }),
       });
 
       running.set(id, task);
-      onChange(id, { state: 'uploading', progress: 0, error: null });
+      onChange(id, { state: 'uploading', progress: 0, error: null, attempt });
 
       task.done.then(
-        record => onChange(id, { state: 'done', progress: 1, record }),
-        error => error.code !== 'aborted' && onChange(id, { state: 'failed', error: error.code }),
+        record => {
+          limit = concurrency;
+          onChange(id, { state: 'done', progress: 1, record });
+        },
+        error => {
+          if(error.code === 'aborted') return;
+
+          if(error.code === 'network' && attempt < RETRIES) {
+            limit = 1;
+            onChange(id, { state: 'queued', progress: 0, error: null, attempt: attempt + 1 });
+            retrying.set(id, wait(pause(attempt + 1), () => retrying.has(id) && (retrying.delete(id), waiting.push({ id, file, pos, attempt: attempt + 1 }), pump())));
+
+            return;
+          }
+
+          onChange(id, { state: 'failed', error: error.code });
+        },
       ).finally(() => {
         running.delete(id);
         pump();
@@ -77,6 +103,8 @@ export function createQueue({ concurrency = 3, onChange }) {
       const at = waiting.findIndex(w => w.id === id);
 
       if(at >= 0) waiting.splice(at, 1);
+
+      if(retrying.has(id)) (clearTimeout(retrying.get(id)), retrying.delete(id));
 
       running.get(id)?.abort();
     },

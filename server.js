@@ -289,7 +289,7 @@ async function logged(req) {
   return res;
 }
 
-const server = Bun.serve({ port, hostname: host, maxRequestBodySize: config.maxBytes, fetch: dev ? logged : route });
+const server = Bun.serve({ port, hostname: host, maxRequestBodySize: config.maxBytes, idleTimeout: 180, fetch: dev ? logged : route });
 
 peer.server = server;
 

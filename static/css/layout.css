@@ -251,12 +251,15 @@ body {
   background: var(--wb-card-ground);
 }
 
-/* a picked card: a crimson and cream dashed border that slowly marches */
-.wb-card-selected > .wb-card-box {
+/* a picked card: a crimson and cream dashed border that slowly marches; a card a
+   drag is over right now has it too */
+.wb-card-selected > .wb-card-box,
+.wb-card-ranging > .wb-card-box {
   box-shadow: var(--wb-shadow-select);
 }
 
-.wb-card-selected > .wb-card-box::after {
+.wb-card-selected > .wb-card-box::after,
+.wb-card-ranging > .wb-card-box::after {
   --pick-a: var(--wb-pick);
   --pick-b: var(--wb-pick-ground);
   content: '';

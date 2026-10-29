@@ -22,6 +22,7 @@
   "upload.geotag": "Tag the photo with my location",
   "upload.files.one": "{count} image",
   "upload.files.other": "{count} images",
+  "upload.select.hint": "Tip: drag over several pictures to choose them all (on a phone: press and hold one, then drag).",
   "upload.remove": "Remove",
   "upload.rotate": "Rotate",
   "upload.no-preview": "No preview",
