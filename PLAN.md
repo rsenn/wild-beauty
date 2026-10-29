@@ -173,6 +173,11 @@ what is still needed moves into `layout.css`, the rest is dead (DESIGN.md H1).
 and response, every external command and every file written or removed
 (`server/log.js`); without it the server prints only its start line.
 
+`WB_GEO_API` sets the base URL of the federal geoportal that names the municipality of a
+place (default `https://api3.geo.admin.ch`, `GRAPH.md` S1.5); `WB_GEO_API=off` asks nobody
+and the offline gazetteer and cell coordinates name places instead. It is also off in `bun test`.
+`WB_DATA` and `WB_UPLOADS` move the data and upload directories (`server/config.js`).
+
 Options (`server/cli.js`, `bun server.js --help`): `--port`/`-p`, `--host`/`-H` (env `PORT`,
 `HOST`), `--dev`, `--no-keys`. On a terminal the process supervises the server as a child:
 Ctrl+R (or `rs` + Enter) restarts it, Ctrl+C quits; without a terminal (tests, pipes,
@@ -308,6 +313,11 @@ node_links(id INTEGER PRIMARY KEY, from_id INT, to_id INT, label TEXT NOT NULL,
            UNIQUE(from_id, to_id, label));     -- created now, unused by the PoC
 node_locks(node_id INTEGER PRIMARY KEY REFERENCES nodes, holder TEXT NOT NULL,
            user_id INT, acquired_at INT, expires_at INT);   -- editor lock, EDITOR.md S2.8
+place_suggestions(node_id INT REFERENCES nodes ON DELETE CASCADE, lat REAL, lon REAL,
+                  PRIMARY KEY(node_id, lat, lon));  -- migration 2: rounded (~1 km) position of a saved
+                                                    -- node's photo, until linked or dismissed (GRAPH.md S1.5)
+place_names(lat REAL, lon REAL, name TEXT, PRIMARY KEY(lat, lon));  -- migration 3: municipality of a cell,
+                                                    -- NULL outside Switzerland (GRAPH.md S1.5)
 CREATE INDEX node_links_from ON node_links(from_id, sort);
 CREATE INDEX node_links_to   ON node_links(to_id);
 ```

@@ -825,7 +825,7 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 - [x] **E72 i18n**: all editor keys in `en`, `de`, `fr`; parity check passes. Done when `check-locales` is green.
 - [x] **E73 keyboard and a11y pass**: every command reachable by keyboard, focus order, labels, `role=img`. PageDown/PageUp select steps (or pick the clip mask), `\` cycles corners, arrows move selection/corner/shape cursor, Space places a corner, Enter applies; a live region announces changes, the Keys popover lists them, focus returns to the opener on close. Pointer-only by design: the freehand pen and dragging curve handles.
       Done when the editor is usable without a pointer.
-- [ ] **E74 device checklist**: touch emulation, real phone pressure and multitouch, 360 px width, RTL.
+- [ ] **E74 device checklist**: touch emulation, real phone pressure and multitouch, 360 px width, RTL, and the real geolocation permission prompt behind *Tag the photo with my location* (E139; tested only with a stubbed `navigator.geolocation`).
       Done when each item is ticked in a short notes file.
 
 ### Phase I - 3D gallery additions (C+S, after the PoC; `Y`)

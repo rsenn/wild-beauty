@@ -388,6 +388,21 @@ the lock lives in E31/E67.
       profile in three taps.
 - [~] **12.6a Seed** (2026-10-29, `GRAPH.md` S1.4): `tools/seed.js` makes `overall-root`, `art exhibition`, `fleamarket` and `places` with sample children; idempotent (found by title under the parent). `user-profiles` and `featured` stay with 12.6.
 - [ ] **12.6c Places** (`GRAPH.md` S1.5): `at` edges owner-only until published (migration 4, per-edge `visibility`, with accounts; migration 2 holds `place_suggestions`, 3 `place_names`); editor side is EDITOR.md E136-E140.
+- [ ] **12.6d Venues from KGS** (`GRAPH.md` S1.6): suggest the cultural objects near a place (KGS
+      `identify`, with a tolerance in pixels, not metres) as candidates for `art exhibition`
+      galleries; check the licence ("proprietary" in STAC) and whether `kgs_kategorie` can pick out
+      museums, archives and libraries. Done when a place node can list its nearby venues.
+- [ ] **12.6e Heritage and names** (`GRAPH.md` S1.6): find the working layer name of ISOS (the STAC id
+      returns nothing from `identify`); try `SearchServer` with `origins=gazetteer` for named venues;
+      evaluate the opendata.swiss museum sets, the MySwitzerland API (check it still exists) and
+      swisscollections. Done when each is marked usable or dropped in `GRAPH.md` S1.6.
+- [ ] **12.6f Places housekeeping**: (a) places made before the municipality lookup are titled `Zürich`,
+      not `Zürich (ZH)`: rename them (a one-off script, or match both on lookup); (b) a position near
+      a cell edge can split one town into two places: snap to an existing place within ~1 km before
+      creating one; (c) nodes saved before migration 2 have no suggestions (only a new upload brings
+      one); (d) the chip's *Not now* (E137) is per browser and does not touch the server rows;
+      (e) a row stays in `place_suggestions` until answered or its node goes. Each needs a decision
+      before it is worth building.
 - [ ] **12.6b Node lock**: `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
       `DELETE` (release), expiry after ~60 s without heartbeat, owner may break;
       the editor (`EDITOR.md` E67) takes the lock on open, shows "locked by <name>" read-only when

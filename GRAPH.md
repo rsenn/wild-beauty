@@ -195,6 +195,31 @@ position.
    come back.
 
 
+### 1.6 Swiss data sources (researched 2026-10-29)
+
+What the federal geoportal and the open-data catalogues offer for venues, culture and
+places. **Verified** = called live on 2026-10-29; **unverified** = from documentation or
+search results only. All federal geodata is open government data (free, attribution);
+the KGS and ISOS collections are marked "proprietary" in STAC, so read their terms
+before storing or republishing (ISOS plans, texts and photos are (c) BAK).
+
+| Source | What it gives | Status |
+|---|---|---|
+| `api3.geo.admin.ch/rest/services/all/MapServer/identify` | features of a layer at a point; needs `mapExtent` and `imageDisplay`; `tolerance` is in **pixels**; layers `all:<id>` | verified |
+| layer `ch.swisstopo.swissboundaries3d-gemeinde-flaeche.fill` | municipality, canton, BFS number; also returns boundaries of earlier years, keep `is_current_jahr: true`; ambiguous names already carry the canton (`Buchs (SG)`) | verified, **used** (S1.5) |
+| layer `ch.babs.kulturgueter` (KGS inventory) | about 3,400 cultural objects of national importance (buildings, museum, archive and library collections): `kgs_nr`, `beschreibung`, `gemeinde`, `kanton`, `kgs_kategorie`, `x`, `y`; the map shows only the A objects | verified, not used |
+| `api/SearchServer?type=locations&origins=gazetteer` | swissNAMES3D names (Kunsthaus Zürich, Aargauer Kunsthaus), typed coarsely ("Leisure park"); the default origins return only municipalities and cantons | verified, not used |
+| `api/MapServer?searchText=` | layer catalogue by keyword | verified |
+| `height?easting=&northing=&sr=2056` | elevation in metres | verified, not used |
+| layer `ch.bak.bundesinventar-schuetzenswerte-ortsbilder` (ISOS) | federal inventory of heritage sites with photos | listed in STAC; an `identify` on this id returned nothing, the working layer name is **unknown** |
+| `data.geo.admin.ch` STAC API | bulk downloads: swissNAMES3D (400k+ names), swissBOUNDARIES3D | unverified |
+| opendata.swiss (CKAN) | museum statistics (BFS), museums and sights of the Zürich region (Zürich Tourismus), Geneva museums, event calendar of the Basel museums (RSS) | unverified |
+| MySwitzerland open data API | about 4,000 destinations and 5,000 experiences, up to 16 languages | unverified, source from 2020 |
+| swisscollections, Memobase (`api.memobase.ch`) | library and archive metadata, audiovisual archives | unverified |
+
+Fair use: one mirror's FAQ gives 20 requests a minute averaged (secondary source). No API
+key. The tasks that build on this are TODO.md 12.6d-12.6f.
+
 ---
 
 ## 2. Graph renderers
