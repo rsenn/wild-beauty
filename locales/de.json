@@ -349,5 +349,8 @@
   "graph.group": "Gruppieren",
   "graph.ungroup": "Auflösen",
   "graph.group.title": "Gruppe",
-  "graph.done.group": "Gruppe aus {n} Werken erstellt"
+  "graph.done.group": "Gruppe aus {n} Werken erstellt",
+  "editor.layout.gap": "Abstand",
+  "editor.layout.cols": "Spalten",
+  "editor.layout.cols.auto": "Automatisch"
 }

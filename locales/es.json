@@ -349,5 +349,8 @@
   "graph.group": "Agrupar",
   "graph.ungroup": "Deshacer grupo",
   "graph.group.title": "Grupo",
-  "graph.done.group": "Grupo de {n} piezas creado"
+  "graph.done.group": "Grupo de {n} piezas creado",
+  "editor.layout.gap": "Separación",
+  "editor.layout.cols": "Columnas",
+  "editor.layout.cols.auto": "Automático"
 }

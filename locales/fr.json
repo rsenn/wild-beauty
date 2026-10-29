@@ -349,5 +349,8 @@
   "graph.group": "Grouper",
   "graph.ungroup": "Dissoudre",
   "graph.group.title": "Groupe",
-  "graph.done.group": "Groupe de {n} pièces créé"
+  "graph.done.group": "Groupe de {n} pièces créé",
+  "editor.layout.gap": "Espacement",
+  "editor.layout.cols": "Colonnes",
+  "editor.layout.cols.auto": "Automatique"
 }

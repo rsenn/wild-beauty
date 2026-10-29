@@ -1587,15 +1587,23 @@ body {
   cursor: grab;
 }
 
+/* the selection is drawn by the frame, not by the browser's focus ring */
+.wb-graph-node:focus,
+.wb-graph-node:focus-visible {
+  outline: none;
+}
+
 .wb-graph-frame {
   fill: none;
   stroke: none;
-  stroke-width: 4;
+  stroke-width: 1.5;
 }
 
+/* the active node: one thin stippled line, ink and transparent */
 .wb-graph-node.wb-selected .wb-graph-frame,
 .wb-graph-node.wb-linking .wb-graph-frame {
-  stroke: var(--wb-accent);
+  stroke: var(--wb-ink);
+  stroke-dasharray: 3 3;
 }
 
 .wb-graph-title {
@@ -1657,12 +1665,15 @@ body {
 
 /* several nodes at once: the group, its target, the drop preview */
 .wb-graph-node.wb-multi .wb-graph-frame {
-  stroke-width: 5;
+  stroke: var(--wb-accent);
+  stroke-width: 2;
+  stroke-dasharray: none;
 }
 
 .wb-graph-node.wb-target .wb-graph-frame {
   stroke: var(--wb-select);
-  stroke-width: 7;
+  stroke-width: 3;
+  stroke-dasharray: none;
 }
 
 .wb-graph-preview {

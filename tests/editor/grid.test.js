@@ -1,6 +1,7 @@
 // bun test: client/editor/grid.js
 import { describe, expect, test } from 'bun:test';
-import { GAP, gridCells, gridLayout } from '../../client/editor/grid.js';
+import { GAP, gridCells, gridLayout, gridOptions } from '../../client/editor/grid.js';
+import { setLayout, validate } from '../../client/editor/model.js';
 import { apply } from '../../client/editor/matrix.js';
 
 // the rectangle a photo of the given aspect covers on the stage
@@ -77,5 +78,29 @@ describe('gridLayout', () => {
     const right = last[1].x + last[1].size;
 
     expect(left + right).toBeCloseTo(1000, 9);
+  });
+});
+
+describe('columns and spacing 0', () => {
+  test('cols fixes the column count (at most n), gap 0 packs the cells', () => {
+    const cells = gridCells(5, { gap: 0, margin: 0, cols: 2 });
+
+    expect(new Set(cells.map(c => c.x)).size).toBeLessThanOrEqual(3); // two columns, the last row centred
+    expect(cells.filter(c => c.y === cells[0].y).length).toBe(2);
+    expect(cells[0].size).toBeCloseTo(1000 / 3, 3); // three rows decide
+    expect(gridCells(2, { cols: 9 }).length).toBe(2);
+    expect(gridOptions({ cols: 3, gap: 0 })).toMatchObject({ gap: 0, margin: 0, cols: 3 });
+    expect(gridOptions({ cols: 0 }).cols).toBeUndefined();
+  });
+
+  test('setLayout takes cols, drops it again with null, refuses nonsense', () => {
+    const doc = { v: 1, mode: 'grid', pages: [{ id: 'p', steps: [] }], style: {} };
+    const a = setLayout(doc, { cols: 3, gap: 0 });
+
+    expect(a.layout).toEqual({ cols: 3, gap: 0 });
+    expect(setLayout(a, { cols: null }).layout).toEqual({ gap: 0 });
+    expect(setLayout(a, { cols: 99 })).toBe(a);
+    expect(setLayout(a, { cols: 1.5 })).toBe(a);
+    expect(validate(a).filter(e => e.code === 'bad_layout')).toEqual([]);
   });
 });

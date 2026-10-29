@@ -6,8 +6,27 @@ import { REST, bounds, seed, settled, step } from '../graph/layout.js';
 import { Layout } from './Layout.js';
 
 const SIZE = 84;
+const MAX_FIT = 1.8; // the fitted view never enlarges the nodes beyond this (150 px)
+const GAP = 1 / 3; // the gap between two nodes is at least this share of a node
+const SPREAD = [0.25, 2.5]; // links of 50 to 500 units against nodes of 84: enlarged up to four times against the links, shrunk to dots on long strings no further
 const DASH = { child: null, ref: '10 6', sells: '2 6' };
 const COMPACT = 0.3; // a carried group is gathered to this share of its spread
+
+// the node size the visitor chose is kept in this browser
+const KEY = 'wb-graph-spread';
+
+function storedSpread() {
+  try {
+    const v = Number(localStorage.getItem(KEY));
+
+    return v >= SPREAD[0] && v <= SPREAD[1] ? v : 1;
+  } catch {
+    return 1;
+  }
+}
+
+// a place on screen -> the stored place, in layout units (the page's `spread` undone), 1 decimal
+const unitOf = (v, spread) => Math.round((v / spread) * 10) / 10;
 
 // POST the edits, take the graph the server answers with
 async function send(ops) {
@@ -45,7 +64,7 @@ export const GraphPage = () => {
   const [graph, setGraph] = useState(boot.graph);
   const [, redraw] = useState(0);
   const [view, setView] = useState({ x: 0, y: 0, k: 1 });
-  const [nodeScale, setNodeScale] = useState(1);
+  const [spread, setSpread] = useState(storedSpread); // layout units -> screen: the links' length, shrunk when the nodes are enlarged
   const [selected, setSelected] = useState(null);
   const [multi, setMulti] = useState([]);
   const [selecting, setSelecting] = useState(false);
@@ -65,15 +84,16 @@ export const GraphPage = () => {
   const edges = useMemo(() => graph.edges, [graph]);
   const latest = useRef({});
 
-  latest.current = { edges, view, nodeScale, multi, selecting, graph, linking };
+  latest.current = { edges, view, spread, multi, selecting, graph, linking };
 
   // a new graph from the server: keep the places of the nodes already on screen
   useEffect(() => {
     const old = bodies.current;
 
     bodies.current = seed(
-      graph.nodes.map(n => (old.has(n.id) ? { ...n, x: old.get(n.id).x, y: old.get(n.id).y } : n)),
+      graph.nodes.map(n => (old.has(n.id) ? { ...n, x: old.get(n.id).x, y: old.get(n.id).y } : { ...n, x: n.x * latest.current.spread, y: n.y * latest.current.spread })),
       graph.edges,
+      REST * latest.current.spread,
     );
 
     // a node easing to its place keeps doing so across the new graph
@@ -92,11 +112,23 @@ export const GraphPage = () => {
         const b = bodies.current.get(id);
         const a = Math.PI / 2 + (ids.length === 1 ? 0 : (i / (ids.length - 1) - 0.5) * Math.min(Math.PI * 1.4, Math.max(0.8, ids.length * 0.6)));
 
-        if(b && mid) b.to = { x: mid.x + Math.cos(a) * REST, y: mid.y + Math.sin(a) * REST };
+        if(b && mid) b.to = { x: mid.x + Math.cos(a) * REST * latest.current.spread, y: mid.y + Math.sin(a) * REST * latest.current.spread };
       });
     }
 
-    alpha.current = 1;
+    // the first look: settle the layout before the first frame and fit it, so the
+    // page opens on the finished picture, not on a graph still unfolding
+    if(!old.size && bodies.current.size > 1) {
+      const rest = REST * latest.current.spread;
+      const rounds = bodies.current.size > 400 ? 60 : 400;
+
+      for(let i = 0, a = 1; i < rounds; i++, a = Math.max(0.05, a * 0.985)) step(bodies.current, edges, a, rest);
+
+      fit(true);
+      redraw(n => n + 1);
+    }
+
+    alpha.current = old.size ? 1 : 0.05;
     ticks.current = 0;
     wake();
 
@@ -131,7 +163,7 @@ export const GraphPage = () => {
         } else tweening = true;
       }
 
-      const fastest = step(bodies.current, latest.current.edges, alpha.current);
+      const fastest = step(bodies.current, latest.current.edges, alpha.current, REST * latest.current.spread);
 
       alpha.current = Math.max(0.05, alpha.current * 0.985);
       ticks.current++;
@@ -140,20 +172,56 @@ export const GraphPage = () => {
       const busy = !(settled(fastest) && ticks.current > 60) || tweening || carrying.current;
 
       // until the visitor pans or zooms, the view follows the layout
-      if(!touched.current && (ticks.current % 20 === 0 || !busy)) fit();
+      if(!touched.current && (ticks.current % 20 === 0 || !busy)) fit(!busy);
       if(busy) frame.current = requestAnimationFrame(tick);
     };
 
     frame.current = requestAnimationFrame(tick);
   };
 
-  const fit = () => {
+  // The view may not get too sparse: the nodes cover at least a twenty-fifth of
+  // it, at least 32 px wide however many there are, at most 110 px for a few
+  const minK = () => {
+    const el = svg.current;
+    const area = el ? el.clientWidth * el.clientHeight : 0;
+    const px = Math.min(110, Math.max(32, Math.sqrt((0.04 * area) / Math.max(1, bodies.current.size))));
+
+    return px / SIZE;
+  };
+
+  // Fit the box around the nodes to the view. `final` (the layout has rested)
+  // first keeps the nodes apart: the gap between the closest two is at least a
+  // third of a node, so the nodes are as big as the layout allows, not smaller
+  const fit = (final = false) => {
     const el = svg.current;
 
     if(!el) return;
 
+    const list = [...bodies.current.values()];
+
+    if(final && list.length > 1) {
+      let close = Infinity;
+
+      for(let i = 0; i < list.length; i++) for(let j = i + 1; j < list.length; j++) close = Math.min(close, Math.hypot(list[i].x - list[j].x, list[i].y - list[j].y));
+
+      const sp = latest.current.spread;
+      const next = Math.min(SPREAD[1], Math.max(sp, (sp * SIZE * (1 + GAP)) / Math.max(close, 1)));
+
+      if(next !== sp) {
+        for(const b of list) {
+          b.x *= next / sp;
+          b.y *= next / sp;
+
+          if(b.to) b.to = { x: (b.to.x * next) / sp, y: (b.to.y * next) / sp };
+        }
+
+        latest.current.spread = next;
+        setSpread(next);
+      }
+    }
+
     const box = bounds(bodies.current);
-    const k = Math.min(el.clientWidth / box.w, el.clientHeight / box.h, 1.5);
+    const k = Math.min(el.clientWidth / box.w, el.clientHeight / box.h, MAX_FIT);
 
     setView({ k, x: (el.clientWidth - box.w * k) / 2 - box.x * k, y: (el.clientHeight - box.h * k) / 2 - box.y * k });
   };
@@ -170,6 +238,8 @@ export const GraphPage = () => {
 
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
+
+  const unit = v => unitOf(v, latest.current.spread);
 
   const keep = next => {
     if(!next) return setError(true);
@@ -212,7 +282,7 @@ export const GraphPage = () => {
 
   // the node under the carried group's pointer that is not in the group
   const targetAt = (p, ids) => {
-    const reach = (SIZE * latest.current.nodeScale) / 2 + 6;
+    const reach = SIZE / 2 + 6;
     let best = null;
     let far = reach;
 
@@ -237,7 +307,7 @@ export const GraphPage = () => {
 
     if(g.pinch) {
       const [a, b] = [...pointers.current.values()];
-      const k = Math.min(4, Math.max(0.1, (g.k * Math.hypot(a.x - b.x, a.y - b.y)) / g.d));
+      const k = Math.min(4, Math.max(minK(), (g.k * Math.hypot(a.x - b.x, a.y - b.y)) / g.d));
 
       setView(v => ({ ...v, k }));
     } else if(g.carry) {
@@ -298,7 +368,7 @@ export const GraphPage = () => {
       const a = Math.PI / 2 + (mine.length === 1 ? 0 : (i / (mine.length - 1) - 0.5) * span);
 
       b.hold = false;
-      b.to = { x: target.x + Math.cos(a) * REST, y: target.y + Math.sin(a) * REST };
+      b.to = { x: target.x + Math.cos(a) * REST * latest.current.spread, y: target.y + Math.sin(a) * REST * latest.current.spread };
     });
     alpha.current = 0.6;
     wake();
@@ -315,7 +385,7 @@ export const GraphPage = () => {
   // dropped on empty space: line them up in a row there, pinned
   const lineUp = async (g, p) => {
     const mine = inOrder(g.ids);
-    const gap = SIZE * latest.current.nodeScale * 1.25;
+    const gap = SIZE * 1.25;
 
     mine.forEach((b, i) => {
       b.hold = false;
@@ -324,11 +394,11 @@ export const GraphPage = () => {
     });
     wake();
 
-    const next = await send(mine.map((b, i) => ({ op: 'move', id: b.id, x: Math.round(p.x + (i - (mine.length - 1) / 2) * gap), y: Math.round(p.y), pinned: true })));
+    const next = await send(mine.map((b, i) => ({ op: 'move', id: b.id, x: unit(p.x + (i - (mine.length - 1) / 2) * gap), y: unit(p.y), pinned: true })));
 
     keep(next);
 
-    if(next) setNote({ text: t('graph.done.line', { n: mine.length }), undo: g.before.map(o => ({ op: 'move', id: o.id, x: Math.round(o.x), y: Math.round(o.y), pinned: o.pinned })), tween: g.before });
+    if(next) setNote({ text: t('graph.done.line', { n: mine.length }), undo: g.before.map(o => ({ op: 'move', id: o.id, x: unit(o.x), y: unit(o.y), pinned: o.pinned })), tween: g.before });
   };
 
   const up = async e => {
@@ -367,7 +437,7 @@ export const GraphPage = () => {
 
       if(g.moved) {
         body.pinned = true;
-        keep(await send([{ op: 'move', id: g.node, x: Math.round(body.x), y: Math.round(body.y), pinned: true }]));
+        keep(await send([{ op: 'move', id: g.node, x: unit(body.x), y: unit(body.y), pinned: true }]));
       } else tapNode(g.node, g.toggle);
     } else if(g.box) {
       setMarquee(null);
@@ -419,8 +489,8 @@ export const GraphPage = () => {
 
     if(mine.length < 2) return;
 
-    const x = Math.round(mine.reduce((n, b) => n + b.x, 0) / mine.length);
-    const y = Math.round(mine.reduce((n, b) => n + b.y, 0) / mine.length);
+    const x = unit(mine.reduce((n, b) => n + b.x, 0) / mine.length);
+    const y = unit(mine.reduce((n, b) => n + b.y, 0) / mine.length);
     const known = new Set(graph.nodes.map(n => n.id));
     const next = await send([{ op: 'group', title: t('graph.group.title'), ids: mine.map(b => b.id), x, y }]);
     const made = next?.nodes.find(n => !known.has(n.id));
@@ -465,8 +535,36 @@ export const GraphPage = () => {
   const wheel = e => {
     e.preventDefault();
 
-    // over a node the wheel resizes all the nodes, the places and the lines stay
-    if(e.target.closest?.('.wb-graph-node')) return setNodeScale(v => Math.min(5, Math.max(0.4, v * Math.exp(-e.deltaY * 0.0015))));
+    // over a node the wheel enlarges the nodes: the view zooms in and the layout
+    // shrinks by the same factor, so the links keep their length on screen
+    if(e.target.closest?.('.wb-graph-node')) {
+      const { view: v, spread: sp } = latest.current;
+      const k = Math.min(4, Math.max(minK(), v.k * Math.exp(-e.deltaY * 0.0015)));
+      let f = k / v.k;
+      const next = Math.min(SPREAD[1], Math.max(SPREAD[0], sp / f));
+
+      f = sp / next; // what the clamp left of the step
+
+      if(f === 1) return;
+
+      for(const b of bodies.current.values()) {
+        b.x /= f;
+        b.y /= f;
+
+        if(b.to) b.to = { x: b.to.x / f, y: b.to.y / f };
+      }
+
+      latest.current.spread = next; // the next wheel event may come before the next render
+      latest.current.view = { ...v, k: v.k * f };
+      setSpread(next);
+
+      try {
+        localStorage.setItem(KEY, String(next));
+      } catch {}
+      setView({ ...v, k: v.k * f });
+
+      return;
+    }
 
     touched.current = true;
 
@@ -474,7 +572,7 @@ export const GraphPage = () => {
     const f = Math.exp(-e.deltaY * 0.0015);
 
     setView(v => {
-      const k = Math.min(4, Math.max(0.1, v.k * f));
+      const k = Math.min(4, Math.max(minK(), v.k * f));
       const px = e.clientX - r.left;
       const py = e.clientY - r.top;
 
@@ -510,7 +608,6 @@ export const GraphPage = () => {
     : graph.nodes.length
     ? t('graph.hint')
     : t('graph.empty');
-  const scale = nodeScale;
   const target = carry?.over && bodies.current.get(carry.over);
 
   return html`
@@ -524,7 +621,7 @@ export const GraphPage = () => {
         <button type="button" class="wb-editor-chip" disabled=${!picked || !picked.pinned} onClick=${async () => keep(await send([{ op: 'pin', id: picked.id, pinned: false }]))}>${t('graph.unpin')}</button>
         <a class=${`wb-editor-chip wb-graph-open${picked ? '' : ' wb-disabled'}`} href=${picked ? `/${lang}/node/${picked.id}` : null} aria-disabled=${picked ? null : 'true'}>${t('graph.open')}</a>
         <button type="button" class="wb-editor-chip" disabled=${!note?.undo} onClick=${undo}>${t('graph.undo')}</button>
-        <button type="button" class="wb-editor-chip" onClick=${() => ((touched.current = false), fit())}>${t('graph.fit')}</button>
+        <button type="button" class="wb-editor-chip" onClick=${() => ((touched.current = false), fit(true))}>${t('graph.fit')}</button>
         <span class=${`wb-graph-hint${carry ? ' wb-graph-hint-live' : ''}`} role="status">${hint}</span>
       </div>
       <svg ref=${svg} class="wb-graph" role="group" aria-label=${t('graph.label')} onPointerDown=${e => down(e, null)} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up}>
@@ -556,7 +653,7 @@ export const GraphPage = () => {
 
             const cls = `wb-graph-node${selected?.node === n.id ? ' wb-selected' : ''}${multi.includes(n.id) ? ' wb-selected wb-multi' : ''}${linking === n.id ? ' wb-linking' : ''}${carry?.over === n.id ? ' wb-target' : ''}${n.pinned ? ' wb-pinned' : ''}`;
 
-            return html`<g key=${n.id} data-id=${n.id} class=${cls} transform=${`translate(${b.x} ${b.y}) scale(${scale}) translate(${-SIZE / 2} ${-SIZE / 2})`} onPointerDown=${e => (e.stopPropagation(), down(e, n.id))} role="button" tabindex="0" aria-label=${label(n)} aria-pressed=${multi.includes(n.id) ? 'true' : null}>
+            return html`<g key=${n.id} data-id=${n.id} class=${cls} transform=${`translate(${b.x} ${b.y}) translate(${-SIZE / 2} ${-SIZE / 2})`} onPointerDown=${e => (e.stopPropagation(), down(e, n.id))} role="button" tabindex="0" aria-label=${label(n)} aria-pressed=${multi.includes(n.id) ? 'true' : null}>
               <clipPath id=${`wb-g-${n.id}`}><rect width=${SIZE} height=${SIZE} rx="14" /></clipPath>
               <rect class="wb-graph-ground" width=${SIZE} height=${SIZE} rx="14" fill=${n.color ?? '#e8e2d4'} filter="url(#wb-g-shadow)" />
               ${n.kind === 'list'

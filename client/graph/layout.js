@@ -13,7 +13,7 @@ const noise = (id, k) => {
 };
 
 // nodes: [{ id, x, y, pinned }], edges: [{ from, to }] -> Map id -> { id, x, y, vx, vy, pinned, fixed }
-export function seed(nodes, edges) {
+export function seed(nodes, edges, rest = REST) {
   const bodies = new Map();
 
   for(const n of nodes) {
@@ -30,11 +30,11 @@ export function seed(nodes, edges) {
     const friend = edges.map(e => (e.from === b.id ? e.to : e.to === b.id ? e.from : null)).map(id => bodies.get(id)).find(f => f && Number.isFinite(f.x));
 
     if(friend) {
-      b.x = friend.x + (noise(b.id, 1) - 0.5) * REST;
-      b.y = friend.y + (noise(b.id, 2) - 0.5) * REST;
+      b.x = friend.x + (noise(b.id, 1) - 0.5) * rest;
+      b.y = friend.y + (noise(b.id, 2) - 0.5) * rest;
     } else {
       const angle = ring++ * 2.399963 + noise(b.id, 3);
-      const radius = REST * 0.6 * Math.sqrt(ring);
+      const radius = rest * 0.6 * Math.sqrt(ring);
 
       b.x = Math.cos(angle) * radius;
       b.y = Math.sin(angle) * radius;
@@ -44,8 +44,11 @@ export function seed(nodes, edges) {
   return bodies;
 }
 
-// one tick; `alpha` (1 -> 0) scales the forces -> the largest speed, to test settled
-export function step(bodies, edges, alpha = 1) {
+// one tick; `alpha` (1 -> 0) scales the forces, `rest` is the length a link
+// likes (the page shrinks it when the nodes are enlarged) -> the largest speed,
+// to test settled
+export function step(bodies, edges, alpha = 1, rest = REST) {
+  const unit = rest / REST;
   const list = [...bodies.values()];
 
   for(let i = 0; i < list.length; i++) {
@@ -63,10 +66,10 @@ export function step(bodies, edges, alpha = 1) {
         d2 = 1;
       }
 
-      if(d2 > 640000) continue;
+      if(d2 > 640000 * unit * unit) continue;
 
       const d = Math.sqrt(d2);
-      const push = (REST * REST * 0.9) / d2;
+      const push = (rest * rest * 0.9) / d2;
 
       a.vx += (dx / d) * push * alpha;
       a.vy += (dy / d) * push * alpha;
@@ -84,7 +87,7 @@ export function step(bodies, edges, alpha = 1) {
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     const d = Math.hypot(dx, dy) || 1;
-    const pull = ((d - REST) / d) * 0.08 * alpha;
+    const pull = ((d - rest) / d) * 0.08 * alpha;
 
     a.vx += dx * pull;
     a.vy += dy * pull;
@@ -104,7 +107,7 @@ export function step(bodies, edges, alpha = 1) {
     }
 
     const speed = Math.hypot(b.vx, b.vy);
-    const cap = speed > 40 ? 40 / speed : 1;
+    const cap = speed > 40 * unit ? (40 * unit) / speed : 1;
 
     b.x += b.vx * cap;
     b.y += b.vy * cap;

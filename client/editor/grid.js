@@ -10,24 +10,26 @@ export const GAP = 10;
 // gap between the cells and none around the grid.
 export const TIGHT_GAP = 4;
 
-// the grid options of a document: { gap, margin }
+// the grid options of a document: { gap, margin, cols } (`cols` missing: the
+// column count that gives the biggest cells)
 export function gridOptions(layout = {}) {
   const tight = layout.fill === 'tight';
   const gap = Number.isFinite(layout.gap) ? layout.gap : tight ? TIGHT_GAP : GAP;
 
-  return { gap, margin: tight ? 0 : gap };
+  return { gap, margin: tight ? 0 : gap, ...(Number.isInteger(layout.cols) && layout.cols >= 1 && { cols: layout.cols }) };
 }
 
-// the cells of an n-photo grid: [{ x, y, size }] in reading order. The column
-// count that gives the biggest cells wins (the wider layout on a tie); an
+// the cells of an n-photo grid: [{ x, y, size }] in reading order. With `cols`
+// the grid has that many columns (at most n); otherwise the column count that
+// gives the biggest cells wins (the wider layout on a tie). An
 // incomplete last row is centred, and the whole grid is centred on the stage.
-export function gridCells(n, { gap = GAP, margin = gap } = {}) {
+export function gridCells(n, { gap = GAP, margin = gap, cols: fixed } = {}) {
   if(!(n >= 1)) return [];
 
   let cols = 1;
   let size = 0;
 
-  for(let c = 1; c <= n; c++) {
+  for(let c = fixed ? Math.min(fixed, n) : 1; c <= (fixed ? Math.min(fixed, n) : n); c++) {
     const rows = Math.ceil(n / c);
     const s = Math.min((STAGE - 2 * margin - gap * (c - 1)) / c, (STAGE - 2 * margin - gap * (rows - 1)) / rows);
 

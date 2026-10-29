@@ -53,6 +53,7 @@ export const KINDS = ['node', 'list', 'album', 'gallery', 'shop'];
 // the legacy `fit` of a photo step (before the square crop, EDITOR.md S2.5): only read to migrate
 export const FITS = ['extend', 'cover', 'free'];
 export const FILLS = ['loose', 'tight'];
+export const COLS_MAX = 12; // the most columns of a grid
 export const FONTS = FONT_IDS;
 export const ALIGNS = ['start', 'center', 'end'];
 
@@ -111,7 +112,7 @@ function validateStructure(doc) {
   if(!isObject(doc.style) || (doc.style.theme !== undefined && !isString(doc.style.theme)) || (doc.style.vars !== undefined && !isObject(doc.style.vars))) errors.push({ code: 'bad_style', path: 'style' });
   if(!MODES.includes(doc.mode)) errors.push({ code: 'bad_mode', path: 'mode' });
   if(doc.bg !== undefined && !isFill(doc.bg)) errors.push({ code: 'bad_bg', path: 'bg' });
-  if(doc.layout !== undefined && !(isObject(doc.layout) && (doc.layout.fill === undefined || FILLS.includes(doc.layout.fill)) && (doc.layout.gap === undefined || (isNumber(doc.layout.gap) && doc.layout.gap >= 0 && doc.layout.gap <= 100)) && Object.keys(doc.layout).every(k => k === 'fill' || k === 'gap'))) errors.push({ code: 'bad_layout', path: 'layout' });
+  if(doc.layout !== undefined && !(isObject(doc.layout) && (doc.layout.fill === undefined || FILLS.includes(doc.layout.fill)) && (doc.layout.gap === undefined || (isNumber(doc.layout.gap) && doc.layout.gap >= 0 && doc.layout.gap <= 100)) && (doc.layout.cols === undefined || (Number.isInteger(doc.layout.cols) && doc.layout.cols >= 1 && doc.layout.cols <= COLS_MAX)) && Object.keys(doc.layout).every(k => k === 'fill' || k === 'gap' || k === 'cols'))) errors.push({ code: 'bad_layout', path: 'layout' });
 
   if(doc.title !== undefined && !isString(doc.title)) errors.push({ code: 'bad_title', path: 'title' });
   if(doc.scene !== undefined) errors.push(...validateScene(doc.scene));
@@ -633,7 +634,10 @@ const dropBox = (doc, stepId) => setBox(doc, stepId, null);
 export function setLayout(doc, changes) {
   const layout = { ...doc.layout, ...changes };
 
+  for(const k of Object.keys(layout)) if(layout[k] === undefined || layout[k] === null) delete layout[k]; // back to automatic
+
   if(layout.fill !== undefined && !FILLS.includes(layout.fill)) return doc;
+  if(layout.cols !== undefined && !(Number.isInteger(layout.cols) && layout.cols >= 1 && layout.cols <= COLS_MAX)) return doc;
   if(layout.gap !== undefined && !(Number.isFinite(layout.gap) && layout.gap >= 0 && layout.gap <= 100)) return doc;
 
   return JSON.stringify(layout) === JSON.stringify(doc.layout ?? {}) ? doc : { ...doc, layout };

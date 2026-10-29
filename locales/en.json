@@ -349,5 +349,8 @@
   "graph.group": "Group",
   "graph.ungroup": "Ungroup",
   "graph.group.title": "Group",
-  "graph.done.group": "Made a group of {n} nodes"
+  "graph.done.group": "Made a group of {n} nodes",
+  "editor.layout.gap": "Spacing",
+  "editor.layout.cols": "Columns",
+  "editor.layout.cols.auto": "Auto"
 }
