@@ -4,6 +4,7 @@ import { Boot } from '../boot.js';
 import { NewPage } from './NewPage.js';
 import { GraphPage } from './GraphPage.js';
 import { NodePage } from './NodePage.js';
+import { GalleryPage } from './GalleryPage.js';
 
 // root of every page; `boot` is the JSON the server embeds
 // ({ lang, messages, fallback, languages, limits }, plus `node` and `photos`
@@ -11,7 +12,7 @@ import { NodePage } from './NodePage.js';
 export const App = ({ boot }) => html`
   <${Boot.Provider} value=${boot}>
     <${I18n.Provider} value=${makeI18n(boot)}>
-      ${boot.graph ? html`<${GraphPage} />` : boot.node ? html`<${NodePage} />` : html`<${NewPage} />`}
+      ${boot.graph ? html`<${GraphPage} />` : boot.gallery ? html`<${GalleryPage} />` : boot.node ? html`<${NodePage} />` : html`<${NewPage} />`}
     <//>
   <//>
 `;

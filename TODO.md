@@ -419,14 +419,44 @@ Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
 
 - [ ] **13.1 Document**: `scene3d` step (plan, style, start), validation, sanitiser; photo
       role toggle (`EDITOR.md` E71, E76, E77); texture photos are never hung.
-- [ ] **13.2 Builder** `client/gallery/build.js`: walls, room and corridor floors, ramps
+- [~] **13.2 Builder** `client/gallery/build.js`: walls, room and corridor floors, ramps
       (slope <= 1:12, walls tilt), texture set with default quads (`tools/gallery-warp.mjs`
-      is the prototype); unit-tested without a DOM.
-- [ ] **13.3 Scene**: three.js 0.186.1 (`build/three.module.min.js`, `three.core.min.js`,
-      `PointerLockControls`) vendored via `tools/vendor.sh`, loaded on enter, starfield, art lighting.
-- [ ] **13.4 Walking**: pointer lock + WASD, stick + drag-look, wall collision, floor height.
-- [ ] **13.5 Auto-hang**: child tiles on room insides (`GALLERY.md` S5.1); tap opens the node.
-- [ ] **13.6 Host**: poster until entered, one live canvas, viewport-fill, dispose on leave.
+      is the prototype); unit-tested without a DOM. Done: mitred walls grouped by compass
+      face, room/corridor floors (ear clipping), ramps, collision segments, floor height,
+      corner and slope warnings (`tests/gallery-build.test.js`). Open: the texture set /
+      default quads (the scene maps `uv` metres to textures), room heights with ramps
+      between rooms of different level.
+- [~] **13.3 Scene**: three.js 0.186.1 vendored by `tools/vendor.sh` (`vendor/three/`: `three.core.js`,
+      `three.module.js` minified with bun because the npm package ships none, `PointerLockControls.js`),
+      loaded on enter. Done: `client/gallery/scene.js` `makeWorld` / `enterScene` (mesh per group,
+      frameless canvases 1.3 m, 4 cm off the wall with a soft shadow and a name plate below (S5.1), placeholder colour, tiles fetched within 25 m, 6 warm spots on the nearest
+      pictures, dim ambient, seeded starfield, dispose); `static/gallery-demo.html` (dev aid, `?n=40`
+      tours the auto plan). Textures: `style.wall|floor|corridor.texture = { color, roughness?, tile }` (urls, metres per repeat) are applied; the auto plan has looks (`autoplan.js` LOOKS, `?look=warm|walnut|stone` on the node page): warm (default) = WoodFloor034 pine floors, tinted Plaster001 walls, Marble017 on the bridges; walnut = WoodFloor014; stone = marble and concrete (ambientCG, CC0, `static/textures/`). Open: the node's own texture photos as the source (13.1), fake light wash for
+      the pictures beyond the 6 spots, context-loss handling in the host (13.6).
+- [x] **13.4 Walking**: `client/gallery/walk.js` (circle vs wall segments, floor-only movement, eye follows the
+      floor height, pitch limit) and `controls.js`: W A S D / arrows / Q E / shift, pointer lock and mouse look,
+      touch: left half a stick, right half drag-look, tap a picture to open it. Tested (`tests/gallery-walk.test.js`).
+- [x] **13.5 Auto-hang**: `hang.js` slots and `hang()`, `items.js` (child nodes with tiles in edge order,
+      else the node's own photos, no textures); tap on a picture opens its node.
+- [x] **13.6 Host**: `client/components/GalleryView.js` on the node page (`NodePage.js`): the node's own view is the
+      poster with an "enter" button (offered for list/album/gallery nodes, nodes with child nodes, slide shows
+      and grids with at least two pictures); `client/gallery/session.js` loads on enter (three.js with it),
+      one live canvas, fullscreen (Fullscreen API, else a page-filling class), leave disposes, no WebGL or a
+      lost context shows a message. The server adds the visible `child` edges to the node page's boot data.
+      Tested in headless Chrome (software GL): enter, walk, fullscreen, leave. Open: stage-sized canvas
+      resize while fullscreen on a phone, a per-node `scene` plan instead of the auto plan (13.1).
+- [x] **13.8 Auto plan** `client/gallery/autoplan.js` (done, tested): a node without a
+      drawn plan, e.g. a plain `list` such as "Sous-soul Vitrines", gets a generated one: a
+      row of 12 x 8 m rooms joined by 6 m corridors, as many rooms as the children need
+      (`GALLERY.md` S3.6). The host uses it for every gallery until `scene` (13.1) exists.
+- [x] **13.9 Gallery of all nodes** (`/:lang/gallery`, the "Show" tab): `client/components/GalleryPage.js`
+      lists every saved node with a tile as a link grid (works without JavaScript) and a button for the 3D gallery of
+      them all (`items.js` `nodeItems`, auto plan, titles on the plates, a tap opens the node).
+      Open: order (newest first for now), filters (a group's members only), a per-node `scene` plan.
+- [x] **13.10 Stale tiles**: a node saved before server-side tiles (or as a plain photo collage) showed one
+      photo in the graph and the gallery. `needsRender` (`server/media/raster.js`) now also covers photo-only collages
+      (several photos on page 0, or one faded, blended or clipped); `bun tools/retile.js [--dry] [--force] [ids]`
+      (`server/node/retile.js`) re-renders the stale ones, the node itself untouched. Run it once after deploying.
 - [ ] **13.7 Plan layer in the 2D editor** (`EDITOR.md` E75): wall layer with height; rooms =
       closed, corridors = lines; refuse corners sharper than 90 degrees.
 

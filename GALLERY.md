@@ -250,6 +250,28 @@ A gallery is a node (`kind: 'gallery'`) with a new document step type next to
 - Style is data, not code. The sanitiser (`PLAN.md` S16.6) allows only known keys,
   colours, and a photo hash that belongs to this node and is marked as texture.
 
+### 3.6 Auto plan for a node without one (decided 2026-10-29)
+
+A node with children but no `scene` plan (a plain `list`) is shown as a gallery
+anyway: `client/gallery/autoplan.js` generates the plan. A row of 12 x 8 m rooms
+from west to east, each pair joined by a 6 m long, 2 m wide corridor leaving
+through a 2 m gap in the room walls; the first room has no west door, the last no
+east door, a single room is one closed polygon. The number of rooms is the
+smallest one whose auto-hang slots (S5.1) fit all children. The start is the
+middle of the first room, looking east. The plan is never stored; a drawn plan
+replaces it.
+
+Format refinements made while building (`client/gallery/`):
+
+- An **open** wall hangs pictures on its **left** in the direction of travel
+  (optional `side`: `left`, `right`, `none`), so a room with door gaps is several
+  open polylines drawn counter-clockwise. Closed walls hang on the inside.
+- `start.look` is in degrees, 0 = north, 90 = east.
+- `plan.floors[]` entries are `{ type, points, h? }`; `h` is a flat height. A wall
+  may carry `base` (default 0). Without `floors`, closed walls give the room floors.
+- Output coordinates are y up and `z = -y_plan`; wall `uv` is metres along the
+  wall and above its base.
+
 ### 3.2 Geometry, measured
 
 Walls: each segment becomes a box (4 side faces) with UVs that run along the wall
@@ -425,13 +447,13 @@ Tapping it walks up and opens the node. Photos marked `texture` are never hung.
 - **One side of a wall only**: the **inside of a room** (the side facing the room
   interior of a closed wall polyline). Outer faces and corridor walls stay bare.
 - **Eye level**: picture centre at 1.5 m above the local floor; pictures are
-  square (a tile is square) with a default side of 1.0 m, spaced by a gap (default
-  0.8 m).
+  square (a tile is square) with a default side of 1.3 m, spaced by a gap (default
+  1.6 m; decided 2026-10-29: bigger and further apart).
 - **Wall runs**: walk along each room wall polyline; a run ends at a corner. The
   run is long enough for at least 2-3 pictures before a corner (the editor warns on
   shorter runs: a picture needs its width plus a margin of half a picture + 0.3 m on
-  both ends, so 1.0 m pictures need 2.6 m of free wall to hang one, and about 4.4 m
-  for two, 6.2 m for three).
+  both ends, so 1.3 m pictures need 3.2 m of free wall to hang one, and about 6.1 m
+  for two, 9.0 m for three).
 - **Fill**: along the run, evenly: `n = floor((L - 2*margin + gap) / (w + gap))`
   pictures, centred on the run; each is oriented to its local segment direction.
   Gentle bends inside a run are fine (pictures follow the segment); because no
@@ -443,6 +465,14 @@ Tapping it walks up and opens the node. Photos marked `texture` are never hung.
   children the viewer may not see are skipped, not left empty (the next child moves
   up).
 - **Picture size** may later come from the child's own `size` field; not now.
+
+**The picture itself** (decided 2026-10-29): no frame. A canvas is a shallow box
+(4 cm, "an inch") standing off the wall, the photo on its front and white canvas
+sides, with a soft shadow on the wall (a little below it, since the light comes from
+above). Below it hangs a **name plate** (0.6 x 0.17 m, serif lettering, shrunk to
+fit, cut with an ellipsis) when the item has a title; a child node's title, a
+photo has none, so no plate. The lettering is drawn onto the plate when the visitor
+comes within 25 m.
 
 Consequences:
 

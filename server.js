@@ -17,8 +17,9 @@ import { cutoutRoute } from './server/api/cutout.js';
 import { segmentRoute } from './server/api/segment.js';
 import { servePhoto } from './server/api/photos.js';
 import { photoInfos } from './server/node/view.js';
+import { nodeItems } from './client/gallery/items.js';
 import { canView } from './server/api/nodes.js';
-import { getNode } from './server/db/nodes.js';
+import { getNode, linksFrom } from './server/db/nodes.js';
 import { database } from './server/db/db.js';
 import { reconcile } from './server/node/reconcile.js';
 import { sessionFor } from './server/session.js';
@@ -108,7 +109,7 @@ const listed = ({ hash, ext, display, name, size, mime, width, height, padding, 
 async function bootFor(lang, extra = {}, owner = null) {
   const fallback = lang === DEFAULT_LANG ? {} : locales.get(DEFAULT_LANG);
 
-  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes, uploadDays: Math.max(1, Math.round(config.uploadTtlMs / 86400000)) }, uploads: extra.node || extra.graph ? [] : (await readUploads(owner)).map(listed), ...extra };
+  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes, uploadDays: Math.max(1, Math.round(config.uploadTtlMs / 86400000)) }, uploads: extra.node || extra.graph || extra.gallery ? [] : (await readUploads(owner)).map(listed), ...extra };
 }
 
 // `extra` adds to the boot JSON (the node page: `node` and `photos`);
@@ -135,6 +136,11 @@ async function newPage(lang, req) {
   return page(lang, 'page.title.new', { nodes: visibleNodes(await database()) }, undefined, req);
 }
 
+// GET /:lang/gallery: every saved node as a picture of one 3D gallery ("Show")
+async function galleryPage(lang, req) {
+  return page(lang, 'page.title.gallery', { gallery: { items: nodeItems(visibleNodes(await database()), lang) } }, undefined, req);
+}
+
 // GET /:lang/tree: the graph of the nodes (preliminary demo of GRAPH.md)
 async function treePage(lang, req) {
   return page(lang, 'page.title.tree', { graph: graphOf(await database()) }, undefined, req);
@@ -148,7 +154,13 @@ async function nodePage(lang, id) {
   if(!node) return text('not found\n', 404);
   if(!canView(node, null)) return text('forbidden\n', 403);
 
-  const shown = { id: node.id, title: node.title, kind: node.kind, doc: node.doc, rev: node.rev };
+  // the children as the 3D gallery hangs them (GALLERY.md S5): the visible `child` edges in order
+  const children = linksFrom(h, id, 'child').flatMap(({ id: to }) => {
+    const child = getNode(h, to);
+
+    return child && canView(child, null) ? [{ id: child.id, title: child.title, tile: child.tile }] : [];
+  });
+  const shown = { id: node.id, title: node.title, kind: node.kind, doc: node.doc, rev: node.rev, children };
   const title = `${locales.get(lang)['page.title.node'] ?? 'Wild Beauty'} - ${node.title || locales.get(lang)['node.untitled'] || ''}`;
 
   return page(lang, 'page.title.node', { node: shown, photos: photoInfos(h, node.doc) }, title);
@@ -222,9 +234,11 @@ function route(req) {
   if(pathname === '/manifest.webmanifest') return manifestResponse();
   if(pathname === '/sw.js') return workerResponse();
 
-  // the installed app starts here: the upload area and the editor, in the visitor's language
+  // the site opens on the 3D gallery of all nodes; the installed app starts at
+  // /new (the manifest's start_url): the upload area and the editor. Both in the
+  // visitor's language.
   if(pathname === '/' || pathname === '/new') {
-    const location = new URL(`/${negotiate(locales, { req })}/new`, req.url).href;
+    const location = new URL(`/${negotiate(locales, { req })}/${pathname === '/' ? 'gallery' : 'new'}`, req.url).href;
 
     return new Response(null, { status: 302, headers: { location, vary: 'Cookie, Accept-Language' } });
   }
@@ -234,6 +248,10 @@ function route(req) {
   const viewed = /^\/([a-z]{2,3})\/node\/(\d{1,15})$/.exec(pathname);
 
   if(viewed && locales.has(viewed[1])) return nodePage(viewed[1], Number(viewed[2]));
+
+  const shown = /^\/([a-z]{2,3})\/gallery$/.exec(pathname);
+
+  if(shown && locales.has(shown[1])) return galleryPage(shown[1], req);
 
   const tree = /^\/([a-z]{2,3})\/tree$/.exec(pathname);
 

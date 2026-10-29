@@ -84,6 +84,9 @@
   --wb-editor-popover-bg: #f2eadf;
   --wb-editor-banner-bg: rgb(255 220 32 / 0.75);
   --wb-card-ground: rgb(255 255 255 / 0.4);
+  --wb-gallery-ground: rgb(5 6 13);
+  --wb-gallery-ink: rgb(255 255 255);
+  --wb-gallery-note: rgb(0 0 0 / 0.55);
 
   /* depth */
   --wb-shadow-card: 0 0 4px rgb(0 0 0 / 0.75);

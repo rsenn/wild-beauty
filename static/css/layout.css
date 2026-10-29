@@ -812,6 +812,103 @@ body {
   box-shadow: var(--wb-shadow-card);
 }
 
+/* the 3D gallery in the node's square (GALLERY.md, 13.6); .wb-gallery-fill is the page-filling fallback */
+.wb-gallery {
+  position: relative;
+  aspect-ratio: 1;
+  width: min(100%, max(240px, calc(100vh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em)));
+  width: min(100%, max(240px, calc(100dvh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em)));
+  margin: 0 auto;
+  overflow: hidden;
+  color: var(--wb-gallery-ink);
+  background: var(--wb-gallery-ground);
+  border: var(--wb-border-width) solid var(--wb-ink);
+  box-shadow: var(--wb-shadow-card);
+}
+
+.wb-gallery-poster {
+  position: relative;
+  width: min(100%, max(240px, calc(100vh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em)));
+  width: min(100%, max(240px, calc(100dvh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 4.5em)));
+  margin: 0 auto;
+}
+
+.wb-gallery-poster .wb-node-view {
+  width: 100%;
+}
+
+.wb-gallery-enter {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.wb-gallery-enter.wb-gallery-enter-inline {
+  position: static;
+  transform: none;
+}
+
+.wb-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--wb-tab-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wb-gallery-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: var(--wb-border-width) solid var(--wb-ink);
+  box-shadow: var(--wb-shadow-card);
+}
+
+.wb-gallery:fullscreen,
+.wb-gallery-fill {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  aspect-ratio: auto;
+  margin: 0;
+  border: 0;
+}
+
+.wb-gallery-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  touch-action: none;
+  user-select: none;
+}
+
+.wb-gallery-bar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.wb-gallery-note {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  left: 8px;
+  margin: 0;
+  padding: 6px 10px;
+  text-align: center;
+  background: var(--wb-gallery-note);
+  pointer-events: none;
+}
+
 /* selection overlay on the stage (E39) */
 .wb-editor-outline {
   fill: none;

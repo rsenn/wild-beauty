@@ -387,5 +387,17 @@
   "editor.job.cancel": "Abbrechen",
   "editor.announce.jobCancelled": "Abgebrochen",
   "editor.close.job": "Auf dem Server läuft noch ein Auftrag, er geht beim Schliessen verloren. Trotzdem schliessen?",
-  "editor.text.curve": "Bogen"
+  "editor.text.curve": "Bogen",
+  "gallery.enter": "Durch die 3D-Galerie gehen",
+  "gallery.leave": "Verlassen",
+  "gallery.fullscreen": "Vollbild",
+  "gallery.fullscreen.exit": "Vollbild beenden",
+  "gallery.loading": "Die Galerie wird geladen ...",
+  "gallery.help": "Klicken, um sich umzusehen, W A S D oder Pfeiltasten zum Gehen, Umschalt zum Rennen. Auf dem Touchscreen: linker Daumen geht, rechter Daumen schaut, ein Bild antippen öffnet es.",
+  "gallery.unsupported": "Dieser Browser kann die 3D-Galerie nicht anzeigen (kein WebGL).",
+  "gallery.failed": "Die 3D-Galerie konnte nicht gestartet werden.",
+  "gallery.lost": "Die Grafik ging verloren. Galerie verlassen und neu betreten.",
+  "page.title.gallery": "Wild Beauty - Galerie",
+  "gallery.title": "Galerie",
+  "gallery.none": "Noch keine Werke mit einem Bild."
 }

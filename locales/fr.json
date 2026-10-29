@@ -387,5 +387,17 @@
   "editor.job.cancel": "Annuler",
   "editor.announce.jobCancelled": "Annulé",
   "editor.close.job": "Une tâche tourne encore sur le serveur et sera perdue à la fermeture. Fermer quand même ?",
-  "editor.text.curve": "Courbe"
+  "editor.text.curve": "Courbe",
+  "gallery.enter": "Parcourir la galerie 3D",
+  "gallery.leave": "Quitter",
+  "gallery.fullscreen": "Plein écran",
+  "gallery.fullscreen.exit": "Quitter le plein écran",
+  "gallery.loading": "Chargement de la galerie...",
+  "gallery.help": "Cliquez pour regarder autour de vous, W A S D ou les flèches pour marcher, Maj pour courir. Sur écran tactile : le pouce gauche marche, le droit regarde, touchez un tableau pour l'ouvrir.",
+  "gallery.unsupported": "Ce navigateur ne peut pas afficher la galerie 3D (pas de WebGL).",
+  "gallery.failed": "La galerie 3D n'a pas pu démarrer.",
+  "gallery.lost": "Le rendu graphique a été perdu. Quittez la galerie et entrez-y de nouveau.",
+  "page.title.gallery": "Wild Beauty - Galerie",
+  "gallery.title": "Galerie",
+  "gallery.none": "Aucune œuvre avec une image pour l'instant."
 }
