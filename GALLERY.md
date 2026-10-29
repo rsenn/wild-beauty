@@ -63,7 +63,7 @@ has to be redrawn later), but version 1 builds only this, with these defaults:
 
 | Topic | Version 1 default |
 |---|---|
-| Plan | closed wall polygons = rooms; corridors = polylines of width 2 m with generated side walls; wall height 3.2 m, thickness 0.2 m; corners 90-270 degrees |
+| Plan | closed wall polygons = rooms; corridors = polylines of width 2 m with generated side walls 1 m high (a parapet: a low bridge under the sky; a drawn corridor keeps a height the owner set, the old default 3.2 m counts as not set); wall height 3.2 m, thickness 0.2 m; corners 90-270 degrees |
 | Ramps | a corridor with `h0`, `h1`; slope at most 1:12; walls tilt |
 | Pictures | auto-hung, inside of rooms, 1.0 m square, 1.5 m centre height, 0.8 m gap, in edge order, rooms in drawing order; no size setting |
 | Texture set | up to 3 photos marked `texture` (walls split-in-4 or single / room floor / corridor floor); **default quads only** |

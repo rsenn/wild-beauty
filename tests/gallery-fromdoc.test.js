@@ -18,6 +18,18 @@ describe('planFromDoc', () => {
     expect(plan.plan.walls.every(w => !w.closed && w.height === 3.2)).toBe(true);
   });
 
+  test('corridor walls are a parapet, room walls keep their height', () => {
+    expect(plan.plan.corridors.every(c => c.wallHeight === 1)).toBe(true); // drawn with the old default of 3.2 m
+    expect(plan.plan.walls.every(w => w.height === 3.2)).toBe(true);
+
+    const line = { op: 'shape', id: 'l', path: 'M0 0 L100 0', closed: false, wall: { height: 2.4, width: 2 } };
+    const doc = JSON.parse(JSON.stringify(node9.doc));
+
+    expect(planFromDoc(doc).plan.corridors.length).toBe(2);
+    doc.pages[0].steps.push(line);
+    expect(planFromDoc(doc).plan.corridors.at(-1).wallHeight).toBe(2.4); // a height the owner chose
+  });
+
   test('a corridor ends at the wall of the rooms it joins and keeps its width', () => {
     for(const c of plan.plan.corridors) {
       expect(c.width).toBe(2);

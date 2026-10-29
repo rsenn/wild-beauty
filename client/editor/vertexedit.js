@@ -69,3 +69,19 @@ export const removeVertex = (vertices, index, closed) => (vertices.length <= (cl
 
 export const breakVertex = (vertices, index) => breakSymmetry(vertices, index);
 export const joinVertex = (vertices, index) => joinSymmetry(vertices, index);
+
+// Several vertices dragged together by the same step, `from` to `to` (stage space)
+export const dragMany = (vertices, indices, m, from, to) => indices.reduce((vs, index) => drag(vs, { kind: 'vertex', index }, m, from, to), vertices);
+
+// the vertices taken out, or null when none is named or too few would be left
+export function removeVertices(vertices, indices, closed) {
+  const at = [...new Set(indices)].filter(i => vertices[i]).sort((a, b) => b - a);
+
+  if(!at.length || vertices.length - at.length < (closed ? 3 : 2)) return null;
+
+  return at.reduce((vs, i) => deleteVertex(vs, i), vertices);
+}
+
+// the indices of the vertices of `geo` (see geometry) inside a selection
+// rectangle, two opposite corners [x, y] in stage space
+export const insideRect = (geo, [a, b]) => geo.filter(g => g.p[0] >= Math.min(a[0], b[0]) && g.p[0] <= Math.max(a[0], b[0]) && g.p[1] >= Math.min(a[1], b[1]) && g.p[1] <= Math.max(a[1], b[1])).map(g => g.i);

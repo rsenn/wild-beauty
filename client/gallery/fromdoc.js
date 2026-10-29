@@ -14,7 +14,7 @@ import { apply } from '../editor/matrix.js';
 import { matrixOf } from '../editor/hit.js';
 import { UNITS_PER_METRE } from '../editor/roomaid.js';
 import { verticesFromPath } from '../editor/shapes.js';
-import { CORRIDOR_WIDTH, WALL_HEIGHT } from '../editor/walls.js';
+import { CORRIDOR_WIDTH, PARAPET_HEIGHT, WALL_HEIGHT } from '../editor/walls.js';
 import { LOOKS, clockwise } from './autoplan.js';
 import { contains } from '../editor/polygon.js';
 import { clean, signedArea } from './line.js';
@@ -203,6 +203,11 @@ function insidePoint(poly) {
   return [(best[0] + best[1]) / 2, y];
 }
 
+// the wall height of a corridor: low, like a bridge. Corridors drawn before
+// the parapet was the default carry the room height (WALL_HEIGHT) as their
+// own, so that value counts as "not chosen"
+const parapet = h => (h === undefined || h === WALL_HEIGHT ? PARAPET_HEIGHT : h);
+
 export function planFromDoc(doc) {
   const metres = ([x, y]) => [x / UNITS_PER_METRE, -y / UNITS_PER_METRE];
   const rooms = [];
@@ -220,7 +225,7 @@ export function planFromDoc(doc) {
       const pts = clean(flatten(parsed).map(pt => metres(m ? apply(m, pt) : pt)), parsed.closed);
 
       if(parsed.closed && pts.length >= 3) rooms.push({ pts: signedArea(pts) < 0 ? [...pts].reverse() : pts, height: step.wall.height ?? WALL_HEIGHT });
-      else if(!parsed.closed && pts.length >= 2) lines.push({ pts, width: step.wall.width ?? CORRIDOR_WIDTH, height: step.wall.height ?? WALL_HEIGHT });
+      else if(!parsed.closed && pts.length >= 2) lines.push({ pts, width: step.wall.width ?? CORRIDOR_WIDTH, height: parapet(step.wall.height) });
     }
   });
 

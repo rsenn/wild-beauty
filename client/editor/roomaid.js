@@ -10,7 +10,7 @@
 //     becomes a corridor: an open wall shape of the same quantised kind
 // Pure functions over [x, y] points and the vertices of shapes.js; stage units.
 import { PICTURE } from '../gallery/hang.js';
-import { CORRIDOR_WIDTH, WALL_HEIGHT, acuteCorner, defaultWall } from './walls.js';
+import { CORRIDOR_WIDTH, PARAPET_HEIGHT, WALL_HEIGHT, acuteCorner, defaultWall } from './walls.js';
 import { contains } from './polygon.js';
 import { pathFromVertices, verticesFromPath } from './shapes.js';
 
@@ -143,11 +143,98 @@ export function corridorOf(stroke, rooms, step = STEP) {
   return out;
 }
 
+const isLine = (a, b) => !a.hout && !b.hin;
+const ALCOVE_DEPTH = 2; // steps the cut-out reaches into the room, at most
+
+// do the segments p-q and r-s cross (not merely touch)?
+function crosses(p, q, r, s) {
+  const side = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+  const [d1, d2, d3, d4] = [side(p, q, r), side(p, q, s), side(r, s, p), side(r, s, q)];
+
+  return d1 * d2 < -1e-9 && d3 * d4 < -1e-9;
+}
+
+// The edge a cut-out goes into when none is chosen: of the straight, nearly
+// level edges the lowest one (stage y grows downward), the longer on a tie.
+export function bottomEdge(vertices) {
+  let best = -1;
+  let key = null;
+
+  vertices.forEach((a, i) => {
+    const b = vertices[(i + 1) % vertices.length];
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+
+    if(!len || !isLine(a, b) || Math.abs(b.y - a.y) > 0.1 * len) return;
+
+    const k = [(a.y + b.y) / 2, len];
+
+    if(!key || k[0] > key[0] + 1e-6 || (Math.abs(k[0] - key[0]) <= 1e-6 && k[1] > key[1])) [best, key] = [i, k];
+  });
+
+  return best;
+}
+
+// A trapezoid cut-out in the edge `seg` (default: the bottom one) of a closed
+// room: four new corners, two on the edge and two `depth` steps inside, the
+// sides at 45 degrees, more wall to hang on. `step` is the length of one step
+// in the shape's own units. The cut-out gets as deep as the room allows, up to
+// `depth`. -> { vertices, at } with `at` the index of the first inner corner, or
+// null when the edge is curved, too short (5 steps) or the cut-out does not fit.
+export function alcove(vertices, { seg = bottomEdge(vertices), step = STEP, depth = ALCOVE_DEPTH } = {}) {
+  const n = vertices.length;
+
+  if(n < 3 || !vertices[seg]) return null;
+
+  const a = vertices[seg];
+  const b = vertices[(seg + 1) % n];
+  const len = Math.hypot(b.x - a.x, b.y - a.y);
+
+  if(!len || !isLine(a, b)) return null;
+
+  const steps = len / step;
+  const u = [(b.x - a.x) / len, (b.y - a.y) / len];
+  const poly = vertices.map(v => [v.x, v.y]);
+  const mid = [(a.x + b.x) / 2, (a.y + b.y) / 2];
+  const inside = [u[1], -u[0]];
+  const probe = [mid[0] + inside[0] * step * 0.1, mid[1] + inside[1] * step * 0.1];
+
+  if(!contains(poly, probe)) [inside[0], inside[1]] = [-u[1], u[0]]; // the other side
+
+  if(!contains(poly, [mid[0] + inside[0] * step * 0.1, mid[1] + inside[1] * step * 0.1])) return null;
+
+  for(let d = Math.min(depth, Math.floor((steps - 3) / 2)); d >= 1; d--) {
+    const free = steps - 2 * d;
+    const w = Math.max(1, Math.floor(free / 3)); // the flat side of the cut-out
+    const m = Math.floor((free - w) / 2); // the wall left before it
+    const at = k => [a.x + u[0] * k * step, a.y + u[1] * k * step];
+    const lift = (p, k) => [p[0] + (u[0] * k + inside[0] * d) * step, p[1] + (u[1] * k + inside[1] * d) * step];
+    const p1 = at(m);
+    const p4 = at(m + w + 2 * d);
+    const p2 = lift(p1, d);
+    const p3 = lift(p4, -d);
+    const mine = [p1, p2, p3, p4];
+
+    if(![p2, p3, [(p2[0] + p3[0]) / 2, (p2[1] + p3[1]) / 2]].every(p => contains(poly, p))) continue;
+
+    const clear = [[p1, p2], [p2, p3], [p3, p4]].every(([q, r]) => poly.every((e, i) => i === seg || !crosses(q, r, e, poly[(i + 1) % n])));
+
+    if(!clear) continue;
+
+    const out = [...vertices.slice(0, seg + 1), ...mine.map(([x, y]) => ({ x: r2(x), y: r2(y) })), ...vertices.slice(seg + 1)];
+
+    if(acuteCorner(out, true)) continue;
+
+    return { vertices: out, at: seg + 2 };
+  }
+
+  return null;
+}
+
 // the wall step of a corridor, drawn as wide as the corridor is (CORRIDOR_WIDTH m)
 export function corridorStep(vertices, id, color) {
   const step = { op: 'shape', id, path: pathFromVertices(vertices, false), closed: false, stroke: color, strokeWidth: r2(CORRIDOR_WIDTH * UNITS_PER_METRE) };
 
-  return { ...step, wall: { height: WALL_HEIGHT, width: CORRIDOR_WIDTH } };
+  return { ...step, wall: { height: PARAPET_HEIGHT, width: CORRIDOR_WIDTH } };
 }
 
 // a room finished with the shape tool: the step gets the wall flag

@@ -14,7 +14,7 @@ import { createLock } from '../editor/lock.js';
 import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
 import { centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor/hit.js';
-import { breakVertex, drag as dragVertices, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../editor/vertexedit.js';
+import { breakVertex, drag as dragVertices, dragMany, geometry, hitVertex, insideRect, joinVertex, removeVertices, verticesOf } from '../editor/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { cascade, photosOnPage } from '../editor/cascade.js';
 import { documentLarge, documentThumb, exportImage, sceneCanvas, stepImage } from '../editor/export.js';
@@ -44,7 +44,8 @@ import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/keyboard.
 import { DEFAULT_TOOL, TOOLS, inField, toolForKey } from '../editor/tools.js';
 import { editorStore } from '../editor/useEditor.js';
 import { acuteCorner } from '../editor/walls.js';
-import { STEP, canClose, corridorOf, corridorStep, roomsOf, snapVertex, wallOf } from '../editor/roomaid.js';
+import { STEP, alcove, canClose, corridorOf, corridorStep, roomsOf, snapVertex, wallOf } from '../editor/roomaid.js';
+import { insertVertex, nearest as nearestOnPath } from '../editor/shapes.js';
 import { NEW } from '../editor/store.js';
 import { swatches, usedColours } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
@@ -181,7 +182,7 @@ const VertexEdit = ({ geo, sel, scale }) => {
 
   return html`<g class="wb-editor-vertices">
     ${geo.flatMap(g => [g.hin && [g.p, g.hin], g.hout && [g.p, g.hout]].filter(Boolean)).map(([a, b]) => html`<line class="wb-editor-outline" x1=${a[0]} y1=${a[1]} x2=${b[0]} y2=${b[1]} /><circle class="wb-editor-handle" cx=${b[0]} cy=${b[1]} r=${side / 2} />`)}
-    ${geo.map(g => html`<rect class=${'wb-editor-handle' + (g.i === sel ? ' wb-editor-handle-selected' : '')} x=${g.p[0] - side / 2} y=${g.p[1] - side / 2} width=${side} height=${side} />`)}
+    ${geo.map(g => html`<rect class=${'wb-editor-handle' + (sel.includes(g.i) ? ' wb-editor-handle-selected' : '')} x=${g.p[0] - side / 2} y=${g.p[1] - side / 2} width=${side} height=${side} />`)}
   </g>`;
 };
 
@@ -267,7 +268,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [cursor, setCursor] = useState(null); // the keyboard cursor of the shape tool
   const [candidate, setCandidate] = useState(null); // the shape the clip tool would use, chosen by key
   const [opener] = useState(() => (typeof document === 'undefined' ? null : document.activeElement)); // where the focus goes back to on close
-  const [vsel, setVsel] = useState(null); // the selected vertex of the selected shape
+  const [vsels, setVsels] = useState([]); // the selected vertices of the selected shape, the last one the main one
+  const vsel = vsels.length ? vsels[vsels.length - 1] : null;
+  const setVsel = i => setVsels(i === null ? [] : [i]);
+  const [marquee, setMarquee] = useState(null); // the selection rectangle being dragged round vertices: [from, to]
   const [shape, setShape] = useState(emptyDraft); // the shape being drawn (shape tool)
   const [roomAid, setRoomAid] = useState(false); // gallery room aid (E136): quantised rooms, pen strokes between rooms become corridors
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
@@ -295,6 +299,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const loadingRef = useRef(target !== NEW);
   const remote = useRef(null); // { id, rev } once the node is on the server
   const saving = useRef(false);
+  const lasso = useRef(null); // { from, add, base, moved, geo } while a selection rectangle is dragged round vertices
   const vdrag = useRef(null); // a vertex or handle of the selected shape being dragged
   const shaping = useRef(false); // a vertex of the shape being drawn is being pulled
   const inserted = useRef(null); // the last recorded move: { id, at }
@@ -326,7 +331,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const tr = (key, params) => latestT.current(key, params);
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
-  latest.current = { aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
+  latest.current = { aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, vsels, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
 
   // In slides mode a new drawing goes right after the slide's last drawing, and
   // a move in the stack stays between the photo and the next one: the slide a
@@ -789,7 +794,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     if(!parsed) return;
 
-    const vertices = op === 'delete' ? removeVertex(parsed.vertices, vsel, editStep.closed) : op === 'break' ? breakVertex(parsed.vertices, vsel) : joinVertex(parsed.vertices, vsel);
+    const vertices = op === 'delete' ? removeVertices(parsed.vertices, latest.current.vsels, editStep.closed) : op === 'break' ? breakVertex(parsed.vertices, vsel) : joinVertex(parsed.vertices, vsel);
 
     if(!vertices) return;
 
@@ -877,7 +882,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
         if(parsed && m) {
           e.preventDefault();
-          dispatch({ type: 'setVertices', id: step.id, vertices: dragVertices(parsed.vertices, { kind: 'vertex', index: vs }, m, [0, 0], [dx, dy]) });
+          dispatch({ type: 'setVertices', id: step.id, vertices: dragMany(parsed.vertices, latest.current.vsels, m, [0, 0], [dx, dy]) });
         }
 
         return;
@@ -1130,7 +1135,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
   const down = (e, units) => {
     if(tool === 'select') return selectDown(e, units);
-    if(tool === 'shape') return shapeDown(units);
+    if(tool === 'shape') return cornerDown(e, units) || shapeDown(units);
     if(tool === 'wand') return wandDown(e, units);
     if(tool === 'text') return textDown(units);
     if(tool === 'clip' || tool === 'unclip') return maskDown(units);
@@ -1172,15 +1177,31 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       const m = matrixOf(doc, editStep.id, { page });
       const hit = m && hitVertex(geometry(parsed, m), units, VERTEX_PX / scale);
 
-      if(hit) {
-        setVsel(hit.index);
-        vdrag.current = { hit, base: parsed.vertices, from: units, m, id: editStep.id };
+      if(hit) return pickVertex(e, hit, parsed, m, units, editStep);
+
+      // a double tap on an edge of the selected shape adds a corner there
+      const edge = m && onEdge(parsed, m, units);
+      const tap = lastTap.current;
+
+      if(edge && tap.id === 'edge:' + editStep.id && e.timeStamp - tap.time < DOUBLE_TAP_MS && Math.hypot(units[0] - tap.at[0], units[1] - tap.at[1]) < DOUBLE_TAP_PX / scale) {
+        lastTap.current = { time: 0, id: null, at: null };
+        addCorner(editStep, parsed, edge);
 
         return;
       }
+
+      if(edge) lastTap.current = { time: e.timeStamp, id: 'edge:' + editStep.id, at: units };
     }
 
     const id = hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale, page, upTo: scrubbed ? shown : undefined });
+    const shapeM = parsed && matrixOf(doc, editStep.id, { page });
+
+    // a drag on the empty stage, or with Shift, selects the corners of the selected shape inside a rectangle
+    if(shapeM && (e.shiftKey || !id)) {
+      lasso.current = { from: units, add: e.shiftKey, base: latest.current.vsels, moved: false, geo: geometry(parsed, shapeM) };
+
+      return;
+    }
 
     setSelected(id);
 
@@ -1669,6 +1690,84 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setTool('select');
     setAnnounce(tr(found.kind === 'cut' ? 'editor.announce.cut' : 'editor.announce.clipped'));
   };
+  // A press on a vertex or handle of the selected shape: it is dragged, with the others
+  // selected too when it is one of them; Shift adds it to the selection or takes it out
+  const pickVertex = (e, hit, parsed, m, units, step) => {
+    const { vsels: now } = latest.current;
+    let set = [hit.index];
+
+    if(hit.kind === 'vertex') {
+      if(e.shiftKey) set = now.includes(hit.index) ? now.filter(i => i !== hit.index) : [...now, hit.index];
+      else if(now.includes(hit.index)) set = [...now.filter(i => i !== hit.index), hit.index];
+
+      setVsels(set);
+
+      if(!set.includes(hit.index)) return; // taken out of the selection: no drag
+    }
+    else setVsel(hit.index);
+
+    vdrag.current = { hit, base: parsed.vertices, from: units, m, id: step.id, set: hit.kind === 'vertex' ? set : [hit.index] };
+  };
+  // the point of the selected shape's outline under the pointer: { seg, t } or null
+  const onEdge = (parsed, m, units) => {
+    const inv = invert(m);
+    const local = inv && applyMatrix(inv, units);
+    const near = local && nearestOnPath(parsed.vertices, parsed.closed, { x: local[0], y: local[1] });
+
+    if(!near) return null;
+
+    const [x, y] = applyMatrix(m, [near.x, near.y]);
+
+    return Math.hypot(x - units[0], y - units[1]) <= VERTEX_PX / latest.current.scale ? near : null;
+  };
+  const addCorner = (step, parsed, edge) => {
+    dispatch({ type: 'setVertices', id: step.id, vertices: insertVertex(parsed.vertices, edge.seg, edge.t, parsed.closed) });
+    setHist(history.seal);
+    setVsel(edge.seg + 1);
+  };
+  // shape tool, no room under way: a corner of the selected shape is dragged (and with
+  // Alt an edge gets a corner) instead of starting a new room. -> true when it took the press
+  const cornerDown = (e, units) => {
+    const { editStep, doc, page, scale, shape } = latest.current;
+    const parsed = !previewing && !shape.vertices.length && editStep?.op === 'shape' ? verticesOf(editStep) : null;
+    const m = parsed && matrixOf(doc, editStep.id, { page });
+    const hit = m && hitVertex(geometry(parsed, m), units, VERTEX_PX / scale);
+
+    if(hit) {
+      pickVertex(e, hit, parsed, m, units, editStep);
+
+      return true;
+    }
+
+    const edge = m && e.altKey && onEdge(parsed, m, units);
+
+    if(!edge) return false;
+
+    addCorner(editStep, parsed, edge);
+
+    return true;
+  };
+  // a trapezoid cut-out in the bottom edge of the selected room (or in the edge after the selected corner)
+  const makeAlcove = () => {
+    const { editStep, doc, page, vsel } = latest.current;
+    const parsed = editStep?.op === 'shape' && editStep.closed ? verticesOf(editStep) : null;
+    const m = parsed && matrixOf(doc, editStep.id, { page });
+
+    if(!m) return;
+
+    const made = alcove(parsed.vertices, { seg: vsel ?? undefined, step: STEP / Math.hypot(m[0], m[1]) });
+
+    if(!made) {
+      setHint(tr('editor.alcove.none'));
+      setAnnounce(tr('editor.alcove.none'));
+
+      return;
+    }
+
+    dispatch({ type: 'setVertices', id: editStep.id, vertices: made.vertices });
+    setHist(history.seal);
+    setVsel(made.at);
+  };
   const shapeDown = units => {
     const { shape, scale, doc, aid } = latest.current;
     const near = CLOSE_PX / scale;
@@ -1734,10 +1833,35 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       return dispatch({ type: 'setClipPolygons', id: d.id, polygons: d.polys });
     }
 
+    if(lasso.current) {
+      const l = lasso.current;
+
+      if(Math.hypot(x - l.from[0], y - l.from[1]) > TAP_PX / latest.current.scale) l.moved = true;
+
+      if(l.moved) {
+        const inside = insideRect(l.geo, [l.from, [x, y]]);
+
+        setVsels(l.add ? [...l.base, ...inside.filter(i => !l.base.includes(i))] : inside);
+        setMarquee([l.from, [x, y]]);
+      }
+
+      return;
+    }
+
     if(vdrag.current) {
       const d = vdrag.current;
+      let to = [x, y];
 
-      return dispatch({ type: 'setVertices', id: d.id, vertices: dragVertices(d.base, d.hit, d.m, d.from, [x, y], { alt: e.altKey }) });
+      // in the room aid a corner stays on the grid
+      if(latest.current.aid && latest.current.tool === 'shape' && d.hit.kind === 'vertex') {
+        const v = d.base[d.hit.index];
+        const at = applyMatrix(d.m, [v.x, v.y]);
+        const grid = [at[0] + x - d.from[0], at[1] + y - d.from[1]].map(c => Math.round(c / STEP) * STEP);
+
+        to = [d.from[0] + grid[0] - at[0], d.from[1] + grid[1] - at[1]];
+      }
+
+      return dispatch({ type: 'setVertices', id: d.id, vertices: d.set.length > 1 && d.hit.kind === 'vertex' ? dragMany(d.base, d.set, d.m, d.from, to) : dragVertices(d.base, d.hit, d.m, d.from, to, { alt: e.altKey }) });
     }
 
     if(shaping.current) return setDraft(pull(latest.current.shape, [x, y], { alt: e.altKey }));
@@ -1791,6 +1915,17 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(vdrag.current) {
       setHist(history.seal);
       vdrag.current = null;
+
+      return;
+    }
+
+    if(lasso.current) {
+      const l = lasso.current;
+
+      lasso.current = null;
+      setMarquee(null);
+
+      if(!l.moved && !l.add) setSelected(null); // a plain tap on the empty stage
 
       return;
     }
@@ -2133,10 +2268,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const outline = selectedStep && outlineOf(doc, selectedStep.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true });
   const title = doc.title ?? '';
   const strip = auto || slideInfo ? [] : photoSteps(doc, page);
-  const parsedShape = editStep?.op === 'shape' && tool === 'select' ? verticesOf(editStep) : null;
+  const parsedShape = editStep?.op === 'shape' && (tool === 'select' || (tool === 'shape' && !shape.vertices.length)) ? verticesOf(editStep) : null;
   const clipGeo = tool === 'clip' && !previewing && editStep?.op === 'photo' ? clipPolygonsOf(doc, editStep.id) : null; // the clip outlines to ghost and edit
   const vertexGeo = parsedShape && matrixOf(doc, editStep.id, { page }) ? geometry(parsedShape, matrixOf(doc, editStep.id, { page })) : null;
-  const vertexInfo = vertexGeo && vsel !== null && vertexGeo[vsel] ? { index: vsel, broken: vertexGeo[vsel].broken, canDelete: !!removeVertex(parsedShape.vertices, vsel, editStep.closed) } : null;
+  const vertexInfo = vertexGeo && vsel !== null && vertexGeo[vsel] ? { index: vsel, broken: vertexGeo[vsel].broken, canDelete: !!removeVertices(parsedShape.vertices, vsels, editStep.closed) } : null;
 
   // the palette (E54): shown while the pen or a stroke / shape is selected
   const paletteTargets = tool === 'pen' || tool === 'shape' ? ['pen'] : editStep?.op === 'stroke' ? ['stroke'] : editStep?.op === 'shape' ? ['fill', 'outline'] : null;
@@ -2229,7 +2364,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsel} scale=${scale} />`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
+          overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsels} scale=${scale} />`}${marquee && html`<g fill="none" stroke-width=${1 / scale} shape-rendering="crispEdges" pointer-events="none">${['#ffffff', '#000000'].map((stroke, k) => html`<rect x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke=${stroke} stroke-dasharray=${k ? `${2 / scale} ${2 / scale}` : undefined} />`)}</g>`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           loupe=${coarse && tool !== 'select' && tool !== 'wand'}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
@@ -2255,6 +2390,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             <button type="button" class="wb-editor-chip" disabled=${shape.vertices.length < 2} onClick=${() => commitShape(shape)}>${t('editor.shape.finish')}</button>
             <button type="button" class="wb-editor-chip" disabled=${!shape.vertices.length} onClick=${() => setDraft(emptyDraft())}>${t('editor.shape.cancel')}</button>
             ${kind === 'gallery' && html`<button type="button" class="wb-editor-chip" aria-pressed=${roomAid ? 'true' : 'false'} onClick=${() => setRoomAid(on => !on)}>${t('editor.roomaid')}</button>`}
+            ${kind === 'gallery' && editStep?.op === 'shape' && editStep.closed && !shape.vertices.length && html`<button type="button" class="wb-editor-chip" title=${t('editor.alcove.hint')} onClick=${makeAlcove}>${t('editor.alcove')}</button>`}
             <span class="wb-editor-hint">${roomAid && kind === 'gallery' ? hint || t('editor.roomaid.hint') : t('editor.shape.hint')}</span>
           </div>`
         : tool === 'pen'
@@ -2263,7 +2399,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             ${kind === 'gallery' && html`<button type="button" class="wb-editor-chip" aria-pressed=${roomAid ? 'true' : 'false'} onClick=${() => setRoomAid(on => !on)}>${t('editor.roomaid')}</button>`}
             ${roomAid && kind === 'gallery' && html`<span class="wb-editor-hint">${t('editor.roomaid.pen')}</span>`}
           </div>`
-        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} pal=${pal} used=${usedNow} onCutout=${removeBackground} onCancelJob=${cancelJob} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
+        : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} onAlcove=${makeAlcove} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} pal=${pal} used=${usedNow} onCutout=${removeBackground} onCancelJob=${cancelJob} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       <${PlaceChip} t=${t} doc=${doc} photos=${photos} nodeId=${nodeId} />
       ${paletteTargets && html`<${Palette} t=${t} pal=${pal} used=${usedNow} dropper=${startDropper} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>

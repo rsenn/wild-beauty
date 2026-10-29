@@ -1,6 +1,6 @@
 // bun test: the room aid of a gallery node (client/editor/roomaid.js)
 import { describe, expect, test } from 'bun:test';
-import { STEP, canClose, corridorOf, corridorStep, roomsOf, snapVertex, wallOf } from '../../client/editor/roomaid.js';
+import { STEP, alcove, bottomEdge, canClose, corridorOf, corridorStep, roomsOf, snapVertex, wallOf } from '../../client/editor/roomaid.js';
 import { pathFromVertices } from '../../client/editor/shapes.js';
 import { acuteCorner, isWall } from '../../client/editor/walls.js';
 
@@ -83,5 +83,68 @@ describe('corridors', () => {
     expect(corridorOf([[300, 100], [600, 100]], rooms)).toBeNull();
     expect(corridorOf([[100, 100], [350, 100]], rooms)).toBeNull();
     expect(corridorOf([[100, 100]], rooms)).toBeNull();
+  });
+});
+
+describe('alcove', () => {
+  const room = v([0, 0], [17 * STEP, 0], [17 * STEP, 8 * STEP], [0, 8 * STEP]); // y grows downward: the bottom edge is the last one
+
+  test('the bottom edge is the lowest level straight one', () => {
+    expect(bottomEdge(room)).toBe(2);
+    expect(bottomEdge(v([0, 0], [100, 0], [100, 100]))).toBe(0); // the only level edge
+  });
+
+  test('four new corners in the bottom edge: two on it, two inside, sides at 45 degrees', () => {
+    const { vertices, at } = alcove(room);
+
+    expect(vertices.length).toBe(8);
+    expect(at).toBe(4);
+
+    const [p1, p2, p3, p4] = vertices.slice(3, 7);
+
+    expect([p1.y, p4.y]).toEqual([8 * STEP, 8 * STEP]); // on the edge
+    expect(p2.y).toBeLessThan(8 * STEP); // inside the room
+    expect(p3.y).toBe(p2.y);
+    expect(Math.abs(p2.x - p1.x)).toBeCloseTo(8 * STEP - p2.y, 1); // 45 degrees
+    expect(Math.abs(p4.x - p3.x)).toBeCloseTo(8 * STEP - p3.y, 1);
+    expect(Math.abs(p3.x - p2.x)).toBeGreaterThanOrEqual(STEP - 0.01); // a flat side of a step or more
+    expect(acuteCorner(vertices, true)).toBeFalsy();
+  });
+
+  test('every new corner is on the grid when the room is', () => {
+    const { vertices } = alcove(room);
+
+    for(const q of vertices.slice(3, 7)) {
+      expect(Math.abs(q.x / STEP - Math.round(q.x / STEP))).toBeLessThan(0.01);
+      expect(Math.abs(q.y / STEP - Math.round(q.y / STEP))).toBeLessThan(0.01);
+    }
+  });
+
+  test('works on any straight edge, going to the inside whichever way the room is wound', () => {
+    const turned = [...room].reverse();
+    const { vertices } = alcove(turned, { seg: bottomEdge(turned) });
+
+    expect(vertices.slice(3, 7).filter(q => q.y < 8 * STEP).length).toBe(2);
+  });
+
+  test('gets less deep to fit a shallow room, and refuses an edge that is too short or curved', () => {
+    const shallow = v([0, 0], [17 * STEP, 0], [17 * STEP, 0.8 * STEP], [0, 0.8 * STEP]);
+
+    expect(alcove(shallow)).toBeNull(); // not even one step deep fits
+    expect(alcove(v([0, 0], [4 * STEP, 0], [4 * STEP, 8 * STEP], [0, 8 * STEP]), { seg: 0 })).toBeNull(); // 4 steps
+    expect(alcove(room, { seg: 9 })).toBeNull();
+
+    const curved = room.map((q, i) => (i === 2 ? { ...q, hout: [10, 10] } : q));
+
+    expect(alcove(curved, { seg: 2 })).toBeNull();
+    expect(alcove(curved).vertices.length).toBe(8); // by default another, straight edge
+  });
+
+  test('does not run into another wall of a notched room', () => {
+    const u = v([0, 0], [17 * STEP, 0], [17 * STEP, 3 * STEP], [9 * STEP, 3 * STEP], [9 * STEP, 8 * STEP], [0, 8 * STEP]);
+    const { vertices } = alcove(u, { seg: 4 });
+
+    // the cut-out stays inside the room
+    expect(vertices.length).toBe(10);
   });
 });

@@ -7,6 +7,7 @@ import { verticesFromPath } from './shapes.js';
 
 export const WALL_HEIGHT = 3.2; // metres
 export const CORRIDOR_WIDTH = 2; // metres
+export const PARAPET_HEIGHT = 1; // metres: the wall of a corridor, a low bridge under the sky
 export const MIN_CORNER = 45; // degrees (the room aid turns by 0, 45, 90, 135)
 export const LIMITS = { height: [0.5, 10], width: [0.5, 10] };
 
@@ -55,4 +56,4 @@ export function wallProblem(step) {
 }
 
 // the default wall of a shape: rooms have a height, lines a width as well
-export const defaultWall = step => (step.closed ? { height: WALL_HEIGHT } : { height: WALL_HEIGHT, width: CORRIDOR_WIDTH });
+export const defaultWall = step => (step.closed ? { height: WALL_HEIGHT } : { height: PARAPET_HEIGHT, width: CORRIDOR_WIDTH });

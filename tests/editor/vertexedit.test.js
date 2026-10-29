@@ -1,6 +1,6 @@
 // bun test: client/editor/vertexedit.js and model.setVertices (E61)
 import { describe, expect, test } from 'bun:test';
-import { breakVertex, drag, geometry, hitVertex, joinVertex, removeVertex, verticesOf } from '../../client/editor/vertexedit.js';
+import { breakVertex, drag, dragMany, geometry, hitVertex, insideRect, joinVertex, removeVertex, removeVertices, verticesOf } from '../../client/editor/vertexedit.js';
 import { emptyNode, setVertices, validate } from '../../client/editor/model.js';
 import { pathFromVertices } from '../../client/editor/shapes.js';
 
@@ -105,5 +105,42 @@ describe('hitTest ops (clip tool)', () => {
     expect(hitTest(d, [150, 100], { photos: () => info, ops: ['photo'] })).toBe('photo001');
     expect(hitTest(d, [150, 100], { photos: () => info, ops: ['shape'] })).toBe('shape001');
     expect(hitTest(d, [450, 450], { photos: () => info, ops: ['shape'] })).toBe(null);
+  });
+});
+
+describe('several vertices at once', () => {
+  const quad = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 100 }, { x: 0, y: 100 }];
+
+  test('dragMany moves the named vertices by the same step and leaves the rest', () => {
+    const out = dragMany(quad, [1, 2], I, [50, 50], [30, 70]);
+
+    expect(out.map(q => [q.x, q.y])).toEqual([[0, 0], [80, 20], [80, 120], [0, 100]]);
+    expect(dragMany(quad, [], I, [0, 0], [5, 5])).toEqual(quad);
+  });
+
+  test('dragMany follows the matrix of the shape', () => {
+    const out = dragMany(quad, [0, 3], [2, 0, 0, 2, 0, 0], [0, 0], [20, 0]); // drawn at twice the size
+
+    expect(out[0].x).toBe(10);
+    expect(out[3].x).toBe(10);
+  });
+
+  test('removeVertices takes several out, but never leaves too few', () => {
+    expect(removeVertices(quad, [1], true).map(q => [q.x, q.y])).toEqual([[0, 0], [100, 100], [0, 100]]);
+    expect(removeVertices(quad, [3, 1], false).map(q => [q.x, q.y])).toEqual([[0, 0], [100, 100]]);
+    expect(removeVertices(quad, [0, 1], true)).toBeNull(); // a closed shape keeps three
+    expect(removeVertices(quad, [0, 1], false).length).toBe(2);
+    expect(removeVertices(quad, [0, 1, 2], false)).toBeNull();
+    expect(removeVertices(quad, [], true)).toBeNull();
+    expect(removeVertices(quad, [9], true)).toBeNull();
+  });
+
+  test('insideRect names the vertices within the rectangle, dragged in any direction', () => {
+    const geo = geometry({ vertices: quad, closed: true }, I);
+
+    expect(insideRect(geo, [[-10, -10], [110, 50]])).toEqual([0, 1]); // the top two
+    expect(insideRect(geo, [[110, 50], [-10, -10]])).toEqual([0, 1]); // from the other corner
+    expect(insideRect(geo, [[200, 200], [300, 300]])).toEqual([]);
+    expect(insideRect(geo, [[-10, -10], [110, 110]])).toEqual([0, 1, 2, 3]);
   });
 });
