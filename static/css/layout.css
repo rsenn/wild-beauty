@@ -904,6 +904,12 @@ body {
   background: var(--wb-gallery-ground);
   border: var(--wb-border-width) solid var(--wb-ink);
   box-shadow: var(--wb-shadow-card);
+
+  /* a long press is a control here (the flight stick, the chips), never a text selection or a callout */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .wb-gallery {

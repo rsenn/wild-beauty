@@ -7,7 +7,7 @@
 //         look on a desktop; on a touch screen a stick (left half) and drag-look
 //         (right half)
 //  overview  the bird's-eye flyby: the same stick, drag and keys fly the bird (the session
-//         pilots it, pilot.js); keys count only while the pointer is over the stage
+//         pilots it, flight/pilot.js); keys count only while the pointer is over the stage
 // Both: G toggles guide and free, + - and the wheel zoom. DOM only; `read()` hands
 // the walker the movement since the last call.
 //
@@ -26,7 +26,7 @@ const KEYS = {
   right: ['KeyD'],
   turnLeft: ['KeyQ', 'ArrowLeft'],
   turnRight: ['KeyE', 'ArrowRight'],
-  slipLeft: ['KeyZ'], // above the plan: a sideslip, held (pilot.js)
+  slipLeft: ['KeyZ'], // above the plan: a sideslip, held (flight/pilot.js)
   slipRight: ['KeyX'],
 };
 
@@ -50,7 +50,7 @@ const GUIDE = {
 // in both modes
 const ALWAYS = { KeyG: 'guide', Equal: 'zoomIn', NumpadAdd: 'zoomIn', Minus: 'zoomOut', NumpadSubtract: 'zoomOut' };
 
-// above the plan G and F are the bird's gear and flaps (the running gag, pilot.js)
+// above the plan G and F are the bird's gear and flaps (the running gag, flight/pilot.js)
 const FLY = { KeyG: 'gear', KeyF: 'flaps' };
 
 const LOOK = 0.0022; // radians per pixel of mouse drag

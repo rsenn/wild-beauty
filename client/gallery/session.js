@@ -19,10 +19,6 @@
 import { autoPlan } from './autoplan.js';
 import { OVERVIEW, overviewPose, planBounds } from './overview.js';
 import { makeFlyby } from './flyby.js';
-import { PILOT, checklist, createPilot } from './pilot.js';
-import { makeSound } from './sound.js';
-import { createCallouts } from './callouts.js';
-import { makeVoice } from './voice.js';
 import { buildGallery } from './build.js';
 import { planFromDoc } from './fromdoc.js';
 import { controls } from './controls.js';
@@ -30,6 +26,7 @@ import { hang } from './hang.js';
 import { nearest, stations } from './stations.js';
 import { createTour } from './tour.js';
 import { enterScene } from './scene.js';
+import { createTakeover } from './flight/takeover.js';
 import { createWalker } from './walk.js';
 
 // can this browser make a WebGL context at all
@@ -48,25 +45,6 @@ const SHARP = 4;
 
 // how fast the lens closes and opens, per second
 const LENS = { close: 5, open: 2 };
-
-// taking the controls of the flyby: the field of view of the bird, seconds without input before the bird
-// glides back onto its path, seconds that glide takes
-const PILOT_FOV = 62;
-const PILOT_GRACE = 60; // a minute: the bird flies on by itself (levelled, throttled back low over a floor) and the visitor can stay in the flare
-const PILOT_REJOIN = 2.4;
-const ATC_ARRIVED = 7; // seconds the ground control's last word stays
-const ATC_GATE = 1.5; // metres from the first picture's station that count as the gate
-
-const wrapAngle = a => ((a + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
-const mixPose = (a, b, k) => ({
-  x: a.x + (b.x - a.x) * k,
-  y: a.y + (b.y - a.y) * k,
-  z: a.z + (b.z - a.z) * k,
-  yaw: a.yaw + wrapAngle(b.yaw - a.yaw) * k,
-  pitch: a.pitch + (b.pitch - a.pitch) * k,
-  roll: a.roll + (b.roll - a.roll) * k,
-  fov: a.fov + (b.fov - a.fov) * k,
-});
 
 export async function startGallery(canvas, { items, scene, doc, name = '', overview = false, onOpen, onLock, onLost, onState, onLens, onStick, onNote, onFlight } = {}) {
   if(!webgl()) throw new Error('webgl');
@@ -93,26 +71,25 @@ export async function startGallery(canvas, { items, scene, doc, name = '', overv
 
   if(overview) mode = 'overview';
 
-  // the visitor has the bird (pilot.js), the gear and the flaps (the running gag, sound.js)
-  let pilot = null;
-  let rejoin = null; // { t, from, now }: the bird glides back onto the flyby's path
-  let idle = 0;
-  let slipHeld = 0;
-  let aids = 0; // seconds since the instruments were last sent
-  let landing = null; // the pilot that has just landed
-  let touched = false; // the touchdown has been announced; the bird is rolling out
-  let atc = null; // ground control after a landing: { phase: welcome | taxi | arrived, gate, name }
-  let atcClock = 0;
-  let noted = false; // the hint about the controls is given once
-  let gear = false;
-  let flaps = 0;
-  const sound = makeSound();
-  const voice = makeVoice();
-  const callouts = createCallouts(voice.say);
+  // the visitor can take the controls of the flyby (flight/takeover.js, the running gag)
+  const flight = createTakeover(built, {
+    walker,
+    list,
+    tour,
+    name,
+    onNote,
+    onFlight,
+    onLanded: q => {
+      // the bird has stopped on a floor: the visitor walks from here
+      lastFly = q;
+      command('walk');
+      free();
+    },
+  });
   const state = () => {
     const here = list[tour.index];
 
-    return { mode, index: tour.index, total: list.length, moving: tour.moving, zoomed: tour.zoomTarget > 1.05, title: here?.child?.title ?? '', canOpen: !!here?.child?.href, piloting: !!pilot, gear, flaps, atc };
+    return { mode, index: tour.index, total: list.length, moving: tour.moving, zoomed: tour.zoomTarget > 1.05, title: here?.child?.title ?? '', canOpen: !!here?.child?.href, ...flight.state() };
   };
   const emit = () => {
     const now = state();
@@ -141,13 +118,10 @@ export async function startGallery(canvas, { items, scene, doc, name = '', overv
     while(sharp.length > SHARP) g.world.downgrade(sharp.shift());
   };
 
-  // the gate: the first picture of the guided tour, by its title or else by its number
-  const gate = () => list[0]?.child?.title || `1/${list.length}`;
   const guide = i => {
     if(!list.length) return;
 
-    // asking for the first picture while ground control offers a taxi is taking the taxi
-    if(atc) atc = atc.phase !== 'arrived' && i === 0 ? { ...atc, phase: 'taxi' } : null;
+    flight.ground.guided(i); // the first picture, with a taxi on offer, is taking it
 
     mode = 'guide';
     if(document.pointerLockElement) document.exitPointerLock?.();
@@ -161,30 +135,8 @@ export async function startGallery(canvas, { items, scene, doc, name = '', overv
     emit();
   };
   const command = name => {
-    if(mode === 'overview' && name === 'gear') {
-      gear = !gear;
-      idle = 0; // a switch is a control too
-      sound.gear(gear);
-      onNote?.(gear ? 'gear.down' : 'gear.up');
+    if(mode === 'overview' && flight.command(name)) {
       emit();
-
-      return;
-    }
-
-    if(mode === 'overview' && name === 'flaps') {
-      const from = flaps;
-
-      flaps = (flaps + 1) % (PILOT.flaps + 1);
-      idle = 0;
-      sound.flaps(flaps, from);
-      onNote?.(`flaps.${flaps}`);
-      emit();
-
-      return;
-    }
-
-    if(mode === 'overview' && name.startsWith('slip')) {
-      slipHeld = name === 'slipLeft' ? -1 : name === 'slipRight' ? 1 : 0; // the chips for touch hold it
 
       return;
     }
@@ -197,7 +149,7 @@ export async function startGallery(canvas, { items, scene, doc, name = '', overv
       target = 1;
       origin = lastFly && { ...lastFly };
       mode = list.length ? 'guide' : 'free';
-      pilot = rejoin = null;
+      flight.release();
       emit();
 
       return;
@@ -206,18 +158,10 @@ export async function startGallery(canvas, { items, scene, doc, name = '', overv
     if(name === 'overview') {
       target = 0;
       origin = null;
-      atc = null;
       flyT = 0; // the flyby starts at the bird's-eye view
       lastFly = null;
-      pilot = rejoin = null;
-      slipHeld = 0;
-      touched = false;
-      sound.thrust(0);
-      onFlight?.(null);
-      voice.cancel();
+      flight.reset();
       mode = 'overview';
-      gear = false;
-      flaps = 0;
       tour.release();
       if(document.pointerLockElement) document.exitPointerLock?.();
       emit();
@@ -228,7 +172,7 @@ export async function startGallery(canvas, { items, scene, doc, name = '', overv
     const steps = { next: tour.next, prev: tour.prev, first: tour.first, last: tour.last };
 
     if(steps[name]) return mode === 'guide' && steps[name]();
-    if(name === 'guide') return mode === 'guide' ? free() : atc?.phase === 'welcome' ? guide(0) : guide();
+    if(name === 'guide') return mode === 'guide' ? free() : flight.ground.offered() ? guide(0) : guide();
     if(name === 'zoomIn') return tour.zoomBy(1.3);
     if(name === 'zoomOut') return tour.zoomBy(1 / 1.3);
     if(name === 'zoomReset') return tour.zoomReset();
@@ -321,89 +265,7 @@ export async function startGallery(canvas, { items, scene, doc, name = '', overv
         }
 
         if(fly) {
-          const moving = inp.moving || slipHeld !== 0;
-
-          idle = moving ? 0 : idle + dt;
-
-          // a touch, a key or a drag takes the controls and pauses the loop; let go and it glides back
-          if(moving && !pilot) {
-            pilot = createPilot(built, rejoin?.now ?? lastFly);
-            pilot.gear = gear ? 1 : 0;
-            pilot.flapsAt = flaps;
-            rejoin = null;
-            touched = false;
-            callouts.reset();
-            if(!noted) onNote?.('fly');
-            noted = true;
-          }
-
-          let q;
-
-          if(pilot) {
-            const [bounced, belly, skidded] = [pilot.bounced, pilot.belly, pilot.skidded];
-
-            pilot.step(dt, { ...inp, gear, flaps, slip: inp.slip || slipHeld });
-            if(pilot.skidded > skidded) onNote?.('skid');
-            else if(pilot.belly > belly) onNote?.('belly');
-            else if(pilot.bounced > bounced) onNote?.('bounce');
-
-            q = { ...pilot.pose(), fov: PILOT_FOV };
-            const ins = pilot.instruments();
-
-            if(!pilot.landed) callouts.step(dt, ins); // the radar altimeter's voice and the proximity warnings
-
-            if(onFlight && (aids += dt) >= 0.1) {
-              aids = 0;
-              onFlight({ ...ins, landed: !!pilot.landed, check: checklist(ins) });
-            }
-
-            if(pilot.landed && !touched) {
-              touched = true;
-              voice.cancel();
-
-              if(pilot.medal) {
-                sound.fanfare();
-                onNote?.('medal');
-              } else onNote?.('touchdown');
-            }
-
-            if(pilot.landed) sound.thrust(pilot.reverse); // the reverse thrust spools up and stows
-
-            if(pilot.stopped) {
-              // rolled out and stopped: the visitor walks from here
-              walker.x = pilot.x;
-              walker.y = pilot.y;
-              walker.yaw = pilot.yaw;
-              walker.pitch = 0;
-              walker.eye = pilot.h;
-              lastFly = q;
-              landing = pilot;
-              pilot = null;
-              onFlight?.(null);
-              voice.cancel();
-              sound.thrust(0);
-              command('walk');
-              free();
-              atc = { phase: 'welcome', gate: gate(), name };
-              atcClock = 0;
-            } else if(!pilot.landed && idle > PILOT_GRACE) {
-              rejoin = { t: 0, from: q, now: q };
-              pilot = null;
-              onFlight?.(null);
-              voice.cancel();
-            }
-          } else {
-            const base = fly.pose((flyT += dt));
-
-            if(rejoin) {
-              rejoin.t += dt / PILOT_REJOIN;
-
-              const k = Math.min(1, rejoin.t);
-
-              q = rejoin.now = mixPose(rejoin.from, base, k * k * (3 - 2 * k));
-              if(rejoin.t >= 1) rejoin = null;
-            } else q = base;
-          }
+          const q = flight.step(dt, inp, lastFly, () => fly.pose((flyT += dt)));
 
           lastFly = q;
           camera.position.set(q.x, q.y, q.z);
@@ -413,15 +275,9 @@ export async function startGallery(canvas, { items, scene, doc, name = '', overv
         }
       }
 
-      // ground control: the gate is reached, by a taxi or on foot
-      if(atc && atc.phase !== 'arrived' && list.length && (mode === 'guide' ? tour.index === 0 && !tour.moving : Math.hypot(walker.x - list[0].x, walker.y - list[0].y) < ATC_GATE)) {
-        atc = { ...atc, phase: 'arrived' };
-        atcClock = 0;
-      }
+      flight.ground.step(dt, mode); // the gate is reached, by a taxi or on foot
 
-      if(atc?.phase === 'arrived' && (atcClock += dt) > ATC_ARRIVED) atc = null;
-
-      if(g.world.trail) g.world.trail.paused = !!(flying && fly) || !!pilot; // no footprints from a camera that flies
+      if(g.world.trail) g.world.trail.paused = !!(flying && fly) || flight.state().piloting; // no footprints from a camera that flies
 
       if(Math.abs(camera.fov - fov) > 0.01) {
         camera.fov = fov;
@@ -452,8 +308,7 @@ export async function startGallery(canvas, { items, scene, doc, name = '', overv
     state,
     dispose() {
       canvas.removeEventListener('webglcontextlost', lost);
-      sound.dispose();
-      voice.cancel();
+      flight.dispose();
       input?.dispose();
       g.dispose();
     },

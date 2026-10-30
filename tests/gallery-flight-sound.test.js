@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { makeSound } from '../client/gallery/sound.js';
+import { makeSound } from '../client/gallery/flight/sound.js';
 
 // a context that counts what is scheduled
 function fake() {

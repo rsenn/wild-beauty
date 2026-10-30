@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
-import { Medal } from './Medal.js';
+import { Medal } from '../gallery/flight/Medal.js';
 import { useI18n } from '../i18n.js';
 import { fitHeight } from '../gallery/fit.js';
 import { IconButton } from './GalleryTools.js';

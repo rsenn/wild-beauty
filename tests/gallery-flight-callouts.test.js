@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { createCallouts } from '../client/gallery/callouts.js';
-import { makeVoice, pick } from '../client/gallery/voice.js';
+import { createCallouts } from '../client/gallery/flight/callouts.js';
+import { makeVoice, pick } from '../client/gallery/flight/voice.js';
 
 const run = (heights, { vs = -1, gear = 1, flaps = 3, dt = 0.1 } = {}) => {
   const said = [];

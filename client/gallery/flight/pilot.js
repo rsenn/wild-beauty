@@ -14,8 +14,8 @@
 // After a touchdown the bird rolls out: the wheels brake, the reverse thrust spools up (`rollout.spool`
 // seconds from idle, so it takes a moment to bite), stows when the bird is slow and it stops: `stopped`.
 
-import { EYE } from './scene.js';
-import { collide } from './walk.js';
+import { EYE } from '../scene.js';
+import { collide } from '../walk.js';
 
 export const PILOT = {
   cruise: 8, // metres per second

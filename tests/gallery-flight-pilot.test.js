@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { createPilot, PILOT } from '../client/gallery/pilot.js';
+import { createPilot, PILOT } from '../client/gallery/flight/pilot.js';
 
 // a floor 20 m square at height 0, walls round it
 const built = {
@@ -140,7 +140,7 @@ describe('deserves a medal', () => {
   const good = { sink: 0.6, pitch: 0.02, roll: 0.01, flaps: 3, bounced: 0 };
 
   test('gentle, level, flaps out, no bounce', async () => {
-    const { deserves } = await import('../client/gallery/pilot.js');
+    const { deserves } = await import('../client/gallery/flight/pilot.js');
 
     expect(deserves(good)).toBe(true);
     expect(deserves({ ...good, flaps: 0 })).toBe(false); // no flaps: a landing, no medal
@@ -200,7 +200,7 @@ describe('sideslip', () => {
 
 describe('checklist', () => {
   test('gear, flaps and slip as the aids show them', async () => {
-    const { checklist } = await import('../client/gallery/pilot.js');
+    const { checklist } = await import('../client/gallery/flight/pilot.js');
 
     expect(checklist({ gear: 1, flaps: 3, slip: 0 })).toEqual({ gear: 'ok', flaps: 'ok', slip: 'ok' });
     expect(checklist({ gear: 0.5, flaps: 1, slip: 0.4 })).toEqual({ gear: 'wait', flaps: 'wait', slip: 'no' });

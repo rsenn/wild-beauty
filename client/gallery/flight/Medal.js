@@ -1,6 +1,6 @@
 // The medal for a perfect landing from the flyby (GALLERY.md, the running gag): a gold disc with a
 // star and spread wings on a ribbon, drawn as SVG. The colours are the metal's own, not the theme's.
-import { html } from '../html.js';
+import { html } from '../../html.js';
 
 const feather = 'M52 99 C44 95 33 95 22 102 C33 101 41 103 48 108 Z';
 const wing = html`
