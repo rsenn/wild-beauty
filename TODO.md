@@ -64,7 +64,7 @@ State: all of the work below is committed and pushed (last: `d2ae0104`). The cam
 
 ### Housekeeping
 - [ ] Leftover test cut-outs in `uploads/` expire on their own (7 days).
-- [ ] Restart the dev server on port 3001 (and deploy the live site) to see the latest work.
+- [ ] Restart the dev server on port 3001 to see the latest work (the live site is this local server, deploying is a restart).
 
 ### Dropped on purpose
 - Panorama stitching (2026-10-29).
@@ -477,7 +477,7 @@ Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
 - [x] **13.10 Stale tiles**: a node saved before server-side tiles (or as a plain photo collage) showed one
       photo in the graph and the gallery. `needsRender` (`server/media/raster.js`) now also covers photo-only collages
       (several photos on page 0, or one faded, blended or clipped); `bun tools/retile.js [--dry] [--force] [ids]`
-      (`server/node/retile.js`) re-renders the stale ones, the node itself untouched. Run it once after deploying.
+      (`server/node/retile.js`) re-renders the stale ones, the node itself untouched. **Do not run it**: tiles are now rendered in the browser on save (WYSIWYG).
 - [x] **13.11 Guided walk** (`stations.js`, `route.js` A* over the floor, `tour.js`, `controls.js` modes, `session.js`,
       HUD in `GalleryView.js`): the gallery starts guided at picture 1; arrows / Space / swipe / buttons go to the next or
       previous picture (a sideways glide along a wall, a routed walk across corners, doors and corridors), wheel / pinch /
