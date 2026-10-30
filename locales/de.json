@@ -438,10 +438,14 @@
   "gallery.fly.flaps.3": "Klappen voll.",
   "gallery.fly.belly": "Fahrwerk oben! Bauchlandung. Durchstarten.",
   "gallery.fly.bounce": "Zu hart. Durchstarten.",
-  "gallery.fly.touchdown": "Aufgesetzt. Willkommen in der Galerie.",
+  "gallery.fly.touchdown": "Aufgesetzt. Schubumkehr grün.",
   "gallery.fly.medal": "Perfekte Landung! Goldene Flügel.",
   "gallery.fly.slip": "Slippen",
   "gallery.fly.slip.left": "Slip links",
   "gallery.fly.slip.right": "Slip rechts",
+  "gallery.atc.button": "Rollen",
+  "gallery.atc.welcome": "Boden: Willkommen in {name}. Bahn verlassen. Rollen Sie zu Gate {gate}: auf Rollen tippen, oder rollen Sie selbst hin.",
+  "gallery.atc.taxi": "Boden: Rollen zu Gate {gate}, folgen Sie den grünen Mittellinienfeuern.",
+  "gallery.atc.arrived": "Boden: Gate {gate}. Feststellbremse gesetzt. Danke, dass Sie mit Wild Beauty geflogen sind.",
   "gallery.fly.skid": "Noch im Slip! Vor dem Abfangen geradeaus."
 }

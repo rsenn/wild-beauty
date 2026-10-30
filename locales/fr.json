@@ -438,10 +438,14 @@
   "gallery.fly.flaps.3": "Volets plein.",
   "gallery.fly.belly": "Train rentré ! Atterrissage sur le ventre. Remise de gaz.",
   "gallery.fly.bounce": "Trop dur. Remise de gaz.",
-  "gallery.fly.touchdown": "Contact. Bienvenue dans la galerie.",
+  "gallery.fly.touchdown": "Contact. Inverseurs verts.",
   "gallery.fly.medal": "Atterrissage parfait ! Ailes d'or.",
   "gallery.fly.slip": "Glissade",
   "gallery.fly.slip.left": "Glissade à gauche",
   "gallery.fly.slip.right": "Glissade à droite",
+  "gallery.atc.button": "Roulage",
+  "gallery.atc.welcome": "Sol : Bienvenue à {name}. Piste dégagée. Roulez vers la porte {gate} : touchez Roulage, ou rejoignez-la vous-même.",
+  "gallery.atc.taxi": "Sol : Roulez vers la porte {gate}, suivez les feux verts d'axe.",
+  "gallery.atc.arrived": "Sol : Porte {gate}. Frein de parking serré. Merci d'avoir volé avec Wild Beauty.",
   "gallery.fly.skid": "Encore en glissade ! Redressez avant l'arrondi."
 }

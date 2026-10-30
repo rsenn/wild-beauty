@@ -55,6 +55,7 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
         startGallery(canvas.current, {
           items,
           doc,
+          name: label,
           overview,
           onLock: setLocked,
           onFlight: v => {
@@ -76,7 +77,8 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
             const mark = { ok: '✓', wait: '…', no: '✗' };
             const c = v.check;
 
-            list.textContent = `GEAR ${mark[c.gear]}  FLAPS ${Math.round(v.flaps)}${mark[c.flaps]}  SLIP ${mark[c.slip]}`;
+            if(v.landed) list.textContent = `REVERSE ${v.reverse > 0.95 ? 'GREEN' : v.reverse > 0.02 ? 'TRANSIT' : 'IDLE'}`;
+            else list.textContent = `GEAR ${mark[c.gear]}  FLAPS ${Math.round(v.flaps)}${mark[c.flaps]}  SLIP ${mark[c.slip]}`;
             el.dataset.warn = v.ra !== null && v.ra < 12 && v.vs < -2.4 ? 'sink' : ''; // a sink rate that is too much for the height left
           },
           onStick: v => {
@@ -271,9 +273,10 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
             <button type="button" class="wb-editor-chip" disabled=${hud.index >= hud.total - 1} aria-label=${t('gallery.next')} onClick=${() => live.current?.command('next')}>▶</button>
           `}
           ${hud.mode === 'guide' && hud.canOpen && html`<button type="button" class="wb-editor-chip" onClick=${() => live.current?.command('open')}>${t('gallery.open')}</button>`}
-          <button type="button" class="wb-editor-chip" onClick=${() => live.current?.command('guide')}>${t(hud.mode === 'guide' ? 'gallery.free' : 'gallery.guide')}</button>
+          <button type="button" class="wb-editor-chip" onClick=${() => live.current?.command('guide')}>${t(hud.mode === 'guide' ? 'gallery.free' : hud.atc?.phase === 'welcome' ? 'gallery.atc.button' : 'gallery.guide')}</button>
         </div>
       `}
+      ${state === 'live' && hud?.atc && html`<p class="wb-gallery-note wb-gallery-atc" role="status">${t(`gallery.atc.${hud.atc.phase}`, { name: hud.atc.name, gate: hud.atc.gate })}</p>`}
       ${medal && html`<${Medal} label=${t('gallery.fly.medal')} onClose=${() => setMedal(false)} />`}
       ${overview && state === 'live' && !walking && note && html`<p class="wb-gallery-note wb-gallery-help" role="status">${t(`gallery.fly.${note}`)}</p>`}
       ${overview && state === 'live' && !walking && hud?.piloting && html`
@@ -283,7 +286,7 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
           <button type="button" class="wb-editor-chip" aria-label=${t('gallery.fly.slip.right')} onPointerDown=${() => live.current?.command('slipRight')} onPointerUp=${() => live.current?.command('slipOff')} onPointerLeave=${() => live.current?.command('slipOff')} onPointerCancel=${() => live.current?.command('slipOff')}>${t('gallery.fly.slip')} ▶</button>
           <button type="button" class="wb-editor-chip" aria-pressed=${hud.gear} onClick=${() => live.current?.command('gear')}>${t('gallery.fly.gear')}</button>
         </div>`}
-      ${inside && help && !locked && html`<p class="wb-gallery-note wb-gallery-help" role="status" onClick=${() => setHelp(false)}>${t(hud?.mode === 'free' ? 'gallery.help' : 'gallery.help.guide')}</p>`}
+      ${inside && help && !locked && !hud?.atc && html`<p class="wb-gallery-note wb-gallery-help" role="status" onClick=${() => setHelp(false)}>${t(hud?.mode === 'free' ? 'gallery.help' : 'gallery.help.guide')}</p>`}
     </div>
   `;
 };

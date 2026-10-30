@@ -207,3 +207,58 @@ describe('checklist', () => {
     expect(checklist({ gear: 0, flaps: 0, slip: 0 })).toEqual({ gear: 'no', flaps: 'no', slip: 'ok' });
   });
 });
+
+describe('rollout', () => {
+  const landed = () => {
+    const p = createPilot(built, at(12));
+
+    fly(p, 12, { forward: 1, gear: true });
+
+    return p;
+  };
+  const roll = (p, seconds = 15) => {
+    let t = 0;
+
+    for(; t < seconds && !p.stopped; t += 1 / 60) p.step(1 / 60, { forward: 1 });
+
+    return t;
+  };
+
+  test('after the touchdown the bird brakes level on the floor and stops', () => {
+    const p = landed();
+    const [x, y] = [p.x, p.y];
+    const took = roll(p);
+
+    expect(p.stopped).toBe(true);
+    expect(took).toBeGreaterThan(1.5);
+    expect(took).toBeLessThan(10);
+    expect(Math.hypot(p.x - x, p.y - y)).toBeGreaterThan(0.3);
+    expect(Math.abs(p.pitch)).toBeLessThan(0.05);
+    expect(p.instruments().vs).toBe(0);
+  });
+
+  test('the reverse thrust spools up from idle, and stows when the bird is slow', () => {
+    const p = landed();
+
+    p.step(1 / 60, {});
+    expect(p.reverse).toBeLessThan(0.1);
+
+    let peak = 0;
+
+    for(let t = 0; t < 15 && !p.stopped; t += 1 / 60) {
+      p.step(1 / 60, {});
+      peak = Math.max(peak, p.reverse);
+    }
+
+    expect(peak).toBe(1);
+    expect(p.reverse).toBeLessThan(0.5);
+  });
+
+  test('a wall stops the roll', () => {
+    const p = landed();
+
+    p.y = 39.5; // the bird is facing north, the wall is at 40
+    roll(p);
+    expect(p.y).toBeLessThan(40);
+  });
+});

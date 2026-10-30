@@ -3,6 +3,7 @@
 // is made on the first sound, which always follows a key or a tap; no context, no sound.
 //
 //   const s = makeSound();  s.gear(true);  s.flaps(2, 1);  s.fanfare();  s.dispose()
+// `thrust(level)` is the reverse thrust after a touchdown, 0..1, set every frame: a roar that rises with it.
 // `gear(down)` plays the whole 5 s cycle; `flaps(notch, from)` a short motor run, longer for more notches.
 
 export const SOUND = {
@@ -97,7 +98,56 @@ export function makeSound({ context = () => new (globalThis.AudioContext ?? glob
     hiss(at, size * 0.8, { freq: 500, gain: gain * 0.5, attack: 0.003, release: size * 0.7 });
   };
 
+  let engine = null; // the reverse thrust while it runs: { src, filter, amp, osc, whine }
+
   const api = {
+    // the reverse thrust: the engines' roar and a whine, louder and brighter with `level`; 0 lets it die away
+    thrust(level) {
+      if(level <= 0.001 && !engine) return true;
+      if(!ready()) return false;
+
+      ctx.resume?.();
+
+      if(!engine) {
+        const src = ctx.createBufferSource();
+        const filter = ctx.createBiquadFilter();
+        const amp = ctx.createGain();
+        const osc = ctx.createOscillator();
+        const whine = ctx.createGain();
+
+        src.buffer = noise;
+        src.loop = true;
+        filter.type = 'lowpass';
+        filter.Q.value = 0.8;
+        amp.gain.value = 0.0001;
+        osc.type = 'sawtooth';
+        whine.gain.value = 0.0001;
+        src.connect(filter).connect(amp).connect(master);
+        osc.connect(whine).connect(master);
+        src.start();
+        osc.start();
+        engine = { src, filter, amp, osc, whine };
+      }
+
+      const now = ctx.currentTime;
+      const l = Math.max(0, Math.min(1, level));
+
+      engine.filter.frequency.setTargetAtTime(250 + 1400 * l, now, 0.1);
+      engine.amp.gain.setTargetAtTime(Math.max(0.0001, 1.1 * l), now, 0.12);
+      engine.osc.frequency.setTargetAtTime(70 + 110 * l, now, 0.15);
+      engine.whine.gain.setTargetAtTime(Math.max(0.0001, 0.05 * l), now, 0.12);
+
+      if(l <= 0.001) {
+        const e = engine;
+
+        engine = null;
+        e.src.stop(now + 1);
+        e.osc.stop(now + 1);
+      }
+
+      return true;
+    },
+
     // the gear comes down (true) or goes up (false): the doors, the pump, the air, the lock
     gear(down) {
       if(!ready()) return false;
@@ -158,6 +208,7 @@ export function makeSound({ context = () => new (globalThis.AudioContext ?? glob
     },
 
     dispose() {
+      engine = null;
       ctx?.close?.();
       ctx = null;
     },

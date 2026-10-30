@@ -2228,3 +2228,8 @@ body {
   border: 1px solid var(--wb-select);
   border-radius: 50%;
 }
+
+/* ground control after a landing: a written transmission over the stage */
+.wb-gallery-atc {
+  text-align: left;
+}

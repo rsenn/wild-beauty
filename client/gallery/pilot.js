@@ -11,6 +11,8 @@
 // controls: the wing goes down on one side and the nose points the other way, the track does not turn, the
 // drag and the sink grow; it eases out when let go, and has to be out before the flare. The gear takes its time to come down (`GEAR` seconds), the flaps (`FLAPS`
 // notches, a notch in `NOTCH` seconds) slow the bird down and make it draggy.
+// After a touchdown the bird rolls out: the wheels brake, the reverse thrust spools up (`rollout.spool`
+// seconds from idle, so it takes a moment to bite), stows when the bird is slow and it stops: `stopped`.
 
 import { EYE } from './scene.js';
 import { collide } from './walk.js';
@@ -39,6 +41,7 @@ export const PILOT = {
   notch: 1.1, // seconds a flap notch takes
   flaps: 3, // notches
   medal: { sink: 1, roll: 0.12, nose: 0.2, flaps: 2 }, // a perfect landing: gentle, level, flaps out, no bounce on the way
+  rollout: { friction: 0.35, reverse: 1.1, spool: 1.2, stow: 0.9, stop: 0.25 }, // m/s² of the wheels and of full reverse, seconds to spool up, the speed where it stows and where the bird stands
   drag: [0.07, 0.06], // the share of the speed the gear (all the way down) and a flap notch take away
 };
 
@@ -57,14 +60,39 @@ export const checklist = (ins, o = PILOT) => ({
 
 // `from` is a pose of the camera { x, y, z, yaw, pitch, roll } in scene coordinates (z = -plan y)
 export function createPilot(built, from, o = PILOT) {
-  const p = { x: from.x, y: -from.z, h: from.y, yaw: from.yaw, pitch: from.pitch, roll: from.roll ?? 0, speed: o.cruise, rate: 0, sink: 0, bounced: 0, belly: 0, skidded: 0, gear: 0, flapsAt: 0, slip: 0 };
+  const p = { x: from.x, y: -from.z, h: from.y, yaw: from.yaw, pitch: from.pitch, roll: from.roll ?? 0, speed: o.cruise, rate: 0, sink: 0, bounced: 0, belly: 0, skidded: 0, gear: 0, flapsAt: 0, slip: 0, reverse: 0 };
   const floorAt = () => built.floorHeightAt(p.x, p.y);
+
+  // the roll after a touchdown: level on the floor, braking, the reverse thrust spooling up and down
+  const rollout = dt => {
+    const r = o.rollout;
+
+    p.reverse = clamp(p.reverse + clamp((p.speed > r.stow ? 1 : 0) - p.reverse, -dt / (r.spool * 0.5), dt / r.spool), 0, 1);
+    p.speed = Math.max(0, p.speed - (r.friction + r.reverse * p.reverse) * dt);
+    p.pitch += clamp(-p.pitch, -dt, dt);
+    p.roll += clamp(-p.roll, -dt, dt);
+    p.slip = 0;
+    p.sink = 0;
+
+    const [nx, ny] = [p.x + Math.sin(p.yaw) * p.speed * dt, p.y + Math.cos(p.yaw) * p.speed * dt];
+
+    [p.x, p.y] = collide(nx, ny, o.radius, built.collision);
+
+    const here = floorAt();
+
+    if(here !== null) p.h = here + EYE + 0.05;
+    if(p.speed <= r.stop) p.stopped = true;
+
+    return p;
+  };
 
   // input as the walker's: forward (+ pushes the nose down, as a flight stick), strafe and turn (right +),
   // look [dyaw, dpitch] from a drag (up pitches up), run (shift: faster)
   // -> { landed } on a touchdown; `crashed` counts the bounces
   p.step = (dt, { forward = 0, strafe = 0, turn = 0, look = [0, 0], run = false, gear = false, flaps = 0, slip = 0 } = {}) => {
     dt = Math.min(dt, 0.1);
+
+    if(p.landed) return rollout(dt);
 
     // the slip eases in and out; it slows the bird and sinks it
     p.slip += (clamp(slip, -1, 1) - p.slip) * Math.min(1, dt * o.slip.ease);
@@ -161,7 +189,7 @@ export function createPilot(built, from, o = PILOT) {
   p.instruments = () => {
     const floor = floorAt();
 
-    return { ra: floor === null ? null : Math.max(0, p.h - floor - EYE), vs: -(-Math.sin(p.pitch) * p.speed + Math.abs(p.slip) * o.slip.sink), speed: p.speed, slip: p.slip, gear: p.gear, flaps: p.flapsAt };
+    return { ra: floor === null ? null : Math.max(0, p.h - floor - EYE), vs: p.landed ? 0 : -(-Math.sin(p.pitch) * p.speed + Math.abs(p.slip) * o.slip.sink), speed: p.speed, slip: p.slip, gear: p.gear, flaps: p.flapsAt, reverse: p.reverse };
   };
 
   // the camera pose, scene coordinates

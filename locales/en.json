@@ -438,10 +438,14 @@
   "gallery.fly.flaps.3": "Flaps full.",
   "gallery.fly.belly": "Gear up! Belly landing. Go around.",
   "gallery.fly.bounce": "Too hard. Go around.",
-  "gallery.fly.touchdown": "Touchdown. Welcome to the gallery.",
+  "gallery.fly.touchdown": "Touchdown. Reverse green.",
   "gallery.fly.medal": "Perfect landing! Gold wings.",
   "gallery.fly.slip": "Slip",
   "gallery.fly.slip.left": "Slip left",
   "gallery.fly.slip.right": "Slip right",
+  "gallery.atc.button": "Taxi",
+  "gallery.atc.welcome": "Ground: Welcome to {name}. Runway vacated. Taxi to gate {gate}: press Taxi, or roll there yourself.",
+  "gallery.atc.taxi": "Ground: Taxi to gate {gate}, follow the green centreline lights.",
+  "gallery.atc.arrived": "Ground: Gate {gate}. Parking brake set. Thanks for flying Wild Beauty.",
   "gallery.fly.skid": "Still slipping! Straighten out before the flare."
 }

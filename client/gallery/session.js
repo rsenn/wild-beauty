@@ -14,7 +14,7 @@
 // the auto plan (autoplan.js). `overview` starts above the gallery (overview.js);
 // command('walk') flies down to the first picture and command('overview') back up.
 // `doc` is the node's own document: its drawn walls
-// make the plan (fromdoc.js).
+// make the plan (fromdoc.js). `name` is the gallery's name, for the ground control's welcome.
 
 import { autoPlan } from './autoplan.js';
 import { OVERVIEW, overviewPose, planBounds } from './overview.js';
@@ -54,6 +54,8 @@ const LENS = { close: 5, open: 2 };
 const PILOT_FOV = 62;
 const PILOT_GRACE = 60; // a minute: the bird flies on by itself (levelled, throttled back low over a floor) and the visitor can stay in the flare
 const PILOT_REJOIN = 2.4;
+const ATC_ARRIVED = 7; // seconds the ground control's last word stays
+const ATC_GATE = 1.5; // metres from the first picture's station that count as the gate
 
 const wrapAngle = a => ((a + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
 const mixPose = (a, b, k) => ({
@@ -66,7 +68,7 @@ const mixPose = (a, b, k) => ({
   fov: a.fov + (b.fov - a.fov) * k,
 });
 
-export async function startGallery(canvas, { items, scene, doc, overview = false, onOpen, onLock, onLost, onState, onLens, onStick, onNote, onFlight } = {}) {
+export async function startGallery(canvas, { items, scene, doc, name = '', overview = false, onOpen, onLock, onLost, onState, onLens, onStick, onNote, onFlight } = {}) {
   if(!webgl()) throw new Error('webgl');
 
   // `?look=warm|walnut|stone` picks the surfaces of the auto plan (autoplan.js LOOKS)
@@ -98,6 +100,9 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
   let slipHeld = 0;
   let aids = 0; // seconds since the instruments were last sent
   let landing = null; // the pilot that has just landed
+  let touched = false; // the touchdown has been announced; the bird is rolling out
+  let atc = null; // ground control after a landing: { phase: welcome | taxi | arrived, gate, name }
+  let atcClock = 0;
   let noted = false; // the hint about the controls is given once
   let gear = false;
   let flaps = 0;
@@ -107,7 +112,7 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
   const state = () => {
     const here = list[tour.index];
 
-    return { mode, index: tour.index, total: list.length, moving: tour.moving, zoomed: tour.zoomTarget > 1.05, title: here?.child?.title ?? '', canOpen: !!here?.child?.href, piloting: !!pilot, gear, flaps };
+    return { mode, index: tour.index, total: list.length, moving: tour.moving, zoomed: tour.zoomTarget > 1.05, title: here?.child?.title ?? '', canOpen: !!here?.child?.href, piloting: !!pilot, gear, flaps, atc };
   };
   const emit = () => {
     const now = state();
@@ -136,8 +141,13 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
     while(sharp.length > SHARP) g.world.downgrade(sharp.shift());
   };
 
+  // the gate: the first picture of the guided tour, by its title or else by its number
+  const gate = () => list[0]?.child?.title || `1/${list.length}`;
   const guide = i => {
     if(!list.length) return;
+
+    // asking for the first picture while ground control offers a taxi is taking the taxi
+    if(atc) atc = atc.phase !== 'arrived' && i === 0 ? { ...atc, phase: 'taxi' } : null;
 
     mode = 'guide';
     if(document.pointerLockElement) document.exitPointerLock?.();
@@ -196,10 +206,13 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
     if(name === 'overview') {
       target = 0;
       origin = null;
+      atc = null;
       flyT = 0; // the flyby starts at the bird's-eye view
       lastFly = null;
       pilot = rejoin = null;
       slipHeld = 0;
+      touched = false;
+      sound.thrust(0);
       onFlight?.(null);
       voice.cancel();
       mode = 'overview';
@@ -215,7 +228,7 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
     const steps = { next: tour.next, prev: tour.prev, first: tour.first, last: tour.last };
 
     if(steps[name]) return mode === 'guide' && steps[name]();
-    if(name === 'guide') return mode === 'guide' ? free() : guide();
+    if(name === 'guide') return mode === 'guide' ? free() : atc?.phase === 'welcome' ? guide(0) : guide();
     if(name === 'zoomIn') return tour.zoomBy(1.3);
     if(name === 'zoomOut') return tour.zoomBy(1 / 1.3);
     if(name === 'zoomReset') return tour.zoomReset();
@@ -318,6 +331,7 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
             pilot.gear = gear ? 1 : 0;
             pilot.flapsAt = flaps;
             rejoin = null;
+            touched = false;
             callouts.reset();
             if(!noted) onNote?.('fly');
             noted = true;
@@ -336,15 +350,27 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
             q = { ...pilot.pose(), fov: PILOT_FOV };
             const ins = pilot.instruments();
 
-            callouts.step(dt, ins); // the radar altimeter's voice and the proximity warnings
+            if(!pilot.landed) callouts.step(dt, ins); // the radar altimeter's voice and the proximity warnings
 
             if(onFlight && (aids += dt) >= 0.1) {
               aids = 0;
-              onFlight({ ...ins, check: checklist(ins) });
+              onFlight({ ...ins, landed: !!pilot.landed, check: checklist(ins) });
             }
 
-            if(pilot.landed) {
-              // touched down: the visitor walks from here
+            if(pilot.landed && !touched) {
+              touched = true;
+              voice.cancel();
+
+              if(pilot.medal) {
+                sound.fanfare();
+                onNote?.('medal');
+              } else onNote?.('touchdown');
+            }
+
+            if(pilot.landed) sound.thrust(pilot.reverse); // the reverse thrust spools up and stows
+
+            if(pilot.stopped) {
+              // rolled out and stopped: the visitor walks from here
               walker.x = pilot.x;
               walker.y = pilot.y;
               walker.yaw = pilot.yaw;
@@ -355,13 +381,12 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
               pilot = null;
               onFlight?.(null);
               voice.cancel();
+              sound.thrust(0);
               command('walk');
               free();
-              if(landing.medal) {
-                sound.fanfare();
-                onNote?.('medal');
-              } else onNote?.('touchdown');
-            } else if(idle > PILOT_GRACE) {
+              atc = { phase: 'welcome', gate: gate(), name };
+              atcClock = 0;
+            } else if(!pilot.landed && idle > PILOT_GRACE) {
               rejoin = { t: 0, from: q, now: q };
               pilot = null;
               onFlight?.(null);
@@ -387,6 +412,14 @@ export async function startGallery(canvas, { items, scene, doc, overview = false
           fov = q.fov;
         }
       }
+
+      // ground control: the gate is reached, by a taxi or on foot
+      if(atc && atc.phase !== 'arrived' && list.length && (mode === 'guide' ? tour.index === 0 && !tour.moving : Math.hypot(walker.x - list[0].x, walker.y - list[0].y) < ATC_GATE)) {
+        atc = { ...atc, phase: 'arrived' };
+        atcClock = 0;
+      }
+
+      if(atc?.phase === 'arrived' && (atcClock += dt) > ATC_ARRIVED) atc = null;
 
       if(g.world.trail) g.world.trail.paused = !!(flying && fly) || !!pilot; // no footprints from a camera that flies
 

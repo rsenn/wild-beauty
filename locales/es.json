@@ -438,10 +438,14 @@
   "gallery.fly.flaps.3": "Flaps completos.",
   "gallery.fly.belly": "¡Tren arriba! Aterrizaje de panza. Al aire.",
   "gallery.fly.bounce": "Demasiado duro. Al aire.",
-  "gallery.fly.touchdown": "Contacto. Te damos la bienvenida a la galería.",
+  "gallery.fly.touchdown": "Contacto. Inversores verdes.",
   "gallery.fly.medal": "¡Aterrizaje perfecto! Alas de oro.",
   "gallery.fly.slip": "Resbalamiento",
   "gallery.fly.slip.left": "Resbalar a la izquierda",
   "gallery.fly.slip.right": "Resbalar a la derecha",
+  "gallery.atc.button": "Rodaje",
+  "gallery.atc.welcome": "Tierra: Bienvenido a {name}. Pista libre. Ruede a la puerta {gate}: pulse Rodaje, o llegue usted mismo.",
+  "gallery.atc.taxi": "Tierra: Ruede a la puerta {gate}, siga las luces verdes del eje.",
+  "gallery.atc.arrived": "Tierra: Puerta {gate}. Freno de estacionamiento puesto. Gracias por volar con Wild Beauty.",
   "gallery.fly.skid": "¡Aún resbalando! Endereza antes de la recogida."
 }
