@@ -217,12 +217,12 @@ export const saveNew = (h, body, { viewer = null } = {}) =>
 // `rev` is still the stored one, else 409 with the current rev. Only uploads
 // are baked (a photo the node already had is kept); photos the node no longer
 // uses and nobody else does are removed. -> { status, body }
-export const saveUpdate = (h, id, body, { holder = null, now = Date.now } = {}) =>
+export const saveUpdate = (h, id, body, { holder = null, viewer = null, now = Date.now } = {}) =>
   serial(async () => {
     const node = getNode(h, id);
 
     if(!node) return { status: 404, body: { error: 'not_found' } };
-    if(!canEdit(node, null)) return { status: 403, body: { error: 'forbidden' } };
+    if(!canEdit(node, viewer)) return { status: 403, body: { error: 'forbidden' } };
     const locked = lockedByOther(h, id, holder, now());
 
     if(locked) return { status: 423, body: lockedBody(locked) };
@@ -273,12 +273,12 @@ export const saveUpdate = (h, id, body, { holder = null, now = Date.now } = {}) 
 
 // Delete node `id`: the row, its photo rows, edges and lock go with it, then
 // every photo nobody else uses, with its file and thumbnail. -> { status, body }
-export const removeNode = (h, id, { holder = null, now = Date.now } = {}) =>
+export const removeNode = (h, id, { holder = null, viewer = null, now = Date.now } = {}) =>
   serial(async () => {
     const node = getNode(h, id);
 
     if(!node) return { status: 404, body: { error: 'not_found' } };
-    if(!canEdit(node, null)) return { status: 403, body: { error: 'forbidden' } };
+    if(!canEdit(node, viewer)) return { status: 403, body: { error: 'forbidden' } };
 
     const locked = lockedByOther(h, id, holder, now());
 
@@ -330,7 +330,8 @@ export async function updateNodeRoute(req, idText, h) {
   if(error) return error;
 
   const session = sessionFor(req);
-  const r = await saveUpdate(h ?? (await database()), Number(idText), body, { holder: session.holder });
+  const db = h ?? (await database());
+  const r = await saveUpdate(db, Number(idText), body, { holder: session.holder, viewer: viewerOf(db, req) });
 
   return reply(r.status, r.body, session);
 }
@@ -389,7 +390,7 @@ export async function putLargeRoute(req, idText, h) {
   const node = /^\d{1,15}$/.test(idText) ? getNode(db, Number(idText)) : null;
 
   if(!node) return fail(404, 'not_found');
-  if(!canEdit(node, null)) return fail(403, 'forbidden');
+  if(!canEdit(node, viewerOf(db, req))) return fail(403, 'forbidden');
   if((req.headers.get('content-type') ?? '').toLowerCase() !== 'image/jpeg') return fail(415, 'invalid');
   if(Number(req.headers.get('content-length') ?? 0) > MAX_LARGE) return fail(413, 'too_large');
   if(!node.tile || !needsRender(node.doc) || getPhoto(db, node.tile)) return fail(409, 'no_tile');
@@ -453,7 +454,8 @@ export async function deleteNodeRoute(idText, h, req) {
   if(!/^\d{1,15}$/.test(idText)) return fail(404, 'not_found');
 
   const session = req ? sessionFor(req) : { holder: null };
-  const r = await removeNode(h ?? (await database()), Number(idText), { holder: session.holder });
+  const db = h ?? (await database());
+  const r = await removeNode(db, Number(idText), { holder: session.holder, viewer: req ? viewerOf(db, req) : null });
 
   return r.status === 204 ? new Response(null, { status: 204 }) : reply(r.status, r.body);
 }

@@ -4,7 +4,7 @@ import { open } from '../server/db/db.js';
 import { insertNode } from '../server/db/nodes.js';
 import { guard } from '../server/guard.js';
 import { loginRoute, logoutRoute, meRoute, registerRoute, saveUser, viewerOf } from '../server/auth.js';
-import { canView, listedNodes, visibilityRoute, visibleNodes } from '../server/api/nodes.js';
+import { canView, deleteNodeRoute, listedNodes, updateNodeRoute, visibilityRoute, visibleNodes } from '../server/api/nodes.js';
 import { applyOp, graphOf } from '../server/api/graph.js';
 
 let h, mine, theirs, community, owner, other;
@@ -215,5 +215,28 @@ describe('publish from the graph, and the site out of the tree', () => {
     expect(ids).not.toContain(mine); // space 'janos', owned by `owner`
     expect(visibleNodes(h, { id: owner }).map(n => n.id)).not.toContain(mine);
     expect(listedNodes(h, { id: owner }).map(n => n.id)).toContain(mine); // but the user's own list has it
+  });
+});
+
+describe('the write routes know the user (an owned node can be saved by its owner)', () => {
+  const put = (cookie, id, body = { rev: 1 }) => updateNodeRoute(req('PUT', `/api/nodes/${id}`, { headers: cookie ? { cookie } : {}, body }), String(id), h);
+
+  test('save: the owner gets past the permission check, others do not', async () => {
+    const a = (await cookieFor('a@example.org', 'pw-a')).cookie;
+    const b = (await cookieFor('b@example.org', 'pw-b')).cookie;
+
+    // an empty document is refused as invalid (400), which is after the permission check (403)
+    expect((await put(a, mine, { rev: 1, doc: {} })).status).toBe(400);
+    expect((await put(b, mine)).status).toBe(403);
+    expect((await put(null, mine)).status).toBe(403);
+    expect((await put(null, community, { rev: 1, doc: {} })).status).toBe(400); // the open area
+  });
+
+  test('delete: the owner may, others may not', async () => {
+    const a = (await cookieFor('a@example.org', 'pw-a')).cookie;
+    const b = (await cookieFor('b@example.org', 'pw-b')).cookie;
+
+    expect((await deleteNodeRoute(String(mine), h, req('DELETE', `/api/nodes/${mine}`, { headers: { cookie: b } }))).status).toBe(403);
+    expect((await deleteNodeRoute(String(mine), h, req('DELETE', `/api/nodes/${mine}`, { headers: { cookie: a } }))).status).toBe(204);
   });
 });
