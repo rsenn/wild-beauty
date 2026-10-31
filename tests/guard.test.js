@@ -240,3 +240,14 @@ describe('the write routes know the user (an owned node can be saved by its owne
     expect((await deleteNodeRoute(String(mine), h, req('DELETE', `/api/nodes/${mine}`, { headers: { cookie: a } }))).status).toBe(204);
   });
 });
+
+describe('the kinds of a site', () => {
+  test('a page and a site root are valid kinds, so their nodes can be saved', async () => {
+    const { validateNode } = await import('../server/node/validate.js');
+    const doc = { v: 1, mode: 'free', style: {}, pages: [{ id: 'page0001', steps: [] }] };
+
+    for(const kind of ['node', 'page', 'site']) expect(validateNode({ doc, kind, rev: 1 }, { hasPhoto: () => true }).ok).toBe(true);
+
+    expect(validateNode({ doc, kind: 'nonsense', rev: 1 }, { hasPhoto: () => true }).ok).toBe(false);
+  });
+});

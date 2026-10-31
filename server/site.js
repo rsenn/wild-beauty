@@ -43,3 +43,19 @@ export function sitemapXml(site, map) {
 }
 
 export const robotsTxt = site => `User-agent: *\nAllow: /\nDisallow: /edit\nSitemap: ${site.url}/sitemap.xml\n`;
+
+// Where /edit goes for a site (SITES.md): the editor on the wild-beauty host with the page's node open,
+// behind a login. `/edit` and `/edit/` are the home page, `/edit/<slug>` the page with that slug (a
+// draft too); an unknown slug, or a site without pages, goes to the editor's list -> URL | null (not an edit path)
+export function editLocation(h, site, pathname) {
+  const m = /^\/edit(?:\/([a-z0-9-]*))?\/?$/.exec(pathname);
+
+  if(!m) return null;
+
+  const node = m[1] ? h.get('SELECT id FROM nodes WHERE space = ? AND slug = ?', site.id, m[1]) : sitemap(h, site)?.pages[0]?.node;
+  const url = new URL(site.editUrl);
+
+  if(node) url.searchParams.set('edit', String(node.id));
+
+  return url.href;
+}

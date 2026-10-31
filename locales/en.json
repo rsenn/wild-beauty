@@ -139,6 +139,8 @@
   "editor.kind.album": "Album",
   "editor.kind.gallery": "Gallery",
   "editor.kind.shop": "Shop",
+  "editor.kind.page": "Page",
+  "editor.kind.site": "Site",
   "editor.visibility.public": "Public",
   "editor.visibility.hidden": "Private",
   "editor.visibility.fixed": "Save the node first; only its owner changes this",

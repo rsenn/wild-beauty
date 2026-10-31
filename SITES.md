@@ -417,6 +417,11 @@ create and change them, logged in or not) next to the **accounts**.
   In the graph editor a *Publish* / *Unpublish* button acts on the selected nodes
   that are the user's (graph op `visibility`; private nodes are drawn dimmed with a
   dashed frame). A node nobody owns has no visibility to change.
+- **Edit links:** `/de/new?edit=<node id>` on the wild-beauty host asks for a login
+  (the dialog cannot be dismissed) and then opens that node in the editor. On the
+  site host `/edit` and `/edit/` redirect to it for the home page, `/edit/<slug>` for
+  that page (a draft too; an unknown slug lands on the editor's list), so
+  `https://www.jános.ch/edit/about` is the link to give out (`server/site.js editLocation`).
 - **The site is not in the tree:** the nodes of a site (`space`) are left out of the
   tree and the "Show" gallery for everybody, their owner included; they are in the
   owner's "Saved nodes" list. (So the sitemap cannot be built in the tree yet; the

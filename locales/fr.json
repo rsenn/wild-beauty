@@ -139,6 +139,8 @@
   "editor.kind.album": "Album",
   "editor.kind.gallery": "Galerie",
   "editor.kind.shop": "Boutique",
+  "editor.kind.page": "Page web",
+  "editor.kind.site": "Site web",
   "editor.visibility.public": "Public",
   "editor.visibility.hidden": "Privé",
   "editor.visibility.fixed": "Enregistrez d’abord ; seul le propriétaire peut le changer",

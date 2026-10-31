@@ -50,7 +50,8 @@ export const emptyNode = () => ({ v: VERSION, style: {}, mode: 'free', pages: [{
 
 export const BLENDS = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten'];
 // what a node is for (a hint for views, EDITOR.md S2.9); lives next to the document, not in it
-export const KINDS = ['node', 'list', 'album', 'gallery', 'shop'];
+// `page` and `site` are the nodes of a personal site (SITES.md): the pages, and the root that lists them
+export const KINDS = ['node', 'list', 'album', 'gallery', 'shop', 'page', 'site'];
 // the legacy `fit` of a photo step (before the square crop, EDITOR.md S2.5): only read to migrate
 export const FITS = ['extend', 'cover', 'free'];
 export const FILLS = ['loose', 'tight'];

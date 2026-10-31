@@ -26,7 +26,7 @@ import { sessionFor } from './server/session.js';
 import { guard, mayWrite } from './server/guard.js';
 import { loginRoute, logoutRoute, meRoute, registerRoute, viewerOf } from './server/auth.js';
 import { siteFor } from './server/sites.js';
-import { resolve as resolvePage, robotsTxt, sitemap, sitemapXml } from './server/site.js';
+import { editLocation, resolve as resolvePage, robotsTxt, sitemap, sitemapXml } from './server/site.js';
 import { peer, recordEvents } from './server/events.js';
 import { capabilities, detectTools } from './server/media/tools.js';
 
@@ -137,13 +137,16 @@ async function page(lang, titleKey, extra, title, req) {
 }
 
 // GET /:lang/new: the upload area, the editor and the saved nodes (E68)
-// `?site=<id>` (from /edit/ on a site host) asks for a login first, when there is none
+// `?site=<id>` (from /edit/ on a site host) and `?edit=<node id>` ask for a login first, when there is
+// none; with a login, `?edit=` opens that node in the editor
 async function newPage(lang, req) {
   const h = await database();
   const viewer = viewerOf(h, req);
-  const wanted = new URL(req.url).searchParams.has('site');
+  const params = new URL(req.url).searchParams;
+  const edit = /^\d{1,15}$/.test(params.get('edit') ?? '') ? Number(params.get('edit')) : null;
+  const wanted = params.has('site') || edit !== null;
 
-  return page(lang, 'page.title.new', { nodes: listedNodes(h, viewer), ...(wanted && !viewer && { loginRequired: true }) }, undefined, req);
+  return page(lang, 'page.title.new', { nodes: listedNodes(h, viewer), ...(wanted && !viewer && { loginRequired: true }), ...(edit !== null && viewer && { edit }) }, undefined, req);
 }
 
 // GET /:lang/gallery: every saved node as a picture of one 3D gallery ("Show")
@@ -199,7 +202,9 @@ async function siteRoute(req, site, pathname, h) {
   if(/^\/(static|vendor|app)\//.test(pathname) || pathname.startsWith('/files/photos/') || pathname === '/sw.js') return null;
 
   if(pathname === '/manifest.webmanifest') return manifestResponse(site);
-  if(pathname === '/edit' || pathname === '/edit/') return new Response(null, { status: 302, headers: { location: site.editUrl, 'cache-control': 'no-store' } });
+  const edit = editLocation(h, site, pathname);
+
+  if(edit) return new Response(null, { status: 302, headers: { location: edit, 'cache-control': 'no-store' } });
 
   const map = sitemap(h, site);
 

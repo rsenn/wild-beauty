@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test } from 'bun:test';
 import { open } from '../server/db/db.js';
 import { addLink, insertNode } from '../server/db/nodes.js';
 import { siteFor, siteById } from '../server/sites.js';
-import { resolve, sitemap, sitemapXml } from '../server/site.js';
+import { editLocation, resolve, sitemap, sitemapXml } from '../server/site.js';
 
 const site = siteById('janos');
 let h;
@@ -59,5 +59,24 @@ describe('sitemap', () => {
 
   test('sitemap.xml lists the paths', () => {
     expect(sitemapXml(site, sitemap(h, site))).toContain('<loc>https://www.xn--jnos-5na.ch/about</loc>');
+  });
+});
+
+describe('editLocation', () => {
+  const at = path => editLocation(h, { ...site, editUrl: 'https://wb.example/de/new?site=janos' }, path);
+  const idOf = slug => h.get('SELECT id FROM nodes WHERE slug = ?', slug).id;
+
+  test('/edit is the home page, /edit/<slug> a page, both behind the editor link', () => {
+    expect(at('/edit')).toBe(`https://wb.example/de/new?site=janos&edit=${idOf('home')}`);
+    expect(at('/edit/')).toBe(at('/edit'));
+    expect(at('/edit/about')).toBe(`https://wb.example/de/new?site=janos&edit=${idOf('about')}`);
+  });
+
+  test('a draft page can be edited, an unknown slug falls back to the list, other paths are not edit paths', () => {
+    h.run("UPDATE nodes SET visibility = 'hidden' WHERE slug = 'contact'");
+    expect(at('/edit/contact')).toContain(`edit=${idOf('contact')}`);
+    expect(at('/edit/nope')).toBe('https://wb.example/de/new?site=janos');
+    expect(at('/about')).toBeNull();
+    expect(at('/editor')).toBeNull();
   });
 });

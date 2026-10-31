@@ -16,7 +16,7 @@ export const Properties = ({ t, kind, bg, pal, used = [], dropper, onOpen, dispa
       ${open &&
       html`<div id="wb-editor-props-panel" class="wb-editor-popover" role="group" aria-label=${t('editor.props')} onKeyDown=${e => e.key === 'Escape' && (e.stopPropagation(), setOpen(false))}>
         <label class="wb-editor-field">${t('editor.props.kind')}
-          <select onChange=${e => dispatch({ type: 'setKind', kind: e.target.value })}>${KINDS.map(k => html`<option value=${k} selected=${k === kind}>${t('editor.kind.' + k)}</option>`)}</select>
+          <select onChange=${e => dispatch({ type: 'setKind', kind: e.target.value })}>${KINDS.filter(k => k !== 'site' || k === kind).map(k => html`<option value=${k} selected=${k === kind}>${t('editor.kind.' + k)}</option>`)}</select>
         </label>
         <label class="wb-editor-field">${t('editor.props.visibility')}
           <select disabled=${!canPublish} title=${canPublish ? undefined : t('editor.visibility.fixed')} onChange=${e => onVisibility?.(e.target.value)}>

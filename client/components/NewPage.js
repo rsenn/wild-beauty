@@ -20,6 +20,11 @@ export const NewPage = () => {
   const [number, setNumber] = useState('');
   const [nodes, setNodes] = useState(boot.nodes ?? []);
 
+  // a link with ?edit=<id> (logged in) opens that node at once
+  useEffect(() => {
+    if(boot.edit) openEditor(boot.edit);
+  }, []);
+
   // an upload card's "add to node" opens the editor when none is open; the
   // editor picks the queued photo up when it mounts
   useEffect(() => {
