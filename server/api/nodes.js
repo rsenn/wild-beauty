@@ -180,8 +180,8 @@ function dropUnused(h, hashes) {
 }
 
 // Create a node from `body` ({ doc, kind? }) -> { status, body }. `h` is the database,
-// `viewer` the logged-in user who becomes its owner.
-export const saveNew = (h, body, { viewer = null } = {}) =>
+// `viewer` the logged-in user who becomes its owner, `space` the site it is made on.
+export const saveNew = (h, body, { viewer = null, space = null } = {}) =>
   serial(async () => {
     const checked = validateNode(body, { hasPhoto: photoLookup(h) });
 
@@ -197,6 +197,9 @@ export const saveNew = (h, body, { viewer = null } = {}) =>
       // a logged-in user's new node is theirs: only they change it (server/guard.js),
       // and it is hidden until they make it public
       if(viewer) h.run("UPDATE nodes SET owner_id = ?, visibility = 'hidden' WHERE id = ?", viewer.id, node.id);
+
+      // made on a personal site: a node of that site
+      if(viewer && space) h.run('UPDATE nodes SET space = ? WHERE id = ?', space, node.id);
 
       setNodePhotos(h, node.id, checked.photos);
       addSuggestions(h, node.id, ready.positions);
@@ -310,13 +313,13 @@ async function jsonBody(req) {
 }
 
 // POST /api/nodes
-export async function createNode(req, h) {
+export async function createNode(req, h, { space = null } = {}) {
   const { body, error } = await jsonBody(req);
 
   if(error) return error;
 
   const db = h ?? (await database());
-  const r = await saveNew(db, body, { viewer: viewerOf(db, req) });
+  const r = await saveNew(db, body, { viewer: viewerOf(db, req), space });
 
   return reply(r.status, r.body);
 }

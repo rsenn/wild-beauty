@@ -241,6 +241,18 @@ body {
   margin: 0 0 8px;
 }
 
+.wb-editor-addbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 0 0 8px;
+}
+
+.wb-editor-addbar .wb-quickadd {
+  margin: 0;
+}
+
 .wb-quickadd-button {
   cursor: pointer;
 }
@@ -1601,6 +1613,15 @@ body {
     padding-left: 8px;
   }
 
+  /* the title takes a line of its own, the buttons wrap below it */
+  .wb-editor-head {
+    flex-wrap: wrap;
+  }
+
+  .wb-editor-title {
+    flex: 1 1 100%;
+  }
+
   .wb-editor-stage {
     border-right-width: 0;
     border-left-width: 0;
@@ -2579,4 +2600,134 @@ body {
   width: 36px;
   height: 36px;
   object-fit: cover;
+}
+
+/* the session recording tick box on /new (RecordConsent.js) */
+.wb-record {
+  margin: 16px 0;
+  max-width: 60em;
+}
+
+.wb-record-more summary {
+  cursor: pointer;
+  width: fit-content;
+  margin-top: 2px;
+}
+
+.wb-record-text {
+  margin: 4px 0 0;
+}
+
+.wb-record-blocked {
+  color: var(--wb-error-frame);
+}
+
+/* the admin panel (AdminPage.js) */
+.wb-admin {
+  margin: 8px 0 24px;
+}
+
+.wb-admin-tabs,
+.wb-admin-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 0 0 10px;
+}
+
+.wb-admin-filters label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wb-admin-filters input[type="text"] {
+  width: 9em;
+}
+
+.wb-admin-note {
+  margin: 4px 0;
+  opacity: 0.75;
+}
+
+.wb-admin-error {
+  color: var(--wb-error-frame);
+  opacity: 1;
+}
+
+.wb-admin-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18em, 1fr));
+  gap: 10px;
+}
+
+.wb-admin-card {
+  padding: 8px 10px;
+  border: var(--wb-border-width) solid var(--wb-ink);
+}
+
+.wb-admin-card h3 {
+  margin: 0 0 6px;
+}
+
+.wb-admin-card dl {
+  margin: 0;
+}
+
+.wb-admin-card dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 0;
+  border-bottom: var(--wb-border-width) solid var(--wb-ink-soft);
+}
+
+.wb-admin-card dd {
+  margin: 0;
+  text-align: right;
+  font-weight: bold;
+}
+
+.wb-admin-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.wb-admin-table {
+  border-collapse: collapse;
+  min-width: 100%;
+  white-space: nowrap;
+}
+
+.wb-admin-table th,
+.wb-admin-table td {
+  padding: 3px 8px;
+  text-align: left;
+  border-bottom: var(--wb-border-width) solid var(--wb-ink-soft);
+}
+
+.wb-admin-click {
+  cursor: pointer;
+}
+
+.wb-admin-click:hover,
+.wb-admin-picked {
+  background: var(--wb-ink-soft);
+}
+
+.wb-admin-detail {
+  margin-top: 14px;
+  padding: 8px 10px;
+  border: var(--wb-border-width) solid var(--wb-ink);
+}
+
+.wb-admin-detail h3 {
+  margin: 0 0 4px;
+  word-break: break-all;
+}
+
+.wb-admin-player {
+  max-width: 100%;
+  overflow: auto;
 }

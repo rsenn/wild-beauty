@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test } from 'bun:test';
 import { open } from '../server/db/db.js';
 import { insertNode } from '../server/db/nodes.js';
 import { guard } from '../server/guard.js';
-import { loginRoute, logoutRoute, meRoute, registerRoute, saveUser, viewerOf } from '../server/auth.js';
+import { changePassword, loginRoute, logoutRoute, meRoute, registerRoute, saveUser, setUsername, viewerOf } from '../server/auth.js';
 import { canView, deleteNodeRoute, listedNodes, updateNodeRoute, visibilityRoute, visibleNodes } from '../server/api/nodes.js';
 import { applyOp, graphOf } from '../server/api/graph.js';
 
@@ -249,5 +249,52 @@ describe('the kinds of a site', () => {
     for(const kind of ['node', 'page', 'site']) expect(validateNode({ doc, kind, rev: 1 }, { hasPhoto: () => true }).ok).toBe(true);
 
     expect(validateNode({ doc, kind: 'nonsense', rev: 1 }, { hasPhoto: () => true }).ok).toBe(false);
+  });
+});
+
+describe('changePassword', () => {
+  test('the new password works, the old one does not, and the sessions end', async () => {
+    const { cookie } = await cookieFor('a@example.org', 'pw-a');
+
+    expect(await changePassword(h, 'A@Example.org', 'brand-new')).toBe(true);
+    expect((await cookieFor('a@example.org', 'pw-a')).res.status).toBe(401);
+    expect((await cookieFor('a@example.org', 'brand-new')).res.status).toBe(204);
+    expect(viewerOf(h, req('GET', '/', { headers: { cookie } }))).toBeNull();
+    expect(await changePassword(h, 'nobody@example.org', 'whatever')).toBe(false);
+  });
+
+  test('the sessions can be kept', async () => {
+    const { cookie } = await cookieFor('b@example.org', 'pw-b');
+
+    await changePassword(h, 'b@example.org', 'brand-new', { revoke: false });
+    expect(viewerOf(h, req('GET', '/', { headers: { cookie } }))?.email).toBe('b@example.org');
+  });
+});
+
+describe('usernames', () => {
+  test('a user logs in with the username or the mail address, in any case', async () => {
+    expect(setUsername(h, 'a@example.org', 'Anna')).toBe(true);
+    expect((await cookieFor('anna', 'pw-a')).res.status).toBe(204);
+    expect((await cookieFor('ANNA', 'pw-a')).res.status).toBe(204);
+    expect((await cookieFor('a@example.org', 'pw-a')).res.status).toBe(204);
+    expect((await cookieFor('anna', 'wrong')).res.status).toBe(401);
+    expect((await cookieFor('bernd', 'pw-b')).res.status).toBe(401);
+    expect(viewerOf(h, req('GET', '/', { headers: { cookie: (await cookieFor('anna', 'pw-a')).cookie } })).username).toBe('Anna');
+  });
+
+  test('unique, no @, not too odd, can be taken away', async () => {
+    expect(setUsername(h, 'a@example.org', 'anna')).toBe(true);
+    expect(setUsername(h, 'b@example.org', 'ANNA')).toBe('taken');
+    expect(setUsername(h, 'a@example.org', 'anna')).toBe(true); // its own again
+    for(const bad of ['a', 'x@y.ch', 'has space', '-lead', 'x'.repeat(31)]) expect(setUsername(h, 'b@example.org', bad)).toBe('invalid');
+    expect(setUsername(h, 'nobody@example.org', 'nobody')).toBe('no_user');
+    expect(setUsername(h, 'a@example.org', null)).toBe(true);
+    expect((await cookieFor('anna', 'pw-a')).res.status).toBe(401);
+  });
+
+  test('the password can be changed by username', async () => {
+    setUsername(h, 'b@example.org', 'bernd');
+    expect(await changePassword(h, 'bernd', 'brand-new')).toBe(true);
+    expect((await cookieFor('bernd', 'brand-new')).res.status).toBe(204);
   });
 });

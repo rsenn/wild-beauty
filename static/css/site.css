@@ -82,3 +82,134 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* the owner's buttons: a row in the lower right corner, within a thumb's reach */
+.site-owner {
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  max-width: calc(100vw - 1.5rem);
+}
+
+.site-owner-button {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 1rem;
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--wb-ink);
+  background: var(--wb-wallpaper-color);
+  border: var(--wb-border-width) solid var(--wb-ink);
+  border-radius: var(--wb-radius-button);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.site-owner-main {
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+}
+
+.site-owner-button:hover,
+.site-owner-button:focus-visible {
+  background: var(--wb-accent-hover);
+  color: var(--wb-accent-ink);
+}
+
+/* the tool pages (/edit, /graph): wider than a page's stage, room for the owner buttons below */
+.site-tool {
+  width: 100%;
+  max-width: 60rem;
+  box-sizing: border-box;
+  padding-bottom: 5rem;
+}
+
+.site-editing .wb-header {
+  justify-content: flex-start;
+}
+
+.site-editing .site-link {
+  opacity: 1;
+}
+
+.site-graph .site-tool,
+.site-graph .wb-graph {
+  max-width: none;
+}
+
+.site-graph .wb-graph {
+  width: 100%;
+  height: calc(100dvh - 8rem);
+}
+
+.site-pages {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  width: 100%;
+}
+
+.site-page {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0;
+  border-bottom: var(--wb-border-width) solid var(--wb-ink-soft);
+}
+
+.site-page-title {
+  flex: 1 1 10rem;
+}
+
+.site-state {
+  opacity: 0.55;
+  font-size: 0.85rem;
+}
+
+.site-live {
+  opacity: 1;
+}
+
+.site-new {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.site-new input {
+  flex: 1 1 12rem;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 0.75rem;
+  font: inherit;
+  border: var(--wb-border-width) solid var(--wb-ink);
+  border-radius: var(--wb-radius-button);
+}
+
+/* the session recording choice, folded away at the foot of a page (RecordConsent.js) */
+.site-foot {
+  width: 100%;
+  max-width: 40rem;
+  margin-top: 2rem;
+  padding-bottom: 4rem;
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+.site-foot summary {
+  cursor: pointer;
+  text-align: center;
+}
+
+.site-foot:focus-within,
+.site-foot:hover {
+  opacity: 1;
+}

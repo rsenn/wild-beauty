@@ -58,7 +58,7 @@ State: all of the work below is committed and pushed (last: `d2ae0104`). The cam
 - [~] **E82 server tiles**: photo-only documents with several photos and group nodes still use the first photo's thumbnail; the fonts directory should be a config/setup step (production needs the TTFs in `~/.fonts`, `fc-cache -f`); `latin-ext` subsets not installed; curved text goes through Inkscape (librsvg draws no `<textPath>`).
 - [ ] **Usage-log items** (next section): 25 px remove button, undo granularity, upload failures, right-edge missed taps, log only a summary per drag, touch gesture cancels, crop grab area.
 - [ ] Tight box is the clip's bounding box limited to the picture's content; a smaller box inside a clip could be refined later if needed.
-- [ ] Two reports exist: `tools/events-report.js` (E107) and `tools/events-sessions.js`; merge them.
+- [ ] Three reports exist: `tools/events-report.js` (E107), `tools/events-sessions.js` and `tools/replay.js` (sessions, replay); merge them.
 
 ### Needs a specification before it can be built
 - [ ] **Copy several steps at once**: needs selecting several steps first (Shift-tap, box select, "select all"?); the clipboard payload already holds up to 8 items.

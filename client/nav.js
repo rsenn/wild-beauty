@@ -5,6 +5,7 @@ export const navItems = (t, lang, user = null) => [
   { id: 'show', href: `/${lang}/gallery`, label: t('nav.show'), caption: t('nav.show.caption') },
   { id: 'tree', href: `/${lang}/tree`, label: t('nav.tree'), caption: t('nav.tree.caption') },
   { id: 'new', href: `/${lang}/new`, label: t('nav.new'), caption: t('nav.new.caption') },
+  ...(user?.admin ? [{ id: 'admin', href: `/${lang}/admin`, label: t('nav.admin'), caption: t('nav.admin.caption') }] : []),
   user ? { id: 'login', label: t('nav.logout'), caption: user.email } : { id: 'login', label: t('nav.login'), caption: t('nav.login.caption') },
   { id: 'lang', label: t('nav.lang') },
 ];

@@ -16,7 +16,30 @@ const clientOf = req => req.headers.get('x-real-ip') ?? req.headers.get('x-forwa
 const recent = (client, now) => (fails.get(client) ?? []).filter(t => now - t < WINDOW);
 
 // the user row for a mail address, or null
-export const userByEmail = (h, email) => h.get('SELECT id, email, name, pw_hash FROM users WHERE email = ?', String(email).trim()) ?? null;
+export const userByEmail = (h, email) => h.get('SELECT id, email, name, username, pw_hash FROM users WHERE email = ?', String(email).trim()) ?? null;
+
+// the user row for what is typed into the login: a mail address or a username (no `@` in a username, so which is clear)
+export const userByLogin = (h, login) => {
+  const text = String(login).trim();
+
+  return text.includes('@') ? userByEmail(h, text) : (h.get('SELECT id, email, name, username, pw_hash FROM users WHERE username = ? COLLATE NOCASE', text) ?? null);
+};
+
+// a username: letters, digits, dot, dash and underscore, 2 to 30 characters, starting with a letter or digit
+const USERNAME = /^[A-Za-z0-9][A-Za-z0-9._-]{1,29}$/;
+
+// give the user with this mail address a username (null takes it away) -> true | 'invalid' | 'taken' | 'no_user'
+export function setUsername(h, email, username) {
+  const user = userByEmail(h, email);
+
+  if(!user) return 'no_user';
+  if(username !== null && !USERNAME.test(username)) return 'invalid';
+  if(username !== null && h.get('SELECT 1 AS used FROM users WHERE username = ? COLLATE NOCASE AND id <> ?', username, user.id)) return 'taken';
+
+  h.run('UPDATE users SET username = ? WHERE id = ?', username, user.id);
+
+  return true;
+}
 
 // add a user, or change the password and name of the one with this address -> { id }
 export async function saveUser(h, { email, name = '', password, now = Date.now() }) {
@@ -32,13 +55,33 @@ export async function saveUser(h, { email, name = '', password, now = Date.now()
   return { id: Number(h.run('INSERT INTO users (email, name, pw_hash, created_at) VALUES (?, ?, ?, ?)', email.trim(), name, pw_hash, now).lastInsertRowid) };
 }
 
+// Set a new password for the user with this address or username; `revoke` also ends all their sessions, so
+// whoever knew the old password is out -> true, or false when there is no such user
+export async function changePassword(h, email, password, { revoke = true } = {}) {
+  const user = userByLogin(h, email);
+
+  if(!user) return false;
+
+  h.run('UPDATE users SET pw_hash = ? WHERE id = ?', await Bun.password.hash(password, 'argon2id'), user.id);
+
+  if(revoke) h.run('DELETE FROM sessions WHERE user_id = ?', user.id);
+
+  return true;
+}
+
 // the logged-in user of a request, or null
 export function viewerOf(h, req, now = Date.now()) {
   const cookie = (req.headers.get('cookie') ?? '').split(';').map(c => c.trim().split('=')).find(([name]) => name === COOKIE)?.[1];
 
   if(!cookie || !/^[0-9a-f]{64}$/.test(cookie)) return null;
 
-  return h.get('SELECT u.id, u.email, u.name FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?', hash(cookie), now) ?? null;
+  const row = h.get('SELECT u.id, u.email, u.name, u.username, u.is_admin FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?', hash(cookie), now);
+
+  if(!row) return null;
+
+  const { is_admin: admin, ...viewer } = row;
+
+  return admin ? { ...viewer, admin: true } : viewer;
 }
 
 const setCookie = (req, token, ms) => `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${Math.floor(ms / 1000)}${req.headers.get('x-forwarded-proto') === 'https' ? '; Secure' : ''}`;
@@ -53,19 +96,20 @@ function startSession(h, req, userId, now) {
   return setCookie(req, token, LIFETIME);
 }
 
-// POST /api/login { username, password } -> 204 and the cookie, 401, or 429
-export async function loginRoute(req, h, now = Date.now()) {
+// POST /api/login { username, password } -> 204 and the cookie, 401, or 429. `allow(user)` lets a host
+// accept only some users (a personal site: its owner); the others are refused like a wrong password.
+export async function loginRoute(req, h, now = Date.now(), { allow = () => true } = {}) {
   const client = clientOf(req);
 
   if(recent(client, now).length >= MAX_FAILS) return Response.json({ error: 'too_many' }, { status: 429 });
 
   const { username, password } = await req.json().catch(() => ({}));
-  const user = typeof username === 'string' && typeof password === 'string' ? userByEmail(h, username) : null;
+  const user = typeof username === 'string' && typeof password === 'string' ? userByLogin(h, username) : null;
 
   // verify against something even for an unknown name, so the time does not tell
   const ok = await Bun.password.verify(typeof password === 'string' ? password : '', user?.pw_hash ?? DUMMY).catch(() => false);
 
-  if(!user || !ok) {
+  if(!user || !ok || !allow(user)) {
     fails.set(client, [...recent(client, now), now]);
 
     return Response.json({ error: 'invalid' }, { status: 401 });

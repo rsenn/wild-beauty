@@ -9,6 +9,7 @@ import { NEW } from '../editor/store.js';
 import { ADD_EVENT, SAVED_EVENT } from '../editor/pending.js';
 import { useBoot } from '../boot.js';
 import { SavedNodes } from './SavedNodes.js';
+import { RecordConsent } from './RecordConsent.js';
 import { editorStore, useEditor } from '../editor/useEditor.js';
 
 // /:lang/new: upload area, then the node editor once the "New node" tile has
@@ -70,6 +71,7 @@ export const NewPage = () => {
   return html`
     <${Layout} active="new" hrefFor=${code => `/${code}/new`}>
       <h1 class="wb-sr-only">${t('page.new.heading')}</h1>
+      <${RecordConsent} />
       <${UploadArea} extra=${({ count, addSelected }) => html`<${NewNodeTile} open=${editing} count=${count} onAdd=${addSelected} onMake=${addSelected} onToggle=${() => (editing ? closeEditor() : openEditor(NEW))} />`} />
       <${SavedNodes} nodes=${nodes} editing=${editing ? target : null} onEdit=${id => openEditor(id)} onVisibility=${boot.user ? setVisibility : undefined} />
       <form class="wb-open-node" onSubmit=${e => (e.preventDefault(), /^\d{1,15}$/.test(number) && openEditor(Number(number)))}>

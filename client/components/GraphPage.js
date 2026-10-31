@@ -5,6 +5,15 @@ import { useBoot } from '../boot.js';
 import { REST, bounds, seed, settled, step } from '../graph/layout.js';
 import { fitHeight } from '../gallery/fit.js';
 import { Layout } from './Layout.js';
+import { OwnerBar, SiteHead } from './SiteApp.js';
+import { RecordConsent } from './RecordConsent.js';
+
+// on a personal site the graph sits in the site's own chrome
+const SiteChrome = ({ children }) => {
+  const boot = useBoot();
+
+  return html`<div class="site site-graph"><${SiteHead} /><main class="site-tool">${children}</main>${boot.site.owner && html`<${OwnerBar} />`}</div>`;
+};
 import { PlaceSuggestions } from './PlaceSuggestions.js';
 
 const SIZE = 84;
@@ -64,7 +73,9 @@ const GroupFace = ({ node, kids, title }) => html`<g clip-path=${`url(#wb-g-${no
 export const GraphPage = () => {
   const { t, lang } = useI18n();
   const boot = useBoot();
-  const [graph, setGraph] = useState(boot.graph);
+  const site = boot.site ?? null; // on a personal site: its own graph, read-only for a visitor
+  const readOnly = !!site && !site.owner;
+  const [graph, setGraph] = useState(site ? site.graph : boot.graph);
   const [, redraw] = useState(0);
   const [view, setView] = useState({ x: 0, y: 0, k: 1 });
   const [spread, setSpread] = useState(storedSpread); // layout units -> screen: the links' length, shrunk when the nodes are enlarged
@@ -608,6 +619,7 @@ export const GraphPage = () => {
   // the selected nodes that are the user's own: publish or unpublish them together (visibility: public / hidden)
   const ownSelected = (multi.length > 1 ? multi : selected?.node ? [selected.node] : []).map(nodeOf).filter(n => n && boot.user && n.owner_id === boot.user.id);
   const allPublic = ownSelected.length > 0 && ownSelected.every(n => n.visibility === 'public');
+  const pathOf = n => site?.paths[n.id] ?? (n.slug ? `/edit/${n.slug}` : null);
   const publish = async () => keep(await send(ownSelected.map(n => ({ op: 'visibility', id: n.id, visibility: allPublic ? 'hidden' : 'public' }))));
   const picked = selected?.node && nodeOf(selected.node);
   const label = n => n.title || t('node.untitled');
@@ -630,9 +642,11 @@ export const GraphPage = () => {
     : t('graph.empty');
   const target = carry?.over && bodies.current.get(carry.over);
 
+  const Chrome = site ? SiteChrome : Layout;
+
   return html`
-    <${Layout} bleed active="tree" hrefFor=${code => `/${code}/tree`}>
-      <div class="wb-graph-bar" role="toolbar" aria-label=${t('graph.tools')}>
+    <${Chrome} bleed active="tree" hrefFor=${code => `/${code}/tree`}>
+      ${!readOnly && html`<div class="wb-graph-bar" role="toolbar" aria-label=${t('graph.tools')}>
         <button type="button" class="wb-editor-chip" aria-pressed=${selecting ? 'true' : 'false'} onClick=${() => setSelecting(!selecting)}>${t('graph.select')}</button>
         <button type="button" class="wb-editor-chip" disabled=${multi.length < 2} onClick=${makeGroup}>${t('graph.group')}</button>
         <button type="button" class="wb-editor-chip" disabled=${picked?.kind !== 'list'} onClick=${ungroup}>${t('graph.ungroup')}</button>
@@ -640,14 +654,14 @@ export const GraphPage = () => {
         <button type="button" class="wb-editor-chip" disabled=${!selected?.edge} onClick=${async () => keep(await send([{ op: 'unlink', ...selected.edge }]))}>${t('graph.unlink')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!picked || !picked.pinned} onClick=${async () => keep(await send([{ op: 'pin', id: picked.id, pinned: false }]))}>${t('graph.unpin')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!ownSelected.length} title=${t('graph.publish.hint')} onClick=${publish}>${t(allPublic ? 'graph.unpublish' : 'graph.publish')}</button>
-        <a class=${`wb-editor-chip wb-graph-open${picked ? '' : ' wb-disabled'}`} href=${picked ? `/${lang}/node/${picked.id}` : null} aria-disabled=${picked ? null : 'true'}>${t('graph.open')}</a>
+        <a class=${`wb-editor-chip wb-graph-open${picked ? '' : ' wb-disabled'}`} href=${picked ? (site ? pathOf(picked) : `/${lang}/node/${picked.id}`) : null} aria-disabled=${picked ? null : 'true'}>${t('graph.open')}</a>
         <button type="button" class="wb-editor-chip" disabled=${!note?.undo} onClick=${undo}>${t('graph.undo')}</button>
-        <button type="button" class="wb-editor-chip" aria-pressed=${places ? 'true' : 'false'} onClick=${() => setPlaces(!places)}>${t('graph.places')}</button>
+        <button type="button" class="wb-editor-chip" hidden=${!!site} aria-pressed=${places ? 'true' : 'false'} onClick=${() => setPlaces(!places)}>${t('graph.places')}</button>
         <button type="button" class="wb-editor-chip" onClick=${() => ((touched.current = false), fit(true))}>${t('graph.fit')}</button>
         <span class=${`wb-graph-hint${carry ? ' wb-graph-hint-live' : ''}`} role="status">${hint}</span>
-      </div>
+      </div>`}
       ${places && html`<${PlaceSuggestions} t=${t} onGraph=${keep} onClose=${() => setPlaces(false)} />`}
-      <svg ref=${svg} class="wb-graph" role="group" aria-label=${t('graph.label')} onPointerDown=${e => down(e, null)} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up}>
+      <svg ref=${svg} class="wb-graph" role="group" aria-label=${t('graph.label')} onPointerDown=${e => (readOnly ? null : down(e, null))} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up}>
         <defs><filter id="wb-g-shadow" x="-10%" y="-10%" width="125%" height="125%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-opacity="0.55" /></filter></defs>
         <g transform=${`translate(${view.x} ${view.y}) scale(${view.k})`}>
           ${edges.map(e => {
@@ -676,7 +690,7 @@ export const GraphPage = () => {
 
             const cls = `wb-graph-node${selected?.node === n.id ? ' wb-selected' : ''}${multi.includes(n.id) ? ' wb-selected wb-multi' : ''}${linking === n.id ? ' wb-linking' : ''}${carry?.over === n.id ? ' wb-target' : ''}${n.pinned ? ' wb-pinned' : ''}${n.visibility === 'hidden' ? ' wb-private' : ''}`;
 
-            return html`<g key=${n.id} data-id=${n.id} class=${cls} transform=${`translate(${b.x} ${b.y}) translate(${-SIZE / 2} ${-SIZE / 2})`} onPointerDown=${e => (e.stopPropagation(), down(e, n.id))} role="button" tabindex="0" aria-label=${label(n)} aria-pressed=${multi.includes(n.id) ? 'true' : null}>
+            return html`<g key=${n.id} data-id=${n.id} class=${cls} transform=${`translate(${b.x} ${b.y}) translate(${-SIZE / 2} ${-SIZE / 2})`} onPointerDown=${e => (e.stopPropagation(), readOnly ? pathOf(n) && location.assign(pathOf(n)) : down(e, n.id))} role="button" tabindex="0" aria-label=${label(n)} aria-pressed=${multi.includes(n.id) ? 'true' : null}>
               <clipPath id=${`wb-g-${n.id}`}><rect width=${SIZE} height=${SIZE} rx="14" /></clipPath>
               <rect class="wb-graph-ground" width=${SIZE} height=${SIZE} rx="14" fill=${n.color ?? '#e8e2d4'} filter="url(#wb-g-shadow)" />
               ${n.kind === 'list'
@@ -696,6 +710,7 @@ export const GraphPage = () => {
         </g>
         ${marquee && html`<rect class="wb-graph-marquee" x=${Math.min(marquee.x0, marquee.x1)} y=${Math.min(marquee.y0, marquee.y1)} width=${Math.abs(marquee.x1 - marquee.x0)} height=${Math.abs(marquee.y1 - marquee.y0)} />`}
       </svg>
+      ${!site && html`<${RecordConsent} />`}
     <//>
   `;
 };

@@ -25,9 +25,10 @@ import { reconcile } from './server/node/reconcile.js';
 import { sessionFor } from './server/session.js';
 import { guard, mayWrite } from './server/guard.js';
 import { loginRoute, logoutRoute, meRoute, registerRoute, viewerOf } from './server/auth.js';
-import { siteFor } from './server/sites.js';
-import { editLocation, resolve as resolvePage, robotsTxt, sitemap, sitemapXml } from './server/site.js';
-import { peer, recordEvents } from './server/events.js';
+import { isOwner, siteFor } from './server/sites.js';
+import { createPage, pathsOf, resolve as resolvePage, robotsTxt, sitemap, sitemapXml, siteGraph } from './server/site.js';
+import { adminRoute, isAdmin } from './server/admin.js';
+import { peer, purgeReplay, recordEvents, recordReplay } from './server/events.js';
 import { capabilities, detectTools } from './server/media/tools.js';
 
 // directories served as files: /static/ (assets), /app/ (browser modules),
@@ -49,6 +50,10 @@ await detectTools();
 
   if(done.uploads.length || done.photos.length || done.files.length) log('reconcile', `${done.uploads.length} uploads, ${done.photos.length} photos, ${done.files.length} files removed`);
 }
+
+// recordings past their 30 days go, at start and then daily
+purgeReplay();
+setInterval(purgeReplay, 86400000);
 
 // uploads past their expiry go, at start and then every ten minutes
 const sweep = () => {
@@ -120,7 +125,7 @@ async function bootFor(lang, extra = {}, owner = null) {
 // `title` replaces the translated page title
 async function page(lang, titleKey, extra, title, req) {
   const viewer = req ? viewerOf(await database(), req) : null;
-  const boot = await bootFor(lang, { ...(viewer && { user: { id: viewer.id, email: viewer.email, name: viewer.name } }), ...extra }, req ? sessionFor(req).owner : null);
+  const boot = await bootFor(lang, { ...(viewer && { user: { id: viewer.id, email: viewer.email, name: viewer.name, ...(viewer.admin && { admin: true }) } }), ...extra }, req ? sessionFor(req).owner : null);
   const body = renderPage(html`<${App} boot=${boot} />`, {
     lang,
     dir: boot.messages['meta.dir'],
@@ -156,6 +161,15 @@ async function galleryPage(lang, req) {
   return page(lang, 'page.title.gallery', { gallery: { items: nodeItems(visibleNodes(h, viewerOf(h, req)), lang) } }, undefined, req);
 }
 
+// GET /:lang/admin: the admin panel, for an admin user only (a 404 for everybody else)
+async function adminPage(lang, req) {
+  const h = await database();
+
+  if(!isAdmin(viewerOf(h, req))) return text('not found\n', 404);
+
+  return page(lang, 'page.title.admin', { admin: true }, undefined, req);
+}
+
 // GET /:lang/tree: the graph of the nodes (preliminary demo of GRAPH.md)
 async function treePage(lang, req) {
   const h = await database();
@@ -184,10 +198,10 @@ async function nodePage(lang, id, req) {
 }
 
 // A page of a site: the node in a centred stage, the navigation of the sitemap above it
-async function sitePage(site, map, page, h) {
+async function sitePage(site, map, page, h, owner) {
   const { node } = page;
-  const nav = map.pages.map(p => ({ title: p.node.title, href: p.path, current: p === page }));
-  const boot = await bootFor(site.lang, { site: { id: site.id, title: site.title, nav, node: { id: node.id, title: node.title, doc: node.doc } }, photos: photoInfos(h, node.doc) });
+  const nav = map.pages.filter(p => p.node.visibility === 'public').map(p => ({ title: p.node.title, href: p.path, current: p === page }));
+  const boot = await bootFor(site.lang, { site: { id: site.id, title: site.title, nav, owner, node: { id: node.id, title: node.title, slug: node.slug ?? null, doc: node.doc } }, photos: photoInfos(h, node.doc) });
   const title = page === map.pages[0] ? site.title : `${node.title} - ${site.title}`;
   const body = renderPage(html`<${App} boot=${boot} />`, { lang: site.lang, dir: boot.messages['meta.dir'], title, theme: site.theme, boot, site: { color: site.color, icon: site.icon, canonical: `${site.url}${page.path}` } });
 
@@ -197,16 +211,30 @@ async function sitePage(site, map, page, h) {
 // What a site host answers (SITES.md): its pages, /edit/, the files the pages need.
 // null lets the generic routes serve /static/, /vendor/, /app/, photos and the service worker.
 async function siteRoute(req, site, pathname, h) {
+  const owner = isOwner(site, viewerOf(h, req));
+
+  // the account of the site: its own login, on this origin
+  if(pathname === '/api/login' && req.method === 'POST') return loginRoute(req, h, Date.now(), { allow: user => isOwner(site, user) });
+  if(pathname === '/api/logout' && req.method === 'POST') return logoutRoute(req, h);
+  if(pathname === '/api/me' && req.method === 'GET') return meRoute(req, h);
+
+  // the graph is public to read; the rest of the API and the uploads are the owner's
+  if(pathname === '/api/graph' && req.method === 'GET') return null;
+  // the owner who ticked the recording box (RecordConsent.js) sends it here; a visitor of a site is never recorded
+  if(pathname === '/api/replay' && req.method === 'POST') return owner ? null : text('forbidden\n', 403);
+  if(pathname === '/api/pages' && req.method === 'POST') return owner ? newSitePage(req, site, h) : text('forbidden\n', 403);
+  if(pathname.startsWith('/api/') || pathname.startsWith('/files/uploads/')) return owner ? null : text('not found\n', 404);
+
   if(req.method !== 'GET' && req.method !== 'HEAD') return text('method not allowed\n', 405);
 
   if(/^\/(static|vendor|app)\//.test(pathname) || pathname.startsWith('/files/photos/') || pathname === '/sw.js') return null;
 
   if(pathname === '/manifest.webmanifest') return manifestResponse(site);
-  const edit = editLocation(h, site, pathname);
+  const map = sitemap(h, site, { drafts: owner });
 
-  if(edit) return new Response(null, { status: 302, headers: { location: edit, 'cache-control': 'no-store' } });
+  const tool = /^\/(edit|graph)(?:\/([a-z0-9-]*))?\/?$/.exec(pathname);
 
-  const map = sitemap(h, site);
+  if(tool) return siteTool(site, map, tool[1], tool[2], owner, h, viewerOf(h, req));
 
   if(pathname === '/robots.txt') return new Response(robotsTxt(site), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
   if(pathname === '/sitemap.xml') return new Response(sitemapXml(site, map), { headers: { 'content-type': 'application/xml; charset=utf-8' } });
@@ -214,9 +242,37 @@ async function siteRoute(req, site, pathname, h) {
   const found = resolvePage(map, pathname);
 
   if(found?.redirect) return new Response(null, { status: 301, headers: { location: found.redirect } });
-  if(found?.page) return sitePage(site, map, found.page, h);
+  if(found?.page) return sitePage(site, map, found.page, h, owner);
 
   return text('not found\n', 404);
+}
+
+// POST /api/pages { title } -> { id, slug, path }: a new, hidden page of the site, under its root
+async function newSitePage(req, site, h) {
+  const body = await req.json().catch(() => null);
+  const title = typeof body?.title === 'string' ? body.title.trim().slice(0, 120) : '';
+  const made = createPage(h, site, viewerOf(h, req), title || 'Neu');
+
+  return made ? Response.json({ ...made, path: `/${made.slug}` }, { status: 201 }) : text('no root\n', 409);
+}
+
+// /edit (the page list), /edit/<slug> (the editor), /graph (the tree): the same app as the pages, in
+// the site's chrome; a visitor gets a login on /edit and the read-only graph on /graph
+async function siteTool(site, map, tool, slug, owner, h, viewer) {
+  const node = slug ? map?.pages.find(p => p.slug === slug)?.node : null;
+
+  if(tool === 'edit' && slug && !node && owner) return new Response(null, { status: 302, headers: { location: '/edit' } });
+
+  const list = tool === 'edit' && !slug && owner ? siteGraph(h, site, true).nodes.map(n => ({ id: n.id, title: n.title, slug: n.slug ?? null, kind: n.kind, visibility: n.visibility, tile: n.tile ?? null })) : undefined;
+  const graph = tool === 'graph' ? siteGraph(h, site, owner) : undefined;
+  const nav = (map?.pages ?? []).filter(p => p.node.visibility === 'public').map(p => ({ title: p.node.title, href: p.path, current: false }));
+  const boot = await bootFor(site.lang, {
+    site: { id: site.id, title: site.title, nav, owner, tool, node: node ? { id: node.id, title: node.title, slug: node.slug, path: map.pages.find(p => p.node === node).path } : null, list, paths: pathsOf(map), graph },
+    ...(owner && { user: { id: viewer.id, email: viewer.email, name: viewer.name } }),
+  });
+  const body = renderPage(html`<${App} boot=${boot} />`, { lang: site.lang, dir: boot.messages['meta.dir'], title: site.title, theme: site.theme, boot, site: { color: site.color, icon: site.icon, canonical: `${site.url}/${tool}` } });
+
+  return new Response(body, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
 async function route(req) {
@@ -248,7 +304,7 @@ async function route(req) {
     return text('method not allowed\n', 405);
   }
 
-  if(pathname === '/api/graph' || pathname === '/api/graph/ops') return graphRoute(req);
+  if(pathname === '/api/graph' || pathname === '/api/graph/ops') return graphRoute(req, undefined, { site });
 
   if(pathname === '/api/places' || pathname === '/api/places/near' || pathname === '/api/places/suggestions') return placesRoute(req);
 
@@ -256,13 +312,19 @@ async function route(req) {
 
   if(pathname === '/api/cutout') return req.method === 'POST' ? cutoutRoute(req) : text('method not allowed\n', 405);
 
+  const admin = await adminRoute(req, pathname, h);
+
+  if(admin) return admin;
+
+  if(pathname === '/api/replay') return req.method === 'POST' ? recordReplay(req) : text('method not allowed\n', 405);
+
   if(pathname === '/api/events') return req.method === 'POST' ? recordEvents(req) : text('method not allowed\n', 405);
 
   const lock = /^\/api\/nodes\/([^/]+)\/lock$/.exec(pathname);
 
   if(lock) return lockRoute(req, lock[1]);
 
-  if(pathname === '/api/nodes') return req.method === 'POST' ? createNode(req) : req.method === 'GET' ? listNodesRoute(undefined, req) : text('method not allowed\n', 405);
+  if(pathname === '/api/nodes') return req.method === 'POST' ? createNode(req, undefined, { space: site?.id ?? null }) : req.method === 'GET' ? listNodesRoute(undefined, req) : text('method not allowed\n', 405);
 
   const visibility = /^\/api\/nodes\/([^/]+)\/visibility$/.exec(pathname);
 
@@ -335,6 +397,10 @@ async function route(req) {
   const tree = /^\/([a-z]{2,3})\/tree$/.exec(pathname);
 
   if(tree && locales.has(tree[1])) return treePage(tree[1], req);
+
+  const panel = /^\/([a-z]{2,3})\/admin$/.exec(pathname);
+
+  if(panel && locales.has(panel[1])) return adminPage(panel[1], req);
 
   const m = /^\/([a-z]{2,3})\/new$/.exec(pathname);
 

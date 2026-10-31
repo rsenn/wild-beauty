@@ -16,7 +16,9 @@ export const sites = [
     theme: 'janos',
     color: '#ffffff',
     icon: '/static/img/janos.svg',
-    // where /edit/ goes: the node editor on the wild-beauty host, behind a login
+    // who edits it: the account with this mail address, on the site host itself (/edit, /graph)
+    owner: 'janos.morzsinay@gmail.com',
+    // the editor of the wild-beauty host, where a link with ?edit=<id> also leads (kept for old links)
     editUrl: 'https://wild-beauty.transistorisiert.ch/de/new?site=janos',
   },
 ];
@@ -29,3 +31,6 @@ export function siteFor(req) {
 }
 
 export const siteById = id => sites.find(site => site.id === id) ?? null;
+
+// is `viewer` (a logged-in user) the one who edits `site`?
+export const isOwner = (site, viewer) => !!viewer && viewer.email.toLowerCase() === site.owner.toLowerCase();

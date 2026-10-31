@@ -10,6 +10,7 @@ RENDER=6.8.1
 FREEHAND=1.2.3
 BEZIER=6.1.4
 THREE=0.186.1
+RRWEB=2.2.0
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 out=$root/vendor
@@ -19,7 +20,7 @@ trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$out"
 cd "$tmp"
 
-for spec in preact@$PREACT htm@$HTM preact-render-to-string@$RENDER perfect-freehand@$FREEHAND bezier-js@$BEZIER three@$THREE; do
+for spec in preact@$PREACT htm@$HTM preact-render-to-string@$RENDER perfect-freehand@$FREEHAND bezier-js@$BEZIER three@$THREE rrweb@$RRWEB rrweb-player@$RRWEB; do
   npm pack "$spec" --silent >/dev/null
 done
 
@@ -47,6 +48,14 @@ for f in three.core three.module; do
   bun build --no-bundle --minify "three-$THREE/package/build/$f.js" --outfile "$out/three/$f.js" >/dev/null
 done
 cp "three-$THREE/package/examples/jsm/controls/PointerLockControls.js" "$out/three/PointerLockControls.js"
+# rrweb (usage replay, lazy-loaded by the recorder and by the replay page only): the minified browser builds.
+# Kept under neutral names: content blockers refuse files called rrweb
+mkdir -p "$out/session"
+cp "rrweb-$RRWEB/package/umd/rrweb.min.js" "$out/session/recorder.min.js"
+cp "rrweb-player-$RRWEB/package/umd/rrweb-player.min.js" "$out/session/player.min.js"
+cp "rrweb-player-$RRWEB/package/dist/style.min.css" "$out/session/player.css"
+printf 'rrweb and rrweb-player %s are MIT licensed (package.json "license"):\nhttps://github.com/rrweb-io/rrweb/blob/master/LICENSE\n' "$RRWEB" > "$out/LICENSE.rrweb"
+
 sed -i "s|from 'three'|from './three.module.js'|" "$out/three/PointerLockControls.js"
 cp "three-$THREE/package/LICENSE" "$out/LICENSE.three"
 
@@ -68,4 +77,6 @@ preact-render-to-string  $RENDER  MIT  preact-render-to-string.js  https://www.n
 perfect-freehand  $FREEHAND  MIT  perfect-freehand.js  https://www.npmjs.com/package/perfect-freehand/v/$FREEHAND
 bezier-js  $BEZIER  MIT  bezier-js/bezier.js  https://www.npmjs.com/package/bezier-js/v/$BEZIER
 three  $THREE  MIT  three/three.module.js  https://www.npmjs.com/package/three/v/$THREE
+rrweb  $RRWEB  MIT  session/recorder.min.js  https://www.npmjs.com/package/rrweb/v/$RRWEB
+rrweb-player  $RRWEB  MIT  session/player.min.js  https://www.npmjs.com/package/rrweb-player/v/$RRWEB
 EOT

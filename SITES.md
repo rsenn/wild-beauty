@@ -428,6 +428,9 @@ create and change them, logged in or not) next to the **accounts**.
   Phase D site lens would have to show them on purpose.)
 - **The editor's list (Saved nodes):** a logged-in user sees their own nodes; a
   visitor sees the open public area. `GET /api/nodes` is the same list.
+- **Changing a password:** `bun tools/passwd.js <email>` asks twice without echo (or
+  `PASSWD=... bun tools/passwd.js <email>` for a script) and ends all the user's
+  sessions, unless `--keep-sessions`. There is no form for it yet.
 - **Legacy nodes** (23 from before accounts, ownerless, public) stay in the open
   public area. `bun tools/adopt.js <email> <id...|--all>` gives some of them to a
   user, after which only that user changes them.
@@ -436,3 +439,18 @@ Not done: password reset (needs the mail), profile data, "group" visibility,
 a per-user quota on nodes and uploads (open registration invites abuse), a
 visibility filter ("mine / all") on the tree and gallery.
 
+
+## 14. The workflow on the site host itself (2026-10-31)
+
+jános.ch has its own login (`/api/login`, only the site's owner, `owner` in `server/sites.js`) and its own tools, so
+nothing sends the owner to the wild-beauty host any more:
+
+- every page shows the owner (only) buttons bottom right: edit this page, pages, tree, log out (`OwnerBar`);
+- `/edit` is the page list (draft/online, publish, new page via `POST /api/pages`); `/edit/<slug>` the node editor,
+  closing returns to the page; a visitor gets the login there;
+- `/graph` is the site's tree: read-only for visitors (a tap opens the page), the full graph editor for the owner;
+- API on the site host: login/logout/me for all, `GET /api/graph` public, everything else owner-only (404 otherwise);
+  nodes made there belong to the site (`space`), new pages get a slug under the root.
+
+Not verified in a browser as the owner (no password at hand): editor, list, graph editing. Old `?edit=` links on the
+wild-beauty host still work. Open: PWA `start_url` -> `/edit`.

@@ -2,8 +2,9 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
 import { open } from '../server/db/db.js';
 import { addLink, insertNode } from '../server/db/nodes.js';
-import { siteFor, siteById } from '../server/sites.js';
-import { editLocation, resolve, sitemap, sitemapXml } from '../server/site.js';
+import { siteFor, siteById, isOwner } from '../server/sites.js';
+import { editLocation, createPage, pathsOf, resolve, siteGraph, sitemap, sitemapXml, slugify, uniqueSlug } from '../server/site.js';
+import { graphRoute } from '../server/api/graph.js';
 
 const site = siteById('janos');
 let h;
@@ -78,5 +79,46 @@ describe('editLocation', () => {
     expect(at('/edit/nope')).toBe('https://wb.example/de/new?site=janos');
     expect(at('/about')).toBeNull();
     expect(at('/editor')).toBeNull();
+  });
+});
+
+describe('owner and pages', () => {
+  test('isOwner compares the mail address, ignoring case', () => {
+    expect(isOwner(site, { email: 'Janos.Morzsinay@gmail.com' })).toBe(true);
+    expect(isOwner(site, { email: 'other@x.ch' })).toBe(false);
+    expect(isOwner(site, null)).toBe(false);
+  });
+
+  test('slugify and uniqueSlug: ascii, never a route, never taken', () => {
+    expect(slugify('Über mich!')).toBe('uber-mich');
+    expect(slugify('???')).toBe('page');
+    expect(uniqueSlug(h, site, 'Edit')).toBe('edit-page');
+    expect(uniqueSlug(h, site, 'Kontakt')).toBe('kontakt');
+    expect(uniqueSlug(h, site, 'about')).toBe('about-2');
+  });
+
+  test('createPage: hidden, owned, last child of the root, listed for the owner only', () => {
+    const user = { id: 7 };
+    const made = createPage(h, site, user, 'Arbeiten');
+
+    expect(made.slug).toBe('arbeiten');
+    expect(h.get('SELECT owner_id, space, visibility, kind FROM nodes WHERE id = ?', made.id)).toEqual({ owner_id: 7, space: 'janos', visibility: 'hidden', kind: 'page' });
+    expect(sitemap(h, site).pages.map(p => p.slug)).not.toContain('arbeiten');
+    expect(sitemap(h, site, { drafts: true }).pages.map(p => p.slug).at(-1)).toBe('arbeiten');
+    expect(pathsOf(sitemap(h, site, { drafts: true }))[made.id]).toBe('/arbeiten');
+  });
+
+  test('siteGraph: a visitor sees the public nodes only', () => {
+    h.run("UPDATE nodes SET visibility = 'hidden'");
+    h.run("UPDATE nodes SET visibility = 'public' WHERE kind = 'site' OR slug = 'home'");
+    expect(siteGraph(h, site, false).nodes.length).toBe(2);
+    expect(siteGraph(h, site, true).nodes.length).toBe(4);
+  });
+
+  test('graph route on a site: a visitor cannot change it', async () => {
+    const post = new Request('http://x/api/graph/ops', { method: 'POST', body: JSON.stringify({ ops: [] }) });
+
+    expect((await graphRoute(post, h, { site })).status).toBe(403);
+    expect((await graphRoute(new Request('http://x/api/graph'), h, { site })).status).toBe(200);
   });
 });

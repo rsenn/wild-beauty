@@ -6,6 +6,8 @@ import { database } from '../db/db.js';
 import { LABELS, addLink, deleteNode, graphEdges, graphNodes, insertNode, removeLink, setPinned, setPosition } from '../db/nodes.js';
 import { canView } from './nodes.js';
 import { viewerOf } from '../auth.js';
+import { isOwner } from '../sites.js';
+import { siteGraph, uniqueSlug } from '../site.js';
 import { titleFor } from './gazetteer.js';
 
 const MAX_OPS = 200;
@@ -37,7 +39,7 @@ function dropAnswered(h, node, to) {
 
 // one operation -> true when it changed something, false when it was a no-op;
 // throws a short code on a malformed one
-export function applyOp(h, op, { viewer = null } = {}) {
+export function applyOp(h, op, { viewer = null, site = null } = {}) {
   if(!op || typeof op !== 'object') throw new Error('bad_op');
 
   const label = op.label ?? 'child';
@@ -53,7 +55,16 @@ export function applyOp(h, op, { viewer = null } = {}) {
       // a link that exists stays where it is, unless `resort` moves it behind the others
       if(!op.resort && h.get('SELECT 1 AS ok FROM node_links WHERE from_id = ? AND to_id = ? AND label = ?', op.from, op.to, label)) return false;
 
-      return addLink(h, op.from, op.to, label, h.get('SELECT COALESCE(MAX(sort), -1) + 1 AS n FROM node_links WHERE from_id = ?', op.from).n);
+      const added = addLink(h, op.from, op.to, label, h.get('SELECT COALESCE(MAX(sort), -1) + 1 AS n FROM node_links WHERE from_id = ?', op.from).n);
+
+      // linking a node under the root of a site makes it a page: it gets the path segment it is reached by
+      if(site && label === 'child' && h.get('SELECT kind FROM nodes WHERE id = ?', op.from)?.kind === 'site') {
+        const to = h.get('SELECT title, slug FROM nodes WHERE id = ?', op.to);
+
+        if(to && !to.slug) h.run('UPDATE nodes SET slug = ? WHERE id = ?', uniqueSlug(h, site, to.title), op.to);
+      }
+
+      return added;
     case 'unlink':
       if(!isId(op.from) || !isId(op.to) || !LABELS.includes(label)) throw new Error('bad_op');
 
@@ -74,6 +85,7 @@ export function applyOp(h, op, { viewer = null } = {}) {
 
       // a group of a logged-in user is theirs, and hidden like their new nodes
       if(viewer) h.run("UPDATE nodes SET owner_id = ?, visibility = 'hidden' WHERE id = ?", viewer.id, id);
+      if(site) h.run('UPDATE nodes SET space = ? WHERE id = ?', site.id, id);
 
       setPosition(h, id, op.x, op.y, true);
       ids.forEach((to, i) => addLink(h, id, to, 'child', i));
@@ -100,13 +112,18 @@ export function applyOp(h, op, { viewer = null } = {}) {
   }
 }
 
-export async function graphRoute(req, h) {
+// `site`: the request is for a personal site (server/sites.js): the graph is the site's, only
+// its owner reads all of it or changes it, and every op may name only nodes of the site
+export async function graphRoute(req, h, { site = null } = {}) {
   h ??= await database();
 
   const viewer = viewerOf(h, req);
+  const owner = !!site && isOwner(site, viewer);
+  const graph = () => (site ? siteGraph(h, site, owner) : graphOf(h, viewer));
 
-  if(req.method === 'GET') return Response.json(graphOf(h, viewer), { headers: { 'cache-control': 'no-cache' } });
+  if(req.method === 'GET') return Response.json(graph(), { headers: { 'cache-control': 'no-cache' } });
   if(req.method !== 'POST') return fail(405, 'method_not_allowed');
+  if(site && !owner) return fail(403, 'forbidden');
 
   let body;
 
@@ -118,24 +135,24 @@ export async function graphRoute(req, h) {
 
   if(!Array.isArray(body?.ops) || body.ops.length > MAX_OPS) return fail(400, 'bad_request');
 
-  // an op may point only at a node the user can see
+  // an op may point only at a node the user can see (and, for a site, a node of the site)
   for(const op of body.ops) {
     for(const id of [op?.id, op?.from, op?.to, ...(Array.isArray(op?.ids) ? op.ids : [])]) {
       if(!Number.isInteger(id)) continue;
 
       const node = h.get('SELECT id, owner_id, space, visibility FROM nodes WHERE id = ?', id);
 
-      if(node && !canView(node, viewer)) return fail(404, 'not_found');
+      if(node && (site ? node.space !== site.id : !canView(node, viewer))) return fail(404, 'not_found');
     }
   }
 
   try {
     h.tx(() => {
-      for(const op of body.ops) applyOp(h, op, { viewer });
+      for(const op of body.ops) applyOp(h, op, { viewer, site });
     });
   } catch(e) {
     return fail(e.message === 'not_found' ? 404 : 400, ['bad_op', 'not_found'].includes(e.message) ? e.message : 'bad_request');
   }
 
-  return Response.json(graphOf(h, viewer));
+  return Response.json(graph());
 }

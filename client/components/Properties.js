@@ -2,6 +2,7 @@ import { useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { KINDS } from '../editor/model.js';
 import { ColourPick } from './ColourPick.js';
+import { usePopFit } from './popfit.js';
 
 // The properties popover above the stage (EDITOR.md S2.9): kind, visibility
 // (public or private; the owner of a saved node changes it, `onVisibility`) and
@@ -9,12 +10,13 @@ import { ColourPick } from './ColourPick.js';
 export const Properties = ({ t, kind, bg, pal, used = [], dropper, onOpen, dispatch, visibility = 'public', canPublish = false, onVisibility }) => {
   const [open, setOpenState] = useState(false);
   const setOpen = value => (setOpenState(value), onOpen?.(value));
+  const panel = usePopFit(open);
 
   return html`
     <div class="wb-editor-props">
       <button type="button" class="wb-editor-close" aria-expanded=${open ? 'true' : 'false'} aria-controls="wb-editor-props-panel" onClick=${() => setOpen(!open)}>${t('editor.props')}</button>
       ${open &&
-      html`<div id="wb-editor-props-panel" class="wb-editor-popover" role="group" aria-label=${t('editor.props')} onKeyDown=${e => e.key === 'Escape' && (e.stopPropagation(), setOpen(false))}>
+      html`<div ref=${panel} id="wb-editor-props-panel" class="wb-editor-popover" role="group" aria-label=${t('editor.props')} onKeyDown=${e => e.key === 'Escape' && (e.stopPropagation(), setOpen(false))}>
         <label class="wb-editor-field">${t('editor.props.kind')}
           <select onChange=${e => dispatch({ type: 'setKind', kind: e.target.value })}>${KINDS.filter(k => k !== 'site' || k === kind).map(k => html`<option value=${k} selected=${k === kind}>${t('editor.kind.' + k)}</option>`)}</select>
         </label>

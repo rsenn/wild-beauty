@@ -292,6 +292,37 @@ upload timings, rapid repeated taps, the stage touched) and posts them to `POST 
 `X-Forwarded-For`, is in `WB_OWNER_IPS`), else `tester-<4 characters of the cookie hash>`.
 No photo content, no typed text. `bun tools/events-report.js [who] [--days n]` summarises it.
 
+### 6.5 Session replay (2026-10-31)
+
+`client/replay.js` records the page with rrweb (vendored as `vendor/session/`, neutral names because
+content blockers refuse files called rrweb): a DOM snapshot, every change to it, the pointer (also
+without a button, 30 ms), scrolling, resizing, focus and input. Typed text never leaves the browser: field
+values are masked and so is the text drawn on the editor stage. Batches go to `POST /api/replay`
+(`server/events.js`) and are appended to `data/replay/<date>.jsonl`, one line per batch, with who, the
+session, the page load (`rid`), the client address and the logged-in user's mail. The usage events carry
+the same `user` field now.
+
+Only with consent: the tick box on `/new` (`RecordConsent.js`, off by default) tells the visitor what is
+recorded (no typed text), thanks them, and promises the recording is used only to fix and improve the app,
+deleted after 30 days at the latest (`purgeReplay`, daily) and never passed on or sold. The choice is a flag in
+the browser's localStorage, so it holds on the other app pages until the box is unticked; a link with
+`?record=1` sets it for testers who were asked to (`?record=0` clears it). If a content blocker still refuses
+the recorder the box says so and asks to allow the site. On a personal site (jános.ch) the same choice sits folded at the foot of every page ("Helfen, diese Seite zu verbessern"); the flag is
+per origin, and `POST /api/replay` is the one API route a site host takes from visitors.
+
+### 6.6 Admin panel (2026-10-31)
+
+A user with the admin flag (`users.is_admin`, `bun tools/admin.js grant|revoke|list <login>`) sees an "Admin" tab in
+the main navigation, `/:lang/admin`, with three tabs: Summary (accounts, nodes by kind and visibility, links,
+photos and how many are linked, logged-in sessions, browsers active in the last 15 minutes, log sizes), User
+accounts (read only for now) and Logs and recordings (filter by user, IP, who, page, browser, days; group by IP, user or who; pick a session and
+play its recording in the page, or download it as one HTML file). The data comes from `server/admin.js`
+(`/api/admin/summary|users|sessions|recording/<id>[/page]`), which answers a visitor and a plain user with a 404.
+
+`bun tools/replay.js list [--by ip|user|who] [--who --ip --user --url --ua --min-secs --min-events --replay
+--day --days]` lists the sessions of both logs; `show <id>`; `export <id> [-o file] [--json]` writes one
+standalone HTML file with the player and the events inline (the photos load from the site while it is online).
+
 ## 7. Node document model
 
 Moved to `EDITOR.md` S3 (document, steps, limits, files) and S5 (rendering).

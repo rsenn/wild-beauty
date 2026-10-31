@@ -146,3 +146,12 @@ CREATE TABLE sessions (
 
 ALTER TABLE nodes ADD COLUMN slug TEXT;
 CREATE INDEX nodes_space ON nodes(space, owner_id);
+
+-- migration 7
+-- A name to log in with besides the mail address: no `@` in it, so a login is one or the other.
+ALTER TABLE users ADD COLUMN username TEXT;
+CREATE UNIQUE INDEX users_username ON users(username COLLATE NOCASE) WHERE username IS NOT NULL;
+
+-- migration 8
+-- The operator accounts: they get the admin panel (server/admin.js). Set with tools/admin.js.
+ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0;

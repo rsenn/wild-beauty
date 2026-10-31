@@ -6,3 +6,5 @@ preact-render-to-string  6.8.1  MIT  preact-render-to-string.js  https://www.npm
 perfect-freehand  1.2.3  MIT  perfect-freehand.js  https://www.npmjs.com/package/perfect-freehand/v/1.2.3
 bezier-js  6.1.4  MIT  bezier-js/bezier.js  https://www.npmjs.com/package/bezier-js/v/6.1.4
 three  0.186.1  MIT  three/three.module.js  https://www.npmjs.com/package/three/v/0.186.1
+rrweb  2.2.0  MIT  session/recorder.min.js  https://www.npmjs.com/package/rrweb/v/2.2.0
+rrweb-player  2.2.0  MIT  session/player.min.js  https://www.npmjs.com/package/rrweb-player/v/2.2.0
