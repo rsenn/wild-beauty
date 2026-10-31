@@ -62,11 +62,18 @@ const KEYED = {
 // the colour fields of each op a setColor may write
 const COLOUR_FIELDS = { stroke: ['color'], shape: ['fill', 'stroke'], text: ['color', 'bg'] };
 
+// a batch is several commands as one (and one undo step); `key` coalesces a run of them
+KEYED.batch = c => c.key ?? null;
+KEYED.recordMoves = c => c.key ?? null;
+
 export const commandKey = command => KEYED[command.type]?.(command) ?? null;
 
 // the document part of a command
 function onDoc(doc, c) {
   switch(c.type) {
+    // the same change to several steps (a multiple selection): { commands: [command] }
+    case 'batch':
+      return (c.commands ?? []).reduce((d, sub) => onDoc(d, sub), doc);
     // a batch of photos at once: one render, and (with `batch`) one undo step however
     // many arrive, see KEYED; each is { hash, info, id, role?, crop?, m? }
     case 'addPhotos':
@@ -153,6 +160,9 @@ function onDoc(doc, c) {
       return model.updateShape(doc, c.id, c.changes);
     case 'recordMove':
       return withMask(doc, c.id, c.m, (d, id, m) => model.recordMove(d, id, m, c.k, c.ease));
+    // the same move for several steps while scrubbed back (a multiple selection): see model.recordMoves
+    case 'recordMoves':
+      return model.recordMoves(doc, c.items, c.k, c.again, c.ease);
     case 'setMatrix':
       return withMask(doc, c.id, c.m, model.setMatrix);
     case 'setStrokeWidth': {

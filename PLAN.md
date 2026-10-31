@@ -48,7 +48,7 @@ still says "tile" in places; read it as "node".
 | DB | `bun:sqlite` directly, a few small helper functions in `db.js` (not an abstraction layer) |
 | SSR | `preact-render-to-string`; same component tree as the client |
 | Languages | de, fr, en; adding one = adding one JSON file |
-| Auth | none for the PoC; hard limits instead (size, count, type), see S9 |
+| Auth | none for the PoC; hard limits instead (size, count, type), see S9. The login dialog (UI only) exists, `POST /api/login` does not (S17) |
 | After the PoC | graph view: Preact SVG + vendored `d3-force`/`d3-zoom`/`d3-drag`, rooted depth-limited API, one editor at a time (`GRAPH.md`); 3D gallery: vendored three.js loaded only when a gallery is entered (`GALLERY.md`) |
 | Tools | `mediainfo`, `exiv2` or `exiftool`, ImageMagick (`magick`, or `convert` on IM6 as installed here) for pixels, spawned with argv arrays, never via a shell |
 
@@ -683,3 +683,22 @@ re-validates it (E26).
 Per-user theme storage (cookie only), `prefers-color-scheme` auto-switching,
 theme editor UI, theme-supplied fonts beyond the existing ones (a theme may
 name a font that `static/fonts/stylesheet.css` already declares).
+
+## 17. Login and outgoing mail (2026-10-31, not built beyond the dialog)
+
+- **Login dialog.** `client/components/LoginDialog.js`, opened by the Login tab (`nav.js`, `Nav.js`, `Layout.js`): the old
+  tumbling modal reproduced (DESIGN.md S"login modal motion"). It posts to `/api/login`, which does not exist yet, so it
+  shows "Login failed". Accounts, sessions and registration are out of the PoC (S1) and need a decision before this
+  is built: password hashing (`Bun.password`), session cookie next to `wb-session`, rate limits.
+- **Registration mail.** User registration will need to send mail from `noreply@transistorisiert.ch`. The host runs
+  Postfix and Dovecot for `transistorisiert.ch` and `jános.ch` (`mail.transistorisiert.ch`, Let's Encrypt certificate
+  under `/etc/letsencrypt/live/transistorisiert.ch/`, SASL through Dovecot). Ports: 25 smtp, 465 smtps and 587
+  submission (both only relay for authenticated users, added to `master.cf` 2026-10-31, backup `master.cf.bak-2026-10-31`),
+  143 and 993 imap. The router forwards all five (checked from outside only for 143 and 993: the test proxy blocks SMTP
+  ports). `ufw` has allow rules for them but is inactive (enabling it would block everything else without rules).
+- **Sending from the app.** Either `localhost:25` (no authentication) or authenticated submission on 465 / 587 with a
+  Dovecot password for `noreply@`; a small SMTP client (`nodemailer` works under Bun) with host, port, user and password
+  in the server config or environment, never in the repository.
+- **Open.** SPF, DKIM, DMARC and reverse DNS for `mail.transistorisiert.ch` were not checked (without them mail lands
+  in spam); whether the ISP blocks inbound port 25; the registration flow (confirmation link, expiry, resend limit);
+  the text of the mails in de / fr / en / es.

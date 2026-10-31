@@ -24,16 +24,38 @@ export function complement(hex, deg = 180) {
   return C < GREY ? fromOklch([1 - L, C, h]) : fromOklch([L, C, wrap(h + deg)]);
 }
 
-// D1-D4 from a stored palette ([{ hex, weight }] heaviest first): colours a
-// kept one is closer than MIN_DISTANCE to are skipped, then the skipped ones and
-// lightness steps of D1 fill up to four
+// D1-D4 from a stored palette ([{ hex, weight }] heaviest first). D1 is the heaviest;
+// each next one is the colour that adds most to the picture: far from those kept
+// (OKLab distance, at least MIN_DISTANCE), vivid rather than dull and not negligible in
+// weight, so a purple flower or a yellow phone wins over a third shade of dark
+// background. Fewer than four left: the skipped ones, then lightness steps of D1.
 export function dominant(palette, count = 4) {
-  const kept = [];
+  const rest = (palette ?? []).map(({ hex, weight }, i, all) => ({ hex, weight: weight ?? 1 / all.length, chroma: toOklch(hex)[1] }));
+  const kept = rest.splice(0, 1);
   const skipped = [];
 
-  for(const { hex } of palette ?? []) (kept.every(k => distance(k, hex) >= MIN_DISTANCE) ? kept : skipped).push(hex);
+  while(kept.length < count && rest.length) {
+    let best = -1;
+    let top = 0;
 
-  const out = [...kept, ...skipped].slice(0, count);
+    rest.forEach((c, i) => {
+      const gap = Math.min(...kept.map(k => distance(k.hex, c.hex)));
+      const score = gap < MIN_DISTANCE ? 0 : gap * (1 + 4 * c.chroma) * c.weight ** 0.25;
+
+      if(score > top) {
+        top = score;
+        best = i;
+      }
+    });
+
+    if(best < 0) break;
+
+    kept.push(...rest.splice(best, 1));
+  }
+
+  skipped.push(...rest);
+
+  const out = [...kept, ...skipped].map(c => c.hex).slice(0, count);
 
   if(!out.length) return out;
 

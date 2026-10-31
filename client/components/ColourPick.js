@@ -26,7 +26,7 @@ export const ColourPick = ({ t, pal, used = [], current, onPick, dropper, alpha 
     ${row(used.filter(hex => !shown.has(hex) && !pal.contrast.includes(hex)), 'wb-editor-swatches-used')}
     <span class="wb-colour-free">
       <label class="wb-colour-other" style=${WHEEL} title=${t('editor.props.bg.other')}><input type="color" value=${/^#[0-9a-f]{6}/i.test(current ?? '') ? current.slice(0, 7) : '#808080'} aria-label=${t('editor.props.bg.other')} onInput=${e => onPick(e.target.value)} /></label>
-      ${dropper && html`<button type="button" class="wb-editor-chip wb-editor-dropper" title=${t('editor.dropper')} aria-label=${t('editor.dropper')} onClick=${() => dropper(onPick)}>⌖</button>`}
+      ${dropper && html`<button type="button" class="wb-editor-chip wb-editor-dropper" title=${t('editor.dropper')} aria-label=${t('editor.dropper')} onClick=${() => dropper(onPick)}><span class="wb-editor-tool-icon" aria-hidden="true"></span></button>`}
     </span>
     ${alpha && html`<span class="wb-colour-alpha">
       <label class="wb-editor-field">${t('editor.colour.alpha')} <input type="range" min="0" max="100" step="1" value=${Math.round(alphaOf(current) * 100)} aria-label=${t('editor.colour.alpha')} onInput=${e => onPick(`${/^#[0-9a-f]{6}/i.test(current ?? '') ? current.slice(0, 7) : '#808080'}${Number(e.target.value) >= 100 ? '' : hex2((Number(e.target.value) / 100) * 255)}`)} /></label>

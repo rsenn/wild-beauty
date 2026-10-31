@@ -12,26 +12,38 @@ import { renderToString } from '../../vendor/preact-render-to-string.js';
 export const MARK = 'data-wb-clip';
 const KINDS = ['photo', 'text', 'stroke', 'shape'];
 const IDENTITY = [1, 0, 0, 1, 0, 0];
-const MAX_ITEMS = 8;
+const MAX_ITEMS = LIMITS.steps; // a page cannot hold more steps than that anyway
 const isMatrix = m => Array.isArray(m) && m.length === 6 && m.every(Number.isFinite);
 
-// what a copy of step `id` holds: the step as drawn now (its matrix after the
-// transform steps) and, for a clipped photo, its clip shape
+// what a copy of step `id` (or of several: an array of ids, at most MAX_ITEMS) holds: each step as
+// drawn now (its matrix after the transform steps) and, for a clipped photo, its clip shape; a
+// shape that is the clip of a photo copied along is not an item of its own
 export function copyPayload(doc, id) {
-  const at = findStep(doc, id);
+  const ids = Array.isArray(id) ? id : [id];
+  const by = new Map();
+  const clips = new Set(ids.map(i => findStep(doc, i)?.step).filter(s => s?.op === 'photo' && s.clip).map(s => s.clip));
+  const items = [];
 
-  if(!at || !KINDS.includes(at.step.op)) return null;
+  for(const one of ids) {
+    const at = findStep(doc, one);
 
-  const by = effective(doc.pages[at.page].steps).by;
-  const item = { step: at.step, m: by.get(id)?.m ?? at.step.m ?? IDENTITY };
+    if(!at || !KINDS.includes(at.step.op) || (ids.length > 1 && clips.has(one))) continue;
 
-  if(at.step.op === 'photo' && at.step.clip) {
-    const shape = findStep(doc, at.step.clip);
+    if(!by.has(at.page)) by.set(at.page, effective(doc.pages[at.page].steps).by);
 
-    if(shape?.step.op === 'shape') item.clip = { step: shape.step, m: by.get(shape.step.id)?.m ?? IDENTITY };
+    const m = by.get(at.page);
+    const item = { step: at.step, m: m.get(one)?.m ?? at.step.m ?? IDENTITY };
+
+    if(at.step.op === 'photo' && at.step.clip) {
+      const shape = findStep(doc, at.step.clip);
+
+      if(shape?.step.op === 'shape') item.clip = { step: shape.step, m: m.get(shape.step.id)?.m ?? IDENTITY };
+    }
+
+    if(items.length < MAX_ITEMS) items.push(item);
   }
 
-  return { v: 1, items: [item] };
+  return items.length ? { v: 1, items } : null;
 }
 
 const escape = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);

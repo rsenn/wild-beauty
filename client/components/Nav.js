@@ -22,7 +22,7 @@ const LanguageTab = ({ item, hrefFor }) => {
 };
 
 // the tab strip; the active tab grows and shows its caption
-export const Nav = ({ items, active, hrefFor }) => {
+export const Nav = ({ items, active, hrefFor, onLogin }) => {
   const { t } = useI18n();
 
   return html`
@@ -31,6 +31,15 @@ export const Nav = ({ items, active, hrefFor }) => {
         ${items.map(item =>
           item.id === 'lang'
             ? html`<${LanguageTab} item=${item} hrefFor=${hrefFor} />`
+            : item.id === 'login'
+            ? html`
+                <li class=${'wb-tab' + (active === 'login' ? ' wb-tab-active' : '')}>
+                  <button type="button" class="wb-tab-button" onClick=${onLogin} aria-haspopup="dialog" aria-expanded=${active === 'login' ? 'true' : 'false'}>
+                    <span class="wb-tab-label">${item.label}</span>
+                    <span class="wb-tab-caption">${item.caption}</span>
+                  </button>
+                </li>
+              `
             : html`
                 <li class=${'wb-tab' + (item.id === active ? ' wb-tab-active' : '')}>
                   <a href=${item.href} aria-current=${item.id === active ? 'page' : null}>

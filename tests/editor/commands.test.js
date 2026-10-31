@@ -158,3 +158,38 @@ describe('a clipped photo and its mask', () => {
     expect(eff(snap, 'shape001')).toEqual([1, 0, 0, 1, 30, 0]);
   });
 });
+
+describe('batch', () => {
+  const two = () => run([{ type: 'addPhoto', hash: A, info, id: 'photo001' }, { type: 'addPhoto', hash: A, info, id: 'photo002' }]);
+
+  test('one change to several steps is one undo step', () => {
+    let h = two();
+    const before = h.present;
+
+    h = run([], h.present);
+    h = history.push(h, apply(h.present, { type: 'batch', commands: ['photo001', 'photo002'].map(id => ({ type: 'setOpacity', id, value: 0.4 })) }).snap);
+
+    expect(findStep(h.present.doc, 'photo001').step.opacity).toBe(0.4);
+    expect(findStep(h.present.doc, 'photo002').step.opacity).toBe(0.4);
+    expect(history.undo(h).present).toBe(before);
+  });
+
+  test('a keyed batch folds a run into one step and removing several at once works', () => {
+    let h = two();
+    const move = x => ({ type: 'batch', key: 'group-move', commands: ['photo001', 'photo002'].map(id => ({ type: 'setMatrix', id, m: [1, 0, 0, 1, x, 0] })) });
+
+    for(const x of [5, 10, 20]) {
+      const { snap, key } = apply(h.present, move(x));
+
+      h = history.push(h, snap, key);
+    }
+
+    expect(h.past.length).toBe(3); // two photos added, one folded move
+    expect(findStep(h.present.doc, 'photo002').step.m[4]).toBe(20);
+
+    const gone = apply(h.present, { type: 'batch', commands: ['photo001', 'photo002'].map(id => ({ type: 'removeStep', id })) }).snap;
+
+    expect(findStep(gone.doc, 'photo001')).toBeFalsy();
+    expect(findStep(gone.doc, 'photo002')).toBeFalsy();
+  });
+});

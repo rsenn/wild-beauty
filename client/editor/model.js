@@ -365,6 +365,49 @@ export function recordMove(doc, stepId, m, k, ease = 'inOut') {
   return withSteps(doc, at.page, [...steps.slice(0, index), { op: 'transform', target: stepId, m, ease }, ...steps.slice(index)]);
 }
 
+// Record the same gesture for several steps at the scrubber position `k` (E147): one `transform`
+// step each, in order, so playback moves them together. `again` is a later event of the gesture
+// that already inserted them (the `items.length` steps before `k`): it only changes their matrices.
+export function recordMoves(doc, items, k, again = false, ease = 'inOut') {
+  const valid = (items ?? []).filter(i => Array.isArray(i?.m) && i.m.length === 6 && i.m.every(v => Number.isFinite(v) && Math.abs(v) <= LIMITS.number) && findStep(doc, i.id));
+
+  if(!valid.length || valid.length !== items.length) return doc;
+
+  const page = findStep(doc, valid[0].id).page;
+
+  if(valid.some(i => findStep(doc, i.id).page !== page)) return doc;
+
+  let steps = doc.pages[page].steps;
+
+  if(again) {
+    const from = clamp(Math.trunc(k) - valid.length, 0, steps.length);
+    const to = clamp(Math.trunc(k), 0, steps.length);
+
+    steps = steps.map((step, i) => {
+      const mine = i >= from && i < to && step.op === 'transform' ? valid.find(v => v.id === step.target) : null;
+
+      return mine ? { ...step, m: mine.m } : step;
+    });
+
+    return withSteps(doc, page, steps);
+  }
+
+  if(steps.length + valid.length > LIMITS.steps) return doc;
+
+  let index = clamp(Math.trunc(k), 0, steps.length);
+
+  // each transform goes after the step it moves and after the one inserted before it
+  for(const { id, m } of valid) {
+    const at = steps.findIndex(step => step.id === id);
+
+    index = Math.max(index, at + 1);
+    steps = [...steps.slice(0, index), { op: 'transform', target: id, m, ease }, ...steps.slice(index)];
+    index += 1;
+  }
+
+  return withSteps(doc, page, steps);
+}
+
 // the photo steps of page `pageIndex` in draw order
 export const photoSteps = (doc, pageIndex = 0) => doc.pages[pageIndex].steps.filter(step => step.op === 'photo');
 

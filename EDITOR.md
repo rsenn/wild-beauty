@@ -200,12 +200,13 @@ step visible on the current page at the scrubber position `k`; else the first ph
 step of the node (any page). A node with no photo at all uses the theme's own colours
 (`--wb-accent`, `--wb-ink`, `--wb-select`, `--wb-danger`) as D1-D4.
 
-**Dominant colours D1-D4.** Taken from the photo's stored palette (8 colours, ordered
-by weight, written by ingest; `PLAN.md` S6.2). Walk the palette in order and keep a
-colour unless its OKLab distance to one already kept is below 0.08
-(`distance` of `server/media/color.js`, moved to a shared module, task E84); if fewer
-than four remain, fill from the skipped ones, then with lightness steps of D1. D1 is
-the heaviest.
+**Dominant colours D1-D4.** Taken from the palette of what is on the stage (the visible
+pixels, 24 colours with weights; else the photo's stored palette, 8 colours written by
+ingest; `PLAN.md` S6.2). D1 is the heaviest. Each next one is the colour that adds most to
+the picture: it scores its OKLab distance to the colours kept, times `1 + 4 * chroma`, times
+`weight^0.25`, and a colour closer than 0.08 to one already kept scores nothing. So a small
+vivid region (a flower, a phone) wins over another shade of a dull, heavy background. If
+fewer than four remain, fill from the skipped ones, then with lightness steps of D1.
 
 **Derived colours** (all computed in OKLCH, then gamut-clamped to sRGB by lowering
 chroma):
@@ -230,6 +231,22 @@ chroma):
 
 An achromatic dominant colour (OKLCH chroma below 0.02) has no hue: its "complement"
 is its lightness inverted (`L' = 1 - L`).
+
+**Stable while picking (2026-10-31).** Choosing a colour changes the picture, but the palette must not move
+under the hand that picks from it: the scene palette is only drawn again when something other than a colour
+field changed (`color`, `fill`, `stroke`, `bg`, `outline`); moved, added, removed or cut steps, another page or
+photo, or a photo that finished loading still redraw it (`NodeEditor.js`, `paletteKey`).
+
+**Dropper (E133, icon 2026-10-31).** The dropper button shows a drawn pipette (`static/img/tool-dropper.svg`, token
+`--wb-icon-tool-dropper`, a mask like the tool icons), not a glyph. Its tooltip says how it works: tap it, then tap a
+spot on the picture (key `I`). It keeps the selection outline for as long as it is armed (the editor root has
+`wb-editor-dropping`), until a colour is taken or Escape cancels it; clicking it again while armed restarts it.
+A native `title` is no help on a phone: a visible hint while armed is open (below).
+
+**Popovers and swatches (2026-10-31).** A popover has a hairline border and a soft shadow (`--wb-popover-border`,
+`--wb-popover-shadow`), a swatch a hairline (`--wb-swatch-border`), no more than the 4 px frame
+(`--wb-frame-width`), which the drop zone, the new-node tile and the picker cards keep. The "any colour" wheel
+button still has the 4 px frame and should get the swatch hairline.
 
 **Behaviour.** Tapping a swatch sets the colour of the active target (a small chip
 beside the palette shows which: pen, fill, stroke, text, background, stop 1/2/3,
@@ -324,10 +341,17 @@ fonts installed for fontconfig. Colour values use the sanitiser's patterns (`#rr
 | Delete / Backspace | delete the selection |
 | Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z or Ctrl+Y | undo, redo |
 | Ctrl/Cmd+S | save |
-| Esc | cancel the current drawing; else deselect; else close popovers |
+| Esc | cancel the current drawing or the dropper; else deselect (also a multiple selection); else close popovers |
 | V P S C U T W | switch tool |
 | Arrow keys | nudge the selection 1 unit (Shift: 10) |
-| [ ] | to back / to front |
+| [ ] and { } | one step back / forward, with Shift (the braces) to the very back / front; a multiple selection moves as a group |
+| a press on the empty stage, then drag | a blue, dashed selection rectangle: selects the steps wholly inside it (E147) |
+| Shift+press on a step, Shift+rectangle | toggle a step in the selection, add to it |
+| the Select several button | the same as holding Shift, for a phone |
+| Ctrl/Cmd+A | select every step of the page |
+| Shift+PageDown / Shift+PageUp | add the next / previous step to the selection |
+| a press inside the box of a multiple selection, on the empty stage | drags all selected steps |
+| arrows, + - , . on a multiple selection | move, scale, turn it about the centre of its box |
 
 Every gesture ends in exactly **one history entry** (S2.6), so a pinch is one undo.
 
@@ -786,6 +810,8 @@ client/color.js           OKLab/OKLCH helpers shared with server/media/color.js
 client/components/        NodeEditor.js  Stage.js  Tools.js  ContextBar.js  Filmstrip.js
                           Sequencer.js   Properties.js  SavePanel.js  Overlay.js
                           Palette.js  ColorPicker.js  TextBox.js  FillEditor.js
+                          MultiBar.js (E147)  ColourPick.js  Popover.js
+client/editor/ (E147)     align.js  ordering.js  (multiple selection: align / spread, group order)
 server/node/              validate.js (imports client/editor/model.js)  bake.js
 server/api/nodes.js       routes S4.1
 server/api/locks.js
@@ -1119,6 +1145,19 @@ Colour first (E84-E87 can start any time after E3), then text.
 
 ### Phase J - later (not scheduled)
 
+- [~] **E147 multiple selection** (2026-10-31; built, partly tried in the browser, open items below)
+      Built: the select tool draws a blue, dashed selection rectangle when a press starts on the empty stage (or with Shift on it); the steps whose outline lies wholly inside are selected, Shift adds and Shift on a step toggles, Ctrl+A selects all, Escape lets go. A press on one of the selected steps carries all of them. The group has a box with corner handles (scale) and a round handle (turn) that stays turned with it (`groupBox`, kept while the group is transformed, refitted when the selection changes); arrows, `+ -`, `, .` and the buttons act on the group about its centre. The context bar is `MultiBar.js`: turn, scale and flip, Align (left, centre, right, top, middle, bottom, spread across / down: `editor/align.js`), a Photos popover (opacity, blend, edge, texture in a gallery), Text (font, bold, align, size), Shapes (stroke width), colour (strokes and text `color`, shapes `fill`), to front / forward / backward / to back as a group (`editor/ordering.js`: a step never jumps over a selected one; also `[ ] { }`), Duplicate, Copy, Cut, Paste (`copyPayload` takes several ids) and Delete. One undo step each, through the new `batch` command (`commands.js`). A clip shape moves with its photo, so it is not moved twice. A stroke's or shape's box is taken in its own space and carried by its matrix, so it turns with the step.
+      Done 2026-10-31 (the three that were open): (1) the clipboard holds up to `LIMITS.steps` items, not 8; (2) the group is dragged by its box (a press on the empty stage inside the box; a rectangle starts outside it, or with Shift); (3) a group while the scrubber is back in time: moves, turns, scales and aligns are recorded as one `transform` step per member (`recordMoves`, `commitMatrices`; a clip shape is a member of its own then), the other group controls (properties, order, clipboard, delete) are off there and the bar says so.
+      Concerns (2026-10-31; (a) the toggle, (b) and (e) are fixed, see below, the rest is open): (a) touch: there is no Shift, so a "Select several" button (`addMode`, above the context bar while the select tool is on) makes a tap or a rectangle add, like Shift; built and tried with a mouse, not with a finger; the stage has `touch-action: none` so the rectangle should not scroll the page, but this was never tried; the group handles use `handlePx` and may be too small for a finger; two fingers on a member should pinch the whole group (untried). (b) keyboard: Shift+PageDown / Shift+PageUp extend the selection by the next / previous step (tried), next to Ctrl+A. (c) the bar of a group is long (up to 20 buttons and 5 popovers) and wraps on a 360 px phone; it may need to fold into a "More" popover. (d) the CSS that wraps button rows in a popover (`.wb-editor-popover [role=group]`) was written after the Align popover was seen overlapping, and never seen working (the browser had the old stylesheet cached). (e) the keys of keyboard moves now carry the selection (`group-key:<ids>`), so two different groups never fold into one undo step; the other batch keys (`group-move`, `group-handle`, `multi-*`, `group-text:*`) are sealed by the pointer-up or are per control. (f) a copy of many steps writes all of them into the `text/html` part of the clipboard: a page of 500 strokes may be megabytes and some browsers refuse it; no message tells the user. (g) a group is copied without a picture (`png` is null), other apps get only the html and text parts; an SVG of the group is not made. (h) while scrubbed back, only move, turn, scale, flip and align work; order, delete, clipboard and properties are off (a single step cannot do those there either); a group box turned before the scrub is refitted when the slider moves. (i) "wholly inside" picks the steps for the rectangle; a big photo is only caught by a rectangle round all of it; "touching" may be what you expect, to be decided after use. (j) the `Selection` box of a group is drawn over the individual outlines in the same blue; with 20 steps the stage is busy, a lighter outline for the members may be needed. (k) a text box in a group cannot be flipped (the flip buttons are hidden), a group with a text box and a photo cannot be flipped at all. (m) the keys help popover (`KEYS` in `NodeEditor.js`, `editor.keys.*`) does not list Ctrl+A, Shift+PageDown / PageUp or Shift+click, and has no text for the `\` key (console warning). (l) `moversOf` assumes a clip shape belongs to one photo; a shape that clips two photos of the group moves once, which is right, but a shape selected and clipping a photo that is not selected moves alone and the photo keeps its old window (as a single selected clip shape does today).
+      Open (not decided): touch has no Shift, so a "select several" toggle button (as in the graph view) is needed on a phone; a group cannot be copied as an image (only the html / text parts go to the clipboard); the order of a group while scrubbed, delete while scrubbed (single steps cannot either); "contained" (not "touching") picks the steps for the rectangle, ask again after use.
+      Tested in the browser (2026-10-31): the Select several button (two strokes by tapping), Shift+PageDown twice (three selected), rectangle, Ctrl+A, group drag by a member and by its box, rotate handle, Align left, Duplicate, Delete and undo, a group drag while scrubbed back (three transform steps appear at the scrubber, the strokes move together); no console errors. After that test the member outlines and the box were made to follow the scrubber position (`upTo`) and the box resets on a scrub: not tried again.
+      To test (browser unless noted; every concern (a) to (l) above needs a check too): the scrub-back outlines and box just mentioned, a second event of a scrubbed group drag only changes the three steps (the counter does not grow again), undo of it is one step, a scrubbed group with a clipped photo; Shift-click toggles a step, Shift + rectangle adds; a press on empty stage clears; the corner handles scale about the opposite corner and the box stays turned; arrows (Shift = 10), `+ -`, `, .` on a group; `[ ] { }` on a group; every Align and Spread entry (three steps; spread needs three); Photos popover (opacity, blend, edge, texture only in a gallery) on a group of photos, also a mixed group (photos, text, strokes); Text popover (font, bold, align, size re-lays the boxes out); Shapes popover (stroke width); the group colour popover with alpha and the dropper; To front / Forward / Backward / To back keep the inner order; Duplicate, Copy, Cut and Paste of a group, also into another node and in another tab (the html part), and of more than 8 steps (now allowed); delete and Ctrl+Z / Ctrl+Y of each group action is exactly one step; a clipped photo with its clip shape selected together moves once; a group with a text box has no flip buttons; the group box follows an undo; a group across a page change is dropped; read-only (locked node) refuses every group action; screen reader: the count is announced; keyboard only (no pointer): Ctrl+A, arrows, Delete; touch (phone, 360 px): the rectangle does not scroll the page, the handles are big enough (`handlePx`), two fingers on a member pinch the group; Firefox and Safari; RTL layout of the bar; the de / fr / es strings (`editor.multi.*`, `editor.align.*`); a group of 100 strokes does not stall (one `batch` per pointer event).
+- [x] **E148 editor scrolled into view** (2026-10-31): a newly opened editor (a new node, or Edit on a saved one) scrolls to the top of the viewport, smoothly unless `prefers-reduced-motion`; for a saved node again once it has loaded, as it grows then (`NodeEditor.js`, effect on `loading`). Not tried on a phone. Open: when the editor opens by itself (files added in the upload grid) this scrolls too; say if that is unwanted.
+- [x] **E149 texture toggle only in a gallery** (2026-10-31): the texture button of a photo in the film-strip shows only when the node kind is `gallery`; a photo that already is a texture keeps it, so it can be undone after the kind changed (`Filmstrip.js`, prop `kind`).
+- [x] **E150 text background toggle** (2026-10-31): inside the Background popover of a text box the toggle reads "Add background" / "No background" (`editor.text.background.add`, `editor.props.bg.clear`), no longer a second "Background" button. Open: opening the popover could switch the background on at once (one click less).
+- [x] **E151 dominant colours that fit the picture** (2026-10-31): D1 is the heaviest; D2 to D4 are chosen by distance, vividness and (damped) weight, so a small purple flower or yellow phone wins over another shade of a dull background (S2.3a, `palette.js dominant`); the scene palette keeps 24 colours (`scenepalette.js`). The stored ingest palette (8 colours, ImageMagick `-colors 8` averages small regions away) is only the fallback; raising it to about 16 is open.
+- [x] **E152 stable palette, dropper icon and outline, popover look** (2026-10-31): see S2.3a (stable while picking, dropper, popovers and swatches). Open: a visible hint while the dropper is armed (phones show no tooltip); a second click on the dropper cancels it; the colour wheel button gets the swatch hairline.
+- [x] **E153 selection box of a stroke or shape turns with it** (2026-10-31): `hit.js outlineOf` takes the box in the step's own space and carries its four corners through the step's matrix, instead of refitting an upright box round the moved points, so rotating a drawing no longer makes the box jump; handles, rectangle selection and group boxes read it. Test in `tests/editor/hit.test.js`.
 - [ ] **E79 text boxes**: now phase K (E88-E97).
 - [ ] **E80 fields** (`fields` list in the properties popover).
 - [ ] **E81 cutout and server-side clip buttons** (`opencv-imgproc.md`, only with `capabilities.imgproc`).
@@ -1157,7 +1196,7 @@ Colour first (E84-E87 can start any time after E3), then text.
 
 - [x] **E131 clipboard** (2026-10-29): Copy, Cut, Paste in the context bar and Ctrl+C/X/V. A copy writes the visible part of the step as a transparent PNG, a text box's words as `text/plain` and styled `text/html`, and the step itself (matrix and clip shape included) as JSON in a `data-wb-clip` attribute of the html part, so a paste in another page or node gets it back exactly. Paste takes our own step, else an image (uploaded like a chosen file, added as a photo), else text (a new text box). A payload is checked by the document validator before it is applied. Later: SVG out (`image/svg+xml`, PNG fallback) for shapes and strokes, SVG in as a picture, several steps at once.
 
-- [x] **E132 scene palette** (2026-10-29): the swatches of the palette and of Properties / Background come from the colours of the page as drawn (96 px canvas, visible pixels counted, look-alikes merged, redrawn 0.5 s after the document rests and only while something shows them), not from one photo's stored palette, which includes removed backgrounds and covered parts. A second row offers the colours the node already uses. Properties / Background offers the swatches plus black, white and "Other colour" (the system picker). Open: the palette for text colour, the palette of a selected photo alone (`scenePalette(doc, options, id)` exists), a tap-to-sample eyedropper (undecided).
+- [x] **E132 scene palette** (2026-10-29): the swatches of the palette and of Properties / Background come from the colours of the page as drawn (96 px canvas, visible pixels counted, look-alikes merged, redrawn 0.5 s after the document rests and only while something shows them), not from one photo's stored palette, which includes removed backgrounds and covered parts. A second row offers the colours the node already uses. Properties / Background offers the swatches plus black, white and "Other colour" (the system picker). The palette for text colour, the palette of a selected photo alone and the tap-to-sample eyedropper (E133) are built. 2026-10-31: the palette is not drawn again when only a colour field changed (a colour picked from it, `color`, `fill`, `stroke`, `bg`, `outline`): it used to move under the hand that picks; moved, added, removed or cut steps, another page or photo still redraw it. Not tried in the browser.
 - [x] **E133 drawings and text in slides** (2026-10-29): in `slides` mode the pen, shape and text tools and the select tool work on the drawings of a slide; the photo is laid out by the mode and cannot be picked. A drawing belongs to the photo before it on its page (up to the next photo, `render.js slideOf`); a new drawing is inserted right after the slide's last one, so it stays on that slide, and the order buttons stay inside it. The editor works on `slideView(doc, slide)` (the slide's drawings alone on page 0, everything else behind them so ids stay unique); rendering, export and the slide strip use the real document. No schema change: in `free` the same steps are ordinary steps over their photo, and `grid` still shows photos only. Clip, unclip and wand are disabled on a slide; paste is off there (it appends to a page). Open: a drawing belongs to the photo before it even when that photo sits elsewhere in `free`.
 - [x] **E134 text box vertical padding** (2026-10-29): the text block, from the top of the first capitals to the last baseline, is centred in the box (`text.js firstBaseline`, per-face `asc` `desc` `cap` in em), so the space above equals the space below whatever the face's line metrics (EB Garamond's ascent plus descent is more than the line height, which left almost nothing under the last line). Stored boxes need no change: the text moves inside the stored height; the editing textarea pads its top to meet the drawn text.
 - [x] **E135 viewer flows** (2026-10-29): `layout.flow` (`fit` | `page` | `scroll`) and `layout.axis` (`h` | `v`), both optional, say how the viewer (`NodeView.js`, used by `/node/:id`) shows a node; the editor stage still shows everything at once. `free`: one stage per page, `slides`: one per photo, as a track that **pages** (scroll-snap, Previous / Next and "n / count") or **scrolls**, horizontally (default for pages) or vertically (default for scrolling). `grid`: `fit` is the old square with all photos, `page` pages of cols x cols (3 x 3 when automatic), `scroll` one long stage with `cols` photos across (axis `v`) or high (axis `h`) and as many rows or columns as needed (`grid.js gridPlan`, `renderStage(..., { part })` with a non-square viewBox). The viewer used to show page 1 only of a multi-page free node: it pages now. Editor: Viewer (All / Pages / Scroll) and Direction chips next to the mode. Open: swipe-driven page indicator dots, a grid page size other than cols x cols, autoplay.

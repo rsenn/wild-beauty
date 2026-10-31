@@ -6,6 +6,8 @@ import { LIMITS, allIds, emptyNode, findStep, photoSteps, unique } from '../edit
 import { apply } from '../editor/commands.js';
 import { createGesture } from '../editor/gesture.js';
 import { aboutPoint } from '../editor/gestures.js';
+import { alignShifts, extentOf } from '../editor/align.js';
+import { orderCommands } from '../editor/ordering.js';
 import { apply as applyMatrix, invert, multiply } from '../editor/matrix.js';
 import { ADD_EVENT, SAVED_EVENT, takePending } from '../editor/pending.js';
 import { QuickAdd } from './QuickAdd.js';
@@ -13,7 +15,7 @@ import { deleteNode, errorKey, loadNode, saveLarge, saveNode } from '../editor/s
 import { createLock } from '../editor/lock.js';
 import * as history from '../editor/history.js';
 import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/draft.js';
-import { centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor/hit.js';
+import { anyMatrixOf, centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor/hit.js';
 import { breakVertex, drag as dragVertices, dragMany, geometry, hitVertex, insideRect, joinVertex, removeVertices, verticesOf } from '../editor/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { cascade, photosOnPage } from '../editor/cascade.js';
@@ -22,7 +24,7 @@ import { boxOf, setContext, trackCommand } from '../events.js';
 import { TextEdit } from './TextEdit.js';
 import { measureText } from '../editor/measure.js';
 import { LIMITS as TEXT_LIMITS, boxHeight, layout } from '../editor/text.js';
-import { rasteriseSvg, svgFor, classify, copyPayload, fromEvent, htmlFor, plainFor, readClipboard, writeClipboard } from '../editor/clipboard.js';
+import { rasteriseSvg, svgFor, classify, copyPayload, pasteSteps, fromEvent, htmlFor, plainFor, readClipboard, writeClipboard } from '../editor/clipboard.js';
 import { sendFile } from '../upload.js';
 import { uploadPayload } from '../files.js';
 import { scenePalette } from '../editor/scenepalette.js';
@@ -49,6 +51,7 @@ import { insertVertex, nearest as nearestOnPath } from '../editor/shapes.js';
 import { NEW } from '../editor/store.js';
 import { swatches, usedColours } from '../editor/palette.js';
 import { ContextBar } from './ContextBar.js';
+import { MultiBar } from './MultiBar.js';
 import { PlaceChip } from './PlaceChip.js';
 import { Filmstrip } from './Filmstrip.js';
 import { clampK, durationOf, positionAt } from '../editor/playback.js';
@@ -221,6 +224,28 @@ const themeColours = () => {
 // where the handles of an outline are, for a handle `px` wide on screen
 const handleSet = (outline, scale, px) => ({ ...handlePoints(outline, { inset: px / 2 / scale, gap: (px * 1.8) / scale }), outline });
 
+// the fields of a step that only hold a colour: the palette ignores their changes
+const COLOUR_KEYS = new Set(['color', 'fill', 'stroke', 'bg', 'outline']);
+
+// the steps of `ids` that move by themselves: a shape that clips a photo of the group moves with that
+// photo (the move of the photo carries its clip), so it must not be moved twice
+// is point p inside the convex quadrilateral q (any winding)?
+const insideQuad = (p, q) => {
+  const sides = q.map((a, i) => {
+    const b = q[(i + 1) % q.length];
+
+    return (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+  });
+
+  return sides.every(v => v >= 0) || sides.every(v => v <= 0);
+};
+
+const moversOf = (doc, ids) => {
+  const clips = new Set(ids.map(id => findStep(doc, id)?.step).filter(s => s?.op === 'photo' && s.clip !== undefined).map(s => s.clip));
+
+  return ids.filter(id => !clips.has(id));
+};
+
 // the outline and the handles of the selection, in the stage overlay: four corners
 // that scale and, with `grips`, a round handle above the top edge that turns
 const Selection = ({ outline, scale, px, grips }) => {
@@ -242,7 +267,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [photos, setPhotos] = useState({});
   const [panelTab, setPanelTab] = useState('select'); // landscape: which panel section shows
   const [tool, setTool] = useState(DEFAULT_TOOL);
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelectedOne] = useState(null);
+  const [multi, setMulti] = useState([]); // two or more steps selected together (rectangle, Shift)
+  const [addMode, setAddMode] = useState(false); // a tap or rectangle adds to the selection (the way to Shift on a phone)
+  const [frame, setFrame] = useState(null); // the box of a multiple selection, turned with it (null: fit to the steps)
+  const setSelected = id => (setMulti([]), setFrame(null), setSelectedOne(id));
+  const setGroup = ids => (setFrame(null), ids.length < 2 ? (setMulti([]), setSelectedOne(ids[0] ?? null)) : (setMulti(ids), setSelectedOne(null)));
   const [color, setColor] = useState('#1a1a1a');
   const [size, setSize] = useState(8);
   const [live, setLive] = useState('');
@@ -277,6 +307,15 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const [aim, setAim] = useState('fill'); // which colour of a selected shape the palette sets
   const stroke = useRef(null);
   const tdrag = useRef(null); // a corner of a text box being dragged in the text tool: { id, base, m, index }
+  // a newly opened editor (new node, or Edit on a saved one) is scrolled into view; again once a
+  // saved node has loaded, as the editor grows then
+  useEffect(() => {
+    if(loading) return;
+
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    document.getElementById('wb-editor')?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+  }, [loading]);
   const hdrag = useRef(null); // a selection handle being dragged: { kind, id, base, pivot | centre, down }
   const [wandMode, setWandMode] = useState('add'); // what a wand tap means: add the area, or exclude it
   const [wandPick, setWandPick] = useState(null); // { index, count } of the candidate shown
@@ -323,6 +362,19 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const selectedStep = !auto && located?.page === page && located.index < shown ? located.step : null; // not one of another page, nor one not shown yet
   const editStep = previewing ? null : selectedStep;
   const dirty = isDirty(hist.present, saved.current);
+  // the steps of a multiple selection in draw order (those on this page and already shown)
+  const groupAt = auto ? [] : multi.map(id => findStep(doc, id)).filter(f => f && f.page === page && f.index < shown).sort((a, b) => a.index - b.index);
+  const group = groupAt.length >= 2 ? groupAt.map(f => f.step.id) : [];
+  // its box: the one kept while the group is turned or scaled, else the extent of the steps' outlines
+  const groupBox = (() => {
+    if(!group.length) return null;
+    if(frame) return frame;
+
+    const outlines = groupAt.map(f => outlineOf(doc, f.step.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true })).filter(Boolean);
+    const b = outlines.length ? extentOf(outlines) : null;
+
+    return b && [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]];
+  })();
 
   // always the current state for handlers registered once
   const latest = useRef();
@@ -331,7 +383,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const tr = (key, params) => latestT.current(key, params);
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
-  latest.current = { aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, vsels, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null };
+  latest.current = { aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, vsels, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null, group, groupBox, auto, addMode };
 
   // In slides mode a new drawing goes right after the slide's last drawing, and
   // a move in the stack stays between the photo and the next one: the slide a
@@ -388,6 +440,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // beginning unless the page is already part way
   const scrub = value => {
     setPlaying(false);
+    setFrame(null); // the box of a multiple selection is fitted to where its steps are at this point
     setK(value >= latest.current.count ? null : value);
   };
   const togglePlay = () => {
@@ -532,6 +585,142 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   const remove = id => {
     dispatch({ type: 'removeStep', id });
     setSelected(null);
+  };
+
+  // delete every step of a multiple selection: one undo step
+  const removeGroup = () => {
+    dispatch({ type: 'batch', commands: latest.current.group.map(id => ({ type: 'removeStep', id })) });
+    setSelected(null);
+  };
+
+  // the steps a group transform changes, with their matrices now: a clipped photo carries its
+  // clip, so while the document is at its end the clip is left out (the move of the photo moves it);
+  // scrubbed back, each transform is recorded on its own, so the clip is a member too
+  const membersOf = c => {
+    const at = { page: c.page, upTo: c.scrubbed ? c.shown : undefined };
+    const ids = c.scrubbed ? [...new Set(c.group.flatMap(id => [id, findStep(c.doc, id)?.step.clip].filter(x => x !== undefined)))] : moversOf(c.doc, c.group);
+
+    return ids.flatMap(id => {
+      const m = anyMatrixOf(c.doc, id, at);
+
+      return m ? [[id, m]] : [];
+    });
+  };
+
+  // new matrices for the members of a group: one batch at the end of a page, and scrubbed back
+  // one recorded move per member, kept as one run (`inserted`) while the gesture goes on
+  const commitMatrices = (pairs, key) => {
+    const c = latest.current;
+
+    if(!c.scrubbed) return dispatch({ type: 'batch', key, commands: pairs.map(([id, m]) => ({ type: 'setMatrix', id, m })) });
+
+    const ids = pairs.map(([id]) => id).join('+');
+    const again = inserted.current?.id === ids && inserted.current.at === c.shown - 1;
+
+    dispatch({ type: 'recordMoves', items: pairs.map(([id, m]) => ({ id, m })), k: c.shown, again, key });
+
+    if(!again && c.doc.pages[c.page].steps.length + pairs.length <= LIMITS.steps) {
+      inserted.current = { id: ids, at: c.shown + pairs.length - 1 };
+      c.shown += pairs.length; // the next event of the same gesture must see the new steps
+      c.count += pairs.length;
+      setK(c.shown);
+    }
+  };
+
+  // one similarity for every step of a multiple selection (and its box): buttons, keys and handles
+  const transformGroup = (sim, key) => {
+    const c = latest.current;
+
+    if(c.group.length < 2 || c.auto || !c.groupBox) return;
+
+    commitMatrices(membersOf(c).map(([id, m]) => [id, multiply(sim, m)]), key);
+    setFrame(c.groupBox.map(p => applyMatrix(sim, p)));
+  };
+
+  // the buttons of the multiple selection's bar: the same turn, scale or flip about the centre of its box
+  const nudgeGroup = kind => {
+    const box = latest.current.groupBox;
+    const sim = box && nudge(kind, [(box[0][0] + box[2][0]) / 2, (box[0][1] + box[2][1]) / 2]);
+
+    if(!sim) return;
+
+    transformGroup(sim, null);
+    setHist(history.seal);
+  };
+
+  // order of a multiple selection as a group
+  const orderGroup = to => {
+    const c = latest.current;
+    const commands = orderCommands(c.doc, c.group, to);
+
+    if(commands.length) dispatch({ type: 'batch', commands });
+  };
+
+  // align or distribute the steps of a multiple selection (their boxes, not their pixels)
+  const alignGroup = kind => {
+    const c = latest.current;
+    if(c.auto) return;
+
+    const at = { photos: hash => c.photos[hash], page: c.page, upTo: c.scrubbed ? c.shown : undefined, clipped: true };
+    const items = moversOf(c.doc, c.group).flatMap(id => {
+      const o = outlineOf(c.doc, id, at);
+
+      return o ? [{ id, box: extentOf([o]) }] : [];
+    });
+    const shifts = new Map(alignShifts(items, kind).map(s => [s.id, s]));
+    const pairs = membersOf(c).flatMap(([id, m]) => {
+      // a clip follows the photo it clips
+      const owner = c.group.find(g => g === id || findStep(c.doc, g)?.step.clip === id);
+      const s = shifts.get(owner);
+
+      return s && (s.dx || s.dy) ? [[id, multiply([1, 0, 0, 1, s.dx, s.dy], m)]] : [];
+    });
+
+    if(pairs.length) commitMatrices(pairs, null);
+
+    setFrame(null);
+    setHist(history.seal);
+  };
+
+  // a text change for every text box of a multiple selection, each laid out again
+  const changeTextGroup = patch => {
+    const c = latest.current;
+    const commands = c.group.flatMap(id => {
+      const step = findStep(c.doc, id)?.step;
+
+      if(step?.op !== 'text') return [];
+
+      const next = { ...step, ...patch };
+      const { lines, h } = layout(next, measureFor(next.bold));
+
+      return [{ type: 'updateText', id, patch: { ...patch, lines, h } }];
+    });
+
+    if(commands.length) dispatch({ type: 'batch', commands, key: `group-text:${Object.keys(patch)[0]}` });
+  };
+
+  // copy a multiple selection, or put its copy a little down and right, selected
+  const duplicateGroup = () => {
+    const c = latest.current;
+    const payload = c.previewing ? null : copyPayload(c.doc, c.group);
+
+    if(!payload || c.doc.pages[c.page].steps.length > LIMITS.steps - payload.items.length * 2) return;
+
+    const taken = new Set(allIds(c.doc));
+    const fresh = [];
+
+    for(let i = 0; i < payload.items.length * 2; i++) {
+      const id = unique(taken);
+
+      taken.add(id);
+      fresh.push(id);
+    }
+
+    const made = pasteSteps(c.doc, c.pageId, payload, { shift: 50, ids: fresh });
+
+    dispatch({ type: 'pasteSteps', page: c.pageId, payload, shift: 50, ids: fresh });
+    setGroup(made.ids);
+    setHist(history.seal);
   };
 
   // the "add to node" button of an upload card queues the photo; an open editor
@@ -854,6 +1043,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
           setCandidate(next);
           setAnnounce(next ? tr('editor.announce.candidate') : '');
+        } else if(e.shiftKey && current === 'select') {
+          // Shift extends the selection by the next step, so several can be chosen without a pointer
+          const held = latest.current.group.length ? latest.current.group : sel ? [sel] : [];
+          const next = cycleId(selectableIds(d, { page: pg, upTo }), held.at(-1) ?? null, dir);
+
+          if(next) setGroup(held.includes(next) ? held : [...held, next]);
         } else {
           setSelected(cycleId(selectableIds(d, { page: pg, upTo }), sel, dir));
         }
@@ -943,8 +1138,24 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         if(e.key === 'Backspace') return e.preventDefault(), setDraft(undoVertex(latest.current.shape));
       }
 
+      // Ctrl+A selects every step of the page
+      if((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'a' && !inField(e.target) && current === 'select' && !latest.current.auto) {
+        e.preventDefault();
+
+        return setGroup(selectableIds(d, { page: pg }));
+      }
+
       const move = transformFor(e);
       const { selected: id, doc, page } = latest.current;
+
+      if(move && latest.current.group.length && !latest.current.auto) {
+        e.preventDefault();
+
+        const b = latest.current.groupBox;
+        const centre = b ? [(b[0][0] + b[2][0]) / 2, (b[0][1] + b[2][1]) / 2] : [500, 500];
+
+        return transformGroup(multiply([1, 0, 0, 1, move.dx ?? 0, move.dy ?? 0], aboutPoint(move.scale ?? 1, move.rotate ?? 0, centre)), `group-key:${latest.current.group.join(',')}`);
+      }
 
       if(move && id) {
         e.preventDefault();
@@ -956,6 +1167,12 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       }
 
       const order = orderFor(e);
+
+      if(order && latest.current.group.length && !latest.current.previewing) {
+        e.preventDefault();
+
+        return orderGroup(order);
+      }
 
       if(order && latest.current.selected && !latest.current.previewing) {
         e.preventDefault();
@@ -979,6 +1196,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
       if(action === 'undo') undo();
       else if(action === 'redo') redo();
+      else if(latest.current.group.length && !latest.current.previewing) removeGroup();
       else if(latest.current.selected && !latest.current.previewing) {
         if(latest.current.vsel !== null && latest.current.editStep?.op === 'shape') editVertex('delete');
         else remove(latest.current.selected);
@@ -1008,6 +1226,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // the colours of what is on the stage (E132), drawn small and counted once the document
   // has rested; only while something shows them (the palette, the properties)
   const [scenePal, setScenePal] = useState(null);
+  const paletteKey = useRef(null); // what the palette was last drawn from, without the colours
   const [, setAlphaReady] = useState(0);
 
   // the transparent parts of the photos (clicks go through them, the selection box hugs the content)
@@ -1030,6 +1249,14 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     let live = true;
     const timer = setTimeout(() => {
+      // Choosing a colour changes the picture, but the palette must not move under the hand that
+      // picks from it: it is only drawn again when something other than a colour changed
+      const key = [page, slideNow, photoId, loaded, mode].join('/') + JSON.stringify(realDoc, (name, value) => (COLOUR_KEYS.has(name) ? undefined : value));
+
+      if(key === paletteKey.current) return;
+
+      paletteKey.current = key;
+
       // a selected photo offers its own colours (its visible part), else the page's
       scenePalette(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page }, photoId).then(p => live && setScenePal(p.length ? p : null));
     }, 500);
@@ -1152,6 +1379,21 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     // another finger joins the gesture that is running
     if(gesture.current) return gesture.current.g.down(e.pointerId, units);
 
+    // the handles of a multiple selection: a corner scales about the opposite corner, the round one turns about the centre
+    if(!latest.current.auto && latest.current.group.length && latest.current.groupBox) {
+      const box = latest.current.groupBox;
+      const set = handleSet(box, scale, handlePx);
+      const grip = hitHandle(set, units, (handlePx / 2 + (coarse ? 6 : 3)) / scale);
+
+      if(grip) {
+        const bases = membersOf(latest.current);
+
+        hdrag.current = grip.kind === 'rotate' ? { group: true, kind: 'rotate', bases, box, centre: set.centre, down: units } : { group: true, kind: 'scale', bases, box, pivot: set.outline[(grip.index + 2) % 4], down: units };
+
+        return;
+      }
+    }
+
     // a handle of the selection comes before anything under it: a corner scales
     // about the opposite corner, the round one turns about the centre (E113)
     if(!previewing && editStep) {
@@ -1201,6 +1443,38 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       lasso.current = { from: units, add: e.shiftKey, base: latest.current.vsels, moved: false, geo: geometry(parsed, shapeM) };
 
       return;
+    }
+
+    // Shift toggles a step in the selection; a press on the empty stage (or Shift on it) starts a
+    // rectangle round steps; a press on one of several selected steps carries them all
+    if(!auto) {
+      const held = latest.current.group;
+      const base = held.length ? held : latest.current.selected ? [latest.current.selected] : [];
+      const box = latest.current.groupBox;
+      const more = e.shiftKey || latest.current.addMode; // Shift, or the select-several button
+      const inBox = !id && !more && held.length > 0 && box && insideQuad(units, box); // empty stage inside the box of the group
+
+      if(id && more) return setGroup(base.includes(id) ? base.filter(b => b !== id) : [...base, id]);
+
+      if(!id && !inBox) {
+        lasso.current = { objects: true, from: units, add: more, base, moved: false };
+
+        return;
+      }
+
+      if(inBox || held.includes(id)) {
+        const at = { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined };
+        const m = inBox ? [1, 0, 0, 1, 0, 0] : matrixOf(doc, id, at);
+
+        if(!m) return;
+
+        const g = createGesture(m, { slop: SLOP_PX / scale });
+
+        g.down(e.pointerId, units, { alt: e.altKey, centre: inBox ? [(box[0][0] + box[2][0]) / 2, (box[0][1] + box[2][1]) / 2] : centreOf(doc, id, at) });
+        gesture.current = { g, id: id ?? held[0], base: m, box, group: membersOf(latest.current) };
+
+        return;
+      }
     }
 
     setSelected(id);
@@ -1822,6 +2096,15 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(hdrag.current) {
       const d = hdrag.current;
 
+      if(d.group) {
+        const sim = d.kind === 'rotate' ? rotateDrag([1, 0, 0, 1, 0, 0], d.centre, d.down, [x, y]) : scaleDrag([1, 0, 0, 1, 0, 0], d.pivot, d.down, [x, y]);
+
+        commitMatrices(d.bases.map(([id, m]) => [id, multiply(sim, m)]), 'group-handle');
+        setFrame(d.box.map(p => applyMatrix(sim, p)));
+
+        return;
+      }
+
       return commitMatrix(d.id, d.kind === 'rotate' ? rotateDrag(d.base, d.centre, d.down, [x, y]) : scaleDrag(d.base, d.pivot, d.down, [x, y]));
     }
 
@@ -1838,7 +2121,19 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
       if(Math.hypot(x - l.from[0], y - l.from[1]) > TAP_PX / latest.current.scale) l.moved = true;
 
-      if(l.moved) {
+      if(l.moved && l.objects) {
+        const c = latest.current;
+        const [x0, x1] = [Math.min(l.from[0], x), Math.max(l.from[0], x)];
+        const [y0, y1] = [Math.min(l.from[1], y), Math.max(l.from[1], y)];
+        const inside = selectableIds(c.doc, { page: c.page }).filter(id => {
+          const o = outlineOf(c.doc, id, { photos: hash => c.photos[hash], page: c.page, clipped: true });
+
+          return o && o.every(([px, py]) => px >= x0 && px <= x1 && py >= y0 && py <= y1);
+        });
+
+        setGroup(l.add ? [...l.base, ...inside.filter(i => !l.base.includes(i))] : inside);
+        setMarquee([l.from, [x, y], 'objects']);
+      } else if(l.moved) {
         const inside = insideRect(l.geo, [l.from, [x, y]]);
 
         setVsels(l.add ? [...l.base, ...inside.filter(i => !l.base.includes(i))] : inside);
@@ -1875,7 +2170,15 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     if(gesture.current) {
       const m = gesture.current.g.move(e.pointerId, [x, y]);
 
-      if(m) commitMatrix(gesture.current.id, m);
+      if(m && gesture.current.group) {
+        const back = invert(gesture.current.base);
+        const delta = back && multiply(m, back);
+
+        if(delta) {
+          setFrame(gesture.current.box?.map(p => applyMatrix(delta, p)) ?? null);
+          commitMatrices(gesture.current.group.map(([id, base]) => [id, multiply(delta, base)]), 'group-move');
+        }
+      } else if(m) commitMatrix(gesture.current.id, m);
 
       return;
     }
@@ -2102,15 +2405,16 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   // copy (or cut) the selected step: its picture, its words and itself
   const copySelected = async cut => {
     const c = latest.current;
-    const id = c.selected;
-    const payload = id && !c.previewing ? copyPayload(c.doc, id) : null;
+    const ids = c.group.length ? c.group : c.selected ? [c.selected] : [];
+    const id = ids[0];
+    const payload = id && !c.previewing ? copyPayload(c.doc, ids.length > 1 ? ids : id) : null;
 
     if(!payload) return false;
 
     pasted.current = 0;
 
     try {
-      const png = await stepImage(c.doc, id, { photos: hash => c.photos[hash], page: c.page }).catch(() => null);
+      const png = ids.length > 1 ? null : await stepImage(c.doc, id, { photos: hash => c.photos[hash], page: c.page }).catch(() => null);
 
       await writeClipboard({ png, svg: svgFor(payload), html: htmlFor(payload), text: plainFor(payload) });
     } catch {
@@ -2121,7 +2425,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
 
     setAnnounce(tr(cut ? 'editor.announce.cutDone' : 'editor.announce.copied'));
 
-    if(cut && !c.readOnly) remove(id);
+    if(cut && !c.readOnly) (ids.length > 1 ? removeGroup() : remove(id));
 
     return true;
   };
@@ -2151,8 +2455,10 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         fresh.push(id);
       }
 
-      dispatch({ type: 'pasteSteps', page: c.pageId, payload: { ...what.payload, items }, shift: 50 * n, ids: fresh });
-      setSelected(fresh[0]);
+      const payload = { ...what.payload, items };
+
+      dispatch({ type: 'pasteSteps', page: c.pageId, payload, shift: 50 * n, ids: fresh });
+      setGroup(pasteSteps(c.doc, c.pageId, payload, { shift: 50 * n, ids: fresh }).ids);
       setHist(history.seal);
 
       return setAnnounce(tr('editor.announce.pasted'));
@@ -2200,7 +2506,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
   useEffect(() => {
     const mine = e => !inField(e.target) && !window.getSelection?.()?.toString();
     const copy = e => {
-      if(!mine(e) || !latest.current.selected) return;
+      if(!mine(e) || (!latest.current.selected && !latest.current.group.length)) return;
 
       e.preventDefault();
       copySelected(e.type === 'cut');
@@ -2364,7 +2670,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsels} scale=${scale} />`}${marquee && html`<g fill="none" stroke-width=${1 / scale} shape-rendering="crispEdges" pointer-events="none">${['#ffffff', '#000000'].map((stroke, k) => html`<rect x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke=${stroke} stroke-dasharray=${k ? `${2 / scale} ${2 / scale}` : undefined} />`)}</g>`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
+          overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsels} scale=${scale} />`}${group.length > 0 && groupBox && html`<${Selection} outline=${groupBox} scale=${scale} px=${handlePx} grips=${true} />`}${group.length > 0 && groupAt.map(f => { const o = outlineOf(doc, f.step.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true }); return o && html`<polygon key=${f.step.id} class="wb-editor-outline" points=${o.map(p => p.join(',')).join(' ')} />`; })}${marquee && marquee[2] && html`<rect class="wb-editor-marquee" x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke-dasharray=${`${5 / scale} ${4 / scale}`} />`}${marquee && !marquee[2] && html`<g fill="none" stroke-width=${1 / scale} shape-rendering="crispEdges" pointer-events="none">${['#ffffff', '#000000'].map((stroke, k) => html`<rect x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke=${stroke} stroke-dasharray=${k ? `${2 / scale} ${2 / scale}` : undefined} />`)}</g>`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           loupe=${coarse && tool !== 'select' && tool !== 'wand'}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
@@ -2381,6 +2687,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       </div>
       <div class="wb-editor-side">
       <div class="wb-editor-sec" data-sec="select">
+      ${tool === 'select' && !auto && html`<div class="wb-editor-context"><button type="button" class="wb-editor-chip" aria-pressed=${addMode ? 'true' : 'false'} title=${t('editor.multi.add.hint')} onClick=${() => setAddMode(on => !on)}>${t('editor.multi.add')}</button></div>`}
       ${(tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : t('editor.context.' + tool)}</p>`}
       ${tool === 'clip' && clipGeo && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.clip.mode')}>${['replace', 'add', 'subtract'].map(mode => html`<button type="button" class="wb-editor-chip" aria-pressed=${clipMode === mode ? 'true' : 'false'} onClick=${() => setClipMode(mode)}>${t('editor.clip.' + mode)}</button>`)}${outlineCount(doc, editStep.id) > 1 && html` <button type="button" class="wb-editor-chip" onClick=${splitOutlines}>${t('editor.clip.split')}</button>`}</div>`}
       ${tool === 'wand' && html`<div class="wb-editor-context">${busyAt && html`<button type="button" class="wb-editor-chip" onClick=${cancelJob}>${t('editor.job.cancel')}</button> `}<button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'add' ? 'true' : 'false'} onClick=${() => setWandMode('add')}>${t('editor.wand.add')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'sub' ? 'true' : 'false'} onClick=${() => setWandMode('sub')}>${t('editor.wand.subtract')}</button>${wandPick && wandPick.count > 1 && html` <button type="button" class="wb-editor-chip" disabled=${wandPick.index <= 0} onClick=${() => wandStep(-1)}>${t('editor.nudge.smaller')}</button> <button type="button" class="wb-editor-chip" disabled=${wandPick.index >= wandPick.count - 1} onClick=${() => wandStep(1)}>${t('editor.nudge.larger')}</button>`}</div>`}
@@ -2399,13 +2706,15 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
             ${kind === 'gallery' && html`<button type="button" class="wb-editor-chip" aria-pressed=${roomAid ? 'true' : 'false'} onClick=${() => setRoomAid(on => !on)}>${t('editor.roomaid')}</button>`}
             ${roomAid && kind === 'gallery' && html`<span class="wb-editor-hint">${t('editor.roomaid.pen')}</span>`}
           </div>`
+        : group.length
+        ? html`<${MultiBar} t=${t} kind=${kind} limited=${scrubbed} steps=${groupAt.map(f => f.step)} onNudge=${nudgeGroup} onOrder=${orderGroup} onAlign=${alignGroup} onText=${changeTextGroup} onDuplicate=${duplicateGroup} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDelete=${removeGroup} onDropper=${startDropper} pal=${pal} used=${usedNow} dispatch=${dispatch} />`
         : html`<${ContextBar} t=${t} kind=${kind} step=${editStep} vertex=${vertexInfo} onVertex=${editVertex} onAlcove=${makeAlcove} clipped=${editStep?.clip !== undefined} photo=${editStep && photos[editStep.photo]} onNudge=${nudgeSelection} onDuplicate=${duplicateSelection} onCopy=${() => copySelected(false)} onCut=${() => copySelected(true)} onPaste=${pasteClipboard} onDropper=${startDropper} pal=${pal} used=${usedNow} onCutout=${removeBackground} onCancelJob=${cancelJob} cutting=${cutting !== null} onText=${patch => changeText(patch)} onEditText=${() => editStep?.op === 'text' && setTyping(editStep.id)} dispatch=${command => (command.type === 'removeStep' ? remove(command.id) : dispatch(command))} />`}
       <${PlaceChip} t=${t} doc=${doc} photos=${photos} nodeId=${nodeId} />
       ${paletteTargets && html`<${Palette} t=${t} pal=${pal} used=${usedNow} dropper=${startDropper} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">
         <${QuickAdd} t=${t} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} />
-        <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} />
+        <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} kind=${kind} />
       </div>
       <div class="wb-editor-sec" data-sec="sequence">
       <${ModeSwitch} t=${t} mode=${mode} onMode=${setMode} layout=${doc.layout} onLayout=${changes => dispatch({ type: 'setLayout', changes })} />

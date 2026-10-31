@@ -196,7 +196,7 @@ function clippedBox(entry, steps, w, h, info) {
 }
 
 // The outline of a step as four corners [[x, y] x 4] (a photo's turned
-// rectangle; the bounding box of a stroke or shape), or null when the step is
+// rectangle; the bounding box of a stroke or shape in its own space, turned with it), or null when the step is
 // not drawn or unknown. With `clipped` a clipped photo's outline hugs the part
 // that is still visible (the selection box); otherwise it is the whole photo.
 export function outlineOf(doc, id, { photos = () => null, page = 0, upTo, clipped = false } = {}) {
@@ -220,7 +220,9 @@ export function outlineOf(doc, id, { photos = () => null, page = 0, upTo, clippe
 
   if(step.op === 'text') return [[0, 0], [step.w, 0], [step.w, step.h], [0, step.h]].map(c => apply(m, c));
 
-  const points = step.op === 'stroke' ? step.pts.map(q => apply(m, [q[0], q[1]])) : shapePoints(step, m)?.points;
+  // the box is taken in the step's own space and carried by its matrix, so it turns and
+  // scales with the step instead of being refitted upright round the moved points
+  const points = step.op === 'stroke' ? step.pts.map(q => [q[0], q[1]]) : shapePoints(step, IDENTITY)?.points;
 
   if(!points?.length) return null;
 
@@ -229,7 +231,7 @@ export function outlineOf(doc, id, { photos = () => null, page = 0, upTo, clippe
   const ys = points.map(q => q[1]);
   const [x0, x1, y0, y1] = [Math.min(...xs) - pad, Math.max(...xs) + pad, Math.min(...ys) - pad, Math.max(...ys) + pad];
 
-  return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+  return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(c => apply(m, c));
 }
 
 // the ids of the steps that can be selected on page `page`, in drawing order,
@@ -242,6 +244,13 @@ export function selectableIds(doc, { page = 0, upTo, ops } = {}) {
 // it is not drawn
 export function matrixOf(doc, id, { page = 0, upTo } = {}) {
   return drawn(doc, page, upTo).entries.find(e => e.step.id === id)?.m ?? null;
+}
+
+// like matrixOf, but also for a shape that only serves as the clip of a photo (it is not drawn)
+export function anyMatrixOf(doc, id, { page = 0, upTo } = {}) {
+  const d = drawn(doc, page, upTo);
+
+  return d.entries.find(e => e.step.id === id)?.m ?? d.all.get(id)?.m ?? null;
 }
 
 // the centre of a step's outline: where keys and Alt-drag scale and turn it

@@ -50,6 +50,15 @@
   --wb-radius-node: 8px;
   --wb-node-outline: 3px;
 
+  /* login modal: white card, crimson title bar (the accent), terminal-green
+   * confirmation on black; the tumble in and out lasts --wb-login-time */
+  --wb-login-card: #fff;
+  --wb-login-ring: #808080;
+  --wb-login-shadow: 2px 2px 4px 0 rgb(0 0 0 / 0.6);
+  --wb-login-status-ink: rgb(123 255 15);
+  --wb-login-status-ground: #000;
+  --wb-login-time: 1000ms;
+
   /* type: Fixed is the pixel/terminal face used for everything */
   --wb-font-ui: Fixed, ui-monospace, monospace;
   --wb-font-size: 13px;
@@ -94,6 +103,11 @@
   --wb-shadow-card: 0 0 4px rgb(0 0 0 / 0.75);
   --wb-shadow-select: 2px 2px 6px #000;
   --wb-shadow-hover: 0 2px 4px rgb(0 0 0 / 0.5);
+  /* popovers and colour swatches: a hairline, no heavy frame. To try other looks,
+   * swap these three: popover border `none` with a 2-3px shadow, swatch border `none` */
+  --wb-popover-border: 1px solid rgb(0 0 0 / 0.55);
+  --wb-popover-shadow: 2px 3px 4px rgb(0 0 0 / 0.4);
+  --wb-swatch-border: 1px solid rgb(0 0 0 / 0.4);
   --wb-shadow-pop: 5px 5px 10px 2px rgb(0 0 0 / 0.62);
 
   /* round icon buttons on cards (delete, rotate) */
@@ -133,6 +147,7 @@
   --wb-icon-tool-page: url(/static/img/tool-page.svg);
   --wb-icon-tool-delete: url(/static/img/tool-delete.svg);
   --wb-icon-tool-save: url(/static/img/tool-save.svg);
+  --wb-icon-tool-dropper: url(/static/img/tool-dropper.svg);
   --wb-icon-tool-wand: url(/static/img/tool-wand.svg);
   --wb-icon-tool-unclip: url(/static/img/tool-unclip.svg);
   --wb-icon-tool-text: url(/static/img/tool-text.svg);

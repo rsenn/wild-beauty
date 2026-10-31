@@ -18,6 +18,18 @@ If asked to change anything under `attic/`, explain that it is archived and do n
 
 Source, configuration, build and asset files outside `attic/` (the rewrite, `static/`, `lib/`, `scripts`) may be created and changed as the work in `PLAN.md` requires. `lib/` is a git submodule: do not commit changes inside it without being asked.
 
+## Dev server (runit)
+
+During development the server runs under runit as `/etc/service/wild-beauty` (service dir `/var/service/wild-beauty`, with a `log/` child service), started as `bun server.js --dev --host 0.0.0.0 --port 3001 --no-keys` in the project root. Do not start a second copy by hand on port 3001.
+
+- Status: `sudo svstat /etc/service/wild-beauty{,/log}`
+- Control: `sudo sv <command> wild-beauty` (e.g. `restart`, `stop`, `start`, `hup`; see `man 8 sv`)
+- Log: `/var/service/wild-beauty/log/main/current`
+
+## Mail and login (2026-10-31)
+
+The host runs Postfix and Dovecot for `transistorisiert.ch` and `jános.ch`; registration mail is to be sent as `noreply@transistorisiert.ch` (ports 25, 465, 587 for smtp, 143 and 993 for imap; details and open points in `PLAN.md` S17). The login dialog is UI only: `POST /api/login` does not exist yet. Do not put mail passwords in the repository.
+
 ## Documentation
 
 `*.md` and `*.txt` notes are always in scope: analysis, findings, plans, historical context.

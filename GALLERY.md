@@ -29,6 +29,7 @@ Dates are as of 2026-10-22.
   for **two floor types** (exhibit rooms; corridors and ramps) (S3.3).
 - **Ramps**: a floor polygon with an **entry height and an exit height**, slope at
   most **1:12**; walls standing on a ramp **tilt** with it (S3.1).
+- **Texture toggle in the editor** (2026-10-31): the button that marks a photo as a texture is shown in the film-strip only for a node of kind `gallery`, because a texture is only used there (`EDITOR.md` E149).
 - **Texture set** (one per gallery): up to **three images**. Image 1 is for the
   walls and is either **split in four** (a different texture per compass direction)
   or **not split** (all walls alike); image 2 is the **room floor** and also the

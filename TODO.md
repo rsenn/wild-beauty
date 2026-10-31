@@ -12,11 +12,27 @@ and ends in something you can run or look at ("done when"). Do tasks in order;
 a milestone is finished when all its tasks are. Section references: `P` =
 PLAN.md, `D` = DESIGN.md.
 
-## Open threads (2026-10-29)
+## Open threads (2026-10-29, updated 2026-10-31)
 
 Work that was started, offered or decided but not finished, so a detour does not lose it.
 Detail lives in `EDITOR.md` (E-numbers) and `UX-REQUIREMENTS.md`. Update this list when one closes.
 State: all of the work below is committed and pushed (last: `d2ae0104`). The camera / place work (E137, E139) is done in another session and not listed here.
+
+### Done 2026-10-31 (uncommitted; ask before committing)
+- [x] Dev server under runit (`/var/service/wild-beauty`, log child; two steps for you: `chown log:log .../log/main`, `ln -s` into `/etc/service`), note in `CLAUDE.md`.
+- [x] Mail: Postfix `submission` (587) and `smtps` (465) enabled and restarted, router forwards seen, `ufw` allow rules added (ufw inactive). `PLAN.md` S17.
+- [x] Login dialog with the old tumbling overlay (`LoginDialog.js`), Login tab; `POST /api/login` missing.
+- [x] Editor: scrolled into view (E148), texture toggle only in galleries (E149), text background toggle (E150), colours that fit the picture (E151), stable palette, dropper icon and outline, popover look (E152), box of a stroke turns with it (E153).
+- [x] **E147 multiple selection**: rectangle, Shift, Select several, Ctrl+A, Shift+PageDown, group box with handles, drag by member or box, Align, order, properties by type, clipboard, duplicate, delete, scrubbed groups, `batch` and `recordMoves` commands.
+
+### Open from 2026-10-31
+- [ ] **E147 concerns (a) to (l) and its test list** (`EDITOR.md`): phone check of the rectangle and the Select several button, the group bar is long, popover wrapping CSS never seen, big copies, a picture for a copied group, busy outlines, a "More" popover.
+- [ ] **E150 / E152 small ones**: open the text Background popover with the background on; a visible hint while the dropper is armed and a second click cancelling it; the colour wheel button with the swatch hairline; ingest palette of about 16 colours.
+- [ ] **E148**: should an editor that opens by itself scroll? Check on a phone.
+- [ ] **Login and registration** (`PLAN.md` S17): decide accounts and sessions, build `/api/login`, send the registration mail (SPF, DKIM, DMARC and reverse DNS unchecked, inbound port 25 unchecked from outside), texts in four languages.
+- [ ] **Firewall**: `ufw` is inactive with allow rules for 25, 465, 587, 143, 993; enabling it needs rules for 22, 80, 443, 3001, the `anon` proxy and Docker first.
+- [ ] **Housekeeping**: `i18n: missing key "editor.keys.\"` (the keys help has no text for the backslash key, and does not list the new shortcuts Ctrl+A, Shift+PageDown / PageUp, Shift+click either: `KEYS` in `NodeEditor.js` and four locale files); the test browser tool's Escape made the title placeholder read "null" (no page code wrote it, check with a real keyboard).
+- [ ] Commit this day's work (many files, see `git status`).
 
 ### Closed today (2026-10-29)
 - [x] E128 jobs (Cancel, `job.js blocked`, auto-cancel, leave confirm); E96 round trip tests; E97 right-to-left; fixed-height text box; SVG clipboard in and out; palette of a selected photo; E109 landscape dimming.

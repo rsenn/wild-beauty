@@ -82,11 +82,20 @@ body {
 }
 
 .wb-tab > a,
+.wb-tab > .wb-tab-button,
 .wb-tab-lang > .wb-tab-label {
   display: block;
   padding: 0 0.25em;
   color: inherit;
   text-decoration: none;
+}
+
+.wb-tab > .wb-tab-button {
+  width: 100%;
+  font: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
 }
 
 .wb-tab-label {
@@ -619,6 +628,12 @@ body {
 .wb-editor-tool-wand { --wb-icon-tool: var(--wb-icon-tool-wand); }
 .wb-editor-tool-unclip { --wb-icon-tool: var(--wb-icon-tool-unclip); }
 .wb-editor-tool-text { --wb-icon-tool: var(--wb-icon-tool-text); }
+.wb-editor-dropper { --wb-icon-tool: var(--wb-icon-tool-dropper); }
+
+.wb-editor-dropper > .wb-editor-tool-icon {
+  width: 20px;
+  height: 20px;
+}
 
 .wb-editor-tool-key {
   position: absolute;
@@ -800,7 +815,7 @@ body {
   width: 36px;
   height: 36px;
   padding: 0;
-  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
+  border: var(--wb-swatch-border);
   cursor: pointer;
 }
 
@@ -1190,6 +1205,14 @@ body {
   pointer-events: none;
 }
 
+.wb-editor-marquee {
+  fill: var(--wb-select-fill);
+  stroke: var(--wb-select);
+  stroke-width: var(--wb-editor-outline-width);
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
 .wb-editor-handle {
   fill: var(--wb-editor-handle-fill);
   stroke: var(--wb-editor-handle-stroke);
@@ -1231,7 +1254,8 @@ body {
   cursor: pointer;
 }
 
-.wb-editor-chip[aria-pressed='true'] {
+.wb-editor-chip[aria-pressed='true'],
+.wb-editor-dropping .wb-editor-dropper {
   outline: var(--wb-select-width) solid var(--wb-select);
 }
 
@@ -1256,9 +1280,9 @@ body {
   min-width: 14em;
   padding: var(--wb-editor-gap);
   background: var(--wb-editor-popover-bg);
-  border: var(--wb-frame-width) var(--wb-frame-style) var(--wb-ink);
+  border: var(--wb-popover-border);
   border-radius: var(--wb-radius-frame);
-  box-shadow: var(--wb-shadow-pop);
+  box-shadow: var(--wb-popover-shadow);
 }
 
 /* a stored draft was found (E43) */
@@ -2238,4 +2262,110 @@ body {
 /* ground control after a landing: a written transmission over the stage */
 .wb-gallery-atc {
   text-align: left;
+}
+
+/* login: the overlay (gradient set inline) tumbles as a whole; start pose in
+ * from the top right (the Login tab), end pose out to the bottom left */
+.wb-login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--wb-login-time) linear;
+  transform: perspective(1000px) translate3d(50vw, -50vh, 50px) rotateX(-45deg) rotateY(-45deg) rotateZ(90deg) scale3d(0.02, 0.02, 1);
+}
+
+.wb-login-open {
+  transform: perspective(1000px) translate3d(0, 0, 50px) rotate3d(0, 0, 1, 0deg) scale3d(1, 1, 1);
+}
+
+.wb-login-leave {
+  transform: perspective(1000px) translate3d(-50vw, 50vh, 50px) rotateX(45deg) rotateY(45deg) rotateZ(-90deg) scale3d(0.02, 0.02, 1);
+}
+
+.wb-login {
+  display: flex;
+  flex-direction: column;
+  width: min(75vmin, 275px);
+  min-height: 275px;
+  background: var(--wb-login-card);
+  color: var(--wb-ink);
+  box-shadow: var(--wb-login-shadow);
+}
+
+.wb-login-title {
+  padding: 6px 16px 4px;
+  background: var(--wb-accent);
+  color: var(--wb-accent-ink);
+  font-size: var(--wb-font-size-lead);
+  text-align: center;
+}
+
+.wb-login-field {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 10px;
+  font-size: var(--wb-font-size-label);
+}
+
+.wb-login-field > input {
+  width: 100%;
+  padding: 2px;
+  font: inherit;
+  font-size: var(--wb-font-size-lead);
+  color: var(--wb-ink);
+  border: var(--wb-border-width) solid var(--wb-login-ring);
+  border-radius: var(--wb-radius-button);
+}
+
+.wb-login-button {
+  align-self: center;
+  margin: 10px 0;
+  padding: 4px 10px 2px;
+  font: inherit;
+  font-size: var(--wb-font-size-lead);
+  background: var(--wb-accent);
+  color: var(--wb-accent-ink);
+  border: var(--wb-border-width) solid var(--wb-pick);
+  border-radius: var(--wb-radius-button);
+  box-shadow: var(--wb-login-shadow);
+}
+
+.wb-login-button:active {
+  transform: translate(1px, 1px);
+}
+
+.wb-login-status {
+  align-self: center;
+  margin: 0 0 10px;
+  padding: 0 4px;
+  font-size: var(--wb-font-size-lead);
+  background: var(--wb-login-status-ground);
+  color: var(--wb-login-status-ink);
+}
+
+.wb-login-error {
+  color: var(--wb-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-login-overlay,
+  .wb-login-open,
+  .wb-login-leave {
+    transform: none;
+    transition: opacity var(--wb-login-time) linear;
+  }
+
+  .wb-login-overlay:not(.wb-login-open) {
+    opacity: 0;
+  }
+}
+
+/* button rows inside a popover wrap with a gap, so a long row (align, fonts) never overlaps */
+.wb-editor-popover [role='group'] {
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--wb-editor-gap);
 }

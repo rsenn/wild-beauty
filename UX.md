@@ -107,13 +107,21 @@ Sources: `EDITOR.md` S2.2-S2.9, `GRAPH.md`, `GALLERY.md`.
 | draft saved | A small page with a tick or dot, for a restored or autosaved draft. |
 | warning (have: `icon-exclamation.svg`) | An exclamation mark for the non-fatal notices. |
 
+## Editor tools (additions 2026-10-31)
+
+| Graphic | Description |
+|---|---|
+| eyedropper (have: `tool-dropper.svg`) | A pipette at 45 degrees, bulb up right, tip down left, a drop under the tip. Shown on the dropper button of every colour selector; a mask, so it takes the text colour. |
+| select several | No icon yet (a text button "Select several"); a dotted rectangle with two squares in it would do. |
+| align / spread | No icons yet (text entries in the Align popover); six bars (left, centre, right, top, middle, bottom) and two spread marks would do. |
+
 ## Site chrome
 
 | Graphic | Description |
 |---|---|
 | language (have: `flag-de.svg`, `flag-fr.svg`, `flag-gb.svg`) | Flags for the language picker. |
 | theme switcher | The theme mark in the nav, next to language. |
-| login (have: `login.svg`) | A person or key mark, for accounts later. |
+| login (have: `login.svg`) | A person or key mark, for accounts later. The Login tab itself is text; its dialog is `LoginDialog.js`. |
 | logo (have: `logo-transparent.png`) | The site mark in the header. |
 
 ## Graph view

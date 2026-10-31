@@ -115,6 +115,14 @@ describe('outlineOf', () => {
     expect(outlineOf(d, 'shape001')).toEqual([[-2, -2], [102, -2], [102, 52], [-2, 52]]);
   });
 
+  test('a turned stroke keeps its box and turns it: the corners are the box carried by the matrix', () => {
+    // a quarter turn about the origin: (x, y) -> (-y, x)
+    const d = doc({ op: 'stroke', id: 'strok001', pts: [[100, 100, 10], [300, 200, 10]], color: '#000000' }, { op: 'transform', target: 'strok001', m: [0, 1, -1, 0, 0, 0] });
+    const o = outlineOf(d, 'strok001');
+
+    expect(o.map(p => p.map(Math.round))).toEqual([[-95, 95], [-95, 305], [-205, 305], [-205, 95]]);
+  });
+
   test('unknown ids, clip shapes and photos without size have none', () => {
     const shape = { op: 'shape', id: 'shape001', path: 'M0 0L9 9', closed: false, stroke: '#000000', strokeWidth: 1 };
     const d = doc(shape, photo('photoaaa', A, [1, 0, 0, 1, 0, 0], { clip: 'shape001' }));

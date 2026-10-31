@@ -11,7 +11,7 @@ const hex2 = n => Math.round(n).toString(16).padStart(2, '0');
 
 // [{ hex, weight }] (weights add up to 1, heaviest first) of the visible pixels of
 // RGBA `data`: counted in coarse bins, then bins that are the same colour to the eye merged
-export function paletteFromPixels(data, count = 12) {
+export function paletteFromPixels(data, count = 24) {
   const bins = new Map();
   let total = 0;
 

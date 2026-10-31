@@ -4,8 +4,8 @@ import { html } from '../html.js';
 // The film-strip (EDITOR.md S2.7, E53): one thumbnail per photo step in draw
 // order, shown from two photos on. Click selects, drag (or the arrow buttons,
 // for keyboard and touch) reorders, the cross removes. `photos` is the editor's
-// hash -> info table; `onMove(id, to)` and `onRemove(id)` change the node.
-export const Filmstrip = ({ t, steps, photos, selected, onSelect, onMove, onRole, onRemove }) => {
+// hash -> info table; the texture toggle is for gallery nodes (a photo that already is a texture keeps it, to be undone); `onMove(id, to)` and `onRemove(id)` change the node.
+export const Filmstrip = ({ t, steps, photos, selected, onSelect, onMove, onRole, onRemove, kind }) => {
   const [drag, setDrag] = useState(null);
 
   if(steps.length < 2) return null;
@@ -24,7 +24,7 @@ export const Filmstrip = ({ t, steps, photos, selected, onSelect, onMove, onRole
           <span class="wb-editor-strip-tools">
             <button type="button" class="wb-editor-chip" disabled=${i === 0} aria-label=${t('editor.strip.left')} title=${t('editor.strip.left')} onClick=${() => onMove(step.id, i - 1)}>◀</button>
             <button type="button" class="wb-editor-chip" disabled=${i === steps.length - 1} aria-label=${t('editor.strip.right')} title=${t('editor.strip.right')} onClick=${() => onMove(step.id, i + 1)}>▶</button>
-            <button type="button" class="wb-editor-chip" aria-pressed=${step.role === 'texture' ? 'true' : 'false'} aria-label=${t('editor.role.texture')} title=${t('editor.role.hint')} onClick=${() => onRole(step.id, step.role === 'texture' ? 'picture' : 'texture')}>▦</button>
+            ${(kind === 'gallery' || step.role === 'texture') && html`<button type="button" class="wb-editor-chip" aria-pressed=${step.role === 'texture' ? 'true' : 'false'} aria-label=${t('editor.role.texture')} title=${t('editor.role.hint')} onClick=${() => onRole(step.id, step.role === 'texture' ? 'picture' : 'texture')}>▦</button>`}
             <button type="button" class="wb-editor-chip" aria-label=${t('editor.strip.remove')} title=${t('editor.strip.remove')} onClick=${() => onRemove(step.id)}>✕</button>
           </span>
         </li>`)}

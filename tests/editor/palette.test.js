@@ -48,7 +48,23 @@ describe('palette', () => {
   test('an 8-colour photo keeps the heaviest and skips near duplicates', () => {
     const d = dominant(pal('#c0392b', '#c13a2c', '#2980b9', '#27ae60', '#f1c40f', '#8e44ad', '#16a085', '#d35400'));
 
-    expect(d).toEqual(['#c0392b', '#2980b9', '#27ae60', '#f1c40f']);
+    expect(d[0]).toBe('#c0392b');
+    expect(d).not.toContain('#c13a2c');
+    expect(new Set(d).size).toBe(4);
+  });
+
+  test('small vivid colours win over more shades of a dull, heavy background', () => {
+    const d = dominant([
+      { hex: '#1b1d22', weight: 0.4 },
+      { hex: '#2a2c33', weight: 0.2 },
+      { hex: '#5a5750', weight: 0.15 },
+      { hex: '#7a2fb0', weight: 0.04 },
+      { hex: '#e8c81a', weight: 0.03 },
+      { hex: '#b5651d', weight: 0.05 },
+    ]);
+
+    expect(d[0]).toBe('#1b1d22');
+    expect(d).toEqual(expect.arrayContaining(['#7a2fb0', '#e8c81a', '#b5651d']));
   });
 
   test('a grey photo gives 4 distinct colours', () => {
