@@ -30,6 +30,7 @@ Dates are as of 2026-10-22.
 - **Ramps**: a floor polygon with an **entry height and an exit height**, slope at
   most **1:12**; walls standing on a ramp **tilt** with it (S3.1).
 - **Texture toggle in the editor** (2026-10-31): the button that marks a photo as a texture is shown in the film-strip only for a node of kind `gallery`, because a texture is only used there (`EDITOR.md` E149).
+- **Gallery context pane and surfaces** (2026-10-31): the editor shows a pane for a gallery node (plan as found, capacity, the linked children, look and texture assignment; `EDITOR.md` E154). A drawn gallery wears a named **look** (`scene.look`, default `warm`) and the owner's texture photos (`scene.style.texture.images` = wall, room floor, corridor floor; `null` leaves a slot to the look) lie over it (`fromdoc.js surfaces`). Pictures should be **linked children**, not photos inside the node: the node's own pictures are hung only when no linked child has a picture. Split-by-direction walls stay deferred.
 - **Texture set** (one per gallery): up to **three images**. Image 1 is for the
   walls and is either **split in four** (a different texture per compass direction)
   or **not split** (all walls alike); image 2 is the **room floor** and also the

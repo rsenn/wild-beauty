@@ -205,8 +205,8 @@ describe('GET /api/nodes/:id and /files/photos', () => {
 
     expect(res.status).toBe(200);
     expect(nodes.map(n => n.id).slice(0, 2)).toEqual([second, first]);
-    expect(nodes[0]).toEqual({ id: second, title: 'Second', kind: 'node', tile: A, updated_at: expect.any(Number) });
-    expect(Object.keys(nodes[0]).sort()).toEqual(['id', 'kind', 'tile', 'title', 'updated_at']); // no document, no rev
+    expect(nodes[0]).toEqual({ id: second, title: 'Second', kind: 'node', tile: A, updated_at: expect.any(Number), visibility: 'public', mine: true });
+    expect(Object.keys(nodes[0]).sort()).toEqual(['id', 'kind', 'mine', 'tile', 'title', 'updated_at', 'visibility']); // no document, no rev
   });
 
   test('unknown or malformed ids are 404', async () => {

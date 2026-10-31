@@ -8,7 +8,9 @@ import { resolve } from 'node:path';
 import { config } from '../config.js';
 import { log } from '../log.js';
 import { database } from '../db/db.js';
-import { addSuggestions, deleteNode, deletePhoto, getNode, listNodes, getPhoto, insertNode, nodePhotos, releaseLock, setNodePhotos, updateNode, upsertPhoto } from '../db/nodes.js';
+import { viewerOf } from '../auth.js';
+import { mayWrite } from '../guard.js';
+import { addSuggestions, deleteNode, deletePhoto, getNode, linksFrom, listNodes, getPhoto, insertNode, nodePhotos, releaseLock, setNodePhotos, updateNode, upsertPhoto } from '../db/nodes.js';
 import { validateNode, photoLookup } from '../node/validate.js';
 import { bake } from '../media/bake.js';
 import { identify } from '../media/probe.js';
@@ -177,8 +179,9 @@ function dropUnused(h, hashes) {
   return gone;
 }
 
-// Create a node from `body` ({ doc, kind? }) -> { status, body }. `h` is the database.
-export const saveNew = (h, body) =>
+// Create a node from `body` ({ doc, kind? }) -> { status, body }. `h` is the database,
+// `viewer` the logged-in user who becomes its owner.
+export const saveNew = (h, body, { viewer = null } = {}) =>
   serial(async () => {
     const checked = validateNode(body, { hasPhoto: photoLookup(h) });
 
@@ -190,6 +193,10 @@ export const saveNew = (h, body) =>
 
     const created = h.tx(() => {
       const node = insertNode(h, { title: checked.title, doc: checked.doc, palette: ready.palette, kind: checked.kind });
+
+      // a logged-in user's new node is theirs: only they change it (server/guard.js),
+      // and it is hidden until they make it public
+      if(viewer) h.run("UPDATE nodes SET owner_id = ?, visibility = 'hidden' WHERE id = ?", viewer.id, node.id);
 
       setNodePhotos(h, node.id, checked.photos);
       addSuggestions(h, node.id, ready.positions);
@@ -308,7 +315,8 @@ export async function createNode(req, h) {
 
   if(error) return error;
 
-  const r = await saveNew(h ?? (await database()), body);
+  const db = h ?? (await database());
+  const r = await saveNew(db, body, { viewer: viewerOf(db, req) });
 
   return reply(r.status, r.body);
 }
@@ -327,14 +335,14 @@ export async function updateNodeRoute(req, idText, h) {
   return reply(r.status, r.body, session);
 }
 
-// Who may see a node. The PoC has no accounts: everybody sees everything.
-// With accounts this is the one place that applies `visibility`, the owner
-// and the group (PLAN.md S8); everything that reads a node goes through it.
-export const canView = (node, viewer) => true;
+// Who may see a node: its owner always; everybody else only when it is
+// `public` and not a node of a site (the site host shows those through its own
+// route, server/site.js). `group` is not implemented yet and reads as hidden.
+export const canView = (node, viewer) => (!!viewer && node.owner_id === viewer.id) || (!node.space && node.visibility === 'public');
 
-// Who may change or delete a node: the owner, or a curator or admin of its
-// group. The PoC has no accounts, so everybody may.
-export const canEdit = (node, viewer) => true;
+// Who may change or delete a node: see server/guard.js, which runs before every
+// write route, so the routes themselves do not ask again.
+export const canEdit = (node, viewer) => mayWrite(node, viewer);
 
 // what the API tells about a node: the row without internals, and the document
 const publicNode = ({ id, title, kind, doc, palette, tile, visibility, owner_id, group_id, x, y, pinned, created_at, updated_at }) => ({ id, title, kind, doc, palette, tile, visibility, owner_id, group_id, x, y, pinned, created_at, updated_at });
@@ -346,14 +354,23 @@ export async function readNode(req, idText, h) {
   const node = /^\d{1,15}$/.test(idText) ? getNode(db, Number(idText)) : null;
 
   if(!node) return fail(404, 'not_found');
-  if(!canView(node, null)) return fail(403, 'forbidden');
+  const viewer = viewerOf(db, req);
+
+  if(!canView(node, viewer)) return fail(404, 'not_found');
 
   const etag = `"${node.id}-${node.rev}"`;
   const headers = { etag, 'cache-control': 'no-cache' };
 
   if(req.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers });
 
-  return Response.json({ node: publicNode(node), rev: node.rev, photos: photoInfos(db, node.doc) }, { headers });
+  // the nodes linked as its children, as far as the viewer sees them: what a gallery hangs
+  const children = linksFrom(db, node.id, 'child').flatMap(({ id }) => {
+    const child = getNode(db, id);
+
+    return child && canView(child, viewer) ? [{ id: child.id, title: child.title, kind: child.kind, tile: child.tile }] : [];
+  });
+
+  return Response.json({ node: publicNode(node), rev: node.rev, photos: photoInfos(db, node.doc), children, mine: mayWrite(node, viewer) }, { headers });
 }
 
 // the size of a large render of a tile (zooming in on a picture in the 3D gallery)
@@ -400,12 +417,12 @@ export async function putLargeRoute(req, idText, h) {
 // one plain photo is that photo, the file as baked; any other node is rendered at
 // LARGE once, kept as <tile>.large.jpg and served from /files/photos/ for good.
 // `render` is injected by the tests.
-export async function largeRoute(idText, h, { render = serverTile } = {}) {
+export async function largeRoute(idText, h, { render = serverTile, viewer = null } = {}) {
   const db = h ?? (await database());
   const node = /^\d{1,15}$/.test(idText) ? getNode(db, Number(idText)) : null;
 
   if(!node) return fail(404, 'not_found');
-  if(!canView(node, null)) return fail(403, 'forbidden');
+  if(!canView(node, viewer)) return fail(404, 'not_found');
 
   const go = to => new Response(null, { status: 302, headers: { location: to, 'cache-control': 'no-cache' } });
 
@@ -442,12 +459,42 @@ export async function deleteNodeRoute(idText, h, req) {
 }
 
 // what a tile of the saved-nodes list shows (E68)
-export const tileOf = ({ id, title, kind, tile, updated_at }) => ({ id, title, kind, tile, updated_at });
+export const tileOf = (node, viewer = null) => ({ id: node.id, title: node.title, kind: node.kind, tile: node.tile, updated_at: node.updated_at, visibility: node.visibility, mine: mayWrite(node, viewer) });
 
-// the nodes that may be seen, newest first
-export const visibleNodes = h => listNodes(h).filter(node => canView(node, null)).map(tileOf);
+// the nodes of the public lists (tree, gallery), newest first: what the viewer may see, not
+// the nodes of a site (those are edited from the user's own list, and shown by their site)
+export const visibleNodes = (h, viewer = null) => listNodes(h, 1e6).filter(node => !node.space && canView(node, viewer)).slice(0, 200).map(node => tileOf(node, viewer));
+
+// the nodes of the editor's list: a logged-in user's own, and for a visitor the open
+// public area (the nodes nobody owns, which everybody may change)
+export const listedNodes = (h, viewer = null) =>
+  listNodes(h, 1e6)
+    .filter(node => (viewer ? node.owner_id === viewer.id : node.owner_id === null && !node.space && node.visibility === 'public'))
+    .slice(0, 200)
+    .map(node => tileOf(node, viewer));
 
 // GET /api/nodes -> 200 { nodes: [tile, ...] }
-export async function listNodesRoute(h) {
-  return Response.json({ nodes: visibleNodes(h ?? (await database())) }, { headers: { 'cache-control': 'no-cache' } });
+export async function listNodesRoute(h, req) {
+  const db = h ?? (await database());
+
+  return Response.json({ nodes: listedNodes(db, req ? viewerOf(db, req) : null) }, { headers: { 'cache-control': 'no-cache' } });
+}
+
+// POST /api/nodes/:id/visibility { visibility: 'hidden' | 'public' } -> 200 { visibility }.
+// The owner decides who else sees the node (server/guard.js checked it is theirs). The
+// rev stays: an open editor's save must not conflict with it.
+export async function visibilityRoute(req, idText, h) {
+  if(!/^\d{1,15}$/.test(idText)) return fail(404, 'not_found');
+  if(req.method !== 'POST') return fail(405, 'method_not_allowed');
+
+  const { body, error } = await jsonBody(req);
+
+  if(error) return error;
+  if(body?.visibility !== 'hidden' && body?.visibility !== 'public') return fail(400, 'invalid');
+
+  const db = h ?? (await database());
+
+  if(!db.run('UPDATE nodes SET visibility = ? WHERE id = ?', body.visibility, Number(idText)).changes) return fail(404, 'not_found');
+
+  return Response.json({ visibility: body.visibility });
 }

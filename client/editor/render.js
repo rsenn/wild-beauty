@@ -12,6 +12,7 @@ import { FONTS, LINE_HEIGHT, alignX, anchorOf, firstBaseline, isRtl } from './te
 import { edgeShapes, pathOf } from './edge.js';
 import { curvePath, fitSize, isCurve } from './curve.js';
 import { measureText } from './measure.js';
+import { detect } from './links.js';
 
 const STAGE = 1000;
 const HEX = /^#[0-9a-f]{3,8}$/i;
@@ -48,8 +49,28 @@ export function renderPhoto(step, info) {
   </g>`;
 }
 
-// a `text` step: the lines as <tspan>s, bold and outlined if asked, in its box
-export function renderText(step, m = step.m) {
+// a line with its links (mail, phone, web, profiles: links.js) as <a>
+function linked(line) {
+  const found = detect(line);
+
+  if(!found.length) return line;
+
+  const out = [];
+  let at = 0;
+
+  for(const l of found) {
+    out.push(line.slice(at, l.start), html`<a href=${l.href} class="wb-link" data-link=${l.type} rel="noopener noreferrer">${l.text}</a>`);
+    at = l.end;
+  }
+
+  out.push(line.slice(at));
+
+  return out;
+}
+
+// a `text` step: the lines as <tspan>s, bold and outlined if asked, in its box;
+// with `links` the contact data in the lines are links (a viewer, not the editor)
+export function renderText(step, m = step.m, { links = false } = {}) {
   const face = FONTS[step.font] ?? FONTS.sans;
   const size = Number.isFinite(step.size) ? step.size : 48;
   const pad = step.padding ?? 0;
@@ -62,7 +83,9 @@ export function renderText(step, m = step.m) {
   // when the same <text> has a stroke, while the filled layer draws it as it is
   // text-before-edge puts the ascent line at y: the first baseline minus the ascent
   const top = firstBaseline(face, lines.length, size, Number.isFinite(step.h) ? step.h : lines.length * size * LINE_HEIGHT + pad * 2) - face.asc * size;
-  const rows = lines.map((line, i) => html`<tspan x=${x} y=${top + i * size * LINE_HEIGHT}>${line}</tspan>`);
+  const rowsOf = show => lines.map((line, i) => html`<tspan x=${x} y=${top + i * size * LINE_HEIGHT}>${show(line)}</tspan>`);
+  const plain = rowsOf(line => line);
+  const rows = links ? rowsOf(linked) : plain;
 
   // a fixed-height box clips its text
   const clip = step.fixed ? `url(#textclip-${step.id})` : null;
@@ -72,7 +95,7 @@ export function renderText(step, m = step.m) {
   return html`<g data-step=${step.id} data-op="text" transform=${matrix(m)}>
     ${(bg?.defs || clip) && html`<defs>${bg?.defs}${clip && html`<clipPath id=${`textclip-${step.id}`}><rect x="0" y="0" width=${step.w} height=${step.h} /></clipPath>`}</defs>`}
     ${bg && bg.paint !== 'none' && html`<rect x="0" y="0" width=${step.w} height=${step.h} rx=${step.radius ?? 0} fill=${bg.paint} />`}
-    ${out && html`<text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? face.bold : 400} fill="none" text-anchor=${anchorOf(step.align)} stroke=${step.outline.color} stroke-width=${step.outline.width} stroke-linejoin="round" dominant-baseline="text-before-edge" direction=${rtl ? 'rtl' : null} clip-path=${clip} style="white-space:pre;unicode-bidi:plaintext" aria-hidden="true">${rows}</text>`}
+    ${out && html`<text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? face.bold : 400} fill="none" text-anchor=${anchorOf(step.align)} stroke=${step.outline.color} stroke-width=${step.outline.width} stroke-linejoin="round" dominant-baseline="text-before-edge" direction=${rtl ? 'rtl' : null} clip-path=${clip} style="white-space:pre;unicode-bidi:plaintext" aria-hidden="true">${plain}</text>`}
     <text font-family=${face.stack} font-size=${size} font-weight=${step.bold ? face.bold : 400} fill=${safeColour(step.color) ?? '#000000'} text-anchor=${anchorOf(step.align)} dominant-baseline="text-before-edge" direction=${rtl ? 'rtl' : null} clip-path=${clip} style="white-space:pre;unicode-bidi:plaintext">${rows}</text>
   </g>`;
 }
@@ -300,7 +323,7 @@ function stepsOf(doc, { mode, page, upTo, photos, part }) {
 // the document as an <svg> on the 0..1000 stage. `mode` defaults to the
 // document's own; `page` is the page index (free) or the photo index
 // (slides); `upTo` the number of steps shown (free).
-export function renderStage(doc, { photos = () => null, mode = doc.mode, page = 0, upTo, part } = {}) {
+export function renderStage(doc, { photos = () => null, mode = doc.mode, page = 0, upTo, part, links = false } = {}) {
   const steps = stepsOf(doc, { mode, page, upTo, photos, part });
   const at = mode === 'grid' && part !== undefined ? gridPlan(photoSteps(doc).length, doc.layout).pages[part] : null; // a part of a long stage is not square
   const [w, h] = at ? [at.w, at.h] : [STAGE, STAGE];
@@ -330,7 +353,7 @@ export function renderStage(doc, { photos = () => null, mode = doc.mode, page = 
       case 'shape':
         return clips.has(step.id) ? null : renderShape(step, st.m);
       case 'text':
-        return renderText(step, st.m);
+        return renderText(step, st.m, { links });
       default:
         return null; // clip, unclip, blend and transform act on others
     }

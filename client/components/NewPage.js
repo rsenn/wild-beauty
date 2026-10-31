@@ -47,6 +47,15 @@ export const NewPage = () => {
     return () => window.removeEventListener(SAVED_EVENT, refresh);
   }, []);
 
+  // who else sees a node of the user's: public, or hidden
+  const setVisibility = async (id, visibility) => {
+    try {
+      const res = await fetch(`/api/nodes/${id}/visibility`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ visibility }) });
+
+      if(res.ok) setNodes(list => list.map(node => (node.id === id ? { ...node, visibility } : node)));
+    } catch {}
+  };
+
   // replacing an open editor asks first
   useEffect(() => {
     // only unsaved changes are worth a question
@@ -57,7 +66,7 @@ export const NewPage = () => {
     <${Layout} active="new" hrefFor=${code => `/${code}/new`}>
       <h1 class="wb-sr-only">${t('page.new.heading')}</h1>
       <${UploadArea} extra=${({ count, addSelected }) => html`<${NewNodeTile} open=${editing} count=${count} onAdd=${addSelected} onMake=${addSelected} onToggle=${() => (editing ? closeEditor() : openEditor(NEW))} />`} />
-      <${SavedNodes} nodes=${nodes} editing=${editing ? target : null} onEdit=${id => openEditor(id)} />
+      <${SavedNodes} nodes=${nodes} editing=${editing ? target : null} onEdit=${id => openEditor(id)} onVisibility=${boot.user ? setVisibility : undefined} />
       <form class="wb-open-node" onSubmit=${e => (e.preventDefault(), /^\d{1,15}$/.test(number) && openEditor(Number(number)))}>
         <label>${t('editor.open.id')} <input type="number" min="1" inputmode="numeric" value=${number} onInput=${e => setNumber(e.target.value)} /></label>
         <button type="submit" class="wb-editor-chip" disabled=${!/^\d{1,15}$/.test(number)}>${t('editor.open')}</button>

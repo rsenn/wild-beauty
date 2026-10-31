@@ -3,9 +3,10 @@ import { useI18n } from '../i18n.js';
 
 // The saved nodes on /new (EDITOR.md E68): read-only tiles, newest first, with
 // the node's thumbnail, its title, "Edit" (opens it in the editor) and a link
-// to its page. The server renders the list (boot.nodes); the browser refreshes
+// to its page; a node of the user's has a Public/Private chip that switches who
+// else sees it. The server renders the list (boot.nodes); the browser refreshes
 // it after a save.
-export const SavedNodes = ({ nodes, onEdit, editing }) => {
+export const SavedNodes = ({ nodes, onEdit, editing, onVisibility }) => {
   const { t, lang } = useI18n();
 
   if(!nodes?.length) return null;
@@ -25,6 +26,7 @@ export const SavedNodes = ({ nodes, onEdit, editing }) => {
             </div>
             <span class="wb-saved-name">${title}</span>
             <button type="button" class="wb-editor-chip wb-saved-edit" aria-pressed=${editing === node.id ? 'true' : 'false'} onClick=${() => onEdit(node.id)}>${t('editor.edit')}</button>
+            ${node.mine && node.visibility && onVisibility && html`<button type="button" class="wb-editor-chip wb-saved-visibility" aria-pressed=${node.visibility === 'public' ? 'true' : 'false'} title=${t(node.visibility === 'public' ? 'node.make_private' : 'node.make_public')} onClick=${() => onVisibility(node.id, node.visibility === 'public' ? 'hidden' : 'public')}>${t(node.visibility === 'public' ? 'node.public' : 'node.private')}</button>`}
           </li>`;
         })}
       </ul>

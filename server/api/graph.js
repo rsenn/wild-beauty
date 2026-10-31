@@ -1,10 +1,11 @@
 // The graph view (GRAPH.md S3): GET /api/graph lists the nodes with their
 // place and the links between them; POST /api/graph/ops applies a few edits
-// (link, unlink, move, pin) in one transaction. Preliminary: no owner checks
-// yet, like the node routes (canView/canEdit are always true).
+// (link, unlink, move, pin, visibility) in one transaction. The nodes of a site are listed
+// to their owner only (canView); server/guard.js checks who may change them.
 import { database } from '../db/db.js';
 import { LABELS, addLink, deleteNode, graphEdges, graphNodes, insertNode, removeLink, setPinned, setPosition } from '../db/nodes.js';
 import { canView } from './nodes.js';
+import { viewerOf } from '../auth.js';
 import { titleFor } from './gazetteer.js';
 
 const MAX_OPS = 200;
@@ -19,8 +20,9 @@ const isId = v => Number.isSafeInteger(v) && v > 0;
 const isCoord = v => Number.isFinite(v) && Math.abs(v) <= COORD;
 
 // the graph for the client -> { nodes: [...], edges: [{ from, to, label }] }
-export function graphOf(h) {
-  const nodes = graphNodes(h).filter(n => canView(n, null));
+export function graphOf(h, viewer = null) {
+  // the tree is the public view: the nodes of a site are not in it, for nobody
+  const nodes = graphNodes(h).filter(n => !n.space && canView(n, viewer));
   const ids = new Set(nodes.map(n => n.id));
 
   return { nodes, edges: graphEdges(h).filter(e => ids.has(e.from) && ids.has(e.to)) };
@@ -35,7 +37,7 @@ function dropAnswered(h, node, to) {
 
 // one operation -> true when it changed something, false when it was a no-op;
 // throws a short code on a malformed one
-export function applyOp(h, op) {
+export function applyOp(h, op, { viewer = null } = {}) {
   if(!op || typeof op !== 'object') throw new Error('bad_op');
 
   const label = op.label ?? 'child';
@@ -70,6 +72,9 @@ export function applyOp(h, op) {
 
       const { id } = insertNode(h, { title, doc: emptyDoc(title), kind: 'list' });
 
+      // a group of a logged-in user is theirs, and hidden like their new nodes
+      if(viewer) h.run("UPDATE nodes SET owner_id = ?, visibility = 'hidden' WHERE id = ?", viewer.id, id);
+
       setPosition(h, id, op.x, op.y, true);
       ids.forEach((to, i) => addLink(h, id, to, 'child', i));
 
@@ -81,6 +86,11 @@ export function applyOp(h, op) {
       if(h.get('SELECT kind FROM nodes WHERE id = ?', op.id)?.kind !== 'list') return false;
 
       return deleteNode(h, op.id);
+    case 'visibility':
+      // publish (public) or unpublish (hidden) a node of a user's; the community nodes have no owner and stay public
+      if(!isId(op.id) || (op.visibility !== 'public' && op.visibility !== 'hidden')) throw new Error('bad_op');
+
+      return h.run('UPDATE nodes SET visibility = ? WHERE id = ? AND owner_id IS NOT NULL AND visibility <> ?', op.visibility, op.id, op.visibility).changes > 0;
     case 'pin':
       if(!isId(op.id) || typeof op.pinned !== 'boolean') throw new Error('bad_op');
 
@@ -93,7 +103,9 @@ export function applyOp(h, op) {
 export async function graphRoute(req, h) {
   h ??= await database();
 
-  if(req.method === 'GET') return Response.json(graphOf(h), { headers: { 'cache-control': 'no-cache' } });
+  const viewer = viewerOf(h, req);
+
+  if(req.method === 'GET') return Response.json(graphOf(h, viewer), { headers: { 'cache-control': 'no-cache' } });
   if(req.method !== 'POST') return fail(405, 'method_not_allowed');
 
   let body;
@@ -106,13 +118,24 @@ export async function graphRoute(req, h) {
 
   if(!Array.isArray(body?.ops) || body.ops.length > MAX_OPS) return fail(400, 'bad_request');
 
+  // an op may point only at a node the user can see
+  for(const op of body.ops) {
+    for(const id of [op?.id, op?.from, op?.to, ...(Array.isArray(op?.ids) ? op.ids : [])]) {
+      if(!Number.isInteger(id)) continue;
+
+      const node = h.get('SELECT id, owner_id, space, visibility FROM nodes WHERE id = ?', id);
+
+      if(node && !canView(node, viewer)) return fail(404, 'not_found');
+    }
+  }
+
   try {
     h.tx(() => {
-      for(const op of body.ops) applyOp(h, op);
+      for(const op of body.ops) applyOp(h, op, { viewer });
     });
   } catch(e) {
     return fail(e.message === 'not_found' ? 404 : 400, ['bad_op', 'not_found'].includes(e.message) ? e.message : 'bad_request');
   }
 
-  return Response.json(graphOf(h));
+  return Response.json(graphOf(h, viewer));
 }

@@ -28,7 +28,7 @@ During development the server runs under runit as `/etc/service/wild-beauty` (se
 
 ## Mail and login (2026-10-31)
 
-The host runs Postfix and Dovecot for `transistorisiert.ch` and `jános.ch`; registration mail is to be sent as `noreply@transistorisiert.ch` (ports 25, 465, 587 for smtp, 143 and 993 for imap; details and open points in `PLAN.md` S17). The login dialog is UI only: `POST /api/login` does not exist yet. Do not put mail passwords in the repository.
+The host runs Postfix and Dovecot for `transistorisiert.ch` and `jános.ch`; registration mail is to be sent as `noreply@transistorisiert.ch` (ports 25, 465, 587 for smtp, 143 and 993 for imap; details and open points in `PLAN.md` S17). `POST /api/login` exists since 2026-10-31 (no registration yet; users are made with `tools/janos-seed.js`, see `SITES.md`). Do not put mail passwords in the repository.
 
 ## Documentation
 

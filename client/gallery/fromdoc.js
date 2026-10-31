@@ -16,6 +16,7 @@ import { UNITS_PER_METRE } from '../editor/roomaid.js';
 import { verticesFromPath } from '../editor/shapes.js';
 import { CORRIDOR_WIDTH, PARAPET_HEIGHT, WALL_HEIGHT } from '../editor/walls.js';
 import { LOOKS, clockwise } from './autoplan.js';
+import { DEFAULT_LOOK, textureSlots } from '../editor/scene.js';
 import { contains } from '../editor/polygon.js';
 import { clean, signedArea } from './line.js';
 
@@ -208,7 +209,35 @@ function insidePoint(poly) {
 // own, so that value counts as "not chosen"
 const parapet = h => (h === undefined || h === WALL_HEIGHT ? PARAPET_HEIGHT : h);
 
-export function planFromDoc(doc) {
+// The surfaces of a drawn gallery: the named look (`scene.look`, default warm) with the
+// owner's texture photos laid over it (`scene.style.texture.images`: walls, room floor,
+// corridor floor) and the colours of `scene.style` kept. `photos(hash)` -> { href } | null.
+// A scene without a look and without textures keeps the style it has, as before.
+export function surfaces(scene = {}, photos = () => null) {
+  const slots = textureSlots(scene);
+  const { texture: _, ...style } = scene.style ?? {};
+
+  if(!scene.look && !Object.values(slots).some(Boolean)) return scene.style ?? LOOKS.warm;
+
+  const look = LOOKS[scene.look] ?? LOOKS[DEFAULT_LOOK];
+  const out = { ...look, ...style };
+  const of = (hash, tile) => (hash && photos(hash)?.href ? { texture: { color: photos(hash).href, tile } } : null);
+  const wall = of(slots.wall, style.wall?.tile ?? 2.5);
+  const floor = of(slots.floor, style.floor?.tile ?? 2);
+  const corridor = of(slots.corridor, style.floor?.tile ?? 2);
+
+  if(wall) out.wall = { ...style.wall, ...wall };
+  if(floor) {
+    out.floor = { ...style.floor, ...floor };
+    // the corridors are floored like the rooms unless they have a photo of their own
+    if(!corridor) delete out.corridor;
+  }
+  if(corridor) out.corridor = corridor;
+
+  return out;
+}
+
+export function planFromDoc(doc, { photos } = {}) {
   const metres = ([x, y]) => [x / UNITS_PER_METRE, -y / UNITS_PER_METRE];
   const rooms = [];
   const lines = [];
@@ -245,7 +274,7 @@ export function planFromDoc(doc) {
       floors: rooms.map(r => ({ type: 'room', points: r.pts })),
     },
     thickness: scene.thickness ?? 0.2,
-    style: scene.style ?? LOOKS.warm,
+    style: surfaces(scene, photos),
     start: scene.start ?? { at: insidePoint(polys[0]), look: 0 },
   };
 }

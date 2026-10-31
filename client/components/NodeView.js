@@ -34,7 +34,7 @@ export const NodeView = ({ doc, photos, label }) => {
   const { flow, axis, list } = viewOf(doc);
   const track = useRef(null);
   const [at, setAt] = useState(0);
-  const draw = item => renderNode(doc, { photos, ...item });
+  const draw = item => renderNode(doc, { photos, links: true, ...item });
 
   if(flow === 'fit' || (flow === 'page' && list.length < 2)) return html`<div class="wb-node-view" role="img" aria-label=${label}>${draw(list[0])}</div>`;
 

@@ -1,0 +1,156 @@
+/* janos - the theme of www.jános.ch: white, neutral, minimal.
+ *
+ * Tokens only (PLAN.md S16); a copy of the kraft token set with the paper, the
+ * crimson and the pixel type taken out, so a later restyle is a CSS-only
+ * change. The layout of the site itself is static/css/site.css. */
+
+:root[data-theme="janos"],
+[data-theme="janos"] {
+  /* wallpaper: plain white */
+  --wb-wallpaper-color: #fff;
+  --wb-wallpaper-image: none;
+  --wb-wallpaper-size: auto;
+
+  /* ink: text, frames, outlines */
+  --wb-ink: #111;
+  --wb-ink-soft: rgb(0 0 0 / 0.15);
+
+  /* accent: the main button (monochrome) */
+  --wb-accent: #111;
+  --wb-accent-hover: #555;
+  --wb-accent-ink: #fff;
+
+  /* selection and drag-over (blue), danger (red cross) */
+  --wb-select: hsl(210 100% 55%);
+  --wb-select-fill: hsl(210 100% 55% / 0.5);
+  /* picked upload cards (crimson and cream, readable on any photo) */
+  --wb-pick: #8a0010;
+  --wb-pick-ground: #f4ecd8;
+  --wb-pick-ink: #fff;
+  --wb-drop-fill: rgb(0 122 255 / 0.15);
+  --wb-danger: #f30208;
+  --wb-error-frame: rgb(160 0 16);
+
+  /* frames */
+  --wb-frame-width: 1px;
+  --wb-frame-style: solid;
+  --wb-frame-drag-style: dashed;
+  --wb-border-width: 1px;
+  --wb-select-width: 4px;
+
+  /* shape: square tabs and drop zone, soft round buttons and graph nodes */
+  --wb-radius-tab: 0;
+  --wb-radius-frame: 0;
+  --wb-radius-button: 5px;
+  --wb-radius-round: 99999px;
+  --wb-radius-node: 8px;
+  --wb-node-outline: 1px;
+
+  /* login modal: white card, crimson title bar (the accent), terminal-green
+   * confirmation on black; the tumble in and out lasts --wb-login-time */
+  --wb-login-card: #fff;
+  --wb-login-ring: #808080;
+  --wb-login-shadow: 2px 2px 4px 0 rgb(0 0 0 / 0.6);
+  --wb-login-status-ink: rgb(123 255 15);
+  --wb-login-status-ground: #000;
+  --wb-login-time: 1000ms;
+
+  /* type: Fixed is the pixel/terminal face used for everything */
+  --wb-font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --wb-font-size: 13px;
+  --wb-font-size-small: 14px;
+  --wb-font-size-button: 16px;
+  --wb-font-size-label: 17px;
+  --wb-font-size-lead: 22px;
+  --wb-font-size-tab: 40px;
+
+  /* tabs: 48px collapsed, 100px when active or hovered */
+  --wb-tab-size: 48px;
+  --wb-tab-size-open: 100px;
+  --wb-tab-gap: 4px;
+  --wb-tab-ease: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --wb-tab-time: 1s;
+  --wb-tab-glow: 0 0 4px #fff;
+
+  /* grid of file cards: 5 columns as on the phone screenshots, 8 from
+   * 700px up (layout.css reads these); the ground shows around a photo shown
+   * whole ("extend") */
+  --wb-card-gap: 8px;
+  --wb-card-columns: 3;
+  --wb-card-columns-mid: 4;
+  --wb-card-columns-wide: 6;
+  --wb-editor-tool-size: 44px;
+  --wb-editor-gap: 8px;
+  --wb-editor-outline: var(--wb-select);
+  --wb-editor-outline-width: 2px;
+  --wb-editor-handle-fill: #fff;
+  --wb-editor-handle-stroke: var(--wb-select);
+  --wb-editor-context-bg: rgb(255 255 255 / 0.5);
+  --wb-editor-popover-bg: #f2eadf;
+  --wb-editor-banner-bg: rgb(255 220 32 / 0.75);
+  --wb-card-ground: #fff;
+  --wb-gallery-ground: rgb(5 6 13);
+  --wb-gallery-ink: rgb(255 255 255);
+  --wb-gallery-note: rgb(0 0 0 / 0.55);
+  --wb-gallery-label-ground: rgb(255 255 255);
+  --wb-gallery-label-ink: rgb(0 0 0);
+
+  /* depth */
+  --wb-shadow-card: none;
+  --wb-shadow-select: 2px 2px 6px #000;
+  --wb-shadow-hover: 0 2px 4px rgb(0 0 0 / 0.5);
+  /* popovers and colour swatches: a hairline, no heavy frame. To try other looks,
+   * swap these three: popover border `none` with a 2-3px shadow, swatch border `none` */
+  --wb-popover-border: 1px solid rgb(0 0 0 / 0.55);
+  --wb-popover-shadow: 2px 3px 4px rgb(0 0 0 / 0.4);
+  --wb-swatch-border: 1px solid rgb(0 0 0 / 0.4);
+  --wb-shadow-pop: 5px 5px 10px 2px rgb(0 0 0 / 0.62);
+
+  /* round icon buttons on cards (delete, rotate) */
+  --wb-button-round-bg: #ffffff60;
+  --wb-button-round-border: #cdcdcd;
+  --wb-add-ink: #1fa23c;
+  --wb-add-text: #fff;
+  --wb-pan-ink: #ffd21f;
+  --wb-button-round-hover: #ffdc20c0;
+
+  /* raised grey button (toolbar) */
+  --wb-button-bg: linear-gradient(#f0f0f0 0%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
+  --wb-button-bg-active: linear-gradient(0deg, #f0f0f0 0%, #dcdcdc 44%, #c8c8c8 63%, #8d8d8d 100%);
+  --wb-button-border: #555;
+
+  /* tooltip */
+  --wb-tip-bg: linear-gradient(#ffda15, #f3c500);
+  --wb-tip-ink: #000;
+
+  /* logo: drawn as a background of the header link */
+  --wb-logo-image: url(/static/img/logo-transparent.png);
+  --wb-logo-height: var(--wb-tab-size-open); /* bottom edge in line with an opened tab */
+
+  /* icons: absolute /static urls only, drawn by layout.css as background
+   * images (delete and rotate are coloured, so no mask recolouring) */
+  --wb-icon-upload: url(/static/img/upload-tray.svg);
+  --wb-icon-new: url(/static/img/action-new.svg);
+  --wb-icon-delete: url(/static/img/icon-error.svg);
+  --wb-icon-rotate: url(/static/img/icon-rotate.svg);
+  --wb-icon-next: url(/static/img/arrow-next.svg);
+  --wb-icon-tool-select: url(/static/img/tool-select.svg);
+  --wb-icon-tool-pen: url(/static/img/tool-pen.svg);
+  --wb-icon-tool-shape: url(/static/img/tool-shape.svg);
+  --wb-icon-tool-clip: url(/static/img/tool-clip.svg);
+  --wb-icon-tool-undo: url(/static/img/tool-undo.svg);
+  --wb-icon-tool-redo: url(/static/img/tool-redo.svg);
+  --wb-icon-tool-page: url(/static/img/tool-page.svg);
+  --wb-icon-tool-delete: url(/static/img/tool-delete.svg);
+  --wb-icon-tool-save: url(/static/img/tool-save.svg);
+  --wb-icon-tool-dropper: url(/static/img/tool-dropper.svg);
+  --wb-icon-tool-wand: url(/static/img/tool-wand.svg);
+  --wb-icon-tool-unclip: url(/static/img/tool-unclip.svg);
+  --wb-icon-tool-text: url(/static/img/tool-text.svg);
+}
+
+@media (max-width: 375px) {
+  :root[data-theme="janos"] {
+    --wb-font-size: 14px;
+  }
+}

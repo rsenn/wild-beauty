@@ -20,8 +20,10 @@ const gradient = () => {
 // in from the top right corner, where the Login tab is, by a 3D rotate and zoom;
 // closing tumbles it out to the bottom left. `phase` is the state of that motion:
 // enter (start pose), open (resting), leave (end pose); the CSS does the rest.
-// `onSubmit(username, password)` -> Promise<{ ok, error }>.
-export const LoginDialog = ({ open, onClose, onSubmit }) => {
+// `onSubmit(username, password)` -> Promise<{ ok, error }>. The same card makes an
+// account (`onRegister(email, password)`, the same result): a mail address and a
+// password, nothing else.
+export const LoginDialog = ({ open, onClose, onSubmit, onRegister }) => {
   const { t } = useI18n();
   const [phase, setPhase] = useState('closed');
   const [background, setBackground] = useState('');
@@ -29,6 +31,7 @@ export const LoginDialog = ({ open, onClose, onSubmit }) => {
   const [status, setStatus] = useState(null);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
+  const [mode, setMode] = useState('login');
   const first = useRef(null);
   const timer = useRef(0);
 
@@ -38,6 +41,7 @@ export const LoginDialog = ({ open, onClose, onSubmit }) => {
     if(open) {
       setBackground(gradient());
       setStatus(null);
+      setMode('login');
       setPhase('enter');
       // two frames: the start pose must be painted before the transition begins
       const frame = requestAnimationFrame(() => requestAnimationFrame(() => setPhase('open')));
@@ -62,27 +66,29 @@ export const LoginDialog = ({ open, onClose, onSubmit }) => {
     setBusy(true);
     setStatus(null);
 
-    const result = await onSubmit(user, pass).catch(() => ({ ok: false }));
+    const signup = mode === 'register';
+    const result = await (signup ? onRegister(user, pass) : onSubmit(user, pass)).catch(() => ({ ok: false }));
 
     setBusy(false);
-    setStatus(result.ok ? { ok: true } : { error: result.error ?? t('login.failed') });
+    setStatus(result.ok ? { ok: true } : { error: result.error ?? t(signup ? 'register.failed' : 'login.failed') });
     if(result.ok) setTimeout(onClose, 1333);
   };
 
   return html`
     <div class=${`wb-login-overlay wb-login-${phase}`} style=${{ background }} onKeyDown=${e => e.key === 'Escape' && onClose()} onClick=${e => e.target === e.currentTarget && onClose()}>
       <form class="wb-login" role="dialog" aria-modal="true" aria-label=${t('login.label')} onSubmit=${submit}>
-        <div class="wb-login-title">${t('login.title')}</div>
+        <div class="wb-login-title">${t(mode === 'register' ? 'register.title' : 'login.title')}</div>
         <label class="wb-login-field">
-          <span>${t('login.username')}</span>
-          <input ref=${first} name="username" type="text" autocomplete="username" value=${user} onInput=${e => setUser(e.target.value)} />
+          <span>${t(mode === 'register' ? 'register.email' : 'login.username')}</span>
+          <input ref=${first} name="username" type=${mode === 'register' ? 'email' : 'text'} autocomplete=${mode === 'register' ? 'email' : 'username'} value=${user} onInput=${e => setUser(e.target.value)} />
         </label>
         <label class="wb-login-field">
-          <span>${t('login.password')}</span>
-          <input name="password" type="password" autocomplete="current-password" value=${pass} onInput=${e => setPass(e.target.value)} />
+          <span>${t(mode === 'register' ? 'register.password' : 'login.password')}</span>
+          <input name="password" type="password" autocomplete=${mode === 'register' ? 'new-password' : 'current-password'} value=${pass} onInput=${e => setPass(e.target.value)} />
         </label>
-        <button class="wb-login-button" disabled=${busy}>${t('login.submit')}</button>
-        ${status && html`<div class=${status.ok ? 'wb-login-status' : 'wb-login-status wb-login-error'} role="status">${status.ok ? t('login.logged') : status.error}</div>`}
+        <button class="wb-login-button" disabled=${busy}>${t(mode === 'register' ? 'register.submit' : 'login.submit')}</button>
+        ${onRegister && html`<button type="button" class="wb-login-switch" onClick=${() => (setStatus(null), setMode(m => (m === 'login' ? 'register' : 'login')))}>${t(mode === 'register' ? 'login.switch' : 'register.switch')}</button>`}
+        ${status && html`<div class=${status.ok ? 'wb-login-status' : 'wb-login-status wb-login-error'} role="status">${status.ok ? t(mode === 'register' ? 'register.done' : 'login.logged') : status.error}</div>`}
       </form>
     </div>
   `;

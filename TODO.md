@@ -18,6 +18,9 @@ Work that was started, offered or decided but not finished, so a detour does not
 Detail lives in `EDITOR.md` (E-numbers) and `UX-REQUIREMENTS.md`. Update this list when one closes.
 State: all of the work below is committed and pushed (last: `d2ae0104`). The camera / place work (E137, E139) is done in another session and not listed here.
 
+### Postponed (2026-10-31)
+- [ ] **E154b "Mark as texture" button in the gallery pane** (`components/GalleryPane.js`): list the node's picture photos there with a button that marks one as texture (the `setRole` command, as the ▦ button of the film-strip does), so assigning a texture does not need the Photos tab. Decided to postpone; the pane for now says to use ▦ in the Photos tab. Related open points of E154 (`EDITOR.md`): the pane does not refresh the linked children after linking in the tree; walls split by compass direction are not rendered.
+
 ### Done 2026-10-31 (uncommitted; ask before committing)
 - [x] Dev server under runit (`/var/service/wild-beauty`, log child; two steps for you: `chown log:log .../log/main`, `ln -s` into `/etc/service`), note in `CLAUDE.md`.
 - [x] Mail: Postfix `submission` (587) and `smtps` (465) enabled and restarted, router forwards seen, `ufw` allow rules added (ufw inactive). `PLAN.md` S17.

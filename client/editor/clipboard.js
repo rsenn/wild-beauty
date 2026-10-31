@@ -8,6 +8,7 @@ import { FONTS } from './text.js';
 import { effective, renderStage } from './render.js';
 import { outlineOf } from './hit.js';
 import { renderToString } from '../../vendor/preact-render-to-string.js';
+import { htmlWords, normalizeShared } from './links.js';
 
 export const MARK = 'data-wb-clip';
 const KINDS = ['photo', 'text', 'stroke', 'shape'];
@@ -109,9 +110,12 @@ export function payloadFromHtml(text) {
 
 // What a paste is: { kind: 'steps', payload } | { kind: 'image', file } |
 // { kind: 'svg', source } | { kind: 'text', text } | null. A step of ours comes
-// first, then a picture, then SVG source, then words. An SVG file is an `image` too:
+// first, then a picture, then SVG source, then words. The words of a phone's share
+// or copy are tidied (links.js): a vCard (`vcard`) as lines, a `uriList` as lines,
+// the target of a link in `html` kept, mailto:/tel: as the address/number, tracking
+// parameters off links. An SVG file is an `image` too:
 // the caller turns it into a raster (`rasteriseSvg`) before it is uploaded.
-export function classify({ html = '', text = '', files = [] } = {}) {
+export function classify({ html = '', text = '', files = [], vcard = '', uriList = '' } = {}) {
   const payload = payloadFromHtml(html);
 
   if(payload) return { kind: 'steps', payload };
@@ -122,7 +126,8 @@ export function classify({ html = '', text = '', files = [] } = {}) {
 
   if(/^\s*(<\?xml[^>]*>\s*)?<svg[\s>]/i.test(text)) return { kind: 'svg', source: text };
 
-  const words = (text || html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ')).replace(/[ \t]+/g, ' ').trim();
+  const uris = uriList.split(/\r?\n/).filter(line => line && !line.startsWith('#')).join('\n');
+  const words = normalizeShared(text || vcard || uris || htmlWords(html)).replace(/[ \t]+/g, ' ').trim();
 
   return words ? { kind: 'text', text: words.slice(0, LIMITS.textChars) } : null;
 }
@@ -192,17 +197,19 @@ export async function writeClipboard({ png, svg, html, text }) {
 }
 
 // the parts of a paste event
-export const fromEvent = data => ({ html: data?.getData('text/html') ?? '', text: data?.getData('text/plain') ?? '', files: [...(data?.files ?? [])] });
+export const fromEvent = data => ({ html: data?.getData('text/html') ?? '', text: data?.getData('text/plain') ?? '', vcard: data?.getData('text/vcard') || data?.getData('text/x-vcard') || '', uriList: data?.getData('text/uri-list') ?? '', files: [...(data?.files ?? [])] });
 
 // the parts of the clipboard now (the browser may ask the user once); rejects when refused
 export async function readClipboard() {
-  const out = { html: '', text: '', files: [] };
+  const out = { html: '', text: '', vcard: '', uriList: '', files: [] };
 
   for(const item of await navigator.clipboard.read()) {
     for(const type of item.types) {
       if(/^image\//.test(type)) out.files.push(new File([await item.getType(type)], `pasted.${type.split('/')[1].replace(/[^a-z0-9]/g, '') || 'png'}`, { type }));
       else if(type === 'text/html') out.html ||= await (await item.getType(type)).text();
       else if(type === 'text/plain') out.text ||= await (await item.getType(type)).text();
+      else if(type === 'text/uri-list') out.uriList ||= await (await item.getType(type)).text();
+      else if(type === 'text/vcard' || type === 'text/x-vcard') out.vcard ||= await (await item.getType(type)).text();
     }
   }
 

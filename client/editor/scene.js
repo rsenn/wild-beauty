@@ -1,8 +1,8 @@
 // The `scene` of a gallery node (EDITOR.md S3.1, GALLERY.md S3.1): the 3D
 // settings that live next to the wall shapes. The plan itself is not stored
 // here: the walls are the shape steps flagged `wall` (walls.js).
-//   scene: { thickness?, start?: { at: [x, y], look }, style?: {
-//     texture?: { images: [hash, hash?, hash?], walls: 'split' | 'single' },
+//   scene: { look?, thickness?, start?: { at: [x, y], look }, style?: {
+//     texture?: { images: [hash|null, hash|null, hash|null], walls: 'split' | 'single' },
 //     wall?:  { color?, tile? },  floor?: { color?, gradient?: [c, c], tile? },
 //     sky?:   { stars?, seed?, tint? },  light?: { ambient?, picture? } } }
 // Style is data: only these keys, colours and numbers in range pass, so the
@@ -13,6 +13,12 @@ import { isColour } from './model.js'; // used lazily: model.js imports this fil
 const colour = v => isColour(v);
 
 export const TEXTURE_WALLS = ['split', 'single'];
+// the named default surfaces of a gallery (client/gallery/autoplan.js LOOKS): a drawn
+// gallery wears one until the owner assigns textures of their own
+export const LOOK_NAMES = ['warm', 'walnut', 'stone'];
+export const DEFAULT_LOOK = 'warm';
+// the three slots of the texture set, in the order of `texture.images`
+export const TEXTURE_SLOTS = ['wall', 'floor', 'corridor'];
 export const PICTURE_LIGHTS = ['warm', 'neutral', 'cool'];
 export const MAX_TEXTURES = 3; // walls, room floor, corridor floor
 
@@ -23,7 +29,8 @@ const isHash = v => typeof v === 'string' && /^[0-9a-f]{64}$/.test(v);
 
 // field checks per group; a key that is not listed is rejected
 const GROUPS = {
-  texture: { images: v => Array.isArray(v) && v.length >= 1 && v.length <= MAX_TEXTURES && v.every(isHash), walls: v => TEXTURE_WALLS.includes(v) },
+  // a slot without an image is null (the look's surface stays there)
+  texture: { images: v => Array.isArray(v) && v.length >= 1 && v.length <= MAX_TEXTURES && v.every(h => h === null || isHash(h)) && v.some(isHash), walls: v => TEXTURE_WALLS.includes(v) },
   wall: { color: colour, tile: num(0.1, 20) },
   floor: { color: colour, gradient: v => Array.isArray(v) && v.length === 2 && v.every(colour), tile: num(0.1, 20) },
   sky: { stars: int(0, 10000), seed: int(0, 2 ** 31), tint: colour },
@@ -39,7 +46,9 @@ export function validateScene(scene) {
 
   const errors = [];
 
-  for(const key of Object.keys(scene)) if(!['thickness', 'start', 'style'].includes(key)) errors.push(...bad(`scene.${key}`));
+  for(const key of Object.keys(scene)) if(!['look', 'thickness', 'start', 'style'].includes(key)) errors.push(...bad(`scene.${key}`));
+
+  if(scene.look !== undefined && !LOOK_NAMES.includes(scene.look)) errors.push(...bad('scene.look'));
 
   if(scene.thickness !== undefined && !num(0.05, 1)(scene.thickness)) errors.push(...bad('scene.thickness'));
 
@@ -71,5 +80,28 @@ export function validateScene(scene) {
   return errors;
 }
 
-// the photo hashes a scene uses as textures, in slot order
-export const textureHashes = scene => scene?.style?.texture?.images ?? [];
+// the photo hashes a scene uses as textures, in slot order (empty slots left out)
+export const textureHashes = scene => (scene?.style?.texture?.images ?? []).filter(Boolean);
+
+// the texture photo of each slot: { wall, floor, corridor }, each a hash or null
+export const textureSlots = scene => {
+  const images = scene?.style?.texture?.images ?? [];
+
+  return Object.fromEntries(TEXTURE_SLOTS.map((slot, i) => [slot, images[i] ?? null]));
+};
+
+// `scene` with the slots set from { wall?, floor?, corridor? } (a hash, or null to clear);
+// a scene left without any texture loses its `texture` group
+export function withTextures(scene = {}, slots) {
+  const now = { ...textureSlots(scene), ...slots };
+  const images = TEXTURE_SLOTS.map(slot => now[slot] ?? null);
+
+  while(images.length && images.at(-1) === null) images.pop();
+
+  const { texture: _, ...style } = scene.style ?? {};
+  const next = { ...scene, style: images.length ? { ...style, texture: { images, walls: scene.style?.texture?.walls ?? 'single' } } : style };
+
+  if(!Object.keys(next.style).length) delete next.style;
+
+  return next;
+}

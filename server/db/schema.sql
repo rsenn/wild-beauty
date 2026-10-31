@@ -118,3 +118,31 @@ UPDATE OR IGNORE node_links
 DELETE FROM nodes WHERE id IN (SELECT old_id FROM place_rename WHERE dup_id IS NOT NULL);
 
 DROP TABLE place_rename;
+
+-- migration 5
+-- The space a node belongs to: NULL is the community (the wild-beauty tree),
+-- a name such as 'janos' is the node of a personal site (SITES.md). Nodes of a
+-- space can only be changed with the edit key (server/guard.js) until accounts exist.
+ALTER TABLE nodes ADD COLUMN space TEXT;
+
+-- migration 6
+-- Accounts (SITES.md Phase B): a user, and the sessions that log it in. Only
+-- the hash of a session token is stored. `slug` is the path segment of a node
+-- of a site (www.jános.ch/about).
+CREATE TABLE users (
+  id         INTEGER PRIMARY KEY,
+  email      TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  name       TEXT NOT NULL DEFAULT '',
+  pw_hash    TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+CREATE TABLE sessions (
+  token_hash TEXT PRIMARY KEY,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL
+);
+
+ALTER TABLE nodes ADD COLUMN slug TEXT;
+CREATE INDEX nodes_space ON nodes(space, owner_id);

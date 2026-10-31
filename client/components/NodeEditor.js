@@ -28,6 +28,8 @@ import { rasteriseSvg, svgFor, classify, copyPayload, pasteSteps, fromEvent, htm
 import { sendFile } from '../upload.js';
 import { uploadPayload } from '../files.js';
 import { scenePalette } from '../editor/scenepalette.js';
+import { GalleryPane } from './GalleryPane.js';
+import { useBoot } from '../boot.js';
 import { eventUnits } from '../editor/stage.js';
 import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
@@ -262,10 +264,14 @@ const Selection = ({ outline, scale, px, grips }) => {
 };
 
 export const NodeEditor = ({ onClose, target = 'new' }) => {
+  const boot = useBoot();
   const { t, lang } = useI18n();
   const [hist, setHist] = useState(() => history.create({ doc: emptyNode(), kind: 'node' }));
   const [photos, setPhotos] = useState({});
   const [panelTab, setPanelTab] = useState('select'); // landscape: which panel section shows
+  const [visibility, setVisibility] = useState(boot.user ? 'hidden' : 'public'); // who else sees this node: a logged-in user's new node starts hidden
+  const [owned, setOwned] = useState(false); // the node has an owner and it is the user: only then the visibility can be changed
+  const [children, setChildren] = useState([]); // the nodes linked under this one (what a gallery hangs), as the server last said
   const [tool, setTool] = useState(DEFAULT_TOOL);
   const [selected, setSelectedOne] = useState(null);
   const [multi, setMulti] = useState([]); // two or more steps selected together (rectangle, Shift)
@@ -813,6 +819,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     saved.current = r.snap;
     setHist(history.create(r.snap));
     setPhotos(old => ({ ...old, ...r.photos }));
+    setChildren(r.children);
+    setVisibility(r.visibility);
+    setOwned(r.owned);
     loadingRef.current = false;
     setLoading(false);
     startLock(r.id);
@@ -899,6 +908,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setNodeId(r.id);
     setBusy(false);
 
+    // a new node of a logged-in user is theirs and hidden: ask who owns it now
+    if(first && boot.user) loadNode(r.id).then(m => m.ok && (setVisibility(m.visibility), setOwned(m.owned)));
+
     // a save releases the lock on the server: take it back (a new node gets one now)
     if(first) startLock(r.id);
     else lockRef.current?.retake();
@@ -927,6 +939,9 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     saved.current = r.snap;
     setHist(history.create(r.snap));
     setPhotos(old => Object.fromEntries([...Object.entries(old), ...Object.entries(r.photos)]));
+    setChildren(r.children);
+    setVisibility(r.visibility);
+    setOwned(r.owned);
     setSelected(null);
     setK(null);
     setCurrent(0);
@@ -2493,6 +2508,21 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     setAnnounce(tr('editor.announce.pasted'));
   };
 
+  // publish or unpublish the saved node of the user's (their own call, not part of the document: no rev, no undo)
+  const changeVisibility = async next => {
+    if(!remote.current) return;
+
+    try {
+      const res = await fetch(`/api/nodes/${remote.current.id}/visibility`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ visibility: next }) });
+
+      if(res.ok) {
+        setVisibility(next);
+        setAnnounce(tr(next === 'public' ? 'editor.announce.published' : 'editor.announce.unpublished'));
+        window.dispatchEvent(new CustomEvent(SAVED_EVENT, { detail: { hashes: [] } }));
+      }
+    } catch {}
+  };
+
   // the paste button: ask the clipboard (the browser may ask the user once)
   const pasteClipboard = async () => {
     try {
@@ -2607,7 +2637,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
     </section>`;
 
   return html`
-    <section id="wb-editor" class=${'wb-editor' + (dropping ? ' wb-editor-dropping' : '')} data-tab=${panelTab} tabindex="-1" aria-label=${t('editor.label')}>
+    <section id="wb-editor" class=${'wb-editor' + (dropping ? ' wb-editor-dropping' : '')} data-tab=${panelTab === 'gallery' && kind !== 'gallery' ? 'select' : panelTab} tabindex="-1" aria-label=${t('editor.label')}>
       <div class="wb-sr-only" role="status" aria-live="polite" aria-atomic="true">${announce}</div>
       <p id="wb-editor-keys-hint" class="wb-sr-only">${t('editor.keys.hint')}</p>
       <div class="wb-editor-head">
@@ -2615,7 +2645,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
           <span class="wb-sr-only">${t('editor.title.label')}</span>
           <input type="text" maxlength=${LIMITS.title} autocomplete="off" value=${title} placeholder=${t('editor.title.placeholder')} onInput=${e => dispatch({ type: 'setTitle', title: e.target.value })} />
         </label>
-        <span class="wb-editor-head-fields" inert=${readOnly}><${Properties} t=${t} kind=${kind} bg=${doc.bg} pal=${pal} used=${usedNow} dropper=${startDropper} onOpen=${setPropsOpen} dispatch=${dispatch} /></span>
+        <span class="wb-editor-head-fields" inert=${readOnly}><${Properties} t=${t} kind=${kind} bg=${doc.bg} pal=${pal} used=${usedNow} dropper=${startDropper} onOpen=${setPropsOpen} dispatch=${dispatch} visibility=${visibility} canPublish=${owned && !!nodeId} onVisibility=${changeVisibility} /></span>
         <${Popover} label=${t('editor.export')} class="wb-editor-export" align="right">
           <button type="button" class="wb-editor-chip" disabled=${exporting} onClick=${() => exportAs('png')}>${t('editor.export.png')}</button>
           <button type="button" class="wb-editor-chip" disabled=${exporting} onClick=${() => exportAs('jpg')}>${t('editor.export.jpg')}</button>
@@ -2659,7 +2689,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
       ${savedId !== null && !dirty && !saveError && html`<p class="wb-editor-banner" role="status"><span>${t('editor.saved')} ${t('editor.saved.kept', { count: usedKey.length })}</span> <a href=${`/${lang}/node/${savedId}`}>${t('editor.saved.view', { id: savedId })}</a></p>`}
       ${wallNotice && html`<p class="wb-editor-banner wb-editor-banner-error" role="alert"><span>${t(wallNotice.key, wallNotice.params)}</span> <button type="button" class="wb-editor-chip" onClick=${() => setWallNotice(null)}>${t('editor.save.dismiss')}</button></p>`}
       </div>
-      <div class="wb-editor-tabs" role="tablist" aria-label=${t('editor.panel')}>${['select', 'photos', 'sequence'].map(id => html`<button type="button" role="tab" class="wb-editor-chip" aria-selected=${panelTab === id ? 'true' : 'false'} onClick=${() => setPanelTab(id)}>${t('editor.tab.' + id)}</button>`)}</div>
+      <div class="wb-editor-tabs" role="tablist" aria-label=${t('editor.panel')}>${['select', 'photos', 'sequence', ...(kind === 'gallery' ? ['gallery'] : [])].map(id => html`<button type="button" role="tab" class="wb-editor-chip" aria-selected=${panelTab === id ? 'true' : 'false'} onClick=${() => setPanelTab(id)}>${t('editor.tab.' + id)}</button>`)}</div>
       <div class="wb-editor-frame" inert=${readOnly}>
       <div class="wb-editor-work">
       <div class="wb-editor-body">
@@ -2726,6 +2756,7 @@ export const NodeEditor = ({ onClose, target = 'new' }) => {
         ? html`<${SlideStrip} t=${t} doc=${realDoc} photos=${photos} count=${slides} current=${Math.min(slide, Math.max(0, slides - 1))} onSelect=${setSlide} />`
         : mode === 'free' && html`<${PageStrip} t=${t} doc=${doc} photos=${photos} current=${page} onSelect=${switchPage} onAdd=${addPage} onMove=${(id, to) => dispatch({ type: 'movePage', id, to })} onRemove=${removePage} />`}
       </div>
+      ${kind === 'gallery' && html`<div class="wb-editor-sec" data-sec="gallery"><${GalleryPane} doc=${doc} children=${children} photos=${photos} readOnly=${readOnly} onScene=${patch => dispatch({ type: 'setScene', patch })} /></div>`}
       </div>
       </div>
       </div>

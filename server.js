@@ -9,7 +9,7 @@ import { config } from './server/config.js';
 import { dev, log } from './server/log.js';
 import { clearUploads, createUpload, deleteUpload, listUploads, readUploads, serveUpload, sweepOrphans, sweepUploads } from './server/api/uploads.js';
 import { lockRoute } from './server/api/locks.js';
-import { createNode, deleteNodeRoute, largeRoute, listNodesRoute, putLargeRoute, readNode, updateNodeRoute, visibleNodes } from './server/api/nodes.js';
+import { createNode, deleteNodeRoute, largeRoute, listNodesRoute, listedNodes, putLargeRoute, readNode, updateNodeRoute, visibilityRoute, visibleNodes } from './server/api/nodes.js';
 import { manifestResponse, workerResponse } from './server/pwa.js';
 import { graphOf, graphRoute } from './server/api/graph.js';
 import { placesRoute } from './server/api/places.js';
@@ -23,6 +23,10 @@ import { getNode, linksFrom } from './server/db/nodes.js';
 import { database } from './server/db/db.js';
 import { reconcile } from './server/node/reconcile.js';
 import { sessionFor } from './server/session.js';
+import { guard, mayWrite } from './server/guard.js';
+import { loginRoute, logoutRoute, meRoute, registerRoute, viewerOf } from './server/auth.js';
+import { siteFor } from './server/sites.js';
+import { resolve as resolvePage, robotsTxt, sitemap, sitemapXml } from './server/site.js';
 import { peer, recordEvents } from './server/events.js';
 import { capabilities, detectTools } from './server/media/tools.js';
 
@@ -109,13 +113,14 @@ const listed = ({ hash, ext, display, name, size, mime, width, height, padding, 
 async function bootFor(lang, extra = {}, owner = null) {
   const fallback = lang === DEFAULT_LANG ? {} : locales.get(DEFAULT_LANG);
 
-  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes, uploadDays: Math.max(1, Math.round(config.uploadTtlMs / 86400000)) }, uploads: extra.node || extra.graph || extra.gallery ? [] : (await readUploads(owner)).map(listed), ...extra };
+  return { lang, messages: locales.get(lang), fallback, languages, limits: { maxBytes: config.maxBytes, uploadDays: Math.max(1, Math.round(config.uploadTtlMs / 86400000)) }, uploads: extra.node || extra.graph || extra.gallery || extra.site ? [] : (await readUploads(owner)).map(listed), ...extra };
 }
 
 // `extra` adds to the boot JSON (the node page: `node` and `photos`);
 // `title` replaces the translated page title
 async function page(lang, titleKey, extra, title, req) {
-  const boot = await bootFor(lang, extra, req ? sessionFor(req).owner : null);
+  const viewer = req ? viewerOf(await database(), req) : null;
+  const boot = await bootFor(lang, { ...(viewer && { user: { id: viewer.id, email: viewer.email, name: viewer.name } }), ...extra }, req ? sessionFor(req).owner : null);
   const body = renderPage(html`<${App} boot=${boot} />`, {
     lang,
     dir: boot.messages['meta.dir'],
@@ -132,42 +137,103 @@ async function page(lang, titleKey, extra, title, req) {
 }
 
 // GET /:lang/new: the upload area, the editor and the saved nodes (E68)
+// `?site=<id>` (from /edit/ on a site host) asks for a login first, when there is none
 async function newPage(lang, req) {
-  return page(lang, 'page.title.new', { nodes: visibleNodes(await database()) }, undefined, req);
+  const h = await database();
+  const viewer = viewerOf(h, req);
+  const wanted = new URL(req.url).searchParams.has('site');
+
+  return page(lang, 'page.title.new', { nodes: listedNodes(h, viewer), ...(wanted && !viewer && { loginRequired: true }) }, undefined, req);
 }
 
 // GET /:lang/gallery: every saved node as a picture of one 3D gallery ("Show")
 async function galleryPage(lang, req) {
-  return page(lang, 'page.title.gallery', { gallery: { items: nodeItems(visibleNodes(await database()), lang) } }, undefined, req);
+  const h = await database();
+
+  return page(lang, 'page.title.gallery', { gallery: { items: nodeItems(visibleNodes(h, viewerOf(h, req)), lang) } }, undefined, req);
 }
 
 // GET /:lang/tree: the graph of the nodes (preliminary demo of GRAPH.md)
 async function treePage(lang, req) {
-  return page(lang, 'page.title.tree', { graph: graphOf(await database()) }, undefined, req);
+  const h = await database();
+
+  return page(lang, 'page.title.tree', { graph: graphOf(h, viewerOf(h, req)) }, undefined, req);
 }
 
 // GET /:lang/node/:id: the saved node as a read-only page
-async function nodePage(lang, id) {
+async function nodePage(lang, id, req) {
   const h = await database();
+  const viewer = viewerOf(h, req);
   const node = getNode(h, id);
 
-  if(!node) return text('not found\n', 404);
-  if(!canView(node, null)) return text('forbidden\n', 403);
+  if(!node || !canView(node, viewer)) return text('not found\n', 404);
 
   // the children as the 3D gallery hangs them (GALLERY.md S5): the visible `child` edges in order
   const children = linksFrom(h, id, 'child').flatMap(({ id: to }) => {
     const child = getNode(h, to);
 
-    return child && canView(child, null) ? [galleryChild(h, child)] : [];
+    return child && canView(child, viewer) ? [galleryChild(h, child)] : [];
   });
-  const shown = { id: node.id, title: node.title, kind: node.kind, doc: node.doc, rev: node.rev, children };
+  const shown = { id: node.id, title: node.title, kind: node.kind, doc: node.doc, rev: node.rev, mine: mayWrite(node, viewer), children };
   const title = `${locales.get(lang)['page.title.node'] ?? 'Wild Beauty'} - ${node.title || locales.get(lang)['node.untitled'] || ''}`;
 
-  return page(lang, 'page.title.node', { node: shown, photos: photoInfos(h, node.doc) }, title);
+  return page(lang, 'page.title.node', { node: shown, photos: photoInfos(h, node.doc) }, title, req);
 }
 
-function route(req) {
+// A page of a site: the node in a centred stage, the navigation of the sitemap above it
+async function sitePage(site, map, page, h) {
+  const { node } = page;
+  const nav = map.pages.map(p => ({ title: p.node.title, href: p.path, current: p === page }));
+  const boot = await bootFor(site.lang, { site: { id: site.id, title: site.title, nav, node: { id: node.id, title: node.title, doc: node.doc } }, photos: photoInfos(h, node.doc) });
+  const title = page === map.pages[0] ? site.title : `${node.title} - ${site.title}`;
+  const body = renderPage(html`<${App} boot=${boot} />`, { lang: site.lang, dir: boot.messages['meta.dir'], title, theme: site.theme, boot, site: { color: site.color, icon: site.icon, canonical: `${site.url}${page.path}` } });
+
+  return new Response(body, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
+}
+
+// What a site host answers (SITES.md): its pages, /edit/, the files the pages need.
+// null lets the generic routes serve /static/, /vendor/, /app/, photos and the service worker.
+async function siteRoute(req, site, pathname, h) {
+  if(req.method !== 'GET' && req.method !== 'HEAD') return text('method not allowed\n', 405);
+
+  if(/^\/(static|vendor|app)\//.test(pathname) || pathname.startsWith('/files/photos/') || pathname === '/sw.js') return null;
+
+  if(pathname === '/manifest.webmanifest') return manifestResponse(site);
+  if(pathname === '/edit' || pathname === '/edit/') return new Response(null, { status: 302, headers: { location: site.editUrl, 'cache-control': 'no-store' } });
+
+  const map = sitemap(h, site);
+
+  if(pathname === '/robots.txt') return new Response(robotsTxt(site), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+  if(pathname === '/sitemap.xml') return new Response(sitemapXml(site, map), { headers: { 'content-type': 'application/xml; charset=utf-8' } });
+
+  const found = resolvePage(map, pathname);
+
+  if(found?.redirect) return new Response(null, { status: 301, headers: { location: found.redirect } });
+  if(found?.page) return sitePage(site, map, found.page, h);
+
+  return text('not found\n', 404);
+}
+
+async function route(req) {
   const { pathname } = new URL(req.url);
+
+  const h = await database();
+  const site = siteFor(req);
+
+  if(site) {
+    const answer = await siteRoute(req, site, pathname, h);
+
+    if(answer) return answer;
+  } else {
+    if(pathname === '/api/login' && req.method === 'POST') return loginRoute(req, h);
+    if(pathname === '/api/register' && req.method === 'POST') return registerRoute(req, h);
+    if(pathname === '/api/logout' && req.method === 'POST') return logoutRoute(req, h);
+    if(pathname === '/api/me' && req.method === 'GET') return meRoute(req, h);
+  }
+
+  const denied = await guard(req, pathname, h);
+
+  if(denied) return denied;
 
   if(pathname === '/api/uploads') {
     if(req.method === 'POST') return createUpload(req);
@@ -191,11 +257,15 @@ function route(req) {
 
   if(lock) return lockRoute(req, lock[1]);
 
-  if(pathname === '/api/nodes') return req.method === 'POST' ? createNode(req) : req.method === 'GET' ? listNodesRoute() : text('method not allowed\n', 405);
+  if(pathname === '/api/nodes') return req.method === 'POST' ? createNode(req) : req.method === 'GET' ? listNodesRoute(undefined, req) : text('method not allowed\n', 405);
+
+  const visibility = /^\/api\/nodes\/([^/]+)\/visibility$/.exec(pathname);
+
+  if(visibility) return visibilityRoute(req, visibility[1]);
 
   const large = /^\/api\/nodes\/([^/]+)\/large$/.exec(pathname);
 
-  if(large) return req.method === 'GET' || req.method === 'HEAD' ? largeRoute(large[1]) : req.method === 'PUT' ? putLargeRoute(req, large[1]) : text('method not allowed\n', 405);
+  if(large) return req.method === 'GET' || req.method === 'HEAD' ? largeRoute(large[1], undefined, { viewer: viewerOf(await database(), req) }) : req.method === 'PUT' ? putLargeRoute(req, large[1]) : text('method not allowed\n', 405);
 
   const node = /^\/api\/nodes\/([^/]+)$/.exec(pathname);
 
@@ -251,7 +321,7 @@ function route(req) {
 
   const viewed = /^\/([a-z]{2,3})\/node\/(\d{1,15})$/.exec(pathname);
 
-  if(viewed && locales.has(viewed[1])) return nodePage(viewed[1], Number(viewed[2]));
+  if(viewed && locales.has(viewed[1])) return nodePage(viewed[1], Number(viewed[2]), req);
 
   const shown = /^\/([a-z]{2,3})\/gallery$/.exec(pathname);
 

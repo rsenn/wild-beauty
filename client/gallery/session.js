@@ -46,11 +46,11 @@ const SHARP = 4;
 // how fast the lens closes and opens, per second
 const LENS = { close: 5, open: 2 };
 
-export async function startGallery(canvas, { items, scene, doc, name = '', overview = false, onOpen, onLock, onLost, onState, onLens, onStick, onNote, onFlight } = {}) {
+export async function startGallery(canvas, { items, scene, doc, photos, name = '', overview = false, onOpen, onLock, onLost, onState, onLens, onStick, onNote, onFlight } = {}) {
   if(!webgl()) throw new Error('webgl');
 
   // `?look=warm|walnut|stone` picks the surfaces of the auto plan (autoplan.js LOOKS)
-  const plan = scene ?? planFromDoc(doc) ?? autoPlan(items.length, { look: new URLSearchParams(globalThis.location?.search).get('look') });
+  const plan = scene ?? planFromDoc(doc, { photos }) ?? autoPlan(items.length, { look: new URLSearchParams(globalThis.location?.search).get('look') });
   const built = buildGallery(plan);
   const { hung } = hang(plan, items);
   const walker = createWalker(built);

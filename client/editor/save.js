@@ -34,7 +34,7 @@ export async function saveNode(snap, remote, send = globalThis.fetch, { thumb } 
 }
 
 // the message key for an error code: editor.save.error.<code>, else generic
-export const SAVE_ERRORS = ['invalid', 'too_large', 'missing_photo', 'bake_failed', 'conflict', 'locked', 'forbidden', 'not_found', 'network'];
+export const SAVE_ERRORS = ['invalid', 'too_large', 'missing_photo', 'bake_failed', 'conflict', 'locked', 'forbidden', 'login_required', 'not_found', 'network'];
 export const errorKey = code => 'editor.save.error.' + (SAVE_ERRORS.includes(code) ? code : 'generic');
 
 // Hand the server the large render of a saved node (see putLargeRoute). Best
@@ -48,7 +48,7 @@ export async function saveLarge(id, blob, send = globalThis.fetch) {
 }
 
 // Read node `id` again (E65 "take theirs", E66 open).
-// -> { ok: true, id, rev, snap: { doc, kind }, photos } | { ok: false, code, status }
+// -> { ok: true, id, rev, snap: { doc, kind }, photos, children, visibility, owned } | { ok: false, code, status }
 export async function loadNode(id, send = globalThis.fetch) {
   let res;
 
@@ -67,7 +67,7 @@ export async function loadNode(id, send = globalThis.fetch) {
   if(!res.ok) return { ok: false, code: typeof data?.error === 'string' ? data.error : 'generic', status: res.status };
   if(!data?.node?.doc || !Number.isInteger(data.rev)) return { ok: false, code: 'generic', status: res.status };
 
-  return { ok: true, id, rev: data.rev, snap: { doc: data.node.doc, kind: data.node.kind }, photos: data.photos && typeof data.photos === 'object' ? data.photos : {} };
+  return { ok: true, id, rev: data.rev, snap: { doc: data.node.doc, kind: data.node.kind }, photos: data.photos && typeof data.photos === 'object' ? data.photos : {}, children: Array.isArray(data.children) ? data.children : [], visibility: data.node.visibility === 'hidden' ? 'hidden' : 'public', owned: data.mine === true && data.node.owner_id != null };
 }
 
 // Delete node `id` (E69). -> { ok: true } | { ok: false, code, status }; a node that

@@ -28,7 +28,7 @@ export function getNode(h, id) {
 }
 
 // the saved nodes for a list of tiles, newest first: { id, title, kind, tile, updated_at }
-export const listNodes = (h, limit = 200) => h.all('SELECT id, title, kind, tile, updated_at FROM nodes ORDER BY updated_at DESC, id DESC LIMIT ?', limit);
+export const listNodes = (h, limit = 200) => h.all('SELECT id, title, kind, tile, space, owner_id, visibility, updated_at FROM nodes ORDER BY updated_at DESC, id DESC LIMIT ?', limit);
 
 // Save a new title, doc and palette if the stored rev is still `rev`.
 // -> the new rev, or null when the node is gone or someone saved in between
@@ -136,7 +136,7 @@ export const breakLock = (h, id) => h.run('DELETE FROM node_locks WHERE node_id 
 
 // every node as the graph draws it: { id, title, kind, tile, x, y, pinned, color }
 export const graphNodes = h =>
-  h.all('SELECT id, title, kind, tile, x, y, pinned, palette FROM nodes ORDER BY id').map(({ palette, pinned, ...row }) => ({ ...row, pinned: !!pinned, color: parse(palette)?.[0]?.hex ?? null }));
+  h.all('SELECT id, title, kind, tile, space, owner_id, visibility, x, y, pinned, palette FROM nodes ORDER BY id').map(({ palette, pinned, ...row }) => ({ ...row, pinned: !!pinned, color: parse(palette)?.[0]?.hex ?? null }));
 
 export const graphEdges = h => h.all('SELECT from_id AS "from", to_id AS "to", label FROM node_links ORDER BY from_id, sort, id');
 

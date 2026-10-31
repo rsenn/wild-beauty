@@ -85,7 +85,7 @@ function onDoc(doc, c) {
     case 'updateStep':
       return model.updateStep(doc, c.id, c.patch);
     case 'removeStep':
-      return model.removeStep(doc, c.id);
+      return model.pruneScene(model.removeStep(doc, c.id));
     case 'setEdge':
       return model.setEdge(doc, c.id, c.edge);
     case 'addText':
@@ -107,7 +107,9 @@ function onDoc(doc, c) {
     case 'moveStep':
       return model.moveStep(doc, c.id, c.to);
     case 'setRole':
-      return model.setRole(doc, c.id, c.role);
+      return model.pruneScene(model.setRole(doc, c.id, c.role));
+    case 'setScene':
+      return model.setScene(doc, c.patch);
     case 'setMode':
       return model.setMode(doc, c.mode);
     case 'addPage':

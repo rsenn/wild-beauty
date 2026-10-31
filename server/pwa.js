@@ -25,7 +25,20 @@ self.addEventListener('activate', event => event.waitUntil(self.clients.claim())
 self.addEventListener('fetch', () => {});
 `;
 
-export const manifestResponse = () => new Response(JSON.stringify(manifest), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'no-cache' } });
+// the manifest of a personal site: its own name and colours, `www.` as the one origin
+const siteManifest = site => ({
+  id: '/',
+  name: site.title,
+  short_name: site.title,
+  start_url: '/',
+  scope: '/',
+  display: 'standalone',
+  background_color: site.color,
+  theme_color: site.color,
+  icons: [{ src: site.icon, sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+});
+
+export const manifestResponse = site => new Response(JSON.stringify(site ? siteManifest(site) : manifest), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'no-cache' } });
 
 // served from the root so its scope is the whole site
 export const workerResponse = () => new Response(worker, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache', 'service-worker-allowed': '/' } });

@@ -31,8 +31,8 @@ export const NodePage = () => {
         <h1 class="wb-node-title">${title}</h1>
         ${isGallery && html`<${GalleryTools} chrome=${chrome} overview=${node.kind === 'gallery'} />`}
       </div>
-      ${!editingThis && (isGallery ? html`<${GalleryView} items=${items} doc=${node.kind === 'gallery' ? node.doc : undefined} overview=${node.kind === 'gallery'} label=${title} chrome=${chrome}>${view}<//>` : view)}
-      ${!editingThis && html`<div class="wb-node-foot"><button type="button" class="wb-editor-chip wb-node-edit" onClick=${() => openEditor(node.id)}>${t('editor.edit')}</button>${isGallery && html`<${GalleryNav} chrome=${chrome} />`}</div>`}
+      ${!editingThis && (isGallery ? html`<${GalleryView} items=${items} doc=${node.kind === 'gallery' ? node.doc : undefined} photos=${hash => photos[hash] ?? null} overview=${node.kind === 'gallery'} label=${title} chrome=${chrome}>${view}<//>` : view)}
+      ${!editingThis && html`<div class="wb-node-foot">${node.mine && html`<button type="button" class="wb-editor-chip wb-node-edit" onClick=${() => openEditor(node.id)}>${t('editor.edit')}</button>`}${isGallery && html`<${GalleryNav} chrome=${chrome} />`}</div>`}
       ${editingThis && html`<${NodeEditor} key=${target} target=${target} onClose=${closeEditor} />`}
     <//>
   `;

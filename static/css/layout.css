@@ -895,6 +895,15 @@ body {
   font-size: var(--wb-font-size-lead);
 }
 
+.wb-link {
+  cursor: pointer;
+}
+
+.wb-link:hover,
+.wb-link:focus-visible {
+  text-decoration: underline;
+}
+
 .wb-node-view {
   aspect-ratio: 1;
   /* header and title stay in view with the stage: only the edit button is below the fold */
@@ -1742,7 +1751,8 @@ body {
   /* one section at a time */
   .wb-editor[data-tab='select'] .wb-editor-sec:not([data-sec='select']),
   .wb-editor[data-tab='photos'] .wb-editor-sec:not([data-sec='photos']),
-  .wb-editor[data-tab='sequence'] .wb-editor-sec:not([data-sec='sequence']) {
+  .wb-editor[data-tab='sequence'] .wb-editor-sec:not([data-sec='sequence']),
+  .wb-editor[data-tab='gallery'] .wb-editor-sec:not([data-sec='gallery']) {
     display: none;
   }
 
@@ -2084,6 +2094,15 @@ body {
 }
 
 /* several nodes at once: the group, its target, the drop preview */
+.wb-graph-node.wb-private .wb-graph-ground,
+.wb-graph-node.wb-private image {
+  opacity: 0.55;
+}
+
+.wb-graph-node.wb-private .wb-graph-frame {
+  stroke-dasharray: 6 4;
+}
+
 .wb-graph-node.wb-multi .wb-graph-frame {
   stroke: var(--wb-accent);
   stroke-width: 2;
@@ -2333,6 +2352,18 @@ body {
   box-shadow: var(--wb-login-shadow);
 }
 
+.wb-login-switch {
+  align-self: center;
+  padding: 0;
+  font: inherit;
+  font-size: var(--wb-font-size-small);
+  color: inherit;
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .wb-login-button:active {
   transform: translate(1px, 1px);
 }
@@ -2368,4 +2399,184 @@ body {
   display: flex;
   flex-flow: row wrap;
   gap: var(--wb-editor-gap);
+}
+
+/* the gallery context pane of the editor (client/components/GalleryPane.js) */
+.wb-gal-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--wb-font-size-small);
+}
+
+.wb-gal-title,
+.wb-gal-sub {
+  margin: 8px 0 0;
+  font-size: var(--wb-font-size-button);
+}
+
+.wb-gal-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wb-gal-step {
+  display: flex;
+  gap: 6px;
+  opacity: 0.7;
+}
+
+.wb-gal-done {
+  opacity: 1;
+}
+
+.wb-gal-mark {
+  flex: none;
+  width: 1.2em;
+  text-align: center;
+}
+
+.wb-gal-help summary {
+  cursor: pointer;
+}
+
+.wb-gal-help ul {
+  margin: 4px 0;
+  padding-left: 1.2em;
+}
+
+.wb-gal-warn {
+  margin: 0;
+  padding: 4px 6px;
+  border: var(--wb-border-width) solid var(--wb-danger);
+}
+
+.wb-gal-note,
+.wb-gal-empty {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.wb-gal-plan {
+  width: 100%;
+  max-height: 240px;
+  border: var(--wb-border-width) solid var(--wb-ink-soft);
+  background: var(--wb-card-ground);
+}
+
+.wb-gal-room {
+  fill: var(--wb-ink-soft);
+}
+
+.wb-gal-corridor {
+  fill: none;
+  stroke: var(--wb-ink-soft);
+}
+
+.wb-gal-wall {
+  fill: none;
+  stroke: var(--wb-ink);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.wb-gal-start {
+  fill: var(--wb-accent);
+}
+
+.wb-gal-children {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wb-gal-children a {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: inherit;
+}
+
+.wb-gal-children img,
+.wb-gal-blank {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border: var(--wb-border-width) solid var(--wb-ink-soft);
+}
+
+.wb-gal-looks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wb-gal-look {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  font: inherit;
+  color: inherit;
+  background: var(--wb-card-ground);
+  border: var(--wb-border-width) solid var(--wb-ink-soft);
+}
+
+.wb-gal-look[aria-pressed='true'],
+.wb-gal-pick[aria-pressed='true'] {
+  border: var(--wb-select-width) solid var(--wb-select);
+}
+
+/* a swatch: the wall of the look over its floor */
+.wb-gal-swatch {
+  display: flex;
+  flex-direction: column;
+  width: 56px;
+  height: 36px;
+}
+
+.wb-gal-swatch-wall,
+.wb-gal-swatch-floor {
+  flex: 1;
+  background-position: center;
+  background-size: cover;
+}
+
+.wb-gal-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wb-gal-slot-name {
+  font-weight: bold;
+}
+
+.wb-gal-slot-hint {
+  opacity: 0.75;
+}
+
+.wb-gal-slot-picks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.wb-gal-pick {
+  padding: 0;
+  background: none;
+  border: var(--wb-border-width) solid var(--wb-ink-soft);
+}
+
+.wb-gal-pick img {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
 }

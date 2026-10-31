@@ -605,6 +605,10 @@ export const GraphPage = () => {
   });
 
   const nodeOf = id => graph.nodes.find(n => n.id === id);
+  // the selected nodes that are the user's own: publish or unpublish them together (visibility: public / hidden)
+  const ownSelected = (multi.length > 1 ? multi : selected?.node ? [selected.node] : []).map(nodeOf).filter(n => n && boot.user && n.owner_id === boot.user.id);
+  const allPublic = ownSelected.length > 0 && ownSelected.every(n => n.visibility === 'public');
+  const publish = async () => keep(await send(ownSelected.map(n => ({ op: 'visibility', id: n.id, visibility: allPublic ? 'hidden' : 'public' }))));
   const picked = selected?.node && nodeOf(selected.node);
   const label = n => n.title || t('node.untitled');
   const hint = error
@@ -635,6 +639,7 @@ export const GraphPage = () => {
         <button type="button" class="wb-editor-chip" aria-pressed=${linking ? 'true' : 'false'} disabled=${!picked && !linking} onClick=${() => setLinking(linking ? null : selected.node)}>${t('graph.link')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!selected?.edge} onClick=${async () => keep(await send([{ op: 'unlink', ...selected.edge }]))}>${t('graph.unlink')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!picked || !picked.pinned} onClick=${async () => keep(await send([{ op: 'pin', id: picked.id, pinned: false }]))}>${t('graph.unpin')}</button>
+        <button type="button" class="wb-editor-chip" disabled=${!ownSelected.length} title=${t('graph.publish.hint')} onClick=${publish}>${t(allPublic ? 'graph.unpublish' : 'graph.publish')}</button>
         <a class=${`wb-editor-chip wb-graph-open${picked ? '' : ' wb-disabled'}`} href=${picked ? `/${lang}/node/${picked.id}` : null} aria-disabled=${picked ? null : 'true'}>${t('graph.open')}</a>
         <button type="button" class="wb-editor-chip" disabled=${!note?.undo} onClick=${undo}>${t('graph.undo')}</button>
         <button type="button" class="wb-editor-chip" aria-pressed=${places ? 'true' : 'false'} onClick=${() => setPlaces(!places)}>${t('graph.places')}</button>
@@ -669,7 +674,7 @@ export const GraphPage = () => {
 
             if(!b) return null;
 
-            const cls = `wb-graph-node${selected?.node === n.id ? ' wb-selected' : ''}${multi.includes(n.id) ? ' wb-selected wb-multi' : ''}${linking === n.id ? ' wb-linking' : ''}${carry?.over === n.id ? ' wb-target' : ''}${n.pinned ? ' wb-pinned' : ''}`;
+            const cls = `wb-graph-node${selected?.node === n.id ? ' wb-selected' : ''}${multi.includes(n.id) ? ' wb-selected wb-multi' : ''}${linking === n.id ? ' wb-linking' : ''}${carry?.over === n.id ? ' wb-target' : ''}${n.pinned ? ' wb-pinned' : ''}${n.visibility === 'hidden' ? ' wb-private' : ''}`;
 
             return html`<g key=${n.id} data-id=${n.id} class=${cls} transform=${`translate(${b.x} ${b.y}) translate(${-SIZE / 2} ${-SIZE / 2})`} onPointerDown=${e => (e.stopPropagation(), down(e, n.id))} role="button" tabindex="0" aria-label=${label(n)} aria-pressed=${multi.includes(n.id) ? 'true' : null}>
               <clipPath id=${`wb-g-${n.id}`}><rect width=${SIZE} height=${SIZE} rx="14" /></clipPath>

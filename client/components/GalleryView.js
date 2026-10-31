@@ -12,12 +12,13 @@ import { IconButton } from './GalleryTools.js';
 //  overview  a gallery node: the gallery is shown at once from above (overview.js), the
 //            button flies down into it, the stage widens and the visitor walks
 //  doc    the node's document: a gallery node's drawn walls make the plan (fromdoc.js)
+//  photos hash -> { href } of the document's photos: its texture photos become the surfaces
 //  children  the poster, shown until entered
 //  wide      a poster that is not square (a list): the button goes above it, not over it
 //  chrome    a store (gallery/chrome.js): fullscreen, back to the overview, help and the
 //            previous / next picture are then shown by the page outside the stage, the stage keeps
 //            them only while it is fullscreen
-export const GalleryView = ({ items, doc, label, overview = false, wide = false, chrome, children }) => {
+export const GalleryView = ({ items, doc, photos, label, overview = false, wide = false, chrome, children }) => {
   const { t } = useI18n();
   const [state, setState] = useState('poster'); // poster | loading | live | error
   const [fill, setFill] = useState(false);
@@ -55,6 +56,7 @@ export const GalleryView = ({ items, doc, label, overview = false, wide = false,
         startGallery(canvas.current, {
           items,
           doc,
+          photos,
           name: label,
           overview,
           onLock: setLocked,

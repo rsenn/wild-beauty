@@ -1,0 +1,84 @@
+/* A personal site (client/components/SitePage.js): white, one centred stage,
+ * a quiet monochrome navigation above it. Colours and type come from the
+ * theme tokens (static/themes/janos.css). */
+
+.site {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 1.5rem 1rem 2rem;
+  color: var(--wb-ink);
+  font-family: var(--wb-font-ui);
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.2rem 0.9rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  text-transform: lowercase;
+}
+
+.site-link {
+  color: var(--wb-ink);
+  text-decoration: none;
+  text-underline-offset: 0.35em;
+  text-decoration-thickness: 1px;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.site-link:hover,
+.site-link:focus-visible,
+.site-link[aria-current="page"] {
+  opacity: 1;
+}
+
+.site-link:hover,
+.site-link:focus-visible {
+  text-decoration-line: underline;
+}
+
+.site-dot {
+  opacity: 0.35;
+}
+
+/* the stage fills what the navigation leaves, centred */
+.site-stage {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.site-stage .wb-node-view {
+  width: min(100%, max(240px, calc(100vh - 8rem)));
+  width: min(100%, max(240px, calc(100dvh - 8rem)));
+  /* the stage has no frame and no ground of its own: the node is drawn on the page */
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+/* nor does the node paint a page colour (doc.bg is a rect directly under the svg) */
+.site-stage .wb-node-view > svg > rect {
+  display: none;
+}
+
+.site-h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

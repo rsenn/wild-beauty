@@ -62,7 +62,7 @@ describe('conflicts and loading (E65)', () => {
   test('loadNode returns the snapshot, the rev and the photos', async () => {
     const r = await loadNode(3, reply(200, { node: { doc: snap.doc, kind: 'list' }, rev: 6, photos: { a: { href: '/x' } } }));
 
-    expect(r).toEqual({ ok: true, id: 3, rev: 6, snap: { doc: snap.doc, kind: 'list' }, photos: { a: { href: '/x' } } });
+    expect(r).toEqual({ ok: true, id: 3, rev: 6, snap: { doc: snap.doc, kind: 'list' }, photos: { a: { href: '/x' } }, children: [], visibility: 'public', owned: false });
     expect(await loadNode(3, reply(404, { error: 'not_found' }))).toMatchObject({ ok: false, code: 'not_found' });
     expect(await loadNode(3, reply(200, { nothing: 1 }))).toMatchObject({ ok: false, code: 'generic' });
     expect(await loadNode(3, async () => { throw new Error('x'); })).toMatchObject({ ok: false, code: 'network' });

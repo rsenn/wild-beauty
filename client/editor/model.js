@@ -2,7 +2,7 @@
 // Shared by the browser and the server, so no DOM and no Bun APIs.
 import { pathFromVertices, verticesFromPath } from './shapes.js';
 import { acuteCorner, defaultWall, isWall } from './walls.js';
-import { textureHashes, validateScene } from './scene.js';
+import { LOOK_NAMES, TEXTURE_SLOTS, textureHashes, textureSlots, validateScene, withTextures } from './scene.js';
 import { EDGE_STYLES } from './edge.js';
 import { isCurve } from './curve.js';
 import { DEFAULT_FONT, FONT_IDS, LIMITS as TEXT, clampSize, clampWidth } from './text.js';
@@ -662,6 +662,51 @@ export function setRole(doc, stepId, role) {
   });
 
   return pages.every((page, i) => page === doc.pages[i]) ? doc : { ...doc, pages };
+}
+
+// The scene of a gallery (look, texture photos): `patch` is { look?: name | null, textures?: { wall?, floor?, corridor? } }
+// where a texture is the hash of a photo of this node marked as texture, or null for the look's own surface.
+// A patch that names a photo that is no texture, or an unknown look, changes nothing.
+export function setScene(doc, patch) {
+  if(!patch || typeof patch !== 'object') return doc;
+
+  let scene = doc.scene ?? {};
+
+  if(patch.look !== undefined) {
+    if(patch.look !== null && !LOOK_NAMES.includes(patch.look)) return doc;
+
+    const { look: _, ...rest } = scene;
+
+    scene = patch.look === null ? rest : { ...rest, look: patch.look };
+  }
+
+  if(patch.textures) {
+    const marked = new Set(doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo' && step.role === 'texture').map(step => step.photo)));
+
+    for(const [slot, hash] of Object.entries(patch.textures)) if(!TEXTURE_SLOTS.includes(slot) || (hash !== null && !marked.has(hash))) return doc;
+
+    scene = withTextures(scene, patch.textures);
+  }
+
+  if(JSON.stringify(scene) === JSON.stringify(doc.scene ?? {})) return doc;
+
+  const { scene: _, ...rest } = doc;
+
+  return Object.keys(scene).length ? { ...rest, scene } : rest;
+}
+
+// A scene may name only photos of the node that are textures: drop the slots whose photo is gone or is a picture again
+export function pruneScene(doc) {
+  const slots = textureSlots(doc.scene);
+  const marked = new Set(doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo' && step.role === 'texture').map(step => step.photo)));
+  const gone = Object.fromEntries(Object.entries(slots).filter(([, hash]) => hash && !marked.has(hash)).map(([slot]) => [slot, null]));
+
+  if(!Object.keys(gone).length) return doc;
+
+  const scene = withTextures(doc.scene, gone);
+  const { scene: _, ...rest } = doc;
+
+  return Object.keys(scene).length ? { ...rest, scene } : rest;
 }
 
 const updatePhoto = (doc, stepId, patch) => (findStep(doc, stepId)?.step.op === 'photo' ? updateStep(doc, stepId, patch) : doc);
