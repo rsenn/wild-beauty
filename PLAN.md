@@ -306,7 +306,7 @@ Only with consent: the tick box on `/new` (`RecordConsent.js`, off by default) t
 recorded (no typed text), thanks them, and promises the recording is used only to fix and improve the app,
 deleted after 30 days at the latest (`purgeReplay`, daily) and never passed on or sold. The choice is a flag in
 the browser's localStorage, so it holds on the other app pages until the box is unticked; a link with
-`?record=1` sets it for testers who were asked to (`?record=0` clears it). If a content blocker still refuses
+`?record=1` sets it for testers who were asked to (nothing but the box clears it: the choice stays until the visitor unticks it, in this browser only, and a tab that is open when it changes follows at once, 2026-11-01). If a content blocker still refuses
 the recorder the box says so and asks to allow the site. On a personal site (jános.ch) the same choice sits folded at the foot of every page ("Helfen, diese Seite zu verbessern"); the flag is
 per origin, and `POST /api/replay` is the one API route a site host takes from visitors.
 

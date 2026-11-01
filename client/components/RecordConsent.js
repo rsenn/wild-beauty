@@ -1,8 +1,8 @@
-import { useState } from '../../vendor/hooks.js';
+import { useEffect, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
-import { isRecording, recordable, setRecording } from '../replay.js';
+import { begin, isRecording, onChoice, recordable, setRecording } from '../replay.js';
 
 // The tick box for session recording (client/replay.js): off until the visitor ticks it, for a problem report
 // or to help improve the app. Says what is recorded, how long it is kept and that nobody else gets it.
@@ -12,6 +12,21 @@ export const RecordConsent = ({ fold = false }) => {
   const boot = useBoot();
   const [on, setOn] = useState(isRecording);
   const [blocked, setBlocked] = useState(false);
+
+  // the box follows a choice made in another tab
+  useEffect(() => onChoice(setOn), []);
+
+  // ticked from an earlier visit but the recorder cannot run now (a content blocker refused it): say so,
+  // instead of a ticked box and no recording
+  useEffect(() => {
+    if(!on || !recordable(boot)) return setBlocked(false);
+
+    let alive = true;
+
+    begin().then(ok => alive && setBlocked(!ok));
+
+    return () => (alive = false);
+  }, [on]);
 
   const change = async e => {
     const want = e.target.checked;
