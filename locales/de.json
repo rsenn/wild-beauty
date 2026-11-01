@@ -253,6 +253,8 @@
   "editor.context.lasso": "Klicke entlang der Kante dessen, was du willst: die Linie rastet an den Kanten des Fotos ein. Zum Abschliessen den ersten Punkt nochmals anklicken, Enter drücken oder Schliessen wählen; Rücktaste nimmt den letzten Punkt zurück. Dann Ausschneiden, Herausnehmen oder Entfernen.",
   "editor.announce.wand": "Kontur gefunden",
   "editor.announce.lasso": "Umriss geschlossen und ausgewählt",
+  "editor.announce.selectionDropped": "Die Auswahl wurde verworfen: ihr Foto hat sich geändert",
+  "editor.announce.lassoMax": "Mehr Punkte nimmt das Lasso nicht: den Umriss schliessen (Enter oder Schliessen)",
   "editor.announce.wandFailed": "Der Zauberstab fand keine Kontur. Tippe an eine andere Stelle des Motivs, schliesse eine Stelle aus oder schneide das Foto zuerst grob aus",
   "editor.announce.takenOut": "Motiv herausgenommen, die Lücke ist gefüllt",
   "editor.announce.takeOutFailed": "Die Lücke konnte nicht gefüllt werden, nichts wurde geändert",

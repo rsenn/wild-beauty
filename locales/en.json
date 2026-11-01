@@ -253,6 +253,8 @@
   "editor.context.lasso": "Click along the edge of the thing you want: the line snaps to the edges of the photo. Click the first point again, press Enter or choose Close to finish; Backspace takes the last point back. Then Cut out, Take out or Erase.",
   "editor.announce.wand": "Outline found",
   "editor.announce.lasso": "Outline closed and selected",
+  "editor.announce.selectionDropped": "The selection was dropped: its photo changed",
+  "editor.announce.lassoMax": "That is as many points as the lasso takes: close the outline (Enter or Close)",
   "editor.announce.wandFailed": "The wand could not find an outline. Tap elsewhere on the subject, exclude a spot, or clip the photo roughly first",
   "editor.announce.takenOut": "Subject taken out, the hole is filled",
   "editor.announce.takeOutFailed": "The hole could not be filled, nothing was changed",

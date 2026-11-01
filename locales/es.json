@@ -253,6 +253,8 @@
   "editor.context.lasso": "Haz clic a lo largo del borde de lo que quieras: la línea se ajusta a los bordes de la foto. Haz clic de nuevo en el primer punto, pulsa Intro o elige Cerrar para terminar; Retroceso quita el último punto. Después Recortar, Extraer o Borrar.",
   "editor.announce.wand": "Contorno encontrado",
   "editor.announce.lasso": "Contorno cerrado y seleccionado",
+  "editor.announce.selectionDropped": "Se descartó la selección: su foto cambió",
+  "editor.announce.lassoMax": "Es el máximo de puntos del lazo: cierra el contorno (Intro o Cerrar)",
   "editor.announce.wandFailed": "La varita no encontró ningún contorno. Toca otro punto del motivo, excluye una zona o recorta la foto de forma aproximada primero",
   "editor.announce.takenOut": "Motivo extraído, el hueco está relleno",
   "editor.announce.takeOutFailed": "No se pudo rellenar el hueco, no se cambió nada",

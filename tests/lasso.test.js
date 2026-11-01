@@ -231,3 +231,117 @@ test('an edge map with no edges, or only edges, is not used', () => {
   expect(edgeMapUsable(map(i => (i % 10 === 0 ? 255 : 0)), 1000, 1)).toBe(true); // a tenth is edge
   expect(edgeMapUsable(map(i => (i < 2 ? 255 : 0)), 1000, 1)).toBe(false); // two pixels in a thousand
 });
+
+// ---- fail-safe: whatever the cost map or the input, nothing loops, throws or takes long ----
+import { MAX_VERTICES, MIN_COST, outlineOfSegments as outline } from '../client/editor/lasso.js';
+
+const fields = {
+  flat: n => new Float32Array(n).fill(1.04),
+  free: n => new Float32Array(n).fill(0.04),
+  zero: n => new Float32Array(n).fill(0),
+  negative: n => new Float32Array(n).fill(-3),
+  nan: n => Float32Array.from({ length: n }, (_, i) => (i % 7 === 0 ? NaN : 0.5)),
+  infinite: n => Float32Array.from({ length: n }, (_, i) => (i % 5 === 0 ? Infinity : 0.3)),
+  mixed: n => Float32Array.from({ length: n }, (_, i) => [-1, 0, 0.04, 1.04, NaN, Infinity, 1e30, 0.5][i % 8]),
+  wall: n => Float32Array.from({ length: n }, (_, i) => ((i % 120) === 60 ? Infinity : 0.2)), // a column nothing may cross
+};
+
+test('every kind of cost map: the tree and the live wire end, quickly, with a path or the straight line', () => {
+  const w = 120;
+  const h = 90;
+  let seed = 7;
+  const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+
+  for(const [name, make] of Object.entries(fields)) {
+    const cost = make(w * h);
+    const a = [Math.floor(rnd() * w), Math.floor(rnd() * h)];
+    const tree = createWire(cost, w, h, a, 300);
+    const t0 = performance.now();
+
+    tree.finishTo([w - 1, h - 1], 3000);
+
+    for(let i = 0; i < 40; i++) {
+      const b = [Math.floor(rnd() * w), Math.floor(rnd() * h)];
+      const path = tree.pathTo(b);
+      const line = liveWire(cost, w, h, a, b);
+
+      for(const p of [path, line]) {
+        expect(p.length).toBeGreaterThanOrEqual(1);
+        expect(p.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y))).toBe(true);
+      }
+
+      expect(path.at(-1)).toEqual(b);
+      expect(line.at(-1)).toEqual(b);
+    }
+
+    expect(performance.now() - t0).toBeLessThan(3000); // a very loose bound: a hang would never return at all
+    expect(name).toBeTruthy();
+  }
+});
+
+test('bad input: NaN, out of range, strings and nothing at all give a pixel and no exception', () => {
+  const cost = new Float32Array(50 * 40).fill(0.5);
+
+  for(const bad of [[NaN, NaN], [-100, 1e9], [Infinity, -Infinity], ['x', undefined], [0.4, 39.9], [null, null]]) {
+    expect(() => snap(cost, 50, 40, bad)).not.toThrow();
+    expect(() => liveWire(cost, 50, 40, bad, [10, 10])).not.toThrow();
+    expect(() => liveWire(cost, 50, 40, [10, 10], bad)).not.toThrow();
+
+    const tree = createWire(cost, 50, 40, bad);
+
+    expect(() => tree.step(1)).not.toThrow();
+    expect(() => tree.pathTo(bad)).not.toThrow();
+  }
+
+  const [x, y] = snap(cost, 50, 40, [NaN, 1e9]);
+
+  expect(x >= 0 && x < 50 && y >= 0 && y < 40).toBe(true);
+});
+
+test('a floor under the costs keeps the search finite even with negative weights', () => {
+  const negative = new Float32Array(60 * 60).fill(-5);
+  const t = performance.now();
+  const path = liveWire(negative, 60, 60, [2, 2], [57, 57]);
+
+  expect(performance.now() - t).toBeLessThan(1000);
+  expect(path.at(-1)).toEqual([57, 57]);
+  expect(MIN_COST).toBeGreaterThan(0);
+});
+
+test('a very long outline is thinned until the server takes it', () => {
+  // 30 000 points of a wiggly circle, a pixel apart in places: far more vertices than the server's 2000
+  const pts = Array.from({ length: 30000 }, (_, i) => {
+    const a = (i / 30000) * Math.PI * 2;
+    const r = 200 + 6 * Math.sin(i / 3);
+
+    return [Math.round(320 + r * Math.cos(a)), Math.round(240 + r * Math.sin(a))];
+  });
+  const poly = outline([pts], 640, 480);
+
+  expect(poly.length).toBeLessThanOrEqual(MAX_VERTICES);
+  expect(poly.length).toBeGreaterThan(50);
+  expect(poly.every(([x, y]) => x >= 0 && x <= 1 && y >= 0 && y <= 1)).toBe(true);
+});
+
+test('a random session of anchors and pointer moves: every step stays within a few milliseconds', () => {
+  const w = 200;
+  const h = 150;
+  let seed = 11;
+  const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const cost = Float32Array.from({ length: w * h }, () => 0.04 + rnd());
+  let tree = createWire(cost, w, h, [100, 75]);
+  let worst = 0;
+
+  for(let i = 0; i < 400; i++) {
+    const t = performance.now();
+    const p = [Math.floor(rnd() * w), Math.floor(rnd() * h)];
+
+    if(rnd() < 0.3) tree = createWire(cost, w, h, p); // a click: the next tree
+    else if(rnd() < 0.5) tree.step(2);
+    else tree.pathTo(p);
+
+    worst = Math.max(worst, performance.now() - t);
+  }
+
+  expect(worst).toBeLessThan(60);
+});

@@ -73,6 +73,25 @@ answers with the same `result` line and `--mask-out` for the fill). Open: touch 
 live segment before a tap; a hole needs a second outline (the server takes it, the editor does not
 offer it yet); handing a lasso to the wand as `region` and back.
 
+**Fail-safe (2026-11-01).** A freeze in an editor can lose work, so the lasso is built to end and to
+fail small. What it does and why: (1) *the search always ends*: costs have a floor (`MIN_COST`,
+positive weights, so a NaN, infinite or negative map cannot loop), distances are 64-bit (the first
+version kept 32 and looped for ever on one photo: the same parent "improved" the same node on every
+visit, `tests/fixtures/lasso-hang.f32.gz` is that case), stale heap entries are skipped, and every call
+has a step and time budget with the straight line as the answer; (2) *no move waits for a search*:
+one shortest-path tree per anchor grows 6 ms a frame (`createWire`), the line to the pointer is a
+look-up; (3) *every entry point is guarded* (`wireGuard`): any exception resets the lasso and says
+so, the document is untouched until an action applies; (4) *a selection belongs to one photo*: when
+its step is gone or shows another image (Undo, replace) it is dropped (`useEffect([doc])`), and
+`wandApply` refuses a photo that changed, so an outline is never applied to the wrong picture;
+(5) *limits*: 250 anchors, an outline thinned until it has at most 1800 vertices (the server takes
+2000), 15 s to load the photo, bad input (NaN, out of range) becomes a pixel; (6) *the server's
+edge map is optional*: the lasso starts with its local Sobel, takes the OpenCV map when it arrives
+and ignores one without edges (`edgeMapUsable`); the chip row says which one is in use.
+Tests: `tests/lasso.test.js` (every kind of bad cost map, bad input, random sessions with a time
+bound) and a browser run per fault: no tool, a black map, a tool that hangs, Undo with the lasso
+open, 270 anchors.
+
 ---
 
 # Part A: the tool in the node editor

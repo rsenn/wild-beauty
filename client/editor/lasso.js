@@ -7,6 +7,16 @@
 import { stagePolygon } from './wand.js';
 
 export const LASSO_SIZE = 640; // long side of the working copy
+export const MIN_COST = 0.01; // no step is cheaper than this: Dijkstra ends only with positive weights
+const cheap = c => (c > MIN_COST ? c : MIN_COST); // also NaN and negative values (a bad map) become MIN_COST
+
+// a point as a pixel of a `w` x `h` image: rounded, inside it, and never NaN
+const pixelIn = (p, w, h) => {
+  const x = Math.round(+p?.[0]);
+  const y = Math.round(+p?.[1]);
+
+  return [Math.min(w - 1, Math.max(0, Number.isFinite(x) ? x : 0)), Math.min(h - 1, Math.max(0, Number.isFinite(y) ? y : 0))];
+};
 
 // A cost map of an RGBA image `data` (w x h): the Sobel gradient of the luma, scaled by its 98th
 // percentile so one hard edge does not flatten the rest, turned around: edges are cheap, flat areas
@@ -62,6 +72,8 @@ export function costFromEdgeMap(data, w, h) {
 
 // the pixel of lowest cost within `radius` of [x, y] (the click snaps to the nearest strong edge)
 export function snap(cost, w, h, [x, y], radius = 6) {
+  [x, y] = pixelIn([x, y], w, h);
+
   let best = [Math.round(x), Math.round(y)];
   let low = Infinity;
 
@@ -158,6 +170,9 @@ const NEIGHBOURS = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, Math.SQ
 // straight line. An editor must never hang on a photo it does not like (2026-11-01: distances kept
 // in 32 bits made a node look improved by every re-visit, and the search never ended).
 export function liveWire(cost, w, h, a, b, margin = 24, maxMs = 40) {
+  a = pixelIn(a, w, h);
+  b = pixelIn(b, w, h);
+
   const grow = Math.max(margin, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 2));
   const x0 = Math.max(0, Math.min(a[0], b[0]) - grow);
   const y0 = Math.max(0, Math.min(a[1], b[1]) - grow);
@@ -204,7 +219,7 @@ export function liveWire(cost, w, h, a, b, margin = 24, maxMs = 40) {
       if(nx < 0 || ny < 0 || nx >= bw || ny >= bh) continue;
 
       const next = ny * bw + nx;
-      const total = d + step * cost[(ny + y0) * w + nx + x0];
+      const total = d + step * cheap(cost[(ny + y0) * w + nx + x0]);
 
       if(total < dist[next]) {
         dist[next] = total;
@@ -230,6 +245,8 @@ export function liveWire(cost, w, h, a, b, margin = 24, maxMs = 40) {
 // to a node that is not settled yet is the one found so far (a valid path, nearly as good), and to
 // one not reached at all the straight line.
 export function createWire(cost, w, h, seed, radius = 220) {
+  seed = pixelIn(seed, w, h);
+
   const x0 = Math.max(0, seed[0] - radius);
   const y0 = Math.max(0, seed[1] - radius);
   const x1 = Math.min(w - 1, seed[0] + radius);
@@ -275,7 +292,7 @@ export function createWire(cost, w, h, seed, radius = 220) {
           if(nx < 0 || ny < 0 || nx >= bw || ny >= bh) continue;
 
           const next = ny * bw + nx;
-          const total = d + len * cost[(ny + y0) * w + nx + x0];
+          const total = d + len * cheap(cost[(ny + y0) * w + nx + x0]);
 
           if(total < dist[next]) {
             dist[next] = total;
@@ -360,9 +377,13 @@ export function thin(path, tolerance = 0.8) {
 
 // the outline of a lasso: the segments (each a list of pixels from one anchor to the next) joined
 // without repeating the shared anchors, thinned, as [x, y] in 0..1 of the working copy
-export function outlineOfSegments(segments, w, h, tolerance = 0.8) {
+export const MAX_VERTICES = 1800; // the server takes 2000 (cleanPolygon); a long outline is thinned more until it fits
+
+export function outlineOfSegments(segments, w, h, tolerance = 0.8, maxVertices = MAX_VERTICES) {
   const joined = segments.flatMap((seg, i) => (i ? seg.slice(1) : seg));
-  const poly = thin(joined, tolerance);
+  let poly = thin(joined, tolerance);
+
+  for(let t = tolerance, n = 0; poly.length > maxVertices && n < 12; n++) poly = thin(joined, (t *= 1.5));
 
   // the last point may sit on the first: a closed outline repeats nothing
   if(poly.length > 1 && poly[0][0] === poly.at(-1)[0] && poly[0][1] === poly.at(-1)[1]) poly.pop();
@@ -381,7 +402,7 @@ export function workSize(width, height, size = LASSO_SIZE) {
 // pointer) are pixels of the working copy `size` { w, h } of the photo, `corners` its stage outline,
 // `crop` the photo's crop; closed with Z when `closed`. Null when there is nothing to draw
 export function lassoPath(segments, live, size, corners, crop, closed = false) {
-  const pixels = [...segments, ...(live ? [live] : [])].flatMap((seg, i) => (i ? seg.slice(1) : seg));
+  const pixels = [...segments, ...(live ? [live] : [])].flatMap((seg, i) => (i ? seg.slice(1) : seg)).filter(q => Number.isFinite(q?.[0]) && Number.isFinite(q?.[1]));
 
   if(pixels.length < 2 || !corners) return null;
 

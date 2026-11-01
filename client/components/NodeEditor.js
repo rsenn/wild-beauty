@@ -1443,7 +1443,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     if(tool === 'select') return selectDown(e, units);
     if(tool === 'shape') return cornerDown(e, units) || shapeDown(units);
     if(tool === 'wand') return wandDown(e, units);
-    if(tool === 'lasso') return wireDown(e, units);
+    if(tool === 'lasso') return wireGuard(() => wireDown(e, units));
     if(tool === 'cutout') return cutoutDown(units);
     if(tool === 'text') return textDown(units);
     if(tool === 'clip' || tool === 'unclip') return maskDown(units);
@@ -1768,7 +1768,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const wandApply = action => {
     const run = wand.current;
 
-    if(!run || run.applying || !(run.polygon || Number.isInteger(run.pick)) || !findStep(latest.current.doc, run.id)) return;
+    if(!run || run.applying || !(run.polygon || Number.isInteger(run.pick)) || findStep(latest.current.doc, run.id)?.step.photo !== run.photo) return;
 
     const { id } = run;
 
@@ -2092,12 +2092,26 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     const corners = outlineOf(doc, run.id, { photos: hash => photos[hash], page: at });
     const uv = corners && clampedImagePoint(corners, units, run.frame);
 
-    return uv && run.work ? snap(run.work.cost, run.work.w, run.work.h, [uv[0] * run.work.w - 0.5, uv[1] * run.work.h - 0.5], WIRE_SNAP) : null;
+    return uv && run.work && uv.every(Number.isFinite) ? snap(run.work.cost, run.work.w, run.work.h, [uv[0] * run.work.w - 0.5, uv[1] * run.work.h - 0.5], WIRE_SNAP) : null;
   };
   // The shortest-path tree of the last anchor grows a few milliseconds per frame (Intelligent
   // Scissors, lasso.js createWire): the line to the pointer is a look-up in it, so the pointer may go
   // as far as it likes and no move or click ever waits for a search
   const WIRE_SLICE_MS = 6;
+  const WIRE_MAX_ANCHORS = 250; // an outline with more points than that is closed by hand
+  const WIRE_LOAD_MS = 15000; // the photo and its cost map must be ready by then
+
+  // Nothing in the lasso may leave the editor in a bad state: whatever goes wrong inside a handler,
+  // the lasso starts over and says so; the document, the selection of the editor and the undo stack
+  // are not touched (the lasso changes none of them until an action is applied)
+  const wireGuard = fn => {
+    try {
+      return fn();
+    } catch {
+      wireReset();
+      setAnnounce(tr('editor.announce.wandFailed'));
+    }
+  };
   const wireSeed = run => {
     cancelAnimationFrame(run.grow);
     run.tree = createWire(run.work.cost, run.work.w, run.work.h, run.anchors.at(-1));
@@ -2135,7 +2149,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
     if(!wire.current) {
       wire.current = run;
-      run.loading = wireWork(info.href).then(work => ((run.work = work), wireEdges(run), work)).catch(() => {
+      run.loading = Promise.race([wireWork(info.href), new Promise((_, no) => setTimeout(() => no(new Error('timeout')), WIRE_LOAD_MS))]).then(work => ((run.work = work), wireEdges(run), work)).catch(() => {
         if(wire.current === run) wireReset();
         setAnnounce(tr('editor.announce.wandFailed'));
       });
@@ -2149,6 +2163,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       const first = run.stage[0];
 
       if(run.anchors.length >= 3 && Math.hypot(units[0] - first[0], units[1] - first[1]) < WIRE_CLOSE_PX / latest.current.scale) return wireClose();
+
+      if(run.anchors.length >= WIRE_MAX_ANCHORS) return setAnnounce(tr('editor.announce.lassoMax'));
 
       const p = wirePixel(run, units);
 
@@ -2236,7 +2252,23 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     wireShow(run);
   };
 
-  wandKeys.current = tool === 'lasso' ? { reset: wandReset, undo: wireUndo, close: wireClose } : { reset: wandReset, undo: wandUndoTap };
+  wandKeys.current = tool === 'lasso' ? { reset: wandReset, undo: () => wireGuard(wireUndo), close: () => wireGuard(wireClose) } : { reset: wandReset, undo: wandUndoTap };
+
+  // A selection belongs to one photo with one image. When the step is gone (undone, deleted) or shows
+  // another image now (an undo of an earlier cut, a replaced photo), the outline would be applied to the
+  // wrong picture: it is dropped at once, whichever of the wand or the lasso made it
+  useEffect(() => {
+    const run = wire.current ?? wand.current;
+
+    if(!run || run.applying) return;
+
+    const found = findStep(doc, run.id);
+
+    if(!found || found.step.photo !== run.photo) {
+      wandReset();
+      setAnnounce(tr('editor.announce.selectionDropped'));
+    }
+  }, [doc]);
 
   // clip tool: with a photo selected, tapping a shape makes it that photo's clip;
   // tapping a photo selects it. Unclip tool: tapping a clipped photo frees it.
@@ -2509,7 +2541,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   };
 
   const move = (e, [x, y]) => {
-    if(tool === 'lasso') return wireMove([x, y]);
+    if(tool === 'lasso') return wireGuard(() => wireMove([x, y]));
 
     if(tdrag.current) {
       const d = tdrag.current;
