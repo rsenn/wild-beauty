@@ -60,6 +60,21 @@ State: all of the work below is committed and pushed (last: `d2ae0104`). The cam
 - [ ] Tight box is the clip's bounding box limited to the picture's content; a smaller box inside a clip could be refined later if needed.
 - [ ] Three reports exist: `tools/events-report.js` (E107), `tools/events-sessions.js` and `tools/replay.js` (sessions, replay); merge them.
 
+### Photo access: users stay in control of their photos (found 2026-11-01, next to build)
+- [ ] **Today any file is served to anyone who knows its hash**, and published nodes give away hashes they should not:
+  - `GET /files/uploads/<hash>[.display|.card].<ext>` (`serveUpload`) checks nothing, so an upload is reachable without the browser that owns it; marked `cache-control: public, immutable` (a proxy or CDN in front could keep it and hand it to others; nginx has no cache today).
+  - `GET /files/photos/<hash>[.small|.thumb|.large].<ext>` (`servePhoto`) checks nothing either.
+  - Saving bakes the **original behind a cut, erase or take out** (`step.orig`, kept for "Restore original") into the node's photos (`photosOf` in `server/node/validate.js`, role `picture`), and the node page and `GET /api/nodes/:id` hand every visitor the document with `orig` and its photo info (`photoInfos`): **anyone can download the uncut original of a published collage**, the detail erased with the wand included.
+- [ ] **Rule (decided 2026-11-01): a picture is reachable over HTTP only for its owner, or when it belongs to a published node.** Design:
+  - uploads: served only to the browser that owns them (`record.owners[session.owner]` not expired, like the upload list) and to admins (replays); otherwise 404;
+  - baked photos: served when a node links the photo (`node_photos`) and the requester may see that node (`visibility = 'public'`, any space, or the owner); originals only to whoever may edit the node (`mayWrite`: the owner, or anyone for an unowned community node), as only they can restore it; tiles (`<tile>.thumb.jpg`, `<tile>.large.jpg`) when a node with that `tile` may be seen; admins everything; otherwise 404 (forbidden looks like missing);
+  - `photosOf` gives a hash used only as `orig` the role `original`; existing rows are re-classified at start (`server/node/reconcile.js`, idempotent);
+  - views for anyone who may not edit (node page, node API, gallery children, site pages) drop `orig` from the document and originals from `photoInfos`;
+  - `cache-control: private, max-age=31536000, immutable` on both routes (browsers still cache, shared caches may not);
+  - the server's own renderer reads files from disk (inkscape, ImageMagick), not over HTTP: unaffected;
+  - tests: a visitor gets 404 for an upload, an original, a photo of a hidden node and its tile; the owner gets all; the existing `large`, `api-nodes`, `e2e` tests keep passing (they fetch photos of public nodes).
+  - optional later: "Forget the original" (drop `orig` for good).
+
 ### Browser load and GUI responsiveness (idea 2026-11-01)
 - [~] **Built 2026-11-01** (`client/events.js` `startLoad`, events `slow`, `frame`, `load`, device in `session`; `bun tools/replay.js show <id>` prints the summary, `server/replaylog.js` `loadOf`): slow interactions, long frames with their scripts, memory and pictures held per minute. Not built yet: frame times during gestures, `performance.mark` around our own phases, a cross-session report in `tools/events-sessions.js`. Use the recordings of the coming days to see which use cases get heavy on RAM (the editor's photos are 2048 px display copies, about 12 MB decoded each: a medium-size stage copy is the first candidate if that is it).
 - [ ] **Measure how hard upload, editor and graph editor load the browser, and when the GUI gets sluggish**, as usage events (`client/events.js`), only above thresholds plus a summary per minute:

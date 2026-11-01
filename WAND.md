@@ -155,6 +155,12 @@ switched off, **transparent**: the exact complement of the cut's alpha, so the c
 the rest is the original pixel for pixel. Use it when you want your own background behind, or when
 the fill looks wrong (Undo, switch Fill off, apply again).
 
+The photo step keeps the image it had before (`step.orig`) for "Restore original", and saving
+keeps that original with the node. **Privacy gap, found 2026-11-01, not fixed yet:** a published
+node hands its document (with `orig`) and the photo files to every visitor, so the uncut original,
+an erased detail included, can be downloaded. The decided fix (originals only for who may edit,
+files only for owners or published nodes, `TODO.md` "Photo access") is the next thing to build.
+
 If the page's step limit does not allow two more steps, Take out does nothing and says so. If the
 rest fails, nothing changes (`takeOutFailed`); a cut alone (Cut out) only needs the cut.
 
