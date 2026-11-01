@@ -17,7 +17,7 @@ item says what was and was not checked.
 qjs-opencv (`rsenn/qjs-opencv`, branch `claude/affectionate-mendel-2oniyf`, head `a73202a` when this was
 written): your two failing tests fixed, `cutpoly --refine guided` (soft edge like the wand), the `edgemap`
 flag contract (`--clahe-clip 0` = CLAHE off, unknown flags rejected, `provider` and `timings` in the result).
-Its own checklist: `doc/morning-2026-11-01.md` in that repo (requested; see section 6 if it is not there).
+Its own checklist: **`doc/morning-2026-11-01.md` in that repo, commit `24fb1a0`** (pull, build, expect 25 tests all OK, install, a smoke command per new feature, the cuDNN steps for your Mint 22.2, how to check that CUDA is really used, the model files with their sha1, what to send back). It says honestly what has never run: everything new, the package names and the 1.5 s SAM figure come from memory, and no `hed.onnx` / `dexined.onnx` export has been chosen yet.
 
 ## 1. wild-beauty on the desktop (10 min)
 
@@ -97,5 +97,4 @@ The AIM-500 folder names above are my guess (`original` and `mask`): the command
 4. The benchmark table (copy the printed lines), and the sheets for a few flowers.
 5. Anything that froze or was slow: what you were doing, how many anchors, and the browser's task manager (Shift+Esc in Brave) if it hung.
 
-If `doc/morning-2026-11-01.md` is not in the qjs-opencv branch yet, the other session has been asked to write it;
-ask it directly (session "Magnetic lasso contour tracing").
+Questions about the tool or the GPU: ask the qjs-opencv session directly (session "Magnetic lasso contour tracing"); it knows its own checklist.
