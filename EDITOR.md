@@ -937,6 +937,7 @@ proceed in parallel. `P` = `PLAN.md`, `G` = `GRAPH.md`, `Y` = `GALLERY.md`.
 - [x] **E36 `Stage`**: square SVG `viewBox 0 0 1000 1000`, resize observer, pointer-to-unit
       conversion `toUnits(event)`. Done when a click logs the right unit coordinates at two sizes.
 - [x] **E37 tool columns**: buttons with token icons, tool state, keyboard keys, `aria-label`s.
+  *Tool groups (2026-11-01):* tools with the same `group` in `client/editor/tools.js` share one button (`SLOTS`, component `ToolSlot`), like GIMP's: the button shows the member used last with a corner mark, a long press (450 ms), right click or ArrowRight / ArrowDown pops the members out beside it. Groups: **Clip (C) | Remove clip (U)**, **Magic wand (W) | Remove background (B)**. Every tool keeps its own key.
       Done when switching tools highlights the button and the cursor changes.
 - [x] **E38 render the document in the stage** via `renderNode` (empty -> blank ground with
       `bg`). Done when changing `bg` in the console redraws.

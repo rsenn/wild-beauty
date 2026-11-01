@@ -45,7 +45,8 @@ import { photoSteps as allPhotoSteps, renderNode, renderPhoto, slideOf, slideVie
 import { clipPolygonsOf, crossedOutline, cutOutlines, insertOnEdge, nearestVertex, outlineCount } from '../editor/multiclip.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
 import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/keyboard.js';
-import { DEFAULT_TOOL, TOOLS, inField, toolForKey } from '../editor/tools.js';
+import { DEFAULT_TOOL, SLOTS, inField, slotOf, toolForKey } from '../editor/tools.js';
+import { ToolSlot } from './ToolSlot.js';
 import { editorStore } from '../editor/useEditor.js';
 import { acuteCorner } from '../editor/walls.js';
 import { STEP, alcove, canClose, corridorOf, corridorStep, roomsOf, snapVertex, wallOf } from '../editor/roomaid.js';
@@ -292,6 +293,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const [owned, setOwned] = useState(false); // the node has an owner and it is the user: only then the visibility can be changed
   const [children, setChildren] = useState([]); // the nodes linked under this one (what a gallery hangs), as the server last said
   const [tool, setTool] = useState(DEFAULT_TOOL);
+  // the member of each tool group used last: the face of its button (ToolSlot)
+  const [groupLast, setGroupLast] = useState({});
   const [selected, setSelectedOne] = useState(null);
   const [multi, setMulti] = useState([]); // two or more steps selected together (rectangle, Shift)
   const [addMode, setAddMode] = useState(false); // a tap or rectangle adds to the selection (the way to Shift on a phone)
@@ -1427,6 +1430,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     if(tool === 'select') return selectDown(e, units);
     if(tool === 'shape') return cornerDown(e, units) || shapeDown(units);
     if(tool === 'wand') return wandDown(e, units);
+    if(tool === 'cutout') return cutoutDown(units);
     if(tool === 'text') return textDown(units);
     if(tool === 'clip' || tool === 'unclip') return maskDown(units);
 
@@ -1790,6 +1794,9 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
           setPhotos(old => ({ ...old, ...Object.fromEntries(need.map(role => [got[role].hash, info[role]])) }));
 
+          // the box fit arrives later but belongs to the same undo step: seal only after it
+          let fitted = null;
+
           if(action === 'take') {
             const taken = new Set(allIds(now));
             const copy = unique(taken);
@@ -1798,7 +1805,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
             dispatch({ type: 'duplicatePhoto', id, ids: [copy, unique(taken)], offset: 0, wand: true, group: id });
             dispatch({ type: 'replacePhoto', id: copy, hash: got.cut.hash, wand: true, group: id });
             dispatch({ type: 'replacePhoto', id, hash: got.rest.hash, wand: true, group: id });
-            fitBox(copy, got.cut, info.cut, { wand: true, group: id });
+            fitted = fitBox(copy, got.cut, info.cut, { wand: true, group: id });
             setSelected(copy);
             // the taken-out subject is meant to be moved: the select tool, with it in hand
             setTool('select');
@@ -1806,12 +1813,14 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
           } else {
             dispatch({ type: 'replacePhoto', id, hash: got[need[0]].hash, wand: true, group: id });
 
-            if(action === 'cut') fitBox(id, got.cut, info.cut, { wand: true, group: id });
+            if(action === 'cut') fitted = fitBox(id, got.cut, info.cut, { wand: true, group: id });
 
             fadeIn(id);
           }
 
-          setHist(history.seal);
+          Promise.resolve(fitted)
+            .catch(() => {})
+            .then(() => setHist(history.seal));
           setAnnounce(tr({ cut: 'editor.announce.cutOut', take: wandFill ? 'editor.announce.takenOut' : 'editor.announce.takenOutHole', erase: wandFill ? 'editor.announce.erased' : 'editor.announce.erasedHole' }[action]));
           wandReset();
         });
@@ -1829,7 +1838,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const fitBox = (id, record, info, flags) => {
     const crop = findStep(latest.current.doc, id)?.step.crop;
 
-    visibleBox(info, crop).then(box => {
+    return visibleBox(info, crop).then(box => {
       if(box && findStep(latest.current.doc, id)?.step.photo === record.hash) dispatch({ type: 'setBox', id, box, ...flags });
     });
   };
@@ -1865,6 +1874,13 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     setAnnounce(tr('editor.announce.jobCancelled'));
   };
 
+  // a tool of a group becomes the face of its button
+  useEffect(() => {
+    const slot = slotOf(tool);
+
+    if(slot?.members.length > 1) setGroupLast(last => (last[slot.id] === tool ? last : { ...last, [slot.id]: tool }));
+  }, [tool]);
+
   // the photo being worked on is gone (undone away): nothing to wait for
   useEffect(() => {
     if(cutting !== null && !findStep(hist.present.doc, cutting)) cancelJob();
@@ -1881,8 +1897,10 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
       if(polygon) dispatch({ type: 'clipPolygon', id, polygon, shape: unique(new Set(allIds(now))), style: { color: latest.current.color, width: 1 }, cutout: true });
     }, 60);
-  const removeBackground = async () => {
-    const { editStep: step, readOnly } = latest.current;
+  const removeBackground = async given => {
+    const { editStep, readOnly } = latest.current;
+    // a photo tapped with the background tool, else the selected one (the context bar's button)
+    const step = typeof given === 'string' ? findStep(latest.current.doc, given)?.step : editStep;
 
     if(readOnly || step?.op !== 'photo') return;
 
@@ -1931,6 +1949,16 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     } finally {
       if(cutRun.current?.signal === signal) (setCutting(null), setBusyAt(null));
     }
+  };
+  // the background tool (in the wand's group): a tap on a photo removes its background
+  const cutoutDown = units => {
+    const { doc, photos, scale, readOnly, page: at } = latest.current;
+    const id = !readOnly && hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale, page: at, ops: ['photo'] });
+
+    if(!id) return;
+
+    setSelected(id);
+    removeBackground(id);
   };
   // take the last tap back (and select again), or forget the selection when it was the only tap
   const wandUndoTap = () => {
@@ -2740,13 +2768,9 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     return inert(key, t('editor.short.' + key));
   };
 
-  // every tool can be picked; the key is in the label and in aria-keyshortcuts
-  const toolButton = ({ id, key }) => html`
-    <button type="button" class=${'wb-editor-button wb-editor-tool wb-editor-tool-' + id} disabled=${!!slideInfo && ['clip', 'unclip', 'wand'].includes(id)} aria-pressed=${tool === id ? 'true' : 'false'} aria-keyshortcuts=${key} onClick=${() => setTool(id)} title=${`${t('editor.tool.' + id)} (${key})`} aria-label=${t('editor.tool.' + id)}>
-      <span class="wb-editor-tool-icon" aria-hidden="true"></span>
-      <span class="wb-editor-tool-key" aria-hidden="true">${key}</span>
-    </button>
-  `;
+  // every tool can be picked; the key is in the label and in aria-keyshortcuts. A slide has no
+  // photo to clip or cut
+  const toolOff = id => !!slideInfo && ['clip', 'unclip', 'wand', 'cutout'].includes(id);
 
   const empty = !slideInfo && doc.pages[page].steps.length === 0 && !live;
   const outline = selectedStep && outlineOf(doc, selectedStep.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true });
@@ -2848,7 +2872,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       <div class="wb-editor-work">
       ${quickBar && html`<div class="wb-editor-addbar"><${QuickAdd} t=${t} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} onPaste=${pasteClipboard} />${empty && html`<span class="wb-editor-hint">${t('editor.addbar.hint')}</span>`}</div>`}
       <div class="wb-editor-body">
-        <div class="wb-editor-tools" role="toolbar" aria-label=${t('editor.tools')}>${TOOLS.map(toolButton)}</div>
+        <div class="wb-editor-tools" role="toolbar" aria-label=${t('editor.tools')}>${SLOTS.map(slot => html`<${ToolSlot} key=${slot.id} t=${t} slot=${slot} tool=${tool} last=${groupLast[slot.id]} disabled=${toolOff} onPick=${setTool} />`)}</div>
         <${Stage}
           label=${title || t('editor.stage')}
           tabindex="0"
@@ -2857,7 +2881,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
           content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
           overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${tool === 'wand' && wandSel && html`<${WandSelection} path=${wandPath} taps=${wandSel.taps} corners=${wandCorners && outlineOf(doc, wandSel.id, { photos: hash => photos[hash], page, clipped: true })} scale=${scale} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsels} scale=${scale} />`}${group.length > 0 && groupBox && html`<${Selection} outline=${groupBox} scale=${scale} px=${handlePx} grips=${true} />`}${group.length > 0 && groupAt.map(f => { const o = outlineOf(doc, f.step.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true }); return o && html`<polygon key=${f.step.id} class="wb-editor-outline" points=${o.map(p => p.join(',')).join(' ')} />`; })}${marquee && marquee[2] && html`<rect class="wb-editor-marquee" x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke-dasharray=${`${5 / scale} ${4 / scale}`} />`}${marquee && !marquee[2] && html`<g fill="none" stroke-width=${1 / scale} shape-rendering="crispEdges" pointer-events="none">${['#ffffff', '#000000'].map((stroke, k) => html`<rect x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke=${stroke} stroke-dasharray=${k ? `${2 / scale} ${2 / scale}` : undefined} />`)}</g>`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           loupe=${coarse && tool !== 'select' && tool !== 'wand'}
-          interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && !previewing))}
+          interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'cutout' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}
           onDragEnter=${e => accepts(e) && (e.preventDefault(), setOver(true))}
@@ -2873,7 +2897,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       <div class="wb-editor-side">
       <div class="wb-editor-sec" data-sec="select">
       ${tool === 'select' && !auto && html`<div class="wb-editor-context"><button type="button" class="wb-editor-chip" aria-pressed=${addMode ? 'true' : 'false'} title=${t('editor.multi.add.hint')} onClick=${() => setAddMode(on => !on)}>${t('editor.multi.add')}</button></div>`}
-      ${(tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : tool === 'wand' && wandSel?.taps?.length ? (wandAt < 0 ? t('editor.wand.nothing') : t('editor.wand.status', { taps: wandSel.taps.length, index: wandAt + 1, count: wandRank.length })) : t('editor.context.' + tool)}</p>`}
+      ${(tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'cutout' || tool === 'text') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : tool === 'wand' && wandSel?.taps?.length ? (wandAt < 0 ? t('editor.wand.nothing') : t('editor.wand.status', { taps: wandSel.taps.length, index: wandAt + 1, count: wandRank.length })) : t('editor.context.' + tool)}</p>`}
       ${tool === 'clip' && clipGeo && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.clip.mode')}>${['replace', 'add', 'subtract'].map(mode => html`<button type="button" class="wb-editor-chip" aria-pressed=${clipMode === mode ? 'true' : 'false'} onClick=${() => setClipMode(mode)}>${t('editor.clip.' + mode)}</button>`)}${outlineCount(doc, editStep.id) > 1 && html` <button type="button" class="wb-editor-chip" onClick=${splitOutlines}>${t('editor.clip.split')}</button>`}</div>`}
       ${tool === 'wand' && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.wand.group')}>${busyAt && html`<button type="button" class="wb-editor-chip" onClick=${cancelJob}>${t('editor.job.cancel')}</button> `}<button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'add' ? 'true' : 'false'} title=${t('editor.wand.addHint')} onClick=${() => setWandMode('add')}>${t('editor.wand.add')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'sub' ? 'true' : 'false'} title=${t('editor.wand.subtractHint')} onClick=${() => setWandMode('sub')}>${t('editor.wand.subtract')}</button>${wandSel && html` <button type="button" class="wb-editor-chip" disabled=${wandAt <= 0} onClick=${() => wandStep(-1)}>${t('editor.nudge.smaller')}</button> <button type="button" class="wb-editor-chip" disabled=${wandAt < 0 || wandAt >= wandRank.length - 1} onClick=${() => wandStep(1)}>${t('editor.nudge.larger')}</button> <button type="button" class="wb-editor-chip" disabled=${!wandSel.taps?.length || !!cutting} onClick=${wandUndoTap}>${t('editor.wand.undoTap')}</button> <button type="button" class="wb-editor-chip" disabled=${!!cutting} onClick=${wandReset}>${t('editor.wand.reset')}</button>`}${wandSel && wandAt >= 0 && html`<span class="wb-wand-actions"><button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.cutHint')} onClick=${() => wandApply('cut')}>${t('editor.wand.cut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.takeOutHint')} onClick=${() => wandApply('take')}>${t('editor.wand.takeOut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.eraseHint')} onClick=${() => wandApply('erase')}>${t('editor.wand.erase')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandFill ? 'true' : 'false'} disabled=${!!busyAt} title=${t('editor.wand.fillHint')} onClick=${() => setWandFill(f => !f)}>${t('editor.wand.fill')}</button></span>`}</div>`}
       ${tool === 'shape'

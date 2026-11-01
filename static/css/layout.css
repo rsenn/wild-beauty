@@ -640,11 +640,85 @@ body {
 .wb-editor-tool-wand { --wb-icon-tool: var(--wb-icon-tool-wand); }
 .wb-editor-tool-unclip { --wb-icon-tool: var(--wb-icon-tool-unclip); }
 .wb-editor-tool-text { --wb-icon-tool: var(--wb-icon-tool-text); }
+.wb-editor-tool-cutout { --wb-icon-tool: var(--wb-icon-tool-cutout); }
 .wb-editor-dropper { --wb-icon-tool: var(--wb-icon-tool-dropper); }
 
 .wb-editor-dropper > .wb-editor-tool-icon {
   width: 20px;
   height: 20px;
+}
+
+/* a tool group (ToolSlot): one button for several tools, a corner mark says so; a long
+   press or right click pops the members out beside it */
+.wb-editor-slot {
+  display: flex;
+}
+
+.wb-editor-slot > .wb-editor-tool {
+  flex: 1 1 auto;
+}
+
+.wb-editor-slot-group > .wb-editor-tool::after {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid currentcolor;
+  border-left: 6px solid transparent;
+  opacity: 0.7;
+  content: '';
+}
+
+.wb-editor-toolmenu {
+  position: fixed;
+  z-index: 5;
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 2px;
+  padding: 4px;
+  color: var(--wb-ink);
+  background: var(--wb-editor-popover-bg);
+  border: var(--wb-popover-border);
+  border-radius: var(--wb-radius-frame);
+  box-shadow: var(--wb-popover-shadow);
+}
+
+.wb-editor-toolmenu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  color: inherit;
+  text-align: left;
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  border-radius: var(--wb-radius-button);
+  cursor: pointer;
+}
+
+.wb-editor-toolmenu-item > .wb-editor-tool-icon {
+  margin: 0;
+}
+
+.wb-editor-toolmenu-item:hover,
+.wb-editor-toolmenu-item:focus-visible {
+  background: var(--wb-select-fill);
+}
+
+.wb-editor-toolmenu-item[aria-checked='true'] {
+  outline: var(--wb-select-width) solid var(--wb-select);
+}
+
+.wb-editor-toolmenu-name {
+  flex: 1 1 auto;
+}
+
+.wb-editor-toolmenu-item > kbd {
+  opacity: 0.7;
+  font: inherit;
+  font-size: var(--wb-font-size-small);
 }
 
 .wb-editor-tool-key {
@@ -667,6 +741,7 @@ body {
 .wb-editor-cursor-wand,
 .wb-editor-cursor-shape { cursor: crosshair; }
 .wb-editor-cursor-clip,
+.wb-editor-cursor-cutout,
 .wb-editor-cursor-unclip { cursor: pointer; }
 .wb-editor-cursor-text { cursor: text; }
 

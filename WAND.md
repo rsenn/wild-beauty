@@ -200,6 +200,12 @@ a neighbour, the two-object case.
 
 ## A7. Background removal (E127)
 
+Since 2026-11-01 the wand is the main way to isolate subjects and background removal its one-tap
+fallback: it is the **Remove background tool (B)** in the wand's tool group (EDITOR.md E37), a tap
+on a photo removes its background (`cutoutDown`, then `removeBackground(id)`). No shape is needed
+on the photo; the clip is made by the removal. The *Remove background* button of a selected
+photo's context bar does the same and stays.
+
 One button on a selected photo, no taps. The server finds all salient subjects with a trained
 model, cuts the photo in two passes (quick at 1024 px, sharp at full size) and returns the
 subjects' outlines.
