@@ -146,3 +146,67 @@ test('the live wire finds the cheapest path (compared with a plain Dijkstra on r
     expect(paid).toBeCloseTo(cheapest(cost, n, n, a, b), 4);
   }
 });
+
+// the shortest-path tree of the live wire (Intelligent Scissors): grown in slices, read for any pixel
+import { createWire } from '../client/editor/lasso.js';
+
+const pathCost = (path, cost, w) => path.slice(1).reduce((sum, [x, y], i) => sum + (path[i][0] !== x && path[i][1] !== y ? Math.SQRT2 : 1) * cost[y * w + x], 0);
+
+test('the tree gives the cheapest path to every pixel once it has grown, with a slice of time at a time', () => {
+  let seed = 41;
+  const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const n = 30;
+  const cost = Float32Array.from({ length: n * n }, () => 0.04 + rnd());
+  const from = [3, 4];
+  const tree = createWire(cost, n, n, from, 100);
+  let slices = 0;
+
+  while(!tree.step(0.05)) slices++;
+
+  expect(tree.finished).toBe(true);
+  expect(slices).toBeGreaterThan(0); // it did not need one go: it stops when the slice is used
+
+  for(let k = 0; k < 15; k++) {
+    const to = [Math.floor(rnd() * n), Math.floor(rnd() * n)];
+    const path = tree.pathTo(to);
+
+    expect(path[0]).toEqual(from);
+    expect(path.at(-1)).toEqual(to);
+    expect(pathCost(path, cost, n)).toBeCloseTo(cheapest(cost, n, n, from, to), 4);
+  }
+});
+
+test('before the tree has grown a pixel gets the straight line, a settled one its path; outside the box the path goes on straight', () => {
+  const flat = new Float32Array(400 * 400).fill(1);
+  const tree = createWire(flat, 400, 400, [200, 200], 100);
+
+  expect(tree.settled([205, 200])).toBe(false);
+  expect(tree.pathTo([205, 200])).toEqual([[200, 200], [205, 200]]); // not reached yet: straight
+
+  expect(tree.finishTo([260, 240], 1000)).toBe(true);
+  expect(tree.settled([260, 240])).toBe(true);
+
+  const path = tree.pathTo([260, 240]);
+
+  expect(path[0]).toEqual([200, 200]);
+  expect(path.at(-1)).toEqual([260, 240]);
+
+  // 150 px to the right is outside the box (radius 100): the tree's path to its edge, then a line on
+  tree.finishTo([300, 200], 1000);
+
+  const far = tree.pathTo([350, 200]);
+
+  expect(far.at(-1)).toEqual([350, 200]);
+  expect(far.some(([x]) => x === 300)).toBe(true);
+});
+
+test('the tree returns on the cost window that made the first version loop for ever, and in time', () => {
+  const raw = Bun.gunzipSync(readFileSync(new URL('./fixtures/lasso-hang.f32.gz', import.meta.url)));
+  const cost = new Float32Array(raw.buffer, raw.byteOffset, raw.byteLength / 4);
+  const tree = createWire(cost, 118, 200, [50, 149], 300);
+  const t = performance.now();
+
+  expect(tree.finishTo([67, 50], 2000)).toBe(true);
+  expect(performance.now() - t).toBeLessThan(500);
+  expect(tree.pathTo([67, 50]).length).toBeGreaterThan(90);
+});

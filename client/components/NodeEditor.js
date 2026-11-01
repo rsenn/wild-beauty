@@ -35,7 +35,7 @@ import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
 import { contentBox, loadAlpha } from '../editor/alphamap.js';
 import { clampedImagePoint, defaultPick, imagePoint, readLines, regionOf, selectionPath } from '../editor/wand.js';
-import { edgeCost, liveWire, lassoPath, outlineOfSegments, snap, workSize } from '../editor/lasso.js';
+import { createWire, edgeCost, lassoPath, outlineOfSegments, snap, workSize } from '../editor/lasso.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
 import { contains } from '../editor/polygon.js';
 import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag } from '../editor/handles.js';
@@ -2047,6 +2047,30 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
     return uv && run.work ? snap(run.work.cost, run.work.w, run.work.h, [uv[0] * run.work.w - 0.5, uv[1] * run.work.h - 0.5], WIRE_SNAP) : null;
   };
+  // The shortest-path tree of the last anchor grows a few milliseconds per frame (Intelligent
+  // Scissors, lasso.js createWire): the line to the pointer is a look-up in it, so the pointer may go
+  // as far as it likes and no move or click ever waits for a search
+  const WIRE_SLICE_MS = 6;
+  const wireSeed = run => {
+    cancelAnimationFrame(run.grow);
+    run.tree = createWire(run.work.cost, run.work.w, run.work.h, run.anchors.at(-1));
+
+    const tick = () => {
+      run.grow = 0;
+
+      if(wire.current !== run || run.tree.finished) return;
+
+      try {
+        run.tree.step(WIRE_SLICE_MS);
+      } catch {
+        return wireReset();
+      }
+
+      run.grow = requestAnimationFrame(tick);
+    };
+
+    run.grow = requestAnimationFrame(tick);
+  };
   const wireDown = (e, units) => {
     const { doc, photos, scale, editStep: step, page: at } = latest.current;
 
@@ -2086,11 +2110,16 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       const last = run.anchors.at(-1);
 
       if(last && last[0] === p[0] && last[1] === p[1]) return;
-      if(last) run.segments = [...run.segments, liveWire(run.work.cost, run.work.w, run.work.h, last, p)];
+      // the part the tree has not reached yet is finished now (at most 150 ms), the rest is a look-up
+      if(last) {
+        run.tree.finishTo(p, 150);
+        run.segments = [...run.segments, run.tree.pathTo(p)];
+      }
 
       run.anchors = [...run.anchors, p];
       run.stage = [...run.stage, units];
       run.aim = null;
+      wireSeed(run);
       wireShow(run);
       } catch {
         // whatever went wrong, the lasso starts over; the editor and the work are not touched
@@ -2099,11 +2128,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       }
     });
   };
-  // The pointer moves faster than the shortest path can follow (a segment from a far anchor takes
-  // over 100 ms, and the stage reports every coalesced position): at most one search per frame, for
-  // the latest position only, and a pointer far from the last anchor shows a straight preview; the
-  // real path is found when the click comes
-  const WIRE_PREVIEW_PX = 80; // working-copy px
+  // the live line follows the pointer: at most once per frame (the stage reports every coalesced
+  // position), a look-up in the tree of the last anchor
   const wireMove = units => {
     const run = wire.current;
 
@@ -2123,10 +2149,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
         if(!p || (run.aim && run.aim[0] === p[0] && run.aim[1] === p[1])) return;
 
-        const last = run.anchors.at(-1);
-
         run.aim = p;
-        wireShow(run, Math.hypot(p[0] - last[0], p[1] - last[1]) > WIRE_PREVIEW_PX ? [last, p] : liveWire(run.work.cost, run.work.w, run.work.h, last, p));
+        wireShow(run, run.tree.pathTo(p));
       } catch {
         wireReset();
       }
@@ -2138,7 +2162,9 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
     if(!run?.work || run.anchors.length < 3 || wand.current) return;
 
-    const segments = [...run.segments, liveWire(run.work.cost, run.work.w, run.work.h, run.anchors.at(-1), run.anchors[0])];
+    run.tree.finishTo(run.anchors[0], 150);
+
+    const segments = [...run.segments, run.tree.pathTo(run.anchors[0])];
     const polygon = outlineOfSegments(segments, run.work.w, run.work.h);
 
     if(polygon.length < 3) return setAnnounce(tr('editor.announce.wandNothing'));
@@ -2159,6 +2185,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     run.stage = run.stage.slice(0, -1);
     run.segments = run.segments.slice(0, -1);
     run.aim = null;
+    wireSeed(run);
     wireShow(run);
   };
 

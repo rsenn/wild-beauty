@@ -200,6 +200,105 @@ export function liveWire(cost, w, h, a, b, margin = 24, maxMs = 40) {
   return path.reverse();
 }
 
+// The live wire as Intelligent Scissors does it: ONE shortest-path tree grows from the anchor,
+// a little at a time, and the line to the pointer is a look-up in it - no new search per move, no
+// limit on how far the pointer may go (within `radius` pixels of the anchor), and no step that can
+// hold the editor for more than the slice it is given. `step(ms)` expands for at most `ms`; the path
+// to a node that is not settled yet is the one found so far (a valid path, nearly as good), and to
+// one not reached at all the straight line.
+export function createWire(cost, w, h, seed, radius = 220) {
+  const x0 = Math.max(0, seed[0] - radius);
+  const y0 = Math.max(0, seed[1] - radius);
+  const x1 = Math.min(w - 1, seed[0] + radius);
+  const y1 = Math.min(h - 1, seed[1] + radius);
+  const bw = x1 - x0 + 1;
+  const bh = y1 - y0 + 1;
+  const dist = new Float64Array(bw * bh).fill(Infinity); // 64 bits, see liveWire
+  const back = new Int32Array(bw * bh).fill(-1);
+  const done = new Uint8Array(bw * bh);
+  const heap = new Heap();
+  const now = () => (typeof performance === 'object' ? performance.now() : Date.now());
+  const clamp = ([x, y]) => [Math.min(x1, Math.max(x0, Math.round(x))), Math.min(y1, Math.max(y0, Math.round(y)))];
+  const index = ([x, y]) => (y - y0) * bw + (x - x0);
+  const start = index(clamp(seed));
+
+  dist[start] = 0;
+  heap.push(0, start);
+
+  const tree = {
+    seed,
+    get finished() {
+      return heap.size === 0;
+    },
+    // expand for at most `ms`; true when the whole box is done
+    step(ms = 6) {
+      const t0 = now();
+
+      for(let n = 1; heap.size; n++) {
+        const here = heap.pop();
+
+        if(heap.top > dist[here] || done[here]) continue;
+
+        done[here] = 1;
+
+        const hx = here % bw;
+        const hy = (here - hx) / bw;
+        const d = dist[here];
+
+        for(const [dx, dy, len] of NEIGHBOURS) {
+          const nx = hx + dx;
+          const ny = hy + dy;
+
+          if(nx < 0 || ny < 0 || nx >= bw || ny >= bh) continue;
+
+          const next = ny * bw + nx;
+          const total = d + len * cost[(ny + y0) * w + nx + x0];
+
+          if(total < dist[next]) {
+            dist[next] = total;
+            back[next] = here;
+            heap.push(total, next);
+          }
+        }
+
+        if((n & 127) === 0 && now() - t0 > ms) break;
+      }
+
+      return heap.size === 0;
+    },
+    // is the pixel settled (its path is the cheapest)?
+    settled: p => !!done[index(clamp(p))],
+    // expand until the pixel is settled, for at most `ms`
+    finishTo(p, ms = 120) {
+      const t0 = now();
+
+      while(!tree.settled(p) && heap.size && now() - t0 < ms) tree.step(Math.min(ms, 20));
+
+      return tree.settled(p);
+    },
+    // the path from the seed to the pixel: [[x, y], ...]
+    pathTo(p) {
+      const q = clamp(p);
+      let at = index(q);
+
+      if(!(dist[at] < Infinity)) return [[seed[0], seed[1]], [Math.round(p[0]), Math.round(p[1])]];
+
+      const path = [];
+
+      for(let guard = bw * bh; at >= 0 && guard-- > 0; at = back[at]) path.push([(at % bw) + x0, Math.floor(at / bw) + y0]);
+
+      path.reverse();
+
+      // beyond the box: on in a straight line
+      if(q[0] !== Math.round(p[0]) || q[1] !== Math.round(p[1])) path.push([Math.round(p[0]), Math.round(p[1])]);
+
+      return path;
+    },
+  };
+
+  return tree;
+}
+
 // Douglas-Peucker: the path with the points that deviate less than `tolerance` pixels dropped
 export function thin(path, tolerance = 0.8) {
   if(path.length < 3) return path.slice();
