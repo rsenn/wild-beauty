@@ -114,9 +114,21 @@ export function cleanPolygon(polygon) {
   return total <= MAX_LASSO ? out : null;
 }
 
-// the cut along a lasso outline: tools/polycut.py (Pillow only) in place of the segment tool; it
-// answers with the same `result` line, so the rest of the route does not tell them apart
-export const polygonArgs = ({ file, polygon, out, action }) => [PYTHON, '-I', LASSO, '--image', file, '--polygon', JSON.stringify(polygon), '--out', resolve(out, 'cut.png'), ...(FILLS.includes(action) ? ['--mask-out', resolve(out, 'mask.png')] : [])];
+// the cut along a lasso outline. By default tools/polycut.py (Pillow only); with WB_CUTPOLY=guided or
+// WB_CUTPOLY=none the qjs-opencv tool does it: `opencv-imgproc cutpoly` (guided: a soft matte edge from a
+// guided filter in a band around the outline, as the wand has; none: only a feathered polygon). Both answer
+// with the same `result` line and write the 8-bit mask for the fill, so the rest of the route does not
+// tell them apart. Off by default until the tool is installed and tested (nothing breaks without it)
+export const cutpolyMode = () => (['guided', 'none'].includes(process.env.WB_CUTPOLY) ? process.env.WB_CUTPOLY : null);
+
+export function polygonArgs({ file, polygon, out, action }) {
+  const mask = FILLS.includes(action) ? ['--mask-out', resolve(out, 'mask.png')] : [];
+  const mode = cutpolyMode();
+
+  if(mode) return [TOOL, 'cutpoly', '--in', file, '--out', resolve(out, 'cut.png'), '--polygon', JSON.stringify(polygon), '--refine', mode, ...mask];
+
+  return [PYTHON, '-I', LASSO, '--image', file, '--polygon', JSON.stringify(polygon), '--out', resolve(out, 'cut.png'), ...mask];
+}
 
 // the tool's arguments: a select step without `action`, else the full-size cut of candidate `pick`
 export function segmentArgs({ file, points, out, cache, pick, region, action }) {

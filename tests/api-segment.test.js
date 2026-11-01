@@ -83,6 +83,30 @@ describe('the magic wand route (E119)', () => {
     expect(polygonArgs({ file: '/p/a.jpg', polygon: [sq], out: '/o', action: 'cut' })).not.toContain('--mask-out');
     expect(polygonArgs({ file: '/p/a.jpg', polygon: [sq], out: '/o', action: 'take' }).at(-1)).toBe('/o/mask.png');
 
+    // WB_CUTPOLY switches the cut to the qjs-opencv tool; nothing changes without it
+    const before = process.env.WB_CUTPOLY;
+
+    try {
+      process.env.WB_CUTPOLY = 'guided';
+
+      const guided = polygonArgs({ file: '/p/a.jpg', polygon: [sq], out: '/o', action: 'take' });
+
+      expect(guided.slice(1, 6)).toEqual(['cutpoly', '--in', '/p/a.jpg', '--out', '/o/cut.png']);
+      expect(guided[guided.indexOf('--refine') + 1]).toBe('guided');
+      expect(guided.at(-2)).toBe('--mask-out');
+      expect(JSON.parse(guided[guided.indexOf('--polygon') + 1])).toEqual([sq]);
+      expect(polygonArgs({ file: '/p/a.jpg', polygon: [sq], out: '/o', action: 'cut' })).not.toContain('--mask-out');
+
+      process.env.WB_CUTPOLY = 'none';
+      expect(polygonArgs({ file: '/p/a.jpg', polygon: [sq], out: '/o', action: 'cut' })[polygonArgs({ file: '/p/a.jpg', polygon: [sq], out: '/o', action: 'cut' }).indexOf('--refine') + 1]).toBe('none');
+
+      process.env.WB_CUTPOLY = 'nonsense';
+      expect(polygonArgs({ file: '/p/a.jpg', polygon: [sq], out: '/o', action: 'cut' })[1]).toBe('-I'); // the Python stand-in
+    } finally {
+      if(before === undefined) delete process.env.WB_CUTPOLY;
+      else process.env.WB_CUTPOLY = before;
+    }
+
     const { mkdtempSync, rmSync } = await import('node:fs');
     const { tmpdir } = await import('node:os');
     const { join } = await import('node:path');
