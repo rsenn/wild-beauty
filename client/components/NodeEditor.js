@@ -153,7 +153,7 @@ const Busy = ({ at, scale }) => {
 // sees the whole image, and what lies beyond the crop must not be drawn over the neighbours.
 // Sizes are in screen pixels
 const stillMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-const WandSelection = ({ path, taps, corners, scale }) => {
+const WandSelection = ({ path, live, taps, corners, scale }) => {
   const d = 6 / scale;
   const k = 5 / scale;
 
@@ -162,6 +162,7 @@ const WandSelection = ({ path, taps, corners, scale }) => {
     ${path && html`<g clip-path=${corners ? 'url(#wb-wand-window)' : undefined}><path class="wb-wand-area" d=${path} fill-rule="evenodd" />
     <path class="wb-wand-edge" d=${path} stroke-width=${1.5 / scale} />
     <path class="wb-wand-ants" d=${path} stroke-width=${1.5 / scale} stroke-dasharray=${`${d} ${d}`}>${!stillMotion() && html`<animate attributeName="stroke-dashoffset" from="0" to=${-2 * d} dur="0.8s" repeatCount="indefinite" />`}</path></g>`}
+    ${live && html`<g clip-path=${corners ? 'url(#wb-wand-window)' : undefined}><path class="wb-wand-edge" d=${live} stroke-width=${1.5 / scale} /><path class="wb-wand-ants" d=${live} stroke-width=${1.5 / scale} stroke-dasharray=${`${d} ${d}`} /></g>`}
     ${(taps ?? []).map(({ at, label }, i) => label >= 2 ? html`<g key=${i} class=${'wb-wand-anchor' + (label === 3 ? ' wb-wand-first' : '')} transform=${`translate(${at[0]} ${at[1]})`}><circle r=${(label === 3 ? 7 : 4) / scale} stroke-width=${2 / scale} /></g>` : html`<g key=${i} class=${'wb-wand-tap ' + (label ? 'wb-wand-add' : 'wb-wand-sub')} transform=${`translate(${at[0]} ${at[1]})`}><circle r=${9 / scale} stroke-width=${2 / scale} /><path d=${label ? `M${-k} 0H${k}M0 ${-k}V${k}` : `M${-k} 0H${k}`} stroke-width=${2 / scale} /></g>`)}
   </g>`;
 };
@@ -357,6 +358,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const cutRun = useRef(null);
   const wand = useRef(null); // the wand run: { id, photo, points, taps, region, candidates, output, pick, controller, applying }
   const [wireSel, setWireSel] = useState(null); // the magnetic lasso: { id, segments, live, anchors (stage), size, closed }
+  const wireCache = useRef({ segments: null, key: '', d: null }); // the path of the finished segments, drawn again only when they or the photo change
   const wire = useRef(null); // its run: { id, photo, frame, work: { cost, w, h }, loading, anchors (pixels), stage, segments, aim }
   const wandKeys = useRef(null); // the wand's key actions for the key handler, current every render
   const clipStroke = useRef(null); // { points } while a clip-tool stroke is drawn
@@ -2090,17 +2092,34 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       wireShow(run);
     });
   };
+  // The pointer moves faster than the shortest path can follow (a segment from a far anchor takes
+  // over 100 ms, and the stage reports every coalesced position): at most one search per frame, for
+  // the latest position only, and a pointer far from the last anchor shows a straight preview; the
+  // real path is found when the click comes
+  const WIRE_PREVIEW_PX = 80; // working-copy px
   const wireMove = units => {
     const run = wire.current;
 
     if(!run?.work || !run.anchors.length || wand.current) return;
 
-    const p = wirePixel(run, units);
+    run.pointer = units;
 
-    if(!p || (run.aim && run.aim[0] === p[0] && run.aim[1] === p[1])) return;
+    if(run.raf) return;
 
-    run.aim = p;
-    wireShow(run, liveWire(run.work.cost, run.work.w, run.work.h, run.anchors.at(-1), p));
+    run.raf = requestAnimationFrame(() => {
+      run.raf = 0;
+
+      if(wire.current !== run || wand.current) return;
+
+      const p = wirePixel(run, run.pointer);
+
+      if(!p || (run.aim && run.aim[0] === p[0] && run.aim[1] === p[1])) return;
+
+      const last = run.anchors.at(-1);
+
+      run.aim = p;
+      wireShow(run, Math.hypot(p[0] - last[0], p[1] - last[1]) > WIRE_PREVIEW_PX ? [last, p] : liveWire(run.work.cost, run.work.w, run.work.h, last, p));
+    });
   };
   // close the outline back to the first anchor and make it the selection
   const wireClose = () => {
@@ -2921,7 +2940,13 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const wandPath = wandCorners && Number.isInteger(wandSel.pick) ? selectionPath(wandSel.candidates.find(c => c.index === wandSel.pick), wandSel.output, wandCorners, wandStepOf.step.crop) : null;
   const wireStep = wireSel && findStep(doc, wireSel.id);
   const wireCorners = tool === 'lasso' && wireStep && outlineOf(doc, wireSel.id, { photos: hash => photos[hash], page });
-  const wirePath = wireCorners && wireSel.size ? lassoPath(wireSel.segments, wireSel.live, wireSel.size, wireCorners, wireStep.step.crop, wireSel.closed) : null;
+  // the finished segments are one long path: build it once per change, not on every pointer move
+  const wireKey = wireCorners && wireSel.size ? `${wireCorners.join()}|${wireStep.step.crop}|${wireSel.closed}|${wireSel.size.w}` : '';
+
+  if(wireKey && (wireCache.current.segments !== wireSel.segments || wireCache.current.key !== wireKey)) wireCache.current = { segments: wireSel.segments, key: wireKey, d: lassoPath(wireSel.segments, null, wireSel.size, wireCorners, wireStep.step.crop, wireSel.closed) };
+
+  const wirePath = wireKey ? wireCache.current.d : null;
+  const wireLive = wireKey && wireSel.live ? lassoPath([], wireSel.live, wireSel.size, wireCorners, wireStep.step.crop) : null;
   const wireAnchors = wireSel && !wireSel.closed ? wireSel.anchors.map((at, i) => ({ at, label: i === 0 && wireSel.anchors.length >= 3 ? 3 : 2 })) : [];
   const wandRank = wandSel ? wandOrder(wandSel) : [];
   const wandAt = wandSel ? wandRank.indexOf(wandSel.pick) : -1;
@@ -3020,7 +3045,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
           aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${tool === 'lasso' && wireSel && html`<${WandSelection} path=${wirePath} taps=${wireAnchors} corners=${wireCorners && outlineOf(doc, wireSel.id, { photos: hash => photos[hash], page, clipped: true })} scale=${scale} />`}${tool === 'wand' && wandSel && html`<${WandSelection} path=${wandPath} taps=${wandSel.taps} corners=${wandCorners && outlineOf(doc, wandSel.id, { photos: hash => photos[hash], page, clipped: true })} scale=${scale} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsels} scale=${scale} />`}${group.length > 0 && groupBox && html`<${Selection} outline=${groupBox} scale=${scale} px=${handlePx} grips=${true} />`}${group.length > 0 && groupAt.map(f => { const o = outlineOf(doc, f.step.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true }); return o && html`<polygon key=${f.step.id} class="wb-editor-outline" points=${o.map(p => p.join(',')).join(' ')} />`; })}${marquee && marquee[2] && html`<rect class="wb-editor-marquee" x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke-dasharray=${`${5 / scale} ${4 / scale}`} />`}${marquee && !marquee[2] && html`<g fill="none" stroke-width=${1 / scale} shape-rendering="crispEdges" pointer-events="none">${['#ffffff', '#000000'].map((stroke, k) => html`<rect x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke=${stroke} stroke-dasharray=${k ? `${2 / scale} ${2 / scale}` : undefined} />`)}</g>`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
+          overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${tool === 'lasso' && wireSel && html`<${WandSelection} path=${wirePath} live=${wireLive} taps=${wireAnchors} corners=${wireCorners && outlineOf(doc, wireSel.id, { photos: hash => photos[hash], page, clipped: true })} scale=${scale} />`}${tool === 'wand' && wandSel && html`<${WandSelection} path=${wandPath} taps=${wandSel.taps} corners=${wandCorners && outlineOf(doc, wandSel.id, { photos: hash => photos[hash], page, clipped: true })} scale=${scale} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsels} scale=${scale} />`}${group.length > 0 && groupBox && html`<${Selection} outline=${groupBox} scale=${scale} px=${handlePx} grips=${true} />`}${group.length > 0 && groupAt.map(f => { const o = outlineOf(doc, f.step.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true }); return o && html`<polygon key=${f.step.id} class="wb-editor-outline" points=${o.map(p => p.join(',')).join(' ')} />`; })}${marquee && marquee[2] && html`<rect class="wb-editor-marquee" x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke-dasharray=${`${5 / scale} ${4 / scale}`} />`}${marquee && !marquee[2] && html`<g fill="none" stroke-width=${1 / scale} shape-rendering="crispEdges" pointer-events="none">${['#ffffff', '#000000'].map((stroke, k) => html`<rect x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke=${stroke} stroke-dasharray=${k ? `${2 / scale} ${2 / scale}` : undefined} />`)}</g>`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           loupe=${coarse && tool !== 'select' && tool !== 'wand' && tool !== 'lasso'}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'lasso' || tool === 'cutout' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
