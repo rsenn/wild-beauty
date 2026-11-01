@@ -1,6 +1,6 @@
 // bun test: the upload queue retries a dropped connection (client/upload.js)
 import { describe, expect, test } from 'bun:test';
-import { READ_MS, READ_RETRIES, RETRIES, createQueue, pause, readPause, sendFile } from '../client/upload.js';
+import { READ_MS, READ_RETRIES, RETRIES, STALL_MS, REPLY_MS, createQueue, pause, readBytes, readPause, sendFile } from '../client/upload.js';
 
 const fail = code => ({ done: Promise.reject(Object.assign(new Error(code), { code })), abort() {} });
 const ok = record => ({ done: Promise.resolve(record), abort() {} });
@@ -136,5 +136,79 @@ describe('createQueue', () => {
     await tick();
 
     expect(sent).toBe(1); // the pending attempt was forgotten
+  });
+
+  test('a file that refuses one big read is read slice by slice; when nothing works the error says what each path answered', async () => {
+    const dead = () => Promise.reject(Object.assign(new Error('x'), { name: 'NotReadableError' }));
+    const whole = { name: 'a.jpg', size: 600000, arrayBuffer: dead, slice: (from, to) => ({ arrayBuffer: async () => new ArrayBuffer(Math.min(to, 600000) - from) }) };
+
+    expect((await readBytes(whole)).size).toBe(600000);
+
+    const gone = { name: 'b.jpg', size: 10, arrayBuffer: dead, slice: () => ({ arrayBuffer: dead }) };
+    const error = await readBytes(gone).catch(e => e);
+
+    expect(error.tried[0]).toBe('buffer:NotReadableError');
+    expect(error.tried.at(-1)).toBe('slices:NotReadableError');
+  });
+
+  test('a connection that stops answering is given up on and counts as a dropped connection', async () => {
+    const real = globalThis.setTimeout;
+    const realXhr = globalThis.XMLHttpRequest;
+    const timers = [];
+    let aborted = 0;
+
+    globalThis.setTimeout = (fn, ms) => (timers.push([fn, ms]), timers.length);
+    globalThis.XMLHttpRequest = class {
+      upload = {};
+      open() {}
+      setRequestHeader() {}
+      send() {}
+      abort() {
+        aborted++;
+        this.onabort?.();
+      }
+    };
+
+    try {
+      const task = sendFile({ name: 'a.jpg', size: 3, arrayBuffer: async () => new ArrayBuffer(3) }, { onProgress() {} });
+      const outcome = task.done.then(() => 'sent', e => e.code);
+
+      for(let i = 0; i < 20 && !timers.some(t => t[1] === STALL_MS); i++) await Promise.resolve();
+
+      // nothing arrives: the stall timer fires
+      timers.filter(t => t[1] === STALL_MS).at(-1)[0]();
+
+      expect(await outcome).toBe('network');
+      expect(aborted).toBe(1);
+      expect(REPLY_MS).toBeGreaterThan(STALL_MS);
+    } finally {
+      globalThis.setTimeout = real;
+      globalThis.XMLHttpRequest = realXhr;
+    }
+  });
+
+  test('an abort the user asked for is still an abort, not a retry', async () => {
+    const realXhr = globalThis.XMLHttpRequest;
+
+    globalThis.XMLHttpRequest = class {
+      upload = {};
+      open() {}
+      setRequestHeader() {}
+      send() {}
+      abort() {
+        this.onabort?.();
+      }
+    };
+
+    try {
+      const task = sendFile({ name: 'a.jpg', size: 3, arrayBuffer: async () => new ArrayBuffer(3) }, { onProgress() {} });
+      const outcome = task.done.then(() => 'sent', e => e.code);
+
+      await Bun.sleep(5);
+      task.abort();
+      expect(await outcome).toBe('aborted');
+    } finally {
+      globalThis.XMLHttpRequest = realXhr;
+    }
   });
 });

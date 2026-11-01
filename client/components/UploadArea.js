@@ -31,6 +31,7 @@ export const UploadArea = ({ extra = null }) => {
   const depth = useRef(0);
   const nextId = useRef(uploads.length + 1);
   const latest = useRef(items);
+  const startRef = useRef(null); // `start` of the latest render, for the listeners that outlive it
 
   latest.current = items;
 
@@ -69,7 +70,24 @@ export const UploadArea = ({ extra = null }) => {
     else queue.current.add(item.id, item.file, item.pos);
   };
 
+  startRef.current = start;
+
   const update = (id, change) => setItems(old => old.map(item => (item.id === id ? { ...item, ...change(item) } : item)));
+
+  // the connection is back, or the phone woke up with the page in front: what the network dropped
+  // (and ran out of tries for) goes again by itself, no Retry press needed
+  useEffect(() => {
+    const again = () => latest.current.filter(item => item.state === 'failed' && item.error === 'network').forEach(item => startRef.current(item));
+    const shown = () => document.visibilityState === 'visible' && again();
+
+    window.addEventListener('online', again);
+    document.addEventListener('visibilitychange', shown);
+
+    return () => {
+      window.removeEventListener('online', again);
+      document.removeEventListener('visibilitychange', shown);
+    };
+  }, []);
 
   // a saved node took these uploads over: the cards go, the files are already gone
   useEffect(() => {

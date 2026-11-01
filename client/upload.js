@@ -11,14 +11,59 @@ const failure = code => Object.assign(new Error(code), { code });
 // for ever: after READ_MS it counts as unreadable like one that fails at once.
 export const READ_MS = 15000;
 
-const readBytes = (file, ms = READ_MS) => {
+// A connection that stops answering without an error (a phone in a tunnel, a proxy that lost the
+// request) must not leave a card "uploading" for ever or hold one of the queue's places: no progress
+// for STALL_MS while sending, or no reply for REPLY_MS after the last byte (the server converts and
+// reads the picture meanwhile), counts as a dropped connection and is sent again. The server keeps
+// a file it has already stored by its hash, so a send repeated after a lost reply costs nothing.
+export const STALL_MS = 45000;
+export const REPLY_MS = 120000;
+
+const withTimeout = (promise, ms) => {
   let timer;
 
-  return Promise.race([
-    file.arrayBuffer(),
-    new Promise((_, reject) => (timer = setTimeout(() => reject(Object.assign(new Error('timeout'), { name: 'TimeoutError' })), ms))),
-  ]).finally(() => clearTimeout(timer));
+  return Promise.race([promise, new Promise((_, reject) => (timer = setTimeout(() => reject(Object.assign(new Error('timeout'), { name: 'TimeoutError' })), ms)))]).finally(() => clearTimeout(timer));
 };
+
+// the other ways to get at a file's bytes: another reader, and slice by slice (a handle that
+// refuses one big read sometimes gives ranges). They are tried only after `arrayBuffer` failed.
+const viaReader = file =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error ?? new Error('FileReader'));
+    reader.readAsArrayBuffer(file);
+  });
+
+const SLICE = 256 * 1024;
+const viaSlices = async file => {
+  const parts = [];
+
+  for(let at = 0; at < file.size; at += SLICE) parts.push(await file.slice(at, at + SLICE).arrayBuffer());
+
+  return new Blob(parts);
+};
+
+// -> the file's bytes (an ArrayBuffer or a Blob); on failure an Error with `tried`: what each path said
+export async function readBytes(file, ms = READ_MS) {
+  const tried = [];
+
+  for(const [how, read] of [['buffer', () => file.arrayBuffer()], ['reader', () => viaReader(file)], ['slices', () => viaSlices(file)]]) {
+    if(typeof FileReader === 'undefined' && how === 'reader') continue;
+
+    try {
+      return await withTimeout(read(), ms);
+    } catch(e) {
+      tried.push(`${how}:${e?.name ?? 'error'}`);
+
+      // a read that hung is not tried again by another path: it would hang as well
+      if(e?.name === 'TimeoutError') break;
+    }
+  }
+
+  throw Object.assign(new Error('unreadable'), { tried });
+}
 
 // -> { done: Promise<record>, abort() }; onProgress gets 0..1 of the bytes sent
 //
@@ -41,7 +86,21 @@ export function sendFile(file, { onProgress, pos }) {
     try {
       body = new Blob([await readBytes(file)], { type: 'application/octet-stream' });
     } catch(e) {
-      track('upload', { ok: false, code: 'unreadable', name: e?.name, bytes: file.size, ms: Math.round(performance.now() - began) });
+      // what the next occurrence needs to be understood: every path's answer, the file's type, the
+      // age of its modification stamp (a file changed after it was picked is refused by the browser),
+      // and the shape of its name (a picker's own number, a camera's date)
+      track('upload', {
+        ok: false,
+        code: 'unreadable',
+        name: e?.tried?.[0]?.split(':')[1] ?? e?.name,
+        tried: e?.tried,
+        bytes: file.size,
+        type: file.type,
+        ext: /\.(\w{1,5})$/.exec(file.name ?? '')?.[1]?.toLowerCase(),
+        picker: /^\d{9,}\./.test(file.name ?? ''),
+        age: file.lastModified ? Math.round((Date.now() - file.lastModified) / 1000) : null,
+        ms: Math.round(performance.now() - began),
+      });
       throw failure('unreadable');
     }
 
@@ -50,18 +109,33 @@ export function sendFile(file, { onProgress, pos }) {
     return new Promise((resolve, reject) => {
       const sending = performance.now();
 
+      let stalled = false;
+      let watchdog;
+      const watch = ms => (clearTimeout(watchdog), (watchdog = setTimeout(() => ((stalled = true), xhr.abort()), ms)));
+
       xhr.open('POST', '/api/uploads');
       xhr.setRequestHeader('X-Filename', encodeURIComponent(file.name));
       xhr.setRequestHeader('Content-Type', 'application/octet-stream');
       if(pos) xhr.setRequestHeader('X-Position', `${pos.lat},${pos.lon}`);
       xhr.upload.onprogress = e => {
         sent = e.loaded;
+        watch(STALL_MS);
         e.lengthComputable && onProgress(e.loaded / e.total);
       };
+      xhr.upload.onload = () => watch(REPLY_MS);
       // what a bare network error knew: how far it got and after how long
-      xhr.onerror = () => (track('upload', { ok: false, code: 'network', bytes: file.size, sent, ms: Math.round(performance.now() - sending), online: navigator.onLine }), reject(failure('network')));
-      xhr.onabort = () => reject(failure('aborted'));
+      xhr.onerror = () => (clearTimeout(watchdog), track('upload', { ok: false, code: 'network', bytes: file.size, sent, ms: Math.round(performance.now() - sending), online: navigator.onLine }), reject(failure('network')));
+      xhr.onabort = () => {
+        clearTimeout(watchdog);
+
+        if(!stalled) return reject(failure('aborted'));
+
+        track('upload', { ok: false, code: 'network', stalled: true, bytes: file.size, sent, ms: Math.round(performance.now() - sending), online: navigator.onLine });
+        reject(failure('network'));
+      };
       xhr.onload = () => {
+        clearTimeout(watchdog);
+
         let json = null;
 
         try {
@@ -75,6 +149,7 @@ export function sendFile(file, { onProgress, pos }) {
         if(ok) resolve(json);
         else reject(failure(json?.error?.code ?? STATUS[xhr.status] ?? 'generic'));
       };
+      watch(STALL_MS);
       xhr.send(body);
     });
   })();
