@@ -20,7 +20,7 @@ import { breakVertex, drag as dragVertices, dragMany, geometry, hitVertex, insid
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { cascade, photosOnPage } from '../editor/cascade.js';
 import { documentLarge, documentThumb, exportImage, sceneCanvas, stepImage } from '../editor/export.js';
-import { boxOfCached, setContext, setHolding, trackCommand } from '../events.js';
+import { boxOfCached, setContext, setHolding, track, trackCommand } from '../events.js';
 import { TextEdit } from './TextEdit.js';
 import { measureText } from '../editor/measure.js';
 import { LIMITS as TEXT_LIMITS, boxHeight, layout } from '../editor/text.js';
@@ -34,7 +34,7 @@ import { eventUnits } from '../editor/stage.js';
 import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
 import { contentBox, loadAlpha } from '../editor/alphamap.js';
-import { clampedImagePoint, defaultPick, imagePoint, readLines, regionOf, selectionPath } from '../editor/wand.js';
+import { clampedImagePoint, defaultPick, imagePoint, readLines, regionOf, runStale, selectionPath } from '../editor/wand.js';
 import { LASSO_SIZE, costFromEdgeMap, createWire, edgeMapUsable, edgeCost, lassoPath, outlineOfSegments, snap, workSize } from '../editor/lasso.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
 import { contains } from '../editor/polygon.js';
@@ -522,6 +522,18 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     return () => setHolding(null);
   }, []);
 
+  // a run belongs to the picture (and clip) its taps were made on: when the document says otherwise
+  // (an undo took the photo away, a redo or undo swapped its image) the taps and the outline go
+  useEffect(() => {
+    const run = wand.current ?? wire.current;
+
+    if(!run || run.applying) return;
+
+    const at = findStep(hist.present.doc, run.id);
+
+    if(runStale(run, at)) wandReset();
+  }, [hist]);
+
   // leaving the wand (or the editor) kills a run that is still going
   useEffect(() => {
     if(tool === 'wand' || tool === 'lasso') return;
@@ -594,7 +606,14 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     dispatch({ type: 'removePage', id });
     switchPage(Math.min(index, latest.current.doc.pages.length - 2));
   };
-  const undo = () => latest.current.readOnly || (trackCommand({ type: 'undo' }), (inserted.current = null), setHist(history.undo));
+  // a selection in the making (wand taps, lasso anchors): the toolbar Undo takes its last tap back, as
+  // Backspace does, instead of undoing the document under it (the photo itself, on a phone)
+  const selecting = () => {
+    const { tool: now } = latest.current;
+
+    return (now === 'wand' && !!wand.current?.points?.length && !wand.current.applying) || (now === 'lasso' && !!wire.current?.anchors?.length && !wand.current);
+  };
+  const undo = () => latest.current.readOnly || (selecting() ? wandKeys.current?.undo() : (trackCommand({ type: 'undo' }), (inserted.current = null), setHist(history.undo)));
   const redo = () => latest.current.readOnly || (trackCommand({ type: 'redo' }), (inserted.current = null), setHist(history.redo));
 
   // A photo lands as a half-stage square in a diagonal cascade (E112): `index` is
@@ -1715,7 +1734,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     };
     // the image the photo shows now, not its original: a second action builds on the first (an
     // Erase on a filled hole must not bring back what Take out took)
-    const run = wand.current?.id === id ? wand.current : { id, photo: photo.photo, points: [], taps: [], region: manual() };
+    const run = wand.current?.id === id ? wand.current : { id, photo: photo.photo, clip: photo.clip, points: [], taps: [], region: manual() };
     // excluding needs something to exclude from: until a tap added something, every tap adds
     const label = (e?.altKey || wandMode === 'sub') && run.points.some(p => p[2] === 1) ? 0 : 1;
 
@@ -1830,7 +1849,15 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
             if(action === 'cut') fitted = fitBox(id, got.cut, info.cut, { wand: true, group: id });
 
             fadeIn(id);
+
+            // the cut subject is meant to be moved (a selection box on it invites that, and a tap with
+            // the wand still active would start a new run): the select tool. After an erase the photo
+            // is what it was and the next thing to erase is the likely one: the wand stays
+            if(action === 'cut') (setSelected(id), setTool('select'));
           }
+
+          // which tool the user goes to next is in the events that follow; this says what was applied
+          track('wand-apply', { action, tool: latest.current.tool, taps: run.points.length, fill: wandFill });
 
           Promise.resolve(fitted)
             .catch(() => {})
@@ -1933,6 +1960,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     if(corners) setBusyAt({ x: corners.reduce((sum, c) => sum + c[0], 0) / 4, y: corners.reduce((sum, c) => sum + c[1], 0) / 4 });
 
     const loading = [];
+    let made = false;
 
     try {
       const res = await fetch('/api/cutout', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ photo: step.photo }), signal });
@@ -1942,6 +1970,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       await readLines(res.body, event => {
         if(event.event === 'progress') setBusyAt(b => b && { ...b, percent: event.percent * SERVER_SHARE });
         else if(event.event === 'derived') {
+          made = true;
           loading.push(
             arrived(event.record, event.phase !== 'preview').then(info => {
               if(signal.aborted) return;
@@ -1958,6 +1987,12 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
         } else if(event.event === 'error') setAnnounce(tr('editor.announce.cutoutFailed'));
       });
       await Promise.all(loading);
+
+      // the subjects are there to be moved or split: the select tool with the photo in hand (the
+      // background tool would just remove another background)
+      if(made && !signal.aborted && latest.current.tool === 'cutout') (setSelected(id), setTool('select'));
+
+      track('wand-apply', { action: 'cutout', tool: latest.current.tool, ok: made });
     } catch {
       if(!signal.aborted) setAnnounce(tr('editor.announce.cutoutFailed'));
     } finally {
@@ -3029,7 +3064,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     if(key === 'page') return html`<button type="button" class="wb-editor-button wb-editor-add-page" onClick=${addPage} title=${t('editor.page.add')} aria-label=${t('editor.page.add')}><span class="wb-editor-tool-icon" aria-hidden="true"></span></button>`;
 
     if(key === 'undo' || key === 'redo') {
-      const can = key === 'undo' ? history.canUndo(hist) : history.canRedo(hist);
+      const can = key === 'undo' ? history.canUndo(hist) || selecting() : history.canRedo(hist);
 
       return html`<button type="button" class=${'wb-editor-button wb-editor-' + key} disabled=${!can} onClick=${key === 'undo' ? undo : redo} title=${t('editor.' + key)} aria-label=${t('editor.' + key)}><span class="wb-editor-tool-icon" aria-hidden="true"></span></button>`;
     }

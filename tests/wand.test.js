@@ -1,6 +1,6 @@
 // bun test: wand geometry and the NDJSON reader (E119)
 import { expect, test } from 'bun:test';
-import { clampedImagePoint, defaultPick, imagePoint, photoCoords, photoPoint, readLines, regionOf, resultPolygon, selectionPath, stagePolygon } from '../client/editor/wand.js';
+import { runStale, clampedImagePoint, defaultPick, imagePoint, photoCoords, photoPoint, readLines, regionOf, resultPolygon, selectionPath, stagePolygon } from '../client/editor/wand.js';
 
 const corners = [[100, 100], [300, 100], [300, 200], [100, 200]];
 
@@ -109,4 +109,14 @@ test('clampedImagePoint keeps a point outside the photo on its edge, and agrees 
   expect(clampedImagePoint(stage, [1500, 1400], frame)).toEqual([0.75, 1]);
   expect(imagePoint(stage, [-300, 500], frame)).toBeNull();
   expect(clampedImagePoint([[0, 0], [0, 0], [0, 0], [0, 0]], [5, 5])).toBeNull();
+});
+
+test('runStale: a run ends when an undo took its photo away or swapped its image', () => {
+  const at = { step: { photo: 'h1', clip: 'c1' } };
+
+  expect(runStale({ photo: 'h1', clip: 'c1' }, at)).toBe(false);
+  expect(runStale({ photo: 'h1', clip: 'c1' }, undefined)).toBe(true); // the photo is gone
+  expect(runStale({ photo: 'h0', clip: 'c1' }, at)).toBe(true); // another image (undo of a cut)
+  expect(runStale({ photo: 'h1', clip: undefined }, at)).toBe(true); // wand run, the clip changed
+  expect(runStale({ photo: 'h1' }, at)).toBe(false); // lasso run: no clip to compare
 });

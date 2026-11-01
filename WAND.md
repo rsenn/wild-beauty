@@ -123,7 +123,7 @@ was only right for square photos.)*
 | **Add area** | always; pressed by default (`wandMode = 'add'`) | a tap adds the thing under it (label 1) |
 | **Exclude area** | always (`wandMode = 'sub'`), or Alt held on a tap | a tap takes the thing under it out (label 0). Until a tap added something every tap adds, whatever the mode; Clear and every action set the mode back to Add (2026-11-01: a stale Exclude from the photo before swallowed the first two taps on the next one) |
 | **Smaller / Larger** | with a selection | switch between the non-empty candidate outlines, ordered by coverage; local, instant |
-| **Undo tap** (Backspace) | with a selection | removes the last tap and selects again; with no tap left it clears |
+| **Undo tap** (Backspace) | with a selection | removes the last tap and selects again; with no tap left it clears ; the toolbar **Undo** does the same while a selection is in the making (wand taps, lasso anchors) instead of undoing the document under it. A run whose photo or clip an undo / redo changed is dropped (`runStale`, 2026-11-01: Undo took the photo away and left taps and anchors floating over nothing) |
 | **Clear** (Esc) | with a selection | drops the selection and the taps; the photo was never changed |
 | **Cut out**, **Take out**, **Erase** | when the selection is not empty | apply it (A5); disabled while busy |
 | **Fill the hole** | next to the actions; on by default (`wandFill`) | Take out and Erase fill the hole with MI-GAN; off, the hole stays transparent |
@@ -195,6 +195,8 @@ keeps that original with the node. **Privacy gap, found 2026-11-01, not fixed ye
 node hands its document (with `orig`) and the photo files to every visitor, so the uncut original,
 an erased detail included, can be downloaded. The decided fix (originals only for who may edit,
 files only for owners or published nodes, `TODO.md` "Photo access") is the next thing to build.
+
+After **Cut out**, **Take out** and **Remove background** the editor switches to the **select tool** with the result selected (2026-11-01): the selection box invites moving it, and a tap with the wand still active starts a new run. **Erase** keeps the wand (the next thing to erase is the likely next step). The usage event `wand-apply` (`action`, `tool`, `taps`, `fill`) records each apply, the events that follow show where the user went next, to revisit this with data.
 
 If the page's step limit does not allow two more steps, Take out does nothing and says so. If the
 rest fails, nothing changes (`takeOutFailed`); a cut alone (Cut out) only needs the cut.

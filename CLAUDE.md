@@ -26,6 +26,10 @@ During development the server runs under runit as `/etc/service/wild-beauty` (se
 - Control: `sudo sv <command> wild-beauty` (e.g. `restart`, `stop`, `start`, `hup`; see `man 8 sv`)
 - Log: `/var/service/wild-beauty/log/main/current`
 
+## Storage (moved 2026-11-01)
+
+The writable directories live on the big disk: `data/` and `uploads/` in the project root are **symlinks** to `/mnt/data/wild-beauty/data` (SQLite database, `photos/`, usage logs `events/`, recordings `replay/`, `vapid.json`) and `/mnt/data/wild-beauty/uploads` (originals, sidecars, `.tmp`). Tools that default to `data/` keep working unchanged. If `/mnt/data` is not mounted the symlinks dangle and the server fails to start instead of creating empty directories on the root disk (check `mountpoint /mnt/data`; its `/etc/fstab` line must be active). The pre-move copies are `data.moved-2026-11-01/` and `uploads.moved-2026-11-01/` (git-excluded): delete them once the new location has proven itself, they hold about 1 GB of the root disk. The runit service writes its own log to `/var/service/wild-beauty/log/main` (small, rotated by svlogd).
+
 ## Mail and login (2026-10-31)
 
 The host runs Postfix and Dovecot for `transistorisiert.ch` and `jános.ch`; registration mail is to be sent as `noreply@transistorisiert.ch` (ports 25, 465, 587 for smtp, 143 and 993 for imap; details and open points in `PLAN.md` S17). `POST /api/login` and `POST /api/register` exist (`server/auth.js`; registration is minimal, the address is not verified and no mail is sent; `WB_REGISTRATION=closed` switches it off); the jános.ch users are made with `tools/janos-seed.js`, see `SITES.md`. Do not put mail passwords in the repository.

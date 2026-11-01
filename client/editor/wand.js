@@ -172,3 +172,8 @@ export function defaultPick(candidates, maxCover = 0.6) {
 
   return (fits.length ? fits : found).reduce((a, b) => (b.index > a.index ? b : a)).index;
 }
+
+// does a run (wand taps or lasso anchors) still belong to the document? `at` is findStep() of the
+// run's photo. It does not when an undo or redo took the photo away or swapped its image, and for a
+// wand run when the clip it started on changed (a lasso run has no `clip`)
+export const runStale = (run, at) => !at || at.step.photo !== run.photo || ('clip' in run && at.step.clip !== run.clip);
