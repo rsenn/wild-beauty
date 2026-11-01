@@ -715,12 +715,14 @@ Per-user theme storage (cookie only), `prefers-color-scheme` auto-switching,
 theme editor UI, theme-supplied fonts beyond the existing ones (a theme may
 name a font that `static/fonts/stylesheet.css` already declares).
 
-## 17. Login and outgoing mail (2026-10-31, not built beyond the dialog)
+## 17. Login and outgoing mail (2026-10-31; login and registration built 2026-10-31, mail sending not)
 
 - **Login dialog.** `client/components/LoginDialog.js`, opened by the Login tab (`nav.js`, `Nav.js`, `Layout.js`): the old
-  tumbling modal reproduced (DESIGN.md S"login modal motion"). It posts to `/api/login`, which does not exist yet, so it
-  shows "Login failed". Accounts, sessions and registration are out of the PoC (S1) and need a decision before this
-  is built: password hashing (`Bun.password`), session cookie next to `wb-session`, rate limits.
+  tumbling modal reproduced (DESIGN.md S"login modal motion"). It posts to `/api/login`. **Built since** (`server/auth.js`):
+  `POST /api/login`, `/api/register`, `/api/logout`, `GET /api/me`; argon2id through `Bun.password`, a session cookie
+  next to `wb-session`, rate limits (5 failures per client; 5 sign-ups an hour). Registration is deliberately minimal:
+  the address is kept for a later password reset but is not verified and no mail is sent; `WB_REGISTRATION=closed`
+  switches it off. The mail below is therefore not needed for sign-up today, only for a reset or an activation link.
 - **Registration mail.** User registration will need to send mail from `noreply@transistorisiert.ch`. The host runs
   Postfix and Dovecot for `transistorisiert.ch` and `jános.ch` (`mail.transistorisiert.ch`, Let's Encrypt certificate
   under `/etc/letsencrypt/live/transistorisiert.ch/`, SASL through Dovecot). Ports: 25 smtp, 465 smtps and 587

@@ -691,7 +691,7 @@ Ordered by what is next. Status 2026-11-01 (evening).
    the subject as the only context.
 
 **Later**
-8. Magnetic lasso as a separate selection tool (0), sharing the actions.
+8. ~~Magnetic lasso as a separate selection tool (0), sharing the actions.~~ Built 2026-11-01 (see 0); better edges (CLAHE `edgemap`, then deep edges) and a browser pass are open, `TODO.md`.
 9. Box drag as first prompt (`--box` exists in the tool); grow or shrink the hole; fill variants
    for large holes (`--work` smaller or larger, a second pass) as a choice, the current look kept.
 10. Small objects fail with `E_METHOD` (BUGS entry in qjs-opencv).

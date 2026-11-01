@@ -98,6 +98,8 @@ Things where the work moved on before the item closed. Ordered by how likely the
 
 ## 4. The documents disagree with the code
 
+**Fixed 2026-11-01** in the commit that follows this file: the rows below are corrected in `TODO.md`, `EDITOR.md`, `PLAN.md`, `WAND.md` and `CLAUDE.md`. M12 is now `[~]` where it is built in a smaller form than specified (the graph API is a flat list, not rooted; the layout is our own, no d3); the node lock is `[x]` with one open point found while checking: `canBreak` returns true for everybody. The registration row turned out to be a decision: sign-up needs no mail by design. The table is kept as the record of what was wrong.
+
 These make the plan unreliable as a to-do list; each is a quick fix.
 
 | Where | Says | The code says |

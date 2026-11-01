@@ -16,12 +16,12 @@ PLAN.md, `D` = DESIGN.md.
 
 Work that was started, offered or decided but not finished, so a detour does not lose it.
 Detail lives in `EDITOR.md` (E-numbers) and `UX-REQUIREMENTS.md`. Update this list when one closes.
-State: all of the work below is committed and pushed (last: `d2ae0104`). The camera / place work (E137, E139) is done in another session and not listed here.
+State 2026-11-01: everything below is committed (the 2026-10-31 work in `3552fad`, `4aba6bf`, `ef0983b`, `4960fd4`, `c334a91`, `1cf6919`); the branch `claude/pensive-lovelace-omjgl4` holds the magnetic lasso and the assessment (`ASSESSMENT.md`) on top of `master`. The camera / place work (E137, E139) is done in another session and not listed here.
 
 ### Postponed (2026-10-31)
 - [ ] **E154b "Mark as texture" button in the gallery pane** (`components/GalleryPane.js`): list the node's picture photos there with a button that marks one as texture (the `setRole` command, as the ▦ button of the film-strip does), so assigning a texture does not need the Photos tab. Decided to postpone; the pane for now says to use ▦ in the Photos tab. Related open points of E154 (`EDITOR.md`): the pane does not refresh the linked children after linking in the tree; walls split by compass direction are not rendered.
 
-### Done 2026-10-31 (uncommitted; ask before committing)
+### Done 2026-10-31 (committed since)
 - [x] Dev server under runit (`/var/service/wild-beauty`, log child; two steps for you: `chown log:log .../log/main`, `ln -s` into `/etc/service`), note in `CLAUDE.md`.
 - [x] Mail: Postfix `submission` (587) and `smtps` (465) enabled and restarted, router forwards seen, `ufw` allow rules added (ufw inactive). `PLAN.md` S17.
 - [x] Login dialog with the old tumbling overlay (`LoginDialog.js`), Login tab; `POST /api/login` missing.
@@ -32,10 +32,10 @@ State: all of the work below is committed and pushed (last: `d2ae0104`). The cam
 - [ ] **E147 concerns (a) to (l) and its test list** (`EDITOR.md`): phone check of the rectangle and the Select several button, the group bar is long, popover wrapping CSS never seen, big copies, a picture for a copied group, busy outlines, a "More" popover.
 - [ ] **E150 / E152 small ones**: open the text Background popover with the background on; a visible hint while the dropper is armed and a second click cancelling it; the colour wheel button with the swatch hairline; ingest palette of about 16 colours.
 - [ ] **E148**: should an editor that opens by itself scroll? Check on a phone.
-- [ ] **Login and registration** (`PLAN.md` S17): decide accounts and sessions, build `/api/login`, send the registration mail (SPF, DKIM, DMARC and reverse DNS unchecked, inbound port 25 unchecked from outside), texts in four languages.
+- [~] **Login and registration** (`PLAN.md` S17): built - `POST /api/login`, `/api/register`, `/api/logout`, `GET /api/me` in `server/auth.js` (argon2id, session cookie, rate limits: 5 failures per client, 5 sign-ups an hour; `WB_REGISTRATION=closed` switches sign-up off). Registration is deliberately minimal: the mail address is kept but **not verified**, no activation mail. Open: decide whether a password reset or an activation link is wanted (both need mail sent: no sender in the code, `nodemailer` under Bun is the plan), then SPF, DKIM, DMARC and reverse DNS (unchecked), inbound port 25 (unchecked from outside), texts in four languages.
 - [ ] **Firewall**: `ufw` is inactive with allow rules for 25, 465, 587, 143, 993; enabling it needs rules for 22, 80, 443, 3001, the `anon` proxy and Docker first.
 - [ ] **Housekeeping**: `i18n: missing key "editor.keys.\"` (the keys help has no text for the backslash key, and does not list the new shortcuts Ctrl+A, Shift+PageDown / PageUp, Shift+click either: `KEYS` in `NodeEditor.js` and four locale files); the test browser tool's Escape made the title placeholder read "null" (no page code wrote it, check with a real keyboard).
-- [ ] Commit this day's work (many files, see `git status`).
+- [x] Commit this day's work (done: see the commits above).
 
 ### Closed today (2026-10-29)
 - [x] E128 jobs (Cancel, `job.js blocked`, auto-cancel, leave confirm); E96 round trip tests; E97 right-to-left; fixed-height text box; SVG clipboard in and out; palette of a selected photo; E109 landscape dimming.
@@ -432,19 +432,19 @@ the lock lives in E31/E67.
 - [x] **12.0 Decide** (2026-10-22): shared landscape, visibility owner/group/public,
       positions owner-defined, server-side cached tiles later. Still open: `GRAPH.md`
       S5 (edge kinds confirmation, who may link where, collaboration).
-- [ ] **12.1 Rooted neighbourhood API** `GET /api/graph?root=<id>&depth=<n>`: nodes
+- [~] **12.1 Rooted neighbourhood API** (built in a smaller form: `GET /api/graph` lists all visible nodes and their links, `graphOf` in `server/api/graph.js`; open: root / depth, windows, `rev`, ETag, the 10 000-user timing) `GET /api/graph?root=<id>&depth=<n>`: nodes
       with child counts (`+N` badges), edges, `rev`, ETag/304, brotli; ordered
       children windowed (`?offset=&limit=`); visibility filter in the traversal
       (recursive CTE, measured ~2 ms/13 KB at 1 M nodes). Visible = owner, or
       `public`, or `group` with the viewer in `group_members`; an edge is sent only
       when both ends are visible. Done when a generated
       10 000-user data set answers depth 2 in under 5 ms.
-- [ ] **12.2 Ops** `POST /api/graph/ops`: `link`, `unlink`, `move`, `pin`, `order`
+- [~] **12.2 Ops** (built: `link`, `unlink`, `move`, `pin`, `visibility` in `applyOp`, one transaction, `server/guard.js` checks who may write; open: `order`, `retitle`, edge-label limit, `rev`, group admins) `POST /api/graph/ops`: `link`, `unlink`, `move`, `pin`, `order`
       (shift siblings), `retitle`; edge labels limited to `child`, `sells`, `ref`; one
       transaction, bumps `rev`; permission check: owner or group admin.
-- [ ] **12.2b Vendor** `d3-force`, `d3-zoom`, `d3-drag`, `d3-quadtree` (ISC) via
+- [ ] **12.2b Vendor** (not done: `vendor/` has no d3; the graph runs on its own layout, `client/graph/layout.js`) `d3-force`, `d3-zoom`, `d3-drag`, `d3-quadtree` (ISC) via
       `tools/vendor.sh`, versions in `vendor/VERSIONS`, relative imports only.
-- [ ] **12.3 `GraphView`** (Preact SVG + vendored `d3-force`/`d3-zoom`/`d3-drag`):
+- [~] **12.3 `GraphView`** (built as `client/components/GraphPage.js` on `client/graph/layout.js`, own force layout; open: expand-on-demand, semantic zoom, the vendored d3 of 12.2b)  (Preact SVG + vendored `d3-force`/`d3-zoom`/`d3-drag`):
       tokens for node/edge/label, stored positions, expand-on-demand on tap, tiles
       read-only, semantic zoom (colour -> label -> tile). Looks like
       `docs/screenshots/graph-mobile-*.jpg`.
@@ -483,7 +483,7 @@ the lock lives in E31/E67.
       migration 2 get no suggestions, the position is gone; (d) decided: the chip's *Not now* stays per
       browser, the panel is the durable list; (e) answered suggestions are purged when the panel opens.
       Tests: `tests/place-housekeeping.test.js`.
-- [ ] **12.6b Node lock**: `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
+- [x] **12.6b Node lock** (built: `server/api/locks.js`, `server/db/nodes.js`, `client/editor/lock.js`, `tests/locks.test.js`; **open: `canBreak` in `locks.js` still returns true for everybody** ("the PoC has no owners"), now that accounts exist only the owner should break a lock): `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
       `DELETE` (release), expiry after ~60 s without heartbeat, owner may break;
       the editor (`EDITOR.md` E67) takes the lock on open, shows "locked by <name>" read-only when
       refused. Ops and saves are rejected without the lock.
@@ -564,7 +564,7 @@ Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
 - [ ] **13.15 Motion safety and budget** (Q9): `prefers-reduced-motion` shows the rest pose with a HUD "motion off" button;
       no blink faster than 0.5 s and no cross-fade shorter than 0.3 s (WCAG 2.3.1); a hidden tab or a lost context pauses.
       Done when the system setting stands every moving work still, in a browser test.
-- [ ] **13.7 Plan layer in the 2D editor** (`EDITOR.md` E75): wall layer with height; rooms =
+- [x] **13.7 Plan layer in the 2D editor** (`EDITOR.md` E75; built: `client/editor/walls.js`, the acute-corner refusal in `model.js`, `shape.wall`): wall layer with height; rooms =
       closed, corridors = lines; refuse corners sharper than 90 degrees.
 
 ## Docs and housekeeping (do alongside, not blocking)
