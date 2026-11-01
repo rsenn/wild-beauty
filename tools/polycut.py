@@ -27,19 +27,29 @@ def main():
 
     image = ImageOps.exif_transpose(Image.open(a.image)).convert('RGB')
     w, h = image.size
-    scale = 4 # drawn four times as large, so the edge has no stairs before it is feathered
-    total = Image.new('L', (w * scale, h * scale), 0)
+    radius = max(0.5, a.feather * max(w, h))
+    # only the box of the outline (and the reach of the blur) is drawn: a 12 MP photo with a
+    # small subject must not cost a 12 MP mask at four times the size
+    xs = [x * w for shape in shapes for x, _ in shape]
+    ys = [y * h for shape in shapes for _, y in shape]
+    pad = int(radius * 3) + 3
+    x0, y0 = max(0, int(min(xs)) - pad), max(0, int(min(ys)) - pad)
+    x1, y1 = min(w, int(max(xs)) + pad + 1), min(h, int(max(ys)) + pad + 1)
+    bw, bh = max(1, x1 - x0), max(1, y1 - y0)
+    # drawn larger, so the edge has no stairs before it is feathered; at most about 24 MP
+    scale = max(1, min(4, int((24e6 / (bw * bh)) ** 0.5)))
+    total = Image.new('L', (bw * scale, bh * scale), 0)
 
     # even-odd: every outline flips what it covers
     for shape in shapes:
-        points = [(x * w * scale, y * h * scale) for x, y in shape]
+        points = [((x * w - x0) * scale, (y * h - y0) * scale) for x, y in shape]
         layer = Image.new('L', total.size, 0)
         ImageDraw.Draw(layer).polygon(points, fill=255)
         total = ImageChops.difference(total, layer)
 
-    mask = total.resize((w, h), Image.LANCZOS)
-    radius = max(0.5, a.feather * max(w, h))
-    mask = mask.filter(ImageFilter.GaussianBlur(radius))
+    part = total.resize((bw, bh), Image.LANCZOS).filter(ImageFilter.GaussianBlur(radius))
+    mask = Image.new('L', (w, h), 0)
+    mask.paste(part, (x0, y0))
 
     if mask.getbbox() is None:
         print(json.dumps({'event': 'result', 'ok': False, 'error': 'empty'}))
@@ -47,7 +57,7 @@ def main():
 
     cut = image.convert('RGBA')
     cut.putalpha(mask)
-    cut.save(a.out)
+    cut.save(a.out, compress_level=1)
 
     if a.mask_out:
         mask.save(a.mask_out)

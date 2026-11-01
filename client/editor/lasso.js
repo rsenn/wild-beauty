@@ -92,8 +92,12 @@ class Heap {
     this.v[i] = v;
   }
 
+  // the value of the smallest entry; `top` is left as its priority
   pop() {
     const v = this.v[0];
+
+    this.top = this.p[0];
+
     const p = this.p.pop();
     const last = this.v.pop();
     const n = this.p.length;
@@ -126,8 +130,11 @@ const NEIGHBOURS = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, Math.SQ
 // The live wire: the cheapest 8-connected path from pixel `a` to pixel `b` as a list of [x, y]
 // pixels, both ends included. The search stays inside the box of the two ends grown by `margin`
 // pixels (or by half their distance, if more), so a click costs time in proportion to the segment
-// and not to the photo. Never fails: when the box holds no path (it always does) the straight line
-export function liveWire(cost, w, h, a, b, margin = 24) {
+// and not to the photo. It always ends, and fast: the search has a budget (`maxMs`, and a count of
+// steps in proportion to the box), and when it runs out, or the box holds no path, the answer is the
+// straight line. An editor must never hang on a photo it does not like (2026-11-01: distances kept
+// in 32 bits made a node look improved by every re-visit, and the search never ended).
+export function liveWire(cost, w, h, a, b, margin = 24, maxMs = 40) {
   const grow = Math.max(margin, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 2));
   const x0 = Math.max(0, Math.min(a[0], b[0]) - grow);
   const y0 = Math.max(0, Math.min(a[1], b[1]) - grow);
@@ -141,9 +148,15 @@ export function liveWire(cost, w, h, a, b, margin = 24) {
 
   if(a[0] === b[0] && a[1] === b[1]) return [[a[0], a[1]]];
 
-  const dist = new Float32Array(bw * bh).fill(Infinity);
+  // 64 bits, not 32: a stored distance must equal the sum it was computed from, or the same parent
+  // "improves" the same node every time it is looked at
+  const dist = new Float64Array(bw * bh).fill(Infinity);
   const back = new Int32Array(bw * bh).fill(-1);
   const heap = new Heap();
+
+  const limit = 12 * bw * bh + 1000; // every node is settled once; this is far more than a search needs
+  const t0 = typeof performance === 'object' ? performance.now() : 0;
+  let steps = 0;
 
   dist[from] = 0;
   heap.push(0, from);
@@ -151,7 +164,11 @@ export function liveWire(cost, w, h, a, b, margin = 24) {
   while(heap.size) {
     const here = heap.pop();
 
+    // an entry that a better one has replaced
+    if(heap.top > dist[here]) continue;
     if(here === to) break;
+
+    if(++steps > limit || ((steps & 511) === 0 && t0 && performance.now() - t0 > maxMs)) return [[a[0], a[1]], [b[0], b[1]]];
 
     const hx = here % bw;
     const hy = (here - hx) / bw;

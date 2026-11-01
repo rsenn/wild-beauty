@@ -2073,6 +2073,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     run.loading.then(() => {
       if(wire.current !== run || !run.work) return;
 
+      try {
+
       const first = run.stage[0];
 
       if(run.anchors.length >= 3 && Math.hypot(units[0] - first[0], units[1] - first[1]) < WIRE_CLOSE_PX / latest.current.scale) return wireClose();
@@ -2090,6 +2092,11 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       run.stage = [...run.stage, units];
       run.aim = null;
       wireShow(run);
+      } catch {
+        // whatever went wrong, the lasso starts over; the editor and the work are not touched
+        wireReset();
+        setAnnounce(tr('editor.announce.wandFailed'));
+      }
     });
   };
   // The pointer moves faster than the shortest path can follow (a segment from a far anchor takes
@@ -2111,14 +2118,18 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
       if(wire.current !== run || wand.current) return;
 
-      const p = wirePixel(run, run.pointer);
+      try {
+        const p = wirePixel(run, run.pointer);
 
-      if(!p || (run.aim && run.aim[0] === p[0] && run.aim[1] === p[1])) return;
+        if(!p || (run.aim && run.aim[0] === p[0] && run.aim[1] === p[1])) return;
 
-      const last = run.anchors.at(-1);
+        const last = run.anchors.at(-1);
 
-      run.aim = p;
-      wireShow(run, Math.hypot(p[0] - last[0], p[1] - last[1]) > WIRE_PREVIEW_PX ? [last, p] : liveWire(run.work.cost, run.work.w, run.work.h, last, p));
+        run.aim = p;
+        wireShow(run, Math.hypot(p[0] - last[0], p[1] - last[1]) > WIRE_PREVIEW_PX ? [last, p] : liveWire(run.work.cost, run.work.w, run.work.h, last, p));
+      } catch {
+        wireReset();
+      }
     });
   };
   // close the outline back to the first anchor and make it the selection
