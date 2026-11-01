@@ -7,6 +7,19 @@ const STATUS = { 413: 'too-large', 415: 'unsupported', 422: 'undecodable', 400: 
 
 const failure = code => Object.assign(new Error(code), { code });
 
+// A read that never settles (a cloud photo the phone is still fetching) must not hold the queue
+// for ever: after READ_MS it counts as unreadable like one that fails at once.
+export const READ_MS = 15000;
+
+const readBytes = (file, ms = READ_MS) => {
+  let timer;
+
+  return Promise.race([
+    file.arrayBuffer(),
+    new Promise((_, reject) => (timer = setTimeout(() => reject(Object.assign(new Error('timeout'), { name: 'TimeoutError' })), ms))),
+  ]).finally(() => clearTimeout(timer));
+};
+
 // -> { done: Promise<record>, abort() }; onProgress gets 0..1 of the bytes sent
 //
 // The file is read into memory first (`arrayBuffer`) and that copy is sent. A phone
@@ -26,7 +39,7 @@ export function sendFile(file, { onProgress, pos }) {
     let body;
 
     try {
-      body = new Blob([await file.arrayBuffer()], { type: 'application/octet-stream' });
+      body = new Blob([await readBytes(file)], { type: 'application/octet-stream' });
     } catch(e) {
       track('upload', { ok: false, code: 'unreadable', name: e?.name, bytes: file.size, ms: Math.round(performance.now() - began) });
       throw failure('unreadable');
@@ -83,6 +96,12 @@ export function sendFile(file, { onProgress, pos }) {
 export const RETRIES = 4;
 export const pause = attempt => 1500 * attempt * attempt;
 
+// A file the phone cannot read is the same dead handle on every attempt, so it gets only a
+// couple of quick tries (a cloud photo may be there by then) before the card asks for the file
+// again; it also does not slow the other files down (only a dropped connection does).
+export const READ_RETRIES = 2;
+export const readPause = attempt => 1000 * attempt;
+
 // `onChange(id, patch)` reports { state, progress, record, error, attempt }; states:
 // queued, uploading, processing (bytes sent, server still working), done, failed
 // `send` and `wait` are injectable for the tests.
@@ -101,7 +120,7 @@ export function createQueue({ concurrency = 3, onChange, send = sendFile, wait =
       });
 
       running.set(id, task);
-      onChange(id, { state: 'uploading', progress: 0, error: null, attempt });
+      onChange(id, { state: 'uploading', progress: 0, error: null, attempt, retry: null });
 
       task.done.then(
         record => {
@@ -111,10 +130,14 @@ export function createQueue({ concurrency = 3, onChange, send = sendFile, wait =
         error => {
           if(error.code === 'aborted') return;
 
-          if((error.code === 'network' || error.code === 'unreadable') && attempt < RETRIES) {
-            limit = 1;
-            onChange(id, { state: 'queued', progress: 0, error: null, attempt: attempt + 1 });
-            retrying.set(id, wait(pause(attempt + 1), () => retrying.has(id) && (retrying.delete(id), waiting.push({ id, file, pos, attempt: attempt + 1 }), pump())));
+          const unreadable = error.code === 'unreadable';
+          const tries = unreadable ? READ_RETRIES : RETRIES;
+
+          if((error.code === 'network' || unreadable) && attempt < tries) {
+            if(!unreadable) limit = 1;
+            // `retry` tells the card why it waits: { n, of, reason }
+            onChange(id, { state: 'queued', progress: 0, error: null, attempt: attempt + 1, retry: { n: attempt + 1, of: tries, reason: error.code } });
+            retrying.set(id, wait((unreadable ? readPause : pause)(attempt + 1), () => retrying.has(id) && (retrying.delete(id), waiting.push({ id, file, pos, attempt: attempt + 1 }), pump())));
 
             return;
           }

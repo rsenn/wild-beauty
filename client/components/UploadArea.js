@@ -222,7 +222,7 @@ export const UploadArea = ({ extra = null }) => {
             onRemove=${() => remove(item.id)}
             onRotate=${() => update(item.id, i => ({ rotation: (i.rotation + 90) % 360 }))}
             onCrop=${crop => update(item.id, () => ({ crop }))}
-            onRetry=${() => start(item)}
+            onRetry=${() => (item.error === 'unreadable' ? (remove(item.id), document.getElementById('wb-file-input')?.click()) : start(item))}
           />`,
         )}
         ${typeof extra === 'function' ? extra({ count: ready.length, addSelected }) : extra}

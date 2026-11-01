@@ -1,6 +1,6 @@
 // bun test: the upload queue retries a dropped connection (client/upload.js)
 import { describe, expect, test } from 'bun:test';
-import { RETRIES, createQueue, pause } from '../client/upload.js';
+import { READ_MS, READ_RETRIES, RETRIES, createQueue, pause, readPause, sendFile } from '../client/upload.js';
 
 const fail = code => ({ done: Promise.reject(Object.assign(new Error(code), { code })), abort() {} });
 const ok = record => ({ done: Promise.resolve(record), abort() {} });
@@ -72,6 +72,56 @@ describe('createQueue', () => {
     await tick();
 
     expect(states.at(-1)).toBe('done');
+  });
+
+  test('a photo that cannot be read gets a few quick tries, says why it waits, and does not slow the others', async () => {
+    const waits = [];
+    const events = [];
+    let sent = 0;
+    const answers = { dead: () => fail('unreadable'), good: () => ok({ hash: 'g' }) };
+    const queue = createQueue({ onChange: (id, patch) => events.push([id, patch.state, patch.error, patch.retry]), send: file => (sent++, answers[file]()), wait: (ms, fn) => waits.push([ms, fn]) });
+
+    queue.add(1, 'dead');
+    await tick();
+    expect(events).toContainEqual([1, 'queued', null, { n: 1, of: READ_RETRIES, reason: 'unreadable' }]);
+    expect(waits[0][0]).toBe(readPause(1));
+
+    // a second file is not held back to one at a time
+    queue.add(2, 'good');
+    queue.add(3, 'good');
+    await tick();
+    expect(events.filter(e => e[1] === 'done').map(e => e[0])).toEqual([2, 3]);
+
+    for(let i = 0; i < READ_RETRIES; i++) {
+      waits.shift()[1]();
+      await tick();
+    }
+
+    expect(sent).toBe(READ_RETRIES + 1 + 2);
+    expect(events.at(-1)).toEqual([1, 'failed', 'unreadable', undefined]);
+  });
+
+  test('a read that never settles is given up after READ_MS instead of holding the queue', async () => {
+    const real = globalThis.setTimeout;
+    const realXhr = globalThis.XMLHttpRequest;
+    const timers = [];
+
+    globalThis.setTimeout = (fn, ms) => (timers.push([fn, ms]), timers.length);
+    globalThis.XMLHttpRequest = class {};
+
+    try {
+      const hung = { name: 'x.jpg', size: 1, arrayBuffer: () => new Promise(() => {}) };
+      const task = sendFile(hung, { onProgress() {} });
+      const outcome = task.done.then(() => 'sent', e => e.code);
+
+      await Promise.resolve();
+      expect(timers.at(-1)[1]).toBe(READ_MS);
+      timers.at(-1)[0]();
+      expect(await outcome).toBe('unreadable');
+    } finally {
+      globalThis.setTimeout = real;
+      globalThis.XMLHttpRequest = realXhr;
+    }
   });
 
   test('cancel stops a file that waits for its next attempt', async () => {

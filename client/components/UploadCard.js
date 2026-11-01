@@ -28,7 +28,7 @@ export const UploadCard = ({ item, order, inNode, ranging, onRange, onToggle, on
   const expiry = item.record?.expiresAt && !inNode ? expiryNote(item.record.expiresAt) : null;
 
   const status = {
-    queued: () => t('upload.state.queued'),
+    queued: () => (item.retry ? t('upload.state.retrying.' + item.retry.reason, { n: item.retry.n, of: item.retry.of }) : t('upload.state.queued')),
     uploading: () => t('upload.state.uploading', { percent }),
     processing: () => t('upload.state.processing'),
     failed: () => t('upload.error.' + item.error, { max: formatSize(limits.maxBytes, lang) }),
@@ -138,7 +138,7 @@ export const UploadCard = ({ item, order, inNode, ranging, onRange, onToggle, on
       ${SHOW_FILE_INFO && html`<span class="wb-card-size">${formatSize(item.file.size, lang)}</span>`}
       ${expiry && html`<span class="wb-card-expiry">${t(expiry.key, expiry.count ? { count: expiry.count } : {})}</span>`}
       ${status && html`<span class="wb-card-status" role=${item.state === 'failed' ? 'alert' : null}>${status}</span>`}
-      ${item.state === 'failed' && item.error !== 'too-large' && html`<button type="button" class="wb-card-retry" onClick=${onRetry}>${t('upload.retry')}</button>`}
+      ${item.state === 'failed' && item.error !== 'too-large' && html`<button type="button" class="wb-card-retry" onClick=${onRetry}>${t(item.error === 'unreadable' ? 'upload.choose' : 'upload.retry')}</button>`}
     </li>
   `;
 };
