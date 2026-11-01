@@ -28,6 +28,7 @@ import { loginRoute, logoutRoute, meRoute, registerRoute, viewerOf } from './ser
 import { isOwner, siteFor } from './server/sites.js';
 import { createPage, pathsOf, resolve as resolvePage, robotsTxt, sitemap, sitemapXml, siteGraph } from './server/site.js';
 import { adminRoute, isAdmin } from './server/admin.js';
+import { pushRoute } from './server/push.js';
 import { peer, purgeReplay, recordEvents, recordReplay } from './server/events.js';
 import { capabilities, detectTools } from './server/media/tools.js';
 
@@ -220,6 +221,8 @@ async function siteRoute(req, site, pathname, h) {
 
   // the graph is public to read; the rest of the API and the uploads are the owner's
   if(pathname === '/api/graph' && req.method === 'GET') return null;
+  // notifications on a new page: any visitor may subscribe
+  if(pathname.startsWith('/api/push/')) return pushRoute(req, pathname, h, site);
   // the owner who ticked the recording box (RecordConsent.js) sends it here; a visitor of a site is never recorded
   if(pathname === '/api/replay' && req.method === 'POST') return owner ? null : text('forbidden\n', 403);
   if(pathname === '/api/pages' && req.method === 'POST') return owner ? newSitePage(req, site, h) : text('forbidden\n', 403);

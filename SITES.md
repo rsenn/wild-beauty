@@ -454,3 +454,15 @@ nothing sends the owner to the wild-beauty host any more:
 
 Not verified in a browser as the owner (no password at hand): editor, list, graph editing. Old `?edit=` links on the
 wild-beauty host still work. Open: PWA `start_url` -> `/edit`.
+
+## 15. Installed app and notifications (2026-11-01)
+
+- The installed jános.ch app opens on `/edit` (`startUrl` in `server/sites.js`); a visitor who installs it gets the
+  login there.
+- A visitor can allow notifications at the foot of any page ("Über neue Seiten benachrichtigen"); the browser
+  subscribes with the site's VAPID key (`data/vapid.json`, made on first use, never committed) and
+  `/api/push/subscribe` stores the endpoint (table `push_subscriptions`). iOS only offers push to an installed app.
+- When a page of a site becomes public (publish button, page list, graph) every subscriber gets a push,
+  at most once a day per page (`push_sent`); endpoints that answer 404 or 410 are dropped. The push carries no
+  text: the service worker (`server/pwa.js`) asks `/api/push/latest` and shows the newest page's title; a tap opens it.
+- Not done: notifications for other kinds of change, a per-visitor topic choice, a send-to-all button for the owner.

@@ -574,5 +574,8 @@
   "nav.admin.caption": "Status, accounts, logs",
   "page.title.admin": "Wild Beauty - Admin",
   "record.summary": "Help improve this site",
-  "record.more": "What is recorded?"
+  "record.more": "What is recorded?",
+  "push.off": "Notify me about new pages",
+  "push.on": "Notifications are on (tap to stop)",
+  "push.denied": "Notifications are blocked in this browser"
 }

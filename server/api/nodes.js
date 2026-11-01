@@ -9,6 +9,7 @@ import { config } from '../config.js';
 import { log } from '../log.js';
 import { database } from '../db/db.js';
 import { viewerOf } from '../auth.js';
+import { published } from '../push.js';
 import { mayWrite } from '../guard.js';
 import { addSuggestions, deleteNode, deletePhoto, getNode, linksFrom, listNodes, getPhoto, insertNode, nodePhotos, releaseLock, setNodePhotos, updateNode, upsertPhoto } from '../db/nodes.js';
 import { validateNode, photoLookup } from '../node/validate.js';
@@ -499,7 +500,10 @@ export async function visibilityRoute(req, idText, h) {
 
   const db = h ?? (await database());
 
+  const before = db.get('SELECT visibility FROM nodes WHERE id = ?', Number(idText))?.visibility;
+
   if(!db.run('UPDATE nodes SET visibility = ? WHERE id = ?', body.visibility, Number(idText)).changes) return fail(404, 'not_found');
+  if(body.visibility === 'public' && before !== 'public') published(db, Number(idText));
 
   return Response.json({ visibility: body.visibility });
 }

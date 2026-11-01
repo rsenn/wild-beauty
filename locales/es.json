@@ -574,5 +574,8 @@
   "nav.admin.caption": "Estado, cuentas, registros",
   "page.title.admin": "Wild Beauty - Gestión",
   "record.summary": "Ayudar a mejorar este sitio",
-  "record.more": "¿Qué se graba?"
+  "record.more": "¿Qué se graba?",
+  "push.off": "Avisarme de páginas nuevas",
+  "push.on": "Avisos activados (toca para detenerlos)",
+  "push.denied": "Avisos bloqueados en este navegador"
 }

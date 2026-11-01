@@ -213,3 +213,23 @@
 .site-foot:hover {
   opacity: 1;
 }
+
+.site-push {
+  text-align: center;
+  margin-bottom: 0.6rem;
+}
+
+.site-push-button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  cursor: pointer;
+}
+
+.site-push-button:disabled {
+  cursor: default;
+  text-decoration: none;
+}

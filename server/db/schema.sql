@@ -155,3 +155,16 @@ CREATE UNIQUE INDEX users_username ON users(username COLLATE NOCASE) WHERE usern
 -- migration 8
 -- The operator accounts: they get the admin panel (server/admin.js). Set with tools/admin.js.
 ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0;
+
+-- migration 9
+-- Browsers that allowed notifications on a personal site (server/push.js), and when each page was last announced.
+CREATE TABLE push_subscriptions (
+  endpoint   TEXT PRIMARY KEY,
+  site       TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+CREATE TABLE push_sent (
+  node_id INTEGER PRIMARY KEY REFERENCES nodes(id) ON DELETE CASCADE,
+  at      INTEGER NOT NULL
+);

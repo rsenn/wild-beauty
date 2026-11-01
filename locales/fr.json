@@ -574,5 +574,8 @@
   "nav.admin.caption": "État, comptes, journaux",
   "page.title.admin": "Wild Beauty - Gestion",
   "record.summary": "Aider à améliorer ce site",
-  "record.more": "Que enregistre-t-on ?"
+  "record.more": "Que enregistre-t-on ?",
+  "push.off": "Me prévenir des nouvelles pages",
+  "push.on": "Notifications actives (touchez pour arrêter)",
+  "push.denied": "Notifications bloquées dans ce navigateur"
 }

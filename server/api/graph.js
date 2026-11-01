@@ -7,6 +7,7 @@ import { LABELS, addLink, deleteNode, graphEdges, graphNodes, insertNode, remove
 import { canView } from './nodes.js';
 import { viewerOf } from '../auth.js';
 import { isOwner } from '../sites.js';
+import { published } from '../push.js';
 import { siteGraph, uniqueSlug } from '../site.js';
 import { titleFor } from './gazetteer.js';
 
@@ -102,7 +103,10 @@ export function applyOp(h, op, { viewer = null, site = null } = {}) {
       // publish (public) or unpublish (hidden) a node of a user's; the community nodes have no owner and stay public
       if(!isId(op.id) || (op.visibility !== 'public' && op.visibility !== 'hidden')) throw new Error('bad_op');
 
-      return h.run('UPDATE nodes SET visibility = ? WHERE id = ? AND owner_id IS NOT NULL AND visibility <> ?', op.visibility, op.id, op.visibility).changes > 0;
+      if(h.run('UPDATE nodes SET visibility = ? WHERE id = ? AND owner_id IS NOT NULL AND visibility <> ?', op.visibility, op.id, op.visibility).changes === 0) return false;
+      if(op.visibility === 'public') published(h, op.id);
+
+      return true;
     case 'pin':
       if(!isId(op.id) || typeof op.pinned !== 'boolean') throw new Error('bad_op');
 

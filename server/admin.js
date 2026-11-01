@@ -69,6 +69,7 @@ export function summary(h, { dataDir = config.dataDir, now = Date.now() } = {}) 
           ['logged-in sessions (valid)', count(h, 'SELECT COUNT(*) AS n FROM sessions WHERE expires_at > ?', now)],
           ['users logged in', count(h, 'SELECT COUNT(DISTINCT user_id) AS n FROM sessions WHERE expires_at > ?', now)],
           [`browsers active in the last ${ACTIVE_MS / 60000} min`, browsers.size],
+          ['push subscriptions (notifications on a site)', count(h, 'SELECT COUNT(*) AS n FROM push_subscriptions')],
           ['editor locks held', count(h, 'SELECT COUNT(*) AS n FROM node_locks WHERE expires_at > ?', now)],
         ],
       },

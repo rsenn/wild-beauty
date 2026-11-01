@@ -4,6 +4,7 @@ import { useBoot } from '../boot.js';
 import { NodeView } from './NodeView.js';
 import { OwnerBar } from './SiteApp.js';
 import { RecordConsent } from './RecordConsent.js';
+import { PushToggle } from './PushToggle.js';
 
 // A page of a personal site (SITES.md): the navigation of the sitemap above,
 // the node in a centred stage below. Its own layout, not the app's tab strip.
@@ -56,7 +57,7 @@ export const SitePage = () => {
         <h1 class="site-h1">${node.title}</h1>
         <${NodeView} doc=${node.doc} photos=${hash => photos[hash] ?? null} label=${node.title} />
       </main>
-      ${site.owner && html`<footer class="site-foot"><${RecordConsent} fold=${true} /></footer>`}
+      <footer class="site-foot"><${PushToggle} />${site.owner && html`<${RecordConsent} fold=${true} />`}</footer>
       ${site.owner && html`<${OwnerBar} edit=${node.slug ? `/edit/${node.slug}` : '/edit'} />`}
     </div>
   `;

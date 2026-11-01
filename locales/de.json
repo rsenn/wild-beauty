@@ -574,5 +574,8 @@
   "nav.admin.caption": "Status, Konten, Protokolle",
   "page.title.admin": "Wild Beauty - Verwaltung",
   "record.summary": "Helfen, diese Seite zu verbessern",
-  "record.more": "Was wird aufgezeichnet?"
+  "record.more": "Was wird aufgezeichnet?",
+  "push.off": "Über neue Seiten benachrichtigen",
+  "push.on": "Benachrichtigungen sind an (tippen zum Beenden)",
+  "push.denied": "Benachrichtigungen sind in diesem Browser blockiert"
 }

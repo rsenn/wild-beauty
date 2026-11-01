@@ -23,6 +23,28 @@ const worker = `// Wild Beauty service worker: no caching, requests go to the ne
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', () => {});
+
+// a push carries nothing: ask the site what is new (SITES.md S15)
+self.addEventListener('push', event =>
+  event.waitUntil(
+    fetch('/api/push/latest', { cache: 'no-store' })
+      .then(res => (res.ok ? res.json() : { title: 'Wild Beauty', body: '', url: '/' }))
+      .catch(() => ({ title: 'Wild Beauty', body: '', url: '/' }))
+      .then(news => self.registration.showNotification(news.title, { body: news.body, icon: news.icon, data: { url: news.url } })),
+  ),
+);
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      const url = new URL(event.notification.data?.url ?? '/', self.location.origin).href;
+      const open = list.find(c => c.url === url) ?? list[0];
+
+      return open ? open.focus().then(c => c.navigate?.(url) ?? c) : self.clients.openWindow(url);
+    }),
+  );
+});
 `;
 
 // the manifest of a personal site: its own name and colours, `www.` as the one origin
@@ -30,7 +52,7 @@ const siteManifest = site => ({
   id: '/',
   name: site.title,
   short_name: site.title,
-  start_url: '/',
+  start_url: site.startUrl ?? '/',
   scope: '/',
   display: 'standalone',
   background_color: site.color,
