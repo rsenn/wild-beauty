@@ -48,6 +48,7 @@ import { orderFor, shortcutFor, transformFor } from '../editor/shortcuts.js';
 import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/keyboard.js';
 import { DEFAULT_TOOL, SLOTS, inField, slotOf, toolForKey } from '../editor/tools.js';
 import { ToolSlot } from './ToolSlot.js';
+import { SMALL, loupeEnabled, loupeShows, readPref, toggled, writePref } from '../editor/loupe.js';
 import { editorStore } from '../editor/useEditor.js';
 import { acuteCorner } from '../editor/walls.js';
 import { STEP, alcove, canClose, corridorOf, corridorStep, roomsOf, snapVertex, wallOf } from '../editor/roomaid.js';
@@ -365,6 +366,21 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const [clipLine, setClipLine] = useState(null);
   const [coarse] = useState(() => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches);
   const handlePx = coarse ? HANDLE_PX_TOUCH : HANDLE_PX;
+  // the loupe (E124, editor/loupe.js): on by default on small screens, opt-in elsewhere; the choice is this browser's
+  const [small, setSmall] = useState(() => typeof matchMedia === 'function' && matchMedia(SMALL).matches);
+  const [loupePref, setLoupePref] = useState(readPref);
+
+  useEffect(() => {
+    if(typeof matchMedia !== 'function') return;
+
+    const query = matchMedia(SMALL);
+    const follow = () => setSmall(query.matches);
+
+    query.addEventListener?.('change', follow);
+    follow();
+
+    return () => query.removeEventListener?.('change', follow);
+  }, []);
   const [hint, setHint] = useState('');
   const [exporting, setExporting] = useState(false);
   const [exportFailed, setExportFailed] = useState(false); // a short note in place of the clip tool's help text
@@ -418,7 +434,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const tr = (key, params) => latestT.current(key, params);
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
-  latest.current = { aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, vsels, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null, group, groupBox, auto, addMode };
+  latest.current = { loupePref, small, aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, vsels, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null, group, groupBox, auto, addMode };
 
   // In slides mode a new drawing goes right after the slide's last drawing, and
   // a move in the stack stays between the photo and the next one: the slide a
@@ -606,6 +622,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     dispatch({ type: 'removePage', id });
     switchPage(Math.min(index, latest.current.doc.pages.length - 2));
   };
+  // does a pointer event get the loupe (client/editor/loupe.js); a handle or vertex being dragged counts in the select tool
+  const loupeFor = event => loupeShows({ pref: latest.current.loupePref, small: latest.current.small, tool: latest.current.tool, fine: !!(hdrag.current || vdrag.current), pointerType: event.pointerType });
   // a selection in the making (wand taps, lasso anchors): the toolbar Undo takes its last tap back, as
   // Backspace does, instead of undoing the document under it (the photo itself, on a phone)
   const selecting = () => {
@@ -3151,6 +3169,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
         <${Popover} label=${t('editor.keys')} class="wb-editor-keys" align="right">
           <dl class="wb-editor-keylist">${KEYS.map(k => html`<dt><kbd>${k}</kbd></dt><dd>${t('editor.keys.' + k)}</dd>`)}</dl>
         <//>
+        <button type="button" class="wb-editor-chip wb-editor-loupe-toggle" aria-pressed=${loupeEnabled(loupePref, small) ? 'true' : 'false'} title=${t('editor.loupe.hint')} onClick=${() => { const next = toggled(loupePref, small); writePref(next); setLoupePref(next); }}>${t('editor.loupe')}</button>
         <button type="button" class="wb-editor-close" onClick=${close}>${t('editor.close')}</button>
       </div>
       <div class="wb-editor-banners">
@@ -3198,7 +3217,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
           overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${tool === 'lasso' && wireSel && html`<${WandSelection} path=${wirePath} live=${wireLive} taps=${wireAnchors} corners=${wireCorners && outlineOf(doc, wireSel.id, { photos: hash => photos[hash], page, clipped: true })} scale=${scale} />`}${tool === 'wand' && wandSel && html`<${WandSelection} path=${wandPath} taps=${wandSel.taps} corners=${wandCorners && outlineOf(doc, wandSel.id, { photos: hash => photos[hash], page, clipped: true })} scale=${scale} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsels} scale=${scale} />`}${group.length > 0 && groupBox && html`<${Selection} outline=${groupBox} scale=${scale} px=${handlePx} grips=${true} />`}${group.length > 0 && groupAt.map(f => { const o = outlineOf(doc, f.step.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true }); return o && html`<polygon key=${f.step.id} class="wb-editor-outline" points=${o.map(p => p.join(',')).join(' ')} />`; })}${marquee && marquee[2] && html`<rect class="wb-editor-marquee" x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke-dasharray=${`${5 / scale} ${4 / scale}`} />`}${marquee && !marquee[2] && html`<g fill="none" stroke-width=${1 / scale} shape-rendering="crispEdges" pointer-events="none">${['#ffffff', '#000000'].map((stroke, k) => html`<rect x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke=${stroke} stroke-dasharray=${k ? `${2 / scale} ${2 / scale}` : undefined} />`)}</g>`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
-          loupe=${coarse && tool !== 'select' && tool !== 'wand' && tool !== 'lasso' && tool !== 'cutout'}
+          loupe=${loupeFor}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'lasso' || tool === 'cutout' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
           onSize=${({ width }) => setScale(width > 0 ? width / 1000 : 1)}

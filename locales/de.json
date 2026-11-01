@@ -404,6 +404,8 @@
   "editor.export.error": "Das Bild konnte nicht erstellt werden.",
   "editor.announce.clipped": "Foto von der Form maskiert",
   "editor.keys": "Tasten",
+  "editor.loupe": "Lupe",
+  "editor.loupe.hint": "Eine Vergrösserung über dem Finger beim Zeichnen oder Ziehen eines Griffs. Auf kleinen Bildschirmen standardmässig an; hier lässt sie sich ein- oder ausschalten.",
   "editor.keys.hint": "Tastatur: siehe Liste Tasten. Bild runter und Bild hoch wählen den nächsten oder vorigen Schritt, die Pfeiltasten verschieben ihn.",
   "editor.keys.V P S C U T": "Werkzeug wählen: Auswahl, Stift, Form, Maske, Maske lösen, Text",
   "editor.keys.W L B": "Auswahlwerkzeug wählen: Zauberstab, magnetisches Lasso, Hintergrund entfernen",

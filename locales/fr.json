@@ -404,6 +404,8 @@
   "editor.export.error": "L'image n'a pas pu être créée.",
   "editor.announce.clipped": "Photo masquée par la forme",
   "editor.keys": "Touches",
+  "editor.loupe": "Loupe de précision",
+  "editor.loupe.hint": "Un agrandissement au-dessus du doigt pendant le dessin ou le déplacement d'une poignée. Activé par défaut sur les petits écrans ; ici on peut l'activer ou le désactiver.",
   "editor.keys.hint": "Clavier : voir la liste Touches. Page suivante et Page précédente choisissent l'étape suivante ou précédente, les flèches la déplacent.",
   "editor.keys.V P S C U T": "Choisir un outil : sélection, stylo, forme, masque, démasquer, texte",
   "editor.keys.W L B": "Choisir l'outil de sélection : baguette magique, lasso magnétique, supprimer l'arrière-plan",

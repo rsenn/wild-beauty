@@ -11,6 +11,8 @@ import { STAGE, eventUnits, pixelsPerUnit } from '../editor/stage.js';
 // `onSize({ width, height })` hears of changes. A wheel turn comes out as
 // `onPointer.wheel` too; the handler calls preventDefault when it uses it.
 //  interactive  the overlay takes pointer events (a tool is active)
+//  loupe        a magnifier above the point being placed (E124): true for a finger or pen, or a function of the
+//               pointer event that decides (client/editor/loupe.js), asked after the tool handled the event
 //  className    extra class on the overlay (cursor); `class` goes on the stage box
 export const Stage = ({ class: extra = '', label, content, overlay, interactive = false, loupe: wanted = false, className = '', onPointer = {}, onSize, children, ...rest }) => {
   const box = useRef(null);
@@ -33,14 +35,18 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
     return () => watch.disconnect();
   }, []);
 
+  // does this event get a magnifier
+  const show = event => (typeof wanted === 'function' ? !!wanted(event) : !!wanted && event.pointerType !== 'mouse');
+
   // hand the handlers the event and its units; no units, no call
   const wrap = name => event => {
     const units = eventUnits(svg.current, event);
 
-    // a finger hides the point it places: a magnifier shows it from above (E124)
-    if(wanted && event.pointerType !== 'mouse') setLook(name === 'up' || name === 'cancel' ? null : units ? { x: units[0], y: units[1] } : null);
-
     if(units) onPointer[name]?.(event, units);
+
+    // a finger hides the point it places: a magnifier shows it from above (E124). Decided after the
+    // handler, which may just have started the drag that wants it; it always goes with the pointer
+    setLook(name === 'up' || name === 'cancel' || !show(event) ? null : units ? { x: units[0], y: units[1] } : null);
   };
 
   // a pen reports more positions than frames: every coalesced one is a point of
@@ -59,7 +65,7 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
     const last = all[all.length - 1];
     const at = last && eventUnits(svg.current, last);
 
-    if(wanted && at && event.pointerType !== 'mouse') setLook({ x: at[0], y: at[1] });
+    if(at && show(event)) setLook({ x: at[0], y: at[1] });
   };
 
   const down = event => {
@@ -84,7 +90,7 @@ export const Stage = ({ class: extra = '', label, content, overlay, interactive 
   return html`
     <div ref=${box} class=${'wb-editor-stage' + (extra ? ' ' + extra : '')} role="img" aria-label=${label} ...${rest}>
       ${content}
-      <svg ref=${svg} class=${'wb-editor-overlay' + (interactive ? ' wb-editor-interactive' : '') + (className ? ' ' + className : '')} viewBox=${`0 0 ${STAGE} ${STAGE}`} onPointerDown=${interactive ? down : undefined} onPointerMove=${interactive ? moved : undefined} onPointerUp=${interactive ? wrap('up') : undefined} onPointerCancel=${interactive ? wrap('cancel') : undefined} onWheel=${interactive ? wrap('wheel') : undefined}>
+      <svg ref=${svg} class=${'wb-editor-overlay' + (interactive ? ' wb-editor-interactive' : '') + (className ? ' ' + className : '')} viewBox=${`0 0 ${STAGE} ${STAGE}`} onPointerDown=${interactive ? down : undefined} onPointerMove=${interactive ? moved : undefined} onPointerUp=${interactive ? wrap('up') : undefined} onPointerCancel=${interactive ? wrap('cancel') : undefined} onPointerLeave=${interactive ? () => setLook(null) : undefined} onWheel=${interactive ? wrap('wheel') : undefined}>
         ${typeof overlay === 'function' ? overlay({ scale }) : overlay}
       </svg>
       ${look && wanted && html`<${Loupe} look=${look} scale=${scale} content=${content} overlay=${overlay} />`}

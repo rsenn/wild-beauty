@@ -404,6 +404,8 @@
   "editor.export.error": "The picture could not be made.",
   "editor.announce.clipped": "Photo masked by the shape",
   "editor.keys": "Keys",
+  "editor.loupe": "Loupe",
+  "editor.loupe.hint": "A magnifier above your finger while you draw or drag a handle. On by default on small screens; here you can switch it on or off.",
   "editor.keys.hint": "Keyboard: see the Keys list. PageDown and PageUp select the next or previous step, the arrow keys move it.",
   "editor.keys.V P S C U T": "Pick a tool: select, pen, shape, clip, unclip, text",
   "editor.keys.W L B": "Pick the selection tool: magic wand, magnetic lasso, remove background",

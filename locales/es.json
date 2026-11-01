@@ -404,6 +404,8 @@
   "editor.export.error": "No se pudo crear la imagen.",
   "editor.announce.clipped": "Foto enmascarada por la forma",
   "editor.keys": "Teclas",
+  "editor.loupe": "Lupa",
+  "editor.loupe.hint": "Una ampliación sobre el dedo al dibujar o arrastrar un tirador. Activada por defecto en pantallas pequeñas; aquí puedes activarla o desactivarla.",
   "editor.keys.hint": "Teclado: consulta la lista de teclas. AvPág y RePág seleccionan el paso siguiente o anterior, las flechas lo mueven.",
   "editor.keys.V P S C U T": "Elegir una herramienta: seleccionar, bolígrafo, forma, recortar, quitar recorte, texto",
   "editor.keys.W L B": "Elegir la herramienta de selección: varita mágica, lazo magnético, quitar fondo",

@@ -3,6 +3,7 @@ import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { REST, bounds, seed, settled, step } from '../graph/layout.js';
+import { afterLift, pinchZoom } from '../graph/pinch.js';
 import { fitHeight } from '../gallery/fit.js';
 import { Layout } from './Layout.js';
 import { OwnerBar, SiteHead } from './SiteApp.js';
@@ -333,10 +334,10 @@ export const GraphPage = () => {
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if(g.pinch) {
-      const [a, b] = [...pointers.current.values()];
-      const k = Math.min(4, Math.max(minK(), (g.k * Math.hypot(a.x - b.x, a.y - b.y)) / g.d));
+      // one finger left of the pinch (see afterLift): nothing to zoom by
+      const k = pinchZoom(g, pointers.current, { min: minK() });
 
-      setView(v => ({ ...v, k }));
+      if(k !== null) setView(v => ({ ...v, k }));
     } else if(g.carry) {
       const p = world(e);
 
@@ -434,7 +435,7 @@ export const GraphPage = () => {
     pointers.current.delete(e.pointerId);
 
     if(!g || g.pinch) {
-      if(!pointers.current.size) gesture.current = null;
+      gesture.current = afterLift(g, pointers.current, view);
 
       return;
     }
