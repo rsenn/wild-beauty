@@ -91,6 +91,33 @@ export function cleanRegion(region) {
   return out.length ? out : null;
 }
 
+// the outlines of a magnetic lasso (client/editor/lasso.js): up to MAX_OUTLINES polygons of [u, v] in
+// 0..1 of the photo, MAX_LASSO vertices in all (the editor thins its path first); null when absent
+// or malformed. A hole is an outline inside another one (even-odd)
+const MAX_OUTLINES = 4;
+const MAX_LASSO = 2000;
+const LASSO = resolve(import.meta.dir, '../../tools/polycut.py');
+
+export function cleanPolygon(polygon) {
+  if(!Array.isArray(polygon) || !polygon.length || polygon.length > MAX_OUTLINES) return null;
+
+  const out = [];
+  let total = 0;
+
+  for(const poly of polygon) {
+    if(!Array.isArray(poly) || poly.length < 3 || poly.some(q => !Array.isArray(q) || !(q[0] >= 0 && q[0] <= 1) || !(q[1] >= 0 && q[1] <= 1))) return null;
+
+    total += poly.length;
+    out.push(poly.map(([x, y]) => [Math.round(x * 1e5) / 1e5, Math.round(y * 1e5) / 1e5]));
+  }
+
+  return total <= MAX_LASSO ? out : null;
+}
+
+// the cut along a lasso outline: tools/polycut.py (Pillow only) in place of the segment tool; it
+// answers with the same `result` line, so the rest of the route does not tell them apart
+export const polygonArgs = ({ file, polygon, out, action }) => [PYTHON, '-I', LASSO, '--image', file, '--polygon', JSON.stringify(polygon), '--out', resolve(out, 'cut.png'), ...(FILLS.includes(action) ? ['--mask-out', resolve(out, 'mask.png')] : [])];
+
 // the tool's arguments: a select step without `action`, else the full-size cut of candidate `pick`
 export function segmentArgs({ file, points, out, cache, pick, region, action }) {
   const args = ['segment', '--in', file, '--units', 'norm', '--progress', '--groups', 'auto', '--exclude', 'object', '--cache-dir', cache];
@@ -117,9 +144,12 @@ export async function segmentRoute(req) {
     return fail(400, 'bad-json', 'bad request body');
   }
 
-  const points = cleanPoints(body?.points);
+  const action = ACTIONS.includes(body?.action) ? body.action : null;
+  // a lasso outline is only ever applied: the editor finds its path itself
+  const polygon = action ? cleanPolygon(body?.polygon) : null;
+  const points = polygon ? [] : cleanPoints(body?.points);
 
-  if(typeof body?.photo !== 'string' || !HASH.test(body.photo) || !points) return fail(400, 'bad-request', 'photo and points needed');
+  if(typeof body?.photo !== 'string' || !HASH.test(body.photo) || !points) return fail(400, 'bad-request', polygon === null && body?.polygon ? 'bad outline' : 'photo and points needed');
 
   const file = photoFile(body.photo);
 
@@ -131,9 +161,8 @@ export async function segmentRoute(req) {
   mkdirSync(cache, { recursive: true });
   mkdirSync(out, { recursive: true });
 
-  const action = ACTIONS.includes(body.action) ? body.action : null;
   const fill = body.fill !== false;
-  const argv = [TOOL, ...segmentArgs({ file, points, out, cache, pick: body.pick, region: cleanRegion(body.region), action })];
+  const argv = polygon ? polygonArgs({ file, polygon, out, action }) : [TOOL, ...segmentArgs({ file, points, out, cache, pick: body.pick, region: cleanRegion(body.region), action })];
 
   const spawn = (args, stdin = 'ignore') => {
     logCommand(args);
@@ -150,7 +179,7 @@ export async function segmentRoute(req) {
     proc = spawn(argv);
   } catch(e) {
     rmSync(out, { recursive: true, force: true });
-    log('exec', `-> ${TOOL} failed to start: ${e.message}`);
+    log('exec', `-> ${argv[0]} failed to start: ${e.message}`);
 
     return fail(503, 'no-tool', 'segmentation is not available');
   }

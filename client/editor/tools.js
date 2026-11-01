@@ -10,6 +10,7 @@ export const TOOLS = [
   { id: 'clip', key: 'C', cursor: 'pointer', group: 'clip' },
   { id: 'unclip', key: 'U', cursor: 'pointer', group: 'clip' },
   { id: 'wand', key: 'W', cursor: 'crosshair', group: 'wand' },
+  { id: 'lasso', key: 'L', cursor: 'crosshair', group: 'wand' },
   { id: 'cutout', key: 'B', cursor: 'pointer', group: 'wand' },
   { id: 'text', key: 'T', cursor: 'text' },
 ];

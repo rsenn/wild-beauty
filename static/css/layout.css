@@ -638,6 +638,7 @@ body {
 .wb-editor-delete { --wb-icon-tool: var(--wb-icon-tool-delete); }
 .wb-editor-save { --wb-icon-tool: var(--wb-icon-tool-save); }
 .wb-editor-tool-wand { --wb-icon-tool: var(--wb-icon-tool-wand); }
+.wb-editor-tool-lasso { --wb-icon-tool: var(--wb-icon-tool-lasso); }
 .wb-editor-tool-unclip { --wb-icon-tool: var(--wb-icon-tool-unclip); }
 .wb-editor-tool-text { --wb-icon-tool: var(--wb-icon-tool-text); }
 .wb-editor-tool-cutout { --wb-icon-tool: var(--wb-icon-tool-cutout); }
@@ -1982,6 +1983,16 @@ body {
 
 .wb-wand-sub circle {
   fill: var(--wb-danger);
+}
+
+.wb-wand-anchor circle {
+  fill: var(--wb-wand-light);
+  stroke: var(--wb-wand-dark);
+}
+
+.wb-wand-first circle {
+  fill: var(--wb-select);
+  stroke: var(--wb-wand-light);
 }
 
 .wb-wand-actions {

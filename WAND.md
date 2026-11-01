@@ -50,12 +50,28 @@ video, text prompts, automatic subject detection beyond the one-button backgroun
 | **Take things out** | the wand (A2 to A6) | one thing out of a busy photo, removing a thing, keeping only one thing |
 
 A third selection tool, the **magnetic lasso** (edge-snapping freehand outline, OpenCV
-`IntelligentScissors`: Canny and gradient cost, live-wire path between clicks), is spec. It
-would be a separate tool with its own icon, for thin or hard things SAM misses. Its outline
+`IntelligentScissors`: Canny and gradient cost, live-wire path between clicks), was built 2026-11-01 (see below). It
+is a separate tool with its own icon, for thin or hard things SAM misses. Its outline
 becomes the same kind of *selection* as the wand's, so Cut out / Take out / Erase and the fill
 switch are shared. The two never mix within one gesture: the wand is taps and a model, the lasso
 is a traced path. A lasso selection can be passed to the wand as its `region` (A6) and the other
 way round, but that is an explicit step, not a mode.
+
+**Built 2026-11-01.** Not OpenCV `IntelligentScissors` but the same idea in the browser, so no tool
+install and no round trip while the pointer moves: `client/editor/lasso.js` (Sobel gradient of the
+luma on a copy of the photo with the long side 640 px, scaled by its 98th percentile, turned into a
+cost; a click snaps to the cheapest pixel within 6 px; the live wire is Dijkstra over 8 neighbours
+inside the box of the two anchors grown by 24 px or half their distance; the outline is thinned by
+Douglas-Peucker). Tool `lasso` (key L) in the wand's group; `NodeEditor.js` `wireDown`, `wireMove`,
+`wireClose`, `wireUndo`. Clicks set anchors, the line follows the pointer; the first anchor (after
+three) closes, as do Enter and the Close chip; Backspace takes an anchor back, Esc clears. Closing
+makes `wand.current` a run with a `polygon` (fractions of the whole image) and `pick` 0, so Cut out,
+Take out, Erase and the fill switch are the wand's own `wandApply`. Server: `POST /api/segment` with
+`polygon` (up to 4 outlines, 2000 vertices, `cleanPolygon`) and an `action` runs `tools/polycut.py`
+in place of the segment tool (Pillow, even-odd, drawn at 4x, feathered by 0.08% of the long edge,
+answers with the same `result` line and `--mask-out` for the fill). Open: touch has no hover, so no
+live segment before a tap; a hole needs a second outline (the server takes it, the editor does not
+offer it yet); handing a lasso to the wand as `region` and back.
 
 ---
 

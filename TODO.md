@@ -96,7 +96,7 @@ State: all of the work below is committed and pushed (last: `d2ae0104`). The cam
 - [ ] Encoder ahead of the tap (wand tool entry, whole galleries in the background).
 - [ ] Flower gallery (200+ photos) as a real-world test set: one tap each, contact sheet, fixed for later changes.
 - [ ] **Complete the subject** (amodal completion, WAND.md A8): keep the excluded masks, guess the hidden shape, the user refines that outline, then fill only it. Spec, prototype 2026-11-01.
-- [ ] **Magnetic lasso** as a second selection tool next to the wand (not replacing it, WAND.md 0): edge map plus shortest path, its outline becomes the same *selection* with Cut out / Take out / Erase.
+- [x] **Magnetic lasso** (2026-11-01, WAND.md 0): the tool (L) in the wand's group. Built client-side instead of OpenCV `IntelligentScissors`: `client/editor/lasso.js` (Sobel edge cost on a 640 px copy, click snapping, Dijkstra live wire in a bounded window, Douglas-Peucker), the outline is applied by `/api/segment` with `polygon` and `tools/polycut.py` (Pillow, even-odd, feathered), then the same fill / store path as the wand. **Not yet tried in a real browser**; to do: touch (no hover, so no live segment), drawing a hole (second outline), `region`-style hand-over to the wand.
 - [ ] Box drag as first prompt, grow / shrink the hole, fill variants for large holes; small objects fail with `E_METHOD`; choosing which subject Remove background keeps; `sam` for the final pass.
 - [ ] qjs-opencv release: smoke tests of `segment` / `cutout`, models with checksums, install script.
 

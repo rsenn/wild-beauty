@@ -68,4 +68,44 @@ describe('the magic wand route (E119)', () => {
     expect(cleanRegion([big])[0].length).toBeLessThanOrEqual(600);
     expect(segmentArgs({ file: '/p/a.jpg', points: [[0.5, 0.5, 1]], out: '/o', cache: '/c', region: [tri] })).toContain('--region');
   });
+  test('a lasso outline is cleaned and cut by tools/polycut.py, with the mask the fill needs', async () => {
+    const { cleanPolygon, polygonArgs } = await import('../server/api/segment.js');
+    const sq = [[0.2, 0.2], [0.8, 0.2], [0.8, 0.8], [0.2, 0.8]];
+
+    expect(cleanPolygon([sq])).toEqual([sq]);
+    expect(cleanPolygon(null)).toBeNull();
+    expect(cleanPolygon([])).toBeNull();
+    expect(cleanPolygon([[[0, 0], [1, 0]]])).toBeNull();
+    expect(cleanPolygon([[[0, 0], [2, 0], [0.5, 0.5]]])).toBeNull();
+    expect(cleanPolygon(Array.from({ length: 5 }, () => sq))).toBeNull();
+    expect(cleanPolygon([Array.from({ length: 2001 }, () => [0.5, 0.5])])).toBeNull();
+
+    expect(polygonArgs({ file: '/p/a.jpg', polygon: [sq], out: '/o', action: 'cut' })).not.toContain('--mask-out');
+    expect(polygonArgs({ file: '/p/a.jpg', polygon: [sq], out: '/o', action: 'take' }).at(-1)).toBe('/o/mask.png');
+
+    const { mkdtempSync, rmSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const dir = mkdtempSync(join(tmpdir(), 'polycut-'));
+
+    try {
+      const photo = join(dir, 'in.png');
+      const make = Bun.spawnSync(['python3', '-I', '-c', `from PIL import Image; Image.new('RGB', (200, 100), (200, 30, 30)).save('${photo}')`]);
+
+      if(make.exitCode !== 0) return; // no Pillow here
+
+      const ring = [sq, [[0.4, 0.4], [0.6, 0.4], [0.6, 0.6], [0.4, 0.6]]];
+      const run = Bun.spawnSync(polygonArgs({ file: photo, polygon: ring, out: dir, action: 'take' }));
+      const result = JSON.parse(run.stdout.toString().trim().split('\n').at(-1));
+
+      expect(result).toMatchObject({ event: 'result', ok: true, output: { path: join(dir, 'cut.png'), width: 200, height: 100 } });
+
+      const probe = Bun.spawnSync(['python3', '-I', '-c', `from PIL import Image; m = Image.open('${join(dir, 'mask.png')}'); print(m.getpixel((60, 30)), m.getpixel((100, 50)), m.getpixel((5, 5)))`]);
+
+      // inside the ring, in its hole, outside
+      expect(probe.stdout.toString().trim()).toBe('255 0 0');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
