@@ -46,16 +46,17 @@ const KEYED = {
   setVertices: c => `vertices:${c.id}`,
   setCrop: c => `crop:${c.id}`,
   setWall: c => `wall:${c.id}`,
-  // the preview and the full-resolution outline of the magic wand are one undo step
+  // an applied wand selection (cut, take out with its copy, erase) is one undo step: `group` is the photo
   // the preview and the final cutout of a photo are one undo step
   // typing in a text box is one undo step until something else happens
   resizeText: c => `resize:${c.id}`,
   updateText: c => (c.keyed ? `text:${c.id}:${c.keyed}` : null),
   setClipPolygons: c => `clipedit:${c.id}`,
   setEdge: c => `edge:${c.id}`,
-  setBox: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.id}` : null),
-  replacePhoto: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.id}` : null),
+  setBox: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.group ?? c.id}` : null),
+  replacePhoto: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.group ?? c.id}` : null),
   unclip: c => (c.wand ? `wand:${c.id}` : null),
+  duplicatePhoto: c => (c.wand ? `wand:${c.group ?? c.id}` : null),
   clipPolygon: c => (c.cutout ? `cutout:${c.id}` : c.wand ? `wand:${c.id}` : null),
 };
 
@@ -143,7 +144,7 @@ function onDoc(doc, c) {
     case 'cutPhoto':
       return cutPhoto(doc, c.id, c.pieces, c.ids, c.style);
     case 'duplicatePhoto':
-      return duplicatePhoto(doc, c.id, c.ids);
+      return duplicatePhoto(doc, c.id, c.ids, c.offset);
     case 'setTitle':
       return model.setTitle(doc, c.title);
     case 'setBg':

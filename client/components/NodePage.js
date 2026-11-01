@@ -8,12 +8,14 @@ import { GalleryNav, GalleryTools } from './GalleryTools.js';
 import { Layout } from './Layout.js';
 import { NodeEditor } from './NodeEditor.js';
 import { NodeView } from './NodeView.js';
+import { RecordConsent } from './RecordConsent.js';
 import { GalleryView } from './GalleryView.js';
 import { galleryItems, galleryable } from '../gallery/items.js';
 
 // /:lang/node/:id: a saved node, read-only. The server renders it into the
 // HTML (no JavaScript needed to see it); the browser adopts the same markup
-// from boot.node and boot.photos.
+// from boot.node and boot.photos. On a node of one's own the recording tick box sits at the lower
+// right, also while the editor is open (client/replay.js).
 export const NodePage = () => {
   const { t } = useI18n();
   const { node, photos = {}, lang } = useBoot();
@@ -34,6 +36,7 @@ export const NodePage = () => {
       ${!editingThis && (isGallery ? html`<${GalleryView} items=${items} doc=${node.kind === 'gallery' ? node.doc : undefined} photos=${hash => photos[hash] ?? null} overview=${node.kind === 'gallery'} label=${title} chrome=${chrome}>${view}<//>` : view)}
       ${!editingThis && html`<div class="wb-node-foot">${node.mine && html`<button type="button" class="wb-editor-chip wb-node-edit" onClick=${() => openEditor(node.id)}>${t('editor.edit')}</button>`}${isGallery && html`<${GalleryNav} chrome=${chrome} />`}</div>`}
       ${editingThis && html`<${NodeEditor} key=${target} target=${target} onClose=${closeEditor} />`}
+      ${node.mine && html`<div class="wb-node-record"><${RecordConsent} fold=${true} /></div>`}
     <//>
   `;
 };

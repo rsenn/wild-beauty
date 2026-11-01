@@ -34,7 +34,7 @@ import { eventUnits } from '../editor/stage.js';
 import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
 import { contentBox, loadAlpha } from '../editor/alphamap.js';
-import { photoPoint, readLines, resultPolygon } from '../editor/wand.js';
+import { defaultPick, imagePoint, readLines, regionOf, selectionPath } from '../editor/wand.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
 import { contains } from '../editor/polygon.js';
 import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag } from '../editor/handles.js';
@@ -142,6 +142,25 @@ const Busy = ({ at, scale }) => {
     <circle class=${'wb-busy-arc' + (known ? '' : ' wb-busy-spin')} r=${r} pathLength="100" stroke-dasharray=${known ? `${Math.max(2, at.percent)} 100` : '25 100'} transform="rotate(-90)" />
     ${known && html`<text class="wb-busy-text" font-size=${13 / scale} text-anchor="middle" dominant-baseline="central">${Math.round(at.percent)}%</text>`}
     ${at.label && html`<text class="wb-busy-label" y=${r + 16 / scale} font-size=${12 / scale} text-anchor="middle">${at.label}</text>`}
+  </g>`;
+};
+
+// the wand's selection (WAND.md A3): the chosen candidate tinted, its outline in black and white
+// with the dashes running (still when the user asked for less motion), the taps as + (add) and
+// - (exclude) markers. The area is clipped to the photo's visible window (`corners`): the model
+// sees the whole image, and what lies beyond the crop must not be drawn over the neighbours.
+// Sizes are in screen pixels
+const stillMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const WandSelection = ({ path, taps, corners, scale }) => {
+  const d = 6 / scale;
+  const k = 5 / scale;
+
+  return html`<g class="wb-wand" pointer-events="none">
+    ${corners && html`<clipPath id="wb-wand-window"><polygon points=${corners.map(p => p.join(',')).join(' ')} /></clipPath>`}
+    ${path && html`<g clip-path=${corners ? 'url(#wb-wand-window)' : undefined}><path class="wb-wand-area" d=${path} fill-rule="evenodd" />
+    <path class="wb-wand-edge" d=${path} stroke-width=${1.5 / scale} />
+    <path class="wb-wand-ants" d=${path} stroke-width=${1.5 / scale} stroke-dasharray=${`${d} ${d}`}>${!stillMotion() && html`<animate attributeName="stroke-dashoffset" from="0" to=${-2 * d} dur="0.8s" repeatCount="indefinite" />`}</path></g>`}
+    ${(taps ?? []).map(({ at, label }, i) => html`<g key=${i} class=${'wb-wand-tap ' + (label ? 'wb-wand-add' : 'wb-wand-sub')} transform=${`translate(${at[0]} ${at[1]})`}><circle r=${9 / scale} stroke-width=${2 / scale} /><path d=${label ? `M${-k} 0H${k}M0 ${-k}V${k}` : `M${-k} 0H${k}`} stroke-width=${2 / scale} /></g>`)}
   </g>`;
 };
 
@@ -324,14 +343,16 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   }, [loading]);
   const hdrag = useRef(null); // a selection handle being dragged: { kind, id, base, pivot | centre, down }
   const [wandMode, setWandMode] = useState('add'); // what a wand tap means: add the area, or exclude it
-  const [wandPick, setWandPick] = useState(null); // { index, count } of the candidate shown
+  const [wandSel, setWandSel] = useState(null); // the wand's selection: { id, taps, candidates, output, pick } (WAND.md A3)
+  const [wandFill, setWandFill] = useState(true); // take out and erase fill the hole, else it stays transparent (WAND.md A5)
   const [clipMode, setClipMode] = useState('replace'); // what a new closed outline does to a clip: replace, add, subtract
   const cdrag = useRef(null); // a clip vertex being dragged: { id, polys, poly, vertex }
   const [typing, setTyping] = useState(null); // id of the text box being typed in
   const [busyAt, setBusyAt] = useState(null); // { x, y, percent } where the server is working, in stage units
   const [cutting, setCutting] = useState(null); // id of the photo whose background is being removed
   const cutRun = useRef(null);
-  const wand = useRef(null); // { id, points, controller } of the magic wand run
+  const wand = useRef(null); // the wand run: { id, photo, points, taps, region, candidates, output, pick, controller, applying }
+  const wandKeys = useRef(null); // the wand's key actions for the key handler, current every render
   const clipStroke = useRef(null); // { points } while a clip-tool stroke is drawn
   const [clipLine, setClipLine] = useState(null);
   const [coarse] = useState(() => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches);
@@ -479,7 +500,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
     wand.current?.controller?.abort();
     wand.current = null;
-    setWandPick(null);
+    setWandSel(null);
   }, [tool]);
   useEffect(() => () => (wand.current?.controller?.abort(), cutRun.current?.abort()), []);
 
@@ -1141,6 +1162,13 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
         return;
       }
 
+      // the wand with a selection: Escape forgets it, Backspace takes the last tap back
+      if(current === 'wand' && wand.current && !e.ctrlKey && !e.metaKey && !e.altKey && !inField(e.target) && (e.key === 'Escape' || e.key === 'Backspace')) {
+        e.preventDefault();
+
+        return e.key === 'Escape' ? wandKeys.current?.reset() : wandKeys.current?.undo();
+      }
+
       const next = toolForKey(e);
 
       if(next) return setTool(next);
@@ -1618,11 +1646,14 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     dispatch({ type: 'updateText', id: step.id, patch: { ...patch, lines, h }, keyed: key ?? Object.keys(patch)[0] });
   };
 
-  // magic wand (E119): a tap sends the photo and all taps so far to the server;
-  // the outline that comes back (a quick one, later a sharper one) becomes the
-  // photo's clip. A new tap kills the run that is still going.
+  // magic wand (WAND.md A3): taps build a selection and nothing in the document changes until an
+  // action applies it. A tap sends all taps so far as a select step (about a second); the three
+  // candidate masks come back as outlines and are drawn over the photo, the taps marked + and -.
   const wandDown = (e, units) => {
     const { doc, photos, scale, editStep: step, page: at } = latest.current;
+
+    if(wand.current?.applying) return;
+
     const id = step?.op === 'photo' ? step.id : hitTest(doc, units, { photos: hash => photos[hash], tolerance: TAP_PX / scale, page: at, ops: ['photo'] });
     const photo = id && findStep(doc, id).step;
 
@@ -1631,81 +1662,148 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     setSelected(id);
 
     const corners = outlineOf(doc, id, { photos: hash => photos[hash], page: at });
-    const uv = corners && photoPoint(corners, units);
+    // the photo is drawn as a square window into its image; the server works on the whole image
+    const info = photos[photo.photo];
+    const frame = info && { width: info.width, height: info.height, crop: photo.crop };
+    const uv = corners && imagePoint(corners, units, frame);
 
     if(!uv) return;
 
-    const run = wand.current?.id === id ? wand.current : { id, photo: photo.orig ?? photo.photo, points: [] };
+    // a photo clipped before the wand (by hand, or a background removal): the wand works inside the clip
+    const manual = () => {
+      const geo = clipPolygonsOf(latest.current.doc, id);
 
-    run.points = [...run.points, [uv[0], uv[1], e?.altKey || wandMode === 'sub' ? 0 : 1]];
-    run.pick = undefined;
-    run.adjusted = false;
-    run.at = units;
+      return geo && regionOf(corners, geo.polys, frame);
+    };
+    // the image the photo shows now, not its original: a second action builds on the first (an
+    // Erase on a filled hole must not bring back what Take out took)
+    const run = wand.current?.id === id ? wand.current : { id, photo: photo.photo, points: [], taps: [], region: manual() };
+    // excluding needs something to exclude from: until a tap added something, every tap adds
+    const label = (e?.altKey || wandMode === 'sub') && run.points.some(p => p[2] === 1) ? 0 : 1;
+
+    run.points = [...run.points, [uv[0], uv[1], label]];
+    run.taps = [...run.taps, { at: units, label }];
     wand.current = run;
-    runWand(run);
+    setWandSel(s => ({ ...(s?.id === id ? s : { id, candidates: [], output: null, pick: null }), taps: run.taps }));
+    wandSelect(run);
   };
-  // send the run's taps (and the candidate chosen with bigger / smaller) to the server
-  const runWand = run => {
+  // the select step for the run's taps; a newer tap aborts it
+  const wandSelect = run => {
+    run.controller?.abort();
+    run.controller = new AbortController();
+
+    const { signal } = run.controller;
+    const at = run.taps.at(-1).at;
+
+    setBusyAt({ x: at[0], y: at[1] });
+
+    fetch('/api/segment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ photo: run.photo, points: run.points, region: run.region ?? undefined }), signal })
+      .then(res =>
+        res.ok
+          ? readLines(res.body, event => {
+              if(event.event === 'progress') return setBusyAt(b => b && { ...b, percent: event.percent });
+              if(event.event !== 'result') return;
+              // a failed select leaves nothing selected, so no action works on an older outline
+              if(!event.ok) {
+                run.candidates = [];
+                run.pick = null;
+                setWandSel(s => s?.id === run.id && { ...s, candidates: [], pick: null });
+
+                return setAnnounce(tr('editor.announce.wandFailed'));
+              }
+
+              run.candidates = event.candidates ?? [];
+              run.output = event.output;
+              run.pick = defaultPick(run.candidates, WAND_MAX_COVER);
+              setWandSel({ id: run.id, taps: run.taps, candidates: run.candidates, output: run.output, pick: run.pick });
+              setAnnounce(tr(run.pick === null ? 'editor.announce.wandNothing' : 'editor.announce.wand'));
+            })
+          : setAnnounce(tr('editor.announce.wandFailed')),
+      )
+      .catch(() => {})
+      .finally(() => run.controller?.signal === signal && setBusyAt(null));
+  };
+  // apply the selection (WAND.md A5), the chosen candidate at full size. Cut out: the photo becomes
+  // the cut. Take out: a copy right above it holds the cut and the photo itself gets the hole filled.
+  // Erase: the photo gets the hole filled. Without `fill` the hole stays transparent. One undo step;
+  // the photo is guarded like a background removal (E128) while it runs
+  const wandApply = action => {
+    const run = wand.current;
+
+    if(!run || run.applying || !Number.isInteger(run.pick) || !findStep(latest.current.doc, run.id)) return;
+
     const { id } = run;
 
     run.controller?.abort();
     run.controller = new AbortController();
-    setWandPick(null);
-    setBusyAt({ x: run.at[0], y: run.at[1] });
+    run.applying = action;
 
     const { signal } = run.controller;
+    const at = run.taps.at(-1)?.at ?? [500, 500];
+    const got = {};
+    const need = { cut: ['cut'], take: ['cut', 'rest'], erase: ['rest'] }[action];
+    let failed = false;
 
-    const apply = event => {
-      const { doc: now, photos: info, page: here } = latest.current;
-      const corners = findStep(now, id) && outlineOf(now, id, { photos: hash => info[hash], page: here });
-      const polygon = corners && resultPolygon(event, corners);
+    setCutting(id);
+    setBusyAt({ x: at[0], y: at[1], label: tr('editor.busy.' + action) });
 
-      if(!polygon) return;
+    fetch('/api/segment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ photo: run.photo, points: run.points, region: run.region ?? undefined, pick: run.pick, action, fill: wandFill }), signal })
+      .then(res =>
+        res.ok
+          ? readLines(res.body, event => {
+              if(event.event === 'progress') setBusyAt(b => b && { ...b, percent: event.percent * SERVER_SHARE });
+              else if(event.event === 'derived') got[event.role] = event.record;
+              else if(event.event === 'failed' || (event.event === 'result' && !event.ok)) failed = true;
+            })
+          : (failed = true),
+      )
+      .then(() => {
+        if(signal.aborted) return;
+        if(failed || need.some(role => !got[role])) return setAnnounce(tr(action === 'cut' ? 'editor.announce.wandFailed' : 'editor.announce.takeOutFailed'));
 
-      // the server starts with the largest candidate; one that is most of the photo is the background, so go one smaller
-      const cover = event.candidates?.[event.picked]?.coverage;
+        return Promise.all(need.map(role => arrived(got[role], true))).then(infos => {
+          const { doc: now } = latest.current;
+          const info = Object.fromEntries(need.map((role, i) => [role, infos[i]]));
 
-      if(run.pick === undefined && !run.adjusted && cover > WAND_MAX_COVER && event.picked > 0) {
-        run.adjusted = true;
-        run.pick = event.picked - 1;
+          if(signal.aborted || !findStep(now, id)) return;
+          if(action === 'take' && now.pages[findStep(now, id).page].steps.length > LIMITS.steps - 2) return setAnnounce(tr('editor.announce.takeOutFailed'));
 
-        return runWand(run);
-      }
+          setPhotos(old => ({ ...old, ...Object.fromEntries(need.map(role => [got[role].hash, info[role]])) }));
 
-      // a sharper cut from an earlier tap replaced the image: go back to the original
-      if(findStep(now, id).step.photo !== run.photo) dispatch({ type: 'replacePhoto', id, hash: run.photo, wand: true });
+          if(action === 'take') {
+            const taken = new Set(allIds(now));
+            const copy = unique(taken);
 
-      const taken = new Set(allIds(now));
+            taken.add(copy);
+            dispatch({ type: 'duplicatePhoto', id, ids: [copy, unique(taken)], offset: 0, wand: true, group: id });
+            dispatch({ type: 'replacePhoto', id: copy, hash: got.cut.hash, wand: true, group: id });
+            dispatch({ type: 'replacePhoto', id, hash: got.rest.hash, wand: true, group: id });
+            fitBox(copy, got.cut, info.cut, { wand: true, group: id });
+            setSelected(copy);
+            // the taken-out subject is meant to be moved: the select tool, with it in hand
+            setTool('select');
+            fadeIn(copy);
+          } else {
+            dispatch({ type: 'replacePhoto', id, hash: got[need[0]].hash, wand: true, group: id });
 
-      run.picked = event.picked;
-      setWandPick(Number.isInteger(event.picked) ? { index: event.picked, count: event.candidates?.length ?? 1 } : null);
-      dispatch({ type: 'clipPolygon', id, polygon, shape: unique(taken), style: { color: latest.current.color, width: 1 }, wand: true });
-      setAnnounce(tr('editor.announce.wand'));
-    };
+            if(action === 'cut') fitBox(id, got.cut, info.cut, { wand: true, group: id });
 
-    // the final pass: the soft-edged cut becomes the photo's image, the quick outline is not needed
-    const loading = [];
-    const derived = event => {
-      if(!findStep(latest.current.doc, id)) return;
+            fadeIn(id);
+          }
 
-      loading.push(
-        arrived(event.record, true).then(info => {
-          if(signal.aborted || !findStep(latest.current.doc, id)) return;
-
-          setPhotos(old => ({ ...old, [event.record.hash]: info }));
-          dispatch({ type: 'replacePhoto', id, hash: event.record.hash, wand: true });
-          dispatch({ type: 'unclip', id, wand: true });
-          fitBox(id, event.record, info, { wand: true });
-          fadeIn(id);
-        }),
-      );
-    };
-
-    fetch('/api/segment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ photo: run.photo, points: run.points, pick: run.pick }), signal })
-      .then(res => (res.ok ? readLines(res.body, event => (event.event === 'progress' ? setBusyAt(b => b && { ...b, percent: event.percent * SERVER_SHARE }) : event.event === 'result' && !event.ok ? setAnnounce(tr('editor.announce.wandFailed')) : event.event === 'result' && event.phase === 'preview' && event.ok ? (setBusyAt(b => b && { ...b, label: tr('editor.busy.refining') }), apply(event)) : event.event === 'derived' ? derived(event) : apply(event))) : setAnnounce(tr('editor.announce.wandFailed'))))
-      .then(() => Promise.all(loading))
+          setHist(history.seal);
+          setAnnounce(tr({ cut: 'editor.announce.cutOut', take: wandFill ? 'editor.announce.takenOut' : 'editor.announce.takenOutHole', erase: wandFill ? 'editor.announce.erased' : 'editor.announce.erasedHole' }[action]));
+          wandReset();
+        });
+      })
       .catch(() => {})
-      .finally(() => run.controller.signal === signal && setBusyAt(null));
+      .finally(() => {
+        if(wand.current === run) run.applying = null;
+
+        setCutting(c => (c === id ? null : c));
+
+        if(run.controller?.signal === signal) setBusyAt(null);
+      });
   };
   // a new image for photo step `id`: its visible part becomes the selection box
   const fitBox = (id, record, info, flags) => {
@@ -1814,15 +1912,45 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       if(cutRun.current?.signal === signal) (setCutting(null), setBusyAt(null));
     }
   };
-  // bigger / smaller: the next candidate mask of the last taps (part, object, whole)
-  const wandStep = delta => {
+  // take the last tap back (and select again), or forget the selection when it was the only tap
+  const wandUndoTap = () => {
     const run = wand.current;
 
-    if(!run || !wandPick) return;
+    if(!run?.points.length || run.applying) return;
 
-    run.pick = Math.max(0, Math.min(wandPick.count - 1, wandPick.index + delta));
-    runWand(run);
+    run.points = run.points.slice(0, -1);
+    run.taps = run.taps.slice(0, -1);
+
+    if(!run.points.length) return wandReset();
+
+    setWandSel(s => s && { ...s, taps: run.taps });
+    wandSelect(run);
   };
+  // forget the selection; the document is not touched
+  // a new selection starts adding again (WAND.md A2)
+  const wandReset = () => {
+    wand.current?.controller?.abort();
+    wand.current = null;
+    setWandSel(null);
+    setWandMode('add');
+    setBusyAt(null);
+  };
+  // smaller / larger: the next candidate by the share of the photo it covers, at once (all three
+  // came with the select step)
+  const wandOrder = run => (run?.candidates ?? []).filter(c => c.polygons?.length).sort((a, b) => a.coverage - b.coverage).map(c => c.index);
+  const wandStep = delta => {
+    const run = wand.current;
+    const order = wandOrder(run);
+    const next = order[order.indexOf(run?.pick) + delta];
+
+    if(!run || run.applying || next === undefined) return;
+
+    run.pick = next;
+    setWandSel(s => s && { ...s, pick: next });
+  };
+
+  wandKeys.current = { reset: wandReset, undo: wandUndoTap };
+
   // clip tool: with a photo selected, tapping a shape makes it that photo's clip;
   // tapping a photo selects it. Unclip tool: tapping a clipped photo frees it.
   const maskDown = units => {
@@ -2606,6 +2734,12 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const strip = auto || slideInfo ? [] : photoSteps(doc, page);
   const parsedShape = editStep?.op === 'shape' && (tool === 'select' || (tool === 'shape' && !shape.vertices.length)) ? verticesOf(editStep) : null;
   const clipGeo = tool === 'clip' && !previewing && editStep?.op === 'photo' ? clipPolygonsOf(doc, editStep.id) : null; // the clip outlines to ghost and edit
+  // the wand's selection as a stage path (follows the photo if it moves), its place among the candidates
+  const wandStepOf = wandSel && findStep(doc, wandSel.id);
+  const wandCorners = tool === 'wand' && wandStepOf && outlineOf(doc, wandSel.id, { photos: hash => photos[hash], page });
+  const wandPath = wandCorners && Number.isInteger(wandSel.pick) ? selectionPath(wandSel.candidates.find(c => c.index === wandSel.pick), wandSel.output, wandCorners, wandStepOf.step.crop) : null;
+  const wandRank = wandSel ? wandOrder(wandSel) : [];
+  const wandAt = wandSel ? wandRank.indexOf(wandSel.pick) : -1;
   const vertexGeo = parsedShape && matrixOf(doc, editStep.id, { page }) ? geometry(parsedShape, matrixOf(doc, editStep.id, { page })) : null;
   const vertexInfo = vertexGeo && vsel !== null && vertexGeo[vsel] ? { index: vsel, broken: vertexGeo[vsel].broken, canDelete: !!removeVertices(parsedShape.vertices, vsels, editStep.closed) } : null;
 
@@ -2701,7 +2835,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
           aria-describedby="wb-editor-keys-hint"
           class=${'wb-editor-cursor-' + tool + (over ? ' wb-editor-stage-over' : '')}
           content=${renderNode(realDoc, { photos: hash => photos[hash] ?? null, page: mode === 'slides' ? slideNow : page, upTo: auto ? undefined : playing ? pos : previewing ? shown : undefined })}
-          overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsels} scale=${scale} />`}${group.length > 0 && groupBox && html`<${Selection} outline=${groupBox} scale=${scale} px=${handlePx} grips=${true} />`}${group.length > 0 && groupAt.map(f => { const o = outlineOf(doc, f.step.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true }); return o && html`<polygon key=${f.step.id} class="wb-editor-outline" points=${o.map(p => p.join(',')).join(' ')} />`; })}${marquee && marquee[2] && html`<rect class="wb-editor-marquee" x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke-dasharray=${`${5 / scale} ${4 / scale}`} />`}${marquee && !marquee[2] && html`<g fill="none" stroke-width=${1 / scale} shape-rendering="crispEdges" pointer-events="none">${['#ffffff', '#000000'].map((stroke, k) => html`<rect x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke=${stroke} stroke-dasharray=${k ? `${2 / scale} ${2 / scale}` : undefined} />`)}</g>`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
+          overlay=${({ scale }) => html`${roomAid && kind === 'gallery' && (tool === 'shape' || tool === 'pen') && html`<${AidGrid} scale=${scale} />`}${live && html`<path d=${live} fill=${color} />`}${tool === 'shape' && cursor && html`<${KeyCursor} at=${cursor} scale=${scale} />`}${clipLine && html`<${ClipLine} points=${clipLine} />`}${tool === 'wand' && wandSel && html`<${WandSelection} path=${wandPath} taps=${wandSel.taps} corners=${wandCorners && outlineOf(doc, wandSel.id, { photos: hash => photos[hash], page, clipped: true })} scale=${scale} />`}${busyAt && html`<${Busy} at=${busyAt} scale=${scale} />`}${tool === 'clip' && clipGeo && html`<${ClipGhost} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} geo=${clipGeo} lit=${clipLine ? (crossedOutline(clipGeo.polys, clipLine, CUT_REACH_PX / scale)?.i ?? -1) : -1} scale=${scale} px=${handlePx} />`}${tool === 'select' && !previewing && editStep?.op === 'photo' && editStep.clip !== undefined && html`<${ClippedAway} step=${editStep} m=${matrixOf(doc, editStep.id, { page })} info=${photos[editStep.photo]} />`}${tool === 'clip' && candidate && html`<${Candidate} outline=${outlineOf(doc, candidate, { photos: hash => photos[hash], page, clipped: true })} />`}${vertexGeo && html`<${VertexEdit} geo=${vertexGeo} sel=${vsels} scale=${scale} />`}${group.length > 0 && groupBox && html`<${Selection} outline=${groupBox} scale=${scale} px=${handlePx} grips=${true} />`}${group.length > 0 && groupAt.map(f => { const o = outlineOf(doc, f.step.id, { photos: hash => photos[hash], page, upTo: scrubbed ? shown : undefined, clipped: true }); return o && html`<polygon key=${f.step.id} class="wb-editor-outline" points=${o.map(p => p.join(',')).join(' ')} />`; })}${marquee && marquee[2] && html`<rect class="wb-editor-marquee" x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke-dasharray=${`${5 / scale} ${4 / scale}`} />`}${marquee && !marquee[2] && html`<g fill="none" stroke-width=${1 / scale} shape-rendering="crispEdges" pointer-events="none">${['#ffffff', '#000000'].map((stroke, k) => html`<rect x=${Math.min(marquee[0][0], marquee[1][0])} y=${Math.min(marquee[0][1], marquee[1][1])} width=${Math.abs(marquee[1][0] - marquee[0][0])} height=${Math.abs(marquee[1][1] - marquee[0][1])} stroke=${stroke} stroke-dasharray=${k ? `${2 / scale} ${2 / scale}` : undefined} />`)}</g>`}${shape.vertices.length > 0 && html`<${ShapeDraft} draft=${shape} color=${color} width=${Math.max(1, size / 3)} scale=${scale} />`}${outline && html`<${Selection} outline=${outline} scale=${scale} px=${handlePx} grips=${tool === 'select' && !previewing} />`}`}
           loupe=${coarse && tool !== 'select' && tool !== 'wand'}
           interactive=${!auto && (tool === 'select' || ((tool === 'pen' || tool === 'shape' || tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && !previewing))}
           onPointer=${{ down, move, up, cancel: up, wheel, claim: claimCorner }}
@@ -2719,9 +2853,9 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       <div class="wb-editor-side">
       <div class="wb-editor-sec" data-sec="select">
       ${tool === 'select' && !auto && html`<div class="wb-editor-context"><button type="button" class="wb-editor-chip" aria-pressed=${addMode ? 'true' : 'false'} title=${t('editor.multi.add.hint')} onClick=${() => setAddMode(on => !on)}>${t('editor.multi.add')}</button></div>`}
-      ${(tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : t('editor.context.' + tool)}</p>`}
+      ${(tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'text') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : tool === 'wand' && wandSel?.taps?.length ? (wandAt < 0 ? t('editor.wand.nothing') : t('editor.wand.status', { taps: wandSel.taps.length, index: wandAt + 1, count: wandRank.length })) : t('editor.context.' + tool)}</p>`}
       ${tool === 'clip' && clipGeo && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.clip.mode')}>${['replace', 'add', 'subtract'].map(mode => html`<button type="button" class="wb-editor-chip" aria-pressed=${clipMode === mode ? 'true' : 'false'} onClick=${() => setClipMode(mode)}>${t('editor.clip.' + mode)}</button>`)}${outlineCount(doc, editStep.id) > 1 && html` <button type="button" class="wb-editor-chip" onClick=${splitOutlines}>${t('editor.clip.split')}</button>`}</div>`}
-      ${tool === 'wand' && html`<div class="wb-editor-context">${busyAt && html`<button type="button" class="wb-editor-chip" onClick=${cancelJob}>${t('editor.job.cancel')}</button> `}<button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'add' ? 'true' : 'false'} onClick=${() => setWandMode('add')}>${t('editor.wand.add')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'sub' ? 'true' : 'false'} onClick=${() => setWandMode('sub')}>${t('editor.wand.subtract')}</button>${wandPick && wandPick.count > 1 && html` <button type="button" class="wb-editor-chip" disabled=${wandPick.index <= 0} onClick=${() => wandStep(-1)}>${t('editor.nudge.smaller')}</button> <button type="button" class="wb-editor-chip" disabled=${wandPick.index >= wandPick.count - 1} onClick=${() => wandStep(1)}>${t('editor.nudge.larger')}</button>`}</div>`}
+      ${tool === 'wand' && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.wand.group')}>${busyAt && html`<button type="button" class="wb-editor-chip" onClick=${cancelJob}>${t('editor.job.cancel')}</button> `}<button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'add' ? 'true' : 'false'} title=${t('editor.wand.addHint')} onClick=${() => setWandMode('add')}>${t('editor.wand.add')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'sub' ? 'true' : 'false'} title=${t('editor.wand.subtractHint')} onClick=${() => setWandMode('sub')}>${t('editor.wand.subtract')}</button>${wandSel && html` <button type="button" class="wb-editor-chip" disabled=${wandAt <= 0} onClick=${() => wandStep(-1)}>${t('editor.nudge.smaller')}</button> <button type="button" class="wb-editor-chip" disabled=${wandAt < 0 || wandAt >= wandRank.length - 1} onClick=${() => wandStep(1)}>${t('editor.nudge.larger')}</button> <button type="button" class="wb-editor-chip" disabled=${!wandSel.taps?.length || !!cutting} onClick=${wandUndoTap}>${t('editor.wand.undoTap')}</button> <button type="button" class="wb-editor-chip" disabled=${!!cutting} onClick=${wandReset}>${t('editor.wand.reset')}</button>`}${wandSel && wandAt >= 0 && html`<span class="wb-wand-actions"><button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.cutHint')} onClick=${() => wandApply('cut')}>${t('editor.wand.cut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.takeOutHint')} onClick=${() => wandApply('take')}>${t('editor.wand.takeOut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.eraseHint')} onClick=${() => wandApply('erase')}>${t('editor.wand.erase')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandFill ? 'true' : 'false'} disabled=${!!busyAt} title=${t('editor.wand.fillHint')} onClick=${() => setWandFill(f => !f)}>${t('editor.wand.fill')}</button></span>`}</div>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">
             <label>${t('editor.pen.size')} <input type="range" min="2" max="40" value=${size} onInput=${e => setSize(Number(e.target.value))} /></label>

@@ -85,6 +85,9 @@
   --wb-editor-outline-width: 2px;
   --wb-editor-handle-fill: #fff;
   --wb-editor-handle-stroke: var(--wb-select);
+  /* the wand selection outline: light under dark running dashes, readable on any photo */
+  --wb-wand-light: #ffffff;
+  --wb-wand-dark: #000000;
   --wb-editor-context-bg: rgb(255 255 255 / 0.5);
   --wb-editor-popover-bg: #f2eadf;
   --wb-editor-banner-bg: rgb(255 220 32 / 0.75);

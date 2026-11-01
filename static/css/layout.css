@@ -883,6 +883,16 @@ body {
   max-width: none;
 }
 
+.wb-node-record {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.wb-node-record .wb-record {
+  margin: 0 0 1em;
+  max-width: 40em;
+}
+
 .wb-icon-button {
   display: inline-flex;
   align-items: center;
@@ -1858,6 +1868,49 @@ body {
   vector-effect: non-scaling-stroke;
   font-family: inherit;
   pointer-events: none;
+}
+
+/* the wand's selection (WAND.md A3): tinted area, black and white running outline, + / - taps.
+   The outline is black on white whatever the theme: it has to show on any photo */
+.wb-wand-area {
+  fill: var(--wb-select);
+  fill-opacity: 0.3;
+}
+
+.wb-wand-edge,
+.wb-wand-ants {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.wb-wand-edge {
+  stroke: var(--wb-wand-light);
+}
+
+.wb-wand-ants {
+  stroke: var(--wb-wand-dark);
+}
+
+.wb-wand-tap circle {
+  stroke: var(--wb-wand-light);
+}
+
+.wb-wand-tap path {
+  fill: none;
+  stroke: var(--wb-wand-light);
+  stroke-linecap: round;
+}
+
+.wb-wand-add circle {
+  fill: var(--wb-select);
+}
+
+.wb-wand-sub circle {
+  fill: var(--wb-danger);
+}
+
+.wb-wand-actions {
+  margin-inline-start: 0.75em;
 }
 
 .wb-fresh {

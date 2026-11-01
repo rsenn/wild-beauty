@@ -60,14 +60,24 @@ State: all of the work below is committed and pushed (last: `d2ae0104`). The cam
 - [ ] Tight box is the clip's bounding box limited to the picture's content; a smaller box inside a clip could be refined later if needed.
 - [ ] Three reports exist: `tools/events-report.js` (E107), `tools/events-sessions.js` and `tools/replay.js` (sessions, replay); merge them.
 
+### Magic wand and background removal (WAND.md Part E has the details)
+- [ ] **SAM on the GPU** (WAND.md B9, postponed 2026-11-01): full SAM encoder (ViT-B, ViT-L, ViT-H) on the RTX 2070 SUPER via onnxruntime-gpu into the embedding cache; the tool exports its encoder input and the cache key, a Python script writes the `.emb`; harness against MobileSAM first. The venv `~/.local/share/wild-beauty/sam-gpu-venv` is ready, models not downloaded.
+- [ ] Browser pass of the 2026-11-01 wand work (select / apply, Fill the hole, Exclude subtracts the object, first tap adds, overlay clipped, recording box on node pages, the wand on the current image, select tool after Take out, the faster fill).
+- [ ] **Latency, what is left** (WAND.md B8): persistent `opencv-imgproc serve` worker with a pool in the server (select 0.74 s to about 0.25 s); crop `cutFromSoft` to the subject (0.7 s); cropped cuts with an offset (editor change); no-fill rest as WebP or cropped. Done 2026-11-01: Cut out 6.5 s to 3.7 s, Take out 9.5 s to 6.0 s, Erase 9 s to 5.9 s, 4-tap select 2.4 s to 1.3 s.
+- [ ] Encoder ahead of the tap (wand tool entry, whole galleries in the background).
+- [ ] Flower gallery (200+ photos) as a real-world test set: one tap each, contact sheet, fixed for later changes.
+- [ ] **Complete the subject** (amodal completion, WAND.md A8): keep the excluded masks, guess the hidden shape, the user refines that outline, then fill only it. Spec, prototype 2026-11-01.
+- [ ] **Magnetic lasso** as a second selection tool next to the wand (not replacing it, WAND.md 0): edge map plus shortest path, its outline becomes the same *selection* with Cut out / Take out / Erase.
+- [ ] Box drag as first prompt, grow / shrink the hole, fill variants for large holes; small objects fail with `E_METHOD`; choosing which subject Remove background keeps; `sam` for the final pass.
+- [ ] qjs-opencv release: smoke tests of `segment` / `cutout`, models with checksums, install script.
+
 ### Needs a specification before it can be built
 - [ ] **Copy several steps at once**: needs selecting several steps first (Shift-tap, box select, "select all"?); the clipboard payload already holds up to 8 items.
 - [ ] **E110 dark theme**: the colours of a dark kraft (ground, ink, accent, cards) are not decided.
 - [ ] **One word for "node" / "work" in English** (German Werk, French pièce, Spanish pieza).
 - [ ] **E94 fill editor** (none / solid / linear / radial gradient, 2-5 stops, alpha) for the text background: the UI is not drawn.
 - [ ] **11.3 Image embeddings** (duplicates at upload, related nodes, search): runtime decided 2026-10-29 (DINOv2 via dnn), see M11.
-- [ ] **Magnetic lasso** replacing the wand: client side (edge map plus shortest path in a worker, clip polygon out). Needs your go.
-- [ ] Wand follow-ups: `sam` for the final pass, choosing which subject Remove background keeps.
+- [ ] **Promo video from a session recording** (WAND.md E15) (idea 2026-11-01, "a Wild Beauty TV commercial"): render an rrweb recording (`tools/replay.js export`) in headless Chrome at 1920x1080 (rrvideo or Playwright), cut the highlights by the wand / editor events of the server log and usage events, speed up idle stretches, captions and music with ffmpeg. Needs a clean recorded session (fresh collage, no draft banner) and access to the uploads for the renderer.
 - [ ] Verify Spanish with DeepL (needs `DEEPL_API_KEY`, target ES-419) and the tester.
 
 ### Decided, not built (large)

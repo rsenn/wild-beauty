@@ -3,7 +3,8 @@
 // masked here, before anything is sent: the value of every field and the text drawn on the editor stage.
 // Only with the visitor's consent: the tick box (RecordConsent.js) sets the flag in this browser; a link with
 // ?record=1 sets it too (for testers who are asked to), ?record=0 clears it. And only where it is of use: the
-// editing pages /new and /tree of the app, and on a personal site while its owner is logged in. A tab keeps one
+// editing pages /new and /tree of the app, a node page of one's own (its editor), and on a personal site while
+// its owner is logged in. A tab keeps one
 // recording id over the page changes (30 minutes of quiet end it), so the pages of a visit are one recording.
 const KEY = 'wb-record';
 const RID = 'wb-record-rid';
@@ -12,7 +13,8 @@ const FLUSH_MS = 3000;
 const CHUNK = 400 * 1024; // chars of JSON per request, the server takes 2 MB
 
 // may this page be recorded at all (when the visitor wants it)
-export const recordable = boot => (boot?.site ? !!boot.site.owner : /^\/[a-z]{2,3}\/(new|tree)\/?$/.test(location.pathname));
+export const recordable = boot =>
+  boot?.site ? !!boot.site.owner : /^\/[a-z]{2,3}\/(new|tree)\/?$/.test(location.pathname) || (!!boot?.node?.mine && /^\/[a-z]{2,3}\/node\/\d+\/?$/.test(location.pathname));
 
 // the id of this tab's recording: kept over page changes, renewed after a quiet half hour
 const recordingId = () => {

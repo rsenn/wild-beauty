@@ -17,6 +17,10 @@ const TOOL = process.env.WB_IMGPROC ?? 'opencv-imgproc';
 const MODELS = process.env.WB_MODELS_DIR;
 const VIEW_SIZE = 1024;
 
+// the clip of a cut picture is a loose hull: the alpha does the fine cutting, so the outline may lie
+// 1% of the long edge outside, with gaps and spurs smoothed away and at most 48 handles per object
+const OUTLINE = ['--outline-smooth', '0.004', '--outline-grow', '0.01', '--outline-vertices', '48'];
+
 const fail = (status, code, message) => Response.json({ error: { code, message } }, { status });
 
 // the subjects the tool found, outlines as fractions (0..1) of the output picture, so
@@ -26,8 +30,9 @@ export function subjects(event) {
 
   if(!(w > 0 && h > 0) || !Array.isArray(event.outlines)) return {};
 
+  // every object of an outline (the tool lists holes too, a clip over a picture with alpha has no use for them)
   const outlines = event.outlines
-    .map(o => o?.polygon)
+    .flatMap(o => (Array.isArray(o?.polygons) && o.polygons.length ? o.polygons.filter(c => !c.hole).map(c => c.polygon) : [o?.polygon]))
     .filter(poly => Array.isArray(poly) && poly.length >= 3 && poly.every(q => Array.isArray(q) && q.length === 2 && q.every(Number.isFinite)))
     .map(poly => poly.map(([x, y]) => [Math.round((x / w) * 1e5) / 1e5, Math.round((y / h) * 1e5) / 1e5]));
 
@@ -35,7 +40,7 @@ export function subjects(event) {
 }
 
 export const cutoutArgs = ({ file, out }) => {
-  const args = ['cutout', '--in', file, '--out', resolve(out, 'cut.png'), '--view-size', String(VIEW_SIZE), '--phases', 'preview,final', '--refine', 'guided', '--subjects', 'all', '--progress'];
+  const args = ['cutout', '--in', file, '--out', resolve(out, 'cut.png'), '--view-size', String(VIEW_SIZE), '--phases', 'preview,final', '--refine', 'guided', '--subjects', 'all', '--progress', ...OUTLINE];
 
   if(MODELS) args.push('--models-dir', MODELS);
 
