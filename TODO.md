@@ -60,6 +60,17 @@ State: all of the work below is committed and pushed (last: `d2ae0104`). The cam
 - [ ] Tight box is the clip's bounding box limited to the picture's content; a smaller box inside a clip could be refined later if needed.
 - [ ] Three reports exist: `tools/events-report.js` (E107), `tools/events-sessions.js` and `tools/replay.js` (sessions, replay); merge them.
 
+### Browser load and GUI responsiveness (idea 2026-11-01)
+- [~] **Built 2026-11-01** (`client/events.js` `startLoad`, events `slow`, `frame`, `load`, device in `session`; `bun tools/replay.js show <id>` prints the summary, `server/replaylog.js` `loadOf`): slow interactions, long frames with their scripts, memory and pictures held per minute. Not built yet: frame times during gestures, `performance.mark` around our own phases, a cross-session report in `tools/events-sessions.js`. Use the recordings of the coming days to see which use cases get heavy on RAM (the editor's photos are 2048 px display copies, about 12 MB decoded each: a medium-size stage copy is the first candidate if that is it).
+- [ ] **Measure how hard upload, editor and graph editor load the browser, and when the GUI gets sluggish**, as usage events (`client/events.js`), only above thresholds plus a summary per minute:
+  - responsiveness: Event Timing (`PerformanceObserver` `event`, INP), every interaction over 200 ms with the control / command it belonged to;
+  - the cause: Long Animation Frames (`long-animation-frame`, script and function attribution), `longtask` as the fallback;
+  - smoothness during gestures (drag, pinch, graph pan / zoom, upload grid scroll): frame times from `requestAnimationFrame`, dropped frames per gesture;
+  - memory: `performance.memory` (Chrome), growth over a session;
+  - our own phases: `performance.mark` / `measure` around upload decode / resize, editor open, graph layout, image loads;
+  - device class: `hardwareConcurrency`, `deviceMemory`, screen size.
+  Report per page in `tools/events-sessions.js` (95th percentile, worst interactions with their cause); slow events line up with the rrweb replay of recorded sessions. Timings of our own code only, nothing personal.
+
 ### Magic wand and background removal (WAND.md Part E has the details)
 - [ ] **SAM on the GPU** (WAND.md B9, postponed 2026-11-01): full SAM encoder (ViT-B, ViT-L, ViT-H) on the RTX 2070 SUPER via onnxruntime-gpu into the embedding cache; the tool exports its encoder input and the cache key, a Python script writes the `.emb`; harness against MobileSAM first. The venv `~/.local/share/wild-beauty/sam-gpu-venv` is ready, models not downloaded.
 - [ ] Browser pass of the 2026-11-01 wand work (select / apply, Fill the hole, Exclude subtracts the object, first tap adds, overlay clipped, recording box on node pages, the wand on the current image, select tool after Take out, the faster fill).

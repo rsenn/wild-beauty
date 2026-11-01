@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { purgeReplay } from '../server/events.js';
-import { eventsOf, filterSessions, groupSessions, playerPage, readLog, sessionsOf } from '../server/replaylog.js';
+import { eventsOf, filterSessions, groupSessions, loadOf, playerPage, readLog, sessionsOf } from '../server/replaylog.js';
 
 const T = 1_800_000_000_000;
 const batch = (rid, user, ip, ...times) => ({ ts: T, who: 'tester-1', sid: 'aaaa1111', rid, ip, user, ua: 'Mozilla Android Mobile', url: '/de/new', events: times.map((t, i) => ({ type: i ? 3 : 2, timestamp: T + t, data: {} })) });
@@ -105,5 +105,25 @@ describe('purgeReplay', () => {
     expect(existsSync(resolve(dir, 'notes.txt'))).toBe(true);
     expect(purgeReplay({ dataDir: resolve(dataDir, 'none'), now })).toEqual([]);
     rmSync(dataDir, { recursive: true, force: true });
+  });
+});
+
+describe('loadOf', () => {
+  test('the slow interactions, long frames and memory peaks of a session', () => {
+    const rows = [
+      { type: 'session', ts: 1, cores: 8, mem: 4, dpr: 2, screen: [390, 844] },
+      ...[120, 240, 900].map((dur, i) => ({ type: 'slow', ts: 10 + i, dur, wait: 5, run: dur - 50, key: 'Take out', st: { tool: 'wand' } })),
+      { type: 'frame', ts: 20, dur: 400, scripts: [{ dur: 380, fn: 'render', src: 'NodeEditor.js', by: 'FrameRequestCallback' }] },
+      { type: 'load', ts: 30, js: 80, limit: 4096, imgs: 12, imgMP: 3.1, nodes: 2500, editor: { photos: 9, photoMP: 28.3, pageMP: 12 } },
+      { type: 'load', ts: 90, js: 140, limit: 4096, imgs: 10, imgMP: 2.0, nodes: 2700, editor: { photos: 11, photoMP: 34.6, pageMP: 12 } },
+    ];
+    const load = loadOf(rows);
+
+    expect(load.device).toEqual({ cores: 8, mem: 4, dpr: 2, screen: [390, 844] });
+    expect(load.slow.count).toBe(3);
+    expect(load.slow.worst[0]).toMatchObject({ dur: 900, key: 'Take out', tool: 'wand' });
+    expect(load.frames.worst[0].script).toBe('render NodeEditor.js (FrameRequestCallback)');
+    expect(load.memory).toMatchObject({ js: 140, imgMP: 3.1, photos: 11, photoMP: 34.6, samples: 2 });
+    expect(loadOf([{ type: 'tap', ts: 1 }])).toBeNull();
   });
 });

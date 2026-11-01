@@ -1,18 +1,29 @@
 // Usage recording (server/events.js): taps on buttons with the button's box,
 // taps that hit nothing, whole pointer gestures (sampled paths), the editor's
 // commands, a layout dump of the controls, screen changes, errors, upload
-// timings and fast repeated taps (a sign of a button that is hard to hit).
-// Nothing about photo content or typed text. Batched, sent every few seconds
-// and when the page is hidden.
+// timings and fast repeated taps (a sign of a button that is hard to hit), and
+// the load on the browser (slow interactions, long frames, memory, see
+// startLoad). Nothing about photo content or typed text. Batched, sent every
+// few seconds and when the page is hidden.
 const queue = [];
 const started = performance.now();
 let timer = null;
+let idle = null;
+
+// the recording must not make the page sluggish: a full queue is sent when the browser is idle
+// (not in the middle of a drag), at the latest after IDLE_MS
+const IDLE_MS = 2000;
+const whenIdle = fn => (typeof requestIdleCallback === 'function' ? requestIdleCallback(fn, { timeout: IDLE_MS }) : setTimeout(fn, 0));
 
 export function track(type, data = {}) {
-  queue.push({ type, at: Math.round(performance.now() - started), ...data });
+  const row = { type, at: Math.round(performance.now() - started), ...data };
 
-  if(queue.length >= 50) flush();
+  queue.push(row);
+
+  if(queue.length >= 50) idle ??= whenIdle(flush);
   else timer ??= setTimeout(flush, 5000);
+
+  return row;
 }
 
 // `fetch` with keepalive survives the page closing too; a beacon is dropped by many
@@ -20,6 +31,8 @@ export function track(type, data = {}) {
 function flush() {
   clearTimeout(timer);
   timer = null;
+  idle = null;
+  merging = null;
 
   if(!queue.length) return;
 
@@ -43,6 +56,13 @@ export const setContext = fn => {
   context = fn;
 };
 
+// the editor also registers what it holds in pictures, for the `load` events
+let holding = null;
+
+export const setHolding = fn => {
+  holding = fn;
+};
+
 const snapshot = () => {
   try {
     return context?.() ?? undefined;
@@ -63,6 +83,25 @@ export const boxOf = el => {
   const r = el.getBoundingClientRect();
 
   return [round(r.x), round(r.y), round(r.width), round(r.height)];
+};
+
+// the same, kept until the page scrolls or resizes: reading a box forces a layout, and the
+// editor's snapshot is taken for every command (dozens a second while dragging)
+const boxes = new WeakMap();
+let epoch = 0;
+
+if(typeof addEventListener === 'function') for(const e of ['scroll', 'resize']) addEventListener(e, () => epoch++, { capture: true, passive: true });
+
+export const boxOfCached = el => {
+  const known = boxes.get(el);
+
+  if(known?.epoch === epoch) return known.box;
+
+  const box = boxOf(el);
+
+  boxes.set(el, { epoch, box });
+
+  return box;
 };
 
 // distance from a point to a box [x, y, w, h] (0 inside)
@@ -98,11 +137,114 @@ function keyOf(el) {
   return el.getAttribute('aria-label') || el.getAttribute('title') || [...el.classList].find(c => c.startsWith('wb-')) || el.tagName.toLowerCase();
 }
 
-// the editor reports each command: its type and ids, never its text or pixels
-export const trackCommand = (command, applied) => track('cmd', { c: command.type, id: command.id ?? command.ids?.[0] ?? undefined, ok: applied, st: snapshot() });
+// the editor reports each command: its type and ids, never its text or pixels. The same command
+// on the same step again within MERGE_MS (a drag sends one per pointer move) only counts up the
+// first one's `n` and `ms`: one row per gesture instead of dozens a second
+const MERGE_MS = 400;
+let merging = null;
+
+export const trackCommand = (command, applied) => {
+  const c = command.type;
+  const id = command.id ?? command.ids?.[0] ?? undefined;
+  const now = performance.now();
+
+  if(merging && merging.row.c === c && merging.row.id === id && now - merging.last < MERGE_MS) {
+    merging.row.n = (merging.row.n ?? 1) + 1;
+    merging.row.ms = round(now - merging.first);
+    merging.row.ok ||= applied;
+    merging.last = now;
+
+    return;
+  }
+
+  merging = { row: track('cmd', { c, id, ok: applied, st: snapshot() }), first: now, last: now };
+};
+
+// Browser load (TODO.md "Browser load and GUI responsiveness"), only what is slow plus a sample
+// per minute:
+// - `slow`: an interaction (tap, click, key) whose next paint came more than SLOW_MS after the
+//   input, with the control and the editor state; `wait` is the input delay (the main thread was
+//   busy), `run` the handlers, the rest is rendering
+// - `frame`: an animation frame longer than FRAME_MS, with its three slowest scripts (Long
+//   Animation Frames, Chrome 123+), else the bare long task
+// - `load`: JS heap (Chrome), the decoded size of the page's <img> pictures and the editor's
+//   photos in megapixels (about 4 MB of RAM each), every LOAD_MS while the page is visible
+// Timings of the app's own code and sizes of its pictures, nothing personal.
+const SLOW_MS = 200;
+const FRAME_MS = 150;
+const LOAD_MS = 60000;
+const MB = 1 << 20;
+
+function startLoad() {
+  const observe = (type, fn, options = {}) => {
+    try {
+      new PerformanceObserver(list => list.getEntries().forEach(fn)).observe({ type, buffered: true, ...options });
+
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  let reported = 0;
+
+  // one interaction makes several entries (pointerdown, pointerup, click): the first slow one counts
+  observe(
+    'event',
+    e => {
+      if(!e.interactionId || e.duration < SLOW_MS || e.interactionId === reported) return;
+
+      reported = e.interactionId;
+
+      const control = e.target?.closest?.(CONTROLS);
+
+      track('slow', { name: e.name, dur: round(e.duration), wait: round(e.processingStart - e.startTime), run: round(e.processingEnd - e.processingStart), key: control ? keyOf(control) : e.target?.closest?.('.wb-editor-stage') ? 'stage' : undefined, st: snapshot() });
+    },
+    { durationThreshold: 104 },
+  );
+
+  const frames = observe('long-animation-frame', f => {
+    if(f.duration < FRAME_MS) return;
+
+    const scripts = [...(f.scripts ?? [])]
+      .sort((a, b) => b.duration - a.duration)
+      .slice(0, 3)
+      .map(s => ({ dur: round(s.duration), fn: s.sourceFunctionName || undefined, src: (s.sourceURL || '').split('/').pop().split('?')[0] || undefined, by: s.invoker ? String(s.invoker).slice(0, 80) : undefined }));
+
+    track('frame', { dur: round(f.duration), block: round(f.blockingDuration ?? 0), scripts, st: snapshot() });
+  });
+
+  if(!frames) observe('longtask', t => t.duration >= FRAME_MS && track('frame', { dur: round(t.duration), st: snapshot() }));
+
+  const sample = () => {
+    if(document.visibilityState !== 'visible') return;
+
+    let imgs = 0;
+    let px = 0;
+
+    for(const img of document.images)
+      if(img.complete && img.naturalWidth) {
+        imgs++;
+        px += img.naturalWidth * img.naturalHeight;
+      }
+
+    const m = performance.memory;
+    let held;
+
+    try {
+      held = holding?.() ?? undefined;
+    } catch {}
+
+    track('load', { js: m ? round(m.usedJSHeapSize / MB) : undefined, heap: m ? round(m.totalJSHeapSize / MB) : undefined, limit: m ? round(m.jsHeapSizeLimit / MB) : undefined, imgs, imgMP: Math.round(px / 1e5) / 10, nodes: document.getElementsByTagName('*').length, editor: held, url: location.pathname });
+  };
+
+  setTimeout(sample, 10000);
+  setInterval(sample, LOAD_MS);
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && sample());
+}
 
 export function startTracking() {
-  track('session', { ...view(), dpr: devicePixelRatio, screen: [screen.width, screen.height], touch: matchMedia('(pointer: coarse)').matches, lang: navigator.language, url: location.pathname });
+  track('session', { ...view(), dpr: devicePixelRatio, screen: [screen.width, screen.height], touch: matchMedia('(pointer: coarse)').matches, lang: navigator.language, url: location.pathname, cores: navigator.hardwareConcurrency || undefined, mem: navigator.deviceMemory || undefined });
+  startLoad();
 
   let last = { orient: view().orient };
 
@@ -126,6 +268,9 @@ export function startTracking() {
   const dumpLayout = () => {
     dumping = null;
 
+    // not during a gesture: it reads the box of every control, which forces a layout
+    if(gestures.size) return scheduleLayout();
+
     const els = visibleControls().slice(0, MAX_CONTROLS).map(c => [c.key, ...c.box]);
     const stage = document.querySelector('.wb-editor-stage');
     const signature = JSON.stringify([els, stage && boxOf(stage), innerWidth, innerHeight]);
@@ -135,7 +280,7 @@ export function startTracking() {
     dumped = signature;
     track('layout', { ...view(), sx: round(scrollX), sy: round(scrollY), stage: stage ? boxOf(stage) : undefined, els });
   };
-  const scheduleLayout = () => (dumping ??= setTimeout(dumpLayout, 1500));
+  const scheduleLayout = () => (dumping ??= setTimeout(() => whenIdle(dumpLayout), 1500));
 
   scheduleLayout();
   addEventListener('resize', scheduleLayout);

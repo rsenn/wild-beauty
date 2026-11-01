@@ -7,7 +7,7 @@
 //          --min-events n  --replay (only recorded ones)  --day YYYY-MM-DD  --days n (the last n days)  --data dir
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { eventsOf, filterSessions, groupSessions, playerPage, readLog, sessionsOf } from '../server/replaylog.js';
+import { eventsOf, filterSessions, groupSessions, loadOf, playerPage, readLog, sessionsOf } from '../server/replaylog.js';
 
 const args = process.argv.slice(2);
 const opt = name => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
@@ -53,6 +53,19 @@ if(command === 'list') {
 
     if(s.replay) console.log(`  recorded: ${s.events} rrweb events in ${s.lines.length} batches; usage events ${s.usage ?? 0} (commands ${s.cmds ?? 0}, errors ${s.errors ?? 0})`);
     else console.log(`  not recorded: ${s.events} usage events`, Object.entries(s.rows.reduce((m, r) => ((m[r.type] = (m[r.type] ?? 0) + 1), m), {})).map(([k, v]) => `${k} ${v}`).join(', '));
+
+    // the load on the browser (client/events.js startLoad); decoded pictures take about 4 MB per megapixel
+    const load = loadOf(s.rows ?? []);
+    const time = ts => new Date(ts).toISOString().slice(11, 19);
+
+    if(load) {
+      const { device: d, slow, frames, memory: m } = load;
+
+      if(d) console.log(`  device: ${d.cores ?? '?'} cores, ${d.mem ?? '?'} GB, dpr ${d.dpr}, screen ${d.screen?.join('x')}`);
+      console.log(`  slow interactions (> 200 ms): ${slow.count}, p95 ${slow.p95} ms${slow.worst.map(w => `\n    ${time(w.ts)} ${w.dur} ms (wait ${w.wait}, run ${w.run}) ${w.key ?? ''} [${w.tool ?? '-'}]`).join('')}`);
+      console.log(`  long frames (> 150 ms): ${frames.count}, p95 ${frames.p95} ms${frames.worst.map(w => `\n    ${time(w.ts)} ${w.dur} ms ${w.script ?? ''} [${w.tool ?? '-'}]`).join('')}`);
+      console.log(`  memory peaks: js ${m.js} of ${m.limit} MB, <img> ${m.imgs} pictures ${m.imgMP} MP (~${Math.round(m.imgMP * 4)} MB decoded), editor ${m.photos} photos ${m.photoMP} MP (~${Math.round(m.photoMP * 4)} MB), page ${m.pageMP} MP, ${m.nodes} DOM nodes (${m.samples} samples)`);
+    }
   } else if(command === 'export') {
     if(!s.replay) {
       console.error('that session has no recording (list --replay shows the recorded ones)');

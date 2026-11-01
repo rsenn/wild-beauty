@@ -20,7 +20,7 @@ import { breakVertex, drag as dragVertices, dragMany, geometry, hitVertex, insid
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/shapetool.js';
 import { cascade, photosOnPage } from '../editor/cascade.js';
 import { documentLarge, documentThumb, exportImage, sceneCanvas, stepImage } from '../editor/export.js';
-import { boxOf, setContext, trackCommand } from '../events.js';
+import { boxOfCached, setContext, setHolding, trackCommand } from '../events.js';
 import { TextEdit } from './TextEdit.js';
 import { measureText } from '../editor/measure.js';
 import { LIMITS as TEXT_LIMITS, boxHeight, layout } from '../editor/text.js';
@@ -488,10 +488,30 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       const c = latest.current;
       const stage = document.querySelector('.wb-editor-stage');
 
-      return { tool: c.tool, sel: c.editStep ? [c.editStep.op, c.editStep.id] : undefined, pg: c.page, pages: c.doc.pages.length, steps: c.doc.pages[c.page]?.steps.length, k: c.k, scale: Math.round(c.scale * 1000) / 1000, ro: c.readOnly || undefined, prev: c.previewing || undefined, stage: stage ? boxOf(stage) : undefined };
+      return { tool: c.tool, sel: c.editStep ? [c.editStep.op, c.editStep.id] : undefined, pg: c.page, pages: c.doc.pages.length, steps: c.doc.pages[c.page]?.steps.length, k: c.k, scale: Math.round(c.scale * 1000) / 1000, ro: c.readOnly || undefined, prev: c.previewing || undefined, stage: stage ? boxOfCached(stage) : undefined };
     });
 
     return () => setContext(null);
+  }, []);
+
+  // what the editor holds in pictures, for the usage `load` events: the photos of the document
+  // and of the page shown, and their display images in megapixels (decoded, about 4 MB each)
+  useEffect(() => {
+    setHolding(() => {
+      const { doc: d, page: pg, photos: known } = latest.current;
+      const mp = steps => {
+        const hashes = new Set(steps.filter(s => s.op === 'photo').map(s => s.photo));
+        const sum = [...hashes].reduce((n, h) => n + (known[h]?.width ?? 0) * (known[h]?.height ?? 0), 0);
+
+        return [hashes.size, Math.round(sum / 1e5) / 10];
+      };
+      const [photos, photoMP] = mp(d.pages.flatMap(p => p.steps));
+      const [pagePhotos, pageMP] = mp(d.pages[pg]?.steps ?? []);
+
+      return { photos, photoMP, pagePhotos, pageMP, pages: d.pages.length };
+    });
+
+    return () => setHolding(null);
   }, []);
 
   // leaving the wand (or the editor) kills a run that is still going

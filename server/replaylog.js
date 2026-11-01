@@ -71,6 +71,7 @@ export function sessionsOf(replayLines, usageLines) {
   for(const s of replays) {
     const rows = usage.filter(u => u.sid === s.sid && u.end >= s.start && u.start <= s.end).flatMap(u => u.rows).filter(r => r.ts >= s.start && r.ts <= s.end);
 
+    s.rows = rows;
     s.usage = rows.length;
     s.cmds = rows.filter(r => r.type === 'cmd').length;
     s.errors = rows.filter(r => r.type === 'error').length;
@@ -81,6 +82,35 @@ export function sessionsOf(replayLines, usageLines) {
   const covered = u => replays.some(s => s.sid === u.sid && u.start >= s.start - GAP && u.end <= s.end + GAP);
 
   return [...replays, ...usage.filter(u => !covered(u))].sort((a, b) => a.start - b.start);
+}
+
+// the load on the browser in a session's usage rows (client/events.js startLoad): device, the
+// slow interactions and long frames (count, 95th percentile, the worst with what caused them) and
+// the peaks of memory and pictures held; null when the session has none of these events
+export function loadOf(rows) {
+  const of = type => rows.filter(r => r.type === type);
+  const slow = of('slow');
+  const frames = of('frame');
+  const load = of('load');
+  const session = rows.find(r => r.type === 'session' && (r.cores || r.mem));
+
+  if(!slow.length && !frames.length && !load.length) return null;
+
+  const p95 = list => {
+    const d = list.map(r => r.dur).sort((a, b) => a - b);
+
+    return d.length ? d[Math.min(d.length - 1, Math.floor(d.length * 0.95))] : 0;
+  };
+  const worst = (list, n) => [...list].sort((a, b) => b.dur - a.dur).slice(0, n);
+  const peak = key => load.reduce((m, r) => Math.max(m, r[key] ?? 0), 0);
+  const held = key => load.reduce((m, r) => Math.max(m, r.editor?.[key] ?? 0), 0);
+
+  return {
+    device: session ? { cores: session.cores, mem: session.mem, dpr: session.dpr, screen: session.screen } : null,
+    slow: { count: slow.length, p95: p95(slow), worst: worst(slow, 5).map(r => ({ ts: r.ts, dur: r.dur, wait: r.wait, run: r.run, key: r.key ?? r.name, tool: r.st?.tool })) },
+    frames: { count: frames.length, p95: p95(frames), worst: worst(frames, 5).map(r => ({ ts: r.ts, dur: r.dur, script: r.scripts?.[0] ? `${r.scripts[0].fn ?? '?'} ${r.scripts[0].src ?? ''} (${r.scripts[0].by ?? ''})`.trim() : undefined, tool: r.st?.tool })) },
+    memory: { samples: load.length, js: peak('js'), limit: peak('limit'), imgMP: peak('imgMP'), imgs: peak('imgs'), nodes: peak('nodes'), photos: held('photos'), photoMP: held('photoMP'), pageMP: held('pageMP') },
+  };
 }
 
 // the filters of `list`: { who, ip, user, url, ua, minSecs, minEvents, replay } (strings match as substrings, case-insensitively)
