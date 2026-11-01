@@ -50,6 +50,15 @@ export function imagePoint(corners, at, frame) {
   return uv && imageFraction(uv, frame);
 }
 
+// like imagePoint, but a point outside the photo's visible window is moved to the nearest point of
+// its edge instead of refused (the magnetic lasso goes on along the border when the pointer leaves
+// the photo); null only when the outline is degenerate
+export function clampedImagePoint(corners, at, frame) {
+  const uv = photoCoords(corners, at);
+
+  return uv && imageFraction([Math.min(1, Math.max(0, uv[0])), Math.min(1, Math.max(0, uv[1]))], frame);
+}
+
 // a manual clip (polygons in stage units) as the tool's `region`: polygons of [x, y] in 0..1 of the
 // whole image, or null when it is not usable (degenerate photo, no polygon left)
 export function regionOf(corners, polygons, frame) {

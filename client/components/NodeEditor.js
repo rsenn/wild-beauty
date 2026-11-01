@@ -34,7 +34,7 @@ import { eventUnits } from '../editor/stage.js';
 import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
 import { contentBox, loadAlpha } from '../editor/alphamap.js';
-import { defaultPick, imagePoint, readLines, regionOf, selectionPath } from '../editor/wand.js';
+import { clampedImagePoint, defaultPick, imagePoint, readLines, regionOf, selectionPath } from '../editor/wand.js';
 import { edgeCost, liveWire, lassoPath, outlineOfSegments, snap, workSize } from '../editor/lasso.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
 import { contains } from '../editor/polygon.js';
@@ -2041,7 +2041,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const wirePixel = (run, units) => {
     const { doc, photos, page: at } = latest.current;
     const corners = outlineOf(doc, run.id, { photos: hash => photos[hash], page: at });
-    const uv = corners && imagePoint(corners, units, run.frame);
+    const uv = corners && clampedImagePoint(corners, units, run.frame);
 
     return uv && run.work ? snap(run.work.cost, run.work.w, run.work.h, [uv[0] * run.work.w - 0.5, uv[1] * run.work.h - 0.5], WIRE_SNAP) : null;
   };

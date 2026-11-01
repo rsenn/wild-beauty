@@ -1,6 +1,6 @@
 // bun test: wand geometry and the NDJSON reader (E119)
 import { expect, test } from 'bun:test';
-import { defaultPick, imagePoint, photoCoords, photoPoint, readLines, regionOf, resultPolygon, selectionPath, stagePolygon } from '../client/editor/wand.js';
+import { clampedImagePoint, defaultPick, imagePoint, photoCoords, photoPoint, readLines, regionOf, resultPolygon, selectionPath, stagePolygon } from '../client/editor/wand.js';
 
 const corners = [[100, 100], [300, 100], [300, 200], [100, 200]];
 
@@ -98,4 +98,15 @@ test('readLines splits chunks into objects and skips garbage', async () => {
   await readLines(stream, o => got.push(o));
   expect(got).toEqual([{ a: 1 }, { b: 2 }]);
   void body;
+});
+
+test('clampedImagePoint keeps a point outside the photo on its edge, and agrees with imagePoint inside', () => {
+  const stage = [[0, 0], [1000, 0], [1000, 1000], [0, 1000]];
+  const frame = { width: 400, height: 200, crop: 0.5 }; // window x 100..300
+
+  expect(clampedImagePoint(stage, [500, 500], frame)).toEqual(imagePoint(stage, [500, 500], frame));
+  expect(clampedImagePoint(stage, [-300, 500], frame)).toEqual([0.25, 0.5]);
+  expect(clampedImagePoint(stage, [1500, 1400], frame)).toEqual([0.75, 1]);
+  expect(imagePoint(stage, [-300, 500], frame)).toBeNull();
+  expect(clampedImagePoint([[0, 0], [0, 0], [0, 0], [0, 0]], [5, 5])).toBeNull();
 });
