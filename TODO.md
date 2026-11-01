@@ -60,6 +60,9 @@ State: all of the work below is committed and pushed (last: `d2ae0104`). The cam
 - [ ] Tight box is the clip's bounding box limited to the picture's content; a smaller box inside a clip could be refined later if needed.
 - [ ] Three reports exist: `tools/events-report.js` (E107), `tools/events-sessions.js` and `tools/replay.js` (sessions, replay); merge them.
 
+### Wished 2026-11-01
+- [ ] **Drop image files from the desktop's file browser onto the stage.** Today the stage only accepts upload cards dragged from the upload area (`accepts` in `NodeEditor.js` checks `UPLOAD_MIME`); files dropped there do nothing, while the upload area takes them (`UploadArea.js` `add(e.dataTransfer.files)`). To do: the stage also accepts `Files`, hands them to the upload area's flow (same checks, sizes, progress, the card appears), and when each record arrives places the photo at the drop point (`addUpload` with the drop position), several files fanned out a little; a ring at the drop point while it uploads. Desktop only (phones have no file drag).
+
 ### Photo access: users stay in control of their photos (found 2026-11-01, next to build)
 - [ ] **Today any file is served to anyone who knows its hash**, and published nodes give away hashes they should not:
   - `GET /files/uploads/<hash>[.display|.card].<ext>` (`serveUpload`) checks nothing, so an upload is reachable without the browser that owns it; marked `cache-control: public, immutable` (a proxy or CDN in front could keep it and hand it to others; nginx has no cache today).
