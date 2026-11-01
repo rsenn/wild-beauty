@@ -35,7 +35,7 @@ import { fetchImage } from '../editor/preload.js';
 import { visibleBox } from '../editor/alpha.js';
 import { contentBox, loadAlpha } from '../editor/alphamap.js';
 import { clampedImagePoint, defaultPick, imagePoint, readLines, regionOf, selectionPath } from '../editor/wand.js';
-import { createWire, edgeCost, lassoPath, outlineOfSegments, snap, workSize } from '../editor/lasso.js';
+import { LASSO_SIZE, costFromEdgeMap, createWire, edgeMapUsable, edgeCost, lassoPath, outlineOfSegments, snap, workSize } from '../editor/lasso.js';
 import { clipFromStroke } from '../editor/clipstroke.js';
 import { contains } from '../editor/polygon.js';
 import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag } from '../editor/handles.js';
@@ -2036,9 +2036,56 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
     g.drawImage(img, 0, 0, w, h);
 
-    return { cost: edgeCost(g.getImageData(0, 0, w, h).data, w, h), w, h };
+    return { cost: edgeCost(g.getImageData(0, 0, w, h).data, w, h), w, h, source: 'local' };
   };
-  const wireShow = (run, live = null, closed = false) => setWireSel({ id: run.id, segments: run.segments, live, anchors: run.stage, size: run.work && { w: run.work.w, h: run.work.h }, closed });
+  // The server's edge map (CLAHE, edge-aware smoothing, Sobel and Canny through opencv-imgproc) replaces
+  // the plain Sobel as soon as it arrives; the lasso is usable at once with the local one and keeps it
+  // when the server has no tool or is slow. The new cost is used from the next anchor on.
+  const wireEdges = run => {
+    const stop = new AbortController();
+    const timer = setTimeout(() => stop.abort(), 25000);
+
+    fetch(`/api/edges/${run.photo}?size=${LASSO_SIZE}`, { signal: stop.signal })
+      .then(res => (res.ok ? res.blob() : Promise.reject(new Error('edges ' + res.status))))
+      .then(async blob => {
+        const url = URL.createObjectURL(blob);
+
+        try {
+          const img = new Image();
+
+          img.src = url;
+          await img.decode();
+
+          // drawn at the size of the local copy, so both cost maps share one grid
+          const { w, h } = run.work;
+          const canvas = document.createElement('canvas');
+
+          canvas.width = w;
+          canvas.height = h;
+
+          const g = canvas.getContext('2d', { willReadFrequently: true });
+
+          g.drawImage(img, 0, 0, w, h);
+
+          if(wire.current !== run) return;
+
+          const { data } = g.getImageData(0, 0, w, h);
+
+          // a map without edges (the tool failed, or wrote zeros) would leave the lasso with straight lines
+          if(!edgeMapUsable(data, w, h)) return;
+
+          run.work = { ...run.work, cost: costFromEdgeMap(data, w, h), source: 'opencv' };
+          setWireSel(s => (s && s.id === run.id ? { ...s, source: 'opencv' } : s));
+
+          if(run.anchors.length && !wand.current) wireSeed(run);
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      })
+      .catch(() => {})
+      .finally(() => clearTimeout(timer));
+  };
+  const wireShow = (run, live = null, closed = false) => setWireSel({ id: run.id, segments: run.segments, live, anchors: run.stage, size: run.work && { w: run.work.w, h: run.work.h }, source: run.work?.source ?? 'local', closed });
   // the pixel of the working copy under the stage point, snapped to an edge; null outside the photo
   const wirePixel = (run, units) => {
     const { doc, photos, page: at } = latest.current;
@@ -2088,7 +2135,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
     if(!wire.current) {
       wire.current = run;
-      run.loading = wireWork(info.href).then(work => (run.work = work)).catch(() => {
+      run.loading = wireWork(info.href).then(work => ((run.work = work), wireEdges(run), work)).catch(() => {
         if(wire.current === run) wireReset();
         setAnnounce(tr('editor.announce.wandFailed'));
       });
@@ -3103,7 +3150,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       ${tool === 'select' && !auto && html`<div class="wb-editor-context"><button type="button" class="wb-editor-chip" aria-pressed=${addMode ? 'true' : 'false'} title=${t('editor.multi.add.hint')} onClick=${() => setAddMode(on => !on)}>${t('editor.multi.add')}</button></div>`}
       ${(tool === 'clip' || tool === 'unclip' || tool === 'wand' || tool === 'lasso' || tool === 'cutout' || tool === 'text') && html`<p class="wb-editor-context" role="status">${tool === 'clip' && hint ? hint : tool === 'wand' && wandSel?.taps?.length ? (wandAt < 0 ? t('editor.wand.nothing') : t('editor.wand.status', { taps: wandSel.taps.length, index: wandAt + 1, count: wandRank.length })) : t('editor.context.' + tool)}</p>`}
       ${tool === 'clip' && clipGeo && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.clip.mode')}>${['replace', 'add', 'subtract'].map(mode => html`<button type="button" class="wb-editor-chip" aria-pressed=${clipMode === mode ? 'true' : 'false'} onClick=${() => setClipMode(mode)}>${t('editor.clip.' + mode)}</button>`)}${outlineCount(doc, editStep.id) > 1 && html` <button type="button" class="wb-editor-chip" onClick=${splitOutlines}>${t('editor.clip.split')}</button>`}</div>`}
-      ${tool === 'lasso' && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.lasso.group')}>${busyAt && html`<button type="button" class="wb-editor-chip" onClick=${cancelJob}>${t('editor.job.cancel')}</button> `}${wireSel && !wireSel.closed && html`<button type="button" class="wb-editor-chip" disabled=${wireSel.anchors.length < 3} title=${t('editor.lasso.closeHint')} onClick=${wireClose}>${t('editor.lasso.close')}</button> <button type="button" class="wb-editor-chip" onClick=${wireUndo}>${t('editor.lasso.undo')}</button> `}${wireSel && html`<button type="button" class="wb-editor-chip" disabled=${!!cutting} onClick=${wandReset}>${t('editor.wand.reset')}</button>`}${wireSel?.closed && html`<span class="wb-wand-actions"><button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.cutHint')} onClick=${() => wandApply('cut')}>${t('editor.wand.cut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.takeOutHint')} onClick=${() => wandApply('take')}>${t('editor.wand.takeOut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.eraseHint')} onClick=${() => wandApply('erase')}>${t('editor.wand.erase')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandFill ? 'true' : 'false'} disabled=${!!busyAt} title=${t('editor.wand.fillHint')} onClick=${() => setWandFill(f => !f)}>${t('editor.wand.fill')}</button></span>`}</div>`}
+      ${tool === 'lasso' && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.lasso.group')}>${busyAt && html`<button type="button" class="wb-editor-chip" onClick=${cancelJob}>${t('editor.job.cancel')}</button> `}${wireSel && !wireSel.closed && html`<button type="button" class="wb-editor-chip" disabled=${wireSel.anchors.length < 3} title=${t('editor.lasso.closeHint')} onClick=${wireClose}>${t('editor.lasso.close')}</button> <button type="button" class="wb-editor-chip" onClick=${wireUndo}>${t('editor.lasso.undo')}</button> `}${wireSel && html`<button type="button" class="wb-editor-chip" disabled=${!!cutting} onClick=${wandReset}>${t('editor.wand.reset')}</button> <span class="wb-wire-source" title=${t('editor.lasso.edgesHint')}>${t(wireSel.source === 'opencv' ? 'editor.lasso.edgesOpencv' : 'editor.lasso.edgesLocal')}</span>`}${wireSel?.closed && html`<span class="wb-wand-actions"><button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.cutHint')} onClick=${() => wandApply('cut')}>${t('editor.wand.cut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.takeOutHint')} onClick=${() => wandApply('take')}>${t('editor.wand.takeOut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.eraseHint')} onClick=${() => wandApply('erase')}>${t('editor.wand.erase')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandFill ? 'true' : 'false'} disabled=${!!busyAt} title=${t('editor.wand.fillHint')} onClick=${() => setWandFill(f => !f)}>${t('editor.wand.fill')}</button></span>`}</div>`}
       ${tool === 'wand' && html`<div class="wb-editor-context" role="group" aria-label=${t('editor.wand.group')}>${busyAt && html`<button type="button" class="wb-editor-chip" onClick=${cancelJob}>${t('editor.job.cancel')}</button> `}<button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'add' ? 'true' : 'false'} title=${t('editor.wand.addHint')} onClick=${() => setWandMode('add')}>${t('editor.wand.add')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandMode === 'sub' ? 'true' : 'false'} title=${t('editor.wand.subtractHint')} onClick=${() => setWandMode('sub')}>${t('editor.wand.subtract')}</button>${wandSel && html` <button type="button" class="wb-editor-chip" disabled=${wandAt <= 0} onClick=${() => wandStep(-1)}>${t('editor.nudge.smaller')}</button> <button type="button" class="wb-editor-chip" disabled=${wandAt < 0 || wandAt >= wandRank.length - 1} onClick=${() => wandStep(1)}>${t('editor.nudge.larger')}</button> <button type="button" class="wb-editor-chip" disabled=${!wandSel.taps?.length || !!cutting} onClick=${wandUndoTap}>${t('editor.wand.undoTap')}</button> <button type="button" class="wb-editor-chip" disabled=${!!cutting} onClick=${wandReset}>${t('editor.wand.reset')}</button>`}${wandSel && wandAt >= 0 && html`<span class="wb-wand-actions"><button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.cutHint')} onClick=${() => wandApply('cut')}>${t('editor.wand.cut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.takeOutHint')} onClick=${() => wandApply('take')}>${t('editor.wand.takeOut')}</button> <button type="button" class="wb-editor-chip" disabled=${!!busyAt} title=${t('editor.wand.eraseHint')} onClick=${() => wandApply('erase')}>${t('editor.wand.erase')}</button> <button type="button" class="wb-editor-chip" aria-pressed=${wandFill ? 'true' : 'false'} disabled=${!!busyAt} title=${t('editor.wand.fillHint')} onClick=${() => setWandFill(f => !f)}>${t('editor.wand.fill')}</button></span>`}</div>`}
       ${tool === 'shape'
         ? html`<div class="wb-editor-pen-options">

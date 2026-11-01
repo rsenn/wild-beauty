@@ -210,3 +210,24 @@ test('the tree returns on the cost window that made the first version loop for e
   expect(performance.now() - t).toBeLessThan(500);
   expect(tree.pathTo([67, 50]).length).toBeGreaterThan(90);
 });
+
+import { costFromEdgeMap, edgeMapUsable } from '../client/editor/lasso.js';
+
+test('the server edge map becomes a cost map: strong edges cheap, flat areas dear, same range as the local one', () => {
+  const data = new Uint8ClampedArray([255, 0, 0, 255, 0, 0, 0, 255, 128, 0, 0, 255]);
+  const cost = costFromEdgeMap(data, 3, 1);
+
+  expect(cost[0]).toBeCloseTo(0.04, 6);
+  expect(cost[1]).toBeCloseTo(1.04, 6);
+  expect(cost[2]).toBeGreaterThan(0.5);
+  expect(cost[2]).toBeLessThan(0.6);
+});
+
+test('an edge map with no edges, or only edges, is not used', () => {
+  const map = (fill, n = 1000) => { const d = new Uint8ClampedArray(n * 4); for(let i = 0; i < n; i++) { d[i * 4] = fill(i); d[i * 4 + 3] = 255; } return d; };
+
+  expect(edgeMapUsable(map(() => 0), 1000, 1)).toBe(false); // all zero: the tool failed
+  expect(edgeMapUsable(map(() => 255), 1000, 1)).toBe(false); // all edge
+  expect(edgeMapUsable(map(i => (i % 10 === 0 ? 255 : 0)), 1000, 1)).toBe(true); // a tenth is edge
+  expect(edgeMapUsable(map(i => (i < 2 ? 255 : 0)), 1000, 1)).toBe(false); // two pixels in a thousand
+});

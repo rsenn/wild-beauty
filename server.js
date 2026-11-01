@@ -15,6 +15,7 @@ import { graphOf, graphRoute } from './server/api/graph.js';
 import { placesRoute } from './server/api/places.js';
 import { cutoutRoute } from './server/api/cutout.js';
 import { segmentRoute } from './server/api/segment.js';
+import { edgesRoute } from './server/api/edges.js';
 import { servePhoto } from './server/api/photos.js';
 import { galleryChild, photoInfos } from './server/node/view.js';
 import { nodeItems } from './client/gallery/items.js';
@@ -310,6 +311,10 @@ async function route(req) {
   if(pathname === '/api/graph' || pathname === '/api/graph/ops') return graphRoute(req, undefined, { site });
 
   if(pathname === '/api/places' || pathname === '/api/places/near' || pathname === '/api/places/suggestions') return placesRoute(req);
+
+  const edges = /^\/api\/edges\/([^/]+)$/.exec(pathname);
+
+  if(edges) return req.method === 'GET' ? edgesRoute(req, edges[1]) : text('method not allowed\n', 405);
 
   if(pathname === '/api/segment') return req.method === 'POST' ? segmentRoute(req) : text('method not allowed\n', 405);
 

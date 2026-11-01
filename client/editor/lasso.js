@@ -37,6 +37,29 @@ export function edgeCost(data, w, h) {
   return cost;
 }
 
+// Is the server's edge map any use? A map with (almost) no edge in it - the tool failed, wrote
+// zeros, or the photo is flat - would turn the lasso into straight lines, so it is not taken: the
+// local cost stays. `data` is RGBA; at least 0.3 % of the pixels must be a clear edge (red >= 64)
+// and not more than 60 % (a map that is all edge says nothing either)
+export function edgeMapUsable(data, w, h) {
+  let strong = 0;
+
+  for(let i = 0; i < w * h; i++) if(data[i * 4] >= 64) strong++;
+
+  return strong >= w * h * 0.003 && strong <= w * h * 0.6;
+}
+
+// The cost map from the edge map the server makes with `opencv-imgproc edgemap` (CLAHE, edge-aware
+// smoothing, Sobel and Canny fused; an RGBA image, the red channel holds 255 on the strongest edge):
+// strong edges are cheap, flat areas dear, the same range as `edgeCost`
+export function costFromEdgeMap(data, w, h) {
+  const cost = new Float32Array(w * h);
+
+  for(let i = 0; i < cost.length; i++) cost[i] = 1.04 - Math.min(1, data[i * 4] / 255);
+
+  return cost;
+}
+
 // the pixel of lowest cost within `radius` of [x, y] (the click snaps to the nearest strong edge)
 export function snap(cost, w, h, [x, y], radius = 6) {
   let best = [Math.round(x), Math.round(y)];

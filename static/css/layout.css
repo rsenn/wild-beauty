@@ -1995,6 +1995,12 @@ body {
   stroke: var(--wb-wand-light);
 }
 
+.wb-wire-source {
+  margin-inline-start: 0.5em;
+  font-size: var(--wb-font-size-small);
+  opacity: 0.7;
+}
+
 .wb-wand-actions {
   margin-inline-start: 0.75em;
 }
