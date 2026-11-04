@@ -1,4 +1,4 @@
-// Keyboard helpers of the editor (EDITOR.md E73): which keys are the editor's,
+// Keyboard helpers of the editor (docs/EDITOR.md E73): which keys are the editor's,
 // walking through the steps, the keyboard cursor of the shape tool.
 export const CURSOR_STEP = 10; // units per arrow press, Shift: ten times that
 export const CURSOR_START = [500, 500];

@@ -1,4 +1,4 @@
-// SQLite access (PLAN.md S8): `bun:sqlite` with a few helpers, no abstraction
+// SQLite access (docs/PLAN.md S8): `bun:sqlite` with a few helpers, no abstraction
 // layer. All SQL lives in server/db/. `open()` creates the file on a fresh
 // start and applies the numbered migrations of schema.sql that are still
 // missing; a second start finds nothing to do.

@@ -1,4 +1,4 @@
-// bun test: clipboard (EDITOR.md E131), the pure parts
+// bun test: clipboard (docs/EDITOR.md E131), the pure parts
 import { describe, expect, test } from 'bun:test';
 import { apply } from '../client/editor/core/commands.js';
 import { classify, copyPayload, htmlFor, pasteSteps, payloadFromHtml, plainFor, svgFor } from '../client/editor/io/clipboard.js';

@@ -1,4 +1,4 @@
-// Input for the gallery (GALLERY.md S4, TODO 13.4, 13.11). Two modes, asked of
+// Input for the gallery (docs/GALLERY.md S4, TODO 13.4, 13.11). Two modes, asked of
 // the session through `mode()`:
 //  guide  arrows, Space, PageUp/Down or a swipe go to the next or previous
 //         picture; Up/Down, the wheel or a pinch zoom; a tap picks a picture;

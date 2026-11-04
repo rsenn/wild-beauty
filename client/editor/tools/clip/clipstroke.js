@@ -1,5 +1,5 @@
-// What a stroke drawn with the clip tool means (EDITOR.md E114, E121,
-// UX-REQUIREMENTS.md I5): a tap, a closing outline (a new clip), a cut across
+// What a stroke drawn with the clip tool means (docs/EDITOR.md E114, E121,
+// docs/UX-REQUIREMENTS.md I5): a tap, a closing outline (a new clip), a cut across
 // the photo (two photo copies), or nothing the editor can use. Pure functions on
 // points in stage units; the distances come from the caller in the same units.
 import { area, cutByStroke } from '../../geometry/polygon.js';

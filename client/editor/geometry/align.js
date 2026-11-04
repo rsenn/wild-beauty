@@ -1,4 +1,4 @@
-// Align and distribute a multiple selection (EDITOR.md E147). Boxes are the axis-aligned
+// Align and distribute a multiple selection (docs/EDITOR.md E147). Boxes are the axis-aligned
 // extent [x0, y0, x1, y1] of each step's outline; the result is the shift [dx, dy] of
 // each step. Pure.
 

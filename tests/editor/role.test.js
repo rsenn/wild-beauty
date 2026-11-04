@@ -1,4 +1,4 @@
-// bun test: the texture role (EDITOR.md E71)
+// bun test: the texture role (docs/EDITOR.md E71)
 import { describe, expect, test } from 'bun:test';
 import { apply } from '../../client/editor/core/commands.js';
 import { addPhoto, emptyNode, isTexture, setRole, validate } from '../../client/editor/core/model.js';

@@ -1,4 +1,4 @@
-// Taking the controls during the flyby (GALLERY.md): the visitor flies the bird for a while.
+// Taking the controls during the flyby (docs/GALLERY.md): the visitor flies the bird for a while.
 // Pure maths, no DOM and no three.js: `createPilot(built, from)` -> `step(dt, input)`.
 // Plan coordinates, x east and y north, the height `h` over the scene's zero; yaw in radians, 0
 // faces north and turning right is positive; pitch up positive; roll positive banks left.

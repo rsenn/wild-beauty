@@ -1,4 +1,4 @@
-// The editor's lock on an open node (EDITOR.md S2.8, E67): take it, renew it
+// The editor's lock on an open node (docs/EDITOR.md S2.8, E67): take it, renew it
 // every 20 s, release it on close. State: 'idle' | 'held' | 'locked' (someone
 // else had it when we asked: read-only) | 'lost' (we had it and it is gone:
 // read-only, the draft is kept). `send` and the timers are injectable for tests.

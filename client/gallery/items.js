@@ -1,4 +1,4 @@
-// What the 3D gallery hangs for a node (GALLERY.md S5): its child nodes with
+// What the 3D gallery hangs for a node (docs/GALLERY.md S5): its child nodes with
 // their tiles, in edge order; a node without child nodes (a list or slide show
 // of photos) hangs its own photos in page order. -> [{ id, title?, url, full?, href? }]
 // where `url` is the picture's image, `full` the sharper one that replaces it when

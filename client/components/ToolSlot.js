@@ -4,7 +4,7 @@ import { html } from '../html.js';
 const HOLD_MS = 450;
 const GAP = 4;
 
-// One button of the tool column (EDITOR.md E37). A tool group (tools.js SLOTS) shows the
+// One button of the tool column (docs/EDITOR.md E37). A tool group (tools.js SLOTS) shows the
 // member used last and a corner mark; a long press, a right click or ArrowRight / ArrowDown
 // pops the members out beside it (GIMP's tool groups). Picking one makes it the tool and the
 // face of the button. `last` is the member shown when none of the group is active.

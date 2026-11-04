@@ -1,4 +1,4 @@
-// bun test: the 3D gallery builder, auto-hang and auto plan (GALLERY.md S3, S5.1, TODO 13.2 13.5 13.8)
+// bun test: the 3D gallery builder, auto-hang and auto plan (docs/GALLERY.md S3, S5.1, TODO 13.2 13.5 13.8)
 import { describe, expect, test } from 'bun:test';
 import { autoPlan } from '../client/gallery/autoplan.js';
 import { buildGallery } from '../client/gallery/build.js';

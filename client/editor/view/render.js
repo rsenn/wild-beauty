@@ -1,4 +1,4 @@
-// The one renderer (EDITOR.md S5): a node document -> Preact vnodes, used by
+// The one renderer (docs/EDITOR.md S5): a node document -> Preact vnodes, used by
 // SSR, the editor stage, thumbnails and the viewer. Pure: everything it
 // needs comes from the document and the options.
 import { html } from '../../html.js';
@@ -188,7 +188,7 @@ export function renderShape(step, m = IDENTITY) {
 
 // What the steps of a page add up to, in list order: the clip, blend and
 // matrix every step ends with after its clip/unclip/blend/transform ops, and
-// the shapes that are used as a clip (they are not drawn, EDITOR.md S2.7).
+// the shapes that are used as a clip (they are not drawn, docs/EDITOR.md S2.7).
 // Ops that name a missing target are ignored.
 export function effective(steps) {
   const by = new Map();
@@ -366,7 +366,7 @@ export function renderStage(doc, { photos = () => null, mode = doc.mode, page = 
   </svg>`;
 }
 
-// the stage inside the node's theme wrapper (PLAN.md S16.6): `data-theme` is
+// the stage inside the node's theme wrapper (docs/PLAN.md S16.6): `data-theme` is
 // the node's theme, else `theme` (the page's), else inherited; the style
 // attribute carries only vars that pass the sanitiser. Same options as
 // renderStage.

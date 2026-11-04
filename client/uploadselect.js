@@ -1,4 +1,4 @@
-// Choosing a run of uploads by dragging over them (EDITOR.md E140). Pure functions
+// Choosing a run of uploads by dragging over them (docs/EDITOR.md E140). Pure functions
 // over the cards as they are shown, in order. Only a finished upload (one with a
 // `record`) can be chosen: a card still uploading or failed is skipped.
 

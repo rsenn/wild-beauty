@@ -1,4 +1,4 @@
-// Polygon maths for clip paths (EDITOR.md E121, UX-REQUIREMENTS.md I5): the area
+// Polygon maths for clip paths (docs/EDITOR.md E121, docs/UX-REQUIREMENTS.md I5): the area
 // of a polygon, a point in a polygon, and splitting a polygon along a stroke
 // that goes from one edge to the other. Pure functions; a polygon is
 // [[x, y], ...] (closed implicitly), a stroke is an open [[x, y], ...].

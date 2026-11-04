@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { answerKey, linkPlace, nearPlace, positionsOf, readAnswered, remember } from '../editor/io/placeSuggestions.js';
 
-// The place suggestion under the context bar (EDITOR.md E137): when a photo of
+// The place suggestion under the context bar (docs/EDITOR.md E137): when a photo of
 // the node has a position, "taken near <place>" with a button to link the node
 // to it. Never a dialog, never an automatic edge. A node that is not saved yet
 // keeps the answer until it has an id.

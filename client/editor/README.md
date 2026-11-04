@@ -1,6 +1,6 @@
 # client/editor
 
-The node editor's logic (the component is `client/components/NodeEditor.js`; the spec is `EDITOR.md`). Every file belongs to exactly one folder, grouped by responsibility. Put new files in the folder that fits; do not add files to this directory.
+The node editor's logic (the component is `client/components/NodeEditor.js`; the spec is `docs/EDITOR.md`). Every file belongs to exactly one folder, grouped by responsibility. Put new files in the folder that fits; do not add files to this directory.
 
 | Folder | Responsibility | Depends on |
 |---|---|---|

@@ -1,4 +1,4 @@
-// The node document (EDITOR.md S3.1): constants, ids and the empty node.
+// The node document (docs/EDITOR.md S3.1): constants, ids and the empty node.
 // Shared by the browser and the server, so no DOM and no Bun APIs.
 import { pathFromVertices, verticesFromPath } from '../geometry/shapes.js';
 import { acuteCorner, defaultWall, isWall } from './walls.js';
@@ -49,10 +49,10 @@ export function unique(taken) {
 export const emptyNode = () => ({ v: VERSION, style: {}, mode: 'free', pages: [{ id: newId(), steps: [] }] });
 
 export const BLENDS = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten'];
-// what a node is for (a hint for views, EDITOR.md S2.9); lives next to the document, not in it
-// `page` and `site` are the nodes of a personal site (SITES.md): the pages, and the root that lists them
+// what a node is for (a hint for views, docs/EDITOR.md S2.9); lives next to the document, not in it
+// `page` and `site` are the nodes of a personal site (docs/SITES.md): the pages, and the root that lists them
 export const KINDS = ['node', 'list', 'album', 'gallery', 'shop', 'page', 'site'];
-// the legacy `fit` of a photo step (before the square crop, EDITOR.md S2.5): only read to migrate
+// the legacy `fit` of a photo step (before the square crop, docs/EDITOR.md S2.5): only read to migrate
 export const FITS = ['extend', 'cover', 'free'];
 export const FILLS = ['loose', 'tight'];
 export const FLOWS = ['fit', 'page', 'scroll']; // how the viewer shows a node: all at once (a grid only), page by page, scrolling
@@ -517,7 +517,7 @@ export const setTitle = (doc, title) => (title === doc.title ? doc : { ...doc, t
 const STAGE = 1000;
 
 // A photo's local space is a square of 1000 units, the largest square of the
-// picture at the crop position (EDITOR.md S2.5); its matrix places that square
+// picture at the crop position (docs/EDITOR.md S2.5); its matrix places that square
 // on the stage. A new photo covers the stage.
 const IDENTITY = [1, 0, 0, 1, 0, 0];
 
@@ -638,7 +638,7 @@ function updateStepReplace(doc, at, step) {
   return withSteps(doc, at.page, doc.pages[at.page].steps.map((s, i) => (i === at.index ? step : s)));
 }
 
-// a texture photo is for the 3D scene: not drawn as a picture (EDITOR.md S2.5)
+// a texture photo is for the 3D scene: not drawn as a picture (docs/EDITOR.md S2.5)
 export const isTexture = step => step?.op === 'photo' && step.role === 'texture';
 
 // Mark the photo of step `stepId` as texture or picture (E71). The role belongs

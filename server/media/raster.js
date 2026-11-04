@@ -1,4 +1,4 @@
-// Server-side rasterising of a document (E82, GRAPH.md S3.7): the same SVG the
+// Server-side rasterising of a document (E82, docs/GRAPH.md S3.7): the same SVG the
 // editor and the viewer draw, through librsvg (`rsvg-convert`). Photos are
 // referenced by file name next to a temporary SVG in the photos folder (librsvg
 // only reads files below its base), fonts come from fontconfig (~/.fonts, see

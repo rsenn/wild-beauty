@@ -1,4 +1,4 @@
-// bun test: the position a browser attaches to a camera photo (EDITOR.md E139)
+// bun test: the position a browser attaches to a camera photo (docs/EDITOR.md E139)
 import { afterAll, beforeAll, describe, expect, setDefaultTimeout, test } from 'bun:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';

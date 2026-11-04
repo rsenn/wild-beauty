@@ -1,4 +1,4 @@
-// The pages of a site (SITES.md Phase C/D): the sitemap is the root node of the
+// The pages of a site (docs/SITES.md Phase C/D): the sitemap is the root node of the
 // site and its `child` links in order; a page's path is its `slug`, the first
 // page is the home page at `/`.
 import { addLink, getNode, graphEdges, graphNodes, insertNode, linksFrom } from './db/nodes.js';
@@ -45,7 +45,7 @@ export function sitemapXml(site, map) {
 
 export const robotsTxt = site => `User-agent: *\nAllow: /\nDisallow: /edit\nSitemap: ${site.url}/sitemap.xml\n`;
 
-// Where /edit goes for a site (SITES.md): the editor on the wild-beauty host with the page's node open,
+// Where /edit goes for a site (docs/SITES.md): the editor on the wild-beauty host with the page's node open,
 // behind a login. `/edit` and `/edit/` are the home page, `/edit/<slug>` the page with that slug (a
 // draft too); an unknown slug, or a site without pages, goes to the editor's list -> URL | null (not an edit path)
 export function editLocation(h, site, pathname) {

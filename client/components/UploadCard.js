@@ -34,7 +34,7 @@ export const UploadCard = ({ item, order, inNode, ranging, onRange, onToggle, on
     failed: () => t('upload.error.' + item.error, { max: formatSize(limits.maxBytes, lang) }),
   }[item.state]?.();
 
-  // dragging the selected photo slides the square crop along its long edge (EDITOR.md S2.5)
+  // dragging the selected photo slides the square crop along its long edge (docs/EDITOR.md S2.5)
   // only a selected card pans: otherwise a swipe over it scrolls the page
   const pan = item.selected ? panAxis(item.record, item.rotation) : { axis: null, sign: 1 };
   const drag = useRef(null);

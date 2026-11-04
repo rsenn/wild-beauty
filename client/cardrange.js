@@ -1,4 +1,4 @@
-// Dragging over the upload cards to choose a run of them (EDITOR.md E140). The
+// Dragging over the upload cards to choose a run of them (docs/EDITOR.md E140). The
 // page scrolls by itself while the pointer is near the top or bottom edge, so a
 // run longer than the screen can be dragged out. A mouse drags from the card at
 // once; a finger swipes sideways (an up or down swipe is the page scrolling) or

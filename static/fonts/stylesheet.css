@@ -1,4 +1,4 @@
-/* Fixed: the pixel/terminal face of the UI chrome (DESIGN.md S7.3). Only
+/* Fixed: the pixel/terminal face of the UI chrome (docs/DESIGN.md S7.3). Only
  * files that exist: the old IE eot and svg sources are dropped. */
 @font-face {
   font-family: "Fixed";
@@ -8,7 +8,7 @@
   font-display: swap;
 }
 
-/* Text box faces (EDITOR.md E90), all SIL Open Font License 1.1 (OFL-*.txt):
+/* Text box faces (docs/EDITOR.md E90), all SIL Open Font License 1.1 (OFL-*.txt):
  * Jost (sans), EB Garamond (serif), Archivo Black (display). Latin and
  * Latin Extended subsets from Google Fonts; the browser fetches a file only
  * when a character in its range is drawn. */

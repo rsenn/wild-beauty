@@ -5,7 +5,7 @@ import { createQueue } from '../upload.js';
 import { fitFiles, readyToAdd } from '../editor/io/quickadd.js';
 import { LIMITS } from '../editor/core/model.js';
 
-// "Add photos" of the node editor (EDITOR.md E141). One tap opens the file picker
+// "Add photos" of the node editor (docs/EDITOR.md E141). One tap opens the file picker
 // (several photos at once); they upload three at a time, with the retry and read-first
 // of upload.js, and each lands in the node as soon as it and the ones before it are up,
 // in the order chosen. The whole batch is one undo step. `have` is how many photos the

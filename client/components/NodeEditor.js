@@ -69,13 +69,13 @@ import { Properties } from './Properties.js';
 import { Popover } from './Popover.js';
 import { Stage } from './Stage.js';
 
-// Editor frame (EDITOR.md S2.2): title row, tool column, square stage, action
+// Editor frame (docs/EDITOR.md S2.2): title row, tool column, square stage, action
 // column, context bar and page strip. Everything that changes the node is a
 // command through `dispatch`, so there is one history (undo, redo, keys) and
 // one place that knows what is dirty. The page strip and the node-level
 // actions stay inert until their tasks.
 const ACTIONS = ['undo', 'redo', 'page', 'delete', 'save'];
-// the keys the help popover lists (EDITOR.md E73), each with `editor.keys.<name>`
+// the keys the help popover lists (docs/EDITOR.md E73), each with `editor.keys.<name>`
 // why a command that changed nothing was a wall refusal, or null: { key, params }
 function wallRefusal(snap, command) {
   const step = findStep(snap.doc, command.id)?.step;
@@ -148,7 +148,7 @@ const Busy = ({ at, scale }) => {
   </g>`;
 };
 
-// the wand's selection (WAND.md A3): the chosen candidate tinted, its outline in black and white
+// the wand's selection (docs/WAND.md A3): the chosen candidate tinted, its outline in black and white
 // with the dashes running (still when the user asked for less motion), the taps as + (add) and
 // - (exclude) markers. The area is clipped to the photo's visible window (`corners`): the model
 // sees the whole image, and what lies beyond the crop must not be drawn over the neighbours.
@@ -349,8 +349,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   }, [loading]);
   const hdrag = useRef(null); // a selection handle being dragged: { kind, id, base, pivot | centre, down }
   const [wandMode, setWandMode] = useState('add'); // what a wand tap means: add the area, or exclude it
-  const [wandSel, setWandSel] = useState(null); // the wand's selection: { id, taps, candidates, output, pick } (WAND.md A3)
-  const [wandFill, setWandFill] = useState(true); // take out and erase fill the hole, else it stays transparent (WAND.md A5)
+  const [wandSel, setWandSel] = useState(null); // the wand's selection: { id, taps, candidates, output, pick } (docs/WAND.md A3)
+  const [wandFill, setWandFill] = useState(true); // take out and erase fill the hole, else it stays transparent (docs/WAND.md A5)
   const [clipMode, setClipMode] = useState('replace'); // what a new closed outline does to a clip: replace, add, subtract
   const cdrag = useRef(null); // a clip vertex being dragged: { id, polys, poly, vertex }
   const [typing, setTyping] = useState(null); // id of the text box being typed in
@@ -1721,7 +1721,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     dispatch({ type: 'updateText', id: step.id, patch: { ...patch, lines, h }, keyed: key ?? Object.keys(patch)[0] });
   };
 
-  // magic wand (WAND.md A3): taps build a selection and nothing in the document changes until an
+  // magic wand (docs/WAND.md A3): taps build a selection and nothing in the document changes until an
   // action applies it. A tap sends all taps so far as a select step (about a second); the three
   // candidate masks come back as outlines and are drawn over the photo, the taps marked + and -.
   const wandDown = (e, units) => {
@@ -1798,7 +1798,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       .catch(() => {})
       .finally(() => run.controller?.signal === signal && setBusyAt(null));
   };
-  // apply the selection (WAND.md A5), the chosen candidate at full size. Cut out: the photo becomes
+  // apply the selection (docs/WAND.md A5), the chosen candidate at full size. Cut out: the photo becomes
   // the cut. Take out: a copy right above it holds the cut and the photo itself gets the hole filled.
   // Erase: the photo gets the hole filled. Without `fill` the hole stays transparent. One undo step;
   // the photo is guarded like a background removal (E128) while it runs
@@ -2042,7 +2042,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     wandSelect(run);
   };
   // forget the selection; the document is not touched
-  // a new selection starts adding again (WAND.md A2)
+  // a new selection starts adding again (docs/WAND.md A2)
   const wandReset = () => {
     wand.current?.controller?.abort();
     wand.current = null;
@@ -2066,7 +2066,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     setWandSel(s => s && { ...s, pick: next });
   };
 
-  // --- magnetic lasso (WAND.md 0): clicks set anchors, the path between two of them follows the
+  // --- magnetic lasso (docs/WAND.md 0): clicks set anchors, the path between two of them follows the
   // edges of the photo. Closing it makes the same kind of selection as the wand, applied by the
   // same Cut out / Take out / Erase (a `polygon` in place of `points`)
   const WIRE_SNAP = 6; // px of the working copy: a click snaps to the strongest edge this close

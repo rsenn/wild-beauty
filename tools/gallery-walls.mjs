@@ -1,4 +1,4 @@
-// Gallery geometry benchmark (GALLERY.md S3.2): polylines -> wall mesh, floor,
+// Gallery geometry benchmark (docs/GALLERY.md S3.2): polylines -> wall mesh, floor,
 // circle-vs-segments collision. CPU only, no GPU.
 // Run: bun tools/gallery-walls.mjs   (needs three@0.186.1; not vendored, Bun
 // auto-installs it when the project has no node_modules)

@@ -1,4 +1,4 @@
-// HEIC/HEIF extraction (PLAN.md S6.2 step 3b): decode the primary image into
+// HEIC/HEIF extraction (docs/PLAN.md S6.2 step 3b): decode the primary image into
 // uploads/<hash>.display.jpg (.png when it has alpha) so browsers and the
 // rest of the pipeline never see the container.
 import { mkdtempSync, readdirSync, renameSync, rmSync } from 'node:fs';

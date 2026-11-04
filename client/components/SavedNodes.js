@@ -1,7 +1,7 @@
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 
-// The saved nodes on /new (EDITOR.md E68): read-only tiles, newest first, with
+// The saved nodes on /new (docs/EDITOR.md E68): read-only tiles, newest first, with
 // the node's thumbnail, its title, "Edit" (opens it in the editor) and a link
 // to its page; a node of the user's has a Public/Private chip that switches who
 // else sees it. The server renders the list (boot.nodes); the browser refreshes

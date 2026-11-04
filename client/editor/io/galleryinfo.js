@@ -1,4 +1,4 @@
-// What the editor tells the owner of a gallery node (EDITOR.md E154, GALLERY.md):
+// What the editor tells the owner of a gallery node (docs/EDITOR.md E154, docs/GALLERY.md):
 // which rooms and corridors it has found in the drawing, what is wrong with them,
 // how many pictures they have room for, where the pictures come from and which
 // textures are set. Pure: the gallery context pane (components/GalleryPane.js) draws it.

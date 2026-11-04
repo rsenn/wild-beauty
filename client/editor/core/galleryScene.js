@@ -1,4 +1,4 @@
-// The `scene` of a gallery node (EDITOR.md S3.1, GALLERY.md S3.1): the 3D
+// The `scene` of a gallery node (docs/EDITOR.md S3.1, docs/GALLERY.md S3.1): the 3D
 // settings that live next to the wall shapes. The plan itself is not stored
 // here: the walls are the shape steps flagged `wall` (walls.js).
 //   scene: { look?, thickness?, start?: { at: [x, y], look }, style?: {

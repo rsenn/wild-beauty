@@ -1,4 +1,4 @@
-// Clips with several outlines (EDITOR.md E122). A clip is one shape whose path
+// Clips with several outlines (docs/EDITOR.md E122). A clip is one shape whose path
 // has several closed subpaths 'M..L..Z'. SVG fills a clip path with the
 // non-zero rule, so no polygon boolean is needed: an outline wound the same
 // way as the first one ADDS to the clip (overlaps are united), an outline wound

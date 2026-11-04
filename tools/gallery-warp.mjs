@@ -1,4 +1,4 @@
-// Quad -> square warp benchmark (GALLERY.md S3.3): a texture region is an arbitrary
+// Quad -> square warp benchmark (docs/GALLERY.md S3.3): a texture region is an arbitrary
 // convex 4-point polygon over the source image, resampled into an N x N tile by a
 // projective (homography) inverse map with bilinear sampling. CPU only.
 // Run: bun tools/gallery-warp.mjs

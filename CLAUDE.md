@@ -1,13 +1,13 @@
 # Project Status: legacy code ARCHIVED in `attic/`, rewrite in progress
 
-The original Next.js/Hasura implementation is a frozen historical artifact and lives in `attic/` (also pinned by the git tag and branch `before-rewrite`). The rewrite is a minimal PoC described in `PLAN.md`; library choices and the design source of truth are in `DESIGN.md`; `TODO.md` is the working task list and the authority for the directory layout; `EDITOR.md` specifies the node editor (UX, node data, server, granular tasks E1-E97, incl. the colour palette and text boxes); `GRAPH.md` (graph view, transport, databases, visibility, groups, locks) and `GALLERY.md` (walkable 3D gallery node) are research and decision records for the work after the PoC; `opencv-imgproc.md` specifies the optional background-removal tool; `WAND.md` is the design of the magic wand, background removal and take out (UI and server backend); `attic/HISTORIC.md` is the structural reference for the old code (its paths predate the move, read `components/…` as `attic/components/…`); `attic/README.md` is the old readme.
+The original Next.js/Hasura implementation is a frozen historical artifact and lives in `attic/` (also pinned by the git tag and branch `before-rewrite`). The rewrite is a minimal PoC described in `docs/PLAN.md`; library choices and the design source of truth are in `docs/DESIGN.md`; `TODO.md` is the working task list and the authority for the directory layout; `docs/EDITOR.md` specifies the node editor (UX, node data, server, granular tasks E1-E97, incl. the colour palette and text boxes); `docs/GRAPH.md` (graph view, transport, databases, visibility, groups, locks) and `docs/GALLERY.md` (walkable 3D gallery node) are research and decision records for the work after the PoC; `docs/opencv-imgproc.md` specifies the optional background-removal tool; `docs/WAND.md` is the design of the magic wand, background removal and take out (UI and server backend); `attic/HISTORIC.md` is the structural reference for the old code (its paths predate the move, read `components/…` as `attic/components/…`); `attic/README.md` is the old readme.
 
 ## Hard rule: no changes inside `attic/`
 
 **Do not create, edit, or delete any file under `attic/`, except the documentation files `attic/*.md` (see below).** It is read-only reference material. This includes (non-exhaustive) `*.js`, `*.json`, `*.yaml`/`*.yml`, `.babelrc`, `.env`, and everything under `attic/pages/`, `attic/components/`, `attic/stores/`, `attic/service/`, `attic/assembly/`, `attic/public/`, `attic/build/`.
 
 Do not:
-- Fix bugs in it, even ones documented in `DESIGN.md` (e.g. the exposed Hasura admin secret, the `browse.js` schema drift, the query-injection path).
+- Fix bugs in it, even ones documented in `docs/DESIGN.md` (e.g. the exposed Hasura admin secret, the `browse.js` schema drift, the query-injection path).
 - Refactor, clean up, or remove dead code there (e.g. `attic/components/forceGraph.js`, `attic/tmp.js`, `attic/data.js`, `attic/service/next/`, `attic/webpack.config.js`).
 - Upgrade, add, or remove its dependencies, or run its build/install/dev-server commands (e.g. `next build`, `yarn install`).
 - Reformat or reorganize it.
@@ -16,7 +16,7 @@ If asked to change anything under `attic/`, explain that it is archived and do n
 
 ## Outside `attic/`
 
-Source, configuration, build and asset files outside `attic/` (the rewrite, `static/`, `lib/`, `scripts`) may be created and changed as the work in `PLAN.md` requires. `lib/` is a git submodule: do not commit changes inside it without being asked.
+Source, configuration, build and asset files outside `attic/` (the rewrite, `static/`, `lib/`, `scripts`) may be created and changed as the work in `docs/PLAN.md` requires. `lib/` is a git submodule: do not commit changes inside it without being asked.
 
 ## Dev server (runit)
 
@@ -32,7 +32,7 @@ The writable directories live on the big disk: `data/` and `uploads/` in the pro
 
 ## Mail and login (2026-10-31)
 
-The host runs Postfix and Dovecot for `transistorisiert.ch` and `jános.ch`; registration mail is to be sent as `noreply@transistorisiert.ch` (ports 25, 465, 587 for smtp, 143 and 993 for imap; details and open points in `PLAN.md` S17). `POST /api/login` and `POST /api/register` exist (`server/auth.js`; registration is minimal, the address is not verified and no mail is sent; `WB_REGISTRATION=closed` switches it off); the jános.ch users are made with `tools/janos-seed.js`, see `SITES.md`. Do not put mail passwords in the repository.
+The host runs Postfix and Dovecot for `transistorisiert.ch` and `jános.ch`; registration mail is to be sent as `noreply@transistorisiert.ch` (ports 25, 465, 587 for smtp, 143 and 993 for imap; details and open points in `docs/PLAN.md` S17). `POST /api/login` and `POST /api/register` exist (`server/auth.js`; registration is minimal, the address is not verified and no mail is sent; `WB_REGISTRATION=closed` switches it off); the jános.ch users are made with `tools/janos-seed.js`, see `docs/SITES.md`. Do not put mail passwords in the repository.
 
 ## Documentation
 

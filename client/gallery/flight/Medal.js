@@ -1,4 +1,4 @@
-// The medal for a perfect landing from the flyby (GALLERY.md, the running gag): a gold disc with a
+// The medal for a perfect landing from the flyby (docs/GALLERY.md, the running gag): a gold disc with a
 // star and spread wings on a ribbon, drawn as SVG. The colours are the metal's own, not the theme's.
 import { html } from '../../html.js';
 

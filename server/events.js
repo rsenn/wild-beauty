@@ -1,4 +1,4 @@
-// Usage recording (UX-REQUIREMENTS.md, testing): the client posts batches of
+// Usage recording (docs/UX-REQUIREMENTS.md, testing): the client posts batches of
 // small events (what was tapped, errors, upload timings, never photo content
 // or text); each is stored with who sent it as a line of
 // data/events/<date>.jsonl. Who: `claude` (the cookie wb-who=claude, set in the

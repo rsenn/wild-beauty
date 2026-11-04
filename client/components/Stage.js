@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { STAGE, eventUnits, pixelsPerUnit } from '../editor/geometry/stage.js';
 
-// The square stage (EDITOR.md S2.2, E36): `content` (the rendered node) fills
+// The square stage (docs/EDITOR.md S2.2, E36): `content` (the rendered node) fills
 // it, an overlay <svg> with the same 0..1000 viewBox lies on top for what is
 // not part of the node (selection handles, the live stroke). Pointer events on
 // the overlay come out as `onPointer.{down,move,up,cancel}(event, [x, y])`

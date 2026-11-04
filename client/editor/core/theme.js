@@ -1,4 +1,4 @@
-// Token sanitiser for a node's `style` (PLAN.md S16.6): a stub with the same
+// Token sanitiser for a node's `style` (docs/PLAN.md S16.6): a stub with the same
 // contract as the future server/theme.js, `sanitize(style) -> { theme, vars }`
 // and `toAttr(style) -> string`, so rendering never trusts a stored style.
 // Only whitelisted `--wb-*` tokens pass, each with a pattern for its kind.

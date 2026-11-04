@@ -1,4 +1,4 @@
-// Node, photo and link queries (PLAN.md S8). Every function takes the handle
+// Node, photo and link queries (docs/PLAN.md S8). Every function takes the handle
 // from db.js `open()` first. `doc` and `palette` are JSON in the database and
 // plain values here; time is Date.now() unless `now` is given.
 import { migrateDoc } from '../../client/editor/core/model.js';
@@ -97,7 +97,7 @@ export const linksFrom = (h, id, label) => h.all('SELECT to_id AS id, label, sor
 
 export const linksTo = (h, id, label) => h.all('SELECT from_id AS id, label, sort FROM node_links WHERE to_id = ?1 AND (?2 IS NULL OR label = ?2) ORDER BY sort, id', id, label ?? null);
 
-// --- editor locks (EDITOR.md S2.8, S3.5) -----------------------------------
+// --- editor locks (docs/EDITOR.md S2.8, S3.5) -----------------------------------
 // One row per node. A lock is live while `expires_at` is in the future; an
 // expired row is ignored and replaced, never swept. Times are ms since 1970.
 export const LOCK_TTL = 60000;
@@ -132,7 +132,7 @@ export const releaseLock = (h, id, holder) => h.run('DELETE FROM node_locks WHER
 // remove the lock whoever holds it; true when a row went
 export const breakLock = (h, id) => h.run('DELETE FROM node_locks WHERE node_id = ?', id).changes > 0;
 
-// --- graph view (GRAPH.md S3.5) --------------------------------------------
+// --- graph view (docs/GRAPH.md S3.5) --------------------------------------------
 
 // every node as the graph draws it: { id, title, kind, tile, x, y, pinned, color }
 export const graphNodes = h =>
@@ -145,7 +145,7 @@ export const setPosition = (h, id, x, y, pinned) => h.run('UPDATE nodes SET x = 
 
 export const setPinned = (h, id, pinned) => h.run('UPDATE nodes SET pinned = ? WHERE id = ?', pinned ? 1 : 0, id).changes > 0;
 
-// --- place suggestions (GRAPH.md S1.5) ---------------------------------------
+// --- place suggestions (docs/GRAPH.md S1.5) ---------------------------------------
 
 // remember the rounded positions of the photos a node was saved with
 export function addSuggestions(h, nodeId, positions) {
@@ -157,7 +157,7 @@ export const listSuggestions = h => h.all('SELECT s.node_id, n.title, s.lat, s.l
 
 export const removeSuggestion = (h, nodeId, lat, lon) => h.run('DELETE FROM place_suggestions WHERE node_id = ? AND lat = ? AND lon = ?', nodeId, lat, lon).changes > 0;
 
-// --- place names (GRAPH.md S1.5) -----------------------------------------------
+// --- place names (docs/GRAPH.md S1.5) -----------------------------------------------
 
 // the cached municipality of a cell: a string, null (outside Switzerland) or undefined (not asked yet)
 export function getPlaceName(h, { lat, lon }) {

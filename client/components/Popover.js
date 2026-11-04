@@ -2,7 +2,7 @@ import { useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { usePopFit } from './popfit.js';
 
-// A button that opens a small panel under it (EDITOR.md S2.9 pattern, shared by
+// A button that opens a small panel under it (docs/EDITOR.md S2.9 pattern, shared by
 // the properties and the opacity/blend popovers; placed by popfit.js so it is never cut off). Escape closes it and gives the
 // focus back to the button.
 let serial = 0;

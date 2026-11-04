@@ -1,4 +1,4 @@
-// Force layout of the graph view (GRAPH.md S2.7): nodes repel each other,
+// Force layout of the graph view (docs/GRAPH.md S2.7): nodes repel each other,
 // links pull their ends to a rest length, a weak pull keeps everything near the
 // middle. Pure: no DOM, no timers; the page calls `step` once per frame until
 // `settled`. A node with a stored place starts there, a new one next to a

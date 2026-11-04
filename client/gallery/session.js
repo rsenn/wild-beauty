@@ -1,4 +1,4 @@
-// One visit to a gallery (GALLERY.md S6, TODO 13.6): the plan, the build, the
+// One visit to a gallery (docs/GALLERY.md S6, TODO 13.6): the plan, the build, the
 // hung pictures, the live canvas, walking and tapping. Loaded when the visitor
 // enters, so nothing of it reaches a page that never does.
 //

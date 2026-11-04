@@ -1,4 +1,4 @@
-// Stage geometry (EDITOR.md S2.2, E36): the stage is a square drawn at any
+// Stage geometry (docs/EDITOR.md S2.2, E36): the stage is a square drawn at any
 // size, and the document lives in a 0..1000 unit square (S2.1). Pure
 // functions, shared by the stage component and the tools.
 export const STAGE = 1000;

@@ -65,7 +65,7 @@ const GroupFace = ({ node, kids, title }) => html`<g clip-path=${`url(#wb-g-${no
   <text class="wb-graph-strip-text" x="6" y="73" dominant-baseline="central">${title.slice(0, 9)} · ${kids.length}</text>
 </g>`;
 
-// /:lang/tree: the graph of the nodes (GRAPH.md S2.7, preliminary demo). A node
+// /:lang/tree: the graph of the nodes (docs/GRAPH.md S2.7, preliminary demo). A node
 // is a rounded square with its tile; drag moves and pins it. Several nodes can
 // be selected (Shift, or the Select button, then tap or draw a box); dragging
 // one carries the group, gathered under the pointer: dropped on a node it links
@@ -88,7 +88,7 @@ export const GraphPage = () => {
   const [note, setNote] = useState(null);
   const [linking, setLinking] = useState(null);
   const [error, setError] = useState(false);
-  const [places, setPlaces] = useState(false); // the place suggestions panel (EDITOR.md E140)
+  const [places, setPlaces] = useState(false); // the place suggestions panel (docs/EDITOR.md E140)
   const bodies = useRef(new Map());
   const alpha = useRef(1);
   const svg = useRef(null);

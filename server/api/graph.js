@@ -1,4 +1,4 @@
-// The graph view (GRAPH.md S3): GET /api/graph lists the nodes with their
+// The graph view (docs/GRAPH.md S3): GET /api/graph lists the nodes with their
 // place and the links between them; POST /api/graph/ops applies a few edits
 // (link, unlink, move, pin, visibility) in one transaction. The nodes of a site are listed
 // to their owner only (canView); server/guard.js checks who may change them.
@@ -31,7 +31,7 @@ export function graphOf(h, viewer = null) {
   return { nodes, edges: graphEdges(h).filter(e => ids.has(e.from) && ids.has(e.to)) };
 }
 
-// the suggestions of `node` that the place node `to` stands for go (GRAPH.md S1.5)
+// the suggestions of `node` that the place node `to` stands for go (docs/GRAPH.md S1.5)
 function dropAnswered(h, node, to) {
   const title = h.get('SELECT title FROM nodes WHERE id = ?', to).title;
 

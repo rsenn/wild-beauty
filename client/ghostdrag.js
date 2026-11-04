@@ -1,4 +1,4 @@
-// The touch fallback for dragging an upload onto the stage (EDITOR.md S2.5,
+// The touch fallback for dragging an upload onto the stage (docs/EDITOR.md S2.5,
 // E46). HTML5 drag-and-drop does not fire for a finger on most phones, so a
 // card also listens for a press-and-hold with a pointer: after HOLD_MS without
 // moving it picks the card up as a "ghost" picture under the finger; letting

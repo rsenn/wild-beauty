@@ -1,4 +1,4 @@
-// Photos waiting for an editor (EDITOR.md S2.5, E47). The "add to node" button
+// Photos waiting for an editor (docs/EDITOR.md S2.5, E47). The "add to node" button
 // of an upload card works whether an editor is open or not: it queues the
 // photo here and announces it; an open editor takes it at once, and one that
 // is just being opened takes it when it mounts.

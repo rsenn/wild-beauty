@@ -1,5 +1,5 @@
 // The drawn plan of a gallery node -> the scene3d document the builder takes
-// (EDITOR.md E136, TODO 13.1). The walls are the shape steps flagged `wall`:
+// (docs/EDITOR.md E136, TODO 13.1). The walls are the shape steps flagged `wall`:
 // a closed one is a room, an open one a corridor `width` metres wide. Stage
 // units become metres (roomaid.js UNITS_PER_METRE), the stage's top is north
 // (y flips), moves and turns of a step (transform steps) are applied.

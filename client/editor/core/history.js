@@ -1,4 +1,4 @@
-// Undo/redo over document snapshots (EDITOR.md S2). Documents are immutable
+// Undo/redo over document snapshots (docs/EDITOR.md S2). Documents are immutable
 // (model commands never mutate), so a snapshot is just a reference. A history
 // is a plain value too: every function returns a new one.
 export const MAX_UNDO = 100;

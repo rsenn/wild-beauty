@@ -1,5 +1,5 @@
 // Which external tools exist on this machine, detected once at start
-// (PLAN.md S6.2 step 4, S6.1 /api/capabilities).
+// (docs/PLAN.md S6.2 step 4, S6.1 /api/capabilities).
 import { run } from './run.js';
 
 const NAMES = ['mediainfo', 'exiftool', 'exiv2', 'magick', 'convert', 'identify', 'heif-convert', 'heif-info', 'jpegtran', 'qjsm', 'rsvg-convert'];

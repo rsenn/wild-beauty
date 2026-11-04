@@ -1,4 +1,4 @@
-// Text boxes (EDITOR.md S2.3b, E88-E93): the faces, line breaking and the box
+// Text boxes (docs/EDITOR.md S2.3b, E88-E93): the faces, line breaking and the box
 // size. A box's local space has its top-left corner at (0, 0), the box is `w`
 // wide and `h` high, and `m` places it on the stage like a photo's matrix.
 // Pure: the width of a string comes from an injected `measure(text, font, size)`.

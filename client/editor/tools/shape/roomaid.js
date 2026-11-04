@@ -1,4 +1,4 @@
-// The room aid of a gallery node (EDITOR.md E136): while on, the shape tool
+// The room aid of a gallery node (docs/EDITOR.md E136): while on, the shape tool
 // draws rooms the way a floor plan is built and the pen draws corridors.
 //   - one step is the room a hung work takes (picture size + gap, hang.js), in
 //     stage units `STEP`; the first vertex sits on that grid and every edge is a

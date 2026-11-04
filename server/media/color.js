@@ -1,5 +1,5 @@
 // Colour helpers for the palette: OKLab distance and the two padding colours
-// of an "extended" photo (PLAN.md S6.2 step 5).
+// of an "extended" photo (docs/PLAN.md S6.2 step 5).
 
 import { distance } from '../../client/color.js';
 

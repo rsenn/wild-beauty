@@ -1,4 +1,4 @@
-// bun test: the translations (EDITOR.md E72): parity of the three locale files,
+// bun test: the translations (docs/EDITOR.md E72): parity of the three locale files,
 // every key the code asks for exists, every key built from a list exists for
 // each member, and no German or French string is an untranslated copy
 import { describe, expect, test } from 'bun:test';

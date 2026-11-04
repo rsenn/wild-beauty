@@ -1,4 +1,4 @@
-// Editor commands (EDITOR.md S2.6, E40): everything that changes the node goes
+// Editor commands (docs/EDITOR.md S2.6, E40): everything that changes the node goes
 // through here as a plain object, `apply(snapshot, command)`, so the editor
 // has one way to change anything and one history (history.js). A snapshot is
 // `{ doc, kind }`: the document plus the node metadata that is saved next to
@@ -11,7 +11,7 @@ import { pasteSteps } from '../io/clipboard.js';
 import { effective } from '../view/render.js';
 import { invert, multiply } from '../geometry/matrix.js';
 
-// A clipped photo and its mask move together (EDITOR.md S2.7): whatever takes
+// A clipped photo and its mask move together (docs/EDITOR.md S2.7): whatever takes
 // the photo from its matrix to `m`, the same move is applied to the clip
 // shape, so the window stays where it is on the photo. `move(doc, id, m)` does
 // the change for one step.

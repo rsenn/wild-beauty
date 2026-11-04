@@ -1,4 +1,4 @@
-// Editing the vertices of a selected shape (EDITOR.md S6, E61): find the vertex
+// Editing the vertices of a selected shape (docs/EDITOR.md S6, E61): find the vertex
 // or handle under the pointer, drag it, delete a vertex. Pure functions; the
 // vertices are in the shape's own space, the points to hit-test in stage
 // space (the step's matrix applied).

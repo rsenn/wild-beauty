@@ -1,4 +1,4 @@
-// Shape tool maths (EDITOR.md S6, E13): vertices with optional bezier
+// Shape tool maths (docs/EDITOR.md S6, E13): vertices with optional bezier
 // handles <-> SVG path string, vertex operations, hit-testing. Pure
 // functions; every operation returns a new vertex array.
 //

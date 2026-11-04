@@ -1,4 +1,4 @@
-// Contact shadows (GALLERY.md): the dark that gathers where a wall meets the
+// Contact shadows (docs/GALLERY.md): the dark that gathers where a wall meets the
 // floor. A strip of soft shadow is laid on the floor along the foot of every
 // wall face that has floor in front of it; the wall itself darkens toward its
 // base in the material (scene.js `grounded`). No three.js and no DOM here: the

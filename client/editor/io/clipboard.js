@@ -1,4 +1,4 @@
-// Clipboard (EDITOR.md E131): copy a step as an image, as text and as itself,
+// Clipboard (docs/EDITOR.md E131): copy a step as an image, as text and as itself,
 // paste an image, text or such a step. The step travels inside the `text/html`
 // part (a data attribute), which every browser and the paste event carry, so a
 // paste in another page or node gets it back exactly; other apps take the

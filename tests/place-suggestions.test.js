@@ -1,4 +1,4 @@
-// bun test: place suggestions kept at save and answered in bulk (EDITOR.md E140, GRAPH.md S1.5)
+// bun test: place suggestions kept at save and answered in bulk (docs/EDITOR.md E140, docs/GRAPH.md S1.5)
 import { afterAll, beforeAll, beforeEach, describe, expect, setDefaultTimeout, test } from 'bun:test';
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';

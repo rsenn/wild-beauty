@@ -2,7 +2,7 @@ import { useEffect, useRef } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { FONTS, LINE_HEIGHT, firstBaseline } from '../editor/core/text.js';
 
-// The in-place editor of a text box (EDITOR.md E91): a transparent textarea laid
+// The in-place editor of a text box (docs/EDITOR.md E91): a transparent textarea laid
 // exactly over the box, so the caret and the selection are the browser's (IME and
 // right-to-left text work natively) while the drawn text under it is the box.
 // `scale` is screen pixels per stage unit. Esc and leaving the field end it.

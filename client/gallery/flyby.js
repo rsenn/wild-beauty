@@ -1,4 +1,4 @@
-// The flyby of a gallery node before anyone walks in (GALLERY.md): the camera starts at the
+// The flyby of a gallery node before anyone walks in (docs/GALLERY.md): the camera starts at the
 // bird's-eye view, dives into a room, glides along a wall past its pictures, pulls up like a
 // stunt flyer, flies a figure eight over the room, and dives into the next wall; then the next,
 // and back to the bird's-eye view. Pure maths, no three.js and no DOM: `makeFlyby` -> `pose(time)`.

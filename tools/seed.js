@@ -1,4 +1,4 @@
-// Seed the starting landscape (GRAPH.md S1.4): overall-root with the category
+// Seed the starting landscape (docs/GRAPH.md S1.4): overall-root with the category
 // nodes `art exhibition`, `fleamarket` and `places`, and a few samples below.
 // Idempotent: a node is found by title among the children of its parent, so a
 // second run adds nothing. Run: bun tools/seed.js [database file]

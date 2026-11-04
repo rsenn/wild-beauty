@@ -1,4 +1,4 @@
-// Locale files and negotiation (PLAN.md S11.7). Locales are read once at
+// Locale files and negotiation (docs/PLAN.md S11.7). Locales are read once at
 // start; adding locales/<code>.json and restarting is all a new language needs.
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';

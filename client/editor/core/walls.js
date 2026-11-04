@@ -1,4 +1,4 @@
-// The wall layer of the 3D gallery (EDITOR.md S2.3, GALLERY.md S3.1): a shape
+// The wall layer of the 3D gallery (docs/EDITOR.md S2.3, docs/GALLERY.md S3.1): a shape
 // step flagged `wall: { height, width? }`. A closed wall is a room, an open one
 // a line (a corridor, `width` metres wide). Rooms and lines may not have a
 // corner sharper than 45 degrees. Pure functions; the commands and the editor

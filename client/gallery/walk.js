@@ -1,4 +1,4 @@
-// Walking (GALLERY.md S4, TODO 13.4): the visitor is a circle on the plan that
+// Walking (docs/GALLERY.md S4, TODO 13.4): the visitor is a circle on the plan that
 // moves with the input, is pushed out of the walls and keeps to the floor. No
 // DOM and no three.js: the host feeds it the build's `collision` and
 // `floorHeightAt`. Plan coordinates, x east and y north; yaw in radians, 0 faces

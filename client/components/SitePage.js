@@ -6,7 +6,7 @@ import { OwnerBar } from './SiteApp.js';
 import { RecordConsent } from './RecordConsent.js';
 import { PushToggle } from './PushToggle.js';
 
-// A page of a personal site (SITES.md): the navigation of the sitemap above,
+// A page of a personal site (docs/SITES.md): the navigation of the sitemap above,
 // the node in a centred stage below. Its own layout, not the app's tab strip.
 // Centres what is drawn on the stage horizontally: the picture is shifted (by its viewBox) so that the middle of
 // the drawn parts is the middle of the stage, however the page was laid out in the editor.

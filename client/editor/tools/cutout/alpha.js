@@ -1,4 +1,4 @@
-// The visible part of a cutout (EDITOR.md E115): its box in a photo's local
+// The visible part of a cutout (docs/EDITOR.md E115): its box in a photo's local
 // space, so the selection box and the hit test skip the transparent margin.
 import { cropWindow } from '../../core/model.js';
 

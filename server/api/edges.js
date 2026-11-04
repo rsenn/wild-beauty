@@ -1,4 +1,4 @@
-// GET /api/edges/<photo hash>: the edge map the magnetic lasso follows (WAND.md 0). `opencv-imgproc
+// GET /api/edges/<photo hash>: the edge map the magnetic lasso follows (docs/WAND.md 0). `opencv-imgproc
 // edgemap` does the work - CLAHE on the lightness, an edge-aware smoothing, Sobel and Canny fused,
 // optionally a deep detector - and answers with an 8-bit PNG, 255 on the strongest edge, with the
 // long side `size` px. The tool caches by photo and flags itself (`--cache-dir`), so the second ask

@@ -1,7 +1,7 @@
-// Node endpoints (EDITOR.md S4, S4.1). POST /api/nodes: validate, bake the
+// Node endpoints (docs/EDITOR.md S4, S4.1). POST /api/nodes: validate, bake the
 // uploads the node uses into data/photos, write the rows in one transaction,
 // and only after the commit delete the uploads. Errors are `{ error: <code> }`
-// with the codes of EDITOR.md S2.11.
+// with the codes of docs/EDITOR.md S2.11.
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -22,7 +22,7 @@ import { readUpload, removeUpload } from './uploads.js';
 import { lockedBody, lockedByOther } from './locks.js';
 import { sessionCookie, sessionFor } from '../session.js';
 
-// request bodies are capped a little above the document limit (EDITOR.md S4.1)
+// request bodies are capped a little above the document limit (docs/EDITOR.md S4.1)
 export const MAX_BODY = 1.2 * 1024 * 1024;
 
 // a new session (cookie not seen before) is handed its cookie on the way out
@@ -120,7 +120,7 @@ async function prepare(h, checked, thumb) {
   const positions = [];
 
   for(const { hash } of checked.photos) {
-    // an upload's position is kept only as a suggestion for the owner (GRAPH.md S1.5)
+    // an upload's position is kept only as a suggestion for the owner (docs/GRAPH.md S1.5)
     const pos = (await readUpload(hash))?.pos;
 
     if(pos) positions.push(pos);

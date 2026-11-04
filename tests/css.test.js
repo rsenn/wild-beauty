@@ -1,4 +1,4 @@
-// bun test: the token contract of the stylesheets (PLAN.md S16.2, EDITOR.md E44):
+// bun test: the token contract of the stylesheets (docs/PLAN.md S16.2, docs/EDITOR.md E44):
 // layout.css holds structure only, no literal colours, and every token it
 // reads is defined by every theme.
 import { describe, expect, test } from 'bun:test';

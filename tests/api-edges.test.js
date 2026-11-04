@@ -1,4 +1,4 @@
-// bun test: GET /api/edges/<hash> runs `opencv-imgproc edgemap` and hands the PNG on (the lasso, WAND.md 0)
+// bun test: GET /api/edges/<hash> runs `opencv-imgproc edgemap` and hands the PNG on (the lasso, docs/WAND.md 0)
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

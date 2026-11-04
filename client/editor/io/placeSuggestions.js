@@ -1,4 +1,4 @@
-// Place suggestions for the open node (EDITOR.md E137, GRAPH.md S1.5): the
+// Place suggestions for the open node (docs/EDITOR.md E137, docs/GRAPH.md S1.5): the
 // rounded positions of its photos and the remembered answers. No state here
 // but the browser's storage; the suggestion itself is never saved with the node.
 const STORE = 'wb.places.answered';
@@ -68,7 +68,7 @@ export async function linkPlace(nodeId, pos, fetcher = fetch) {
 }
 
 // the position the browser reports, rounded to ~1 km before it leaves the device
-// -> { lat, lon } | null (denied, unavailable, timed out: a quiet no-op, EDITOR.md E139)
+// -> { lat, lon } | null (denied, unavailable, timed out: a quiet no-op, docs/EDITOR.md E139)
 export function currentPosition(geo = globalThis.navigator?.geolocation, timeout = 8000) {
   return new Promise(resolve => {
     if(!geo) return resolve(null);

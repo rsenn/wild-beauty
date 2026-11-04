@@ -1,4 +1,4 @@
-// Shared colour maths (EDITOR.md S2.3a, E84): hex <-> sRGB <-> OKLab / OKLCH,
+// Shared colour maths (docs/EDITOR.md S2.3a, E84): hex <-> sRGB <-> OKLab / OKLCH,
 // distance, gamut clamping. Used by the server (palette, tile padding) and the
 // editor (palette strip), so no DOM and no Bun APIs.
 const lin = c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);

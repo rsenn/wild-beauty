@@ -1,4 +1,4 @@
-// Lock endpoints (EDITOR.md S2.8, S4.1). `POST /api/nodes/:id/lock` takes or
+// Lock endpoints (docs/EDITOR.md S2.8, S4.1). `POST /api/nodes/:id/lock` takes or
 // renews the lock (the heartbeat), `DELETE` releases it; whoever may break a
 // lock (the owner, `canBreak`) removes another's with the same call. The
 // holder is the hash of the session cookie, so no account is needed.

@@ -1,4 +1,4 @@
-// Polyline maths for the 3D gallery builder (GALLERY.md S3). Plan coordinates
+// Polyline maths for the 3D gallery builder (docs/GALLERY.md S3). Plan coordinates
 // are metres, x east and y north; a polyline is [[x, y], ...]. Pure functions.
 
 // signed area (positive for a counter-clockwise polygon)

@@ -1,4 +1,4 @@
-// Picking on the stage (EDITOR.md S2.3, E39): which step is under a point,
+// Picking on the stage (docs/EDITOR.md S2.3, E39): which step is under a point,
 // and the outline to draw around it. Works on the document as the renderer
 // sees it: a step's matrix and clip after its transform/clip ops, shapes that
 // serve as a clip not drawn (render.js `effective`). Points are stage units.
@@ -11,7 +11,7 @@ import { opaqueAt, peekAlpha } from '../tools/cutout/alphamap.js';
 
 const IDENTITY = [1, 0, 0, 1, 0, 0];
 
-// a photo's local space is the 1000 unit square of its crop (EDITOR.md S2.5)
+// a photo's local space is the 1000 unit square of its crop (docs/EDITOR.md S2.5)
 const localSize = () => [1000, 1000];
 
 // the polyline of a shape's path, curves sampled, through matrix `m`;

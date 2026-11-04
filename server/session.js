@@ -1,4 +1,4 @@
-// The anonymous session (EDITOR.md S3.5): a random token in the `wb-session`
+// The anonymous session (docs/EDITOR.md S3.5): a random token in the `wb-session`
 // cookie so locks work before accounts exist. The token is a credential, so
 // the database and every response only ever see its hash, the `holder`.
 const COOKIE = 'wb-session';

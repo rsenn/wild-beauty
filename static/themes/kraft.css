@@ -2,7 +2,7 @@
  *
  * Distilled from docs/screenshots/*.jpg, static/style.css and the styled-jsx
  * blocks in attic/pages/_app.js, attic/components/{nav,layout}.js and
- * attic/components/views/imageUpload.js. Sets tokens only (PLAN.md S16); the
+ * attic/components/views/imageUpload.js. Sets tokens only (docs/PLAN.md S16); the
  * rules that read them live in layout.css. A node may wear this theme too, so
  * every selector is :root[data-theme=kraft] or [data-theme=kraft]. */
 

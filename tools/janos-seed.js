@@ -1,5 +1,5 @@
 // Create (or update) the user and the sitemap nodes of www.jános.ch
-// (SITES.md): the root "jános.ch" with the pages Start, Über and Kontakt, all
+// (docs/SITES.md): the root "jános.ch" with the pages Start, Über and Kontakt, all
 // owned by the user. The password comes from the environment, never from a file:
 //
 //   JANOS_PASSWORD='...' bun tools/janos-seed.js [email]

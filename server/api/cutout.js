@@ -1,4 +1,4 @@
-// POST /api/cutout: remove the background of a photo (EDITOR.md E127). Runs
+// POST /api/cutout: remove the background of a photo (docs/EDITOR.md E127). Runs
 // `opencv-imgproc cutout` in two phases and streams NDJSON: `progress` lines of
 // the tool, then a `derived` line per phase (the cut stored as a new upload of
 // the caller, as a client sees an upload record), then `done`. Closing the

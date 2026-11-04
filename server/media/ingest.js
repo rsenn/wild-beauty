@@ -1,4 +1,4 @@
-// Ingest of a stored upload (PLAN.md S6.2 steps 4-6): probe, palette and the
+// Ingest of a stored upload (docs/PLAN.md S6.2 steps 4-6): probe, palette and the
 // two padding colours. Failures degrade to an `errors` list, they never
 // reject the upload.
 import { existsSync } from 'node:fs';
@@ -22,7 +22,7 @@ export async function ingest(original, display) {
     hasAlpha,
     orientation,
     exif: exifResult.value ?? null,
-    pos: exifResult.pos ?? null, // rounded to ~1 km; the only place the GPS tags survive (GRAPH.md S1.5)
+    pos: exifResult.pos ?? null, // rounded to ~1 km; the only place the GPS tags survive (docs/GRAPH.md S1.5)
     mediainfo: media.value ?? null,
     palette: colors.value ?? [],
     padding: colors.value ? choosePadding(colors.value) : null,

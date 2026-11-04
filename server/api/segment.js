@@ -1,4 +1,4 @@
-// POST /api/segment: the magic wand (WAND.md, EDITOR.md E119). Two kinds of request, both
+// POST /api/segment: the magic wand (docs/WAND.md, docs/EDITOR.md E119). Two kinds of request, both
 // stateless (the client sends all taps every time) and both streamed as NDJSON; closing the request
 // kills what runs (a newer tap supersedes the running one):
 // - select (no `action`): the taps become a selection. `opencv-imgproc segment --masks-only` answers

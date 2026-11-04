@@ -1,6 +1,6 @@
 import { html } from '../html.js';
 
-// The step scrubber (EDITOR.md S2.7, E56): play / pause and a slider over the
+// The step scrubber (docs/EDITOR.md S2.7, E56): play / pause and a slider over the
 // steps of the current page. `k` is how many steps are shown (0..count).
 export const Scrubber = ({ t, count, k, playing, onScrub, onPlay }) => html`
   <div class="wb-editor-scrubber" role="group" aria-label=${t('editor.scrub')}>

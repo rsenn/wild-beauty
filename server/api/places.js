@@ -1,4 +1,4 @@
-// Places (GRAPH.md S1.5, EDITOR.md E138): a rounded photo position -> the place
+// Places (docs/GRAPH.md S1.5, docs/EDITOR.md E138): a rounded photo position -> the place
 // node below `places`. A place is a locality from the gazetteer, or else a cell
 // of about 1 km titled by its rounded coordinates; its node holds no
 // coordinates, only the title. GET /api/places/near?lat=&lon= looks it up
@@ -26,7 +26,7 @@ const CELL = /^(-?\d+\.\d\d), (-?\d+\.\d\d)$/;
 const NEIGHBOUR_KM = 1.6;
 
 // The place below `root` for a title: the one of that title, or for a cell title the place of a
-// cell that touches it, so a village on a cell edge is one place, not two (GRAPH.md S1.5).
+// cell that touches it, so a village on a cell edge is one place, not two (docs/GRAPH.md S1.5).
 function titled(h, root, title) {
   const all = children(h, root);
   const exact = all.find(n => n.title === title);
@@ -76,7 +76,7 @@ export function ensurePlace(h, pos, gazetteer) {
   });
 }
 
-// The open place suggestions (GRAPH.md S1.5, EDITOR.md E140): saved nodes whose
+// The open place suggestions (docs/GRAPH.md S1.5, docs/EDITOR.md E140): saved nodes whose
 // photos were taken at a place the node is not linked to yet.
 // -> [{ node, title, lat, lon, place: { id|null, title } }]. With `purge` the suggestions of a
 // node that is linked to the place already (made any way) are deleted, not only left out.

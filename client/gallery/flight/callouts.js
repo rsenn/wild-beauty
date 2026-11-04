@@ -1,5 +1,5 @@
 // The radar altimeter's voice and the ground proximity warnings, as on an Airbus (the running gag,
-// GALLERY.md): "FIFTY ... FORTY ... THIRTY ... TWENTY ... RETARD ... TEN" on the way down, and
+// docs/GALLERY.md): "FIFTY ... FORTY ... THIRTY ... TWENTY ... RETARD ... TEN" on the way down, and
 // "SINK RATE", "PULL UP", "TOO LOW GEAR" when the bird is doing it wrong. Pure logic: `step` takes
 // the instruments (pilot.js `instruments`) and calls `say(words, { urgent })`; the voice is voice.js.
 // Heights are called in feet, as in the cockpit.

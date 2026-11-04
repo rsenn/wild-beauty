@@ -1,4 +1,4 @@
-// Dominant colours of an image (PLAN.md S6.2 step 5): ImageMagick reduces a
+// Dominant colours of an image (docs/PLAN.md S6.2 step 5): ImageMagick reduces a
 // 128 px copy to 8 colours and prints a histogram, which gives hex and weight.
 import { imagemagick } from './tools.js';
 import { LIMITS } from './probe.js';

@@ -1,4 +1,4 @@
-// Which place a rounded position belongs to (GRAPH.md S1.5): the municipality the
+// Which place a rounded position belongs to (docs/GRAPH.md S1.5): the municipality the
 // federal geoportal named (cached, municipality.js), else a locality of the
 // offline gazetteer, else the 0.01 degree cell titled by its coordinates. A title
 // is `Name (KT)`: the canton tells apart the many municipalities of one name. Kept apart from

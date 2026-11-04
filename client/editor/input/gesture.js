@@ -1,4 +1,4 @@
-// The move / scale / rotate gesture on the selection (EDITOR.md S2.4, E48) as
+// The move / scale / rotate gesture on the selection (docs/EDITOR.md S2.4, E48) as
 // a small state machine that knows nothing of the DOM. One pointer moves the
 // step, two pointers move, scale and turn it together (pinch), Alt with one
 // pointer scales and turns about a pivot (the step's centre). The result is

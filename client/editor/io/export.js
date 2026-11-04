@@ -1,4 +1,4 @@
-// Export the work as an image (EDITOR.md E125, UX-REQUIREMENTS.md J1.13): the same
+// Export the work as an image (docs/EDITOR.md E125, docs/UX-REQUIREMENTS.md J1.13): the same
 // SVG the viewer draws, its photos inlined (an SVG drawn as an image may not load
 // anything from the network), painted on a canvas, saved as PNG or JPG. The pure
 // parts are here; `exportImage` needs a browser.

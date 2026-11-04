@@ -4,7 +4,7 @@ import { galleryReport, planPicture } from '../editor/io/galleryinfo.js';
 import { LOOKS } from '../gallery/autoplan.js';
 import { LOOK_NAMES, TEXTURE_SLOTS } from '../editor/core/galleryScene.js';
 
-// The gallery context pane (EDITOR.md E154): beside the stage of a node of kind
+// The gallery context pane (docs/EDITOR.md E154): beside the stage of a node of kind
 // `gallery`, it explains how a gallery is set up, shows what the editor found in the
 // drawing (rooms, corridors, a top-down plan), how many pictures fit and where the
 // pictures come from, and lets the owner pick the default look and assign texture

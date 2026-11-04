@@ -1,4 +1,4 @@
-// The single-editor store (EDITOR.md S2.1): at most one editor is open on a
+// The single-editor store (docs/EDITOR.md S2.1): at most one editor is open on a
 // page. `open(target)` takes a node id or 'new'; asking for another while one
 // is open raises the `confirmReplace` hook, and the editor is only replaced
 // when it says yes (that is where "unsaved changes, discard?" lives). Plain

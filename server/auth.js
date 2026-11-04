@@ -1,4 +1,4 @@
-// Accounts (SITES.md Phase B): password login with a session cookie. Passwords
+// Accounts (docs/SITES.md Phase B): password login with a session cookie. Passwords
 // are argon2id hashes (Bun.password), a session token is random and only its
 // hash is stored, like the anonymous session (session.js).
 const COOKIE = 'wb-auth';

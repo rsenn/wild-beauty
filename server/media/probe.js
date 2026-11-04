@@ -1,4 +1,4 @@
-// Metadata of an upload (PLAN.md S6.2 step 4): the size, alpha and EXIF
+// Metadata of an upload (docs/PLAN.md S6.2 step 4): the size, alpha and EXIF
 // orientation of the display file from ImageMagick, the full EXIF dump from
 // exiftool (or exiv2), and mediainfo's description. Every call has a timeout
 // and an output cap; a failure is reported, never thrown.
@@ -38,7 +38,7 @@ const SKIP_GROUPS = /^(System|ExifTool|File|SourceFile)/;
 const GPS_TAG = /GPS/i; // exiftool "GPS:GPSLatitude", "Composite:GPSPosition", exiv2 "Exif.GPSInfo.*"
 const clip = v => (typeof v === 'string' && v.length > 500 ? v.slice(0, 500) : v);
 
-// Place of a photo for suggesting a place link (GRAPH.md S1.5). Coordinates
+// Place of a photo for suggesting a place link (docs/GRAPH.md S1.5). Coordinates
 // are rounded to two decimals (about 1 km); the exact position is neither
 // returned nor kept. -> { lat, lon } | null (missing, out of range or 0,0)
 export function roundPosition(lat, lon) {

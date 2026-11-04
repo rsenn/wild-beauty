@@ -1,4 +1,4 @@
-// Gallery builder (GALLERY.md S3, TODO 13.2): the scene3d document -> flat
+// Gallery builder (docs/GALLERY.md S3, TODO 13.2): the scene3d document -> flat
 // vertex data per material group, wall collision segments, the floor height and
 // the start position. No three.js and no DOM here; the scene (13.3) turns the
 // typed arrays into BufferGeometry.

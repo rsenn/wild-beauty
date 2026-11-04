@@ -1,5 +1,5 @@
 // Contact data in the text of a text box: mail addresses, phone numbers, web
-// pages, and the profile links of the usual platforms (SITES.md S12). Pure
+// pages, and the profile links of the usual platforms (docs/SITES.md S12). Pure
 // functions shared by the server render, the browser and the paste handler.
 //
 //   detect(text)           the places in `text` that are links -> [{ start, end, text, type, href }]

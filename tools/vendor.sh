@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copy the pinned browser/server libraries into vendor/ (PLAN.md S5, DESIGN.md
+# Copy the pinned browser/server libraries into vendor/ (docs/PLAN.md S5, docs/DESIGN.md
 # S9.5). Needs npm and network; the result is checked in, nothing else
 # touches node_modules. Re-run after changing a version below.
 set -eu

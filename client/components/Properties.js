@@ -4,7 +4,7 @@ import { KINDS } from '../editor/core/model.js';
 import { ColourPick } from './ColourPick.js';
 import { usePopFit } from './popfit.js';
 
-// The properties popover above the stage (EDITOR.md S2.9): kind, visibility
+// The properties popover above the stage (docs/EDITOR.md S2.9): kind, visibility
 // (public or private; the owner of a saved node changes it, `onVisibility`) and
 // stage ground; the group is shown but fixed; the theme joins with M2b.
 export const Properties = ({ t, kind, bg, pal, used = [], dropper, onOpen, dispatch, visibility = 'public', canPublish = false, onVisibility }) => {

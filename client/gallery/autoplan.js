@@ -1,4 +1,4 @@
-// Auto plan (GALLERY.md S3.6, TODO 13.8): a plan for a node that has none,
+// Auto plan (docs/GALLERY.md S3.6, TODO 13.8): a plan for a node that has none,
 // e.g. a plain list. A row of rooms from west to east, each joined to the next
 // by a short corridor; just enough rooms for every child to get a picture. A
 // drawn plan replaces it. Returns a scene3d document (metres, x east, y north).

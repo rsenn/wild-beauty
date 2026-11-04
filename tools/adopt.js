@@ -1,4 +1,4 @@
-// Give nodes that nobody owns to a user (SITES.md S13): the open public area
+// Give nodes that nobody owns to a user (docs/SITES.md S13): the open public area
 // becomes theirs, so only they change it from then on.
 //
 //   bun tools/adopt.js <email> <id> [id...]     those nodes

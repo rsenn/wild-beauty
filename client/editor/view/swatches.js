@@ -1,4 +1,4 @@
-// The eight-swatch palette (EDITOR.md S2.3a, E85 + E86): D1-D4 are the dominant
+// The eight-swatch palette (docs/EDITOR.md S2.3a, E85 + E86): D1-D4 are the dominant
 // colours of a reference photo, T1 T2 R N are derived from them on the OKLCH
 // hue circle. Pure functions over '#rrggbb' strings.
 import { distance, fromOklch, toOklch } from '../../color.js';

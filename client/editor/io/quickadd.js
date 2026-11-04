@@ -1,4 +1,4 @@
-// "Add photos" in the node editor (EDITOR.md E141): the phone's file picker, one
+// "Add photos" in the node editor (docs/EDITOR.md E141): the phone's file picker, one
 // choice of up to the node's room, and the photos upload and land in the node in the
 // order chosen, without going through the upload cards. Pure helpers; the button
 // is components/QuickAdd.js.

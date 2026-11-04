@@ -1,12 +1,12 @@
 // What the upload area accepts and how it describes a file.
-// Main types first (PLAN.md S6.2); browsers report no MIME type for heic.
+// Main types first (docs/PLAN.md S6.2); browsers report no MIME type for heic.
 const EXTENSIONS = ['jpg', 'jpeg', 'png', 'heif', 'heic', 'webp', 'gif', 'avif', 'tif', 'tiff'];
 
 export const ACCEPT = 'image/*,' + EXTENSIONS.map(e => '.' + e).join(',');
 
 export const isImageFile = file => EXTENSIONS.includes(file.name.split('.').pop().toLowerCase());
 
-// The square crop of a card (EDITOR.md S2.5): the photo fills the square and the
+// The square crop of a card (docs/EDITOR.md S2.5): the photo fills the square and the
 // crop window slides along the photo's long edge. -> { axis: 'x' | 'y' | null,
 // sign: 1 | -1 } where `axis` is the screen direction the photo can be dragged
 // in (null: a square photo, or not known yet) and `sign` turns a drag along it
@@ -55,7 +55,7 @@ export function formatSize(bytes, lang) {
   return new Intl.NumberFormat(lang, { style: 'unit', unit, unitDisplay: 'short', maximumFractionDigits: unit === 'byte' ? 0 : 1 }).format(bytes / size);
 }
 
-// what a dragged or "added" upload card tells the editor (EDITOR.md S2.5)
+// what a dragged or "added" upload card tells the editor (docs/EDITOR.md S2.5)
 export const UPLOAD_MIME = 'application/x-wb-upload';
 
 export const uploadPayload = (record, role, crop) => ({ ...(role === 'texture' && { role }), hash: record.hash, display: record.display, width: record.width, height: record.height, padding: record.padding, palette: record.palette, ...(record.pos && { pos: record.pos }), ...(crop !== undefined && crop !== 0.5 && { crop }) });

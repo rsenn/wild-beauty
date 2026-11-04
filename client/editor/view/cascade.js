@@ -1,5 +1,5 @@
-// Where a photo lands on the stage when it is added (EDITOR.md E112,
-// UX-REQUIREMENTS.md I2): a half-stage square, each photo of a page stepped 10 %
+// Where a photo lands on the stage when it is added (docs/EDITOR.md E112,
+// docs/UX-REQUIREMENTS.md I2): a half-stage square, each photo of a page stepped 10 %
 // of the stage down and to the right of the one before, the last on top, so every
 // edge shows and it is plain that the photos are layers. After six the cascade
 // wraps to the top left again, shifted 3 % per round so it does not sit exactly

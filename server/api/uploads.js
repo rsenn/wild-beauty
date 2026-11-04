@@ -1,4 +1,4 @@
-// Upload endpoints (PLAN.md S6.1, S6.2). One file per request, the raw
+// Upload endpoints (docs/PLAN.md S6.1, S6.2). One file per request, the raw
 // body streamed to disk while it is hashed; the file is then stored as
 // uploads/<sha256>.<ext> next to a sidecar uploads/<sha256>.json.
 import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
@@ -62,7 +62,7 @@ async function claim(record, session) {
 const uploaded = (record, status, session) => Response.json(shown(record, session.owner), { status, headers: { 'set-cookie': expiringCookie(session.token, config.uploadTtlMs) } });
 
 // the X-Position header "lat,lon" that the browser sends for a photo the user
-// tagged with their location (EDITOR.md E139) -> { lat, lon } rounded to ~1 km, or null
+// tagged with their location (docs/EDITOR.md E139) -> { lat, lon } rounded to ~1 km, or null
 export function cleanPosition(header) {
   const m = /^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/.exec(header ?? '');
 

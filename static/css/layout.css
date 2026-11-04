@@ -1,6 +1,6 @@
 /* Layout only. No literal colour, font, image, border width, radius or
  * shadow here: everything of that kind is a --wb-* token set by a theme in
- * static/themes/ (PLAN.md S16). */
+ * static/themes/ (docs/PLAN.md S16). */
 
 *,
 *::before,
@@ -345,7 +345,7 @@ body {
   transition: transform 0.2s;
 }
 
-/* the photo always fills the square; its crop slides along the long edge (EDITOR.md S2.5) */
+/* the photo always fills the square; its crop slides along the long edge (docs/EDITOR.md S2.5) */
 .wb-card-image {
   object-fit: cover;
 }
@@ -561,7 +561,7 @@ body {
   overflow: hidden;
 }
 
-/* node editor frame (EDITOR.md S2.2); colours and sizes are tokens (E44) */
+/* node editor frame (docs/EDITOR.md S2.2); colours and sizes are tokens (E44) */
 .wb-editor {
   margin: 0;
   padding: 8px;
@@ -1014,7 +1014,7 @@ body {
   box-shadow: var(--wb-shadow-card);
 }
 
-/* the 3D gallery in the node's square (GALLERY.md, 13.6); .wb-gallery-fill is the page-filling fallback */
+/* the 3D gallery in the node's square (docs/GALLERY.md, 13.6); .wb-gallery-fill is the page-filling fallback */
 .wb-gallery {
   position: relative;
   aspect-ratio: 1;
@@ -1946,7 +1946,7 @@ body {
   pointer-events: none;
 }
 
-/* the wand's selection (WAND.md A3): tinted area, black and white running outline, + / - taps.
+/* the wand's selection (docs/WAND.md A3): tinted area, black and white running outline, + / - taps.
    The outline is black on white whatever the theme: it has to show on any photo */
 .wb-wand-area {
   fill: var(--wb-select);
@@ -2115,7 +2115,7 @@ body {
   gap: var(--wb-editor-gap, 4px);
 }
 
-/* graph view (GRAPH.md S2.7): a full-width drawing under a row of tools */
+/* graph view (docs/GRAPH.md S2.7): a full-width drawing under a row of tools */
 .wb-graph-bar {
   display: flex;
   flex-flow: row wrap;
@@ -2336,7 +2336,7 @@ body {
   pointer-events: none;
 }
 
-/* the viewer's flow (EDITOR.md E135): a track of stages that pages or scrolls */
+/* the viewer's flow (docs/EDITOR.md E135): a track of stages that pages or scrolls */
 .wb-flow-track {
   display: flex;
   width: 100%;

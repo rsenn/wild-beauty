@@ -1,4 +1,4 @@
-// bun test: contact shadows, dust in the spots, moon and clouds, footprints; no GPU (GALLERY.md)
+// bun test: contact shadows, dust in the spots, moon and clouds, footprints; no GPU (docs/GALLERY.md)
 import { describe, expect, test } from 'bun:test';
 import * as THREE from '../vendor/three/three.module.js';
 import { autoPlan } from '../client/gallery/autoplan.js';

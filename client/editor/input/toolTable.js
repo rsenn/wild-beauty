@@ -1,4 +1,4 @@
-// The tools of the left column (EDITOR.md S2.3, E37): id, key and the cursor
+// The tools of the left column (docs/EDITOR.md S2.3, E37): id, key and the cursor
 // the stage shows while the tool is active. Which tools do something is the
 // business of the editor; this is only the table and the key handling.
 // Tools with the same `group` share one button (a tool group, like GIMP's): it shows

@@ -1,4 +1,4 @@
-// bun test: client/editor/io/placeSuggestions.js (EDITOR.md E137)
+// bun test: client/editor/io/placeSuggestions.js (docs/EDITOR.md E137)
 import { describe, expect, test } from 'bun:test';
 import { answerKey, currentPosition, linkPlace, snapPosition, nearPlace, positionsOf, readAnswered, remember } from '../../client/editor/io/placeSuggestions.js';
 

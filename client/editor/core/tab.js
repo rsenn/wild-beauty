@@ -1,5 +1,5 @@
 // A name for this browser tab, sent as `x-wb-tab` with the requests that take
-// part in locking (EDITOR.md S2.8): the session cookie is shared by all tabs of
+// part in locking (docs/EDITOR.md S2.8): the session cookie is shared by all tabs of
 // a browser, so without it a second tab would hold the same lock. It survives a
 // reload of the tab (sessionStorage), so a reload does not lock itself out.
 let id = null;

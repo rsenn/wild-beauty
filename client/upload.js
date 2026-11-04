@@ -1,6 +1,6 @@
 import { track } from './events.js';
 
-// Sending files to POST /api/uploads (PLAN.md S6.2, S11.1): one XMLHttpRequest
+// Sending files to POST /api/uploads (docs/PLAN.md S6.2, S11.1): one XMLHttpRequest
 // per file, because only XHR reports upload progress, and a small queue so
 // three run at a time.
 const STATUS = { 413: 'too-large', 415: 'unsupported', 422: 'undecodable', 400: 'empty' };

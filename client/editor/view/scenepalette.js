@@ -1,4 +1,4 @@
-// The colours of what is on the stage (EDITOR.md E132): the page drawn small, its
+// The colours of what is on the stage (docs/EDITOR.md E132): the page drawn small, its
 // visible pixels counted. A stored photo palette describes the whole original,
 // including what a cut-out removed and what is covered; this one does not.
 import { distance } from '../../color.js';

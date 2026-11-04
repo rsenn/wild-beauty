@@ -10,7 +10,7 @@ describe('the magic wand route (E119)', () => {
     expect(select).toContain('0.50000,0.25000,1');
     expect(select).toContain('0.10000,0.90000,0');
     expect(select[select.indexOf('--groups') + 1]).toBe('auto');
-    // an exclude tap subtracts the object under it (WAND.md A6), select and apply alike
+    // an exclude tap subtracts the object under it (docs/WAND.md A6), select and apply alike
     expect(select[select.indexOf('--exclude') + 1]).toBe('object');
     expect(select).toContain('--masks-only');
     expect(select[select.indexOf('--candidates') + 1]).toBe('3');

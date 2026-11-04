@@ -1,4 +1,4 @@
-// The rule for a server job running on a photo (EDITOR.md E128, UX-REQUIREMENTS
+// The rule for a server job running on a photo (docs/EDITOR.md E128, UX-REQUIREMENTS
 // J6): while the background of a photo is being removed, what would take that
 // photo away or change what the job works on is refused; everything else stays
 // editable. Pure.

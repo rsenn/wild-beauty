@@ -1,4 +1,4 @@
-// bun test: the gallery scene graph with the vendored three.js, no GPU (GALLERY.md S3.4, S3.5, TODO 13.3)
+// bun test: the gallery scene graph with the vendored three.js, no GPU (docs/GALLERY.md S3.4, S3.5, TODO 13.3)
 import { describe, expect, test } from 'bun:test';
 import * as THREE from '../vendor/three/three.module.js';
 import { autoPlan } from '../client/gallery/autoplan.js';

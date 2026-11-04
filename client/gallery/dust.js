@@ -1,4 +1,4 @@
-// Dust in the spot lights (GALLERY.md): a few hundred motes that drift in the
+// Dust in the spot lights (docs/GALLERY.md): a few hundred motes that drift in the
 // cone of each spot and catch the light now and then. One Points object, the
 // motes placed by the vertex shader from the spots' positions, so a spot that
 // moves to another picture costs a few uniforms and no new geometry.

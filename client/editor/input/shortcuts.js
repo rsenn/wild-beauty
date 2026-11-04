@@ -1,4 +1,4 @@
-// Editor key shortcuts besides the tool keys (EDITOR.md S2.6, E40): undo,
+// Editor key shortcuts besides the tool keys (docs/EDITOR.md S2.6, E40): undo,
 // redo and delete. Typing in a field keeps its own keys (a text input has its
 // own undo), so nothing here fires there.
 import { inField } from './toolTable.js';
@@ -28,7 +28,7 @@ const NUDGE_BIG = 10;
 const SCALE_STEP = 1.05;
 const TURN_STEP = 0.05;
 
-// The keyboard way to move, scale and turn the selection (EDITOR.md S2.4,
+// The keyboard way to move, scale and turn the selection (docs/EDITOR.md S2.4,
 // "a keyboard alternative for every command"): arrows nudge by 1 unit (Shift:
 // 10), + and - scale by 5 %, , and . turn by 3 degrees. Held keys repeat.
 // -> { dx, dy, scale, rotate } with the identity values left out, or null

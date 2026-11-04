@@ -1,4 +1,4 @@
-// bun test: the municipality lookup (server/api/municipality.js, EDITOR.md E138)
+// bun test: the municipality lookup (server/api/municipality.js, docs/EDITOR.md E138)
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { open } from '../server/db/db.js';
 import { getPlaceName } from '../server/db/nodes.js';

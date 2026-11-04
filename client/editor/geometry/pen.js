@@ -1,4 +1,4 @@
-// Ink pen maths (EDITOR.md S4 "Ink pen", E10-E12): smoothing, resampling,
+// Ink pen maths (docs/EDITOR.md S4 "Ink pen", E10-E12): smoothing, resampling,
 // width model and outline. Pure functions on [x, y, ...] arrays; times in
 // seconds.
 import { getStroke } from '../../../vendor/perfect-freehand.js';

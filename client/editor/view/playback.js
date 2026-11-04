@@ -1,4 +1,4 @@
-// Step playback (EDITOR.md S2.7, E56). A page shows its steps 0..k; playing
+// Step playback (docs/EDITOR.md S2.7, E56). A page shows its steps 0..k; playing
 // advances k from 0 to the step count over the page's `duration` (seconds).
 export const STEP_SECONDS = 0.5; // per step, when the page has no duration of its own
 export const MAX_SECONDS = 60;

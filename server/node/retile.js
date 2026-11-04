@@ -1,4 +1,4 @@
-// Re-make the tiles of saved nodes (GRAPH.md S3.7, E82): a node saved before the
+// Re-make the tiles of saved nodes (docs/GRAPH.md S3.7, E82): a node saved before the
 // server rendered tiles, or as a plain photo collage, still shows one photo's
 // thumbnail in the graph and the 3D gallery. `retile` renders such a node as
 // the viewer draws it and points the node at the new tile; the node itself

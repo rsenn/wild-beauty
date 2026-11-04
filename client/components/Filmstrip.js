@@ -1,7 +1,7 @@
 import { useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 
-// The film-strip (EDITOR.md S2.7, E53): one thumbnail per photo step in draw
+// The film-strip (docs/EDITOR.md S2.7, E53): one thumbnail per photo step in draw
 // order, shown from two photos on. Click selects, drag (or the arrow buttons,
 // for keyboard and touch) reorders, the cross removes. `photos` is the editor's
 // hash -> info table; the texture toggle is for gallery nodes (a photo that already is a texture keeps it, to be undone); `onMove(id, to)` and `onRemove(id)` change the node.

@@ -1,4 +1,4 @@
-// Wild Beauty server entry (PLAN.md S6, TODO.md M1). Bun only.
+// Wild Beauty server entry (docs/PLAN.md S6, TODO.md M1). Bun only.
 import { host, port } from './server/cli.js';
 import { resolve, sep } from 'node:path';
 import { html } from './client/html.js';
@@ -46,7 +46,7 @@ const languages = languageList(locales);
 
 await detectTools();
 
-// finish or undo what a crash during a save left behind (EDITOR.md S4)
+// finish or undo what a crash during a save left behind (docs/EDITOR.md S4)
 {
   const done = await reconcile(await database());
 
@@ -172,7 +172,7 @@ async function adminPage(lang, req) {
   return page(lang, 'page.title.admin', { admin: true }, undefined, req);
 }
 
-// GET /:lang/tree: the graph of the nodes (preliminary demo of GRAPH.md)
+// GET /:lang/tree: the graph of the nodes (preliminary demo of docs/GRAPH.md)
 async function treePage(lang, req) {
   const h = await database();
 
@@ -187,7 +187,7 @@ async function nodePage(lang, id, req) {
 
   if(!node || !canView(node, viewer)) return text('not found\n', 404);
 
-  // the children as the 3D gallery hangs them (GALLERY.md S5): the visible `child` edges in order
+  // the children as the 3D gallery hangs them (docs/GALLERY.md S5): the visible `child` edges in order
   const children = linksFrom(h, id, 'child').flatMap(({ id: to }) => {
     const child = getNode(h, to);
 
@@ -210,7 +210,7 @@ async function sitePage(site, map, page, h, owner) {
   return new Response(body, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
 }
 
-// What a site host answers (SITES.md): its pages, /edit/, the files the pages need.
+// What a site host answers (docs/SITES.md): its pages, /edit/, the files the pages need.
 // null lets the generic routes serve /static/, /vendor/, /app/, photos and the service worker.
 async function siteRoute(req, site, pathname, h) {
   const owner = isOwner(site, viewerOf(h, req));

@@ -1,4 +1,4 @@
-// The shape tool's state machine (EDITOR.md S2.3, E60): a click adds a vertex,
+// The shape tool's state machine (docs/EDITOR.md S2.3, E60): a click adds a vertex,
 // a click-drag pulls a symmetric bezier handle out of it (Alt: the handles stay
 // independent), a click on the first vertex closes the shape. Pure functions
 // over a draft `{ vertices, closed }`; every one returns a new draft.

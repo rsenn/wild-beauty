@@ -1,4 +1,4 @@
-// Baking (EDITOR.md S4 step 2): the file a saved node keeps in data/photos/,
+// Baking (docs/EDITOR.md S4 step 2): the file a saved node keeps in data/photos/,
 // oriented, stripped of metadata and at most 2048 on the long edge. This part
 // is the JPEG pass-through: a JPEG that needs no shrinking is never
 // re-encoded, it goes through jpegtran, which is lossless.
@@ -11,10 +11,10 @@ import { imagemagick, tools } from './tools.js';
 
 export const MAX_EDGE = 2048;
 
-// quality used when the source's cannot be estimated (EDITOR.md S4)
+// quality used when the source's cannot be estimated (docs/EDITOR.md S4)
 export const FALLBACK_QUALITY = 90;
 
-// Colour profiles (EDITOR.md S10 point 1, decided): a profile other than sRGB
+// Colour profiles (docs/EDITOR.md S10 point 1, decided): a profile other than sRGB
 // (Display P3 from phones, Adobe RGB) changes what the pixels mean, so baking
 // keeps it; an sRGB profile, or none, is dropped because browsers assume sRGB.
 // `keepIcc: false` in the options of every function below drops all profiles.
@@ -232,7 +232,7 @@ export async function bakeImage(src, destBase, { max = MAX_EDGE, transparent, ke
   return { ok: true, ext, width, height, icc: strip.args.length > 1 };
 }
 
-// Bake any source image to `<destBase>.<ext>` by the rules of EDITOR.md S4:
+// Bake any source image to `<destBase>.<ext>` by the rules of docs/EDITOR.md S4:
 // a JPEG by bakeJpegFile, everything else by bakeImage.
 // -> { ok: true, ext, ... } | { error }
 export async function bake(src, destBase, options = {}) {

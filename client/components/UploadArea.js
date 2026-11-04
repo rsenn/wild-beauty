@@ -27,7 +27,7 @@ export const UploadArea = ({ extra = null }) => {
   const [items, setItems] = useState(() => uploads.map(existingItem));
   const [ignored, setIgnored] = useState(0);
   const [over, setOver] = useState(false);
-  const [tagLocation, setTagLocation] = useState(false); // off until the user turns it on (EDITOR.md E139)
+  const [tagLocation, setTagLocation] = useState(false); // off until the user turns it on (docs/EDITOR.md E139)
   const depth = useRef(0);
   const nextId = useRef(uploads.length + 1);
   const latest = useRef(items);

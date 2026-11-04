@@ -1,4 +1,4 @@
-// Document changes of the clip tool (EDITOR.md E114, E121): clip a photo with a
+// Document changes of the clip tool (docs/EDITOR.md E114, E121): clip a photo with a
 // drawn polygon, or cut a photo in two along a stroke (two photo copies, each
 // with the clip of one side). Pure: `(doc, ...) -> doc`, called by commands.js.
 import { effective } from '../../view/render.js';

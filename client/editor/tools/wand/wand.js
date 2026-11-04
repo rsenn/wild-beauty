@@ -1,4 +1,4 @@
-// The magic wand (EDITOR.md E119): maps between the stage and a photo's own
+// The magic wand (docs/EDITOR.md E119): maps between the stage and a photo's own
 // 0..1 square, and reads the NDJSON the server streams from `opencv-imgproc
 // segment`. A photo's outline is four stage corners [tl, tr, br, bl] (hit.js).
 
@@ -148,7 +148,7 @@ export async function readLines(body, onLine) {
   flush(rest + decoder.decode());
 }
 
-// The selection (WAND.md A3): the outlines of one candidate of a select step, in pixels of the
+// The selection (docs/WAND.md A3): the outlines of one candidate of a select step, in pixels of the
 // step's `output` size, as one SVG path in stage units. The path is drawn even-odd, so holes and
 // several objects need no winding; null when the candidate found nothing
 export function selectionPath(candidate, output, corners, crop) {

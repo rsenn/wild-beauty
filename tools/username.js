@@ -1,4 +1,4 @@
-// Give a user a username to log in with besides the mail address (SITES.md S13):
+// Give a user a username to log in with besides the mail address (docs/SITES.md S13):
 //
 //   bun tools/username.js <email> <username>      set it
 //   bun tools/username.js <email> --none           take it away

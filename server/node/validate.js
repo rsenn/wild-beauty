@@ -1,4 +1,4 @@
-// Server-side validation of a node before it is saved (EDITOR.md S4 step 1):
+// Server-side validation of a node before it is saved (docs/EDITOR.md S4 step 1):
 // the shared document check (client/editor/core/model.js validate), the metadata,
 // the theme sanitiser and the existence of every photo. The same rules run in
 // the browser, so a document that passed there passes here; the server just
@@ -10,7 +10,7 @@ import { sanitize } from '../../client/editor/core/theme.js';
 import { KINDS, validate } from '../../client/editor/core/model.js';
 import { getPhoto } from '../db/nodes.js';
 
-// API error code and HTTP status per failure (EDITOR.md S2.11, S4.1)
+// API error code and HTTP status per failure (docs/EDITOR.md S2.11, S4.1)
 const STATUS = { too_large: 413, invalid: 400, missing_photo: 422 };
 
 // a photo exists when it is baked (a row in `photos`) or still an upload
@@ -41,7 +41,7 @@ export function photosOf(doc) {
 // -> { ok: true, doc, title, kind, photos }
 //  | { ok: false, code, status, errors: [{ code, path }] }
 // `doc` is the document with its style sanitised, `title` the one the node
-// row gets (doc.title, EDITOR.md S3.1).
+// row gets (doc.title, docs/EDITOR.md S3.1).
 export function validateNode(body, { hasPhoto, themes } = {}) {
   const fail = (code, errors) => ({ ok: false, code, status: STATUS[code], errors });
 

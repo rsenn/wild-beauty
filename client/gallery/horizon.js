@@ -1,4 +1,4 @@
-// The sky beyond the stars (GALLERY.md): a moon, and a sea of clouds far below
+// The sky beyond the stars (docs/GALLERY.md): a moon, and a sea of clouds far below
 // the bridges, so the building stands over something. Shader-only objects, no
 // textures; both follow the visitor like the stars do, the clouds keep their
 // place in the world (their noise is sampled at world coordinates), so walking

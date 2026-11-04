@@ -1,5 +1,5 @@
 // GET /files/photos/<hash>[.thumb|.large|.small].<ext>: baked photos, node thumbnails,
-// the large render of a tile and the small picture of a photo (EDITOR.md S4.1). A baked photo is named by the hash
+// the large render of a tile and the small picture of a photo (docs/EDITOR.md S4.1). A baked photo is named by the hash
 // of its upload and never changes, and a large render by the hash of its tile, so
 // both are cached for good; a thumbnail is rewritten on every save, so it is
 // revalidated with an ETag.

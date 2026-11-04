@@ -1,5 +1,5 @@
-// The municipality a position lies in, from the federal geoportal (GRAPH.md
-// S1.5, EDITOR.md E138): `identify` on swissBOUNDARIES3D, free and without a key.
+// The municipality a position lies in, from the federal geoportal (docs/GRAPH.md
+// S1.5, docs/EDITOR.md E138): `identify` on swissBOUNDARIES3D, free and without a key.
 // Only the position rounded to ~1 km is sent, from the server and never from the
 // browser, and each cell is asked once (table place_names). WB_GEO_API=off turns
 // it off (the local gazetteer and the cell coordinates name the place then), and

@@ -1,4 +1,4 @@
-// Paths and limits (PLAN.md S6.2, S9).
+// Paths and limits (docs/PLAN.md S6.2, S9).
 import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dir, '..');

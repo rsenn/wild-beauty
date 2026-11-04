@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Cut a photo along a polygon (the magnetic lasso, WAND.md 0): the same job the segment tool does
+# Cut a photo along a polygon (the magnetic lasso, docs/WAND.md 0): the same job the segment tool does
 # for the magic wand, with the outline drawn by the user instead of found by a model. Writes the
 # soft-edged cut (RGBA, the photo with the polygon as alpha, same size as the photo after its EXIF
 # turn) and, with --mask-out, the 8-bit mask that tools/inpaint.py fills the hole from. Prints the

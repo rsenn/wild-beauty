@@ -1,4 +1,4 @@
-// Edge decoration of a photo (EDITOR.md E123): `edge: { style, amount, seed }`.
+// Edge decoration of a photo (docs/EDITOR.md E123): `edge: { style, amount, seed }`.
 // Pure geometry in the photo's own 1000 unit square, no filters: a clip polygon
 // that shapes the picture (torn, paper), and shapes drawn under it (a rim, a
 // frame, a shadow). The same seed always gives the same edge.

@@ -1,4 +1,4 @@
-// The loupe (EDITOR.md E124): a magnifier above the point a finger is placing, because the finger hides it.
+// The loupe (docs/EDITOR.md E124): a magnifier above the point a finger is placing, because the finger hides it.
 // This is the policy, kept apart from the stage that draws it so it can be tested.
 //
 // Where it makes sense: tools that give feedback under a pointer that is down (strokes and outlines drawn

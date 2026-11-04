@@ -2,7 +2,7 @@ import { useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { renderNode } from '../editor/view/render.js';
 
-// The page strip under the editor (EDITOR.md S2.7, E55): one thumbnail per
+// The page strip under the editor (docs/EDITOR.md S2.7, E55): one thumbnail per
 // page, the current one pressed. Click switches, drag (or ◀ ▶) reorders, the
 // minus removes (the editor asks first when the page has steps), the plus adds.
 export const PageStrip = ({ t, doc, photos, current, onSelect, onAdd, onMove, onRemove }) => {

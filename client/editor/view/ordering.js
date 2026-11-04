@@ -1,4 +1,4 @@
-// The draw order of a multiple selection (EDITOR.md E147): the commands that move several
+// The draw order of a multiple selection (docs/EDITOR.md E147): the commands that move several
 // steps one place forward or backward, or to the very front or back, as a group. A step
 // does not jump over another selected one (the group keeps its inner order). Pure.
 import { findStep, moveStep } from '../core/model.js';

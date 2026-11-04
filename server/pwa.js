@@ -24,7 +24,7 @@ self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', () => {});
 
-// a push carries nothing: ask the site what is new (SITES.md S15)
+// a push carries nothing: ask the site what is new (docs/SITES.md S15)
 self.addEventListener('push', event =>
   event.waitUntil(
     fetch('/api/push/latest', { cache: 'no-store' })

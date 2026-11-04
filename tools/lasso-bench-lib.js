@@ -2,7 +2,7 @@
 // simulated user who clicks along it, the lasso's own code (snap, createWire) turning the clicks into
 // an outline, and the scores. No file, no process: tests/lasso-bench.test.js runs it on synthetic shapes.
 //
-// What is measured follows WAND.md Part D: the mask of the result against the matte, as IoU and as
+// What is measured follows docs/WAND.md Part D: the mask of the result against the matte, as IoU and as
 // boundary F (precision and recall of the outline within `tol` pixels), for several click spacings, so
 // "clicks to reach IoU 0.9" can be read off. The same simulated clicks with NO snapping (a polygon
 // through the clicks) are scored too: the difference is what the edge map buys.

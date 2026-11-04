@@ -1,4 +1,4 @@
-// The personal sites wild-beauty renders (SITES.md). A request whose Host is
+// The personal sites wild-beauty renders (docs/SITES.md). A request whose Host is
 // one of a site's hosts gets that site's pages and nothing else of the app.
 // Host names arrive in punycode; `www.` is the canonical one (it follows the
 // server's IP through the dyndns CNAME), the apex redirects there in nginx.

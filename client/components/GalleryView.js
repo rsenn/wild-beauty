@@ -5,7 +5,7 @@ import { useI18n } from '../i18n.js';
 import { fitHeight } from '../gallery/fit.js';
 import { IconButton } from './GalleryTools.js';
 
-// The 3D gallery of a node (GALLERY.md, TODO 13.6): the node's own view is the
+// The 3D gallery of a node (docs/GALLERY.md, TODO 13.6): the node's own view is the
 // poster; a button enters the walkable gallery in the same square, which can fill
 // the screen. Everything of the gallery (three.js too) is loaded on entering.
 //  items  what to hang (client/gallery/items.js)

@@ -1,4 +1,4 @@
-// The sounds of the bird's gear and flaps (the running gag, GALLERY.md). Synthesised with Web Audio,
+// The sounds of the bird's gear and flaps (the running gag, docs/GALLERY.md). Synthesised with Web Audio,
 // no files: a hydraulic whine under a rush of air, the doors' clunk and the lock. The audio context
 // is made on the first sound, which always follows a key or a tap; no context, no sound.
 //

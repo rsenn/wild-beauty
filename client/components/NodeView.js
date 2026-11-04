@@ -5,7 +5,7 @@ import { gridPlan } from '../editor/geometry/grid.js';
 import { photoSteps, renderNode } from '../editor/view/render.js';
 
 // What the viewer shows of a node, as a list of stages and how to move along it
-// (EDITOR.md E135): `{ flow, axis, list: [{ mode, page, part }] }`.
+// (docs/EDITOR.md E135): `{ flow, axis, list: [{ mode, page, part }] }`.
 //  free     one stage per page          slides  one per photo
 //  grid     fit: one stage with all photos; page: pages of cols x cols;
 //           scroll: one long stage

@@ -1,4 +1,4 @@
-// Dirty tracking and the local draft (EDITOR.md S2.8, E43). While an editor
+// Dirty tracking and the local draft (docs/EDITOR.md S2.8, E43). While an editor
 // has unsaved changes its snapshot is written to localStorage so a reload, a
 // crash or an accidental close does not lose the work. Every storage access
 // is in a try/catch: a private window or a full disk just means no draft.

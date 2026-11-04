@@ -2,7 +2,7 @@ import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 
 // last cell of the upload grid: starts (or, when open, closes) the node
-// editor; with photos picked it starts one with them (UX-REQUIREMENTS.md I1). Mockup for E35; the open state moves to the editor store in E34.
+// editor; with photos picked it starts one with them (docs/UX-REQUIREMENTS.md I1). Mockup for E35; the open state moves to the editor store in E34.
 export const NewNodeTile = ({ open, onToggle, count = 0, onAdd, onMake }) => {
   const { t } = useI18n();
 

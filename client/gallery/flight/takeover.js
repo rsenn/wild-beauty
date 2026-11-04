@@ -1,4 +1,4 @@
-// Taking the controls of the flyby (GALLERY.md, the running gag): everything of it that the session
+// Taking the controls of the flyby (docs/GALLERY.md, the running gag): everything of it that the session
 // (../session.js) does not have to know. The visitor flies the bird (pilot.js) while the loop pauses,
 // works the gear and the flaps (sound.js), hears the callouts (callouts.js, voice.js), and lands
 // (a medal for a perfect one), rolls out and is welcomed by ground control (ground.js).

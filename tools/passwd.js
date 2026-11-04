@@ -1,4 +1,4 @@
-// Change the password of a user (SITES.md S13):
+// Change the password of a user (docs/SITES.md S13):
 //
 //   bun tools/passwd.js <email or username> [--keep-sessions]
 //

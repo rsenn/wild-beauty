@@ -247,7 +247,7 @@ Way 2: raw pixels through Bun. Same code as the browser.
 Way 3: opencv-imgproc gets a tone command later.
 - native speed, runs in the same family as cutout
 - cv LUT is 8 bit only. Check if it is bound at all before planning on it
-- needs a change in the qjs-opencv repo and the contract file opencv-imgproc.md
+- needs a change in the qjs-opencv repo and the contract file docs/opencv-imgproc.md
 
 Recommendation: way 2 first, way 3 only if time matters. Way 1 is a quick prototype to see a first result tonight.
 

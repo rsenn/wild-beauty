@@ -1,4 +1,4 @@
-// Crash recovery at start (EDITOR.md S4, "reconcile"). Saving bakes photos
+// Crash recovery at start (docs/EDITOR.md S4, "reconcile"). Saving bakes photos
 // into data/photos, writes the rows, and only then deletes the uploads, so a
 // process that dies in between leaves one of three states:
 //  - committed, uploads still there: a photo some node uses is also an

@@ -1,4 +1,4 @@
-// The selection handles and the transform buttons (EDITOR.md E113): four corner
+// The selection handles and the transform buttons (docs/EDITOR.md E113): four corner
 // handles that scale, one round handle above the top edge that turns, and the
 // button steps (larger, smaller, turn left, turn right). Pure functions in stage
 // units; the sizes in pixels come from the caller (`px / scale`).

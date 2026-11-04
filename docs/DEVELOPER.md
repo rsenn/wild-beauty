@@ -5,7 +5,7 @@ Whoever changes the structure, a convention or a gotcha updates this file in the
 Details live in the big spec files at the root. This file only says where to look.
 
 Last full review: 2026-11-04
-Paths are relative to the project root. No build step anywhere.
+Paths are relative to the project root. The spec files live in docs/. No build step anywhere.
 
 
 ## What it is
@@ -22,15 +22,15 @@ notes:
 
 - CLAUDE.md          rules for working here, read first
 - TODO.md            open work and the authority for the directory layout
-- PLAN.md            the rewrite plan, server side and infrastructure
-- DESIGN.md          library choices, design source of truth
-- EDITOR.md          the node editor, UX, node data, tasks E1 to E154
-- WAND.md            magic wand, background removal, take out
-- opencv-imgproc.md  contract with the image tool of qjs-opencv
-- GRAPH.md           graph view, groups, locks, visibility
-- GALLERY.md         the walkable 3D gallery
-- SITES.md           personal sites, jános.ch and transistorisiert.ch hosting
-- UX.md and UX-REQUIREMENTS.md  what feels right on touch and mouse
+- docs/PLAN.md            the rewrite plan, server side and infrastructure
+- docs/DESIGN.md          library choices, design source of truth
+- docs/EDITOR.md          the node editor, UX, node data, tasks E1 to E154
+- docs/WAND.md            magic wand, background removal, take out
+- docs/opencv-imgproc.md  contract with the image tool of qjs-opencv
+- docs/GRAPH.md           graph view, groups, locks, visibility
+- docs/GALLERY.md         the walkable 3D gallery
+- docs/SITES.md           personal sites, jános.ch and transistorisiert.ch hosting
+- docs/UX.md and docs/UX-REQUIREMENTS.md  what feels right on touch and mouse
 - docs/DARKROOM.md   the tone curve feature
 - attic/HISTORIC.md  map of the old code
 
@@ -106,7 +106,7 @@ Commands today: capabilities info palette clip cutpoly edgemap prepare segment c
 Options are name value or name=value. A job file gives the same keys as json.
 Output is NDJSON on stdout, the last line is the result. Progress lines come with the progress flag.
 The server spawns it, reads lines, kills it when the request closes.
-Contract in opencv-imgproc.md. The qjs-opencv copy must stay identical.
+Contract in docs/opencv-imgproc.md. The qjs-opencv copy must stay identical.
 Env: WB_IMGPROC picks another binary, WB_MODELS_DIR points at the onnx models.
 
 To add a command you edit the qjs-opencv repo, then update the contract, then call it from a route like cutout.js.

@@ -1,7 +1,7 @@
 import { useEffect, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 
-// The bulk form of the place chip (EDITOR.md E140): every saved node whose
+// The bulk form of the place chip (docs/EDITOR.md E140): every saved node whose
 // photos were taken at a place it is not linked to, with the place it would
 // link to. Each row is answered one by one, or all at once. `onGraph` takes the
 // graph the server answers with.

@@ -1,4 +1,4 @@
-// Who may write a node (SITES.md S13). The nodes of the open public area have
+// Who may write a node (docs/SITES.md S13). The nodes of the open public area have
 // no owner and no space: everybody may create and change them, logged in or not.
 // A node of a user (owner_id) is changed by its owner only, and a user's new node
 // is theirs. `tools/adopt.js` gives an ownerless node an owner.

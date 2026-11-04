@@ -2,7 +2,7 @@ import { html } from '../html.js';
 import { AXES, COLS_MAX, FLOWS, MODES } from '../editor/core/model.js';
 import { gridOptions } from '../editor/geometry/grid.js';
 
-// The mode switch of the page sequencer (EDITOR.md S2.7, E57): free (what the
+// The mode switch of the page sequencer (docs/EDITOR.md S2.7, E57): free (what the
 // author drew), slides (one photo per page) or grid (photos auto-tiled).
 export const ModeSwitch = ({ t, mode, onMode, layout, onLayout }) => {
   // how the viewer shows the node: a grid can also show everything at once

@@ -1,4 +1,4 @@
-// bun test: what the gallery hangs and how the visitor walks (GALLERY.md S4, S5; TODO 13.4 13.6)
+// bun test: what the gallery hangs and how the visitor walks (docs/GALLERY.md S4, S5; TODO 13.4 13.6)
 import { describe, expect, test } from 'bun:test';
 import { autoPlan } from '../client/gallery/autoplan.js';
 import { buildGallery } from '../client/gallery/build.js';

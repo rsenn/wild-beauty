@@ -1,6 +1,6 @@
 import { tabHeaders } from '../core/tab.js';
 
-// Saving a node (EDITOR.md S2.8, S4, E64): POST a new one, PUT an open one
+// Saving a node (docs/EDITOR.md S2.8, S4, E64): POST a new one, PUT an open one
 // with the `rev` it was read at. `send` is fetch, injectable for tests.
 // -> { ok: true, id, rev, photos } | { ok: false, code, status, details }
 // where `code` is the server's error code ('invalid', 'too_large',

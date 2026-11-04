@@ -1,4 +1,4 @@
-// bun test: the photo position from EXIF (EDITOR.md E136, GRAPH.md S1.5)
+// bun test: the photo position from EXIF (docs/EDITOR.md E136, docs/GRAPH.md S1.5)
 import { beforeAll, describe, expect, test } from 'bun:test';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';

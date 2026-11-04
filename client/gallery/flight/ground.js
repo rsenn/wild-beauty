@@ -1,4 +1,4 @@
-// Ground control after a landing from the flyby (GALLERY.md, the running gag): written, no audio. It
+// Ground control after a landing from the flyby (docs/GALLERY.md, the running gag): written, no audio. It
 // welcomes the visitor, offers a taxi to the gate (the first picture of the guided tour: its title, else
 // n/total), and signs off when the gate is reached, by the taxi or on foot.
 //

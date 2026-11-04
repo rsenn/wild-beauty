@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// The magnetic lasso benchmark (WAND.md Part D, TODO "Magnetic lasso"): how well does the lasso follow
+// The magnetic lasso benchmark (docs/WAND.md Part D, TODO "Magnetic lasso"): how well does the lasso follow
 // the outline of an object, for different edge maps and different numbers of clicks?
 //
 //   bun tools/lasso-bench.js --images DIR --masks DIR [options]
@@ -11,7 +11,7 @@
 //   --sigma 3         the user's aiming error, px (default 3)
 //   --size 640        long side of the working copy (default 640, the lasso's own)
 //   --limit N         at most N photos (default all); --offset K skips the first K
-//   --split all|tune|test   tune: the even photos, test: the odd ones (decide on tune, confirm on test; WAND.md Part D)
+//   --split all|tune|test   tune: the even photos, test: the odd ones (decide on tune, confirm on test; docs/WAND.md Part D)
 //   --variant NAME[=ARGS]   an edge map; repeatable. `local` (default when none given) is the browser's own Sobel;
 //                     anything else runs `opencv-imgproc edgemap ARGS`, e.g.
 //                       --variant clahe3='--clahe-clip 3' --variant noclahe='--clahe-clip 0 --smooth none'

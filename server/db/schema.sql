@@ -1,4 +1,4 @@
--- Schema of data/wb.sqlite3 (PLAN.md S8). Migrations are numbered blocks, each
+-- Schema of data/wb.sqlite3 (docs/PLAN.md S8). Migrations are numbered blocks, each
 -- applied once in a transaction; PRAGMA user_version holds the last applied
 -- number. Never edit an applied block, append a new one.
 
@@ -57,7 +57,7 @@ CREATE TABLE node_links (
 CREATE INDEX node_links_from ON node_links(from_id, sort);
 CREATE INDEX node_links_to ON node_links(to_id);
 
--- editor lock (EDITOR.md S2.8)
+-- editor lock (docs/EDITOR.md S2.8)
 CREATE TABLE node_locks (
   node_id     INTEGER PRIMARY KEY REFERENCES nodes(id) ON DELETE CASCADE,
   holder      TEXT NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE node_locks (
 
 -- migration 2
 -- A place a saved node's photo was taken near, kept until the owner links or
--- dismisses it (GRAPH.md S1.5). Only the position rounded to ~1 km, and only
+-- dismisses it (docs/GRAPH.md S1.5). Only the position rounded to ~1 km, and only
 -- for the owner; a row goes when it is answered or its node goes.
 CREATE TABLE place_suggestions (
   node_id INTEGER NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
@@ -79,7 +79,7 @@ CREATE TABLE place_suggestions (
 
 -- migration 3
 -- The municipality a rounded position (the 0.01 degree cell) lies in, as the
--- federal geoportal told us (GRAPH.md S1.5), so a place is named once and
+-- federal geoportal told us (docs/GRAPH.md S1.5), so a place is named once and
 -- found again without a request. name NULL: the cell is outside Switzerland.
 CREATE TABLE place_names (
   lat  REAL NOT NULL,
@@ -121,12 +121,12 @@ DROP TABLE place_rename;
 
 -- migration 5
 -- The space a node belongs to: NULL is the community (the wild-beauty tree),
--- a name such as 'janos' is the node of a personal site (SITES.md). Nodes of a
+-- a name such as 'janos' is the node of a personal site (docs/SITES.md). Nodes of a
 -- space can only be changed with the edit key (server/guard.js) until accounts exist.
 ALTER TABLE nodes ADD COLUMN space TEXT;
 
 -- migration 6
--- Accounts (SITES.md Phase B): a user, and the sessions that log it in. Only
+-- Accounts (docs/SITES.md Phase B): a user, and the sessions that log it in. Only
 -- the hash of a session token is stored. `slug` is the path segment of a node
 -- of a site (www.jános.ch/about).
 CREATE TABLE users (

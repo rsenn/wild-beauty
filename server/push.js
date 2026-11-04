@@ -1,4 +1,4 @@
-// Web push for the personal sites (SITES.md S15): a visitor who allows it gets a notification when a new page is
+// Web push for the personal sites (docs/SITES.md S15): a visitor who allows it gets a notification when a new page is
 // published. The push carries no content (so no payload encryption is needed): the service worker asks
 // /api/push/latest what is new. Messages are signed with a VAPID key pair, made once in data/vapid.json.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';

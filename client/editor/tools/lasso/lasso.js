@@ -1,4 +1,4 @@
-// The magnetic lasso (WAND.md 0, TODO "Magnetic lasso"): a selection tool next to the magic wand.
+// The magnetic lasso (docs/WAND.md 0, TODO "Magnetic lasso"): a selection tool next to the magic wand.
 // The user clicks anchors, the path between two anchors snaps to the edges of the photo (a live
 // wire: the shortest path over a cost that is low on strong edges). This module is the pure part -
 // edge cost, snapping, the shortest path, thinning - on a small grey copy of the photo (long side

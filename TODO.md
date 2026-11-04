@@ -1,28 +1,28 @@
 # TODO - Wild Beauty rewrite
 
-Source of truth: this file for the **directory layout** (PLAN S5 mirrors it), `EDITOR.md`
-for the node editor, `PLAN.md` for everything else, then `DESIGN.md`. A content item is a **node** (not tile). Videos and
-handwriting recognition are out of the PoC. After the PoC: M12 graph view (`GRAPH.md`) and
-M13 3D gallery (`GALLERY.md`). Target is
-**Bun only**, no runtime abstraction (`PLAN.md` S2.1). Old code is read-only in
+Source of truth: this file for the **directory layout** (PLAN S5 mirrors it), `docs/EDITOR.md`
+for the node editor, `docs/PLAN.md` for everything else, then `docs/DESIGN.md`. A content item is a **node** (not tile). Videos and
+handwriting recognition are out of the PoC. After the PoC: M12 graph view (`docs/GRAPH.md`) and
+M13 3D gallery (`docs/GALLERY.md`). Target is
+**Bun only**, no runtime abstraction (`docs/PLAN.md` S2.1). Old code is read-only in
 `attic/` (`CLAUDE.md`).
 
 Conventions: `[ ]` open, `[x]` done. Each task is small enough for one commit
 and ends in something you can run or look at ("done when"). Do tasks in order;
 a milestone is finished when all its tasks are. Section references: `P` =
-PLAN.md, `D` = DESIGN.md.
+docs/PLAN.md, `D` = docs/DESIGN.md.
 
 ## Open threads (2026-10-29, updated 2026-10-31)
 
 Work that was started, offered or decided but not finished, so a detour does not lose it.
-Detail lives in `EDITOR.md` (E-numbers) and `UX-REQUIREMENTS.md`. Update this list when one closes.
-State 2026-11-01: everything below is committed (the 2026-10-31 work in `3552fad`, `4aba6bf`, `ef0983b`, `4960fd4`, `c334a91`, `1cf6919`); the branch `claude/pensive-lovelace-omjgl4` holds the magnetic lasso and the assessment (`ASSESSMENT.md`) on top of `master`. The camera / place work (E137, E139) is done in another session and not listed here.
+Detail lives in `docs/EDITOR.md` (E-numbers) and `docs/UX-REQUIREMENTS.md`. Update this list when one closes.
+State 2026-11-01: everything below is committed (the 2026-10-31 work in `3552fad`, `4aba6bf`, `ef0983b`, `4960fd4`, `c334a91`, `1cf6919`); the branch `claude/pensive-lovelace-omjgl4` holds the magnetic lasso and the assessment (`docs/ASSESSMENT.md`) on top of `master`. The camera / place work (E137, E139) is done in another session and not listed here.
 
 ### Editor regroup and NodeEditor split (2026-11-04)
 
 `client/editor/` was a flat directory of 56 files; it is now grouped (`client/editor/README.md`, map in `tools/editor-moves.map`, done with `qjs-modules/utilities/move-modules.js`). Tests pass (1016), the dev server serves the new paths. The split of `components/NodeEditor.js` (3282 lines) is planned but postponed.
-- [x] Regroup `client/editor/` into `core/ geometry/ input/ tools/<tool>/ io/ view/ overlay/ hooks/` with a README per folder; `EDITOR.md` S7 file list updated.
-- [ ] **Commit the regroup** (not committed yet): the staged moves, the rewritten imports and mentions, `tools/editor-moves.map`, the folder READMEs, `EDITOR.md`. One commit, no logic changes.
+- [x] Regroup `client/editor/` into `core/ geometry/ input/ tools/<tool>/ io/ view/ overlay/ hooks/` with a README per folder; `docs/EDITOR.md` S7 file list updated.
+- [ ] **Commit the regroup** (not committed yet): the staged moves, the rewritten imports and mentions, `tools/editor-moves.map`, the folder READMEs, `docs/EDITOR.md`. One commit, no logic changes.
 - [ ] **Browser check of the editor** after the move (only served and unit-tested so far): open the editor, try the select, wand, lasso, clip, shape and text tools, save and reload.
 - [x] **Rename the four basename clashes** (done 2026-11-04, `tools/editor-renames.map`, tests green, dev server restarted): `core/scene.js` -> `galleryScene.js`, `view/palette.js` -> `swatches.js`, `io/places.js` -> `placeSuggestions.js`, `input/tools.js` -> `toolTable.js`.
 - [ ] **Decide** whether to also rename `tools/wand/wand.js` -> `wandMaps.js` and `tools/lasso/lasso.js` -> `lassoWire.js` (a folder-then-same-name stutter, no clash today).
@@ -37,21 +37,32 @@ State 2026-11-01: everything below is committed (the 2026-10-31 work in `3552fad
   6. `deriveView.js` for the derived values, and the JSX split into `components/editor/EditorHead.js`, `EditorBody.js`, `EditorFooter.js`.
   Rules for the new files: every basename unique in the repo; hooks `useX.js`, components `PascalCase.js`, the rest `camelCase.js`; no `index.js`, `utils.js`, `helpers.js` or `constants.js`; dependencies point down `components -> hooks and tools -> overlay, view, input, io -> core -> geometry`. Every hook takes one `host` object (`latest`, `dispatch`, `announce`, `tr`, ...) and returns `{ state, actions }`.
 
+### Carried over from MORNING.md (retired 2026-11-04)
+
+`MORNING.md` was a one-off checklist from 2026-11-01. What is still open from it (the qjs-opencv side has its own `doc/morning-2026-11-01.md` there):
+- [ ] **Lasso check on the desktop and the phone**: the line snaps and follows the pointer; the chip says "Kanten: OpenCV" after a moment (that is how you know the server's `edgemap` is in use; if it stays "einfach" with the tool installed, read the `/api/edges/` lines of the runit log); closing with Enter or the first dot; Cut out, Take out, Erase with and without "Lücke füllen" and Undo each; Ctrl+Z until the photo is gone must drop the selection without an error. On the phone: the line appears after each tap, the loupe shows above the finger, closing by tapping the first dot works, Take out on a large camera photo (timing). Screenshot every wrong edge.
+- [ ] **Decide `WB_CUTPOLY=guided` as the lasso default**: set `export WB_CUTPOLY=guided` in `/var/service/wild-beauty/run`, restart, compare cuts of one outline on petals, hair, fur against the Python stand-in `tools/polycut.py`. If guided wins, make it the default and delete `polycut.py`.
+- [ ] **Run the lasso benchmark** (`tools/lasso-bench.js`, simulated clicks every 20/40/80 px with 3 px aiming error): AIM-500 with `--split tune` to decide, `--split test` to confirm (no default changes without a held-out run); the flower photos with `--sheet` (no ground truth, contact sheets only). Variants: `local`, `clahe3='--clahe-clip 3'`, `noclahe='--clahe-clip 0 --smooth none'`.
+- [ ] **Decide the lasso's next step**: add / subtract with the wand, holes (a second outline), touch dragging, or the benchmark first. Known gaps: no live line on touch before a tap, no holes, no add/subtract.
+- [ ] **Deep edge detector for qjs-opencv**: HED or DexiNed ONNX export and which venv (see "Deep edges" under the magnetic lasso below).
+- [ ] **GPU**: SAM encoder timings from this machine and the cuDNN question, see "SAM on the GPU" above and `WAND.md` B9.
+- [ ] One test failed before the lasso work and may still: `POST /api/nodes > a photo-less node ... server-rendered tile (E82)` (fonts or Inkscape on this host). `tests/lasso.test.js` "the live wire returns on the cost window" has a 500 ms budget that fails under the load of a full `bun test` and passes alone; loosen it or move it out of the parallel run.
+
 ### Postponed (2026-10-31)
-- [ ] **E154b "Mark as texture" button in the gallery pane** (`components/GalleryPane.js`): list the node's picture photos there with a button that marks one as texture (the `setRole` command, as the ▦ button of the film-strip does), so assigning a texture does not need the Photos tab. Decided to postpone; the pane for now says to use ▦ in the Photos tab. Related open points of E154 (`EDITOR.md`): the pane does not refresh the linked children after linking in the tree; walls split by compass direction are not rendered.
+- [ ] **E154b "Mark as texture" button in the gallery pane** (`components/GalleryPane.js`): list the node's picture photos there with a button that marks one as texture (the `setRole` command, as the ▦ button of the film-strip does), so assigning a texture does not need the Photos tab. Decided to postpone; the pane for now says to use ▦ in the Photos tab. Related open points of E154 (`docs/EDITOR.md`): the pane does not refresh the linked children after linking in the tree; walls split by compass direction are not rendered.
 
 ### Done 2026-10-31 (committed since)
 - [x] Dev server under runit (`/var/service/wild-beauty`, log child; two steps for you: `chown log:log .../log/main`, `ln -s` into `/etc/service`), note in `CLAUDE.md`.
-- [x] Mail: Postfix `submission` (587) and `smtps` (465) enabled and restarted, router forwards seen, `ufw` allow rules added (ufw inactive). `PLAN.md` S17.
+- [x] Mail: Postfix `submission` (587) and `smtps` (465) enabled and restarted, router forwards seen, `ufw` allow rules added (ufw inactive). `docs/PLAN.md` S17.
 - [x] Login dialog with the old tumbling overlay (`LoginDialog.js`), Login tab; `POST /api/login` missing.
 - [x] Editor: scrolled into view (E148), texture toggle only in galleries (E149), text background toggle (E150), colours that fit the picture (E151), stable palette, dropper icon and outline, popover look (E152), box of a stroke turns with it (E153).
 - [x] **E147 multiple selection**: rectangle, Shift, Select several, Ctrl+A, Shift+PageDown, group box with handles, drag by member or box, Align, order, properties by type, clipboard, duplicate, delete, scrubbed groups, `batch` and `recordMoves` commands.
 
 ### Open from 2026-10-31
-- [ ] **E147 concerns (a) to (l) and its test list** (`EDITOR.md`): phone check of the rectangle and the Select several button, the group bar is long, popover wrapping CSS never seen, big copies, a picture for a copied group, busy outlines, a "More" popover.
+- [ ] **E147 concerns (a) to (l) and its test list** (`docs/EDITOR.md`): phone check of the rectangle and the Select several button, the group bar is long, popover wrapping CSS never seen, big copies, a picture for a copied group, busy outlines, a "More" popover.
 - [ ] **E150 / E152 small ones**: open the text Background popover with the background on; a visible hint while the dropper is armed and a second click cancelling it; the colour wheel button with the swatch hairline; ingest palette of about 16 colours.
 - [ ] **E148**: should an editor that opens by itself scroll? Check on a phone.
-- [~] **Login and registration** (`PLAN.md` S17): built - `POST /api/login`, `/api/register`, `/api/logout`, `GET /api/me` in `server/auth.js` (argon2id, session cookie, rate limits: 5 failures per client, 5 sign-ups an hour; `WB_REGISTRATION=closed` switches sign-up off). Registration is deliberately minimal: the mail address is kept but **not verified**, no activation mail. Open: decide whether a password reset or an activation link is wanted (both need mail sent: no sender in the code, `nodemailer` under Bun is the plan), then SPF, DKIM, DMARC and reverse DNS (unchecked), inbound port 25 (unchecked from outside), texts in four languages.
+- [~] **Login and registration** (`docs/PLAN.md` S17): built - `POST /api/login`, `/api/register`, `/api/logout`, `GET /api/me` in `server/auth.js` (argon2id, session cookie, rate limits: 5 failures per client, 5 sign-ups an hour; `WB_REGISTRATION=closed` switches sign-up off). Registration is deliberately minimal: the mail address is kept but **not verified**, no activation mail. Open: decide whether a password reset or an activation link is wanted (both need mail sent: no sender in the code, `nodemailer` under Bun is the plan), then SPF, DKIM, DMARC and reverse DNS (unchecked), inbound port 25 (unchecked from outside), texts in four languages.
 - [ ] **Firewall**: `ufw` is inactive with allow rules for 25, 465, 587, 143, 993; enabling it needs rules for 22, 80, 443, 3001, the `anon` proxy and Docker first.
 - [ ] **Housekeeping**: `i18n: missing key "editor.keys.\"` (the keys help has no text for the backslash key, and does not list the new shortcuts Ctrl+A, Shift+PageDown / PageUp, Shift+click either: `KEYS` in `NodeEditor.js` and four locale files); the test browser tool's Escape made the title placeholder read "null" (no page code wrote it, check with a real keyboard).
 - [x] Commit this day's work (done: see the commits above).
@@ -108,16 +119,16 @@ State 2026-11-01: everything below is committed (the 2026-10-31 work in `3552fad
   - device class: `hardwareConcurrency`, `deviceMemory`, screen size.
   Report per page in `tools/events-sessions.js` (95th percentile, worst interactions with their cause); slow events line up with the rrweb replay of recorded sessions. Timings of our own code only, nothing personal.
 
-### Magic wand and background removal (WAND.md Part E has the details)
-- [ ] **SAM on the GPU** (WAND.md B9, postponed 2026-11-01): full SAM encoder (ViT-B, ViT-L, ViT-H) on the RTX 2070 SUPER via onnxruntime-gpu into the embedding cache; the tool exports its encoder input and the cache key, a Python script writes the `.emb`; harness against MobileSAM first. The venv `~/.local/share/wild-beauty/sam-gpu-venv` is ready, models not downloaded.
+### Magic wand and background removal (docs/WAND.md Part E has the details)
+- [ ] **SAM on the GPU** (docs/WAND.md B9, postponed 2026-11-01): full SAM encoder (ViT-B, ViT-L, ViT-H) on the RTX 2070 SUPER via onnxruntime-gpu into the embedding cache; the tool exports its encoder input and the cache key, a Python script writes the `.emb`; harness against MobileSAM first. The venv `~/.local/share/wild-beauty/sam-gpu-venv` is ready, models not downloaded.
 - [ ] Browser pass of the 2026-11-01 wand work (select / apply, Fill the hole, Exclude subtracts the object, first tap adds, overlay clipped, recording box on node pages, the wand on the current image, select tool after Take out, the faster fill).
-- [ ] **Latency, what is left** (WAND.md B8): persistent `opencv-imgproc serve` worker with a pool in the server (select 0.74 s to about 0.25 s); crop `cutFromSoft` to the subject (0.7 s); cropped cuts with an offset (editor change); no-fill rest as WebP or cropped. Done 2026-11-01: Cut out 6.5 s to 3.7 s, Take out 9.5 s to 6.0 s, Erase 9 s to 5.9 s, 4-tap select 2.4 s to 1.3 s.
+- [ ] **Latency, what is left** (docs/WAND.md B8): persistent `opencv-imgproc serve` worker with a pool in the server (select 0.74 s to about 0.25 s); crop `cutFromSoft` to the subject (0.7 s); cropped cuts with an offset (editor change); no-fill rest as WebP or cropped. Done 2026-11-01: Cut out 6.5 s to 3.7 s, Take out 9.5 s to 6.0 s, Erase 9 s to 5.9 s, 4-tap select 2.4 s to 1.3 s.
 - [ ] Encoder ahead of the tap (wand tool entry, whole galleries in the background).
 - [ ] Flower gallery (200+ photos) as a real-world test set: one tap each, contact sheet, fixed for later changes.
-- [ ] **Complete the subject** (amodal completion, WAND.md A8): keep the excluded masks, guess the hidden shape, the user refines that outline, then fill only it. Spec, prototype 2026-11-01.
-- [x] **Magnetic lasso** (2026-11-01, WAND.md 0): the tool (L) in the wand's group. Built client-side instead of OpenCV `IntelligentScissors`: `client/editor/tools/lasso/lasso.js` (Sobel edge cost on a 640 px copy, click snapping, Dijkstra live wire in a bounded window, Douglas-Peucker), the outline is applied by `/api/segment` with `polygon` and `tools/polycut.py` (Pillow, even-odd, feathered), then the same fill / store path as the wand. **Not yet tried in a real browser**; to do: touch (no hover, so no live segment), drawing a hole (second outline), `region`-style hand-over to the wand.
-  - [ ] **Better edges for the lasso (qjs-opencv `edgemap`, WAND.md 0)**: CLAHE on the lightness, edge-aware smoothing, Sobel plus Canny fused into an 8-bit edge map per photo (cached), which the browser's live wire uses in place of its own JS Sobel (kept as the fallback while the map loads). Spec sent to the qjs-opencv session 2026-11-01.
-  - [ ] **Deep edges are required, built second** (`edgemap --detector hed|dexined` through `dnn`, fused with Sobel / Canny): the first `edgemap` ships without a network, but the option, the models dir and the fusion are part of it and must work before the lasso counts as done. Needs the models (with checksums, as for MI-GAN and SAM), a licence check, and a measurement against the classical map on the flower gallery (WAND.md, fur / foliage / clutter).
+- [ ] **Complete the subject** (amodal completion, docs/WAND.md A8): keep the excluded masks, guess the hidden shape, the user refines that outline, then fill only it. Spec, prototype 2026-11-01.
+- [x] **Magnetic lasso** (2026-11-01, docs/WAND.md 0): the tool (L) in the wand's group. Built client-side instead of OpenCV `IntelligentScissors`: `client/editor/tools/lasso/lasso.js` (Sobel edge cost on a 640 px copy, click snapping, Dijkstra live wire in a bounded window, Douglas-Peucker), the outline is applied by `/api/segment` with `polygon` and `tools/polycut.py` (Pillow, even-odd, feathered), then the same fill / store path as the wand. **Not yet tried in a real browser**; to do: touch (no hover, so no live segment), drawing a hole (second outline), `region`-style hand-over to the wand.
+  - [ ] **Better edges for the lasso (qjs-opencv `edgemap`, docs/WAND.md 0)**: CLAHE on the lightness, edge-aware smoothing, Sobel plus Canny fused into an 8-bit edge map per photo (cached), which the browser's live wire uses in place of its own JS Sobel (kept as the fallback while the map loads). Spec sent to the qjs-opencv session 2026-11-01.
+  - [ ] **Deep edges are required, built second** (`edgemap --detector hed|dexined` through `dnn`, fused with Sobel / Canny): the first `edgemap` ships without a network, but the option, the models dir and the fusion are part of it and must work before the lasso counts as done. Needs the models (with checksums, as for MI-GAN and SAM), a licence check, and a measurement against the classical map on the flower gallery (docs/WAND.md, fur / foliage / clutter).
 - [ ] Box drag as first prompt, grow / shrink the hole, fill variants for large holes; small objects fail with `E_METHOD`; choosing which subject Remove background keeps; `sam` for the final pass.
 - [ ] qjs-opencv release: smoke tests of `segment` / `cutout`, models with checksums, install script.
 
@@ -127,11 +138,11 @@ State 2026-11-01: everything below is committed (the 2026-10-31 work in `3552fad
 - [ ] **One word for "node" / "work" in English** (German Werk, French pièce, Spanish pieza).
 - [ ] **E94 fill editor** (none / solid / linear / radial gradient, 2-5 stops, alpha) for the text background: the UI is not drawn.
 - [ ] **11.3 Image embeddings** (duplicates at upload, related nodes, search): runtime decided 2026-10-29 (DINOv2 via dnn), see M11.
-- [ ] **Promo video from a session recording** (WAND.md E15) (idea 2026-11-01, "a Wild Beauty TV commercial"): render an rrweb recording (`tools/replay.js export`) in headless Chrome at 1920x1080 (rrvideo or Playwright), cut the highlights by the wand / editor events of the server log and usage events, speed up idle stretches, captions and music with ffmpeg. Needs a clean recorded session (fresh collage, no draft banner) and access to the uploads for the renderer.
+- [ ] **Promo video from a session recording** (docs/WAND.md E15) (idea 2026-11-01, "a Wild Beauty TV commercial"): render an rrweb recording (`tools/replay.js export`) in headless Chrome at 1920x1080 (rrvideo or Playwright), cut the highlights by the wand / editor events of the server log and usage events, speed up idle stretches, captions and music with ffmpeg. Needs a clean recorded session (fresh collage, no draft banner) and access to the uploads for the renderer.
 - [ ] Verify Spanish with DeepL (needs `DEEPL_API_KEY`, target ES-419) and the tester.
 
 ### Decided, not built (large)
-- [ ] E74 / E108 device pass, stage zoom (postponed: the loupe covers it), E114 simple clip, the `UX-REQUIREMENTS.md` list.
+- [ ] E74 / E108 device pass, stage zoom (postponed: the loupe covers it), E114 simple clip, the `docs/UX-REQUIREMENTS.md` list.
 - [ ] **E129 text as clip** (postponed).
 
 ### Postponed (decided 2026-10-29): grid and viewer follow-ups
@@ -194,8 +205,8 @@ woff2/woff/ttf. Fonts are served from `/static/`.
       (5 JPEGs, 2022-08-25, phone) to `docs/screenshots/` with descriptive names:
       `graph-mobile-zoomed`, `new-dropzone`, `ios-photo-picker`,
       `new-upload-grid-selected`, `graph-mobile-overview`. Done when they are
-      committed and `DESIGN.md` S7 links them.
-- [ ] **0.2 Record what the screenshots show** in `DESIGN.md` S7 (task H1 uses
+      committed and `docs/DESIGN.md` S7 links them.
+- [ ] **0.2 Record what the screenshots show** in `docs/DESIGN.md` S7 (task H1 uses
       it): drop zone is a **square-cornered ~4px black frame**, large black
       upload arrow icon (`action-upload.svg`), line "Drag and drop Images Here
       to Upload", line "Or", crimson **"Select Images to Upload"** button;
@@ -304,7 +315,7 @@ woff2/woff/ttf. Fonts are served from `/static/`.
       top-right, state (queued), selected state (thick `--wb-select` border and
       shadow). Dragover highlight. Directories ignored for now. Done when 10
       dropped photos show as 10 cards and selecting one gives the blue frame.
-- [x] **4.3 Extend preview (client-side)** (superseded: photos are always square crops, see 4.4 and `EDITOR.md` E98-E101): `object-fit: contain` over a
+- [x] **4.3 Extend preview (client-side)** (superseded: photos are always square crops, see 4.4 and `docs/EDITOR.md` E98-E101): `object-fit: contain` over a
       neutral ground; toggle per card to `cover` (P S11.1). Colours come in M6.
       Done when the toggle flips one card without touching the others.
 
@@ -372,20 +383,20 @@ woff2/woff/ttf. Fonts are served from `/static/`.
       button on the card calls it. Done when the files vanish from `uploads/`.
 - [x] **4.4 Square crop on the upload card (decided)**: every card shows the photo zoomed in to a square;
       dragging pans the crop along the long axis; cursor `ns-resize`/`ew-resize` on desktop, a double-arrow
-      icon on touch, nothing for square photos; the yellow fit triangle goes. Tasks in `EDITOR.md` E98-E103.
-- [x] **7.6 Ownership and expiry (2026-10-28)**: uploads belong to the `wb-session` cookie and expire with it; list and delete only for the owner (`EDITOR.md` E104, `PLAN.md` S6.2).
-- [ ] **7.7 Collage use case (2026-10-28)**: first placement, touch transform handles, simple/freehand clip, clip preview, edit clip (`EDITOR.md` E112-E126, `UX-REQUIREMENTS.md` section I); E117/E118: auto clip and grabCut with opencv.js, trimmed build.
+      icon on touch, nothing for square photos; the yellow fit triangle goes. Tasks in `docs/EDITOR.md` E98-E103.
+- [x] **7.6 Ownership and expiry (2026-10-28)**: uploads belong to the `wb-session` cookie and expire with it; list and delete only for the owner (`docs/EDITOR.md` E104, `docs/PLAN.md` S6.2).
+- [ ] **7.7 Collage use case (2026-10-28)**: first placement, touch transform handles, simple/freehand clip, clip preview, edit clip (`docs/EDITOR.md` E112-E126, `docs/UX-REQUIREMENTS.md` section I); E117/E118: auto clip and grabCut with opencv.js, trimmed build.
 - [ ] **7.5 Quota**: total `uploads/` size cap with a translated error (P S9).
 
 **First deliverable ends here (M1-M7): `/new` with design, i18n, drop zone,
 progress, metadata, palette, list, delete.**
 
-## M8 - M10 - Node editor, save, vector tools: see `EDITOR.md` S9
+## M8 - M10 - Node editor, save, vector tools: see `docs/EDITOR.md` S9
 
-The editor's tasks moved to `EDITOR.md` S9 (E1-E83, client and server, small and
+The editor's tasks moved to `docs/EDITOR.md` S9 (E1-E83, client and server, small and
 ordered). Mapping from the old milestones:
 
-| Old | Now (`EDITOR.md` S9) |
+| Old | Now (`docs/EDITOR.md` S9) |
 |---|---|
 | M8 Node editor shell (8.1-8.7) | phases A (model, pure code), C (shell), D (photos), E (pages) |
 | M9 Save a node (9.1-9.4) | phase B (server storage, E18-E33) and G (save/update/open/lock, E64-E69) |
@@ -403,12 +414,12 @@ the lock lives in E31/E67.
       is NanoVG compiled with Emscripten on WebGL2 (`nanovg-web.{js,wasm}`, 195 KB wasm,
       `nanovg.js` mirrors the native `nanovg` module, vector paths, fills, strokes, text).
       Consider it if the SVG stage gets too slow: many steps or photos on a page, the
-      graph view (`GRAPH.md`) with many nodes, or smooth playback of big pages (E58). The
+      graph view (`docs/GRAPH.md`) with many nodes, or smooth playback of big pages (E58). The
       renderer (`client/editor/view/render.js`) would get a canvas backend next to the SVG one,
       same step model; SSR, thumbnails and the viewer keep SVG. Measure first. Needs a
       vendored copy under `vendor/` (served as-is, no build step).
 
-- [ ] **11.0 `opencv-imgproc.js` in qjs-opencv** (spec: `opencv-imgproc.md`; done in
+- [ ] **11.0 `opencv-imgproc.js` in qjs-opencv** (spec: `docs/opencv-imgproc.md`; done in
       that project via the handoff prompt). Done when `qjsm opencv-imgproc.js
       capabilities` runs and the spec's acceptance tests pass.
 - [ ] **11.1 Server glue** `server/media/imgproc.js`: detect the tool, write the job
@@ -423,15 +434,15 @@ the lock lives in E31/E67.
       in the upload list; button hidden unless `capabilities.imgproc` (P S10).
 - [ ] **11.1c Server-side clip**: `clip` job from a `shape` step (polygon or SVG path +
       the photo matrix) for a destructive cut-out and for the thumbnail rendition
-      (`EDITOR.md` E25; P S10 use 2).
-- [ ] **11.3 Image embeddings at ingest** (`opencv-imgproc.md` S16.5, S16.8, S16.10 item 1). One vector per
+      (`docs/EDITOR.md` E25; P S10 use 2).
+- [ ] **11.3 Image embeddings at ingest** (`docs/opencv-imgproc.md` S16.5, S16.8, S16.10 item 1). One vector per
       baked photo, stored with the photo row, for three uses: (a) duplicate and near-duplicate warning while
       uploading and a "possible duplicate" list for a gallery (on 2026-10-29 this was done once by hand with a dHash
       script over node 11 and 19 and found 3 pairs in 214 photos; a stored vector makes it routine and also finds
-      crops and re-exports a dHash misses); (b) "related nodes" in the graph view (`GRAPH.md`); (c) search by
+      crops and re-exports a dHash misses); (b) "related nodes" in the graph view (`docs/GRAPH.md`); (c) search by
       content or text. Candidates: CLIP ViT-B/32 (MIT; text tower for search), DINOv2-small (Apache-2.0; similarity
       only, better for duplicates).
-      **Decided 2026-10-29** (measured, `opencv-imgproc.md` S16.8b): DINOv2-small fp32 (Xenova/dinov2-small,
+      **Decided 2026-10-29** (measured, `docs/opencv-imgproc.md` S16.8b): DINOv2-small fp32 (Xenova/dinov2-small,
       Apache-2.0, 84 MB, 384-d) through `opencv-imgproc` dnn; it loads and matches onnxruntime (cosine 0.9999) and
       separates copies from other photos far better than CLIP (median 0.71 against 0.90). No onnxruntime, no CLIP for
       now. int8 exports do not load in dnn. Text search (CLIP text tower, language question) stays open and is a
@@ -446,10 +457,10 @@ the lock lives in E31/E67.
       `capabilities.imgproc`.
 - [ ] **11.2 Handwriting recognition**: deferred past the PoC (decided 2026-10-21).
 
-## M12 - Graph view (after the editor's save phase; design and numbers in `GRAPH.md`)
+## M12 - Graph view (after the editor's save phase; design and numbers in `docs/GRAPH.md`)
 
 - [x] **12.0 Decide** (2026-10-22): shared landscape, visibility owner/group/public,
-      positions owner-defined, server-side cached tiles later. Still open: `GRAPH.md`
+      positions owner-defined, server-side cached tiles later. Still open: `docs/GRAPH.md`
       S5 (edge kinds confirmation, who may link where, collaboration).
 - [~] **12.1 Rooted neighbourhood API** (built in a smaller form: `GET /api/graph` lists all visible nodes and their links, `graphOf` in `server/api/graph.js`; open: root / depth, windows, `rev`, ETag, the 10 000-user timing) `GET /api/graph?root=<id>&depth=<n>`: nodes
       with child counts (`+N` badges), edges, `rev`, ETag/304, brotli; ordered
@@ -476,7 +487,7 @@ the lock lives in E31/E67.
 - [ ] **12.3c Run presentations**: filmstrip/carousel and masonry (per category) as
       alternatives to the straight spine, chosen by the list node.
 - [ ] **12.4 Edit gestures**: drag to move/pin, drag handle to relink, drag in a list to
-      reorder; open a node = the single editor (`EDITOR.md` E34).
+      reorder; open a node = the single editor (`docs/EDITOR.md` E34).
 - [ ] **12.5 Live updates**: Bun WebSocket pub/sub of ops, `rev` gap -> refetch.
 - [ ] **12.6 Overall-root** (shared landscape): seed the `overall-root` node with
       children `user-profiles` and `featured`; on sign-up create the user's root, a
@@ -486,17 +497,17 @@ the lock lives in E31/E67.
       Both lists are windowed (paged by `offset`/`limit`), never sent whole. Done
       when the view starts at `overall-root` and a user can walk to any public
       profile in three taps.
-- [~] **12.6a Seed** (2026-10-29, `GRAPH.md` S1.4): `tools/seed.js` makes `overall-root`, `art exhibition`, `fleamarket` and `places` with sample children; idempotent (found by title under the parent). `user-profiles` and `featured` stay with 12.6.
-- [ ] **12.6c Places** (`GRAPH.md` S1.5): `at` edges owner-only until published (migration 5, per-edge `visibility`, with accounts; migrations 2-4 hold `place_suggestions`, `place_names`, the rename); editor side is EDITOR.md E136-E140.
-- [ ] **12.6d Venues from KGS** (`GRAPH.md` S1.6): suggest the cultural objects near a place (KGS
+- [~] **12.6a Seed** (2026-10-29, `docs/GRAPH.md` S1.4): `tools/seed.js` makes `overall-root`, `art exhibition`, `fleamarket` and `places` with sample children; idempotent (found by title under the parent). `user-profiles` and `featured` stay with 12.6.
+- [ ] **12.6c Places** (`docs/GRAPH.md` S1.5): `at` edges owner-only until published (migration 5, per-edge `visibility`, with accounts; migrations 2-4 hold `place_suggestions`, `place_names`, the rename); editor side is docs/EDITOR.md E136-E140.
+- [ ] **12.6d Venues from KGS** (`docs/GRAPH.md` S1.6): suggest the cultural objects near a place (KGS
       `identify`, with a tolerance in pixels, not metres) as candidates for `art exhibition`
       galleries; check the licence ("proprietary" in STAC) and whether `kgs_kategorie` can pick out
       museums, archives and libraries. Done when a place node can list its nearby venues.
-- [ ] **12.6e Heritage and names** (`GRAPH.md` S1.6): find the working layer name of ISOS (the STAC id
+- [ ] **12.6e Heritage and names** (`docs/GRAPH.md` S1.6): find the working layer name of ISOS (the STAC id
       returns nothing from `identify`); try `SearchServer` with `origins=gazetteer` for named venues;
       evaluate the opendata.swiss museum sets, the MySwitzerland API (check it still exists) and
-      swisscollections. Done when each is marked usable or dropped in `GRAPH.md` S1.6.
-- [x] **12.6f Places housekeeping** (2026-10-29, `GRAPH.md` S1.5 point 6): (a) migration 4 renames the
+      swisscollections. Done when each is marked usable or dropped in `docs/GRAPH.md` S1.6.
+- [x] **12.6f Places housekeeping** (2026-10-29, `docs/GRAPH.md` S1.5 point 6): (a) migration 4 renames the
       places of the old gazetteer to `Name (KT)` and merges duplicates; (b) cell-titled places snap to a
       cell that touches them (`titled()` in `server/api/places.js`); (c) decided: nodes saved before
       migration 2 get no suggestions, the position is gone; (d) decided: the chip's *Not now* stays per
@@ -504,7 +515,7 @@ the lock lives in E31/E67.
       Tests: `tests/place-housekeeping.test.js`.
 - [x] **12.6b Node lock** (built: `server/api/locks.js`, `server/db/nodes.js`, `client/editor/io/lock.js`, `tests/locks.test.js`; **open: `canBreak` in `locks.js` still returns true for everybody** ("the PoC has no owners"), now that accounts exist only the owner should break a lock): `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
       `DELETE` (release), expiry after ~60 s without heartbeat, owner may break;
-      the editor (`EDITOR.md` E67) takes the lock on open, shows "locked by <name>" read-only when
+      the editor (`docs/EDITOR.md` E67) takes the lock on open, shows "locked by <name>" read-only when
       refused. Ops and saves are rejected without the lock.
 - [ ] **12.7 Groups** (with accounts): create group, invite/accept/leave, promote to
       `admin`, set a node's visibility to `group` (one `group_id`); ops are allowed
@@ -513,12 +524,12 @@ the lock lives in E31/E67.
 - [ ] **12.8 Server-side tiles** (later): rasterise a node on the server, cache by
       `rev`, serve as the `tile`; until then the palette colour is the fallback.
 
-## M13 - Canvas nodes: 3D gallery, version 1 (`GALLERY.md` S0b, S10; after the editor's phase F and M12; editor parts: `EDITOR.md` E75-E78)
+## M13 - Canvas nodes: 3D gallery, version 1 (`docs/GALLERY.md` S0b, S10; after the editor's phase F and M12; editor parts: `docs/EDITOR.md` E75-E78)
 
-Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
+Minimal on purpose; everything not listed is deferred (`docs/GALLERY.md` S0b).
 
 - [~] **13.1 Document**: `scene3d` step (plan, style, start), validation, sanitiser; done 2026-10-29: `client/gallery/fromdoc.js` `planFromDoc` turns a gallery node's drawn `wall` shapes into the scene (stage units -> metres, y flipped, transforms applied, corridors cut back to the room walls, doorways cut in the walls, rooms counter-clockwise), used by `startGallery` for `kind: gallery` nodes before the auto plan (`tests/gallery-fromdoc.test.js`, fixture node 9); open: `scale`/`start` editing; photo
-      role toggle (`EDITOR.md` E71, E76, E77); texture photos are never hung.
+      role toggle (`docs/EDITOR.md` E71, E76, E77); texture photos are never hung.
 - [~] **13.2 Builder** `client/gallery/build.js`: walls, room and corridor floors, ramps
       (slope <= 1:12, walls tilt), texture set with default quads (`tools/gallery-warp.mjs`
       is the prototype); unit-tested without a DOM. Done: mitred walls grouped by compass
@@ -548,7 +559,7 @@ Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
 - [x] **13.8 Auto plan** `client/gallery/autoplan.js` (done, tested): a node without a
       drawn plan, e.g. a plain `list` such as "Sous-soul Vitrines", gets a generated one: a
       row of 12 x 8 m rooms joined by 6 m corridors, as many rooms as the children need
-      (`GALLERY.md` S3.6). The host uses it for every gallery until `scene` (13.1) exists.
+      (`docs/GALLERY.md` S3.6). The host uses it for every gallery until `scene` (13.1) exists.
 - [x] **13.9 Gallery of all nodes** (`/:lang/gallery`, the "Show" tab): `client/components/GalleryPage.js`
       lists every saved node with a tile as a link grid (works without JavaScript) and a button for the 3D gallery of
       them all (`items.js` `nodeItems`, auto plan, titles on the plates, a tap opens the node).
@@ -565,8 +576,8 @@ Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
       a sharper one (`GET /api/nodes/:id/large`: the baked photo, or a 1600 px render cached as `<tile>.large.jpg`; 4 stay
       loaded). No automatic slide show (decided). Sky: shader stars with twinkle, colour temperatures and a Milky Way band.
 - [ ] **13.12 Moving works, design** (decided 2026-10-29): a hung work may be an overhead projector with a slide show or a
-      machine (Tinguely / Luginbuehl style) as a vector animation, besides the still canvas. Recorded in `GALLERY.md` S5.2
-      (kinds, prop, canvas renderer, budget, safety, guided walk), S9 and S10 (Q7-Q9), and in `EDITOR.md` S2.3c (motors),
+      machine (Tinguely / Luginbuehl style) as a vector animation, besides the still canvas. Recorded in `docs/GALLERY.md` S5.2
+      (kinds, prop, canvas renderer, budget, safety, guided walk), S9 and S10 (Q7-Q9), and in `docs/EDITOR.md` S2.3c (motors),
       S2.9 (Hung as), S3.1 (`motor` step, `doc.motion`), S5 (`motionAt`) and phase N (E141-E146). The tour itself never advances
       by itself (decided). Done when 13.13-13.15 and E141-E146 are done.
 - [ ] **13.13 Projector** (`client/gallery/projector.js`, Q7): the prop (trolley, glass stage, head, mirror), the faint cone
@@ -583,28 +594,28 @@ Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
 - [ ] **13.15 Motion safety and budget** (Q9): `prefers-reduced-motion` shows the rest pose with a HUD "motion off" button;
       no blink faster than 0.5 s and no cross-fade shorter than 0.3 s (WCAG 2.3.1); a hidden tab or a lost context pauses.
       Done when the system setting stands every moving work still, in a browser test.
-- [x] **13.7 Plan layer in the 2D editor** (`EDITOR.md` E75; built: `client/editor/core/walls.js`, the acute-corner refusal in `model.js`, `shape.wall`): wall layer with height; rooms =
+- [x] **13.7 Plan layer in the 2D editor** (`docs/EDITOR.md` E75; built: `client/editor/core/walls.js`, the acute-corner refusal in `model.js`, `shape.wall`): wall layer with height; rooms =
       closed, corridors = lines; refuse corners sharper than 90 degrees.
 
 ## Docs and housekeeping (do alongside, not blocking)
 
 - [ ] **H1 Design source of truth** (P S4): extract tokens, asset inventory,
       component catalogue, paper-texture recipe, dead styles from `attic/`,
-      `static/` and the screenshots (0.2) into `DESIGN.md`, **as the `--wb-*`
+      `static/` and the screenshots (0.2) into `docs/DESIGN.md`, **as the `--wb-*`
       token list** plus the `kraft` theme values. Do it before M8 so tokens
       from 2.3 stay consistent.
-- [ ] **H1b Theme authoring note** in `DESIGN.md`: how to write a theme file,
+- [ ] **H1b Theme authoring note** in `docs/DESIGN.md`: how to write a theme file,
       what a node may override, the sanitiser's whitelist.
 - [ ] **H2 Update `attic/HISTORIC.md`** paths to the `attic/` prefix.
-- [ ] **H3 `DESIGN.md` S4.x vs PoC**: mark which parts the PoC replaces (done
-      for S4.1; do S4.2.1 `tiles` -> `nodes` (decided: node, not tile), S4.3 image pipeline; S4.5 editor now points to `EDITOR.md`).
+- [ ] **H3 `docs/DESIGN.md` S4.x vs PoC**: mark which parts the PoC replaces (done
+      for S4.1; do S4.2.1 `tiles` -> `nodes` (decided: node, not tile), S4.3 image pipeline; S4.5 editor now points to `docs/EDITOR.md`).
 - [ ] **H4 Tests**: `bun test` for router/ingest/palette/i18n parity; hostile
       inputs (traversal, extension mismatch, oversize, zero byte, tool missing)
       (P S13).
 - [x] **H5 Resolve open questions** (P S15): all decided: SHA-256, upload formats
       (jpg/jpeg/png/heif/heic, HEIC extracted), baked JPEG without raising source quality (q99 only for non-JPEG sources; alpha: WebP/PNG), alpha on
       cutout, server-side clip, videos out, node naming, no handwriting.
-- [ ] **H7 Keep the companion docs in step**: `GRAPH.md`, `GALLERY.md`, `PLAN.md`,
-      `DESIGN.md` 4a/4.2.1/4.4/4.5 and this file must agree (decisions of 2026-10-22).
-- [ ] **H6 Commit hygiene**: commit `DESIGN.md`, `PLAN.md`, `TODO.md`,
+- [ ] **H7 Keep the companion docs in step**: `docs/GRAPH.md`, `docs/GALLERY.md`, `docs/PLAN.md`,
+      `docs/DESIGN.md` 4a/4.2.1/4.4/4.5 and this file must agree (decisions of 2026-10-22).
+- [ ] **H6 Commit hygiene**: commit `docs/DESIGN.md`, `docs/PLAN.md`, `TODO.md`,
       `CLAUDE.md` and the `attic/` move as separate commits.

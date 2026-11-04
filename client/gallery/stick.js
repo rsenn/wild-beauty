@@ -1,4 +1,4 @@
-// The thumb stick of the touch screen (GALLERY.md S4): a floating stick that starts where the
+// The thumb stick of the touch screen (docs/GALLERY.md S4): a floating stick that starts where the
 // thumb lands, so there is nothing to aim at. Pure maths, no DOM: `controls.js` feeds it the
 // pointer and reads the walker's input from it, the page draws `view()`.
 //   - a small push already walks (a first kick), the speed grows to full over the radius

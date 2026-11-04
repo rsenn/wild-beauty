@@ -1,4 +1,4 @@
-// Auto layout of the `grid` mode (EDITOR.md S4, E9): n photos in equal square
+// Auto layout of the `grid` mode (docs/EDITOR.md S4, E9): n photos in equal square
 // cells on the 1000 x 1000 stage, no manual transforms. Pure functions, shared
 // by the editor and the viewer.
 const STAGE = 1000;
@@ -6,7 +6,7 @@ const STAGE = 1000;
 // space between cells and, for a loose grid, around the grid, in stage units
 export const GAP = 10;
 
-// A tight grid (EDITOR.md S2.7) covers as much of the stage as possible: a small
+// A tight grid (docs/EDITOR.md S2.7) covers as much of the stage as possible: a small
 // gap between the cells and none around the grid.
 export const TIGHT_GAP = 4;
 
@@ -59,7 +59,7 @@ export function gridLayout(n, layout) {
   return gridCells(n, gridOptions(layout)).map(({ x, y, size }) => [size / STAGE, 0, 0, size / STAGE, x, y]);
 }
 
-// --- how the viewer shows a grid (EDITOR.md E135) ---------------------------
+// --- how the viewer shows a grid (docs/EDITOR.md E135) ---------------------------
 
 export const FLOWS = ['fit', 'page', 'scroll'];
 export const AXES = ['h', 'v'];

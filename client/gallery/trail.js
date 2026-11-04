@@ -1,4 +1,4 @@
-// Footprints (GALLERY.md): the visitor leaves faint prints on the floor, so the
+// Footprints (docs/GALLERY.md): the visitor leaves faint prints on the floor, so the
 // rooms show where they have been and which pictures they walked past. One
 // InstancedMesh used as a ring: the oldest print is overwritten when there are
 // too many. A print points the way the visitor moves, except when they walk

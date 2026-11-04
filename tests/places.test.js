@@ -1,4 +1,4 @@
-// bun test: server/api/places.js (EDITOR.md E138)
+// bun test: server/api/places.js (docs/EDITOR.md E138)
 import { beforeEach, describe, expect, test } from 'bun:test';
 import { open } from '../server/db/db.js';
 import { linksFrom } from '../server/db/nodes.js';

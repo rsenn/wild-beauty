@@ -1,4 +1,4 @@
-// Pointer gestures as matrices (EDITOR.md S9, E2). The result is composed
+// Pointer gestures as matrices (docs/EDITOR.md S9, E2). The result is composed
 // onto the matrix the selection had when the gesture began, so it does not
 // drift: multiply(solveSimilarity(...), startMatrix).
 // the similarity (scale, rotation, translation) that maps the start points

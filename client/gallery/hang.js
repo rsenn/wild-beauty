@@ -1,4 +1,4 @@
-// Auto-hang (GALLERY.md S5.1): the pictures of a gallery's child nodes on the
+// Auto-hang (docs/GALLERY.md S5.1): the pictures of a gallery's child nodes on the
 // wall runs, one side of the wall only. Pure functions over the scene3d
 // document; plan coordinates are metres, x east and y north.
 //

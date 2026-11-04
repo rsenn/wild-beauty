@@ -1,4 +1,4 @@
-// The square thumbnail of a node (EDITOR.md S4 step 3): `<hash>.thumb.jpg`, the
+// The square thumbnail of a node (docs/EDITOR.md S4 step 3): `<hash>.thumb.jpg`, the
 // node's tile until server-side rasterising exists. PoC: the first photo step
 // of the document, drawn as the stage draws it (square crop, matrix).
 import { renameSync, rmSync } from 'node:fs';

@@ -1,4 +1,4 @@
-// Gallery scene (GALLERY.md S3.4, S3.5, TODO 13.3): the build and the hung
+// Gallery scene (docs/GALLERY.md S3.4, S3.5, TODO 13.3): the build and the hung
 // pictures as a three.js scene with art lighting and a starfield sky, and the
 // renderer around it. three.js is imported only when a gallery is entered, so
 // nothing else pays for it.

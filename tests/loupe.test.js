@@ -1,4 +1,4 @@
-// bun test: when the loupe shows (client/editor/input/loupe.js, EDITOR.md E124)
+// bun test: when the loupe shows (client/editor/input/loupe.js, docs/EDITOR.md E124)
 import { describe, expect, test } from 'bun:test';
 import { LOUPE_TOOLS, loupeEnabled, loupeShows, readPref, toggled, writePref } from '../client/editor/input/loupe.js';
 
