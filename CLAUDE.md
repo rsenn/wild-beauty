@@ -45,3 +45,13 @@ When a task is not yet written down in `TODO.md` or `docs/`, and while doing it 
 ## attic/HISTORIC.md maintenance
 
 `attic/HISTORIC.md` is a living structural reference for the old codebase (project summary, db-structure/migration, build files, library sources, server sources, frontend sources, assets, dead code). Whenever you discover a new fact about how the old code is structured or how it works - a function's real location, a previously-unnoticed dependency, an additional piece of dead code, a corrected line reference - **update `attic/HISTORIC.md` immediately**. Cite exact `file:line` locations (function/class names, not just file names), written with the `attic/` prefix. Treat this as an ongoing archival responsibility for every conversation touching this project.
+
+## docs/DEVELOPER.md maintenance
+
+`docs/DEVELOPER.md` is the developer notebook for someone new to the project: map of the tree, server, media pipeline, client, editor folders, document model, conventions, tests, dev server, gotchas. It must always be current. Whenever a change alters the structure (a new folder, route, tool, command, external program), a convention, or reveals a gotcha, **update `docs/DEVELOPER.md` in the same change** and bump its "Last full review" date when you re-check it as a whole. Style: plain notebook text, short lines, no tables, no backquotes, paths unquoted, a `notes:` stub at the end of each section for the developer's own additions (keep their notes). Feature notebooks like `docs/DARKROOM.md` build on it; keep them current the same way.
+
+## Git commits
+
+Do not add the `Co-Authored-By:` or `Claude-Session:` trailers (or any other
+attribution lines) to commit messages in this project, even when Claude Code's
+attribution guidance asks for them. This project's own rule overrides it.
