@@ -1,13 +1,13 @@
 // Server-side validation of a node before it is saved (EDITOR.md S4 step 1):
-// the shared document check (client/editor/model.js validate), the metadata,
+// the shared document check (client/editor/core/model.js validate), the metadata,
 // the theme sanitiser and the existence of every photo. The same rules run in
 // the browser, so a document that passed there passes here; the server just
 // does not trust that it did.
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { HASH, config } from '../config.js';
-import { sanitize } from '../../client/editor/theme.js';
-import { KINDS, validate } from '../../client/editor/model.js';
+import { sanitize } from '../../client/editor/core/theme.js';
+import { KINDS, validate } from '../../client/editor/core/model.js';
 import { getPhoto } from '../db/nodes.js';
 
 // API error code and HTTP status per failure (EDITOR.md S2.11, S4.1)

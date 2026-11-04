@@ -4,9 +4,9 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { BLENDS, KINDS, MODES } from '../client/editor/model.js';
-import { TOOLS } from '../client/editor/tools.js';
-import { SAVE_ERRORS } from '../client/editor/save.js';
+import { BLENDS, KINDS, MODES } from '../client/editor/core/model.js';
+import { TOOLS } from '../client/editor/input/toolTable.js';
+import { SAVE_ERRORS } from '../client/editor/io/save.js';
 
 const root = resolve(import.meta.dir, '..');
 const locale = code => JSON.parse(readFileSync(resolve(root, 'locales', code + '.json'), 'utf8'));

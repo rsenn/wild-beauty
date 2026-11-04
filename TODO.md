@@ -18,6 +18,25 @@ Work that was started, offered or decided but not finished, so a detour does not
 Detail lives in `EDITOR.md` (E-numbers) and `UX-REQUIREMENTS.md`. Update this list when one closes.
 State 2026-11-01: everything below is committed (the 2026-10-31 work in `3552fad`, `4aba6bf`, `ef0983b`, `4960fd4`, `c334a91`, `1cf6919`); the branch `claude/pensive-lovelace-omjgl4` holds the magnetic lasso and the assessment (`ASSESSMENT.md`) on top of `master`. The camera / place work (E137, E139) is done in another session and not listed here.
 
+### Editor regroup and NodeEditor split (2026-11-04)
+
+`client/editor/` was a flat directory of 56 files; it is now grouped (`client/editor/README.md`, map in `tools/editor-moves.map`, done with `qjs-modules/utilities/move-modules.js`). Tests pass (1016), the dev server serves the new paths. The split of `components/NodeEditor.js` (3282 lines) is planned but postponed.
+- [x] Regroup `client/editor/` into `core/ geometry/ input/ tools/<tool>/ io/ view/ overlay/ hooks/` with a README per folder; `EDITOR.md` S7 file list updated.
+- [ ] **Commit the regroup** (not committed yet): the staged moves, the rewritten imports and mentions, `tools/editor-moves.map`, the folder READMEs, `EDITOR.md`. One commit, no logic changes.
+- [ ] **Browser check of the editor** after the move (only served and unit-tested so far): open the editor, try the select, wand, lasso, clip, shape and text tools, save and reload.
+- [x] **Rename the four basename clashes** (done 2026-11-04, `tools/editor-renames.map`, tests green, dev server restarted): `core/scene.js` -> `galleryScene.js`, `view/palette.js` -> `swatches.js`, `io/places.js` -> `placeSuggestions.js`, `input/tools.js` -> `toolTable.js`.
+- [ ] **Decide** whether to also rename `tools/wand/wand.js` -> `wandMaps.js` and `tools/lasso/lasso.js` -> `lassoWire.js` (a folder-then-same-name stutter, no clash today).
+- [ ] **Duplicate test names**: `tests/hit.test.js` and `tests/editor/hit.test.js`, likewise `places` and `tools`; merge or rename.
+- [ ] **Group `client/components/`** (about 45 flat files) with the same mover tool, after the split.
+- [ ] **NodeEditor split** (postponed), in this order, tests and a browser check after each step, one commit per step:
+  1. `editor/editorConstants.js`, the pure helpers (`wallRefusal` -> `core/walls.js`, `insideQuad` -> `geometry/polygon.js`, `moversOf` -> `core/model.js`, `photoInfo` and `isPayload` -> `io/preload.js`, `themeColours` -> `core/theme.js`, `KEYS` and `ACTIONS` -> `input/toolTable.js`) and the 11 pure overlay components -> `editor/overlay/` (about 190 lines).
+  2. Generic hooks in `client/hooks/`: `useLatest`, `useMediaQuery`, `useWindowEvent`, `useInterval`, `useDebouncedEffect`, `useAbortable`, `usePersistedPref`, `useAsyncState`.
+  3. Self-contained feature hooks in `editor/hooks/`: `useDraft`, `useLock`, `usePlayback`, `useScenePalette`, `useAlphaMaps`, `useDropper`, `useUsageContext`, `useLoupe`.
+  4. `useSelection`, `useNodeStore` (load, save, conflict), `useClipboard`.
+  5. Tool hooks (`tools/<tool>/useX.js`) and the tool table `{ down, move, up, keys }` replacing the `tool ===` chains in `down`, `move`, `up`; wand and lasso share one `useSelectionRun`, no cross-imports between tools.
+  6. `deriveView.js` for the derived values, and the JSX split into `components/editor/EditorHead.js`, `EditorBody.js`, `EditorFooter.js`.
+  Rules for the new files: every basename unique in the repo; hooks `useX.js`, components `PascalCase.js`, the rest `camelCase.js`; no `index.js`, `utils.js`, `helpers.js` or `constants.js`; dependencies point down `components -> hooks and tools -> overlay, view, input, io -> core -> geometry`. Every hook takes one `host` object (`latest`, `dispatch`, `announce`, `tr`, ...) and returns `{ state, actions }`.
+
 ### Postponed (2026-10-31)
 - [ ] **E154b "Mark as texture" button in the gallery pane** (`components/GalleryPane.js`): list the node's picture photos there with a button that marks one as texture (the `setRole` command, as the ▦ button of the film-strip does), so assigning a texture does not need the Photos tab. Decided to postpone; the pane for now says to use ▦ in the Photos tab. Related open points of E154 (`EDITOR.md`): the pane does not refresh the linked children after linking in the tree; walls split by compass direction are not rendered.
 
@@ -96,7 +115,7 @@ State 2026-11-01: everything below is committed (the 2026-10-31 work in `3552fad
 - [ ] Encoder ahead of the tap (wand tool entry, whole galleries in the background).
 - [ ] Flower gallery (200+ photos) as a real-world test set: one tap each, contact sheet, fixed for later changes.
 - [ ] **Complete the subject** (amodal completion, WAND.md A8): keep the excluded masks, guess the hidden shape, the user refines that outline, then fill only it. Spec, prototype 2026-11-01.
-- [x] **Magnetic lasso** (2026-11-01, WAND.md 0): the tool (L) in the wand's group. Built client-side instead of OpenCV `IntelligentScissors`: `client/editor/lasso.js` (Sobel edge cost on a 640 px copy, click snapping, Dijkstra live wire in a bounded window, Douglas-Peucker), the outline is applied by `/api/segment` with `polygon` and `tools/polycut.py` (Pillow, even-odd, feathered), then the same fill / store path as the wand. **Not yet tried in a real browser**; to do: touch (no hover, so no live segment), drawing a hole (second outline), `region`-style hand-over to the wand.
+- [x] **Magnetic lasso** (2026-11-01, WAND.md 0): the tool (L) in the wand's group. Built client-side instead of OpenCV `IntelligentScissors`: `client/editor/tools/lasso/lasso.js` (Sobel edge cost on a 640 px copy, click snapping, Dijkstra live wire in a bounded window, Douglas-Peucker), the outline is applied by `/api/segment` with `polygon` and `tools/polycut.py` (Pillow, even-odd, feathered), then the same fill / store path as the wand. **Not yet tried in a real browser**; to do: touch (no hover, so no live segment), drawing a hole (second outline), `region`-style hand-over to the wand.
   - [ ] **Better edges for the lasso (qjs-opencv `edgemap`, WAND.md 0)**: CLAHE on the lightness, edge-aware smoothing, Sobel plus Canny fused into an 8-bit edge map per photo (cached), which the browser's live wire uses in place of its own JS Sobel (kept as the fallback while the map loads). Spec sent to the qjs-opencv session 2026-11-01.
   - [ ] **Deep edges are required, built second** (`edgemap --detector hed|dexined` through `dnn`, fused with Sobel / Canny): the first `edgemap` ships without a network, but the option, the models dir and the fusion are part of it and must work before the lasso counts as done. Needs the models (with checksums, as for MI-GAN and SAM), a licence check, and a measurement against the classical map on the flower gallery (WAND.md, fur / foliage / clutter).
 - [ ] Box drag as first prompt, grow / shrink the hole, fill variants for large holes; small objects fail with `E_METHOD`; choosing which subject Remove background keeps; `sam` for the final pass.
@@ -385,7 +404,7 @@ the lock lives in E31/E67.
       `nanovg.js` mirrors the native `nanovg` module, vector paths, fills, strokes, text).
       Consider it if the SVG stage gets too slow: many steps or photos on a page, the
       graph view (`GRAPH.md`) with many nodes, or smooth playback of big pages (E58). The
-      renderer (`client/editor/render.js`) would get a canvas backend next to the SVG one,
+      renderer (`client/editor/view/render.js`) would get a canvas backend next to the SVG one,
       same step model; SSR, thumbnails and the viewer keep SVG. Measure first. Needs a
       vendored copy under `vendor/` (served as-is, no build step).
 
@@ -483,7 +502,7 @@ the lock lives in E31/E67.
       migration 2 get no suggestions, the position is gone; (d) decided: the chip's *Not now* stays per
       browser, the panel is the durable list; (e) answered suggestions are purged when the panel opens.
       Tests: `tests/place-housekeeping.test.js`.
-- [x] **12.6b Node lock** (built: `server/api/locks.js`, `server/db/nodes.js`, `client/editor/lock.js`, `tests/locks.test.js`; **open: `canBreak` in `locks.js` still returns true for everybody** ("the PoC has no owners"), now that accounts exist only the owner should break a lock): `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
+- [x] **12.6b Node lock** (built: `server/api/locks.js`, `server/db/nodes.js`, `client/editor/io/lock.js`, `tests/locks.test.js`; **open: `canBreak` in `locks.js` still returns true for everybody** ("the PoC has no owners"), now that accounts exist only the owner should break a lock): `node_locks` table, `POST /api/nodes/:id/lock` (take/renew),
       `DELETE` (release), expiry after ~60 s without heartbeat, owner may break;
       the editor (`EDITOR.md` E67) takes the lock on open, shows "locked by <name>" read-only when
       refused. Ops and saves are rejected without the lock.
@@ -564,7 +583,7 @@ Minimal on purpose; everything not listed is deferred (`GALLERY.md` S0b).
 - [ ] **13.15 Motion safety and budget** (Q9): `prefers-reduced-motion` shows the rest pose with a HUD "motion off" button;
       no blink faster than 0.5 s and no cross-fade shorter than 0.3 s (WCAG 2.3.1); a hidden tab or a lost context pauses.
       Done when the system setting stands every moving work still, in a browser test.
-- [x] **13.7 Plan layer in the 2D editor** (`EDITOR.md` E75; built: `client/editor/walls.js`, the acute-corner refusal in `model.js`, `shape.wall`): wall layer with height; rooms =
+- [x] **13.7 Plan layer in the 2D editor** (`EDITOR.md` E75; built: `client/editor/core/walls.js`, the acute-corner refusal in `model.js`, `shape.wall`): wall layer with height; rooms =
       closed, corridors = lines; refuse corners sharper than 90 degrees.
 
 ## Docs and housekeeping (do alongside, not blocking)

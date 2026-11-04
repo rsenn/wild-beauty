@@ -1,7 +1,7 @@
-// bun test: client/ghostdrag.js and client/editor/pending.js with a minimal fake window
+// bun test: client/ghostdrag.js and client/editor/core/pending.js with a minimal fake window
 import { describe, expect, test } from 'bun:test';
 import { watchHold } from '../client/ghostdrag.js';
-import { requestAdd, takePending, ADD_EVENT } from '../client/editor/pending.js';
+import { requestAdd, takePending, ADD_EVENT } from '../client/editor/core/pending.js';
 
 // just enough window and document for watchHold
 function fakeWindow() {

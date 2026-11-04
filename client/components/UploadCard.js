@@ -5,7 +5,7 @@ import { useBoot } from '../boot.js';
 import { UPLOAD_MIME, cropPosition, expiryNote, formatSize, panAxis, saveCrop, uploadPayload } from '../files.js';
 import { watchHold } from '../ghostdrag.js';
 import { watchRange } from '../cardrange.js';
-import { requestAdd } from '../editor/pending.js';
+import { requestAdd } from '../editor/core/pending.js';
 
 // file name and size under the thumbnail are switched off for now
 const SHOW_FILE_INFO = false;

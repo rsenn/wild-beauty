@@ -5,10 +5,10 @@ import { useBoot } from '../boot.js';
 import { ACCEPT, isImageFile, loadCrops, uploadPayload } from '../files.js';
 import { createQueue } from '../upload.js';
 import { choose, rangeBetween } from '../uploadselect.js';
-import { currentPosition } from '../editor/places.js';
-import { SAVED_EVENT, requestAdd } from '../editor/pending.js';
-import { browserStorage, draftHashes } from '../editor/draft.js';
-import { useEditor } from '../editor/useEditor.js';
+import { currentPosition } from '../editor/io/placeSuggestions.js';
+import { SAVED_EVENT, requestAdd } from '../editor/core/pending.js';
+import { browserStorage, draftHashes } from '../editor/core/draft.js';
+import { useEditor } from '../editor/core/useEditor.js';
 import { SweepTile } from './SweepTile.js';
 import { UploadCard } from './UploadCard.js';
 

@@ -1,6 +1,6 @@
-// bun test: client/editor/job.js (E128)
+// bun test: client/editor/tools/cutout/job.js (E128)
 import { describe, expect, test } from 'bun:test';
-import { blocked } from '../../client/editor/job.js';
+import { blocked } from '../../client/editor/tools/cutout/job.js';
 
 const doc = { v: 1, mode: 'free', style: {}, pages: [{ id: 'pageA', steps: [{ op: 'photo', id: 'photoaaa' }, { op: 'photo', id: 'photobbb' }] }, { id: 'pageB', steps: [] }] };
 

@@ -1,6 +1,6 @@
-// bun test: client/editor/keyboard.js
+// bun test: client/editor/input/keyboard.js
 import { describe, expect, test } from 'bun:test';
-import { CURSOR_START, cycleId, inEditor, moveCursor } from '../../client/editor/keyboard.js';
+import { CURSOR_START, cycleId, inEditor, moveCursor } from '../../client/editor/input/keyboard.js';
 
 describe('keyboard helpers', () => {
   test('cycleId walks the list and wraps', () => {

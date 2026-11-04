@@ -58,7 +58,7 @@ is a traced path. A lasso selection can be passed to the wand as its `region` (A
 way round, but that is an explicit step, not a mode.
 
 **Built 2026-11-01.** Not OpenCV `IntelligentScissors` but the same idea in the browser, so no tool
-install and no round trip while the pointer moves: `client/editor/lasso.js` (Sobel gradient of the
+install and no round trip while the pointer moves: `client/editor/tools/lasso/lasso.js` (Sobel gradient of the
 luma on a copy of the photo with the long side 640 px, scaled by its 98th percentile, turned into a
 cost; a click snaps to the cheapest pixel within 6 px; the live wire is Dijkstra over 8 neighbours
 inside the box of the two anchors grown by 24 px or half their distance; the outline is thinned by
@@ -100,11 +100,11 @@ open, 270 anchors.
 
 | Piece | File | Role |
 |---|---|---|
-| tap geometry, selection drawing | `client/editor/wand.js` | stage point to image fraction (crop window aware: `imagePoint`, `regionOf`), NDJSON reader `readLines`, `selectionPath` (candidate outlines to an even-odd SVG path on the stage), `defaultPick` |
+| tap geometry, selection drawing | `client/editor/tools/wand/wand.js` | stage point to image fraction (crop window aware: `imagePoint`, `regionOf`), NDJSON reader `readLines`, `selectionPath` (candidate outlines to an even-odd SVG path on the stage), `defaultPick` |
 | wand run, overlay, chips | `client/components/NodeEditor.js` (`wandDown`, `wandSelect`, `wandApply`, `wandUndoTap`, `wandReset`, `wandStep`, component `WandSelection`) | state, requests, applying an action |
-| background removal | same file (`removeBackground`, `clipToSubjects`) + `client/editor/clipping.js` `outlinesToStage` | E127 |
-| undo grouping | `client/editor/commands.js` | commands flagged `wand` share the key `wand:<group>`: the steps of one action are one undo step |
-| job rule | `client/editor/job.js` `blocked` | E128: while a *background removal* runs on a photo, deleting, cutting, clipping etc. of that photo is refused. The wand sets no job; Cancel, Esc, leaving the tool or a new tap stop it |
+| background removal | same file (`removeBackground`, `clipToSubjects`) + `client/editor/tools/clip/clipping.js` `outlinesToStage` | E127 |
+| undo grouping | `client/editor/core/commands.js` | commands flagged `wand` share the key `wand:<group>`: the steps of one action are one undo step |
+| job rule | `client/editor/tools/cutout/job.js` `blocked` | E128: while a *background removal* runs on a photo, deleting, cutting, clipping etc. of that photo is refused. The wand sets no job; Cancel, Esc, leaving the tool or a new tap stop it |
 | look | `static/css/layout.css` `.wb-wand-*`, theme tokens `--wb-wand-light`, `--wb-wand-dark`, `--wb-select`, `--wb-danger` | tinted area, white edge under black running dashes, + / − tap markers |
 | strings | `locales/{en,de,fr,es}.json` keys `editor.wand.*`, `editor.busy.{cut,take,erase}`, `editor.announce.{wandNothing,cutOut,takenOut,takenOutHole,erased,erasedHole,takeOutFailed,wandFailed}`, `editor.context.wand` | all four languages, `tools/check-locales.js` |
 

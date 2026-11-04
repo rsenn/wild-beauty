@@ -1,7 +1,7 @@
-// bun test: client/editor/hit.js
+// bun test: client/editor/input/hit.js
 import { describe, expect, test } from 'bun:test';
-import { hitTest, outlineOf } from '../../client/editor/hit.js';
-import { emptyNode } from '../../client/editor/model.js';
+import { hitTest, outlineOf } from '../../client/editor/input/hit.js';
+import { emptyNode } from '../../client/editor/core/model.js';
 
 const A = 'a'.repeat(64);
 const B = 'b'.repeat(64);

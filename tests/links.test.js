@@ -1,6 +1,6 @@
-// bun test: client/editor/links.js
+// bun test: client/editor/core/links.js
 import { describe, expect, test } from 'bun:test';
-import { cleanUrl, detect, htmlWords, normalizeShared, platformOf, vcardLines } from '../client/editor/links.js';
+import { cleanUrl, detect, htmlWords, normalizeShared, platformOf, vcardLines } from '../client/editor/core/links.js';
 
 const types = text => detect(text).map(l => [l.type, l.text, l.href]);
 
@@ -112,7 +112,7 @@ describe('render and paste', () => {
 
   test('links only when asked, and only the safe ones', async () => {
     const { renderToString } = await import('../vendor/preact-render-to-string.js');
-    const { renderText } = await import('../client/editor/render.js');
+    const { renderText } = await import('../client/editor/view/render.js');
     const show = (text, links) => renderToString(renderText(step(text), undefined, { links }));
 
     expect(show('janos@example.ch', false)).not.toContain('<a');
@@ -121,7 +121,7 @@ describe('render and paste', () => {
   });
 
   test('classify tidies a phone share', async () => {
-    const { classify } = await import('../client/editor/clipboard.js');
+    const { classify } = await import('../client/editor/io/clipboard.js');
 
     expect(classify({ text: 'Schau\nhttps://www.instagram.com/janos/?igsh=abc' })).toEqual({ kind: 'text', text: 'Schau\nhttps://www.instagram.com/janos/' });
     expect(classify({ vcard: 'BEGIN:VCARD\nFN:J\nTEL:+41 79 1 22 33 44\nEND:VCARD' }).text).toBe('J\n+41 79 1 22 33 44');

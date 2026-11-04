@@ -1,8 +1,8 @@
 // bun test: the first placement of photos (E112)
 import { describe, expect, test } from 'bun:test';
-import { cascade, PER_ROUND, photosOnPage } from '../client/editor/cascade.js';
-import { addPhoto, emptyNode, validate } from '../client/editor/model.js';
-import { apply } from '../client/editor/commands.js';
+import { cascade, PER_ROUND, photosOnPage } from '../client/editor/view/cascade.js';
+import { addPhoto, emptyNode, validate } from '../client/editor/core/model.js';
+import { apply } from '../client/editor/core/commands.js';
 
 const near = (a, b) => a.forEach((v, i) => expect(v).toBeCloseTo(b[i], 6));
 

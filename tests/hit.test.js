@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 
 describe('transparent padding is not hit (alpha map)', () => {
   test('a click on a clear pixel falls through, on content it hits', async () => {
-    const { alphaMap, loadAlpha, opaqueAt } = await import('../client/editor/alphamap.js');
+    const { alphaMap, loadAlpha, opaqueAt } = await import('../client/editor/tools/cutout/alphamap.js');
     const rgba = new Uint8Array(10 * 10 * 4);
 
     for(let y = 3; y < 6; y++) for(let x = 3; x < 6; x++) rgba[(y * 10 + x) * 4 + 3] = 255;
@@ -21,7 +21,7 @@ describe('transparent padding is not hit (alpha map)', () => {
 
 describe('the content box inside a clip (computed at cut time)', () => {
   test('hugs the content inside the piece, not the whole picture', async () => {
-    const { alphaMap, contentBox } = await import('../client/editor/alphamap.js');
+    const { alphaMap, contentBox } = await import('../client/editor/tools/cutout/alphamap.js');
     const w = 100;
     const rgba = new Uint8Array(w * w * 4);
 

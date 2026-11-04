@@ -1,8 +1,8 @@
-// bun test: client/editor/galleryinfo.js, scene textures and look (setScene, surfaces)
+// bun test: client/editor/io/galleryinfo.js, scene textures and look (setScene, surfaces)
 import { describe, expect, test } from 'bun:test';
-import { galleryReport, planPicture } from '../../client/editor/galleryinfo.js';
-import { apply } from '../../client/editor/commands.js';
-import { validate } from '../../client/editor/model.js';
+import { galleryReport, planPicture } from '../../client/editor/io/galleryinfo.js';
+import { apply } from '../../client/editor/core/commands.js';
+import { validate } from '../../client/editor/core/model.js';
 import { surfaces } from '../../client/gallery/fromdoc.js';
 import { LOOKS } from '../../client/gallery/autoplan.js';
 

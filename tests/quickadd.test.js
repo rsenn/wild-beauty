@@ -1,9 +1,9 @@
-// bun test: "Add photos" in the node editor (client/editor/quickadd.js, the addPhotos command)
+// bun test: "Add photos" in the node editor (client/editor/io/quickadd.js, the addPhotos command)
 import { describe, expect, test } from 'bun:test';
-import { apply } from '../client/editor/commands.js';
-import * as history from '../client/editor/history.js';
-import { emptyNode, photoSteps } from '../client/editor/model.js';
-import { fitFiles, readyToAdd } from '../client/editor/quickadd.js';
+import { apply } from '../client/editor/core/commands.js';
+import * as history from '../client/editor/core/history.js';
+import { emptyNode, photoSteps } from '../client/editor/core/model.js';
+import { fitFiles, readyToAdd } from '../client/editor/io/quickadd.js';
 
 const item = (id, state, record = null) => ({ id, state, record: state === 'done' ? (record ?? { hash: 'h' + id }) : record });
 

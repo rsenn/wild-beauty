@@ -1,6 +1,6 @@
-// bun test: client/editor/stage.js
+// bun test: client/editor/geometry/stage.js
 import { describe, expect, test } from 'bun:test';
-import { STAGE, pixelsPerUnit, toClient, toUnits } from '../../client/editor/stage.js';
+import { STAGE, pixelsPerUnit, toClient, toUnits } from '../../client/editor/geometry/stage.js';
 
 const rect = (left, top, side) => ({ left, top, width: side, height: side });
 

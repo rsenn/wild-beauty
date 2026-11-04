@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
-import { answerKey, linkPlace, nearPlace, positionsOf, readAnswered, remember } from '../editor/places.js';
+import { answerKey, linkPlace, nearPlace, positionsOf, readAnswered, remember } from '../editor/io/placeSuggestions.js';
 
 // The place suggestion under the context bar (EDITOR.md E137): when a photo of
 // the node has a position, "taken near <place>" with a button to link the node

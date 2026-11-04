@@ -1,7 +1,7 @@
 // bun test: the magnetic lasso's live wire (pure part)
 import { expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
-import { edgeCost, liveWire, outlineOfSegments, snap, thin, workSize } from '../client/editor/lasso.js';
+import { edgeCost, liveWire, outlineOfSegments, snap, thin, workSize } from '../client/editor/tools/lasso/lasso.js';
 
 // a w x h RGBA image: white, with a black disc of radius r at the middle
 const disc = (w, h, r) => {
@@ -148,7 +148,7 @@ test('the live wire finds the cheapest path (compared with a plain Dijkstra on r
 });
 
 // the shortest-path tree of the live wire (Intelligent Scissors): grown in slices, read for any pixel
-import { createWire } from '../client/editor/lasso.js';
+import { createWire } from '../client/editor/tools/lasso/lasso.js';
 
 const pathCost = (path, cost, w) => path.slice(1).reduce((sum, [x, y], i) => sum + (path[i][0] !== x && path[i][1] !== y ? Math.SQRT2 : 1) * cost[y * w + x], 0);
 
@@ -211,7 +211,7 @@ test('the tree returns on the cost window that made the first version loop for e
   expect(tree.pathTo([67, 50]).length).toBeGreaterThan(90);
 });
 
-import { costFromEdgeMap, edgeMapUsable } from '../client/editor/lasso.js';
+import { costFromEdgeMap, edgeMapUsable } from '../client/editor/tools/lasso/lasso.js';
 
 test('the server edge map becomes a cost map: strong edges cheap, flat areas dear, same range as the local one', () => {
   const data = new Uint8ClampedArray([255, 0, 0, 255, 0, 0, 0, 255, 128, 0, 0, 255]);
@@ -233,7 +233,7 @@ test('an edge map with no edges, or only edges, is not used', () => {
 });
 
 // ---- fail-safe: whatever the cost map or the input, nothing loops, throws or takes long ----
-import { MAX_VERTICES, MIN_COST, outlineOfSegments as outline } from '../client/editor/lasso.js';
+import { MAX_VERTICES, MIN_COST, outlineOfSegments as outline } from '../client/editor/tools/lasso/lasso.js';
 
 const fields = {
   flat: n => new Float32Array(n).fill(1.04),

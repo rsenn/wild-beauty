@@ -1,7 +1,7 @@
 // Node, photo and link queries (PLAN.md S8). Every function takes the handle
 // from db.js `open()` first. `doc` and `palette` are JSON in the database and
 // plain values here; time is Date.now() unless `now` is given.
-import { migrateDoc } from '../../client/editor/model.js';
+import { migrateDoc } from '../../client/editor/core/model.js';
 
 export const LABELS = ['child', 'ref', 'sells', 'at'];
 

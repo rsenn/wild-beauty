@@ -1,7 +1,7 @@
 // bun test: the square crop of an upload card (client/files.js) and the grid options
 import { describe, expect, test } from 'bun:test';
 import { cropPosition, loadCrops, panAxis, saveCrop } from '../client/files.js';
-import { gridCells, gridLayout } from '../client/editor/grid.js';
+import { gridCells, gridLayout } from '../client/editor/geometry/grid.js';
 
 const wide = { width: 400, height: 200 };
 const tall = { width: 200, height: 400 };

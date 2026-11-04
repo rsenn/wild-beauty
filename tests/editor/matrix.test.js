@@ -1,6 +1,6 @@
-// bun test: client/editor/matrix.js
+// bun test: client/editor/geometry/matrix.js
 import { describe, expect, test } from 'bun:test';
-import { apply, decompose, fromSimilarity, identity, invert, multiply } from '../../client/editor/matrix.js';
+import { apply, decompose, fromSimilarity, identity, invert, multiply } from '../../client/editor/geometry/matrix.js';
 
 const close = (actual, expected) => actual.forEach((v, i) => expect(v).toBeCloseTo(expected[i], 9));
 

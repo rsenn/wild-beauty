@@ -6,7 +6,7 @@
 import { database } from '../db/db.js';
 import { addLink, insertNode, linksFrom, listSuggestions, removeSuggestion } from '../db/nodes.js';
 import { graphOf } from './graph.js';
-import { emptyNode } from '../../client/editor/model.js';
+import { emptyNode } from '../../client/editor/core/model.js';
 import { roundPosition } from '../media/probe.js';
 import { km, placeTitle, titleFor } from './gazetteer.js';
 import { resolveNames } from './municipality.js';

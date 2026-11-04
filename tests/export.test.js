@@ -1,7 +1,7 @@
 // bun test: the pure parts of the image export (E125)
 import { describe, expect, test } from 'bun:test';
-import { documentSvg, fileName, imageUrls, inlineImages, withSize } from '../client/editor/export.js';
-import { addPhoto, emptyNode } from '../client/editor/model.js';
+import { documentSvg, fileName, imageUrls, inlineImages, withSize } from '../client/editor/io/export.js';
+import { addPhoto, emptyNode } from '../client/editor/core/model.js';
 
 const HASH = 'a'.repeat(64);
 const info = { href: '/files/uploads/a.jpg?x=1&y=2', width: 400, height: 400 };

@@ -1,6 +1,6 @@
-// bun test: client/editor/store.js
+// bun test: client/editor/core/store.js
 import { describe, expect, test } from 'bun:test';
-import { NEW, createEditorStore } from '../../client/editor/store.js';
+import { NEW, createEditorStore } from '../../client/editor/core/store.js';
 
 describe('editor store', () => {
   test('starts closed; open opens, close closes', async () => {

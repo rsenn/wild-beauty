@@ -4,7 +4,7 @@
 // where `url` is the picture's image, `full` the sharper one that replaces it when
 // zoomed in and `href` the page the Open button leads to.
 
-import { photoSteps } from '../editor/render.js';
+import { photoSteps } from '../editor/view/render.js';
 
 // the photo thumbnail is the node's tile, a baked photo its own thumbnail
 const thumb = hash => `/files/photos/${hash}.thumb.jpg`;

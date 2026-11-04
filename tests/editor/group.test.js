@@ -1,9 +1,9 @@
 // bun test: ordering and alignment of a multiple selection (E147)
 import { describe, expect, test } from 'bun:test';
-import { alignShifts, extentOf } from '../../client/editor/align.js';
-import { orderCommands } from '../../client/editor/ordering.js';
-import { apply } from '../../client/editor/commands.js';
-import { emptyNode, findStep } from '../../client/editor/model.js';
+import { alignShifts, extentOf } from '../../client/editor/geometry/align.js';
+import { orderCommands } from '../../client/editor/view/ordering.js';
+import { apply } from '../../client/editor/core/commands.js';
+import { emptyNode, findStep } from '../../client/editor/core/model.js';
 
 const stroke = id => ({ op: 'stroke', id, pts: [[0, 0, 4], [10, 10, 4]], color: '#000000' });
 const doc = (...ids) => ({ ...emptyNode(), pages: [{ id: 'page0001', steps: ids.map(stroke) }] });

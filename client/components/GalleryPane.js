@@ -1,8 +1,8 @@
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
-import { galleryReport, planPicture } from '../editor/galleryinfo.js';
+import { galleryReport, planPicture } from '../editor/io/galleryinfo.js';
 import { LOOKS } from '../gallery/autoplan.js';
-import { LOOK_NAMES, TEXTURE_SLOTS } from '../editor/scene.js';
+import { LOOK_NAMES, TEXTURE_SLOTS } from '../editor/core/galleryScene.js';
 
 // The gallery context pane (EDITOR.md E154): beside the stage of a node of kind
 // `gallery`, it explains how a gallery is set up, shows what the editor found in the

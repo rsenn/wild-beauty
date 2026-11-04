@@ -1,6 +1,6 @@
 import { useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
-import { KINDS } from '../editor/model.js';
+import { KINDS } from '../editor/core/model.js';
 import { ColourPick } from './ColourPick.js';
 import { usePopFit } from './popfit.js';
 

@@ -1,0 +1,5 @@
+# client/editor: rename the files whose basename clashed with another file in the repo
+client/editor/core/scene.js    client/editor/core/galleryScene.js
+client/editor/view/palette.js  client/editor/view/swatches.js
+client/editor/io/places.js     client/editor/io/placeSuggestions.js
+client/editor/input/tools.js   client/editor/input/toolTable.js

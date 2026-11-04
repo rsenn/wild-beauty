@@ -1,10 +1,10 @@
 // bun test: what a clip-tool stroke means, and the document changes it makes (E114, E121)
 import { describe, expect, test } from 'bun:test';
-import { apply } from '../client/editor/commands.js';
-import { clipFromStroke, simplify, turning } from '../client/editor/clipstroke.js';
-import { area } from '../client/editor/polygon.js';
-import { addPhoto, emptyNode, findStep, validate } from '../client/editor/model.js';
-import { photoPolygon } from '../client/editor/clipping.js';
+import { apply } from '../client/editor/core/commands.js';
+import { clipFromStroke, simplify, turning } from '../client/editor/tools/clip/clipstroke.js';
+import { area } from '../client/editor/geometry/polygon.js';
+import { addPhoto, emptyNode, findStep, validate } from '../client/editor/core/model.js';
+import { photoPolygon } from '../client/editor/tools/clip/clipping.js';
 
 const HASH = 'a'.repeat(64);
 const info = { width: 400, height: 400 };
@@ -200,7 +200,7 @@ describe('cutting a clip of several outlines', () => {
   const square = (x, y, s) => [[x, y], [x + s, y], [x + s, y + s], [x, y + s]];
 
   test('splits the crossed outline, the others go to their side', async () => {
-    const { cutOutlines } = await import('../client/editor/multiclip.js');
+    const { cutOutlines } = await import('../client/editor/tools/clip/multiclip.js');
     const polys = [square(0, 0, 100), square(150, 20, 30), square(-60, 20, 30)];
     const pieces = cutOutlines(polys, [[50, -10], [50, 110]], 20);
 
@@ -210,7 +210,7 @@ describe('cutting a clip of several outlines', () => {
   });
 
   test('null when the stroke splits no outline', async () => {
-    const { cutOutlines } = await import('../client/editor/multiclip.js');
+    const { cutOutlines } = await import('../client/editor/tools/clip/multiclip.js');
 
     expect(cutOutlines([square(0, 0, 100), square(300, 0, 50)], [[200, -10], [200, 110]], 5)).toBeNull();
   });
@@ -220,7 +220,7 @@ describe('the outline a stroke would split', () => {
   const square = (x, y, s) => [[x, y], [x + s, y], [x + s, y + s], [x, y + s]];
 
   test('is the largest outline crossed twice', async () => {
-    const { crossedOutline } = await import('../client/editor/multiclip.js');
+    const { crossedOutline } = await import('../client/editor/tools/clip/multiclip.js');
 
     expect(crossedOutline([square(200, 0, 40), square(0, 0, 100)], [[50, -10], [50, 110]], 20)?.i).toBe(1);
     expect(crossedOutline([square(200, 0, 40), square(0, 0, 100)], [[120, -10], [120, 110]], 5)).toBeNull();
@@ -250,7 +250,7 @@ describe('cutting a cutout along its visible box', () => {
 
 describe('the outlines of a background removal become a multi-outline clip', () => {
   test('outlinesToStage maps fractions to stage, drops specks, largest first', async () => {
-    const { outlinesToStage } = await import('../client/editor/clipping.js');
+    const { outlinesToStage } = await import('../client/editor/tools/clip/clipping.js');
     const info = { width: 1000, height: 1000 };
     const big = [[0.1, 0.1], [0.4, 0.1], [0.4, 0.5], [0.1, 0.5]];
     const bigger = [[0.5, 0.1], [0.9, 0.1], [0.9, 0.9], [0.5, 0.9]];

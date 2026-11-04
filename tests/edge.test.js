@@ -1,6 +1,6 @@
 // bun test: edge decoration geometry (E123)
 import { describe, expect, test } from 'bun:test';
-import { EDGE_STYLES, edgeShapes, pathOf, rng } from '../client/editor/edge.js';
+import { EDGE_STYLES, edgeShapes, pathOf, rng } from '../client/editor/view/edge.js';
 
 describe('edgeShapes', () => {
   test('plain has nothing', () => {

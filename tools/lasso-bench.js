@@ -32,7 +32,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { basename, extname, join, resolve } from 'node:path';
-import { edgeCost } from '../client/editor/lasso.js';
+import { edgeCost } from '../client/editor/tools/lasso/lasso.js';
 import { largestComponent, score, simulate, summarise, traceContour } from './lasso-bench-lib.js';
 
 const argv = globalThis.process?.argv?.slice(2) ?? globalThis.scriptArgs?.slice(1) ?? [];

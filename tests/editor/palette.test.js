@@ -1,7 +1,7 @@
-// bun test: client/color.js and client/editor/palette.js (E84-E86)
+// bun test: client/color.js and client/editor/view/swatches.js (E84-E86)
 import { describe, expect, test } from 'bun:test';
 import { distance, fromOklch, parseHex, formatHex, toOklch } from '../../client/color.js';
-import { contrast, complement, dominant, neutral, swatches, tetradicPair, triadic } from '../../client/editor/palette.js';
+import { contrast, complement, dominant, neutral, swatches, tetradicPair, triadic } from '../../client/editor/view/swatches.js';
 
 const hueOf = hex => toOklch(hex)[2];
 const gap = (a, b) => {

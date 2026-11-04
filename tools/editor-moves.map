@@ -1,0 +1,63 @@
+# client/editor regrouping: old path, new path (relative to the repo root)
+# core: the document and its rules
+client/editor/model.js        client/editor/core/model.js
+client/editor/commands.js     client/editor/core/commands.js
+client/editor/history.js      client/editor/core/history.js
+client/editor/store.js        client/editor/core/store.js
+client/editor/useEditor.js    client/editor/core/useEditor.js
+client/editor/draft.js        client/editor/core/draft.js
+client/editor/pending.js      client/editor/core/pending.js
+client/editor/scene.js        client/editor/core/scene.js
+client/editor/walls.js        client/editor/core/walls.js
+client/editor/text.js         client/editor/core/text.js
+client/editor/links.js        client/editor/core/links.js
+client/editor/theme.js        client/editor/core/theme.js
+client/editor/tab.js          client/editor/core/tab.js
+# geometry: pure maths
+client/editor/matrix.js       client/editor/geometry/matrix.js
+client/editor/polygon.js      client/editor/geometry/polygon.js
+client/editor/curve.js        client/editor/geometry/curve.js
+client/editor/pen.js          client/editor/geometry/pen.js
+client/editor/shapes.js       client/editor/geometry/shapes.js
+client/editor/align.js        client/editor/geometry/align.js
+client/editor/grid.js         client/editor/geometry/grid.js
+client/editor/stage.js        client/editor/geometry/stage.js
+client/editor/measure.js      client/editor/geometry/measure.js
+# input: pointer and keyboard
+client/editor/gesture.js      client/editor/input/gesture.js
+client/editor/gestures.js     client/editor/input/gestures.js
+client/editor/handles.js      client/editor/input/handles.js
+client/editor/hit.js          client/editor/input/hit.js
+client/editor/keyboard.js     client/editor/input/keyboard.js
+client/editor/shortcuts.js    client/editor/input/shortcuts.js
+client/editor/tools.js        client/editor/input/tools.js
+client/editor/loupe.js        client/editor/input/loupe.js
+# tools: one folder per tool
+client/editor/wand.js         client/editor/tools/wand/wand.js
+client/editor/lasso.js        client/editor/tools/lasso/lasso.js
+client/editor/clipping.js     client/editor/tools/clip/clipping.js
+client/editor/clipstroke.js   client/editor/tools/clip/clipstroke.js
+client/editor/multiclip.js    client/editor/tools/clip/multiclip.js
+client/editor/shapetool.js    client/editor/tools/shape/shapetool.js
+client/editor/vertexedit.js   client/editor/tools/shape/vertexedit.js
+client/editor/roomaid.js      client/editor/tools/shape/roomaid.js
+client/editor/job.js          client/editor/tools/cutout/job.js
+client/editor/alpha.js        client/editor/tools/cutout/alpha.js
+client/editor/alphamap.js     client/editor/tools/cutout/alphamap.js
+# io: server, storage, files, clipboard
+client/editor/save.js         client/editor/io/save.js
+client/editor/lock.js         client/editor/io/lock.js
+client/editor/clipboard.js    client/editor/io/clipboard.js
+client/editor/export.js       client/editor/io/export.js
+client/editor/preload.js      client/editor/io/preload.js
+client/editor/quickadd.js     client/editor/io/quickadd.js
+client/editor/places.js       client/editor/io/places.js
+client/editor/galleryinfo.js  client/editor/io/galleryinfo.js
+# view: rendering and presentation
+client/editor/render.js       client/editor/view/render.js
+client/editor/palette.js      client/editor/view/palette.js
+client/editor/scenepalette.js client/editor/view/scenepalette.js
+client/editor/edge.js         client/editor/view/edge.js
+client/editor/ordering.js     client/editor/view/ordering.js
+client/editor/cascade.js      client/editor/view/cascade.js
+client/editor/playback.js     client/editor/view/playback.js

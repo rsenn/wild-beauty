@@ -1,8 +1,8 @@
 // What the read-only node page needs besides the document: where each photo
-// is and how big, for renderNode's `photos` resolver (client/editor/render.js).
+// is and how big, for renderNode's `photos` resolver (client/editor/view/render.js).
 import { getPhoto } from '../db/nodes.js';
 import { choosePadding } from '../media/color.js';
-import { photoSteps } from '../../client/editor/render.js';
+import { photoSteps } from '../../client/editor/view/render.js';
 import { photosOf } from './validate.js';
 
 // -> { [hash]: { href, width, height, padding } } for the photos of `doc`

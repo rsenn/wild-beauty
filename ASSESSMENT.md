@@ -105,8 +105,8 @@ These make the plan unreliable as a to-do list; each is a quick fix.
 | Where | Says | The code says |
 |---|---|---|
 | `PLAN.md` S17, `TODO.md` "Open from 2026-10-31" | `/api/login` does not exist | `server.js` serves `/api/login` and `/api/register`; `CLAUDE.md` says login exists since 2026-10-31 |
-| `TODO.md` M12 (12.1, 12.2, 12.3, 12.5, 12.6b ...) | all open | `server/api/graph.js`, `server/api/locks.js`, `client/editor/lock.js`, `GraphPage.js`, tests for graph and locks exist |
-| `EDITOR.md` E75 to E78 | open | `client/editor/walls.js`, the whole `client/gallery/` tree and `scene3d` handling exist |
+| `TODO.md` M12 (12.1, 12.2, 12.3, 12.5, 12.6b ...) | all open | `server/api/graph.js`, `server/api/locks.js`, `client/editor/io/lock.js`, `GraphPage.js`, tests for graph and locks exist |
+| `EDITOR.md` E75 to E78 | open | `client/editor/core/walls.js`, the whole `client/gallery/` tree and `scene3d` handling exist |
 | `EDITOR.md` E114, E121, E124 | open | `clipping.js`, `clipstroke.js` cite them; the loupe is in `Stage.js` |
 | `TODO.md` "Done 2026-10-31 (uncommitted; ask before committing)" | uncommitted | committed in `3552fad`, `4aba6bf` and later |
 | `TODO.md` "State: ... last: `d2ae0104`" | | 27 commits later |

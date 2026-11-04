@@ -1,7 +1,7 @@
-// bun test: client/editor/gestures.js
+// bun test: client/editor/input/gestures.js
 import { describe, expect, test } from 'bun:test';
-import { solveSimilarity } from '../../client/editor/gestures.js';
-import { apply } from '../../client/editor/matrix.js';
+import { solveSimilarity } from '../../client/editor/input/gestures.js';
+import { apply } from '../../client/editor/geometry/matrix.js';
 
 const near = (actual, expected) => actual.forEach((v, i) => expect(Math.abs(v - expected[i])).toBeLessThan(1e-9));
 

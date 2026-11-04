@@ -1,9 +1,9 @@
 // bun test: clips with several outlines (E122)
 import { describe, expect, test } from 'bun:test';
-import { apply } from '../client/editor/commands.js';
-import { emptyNode, findStep } from '../client/editor/model.js';
-import { outlineCount, pathFromPolygons, polygonsFromPath, windingAt, wound } from '../client/editor/multiclip.js';
-import { area } from '../client/editor/polygon.js';
+import { apply } from '../client/editor/core/commands.js';
+import { emptyNode, findStep } from '../client/editor/core/model.js';
+import { outlineCount, pathFromPolygons, polygonsFromPath, windingAt, wound } from '../client/editor/tools/clip/multiclip.js';
+import { area } from '../client/editor/geometry/polygon.js';
 
 const HASH = 'a'.repeat(64);
 const sq = (x, y, s) => [[x, y], [x + s, y], [x + s, y + s], [x, y + s]];
@@ -89,7 +89,7 @@ describe('add, subtract and split', () => {
 
 describe('editing the outline in place', () => {
   test('nearestVertex and insertOnEdge', async () => {
-    const { nearestVertex, insertOnEdge } = await import('../client/editor/multiclip.js');
+    const { nearestVertex, insertOnEdge } = await import('../client/editor/tools/clip/multiclip.js');
     const polys = [sq(0, 0, 100)];
 
     expect(nearestVertex(polys, [3, 4], 10)).toMatchObject({ poly: 0, vertex: 0 });
@@ -113,7 +113,7 @@ describe('editing the outline in place', () => {
 
 describe('selection box', () => {
   test('a clipped photo is selected by its visible part', async () => {
-    const { outlineOf } = await import('../client/editor/hit.js');
+    const { outlineOf } = await import('../client/editor/input/hit.js');
     const snap = start(sq(200, 300, 100));
     const photos = () => ({ width: 1000, height: 1000 });
     const full = outlineOf(snap.doc, 'photo001', { photos });
@@ -127,8 +127,8 @@ describe('selection box', () => {
 
 describe('visible box', () => {
   test('boxFromAlpha finds the solid part, and a saved cutout validates', async () => {
-    const { boxFromAlpha } = await import('../client/editor/alpha.js');
-    const { validate, replacePhoto, setBox } = await import('../client/editor/model.js');
+    const { boxFromAlpha } = await import('../client/editor/tools/cutout/alpha.js');
+    const { validate, replacePhoto, setBox } = await import('../client/editor/core/model.js');
     const data = new Uint8Array(10 * 10 * 4);
 
     for(let y = 2; y < 5; y++) for(let x = 3; x < 8; x++) data[(y * 10 + x) * 4 + 3] = 255;

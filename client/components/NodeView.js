@@ -1,8 +1,8 @@
 import { useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
-import { gridPlan } from '../editor/grid.js';
-import { photoSteps, renderNode } from '../editor/render.js';
+import { gridPlan } from '../editor/geometry/grid.js';
+import { photoSteps, renderNode } from '../editor/view/render.js';
 
 // What the viewer shows of a node, as a list of stages and how to move along it
 // (EDITOR.md E135): `{ flow, axis, list: [{ mode, page, part }] }`.

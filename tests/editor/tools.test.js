@@ -1,6 +1,6 @@
-// bun test: client/editor/tools.js
+// bun test: client/editor/input/toolTable.js
 import { describe, expect, test } from 'bun:test';
-import { DEFAULT_TOOL, TOOLS, cursorOf, toolForKey } from '../../client/editor/tools.js';
+import { DEFAULT_TOOL, TOOLS, cursorOf, toolForKey } from '../../client/editor/input/toolTable.js';
 
 const key = (k, extra = {}) => ({ key: k, ctrlKey: false, metaKey: false, altKey: false, repeat: false, target: { tagName: 'BODY' }, ...extra });
 

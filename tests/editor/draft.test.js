@@ -1,8 +1,8 @@
-// bun test: client/editor/draft.js and shortcuts.js
+// bun test: client/editor/core/draft.js and shortcuts.js
 import { describe, expect, test } from 'bun:test';
-import { clearDraft, draftKey, isDirty, loadDraft, saveDraft } from '../../client/editor/draft.js';
-import { emptyNode } from '../../client/editor/model.js';
-import { shortcutFor } from '../../client/editor/shortcuts.js';
+import { clearDraft, draftKey, isDirty, loadDraft, saveDraft } from '../../client/editor/core/draft.js';
+import { emptyNode } from '../../client/editor/core/model.js';
+import { shortcutFor } from '../../client/editor/input/shortcuts.js';
 
 const A = 'a'.repeat(64);
 const memory = () => {

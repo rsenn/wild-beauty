@@ -1,10 +1,10 @@
 // bun test: text boxes - wrapping, the model, rendering and picking (E88-E93)
 import { describe, expect, test } from 'bun:test';
 import { renderToString } from '../vendor/preact-render-to-string.js';
-import { addText, emptyNode, findStep, updateText, validate } from '../client/editor/model.js';
-import { renderText } from '../client/editor/render.js';
-import { hitTest, outlineOf } from '../client/editor/hit.js';
-import { FONTS, LINE_HEIGHT, alignX, boxHeight, firstBaseline, isRtl, layout, wrap } from '../client/editor/text.js';
+import { addText, emptyNode, findStep, updateText, validate } from '../client/editor/core/model.js';
+import { renderText } from '../client/editor/view/render.js';
+import { hitTest, outlineOf } from '../client/editor/input/hit.js';
+import { FONTS, LINE_HEIGHT, alignX, boxHeight, firstBaseline, isRtl, layout, wrap } from '../client/editor/core/text.js';
 
 const measure = text => text.length * 10; // every character is 10 units wide
 const page = doc => doc.pages[0].id;
@@ -92,8 +92,8 @@ describe('render and picking', () => {
 
 describe('resizing a box', () => {
   test('one command changes the width, the lines and the place', async () => {
-    const { apply } = await import('../client/editor/commands.js');
-    const { emptyNode, findStep } = await import('../client/editor/model.js');
+    const { apply } = await import('../client/editor/core/commands.js');
+    const { emptyNode, findStep } = await import('../client/editor/core/model.js');
     let snap = { doc: emptyNode(), kind: 'node' };
     const page = snap.doc.pages[0].id;
 

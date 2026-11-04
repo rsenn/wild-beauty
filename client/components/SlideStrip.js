@@ -1,5 +1,5 @@
 import { html } from '../html.js';
-import { renderNode } from '../editor/render.js';
+import { renderNode } from '../editor/view/render.js';
 
 // The page strip of `slides` mode (E57): one thumbnail per photo, in the
 // node's photo order; a click shows that slide. No add, remove or reorder: the

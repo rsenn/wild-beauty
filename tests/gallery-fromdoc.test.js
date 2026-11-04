@@ -4,7 +4,7 @@ import node9 from './fixtures/node9.json';
 import { buildGallery } from '../client/gallery/build.js';
 import { cutRoom, planFromDoc, trimCorridor } from '../client/gallery/fromdoc.js';
 import { slots } from '../client/gallery/hang.js';
-import { contains } from '../client/editor/polygon.js';
+import { contains } from '../client/editor/geometry/polygon.js';
 
 // node 9 ("Sous-soul Vitrines"): two rooms, two corridors drawn with the room aid
 describe('planFromDoc', () => {

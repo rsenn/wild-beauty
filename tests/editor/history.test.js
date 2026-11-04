@@ -1,7 +1,7 @@
-// bun test: client/editor/history.js
+// bun test: client/editor/core/history.js
 import { describe, expect, test } from 'bun:test';
-import { MAX_UNDO, canRedo, canUndo, create, push, redo, seal, undo } from '../../client/editor/history.js';
-import { addPage, emptyNode, setMode, setTitle } from '../../client/editor/model.js';
+import { MAX_UNDO, canRedo, canUndo, create, push, redo, seal, undo } from '../../client/editor/core/history.js';
+import { addPage, emptyNode, setMode, setTitle } from '../../client/editor/core/model.js';
 
 describe('history', () => {
   const d0 = emptyNode();

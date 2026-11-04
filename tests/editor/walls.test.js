@@ -1,9 +1,9 @@
-// bun test: client/editor/walls.js and the wall commands (E75)
+// bun test: client/editor/core/walls.js and the wall commands (E75)
 import { describe, expect, test } from 'bun:test';
-import { acuteCorner, cornerAngle, isWall, wallProblem } from '../../client/editor/walls.js';
-import { apply } from '../../client/editor/commands.js';
-import { emptyNode, findStep, validate } from '../../client/editor/model.js';
-import { pathFromVertices } from '../../client/editor/shapes.js';
+import { acuteCorner, cornerAngle, isWall, wallProblem } from '../../client/editor/core/walls.js';
+import { apply } from '../../client/editor/core/commands.js';
+import { emptyNode, findStep, validate } from '../../client/editor/core/model.js';
+import { pathFromVertices } from '../../client/editor/geometry/shapes.js';
 
 const pts = (...p) => p.map(([x, y]) => ({ x, y }));
 const square = pts([0, 0], [100, 0], [100, 100], [0, 100]);

@@ -6,7 +6,7 @@ import { firstLine, run } from './run.js';
 import { LIMITS, identify } from './probe.js';
 import { FALLBACK_QUALITY, QUALITY, jpegQuality } from './bake.js';
 import { imagemagick } from './tools.js';
-import { cropWindow } from '../../client/editor/model.js';
+import { cropWindow } from '../../client/editor/core/model.js';
 
 export const SIZE = 512;
 const STAGE = 1000;

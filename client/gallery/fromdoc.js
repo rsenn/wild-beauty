@@ -10,14 +10,14 @@
 // handed over clockwise (autoplan.js `clockwise`) so the guided tour goes right.
 // Pure, no DOM. -> a scene3d document, or null when the node has no walls.
 
-import { apply } from '../editor/matrix.js';
-import { matrixOf } from '../editor/hit.js';
-import { UNITS_PER_METRE } from '../editor/roomaid.js';
-import { verticesFromPath } from '../editor/shapes.js';
-import { CORRIDOR_WIDTH, PARAPET_HEIGHT, WALL_HEIGHT } from '../editor/walls.js';
+import { apply } from '../editor/geometry/matrix.js';
+import { matrixOf } from '../editor/input/hit.js';
+import { UNITS_PER_METRE } from '../editor/tools/shape/roomaid.js';
+import { verticesFromPath } from '../editor/geometry/shapes.js';
+import { CORRIDOR_WIDTH, PARAPET_HEIGHT, WALL_HEIGHT } from '../editor/core/walls.js';
 import { LOOKS, clockwise } from './autoplan.js';
-import { DEFAULT_LOOK, textureSlots } from '../editor/scene.js';
-import { contains } from '../editor/polygon.js';
+import { DEFAULT_LOOK, textureSlots } from '../editor/core/galleryScene.js';
+import { contains } from '../editor/geometry/polygon.js';
 import { clean, signedArea } from './line.js';
 
 const CURVE = 8; // samples per bezier segment

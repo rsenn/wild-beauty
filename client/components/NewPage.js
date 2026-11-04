@@ -5,12 +5,12 @@ import { Layout } from './Layout.js';
 import { UploadArea } from './UploadArea.js';
 import { NewNodeTile } from './NewNodeTile.js';
 import { NodeEditor } from './NodeEditor.js';
-import { NEW } from '../editor/store.js';
-import { ADD_EVENT, SAVED_EVENT } from '../editor/pending.js';
+import { NEW } from '../editor/core/store.js';
+import { ADD_EVENT, SAVED_EVENT } from '../editor/core/pending.js';
 import { useBoot } from '../boot.js';
 import { SavedNodes } from './SavedNodes.js';
 import { RecordConsent } from './RecordConsent.js';
-import { editorStore, useEditor } from '../editor/useEditor.js';
+import { editorStore, useEditor } from '../editor/core/useEditor.js';
 
 // /:lang/new: upload area, then the node editor once the "New node" tile has
 // opened it. Whether an editor is open lives in the editor store (E34).

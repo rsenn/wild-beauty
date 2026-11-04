@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { ACCEPT, isImageFile, uploadPayload } from '../files.js';
 import { createQueue } from '../upload.js';
-import { fitFiles, readyToAdd } from '../editor/quickadd.js';
-import { LIMITS } from '../editor/model.js';
+import { fitFiles, readyToAdd } from '../editor/io/quickadd.js';
+import { LIMITS } from '../editor/core/model.js';
 
 // "Add photos" of the node editor (EDITOR.md E141). One tap opens the file picker
 // (several photos at once); they upload three at a time, with the retry and read-first

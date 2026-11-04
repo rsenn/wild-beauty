@@ -9,7 +9,7 @@
 import { open } from '../server/db/db.js';
 import { addLink, getNode, insertNode, updateNode } from '../server/db/nodes.js';
 import { saveUser } from '../server/auth.js';
-import { addText } from '../client/editor/model.js';
+import { addText } from '../client/editor/core/model.js';
 import { siteById } from '../server/sites.js';
 
 const email = process.argv[2] ?? 'janos.morzsinay@gmail.com';
@@ -44,7 +44,7 @@ function pageDoc(title, lines) {
 const PAGES = [
   { slug: 'home', title: 'Start', lines: [{ text: 'jános', size: 96 }] },
   { slug: 'about', title: 'Über', lines: [{ text: 'Über', size: 64 }, { text: 'Hier entsteht eine kurze Vorstellung.', size: 36 }] },
-  // the contact lines are plain text: mail, phone and the profiles become links when shown (client/editor/links.js)
+  // the contact lines are plain text: mail, phone and the profiles become links when shown (client/editor/core/links.js)
   { slug: 'contact', title: 'Kontakt', lines: [{ text: 'Kontakt', size: 64 }, ...['janos@example.invalid', '+41 00 000 00 00', 'wa.me/410000000000', 'facebook.com/placeholder', 'instagram.com/placeholder', 'youtube.com/@placeholder'].map(text => ({ text, size: 34 }))] },
 ];
 

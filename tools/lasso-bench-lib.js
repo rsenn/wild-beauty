@@ -7,7 +7,7 @@
 // "clicks to reach IoU 0.9" can be read off. The same simulated clicks with NO snapping (a polygon
 // through the clicks) are scored too: the difference is what the edge map buys.
 
-import { createWire, outlineOfSegments, snap } from '../client/editor/lasso.js';
+import { createWire, outlineOfSegments, snap } from '../client/editor/tools/lasso/lasso.js';
 
 // the largest 4-connected foreground component of `mask` (w x h, 0 / 1), as a new mask
 export function largestComponent(mask, w, h) {

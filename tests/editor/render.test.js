@@ -1,8 +1,8 @@
-// bun test: client/editor/render.js
+// bun test: client/editor/view/render.js
 import { describe, expect, test } from 'bun:test';
 import { renderToString } from '../../vendor/preact-render-to-string.js';
-import { addPhoto, emptyNode, setCrop } from '../../client/editor/model.js';
-import { renderNode, renderStage } from '../../client/editor/render.js';
+import { addPhoto, emptyNode, setCrop } from '../../client/editor/core/model.js';
+import { renderNode, renderStage } from '../../client/editor/view/render.js';
 
 const hash = 'a'.repeat(64);
 const info = { href: '/files/uploads/a.jpg', width: 2000, height: 1000, padding: ['#112233', '#445566'] };

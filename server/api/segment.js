@@ -91,7 +91,7 @@ export function cleanRegion(region) {
   return out.length ? out : null;
 }
 
-// the outlines of a magnetic lasso (client/editor/lasso.js): up to MAX_OUTLINES polygons of [u, v] in
+// the outlines of a magnetic lasso (client/editor/tools/lasso/lasso.js): up to MAX_OUTLINES polygons of [u, v] in
 // 0..1 of the photo, MAX_LASSO vertices in all (the editor thins its path first); null when absent
 // or malformed. A hole is an outline inside another one (even-odd)
 const MAX_OUTLINES = 4;

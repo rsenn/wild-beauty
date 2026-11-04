@@ -1,7 +1,7 @@
-// bun test: client/editor/save.js with a fake fetch
+// bun test: client/editor/io/save.js with a fake fetch
 import { describe, expect, test } from 'bun:test';
-import { errorKey, saveNode } from '../../client/editor/save.js';
-import { emptyNode } from '../../client/editor/model.js';
+import { errorKey, saveNode } from '../../client/editor/io/save.js';
+import { emptyNode } from '../../client/editor/core/model.js';
 
 const snap = { doc: emptyNode(), kind: 'node' };
 const reply = (status, body) => async (url, init) => Object.assign(Response.json(body, { status }), { sent: { url, init } });
@@ -52,7 +52,7 @@ describe('saveNode', () => {
   });
 });
 
-import { loadNode } from '../../client/editor/save.js';
+import { loadNode } from '../../client/editor/io/save.js';
 
 describe('conflicts and loading (E65)', () => {
   test('a 409 carries the current rev', async () => {
@@ -69,7 +69,7 @@ describe('conflicts and loading (E65)', () => {
   });
 });
 
-import { deleteNode } from '../../client/editor/save.js';
+import { deleteNode } from '../../client/editor/io/save.js';
 
 describe('deleteNode (E69)', () => {
   test('DELETE with the tab header; gone or already gone is ok; errors keep their code', async () => {

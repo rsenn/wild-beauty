@@ -1,9 +1,9 @@
-// bun test: client/editor/commands.js with history.js
+// bun test: client/editor/core/commands.js with history.js
 import { describe, expect, test } from 'bun:test';
-import { apply, fingerprint } from '../../client/editor/commands.js';
-import * as history from '../../client/editor/history.js';
-import { emptyNode, findStep, validate } from '../../client/editor/model.js';
-import { effective } from '../../client/editor/render.js';
+import { apply, fingerprint } from '../../client/editor/core/commands.js';
+import * as history from '../../client/editor/core/history.js';
+import { emptyNode, findStep, validate } from '../../client/editor/core/model.js';
+import { effective } from '../../client/editor/view/render.js';
 
 const A = 'a'.repeat(64);
 const info = { width: 400, height: 300 };

@@ -120,7 +120,7 @@ The pieces already decided or sketched elsewhere: SQLite, `Bun.password`
    walking `child` edges by slug. Single language (S9.3), no `/<lang>/` prefix.
 4. Template `sitePage()` (own markup: header nav built from the root's
    children, footer with social links), reusing the node SVG interpreter
-   (`client/editor/render.js`). The theme contract says themes do not change
+   (`client/editor/view/render.js`). The theme contract says themes do not change
    markup (`PLAN.md` S16.1), so the minimal public layout is a template, not
    a theme.
 5. Theme `static/themes/janos.css`: the full token set (every theme is
@@ -337,7 +337,7 @@ R6. **Certificates - done 2026-10-31.** The acme.sh certificate
   `POST /api/logout` and reloads). A node created by a logged-in user gets
   their `owner_id` (`saveNew`), so only they change it; it stays a community
   node (no `space`), visible to all.
-- **Contact data in text boxes (`client/editor/links.js`):** `detect(text)`
+- **Contact data in text boxes (`client/editor/core/links.js`):** `detect(text)`
   finds mail addresses, phone numbers (`+`/`00`/national, 8-15 digits, dates
   and prices excluded), `mailto:`/`tel:`/`sms:`/`geo:`, WhatsApp (`wa.me`,
   `whatsapp://send?phone=`, `chat.whatsapp.com`), Telegram, Signal, Threema,

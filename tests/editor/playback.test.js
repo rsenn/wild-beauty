@@ -1,6 +1,6 @@
-// bun test: client/editor/playback.js
+// bun test: client/editor/view/playback.js
 import { describe, expect, test } from 'bun:test';
-import { MAX_SECONDS, STEP_SECONDS, clampK, durationOf, stepAt } from '../../client/editor/playback.js';
+import { MAX_SECONDS, STEP_SECONDS, clampK, durationOf, stepAt } from '../../client/editor/view/playback.js';
 
 describe('playback', () => {
   test('duration: the page\'s own, else half a second per step, never zero', () => {
@@ -33,11 +33,11 @@ describe('playback', () => {
   });
 });
 
-import { EASES, ease, positionAt } from '../../client/editor/playback.js';
-import { lerpMatrix } from '../../client/editor/matrix.js';
-import { effective, renderStage } from '../../client/editor/render.js';
-import { emptyNode, recordMove, validate } from '../../client/editor/model.js';
-import { hitTest, matrixOf } from '../../client/editor/hit.js';
+import { EASES, ease, positionAt } from '../../client/editor/view/playback.js';
+import { lerpMatrix } from '../../client/editor/geometry/matrix.js';
+import { effective, renderStage } from '../../client/editor/view/render.js';
+import { emptyNode, recordMove, validate } from '../../client/editor/core/model.js';
+import { hitTest, matrixOf } from '../../client/editor/input/hit.js';
 
 describe('easing and position', () => {
   test('every ease runs 0 -> 1 and stays in range', () => {

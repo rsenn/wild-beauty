@@ -1,8 +1,8 @@
 import { html } from '../html.js';
 import { Fragment } from '../../vendor/preact.js';
-import { BLENDS } from '../editor/model.js';
-import { DEFAULT_EDGE, EDGE_STYLES } from '../editor/edge.js';
-import { FONT_IDS } from '../editor/text.js';
+import { BLENDS } from '../editor/core/model.js';
+import { DEFAULT_EDGE, EDGE_STYLES } from '../editor/view/edge.js';
+import { FONT_IDS } from '../editor/core/text.js';
 import { ColourPick } from './ColourPick.js';
 import { Popover } from './Popover.js';
 

@@ -1,9 +1,9 @@
-// bun test: client/editor/gesture.js, setMatrix and the wheel/key similarity
+// bun test: client/editor/input/gesture.js, setMatrix and the wheel/key similarity
 import { describe, expect, test } from 'bun:test';
-import { createGesture } from '../../client/editor/gesture.js';
-import { aboutPoint } from '../../client/editor/gestures.js';
-import { apply as applyMatrix, decompose, multiply } from '../../client/editor/matrix.js';
-import { emptyNode, findStep, setMatrix, validate } from '../../client/editor/model.js';
+import { createGesture } from '../../client/editor/input/gesture.js';
+import { aboutPoint } from '../../client/editor/input/gestures.js';
+import { apply as applyMatrix, decompose, multiply } from '../../client/editor/geometry/matrix.js';
+import { emptyNode, findStep, setMatrix, validate } from '../../client/editor/core/model.js';
 
 const I = [1, 0, 0, 1, 0, 0];
 const close = (a, b, d = 1e-9) => a.every((v, i) => Math.abs(v - b[i]) < d);

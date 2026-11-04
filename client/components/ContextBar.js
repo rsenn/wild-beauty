@@ -1,9 +1,9 @@
 import { html } from '../html.js';
-import { BLENDS } from '../editor/model.js';
+import { BLENDS } from '../editor/core/model.js';
 import { ColourPick } from './ColourPick.js';
-import { FONT_IDS } from '../editor/text.js';
-import { bendCurve, bendOf } from '../editor/curve.js';
-import { DEFAULT_EDGE, EDGE_STYLES } from '../editor/edge.js';
+import { FONT_IDS } from '../editor/core/text.js';
+import { bendCurve, bendOf } from '../editor/geometry/curve.js';
+import { DEFAULT_EDGE, EDGE_STYLES } from '../editor/view/edge.js';
 import { Popover } from './Popover.js';
 
 // The context bar under the stage (EDITOR.md S2.2): the controls of what is

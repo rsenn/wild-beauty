@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 
 describe('scene palette', () => {
   test('counts the visible pixels, merges look-alikes and ignores transparent ones', async () => {
-    const { paletteFromPixels } = await import('../client/editor/scenepalette.js');
+    const { paletteFromPixels } = await import('../client/editor/view/scenepalette.js');
     const px = [];
     const put = (r, g, b, a, n) => { for(let i = 0; i < n; i++) px.push(r, g, b, a); };
 
@@ -23,7 +23,7 @@ describe('scene palette', () => {
 
 describe('used colours', () => {
   test('the node own colours, most used first', async () => {
-    const { usedColours } = await import('../client/editor/palette.js');
+    const { usedColours } = await import('../client/editor/view/swatches.js');
     const doc = { bg: '#FFFFFF', pages: [{ id: 'p', steps: [{ op: 'stroke', color: '#aa0000' }, { op: 'stroke', color: '#aa0000' }, { op: 'shape', fill: '#00aa00cc', stroke: 'red' }, { op: 'text', color: '#111111', bg: '#aa0000' }] }] };
 
     expect(usedColours(doc)).toEqual(['#aa0000', '#ffffff', '#00aa00', '#111111']);

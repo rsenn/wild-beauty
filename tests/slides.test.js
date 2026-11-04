@@ -1,7 +1,7 @@
 // bun test: the drawings of a slide (render.js slideOf, slideView, stepsOf via renderStage)
 import { describe, expect, test } from 'bun:test';
 import { renderToString } from '../vendor/preact-render-to-string.js';
-import { renderStage, slideOf, slideView } from '../client/editor/render.js';
+import { renderStage, slideOf, slideView } from '../client/editor/view/render.js';
 
 const photo = (id, hash) => ({ op: 'photo', id, photo: hash, m: [0.5, 0, 0, 0.5, 100, 100], crop: undefined });
 const stroke = id => ({ op: 'stroke', id, pts: [[0, 0, 1], [20, 30, 1], [40, 20, 1], [60, 80, 1], [80, 40, 1], [100, 100, 1]], color: '#ff0000', smooth: false });

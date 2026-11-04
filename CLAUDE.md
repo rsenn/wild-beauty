@@ -38,6 +38,10 @@ The host runs Postfix and Dovecot for `transistorisiert.ch` and `jános.ch`; reg
 
 `*.md` and `*.txt` notes are always in scope: analysis, findings, plans, historical context.
 
+## Track detours in TODO.md
+
+When a task is not yet written down in `TODO.md` or `docs/`, and while doing it we start another task (a detour, nested one level deeper), and by then there are several tasks we still want to do: **record all of them in `TODO.md` before leaving the path**. That means the task being left, the new one, and every other follow-up named so far, each with enough detail (order, files, rules agreed) to be picked up cold. Put them under "Open threads", mark the one in progress, and say what is postponed. Update the entries as they close. Do this at the moment of the detour, not at the end of the session; a detour must not lose the original path.
+
 ## attic/HISTORIC.md maintenance
 
 `attic/HISTORIC.md` is a living structural reference for the old codebase (project summary, db-structure/migration, build files, library sources, server sources, frontend sources, assets, dead code). Whenever you discover a new fact about how the old code is structured or how it works - a function's real location, a previously-unnoticed dependency, an additional piece of dead code, a corrected line reference - **update `attic/HISTORIC.md` immediately**. Cite exact `file:line` locations (function/class names, not just file names), written with the `attic/` prefix. Treat this as an ongoing archival responsibility for every conversation touching this project.

@@ -1,6 +1,6 @@
 // bun test: wand geometry and the NDJSON reader (E119)
 import { expect, test } from 'bun:test';
-import { runStale, clampedImagePoint, defaultPick, imagePoint, photoCoords, photoPoint, readLines, regionOf, resultPolygon, selectionPath, stagePolygon } from '../client/editor/wand.js';
+import { runStale, clampedImagePoint, defaultPick, imagePoint, photoCoords, photoPoint, readLines, regionOf, resultPolygon, selectionPath, stagePolygon } from '../client/editor/tools/wand/wand.js';
 
 const corners = [[100, 100], [300, 100], [300, 200], [100, 200]];
 

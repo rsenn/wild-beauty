@@ -1,6 +1,6 @@
 // bun test: polygon area, point in polygon and the split along a stroke (E121)
 import { describe, expect, test } from 'bun:test';
-import { area, contains, cutByStroke, extendStroke, splitByLine } from '../client/editor/polygon.js';
+import { area, contains, cutByStroke, extendStroke, splitByLine } from '../client/editor/geometry/polygon.js';
 
 const square = [[0, 0], [100, 0], [100, 100], [0, 100]];
 const total = pieces => pieces.reduce((sum, p) => sum + Math.abs(area(p)), 0);

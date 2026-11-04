@@ -7,11 +7,11 @@ import { createHash } from 'node:crypto';
 import { readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import renderToString from '../../vendor/preact-render-to-string.js';
-import { renderStage } from '../../client/editor/render.js';
+import { renderStage } from '../../client/editor/view/render.js';
 import { firstLine, run } from './run.js';
 import { imagemagick, tools } from './tools.js';
 import { config } from '../config.js';
-import { isTexture } from '../../client/editor/model.js';
+import { isTexture } from '../../client/editor/core/model.js';
 
 export const SIZE = 512;
 

@@ -1,8 +1,8 @@
-// bun test: client/editor/shapetool.js and model.updateShape (E60)
+// bun test: client/editor/tools/shape/shapetool.js and model.updateShape (E60)
 import { describe, expect, test } from 'bun:test';
-import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../../client/editor/shapetool.js';
-import { emptyNode, updateShape, validate } from '../../client/editor/model.js';
-import { verticesFromPath } from '../../client/editor/shapes.js';
+import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../../client/editor/tools/shape/shapetool.js';
+import { emptyNode, updateShape, validate } from '../../client/editor/core/model.js';
+import { verticesFromPath } from '../../client/editor/geometry/shapes.js';
 
 const add = (d, p) => press(d, p).draft;
 

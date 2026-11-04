@@ -1,6 +1,6 @@
-// bun test: client/editor/shapes.js
+// bun test: client/editor/geometry/shapes.js
 import { describe, expect, test } from 'bun:test';
-import { bounds, breakSymmetry, deleteVertex, hitTest, insertVertex, joinSymmetry, moveHandle, moveVertex, nearest, pathFromVertices, segments, verticesFromPath } from '../../client/editor/shapes.js';
+import { bounds, breakSymmetry, deleteVertex, hitTest, insertVertex, joinSymmetry, moveHandle, moveVertex, nearest, pathFromVertices, segments, verticesFromPath } from '../../client/editor/geometry/shapes.js';
 
 const line = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }];
 const curve = [{ x: 0, y: 0, hout: [10, 0] }, { x: 20, y: 20, hin: [-10, 0], hout: [10, 0] }, { x: 40, y: 0, hin: [-10, 0] }];

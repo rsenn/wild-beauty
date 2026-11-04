@@ -1,7 +1,7 @@
-// bun test: client/editor/lock.js with a fake server and timers, and the
+// bun test: client/editor/io/lock.js with a fake server and timers, and the
 // per-tab holder of server/session.js
 import { describe, expect, test } from 'bun:test';
-import { createLock } from '../../client/editor/lock.js';
+import { createLock } from '../../client/editor/io/lock.js';
 import { sessionFor } from '../../server/session.js';
 
 // a fake lock endpoint: `holder` is who has it, `mine` what this client is

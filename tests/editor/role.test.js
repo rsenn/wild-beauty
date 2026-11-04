@@ -1,9 +1,9 @@
 // bun test: the texture role (EDITOR.md E71)
 import { describe, expect, test } from 'bun:test';
-import { apply } from '../../client/editor/commands.js';
-import { addPhoto, emptyNode, isTexture, setRole, validate } from '../../client/editor/model.js';
-import { renderStage, photoSteps } from '../../client/editor/render.js';
-import { hitTest } from '../../client/editor/hit.js';
+import { apply } from '../../client/editor/core/commands.js';
+import { addPhoto, emptyNode, isTexture, setRole, validate } from '../../client/editor/core/model.js';
+import { renderStage, photoSteps } from '../../client/editor/view/render.js';
+import { hitTest } from '../../client/editor/input/hit.js';
 import { firstPhotoStep } from '../../server/media/thumb.js';
 import { validateNode } from '../../server/node/validate.js';
 

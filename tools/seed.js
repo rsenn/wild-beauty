@@ -4,7 +4,7 @@
 // second run adds nothing. Run: bun tools/seed.js [database file]
 import { open } from '../server/db/db.js';
 import { addLink, insertNode, linksFrom } from '../server/db/nodes.js';
-import { emptyNode } from '../client/editor/model.js';
+import { emptyNode } from '../client/editor/core/model.js';
 
 // the landscape: [title, kind, children?, { sells? }]; an item with `sells` links to an exhibit by path
 const LANDSCAPE = [

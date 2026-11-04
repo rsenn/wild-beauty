@@ -1,6 +1,6 @@
-// bun test: client/editor/places.js (EDITOR.md E137)
+// bun test: client/editor/io/placeSuggestions.js (EDITOR.md E137)
 import { describe, expect, test } from 'bun:test';
-import { answerKey, currentPosition, linkPlace, snapPosition, nearPlace, positionsOf, readAnswered, remember } from '../../client/editor/places.js';
+import { answerKey, currentPosition, linkPlace, snapPosition, nearPlace, positionsOf, readAnswered, remember } from '../../client/editor/io/placeSuggestions.js';
 
 const H = n => String(n).repeat(64);
 const doc = (...hashes) => ({ pages: [{ steps: hashes.map(photo => ({ op: 'photo', photo })).concat([{ op: 'text' }]) }] });

@@ -1,6 +1,6 @@
-// bun test: client/editor/pen.js
+// bun test: client/editor/geometry/pen.js
 import { describe, expect, test } from 'bun:test';
-import { lowPass, oneEuro, oneEuroPoint, outline, outlinePath, resample, strokePath, strokeWidths, width } from '../../client/editor/pen.js';
+import { lowPass, oneEuro, oneEuroPoint, outline, outlinePath, resample, strokePath, strokeWidths, width } from '../../client/editor/geometry/pen.js';
 
 // small deterministic generator, so the tests do not flake
 function random(seed) {

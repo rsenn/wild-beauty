@@ -1,8 +1,8 @@
-// bun test: client/editor/grid.js
+// bun test: client/editor/geometry/grid.js
 import { describe, expect, test } from 'bun:test';
-import { GAP, gridCells, gridLayout, gridOptions, gridPlan } from '../../client/editor/grid.js';
-import { setLayout, validate } from '../../client/editor/model.js';
-import { apply } from '../../client/editor/matrix.js';
+import { GAP, gridCells, gridLayout, gridOptions, gridPlan } from '../../client/editor/geometry/grid.js';
+import { setLayout, validate } from '../../client/editor/core/model.js';
+import { apply } from '../../client/editor/geometry/matrix.js';
 
 // the rectangle a photo of the given aspect covers on the stage
 function rect(m, aspect) {

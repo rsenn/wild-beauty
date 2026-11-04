@@ -1,7 +1,7 @@
 // bun test: the selection handles and button steps (E113)
 import { describe, expect, test } from 'bun:test';
-import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag, STEP_SCALE } from '../client/editor/handles.js';
-import { apply } from '../client/editor/matrix.js';
+import { handlePoints, hitHandle, nudge, rotateDrag, scaleDrag, STEP_SCALE } from '../client/editor/input/handles.js';
+import { apply } from '../client/editor/geometry/matrix.js';
 
 const IDENTITY = [1, 0, 0, 1, 0, 0];
 const stage = [[0, 0], [1000, 0], [1000, 1000], [0, 1000]];

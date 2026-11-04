@@ -2,7 +2,7 @@ import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
 import { useMemo } from '../../vendor/hooks.js';
-import { useEditor } from '../editor/useEditor.js';
+import { useEditor } from '../editor/core/useEditor.js';
 import { createChrome } from '../gallery/chrome.js';
 import { GalleryNav, GalleryTools } from './GalleryTools.js';
 import { Layout } from './Layout.js';

@@ -1,7 +1,7 @@
 // bun test: a cutout replaces a photo's image and keeps the original (E127)
 import { expect, test } from 'bun:test';
-import { addPhoto, emptyNode, findStep } from '../client/editor/model.js';
-import { replacePhoto } from '../client/editor/model.js';
+import { addPhoto, emptyNode, findStep } from '../client/editor/core/model.js';
+import { replacePhoto } from '../client/editor/core/model.js';
 import { photosOf } from '../server/node/validate.js';
 
 const A = 'a'.repeat(64);

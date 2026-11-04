@@ -1,6 +1,6 @@
-// bun test: client/editor/model.js
+// bun test: client/editor/core/model.js
 import { describe, expect, test } from 'bun:test';
-import { LIMITS, addPhoto, cropWindow, migrateDoc, setCrop, setLayout, setBlend, setClip, setOpacity, unclip, MODES, VERSION, addPage, addStep, allIds, emptyNode, findStep, movePage, moveStep, newId, removePage, removeStep, setMode, setTitle, unique, updateStep, validate } from '../../client/editor/model.js';
+import { LIMITS, addPhoto, cropWindow, migrateDoc, setCrop, setLayout, setBlend, setClip, setOpacity, unclip, MODES, VERSION, addPage, addStep, allIds, emptyNode, findStep, movePage, moveStep, newId, removePage, removeStep, setMode, setTitle, unique, updateStep, validate } from '../../client/editor/core/model.js';
 
 describe('ids', () => {
   test('8 base-36 characters, two thousand are distinct', () => {

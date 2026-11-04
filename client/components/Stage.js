@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
-import { STAGE, eventUnits, pixelsPerUnit } from '../editor/stage.js';
+import { STAGE, eventUnits, pixelsPerUnit } from '../editor/geometry/stage.js';
 
 // The square stage (EDITOR.md S2.2, E36): `content` (the rendered node) fills
 // it, an overlay <svg> with the same 0..1000 viewBox lies on top for what is
@@ -12,7 +12,7 @@ import { STAGE, eventUnits, pixelsPerUnit } from '../editor/stage.js';
 // `onPointer.wheel` too; the handler calls preventDefault when it uses it.
 //  interactive  the overlay takes pointer events (a tool is active)
 //  loupe        a magnifier above the point being placed (E124): true for a finger or pen, or a function of the
-//               pointer event that decides (client/editor/loupe.js), asked after the tool handled the event
+//               pointer event that decides (client/editor/input/loupe.js), asked after the tool handled the event
 //  className    extra class on the overlay (cursor); `class` goes on the stage box
 export const Stage = ({ class: extra = '', label, content, overlay, interactive = false, loupe: wanted = false, className = '', onPointer = {}, onSize, children, ...rest }) => {
   const box = useRef(null);

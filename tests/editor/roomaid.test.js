@@ -1,8 +1,8 @@
-// bun test: the room aid of a gallery node (client/editor/roomaid.js)
+// bun test: the room aid of a gallery node (client/editor/tools/shape/roomaid.js)
 import { describe, expect, test } from 'bun:test';
-import { STEP, alcove, bottomEdge, canClose, corridorOf, corridorStep, roomsOf, snapVertex, wallOf } from '../../client/editor/roomaid.js';
-import { pathFromVertices } from '../../client/editor/shapes.js';
-import { acuteCorner, isWall } from '../../client/editor/walls.js';
+import { STEP, alcove, bottomEdge, canClose, corridorOf, corridorStep, roomsOf, snapVertex, wallOf } from '../../client/editor/tools/shape/roomaid.js';
+import { pathFromVertices } from '../../client/editor/geometry/shapes.js';
+import { acuteCorner, isWall } from '../../client/editor/core/walls.js';
 
 const v = (...pts) => pts.map(([x, y]) => ({ x, y }));
 const near = (a, b) => expect(Math.hypot(a[0] - b[0], a[1] - b[1])).toBeLessThan(0.02);

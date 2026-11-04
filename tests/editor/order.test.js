@@ -1,9 +1,9 @@
 // bun test: z-order, photo order, delete with undo (E51-E53), shortcuts
 import { describe, expect, test } from 'bun:test';
-import { apply } from '../../client/editor/commands.js';
-import * as history from '../../client/editor/history.js';
-import { emptyNode, findStep, moveStep, movePhoto, photoSteps, validate } from '../../client/editor/model.js';
-import { orderFor } from '../../client/editor/shortcuts.js';
+import { apply } from '../../client/editor/core/commands.js';
+import * as history from '../../client/editor/core/history.js';
+import { emptyNode, findStep, moveStep, movePhoto, photoSteps, validate } from '../../client/editor/core/model.js';
+import { orderFor } from '../../client/editor/input/shortcuts.js';
 
 const H = n => String(n).repeat(64);
 const photo = (id, n) => ({ op: 'photo', id, photo: H(n), m: [1, 0, 0, 1, 0, 0], fit: 'free', opacity: 1, blend: 'normal' });

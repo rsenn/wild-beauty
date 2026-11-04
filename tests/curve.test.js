@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
-import { bendCurve, bendOf, curveLength, curvePath, fitSize, legal, minRadius, turning } from '../client/editor/curve.js';
+import { bendCurve, bendOf, curveLength, curvePath, fitSize, legal, minRadius, turning } from '../client/editor/geometry/curve.js';
 import { renderToString } from '../vendor/preact-render-to-string.js';
-import { renderText } from '../client/editor/render.js';
+import { renderText } from '../client/editor/view/render.js';
 
 describe('curved text baseline', () => {
   test('a tiny bend snaps to straight', () => expect(bendCurve(400, 0.02, 24)).toBeNull());

@@ -1,8 +1,8 @@
 // bun test: clipboard (EDITOR.md E131), the pure parts
 import { describe, expect, test } from 'bun:test';
-import { apply } from '../client/editor/commands.js';
-import { classify, copyPayload, htmlFor, pasteSteps, payloadFromHtml, plainFor, svgFor } from '../client/editor/clipboard.js';
-import { emptyNode, findStep, validate } from '../client/editor/model.js';
+import { apply } from '../client/editor/core/commands.js';
+import { classify, copyPayload, htmlFor, pasteSteps, payloadFromHtml, plainFor, svgFor } from '../client/editor/io/clipboard.js';
+import { emptyNode, findStep, validate } from '../client/editor/core/model.js';
 
 const HASH = 'a'.repeat(64);
 const sq = (x, y, s) => [[x, y], [x + s, y], [x + s, y + s], [x, y + s]];

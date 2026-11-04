@@ -1,6 +1,6 @@
 // bun test: the tool column, its groups and keys (E37)
 import { expect, test } from 'bun:test';
-import { SLOTS, TOOLS, slotOf, toolForKey } from '../client/editor/tools.js';
+import { SLOTS, TOOLS, slotOf, toolForKey } from '../client/editor/input/toolTable.js';
 
 const key = k => toolForKey({ key: k, target: { tagName: 'DIV' } });
 

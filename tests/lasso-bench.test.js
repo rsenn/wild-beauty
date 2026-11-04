@@ -1,6 +1,6 @@
 // bun test: the pure part of the lasso benchmark (tools/lasso-bench-lib.js) on synthetic shapes
 import { expect, test } from 'bun:test';
-import { edgeCost } from '../client/editor/lasso.js';
+import { edgeCost } from '../client/editor/tools/lasso/lasso.js';
 import { boundaryF, fillPolygon, iou, jitter, largestComponent, resample, score, simulate, summarise, traceContour } from '../tools/lasso-bench-lib.js';
 
 const W = 160;

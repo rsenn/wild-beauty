@@ -1,6 +1,6 @@
 import { useEffect, useRef } from '../../vendor/hooks.js';
 import { html } from '../html.js';
-import { FONTS, LINE_HEIGHT, firstBaseline } from '../editor/text.js';
+import { FONTS, LINE_HEIGHT, firstBaseline } from '../editor/core/text.js';
 
 // The in-place editor of a text box (EDITOR.md E91): a transparent textarea laid
 // exactly over the box, so the caret and the selection are the browser's (IME and

@@ -1,6 +1,6 @@
 import { useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
-import { renderNode } from '../editor/render.js';
+import { renderNode } from '../editor/view/render.js';
 
 // The page strip under the editor (EDITOR.md S2.7, E55): one thumbnail per
 // page, the current one pressed. Click switches, drag (or ◀ ▶) reorders, the

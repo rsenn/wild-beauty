@@ -1,8 +1,8 @@
-// bun test: client/editor/vertexedit.js and model.setVertices (E61)
+// bun test: client/editor/tools/shape/vertexedit.js and model.setVertices (E61)
 import { describe, expect, test } from 'bun:test';
-import { breakVertex, drag, dragMany, geometry, hitVertex, insideRect, joinVertex, removeVertex, removeVertices, verticesOf } from '../../client/editor/vertexedit.js';
-import { emptyNode, setVertices, validate } from '../../client/editor/model.js';
-import { pathFromVertices } from '../../client/editor/shapes.js';
+import { breakVertex, drag, dragMany, geometry, hitVertex, insideRect, joinVertex, removeVertex, removeVertices, verticesOf } from '../../client/editor/tools/shape/vertexedit.js';
+import { emptyNode, setVertices, validate } from '../../client/editor/core/model.js';
+import { pathFromVertices } from '../../client/editor/geometry/shapes.js';
 
 const I = [1, 0, 0, 1, 0, 0];
 const vertices = [{ x: 100, y: 100, hout: [40, 0], hin: [-40, 0] }, { x: 400, y: 100 }, { x: 250, y: 400 }];
@@ -93,7 +93,7 @@ describe('setVertices', () => {
   });
 });
 
-import { hitTest } from '../../client/editor/hit.js';
+import { hitTest } from '../../client/editor/input/hit.js';
 
 describe('hitTest ops (clip tool)', () => {
   const photo = { op: 'photo', id: 'photo001', photo: 'a'.repeat(64), m: [1, 0, 0, 1, 0, 0], fit: 'free', opacity: 1, blend: 'normal' };
