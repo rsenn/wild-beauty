@@ -9,6 +9,8 @@ import { IconButton } from './GalleryTools.js';
 // poster; a button enters the walkable gallery in the same square, which can fill
 // the screen. Everything of the gallery (three.js too) is loaded on entering.
 //  items  what to hang (client/gallery/items.js)
+//  startAt   an item id: stand in front of that picture (a visitor who came from another view)
+//  onAt(id)  told which picture is faced, so a switch to another view starts there
 //  overview  a gallery node: the gallery is shown at once from above (overview.js), the
 //            button flies down into it, the stage widens and the visitor walks
 //  doc    the node's document: a gallery node's drawn walls make the plan (fromdoc.js)
@@ -18,7 +20,7 @@ import { IconButton } from './GalleryTools.js';
 //  chrome    a store (gallery/chrome.js): fullscreen, back to the overview, help and the
 //            previous / next picture are then shown by the page outside the stage, the stage keeps
 //            them only while it is fullscreen
-export const GalleryView = ({ items, doc, photos, label, overview = false, wide = false, chrome, children }) => {
+export const GalleryView = ({ items, doc, photos, label, overview = false, startAt = null, onAt, wide = false, chrome, children }) => {
   const { t } = useI18n();
   const [state, setState] = useState('poster'); // poster | loading | live | error
   const [fill, setFill] = useState(false);
@@ -59,6 +61,7 @@ export const GalleryView = ({ items, doc, photos, label, overview = false, wide 
           photos,
           name: label,
           overview,
+          startAt,
           onLock: setLocked,
           onFlight: v => {
             const el = aidsEl.current;
@@ -114,6 +117,7 @@ export const GalleryView = ({ items, doc, photos, label, overview = false, wide 
           },
           onState: s => {
             setHud(s);
+            if(s.id) onAt?.(s.id); // the picture the visitor faces is the one the other views start on
             if(overview && s.mode !== 'overview') setWalking(true); // it touched down by itself
             if(s.index !== 0 || s.mode === 'free' || s.moving) setSeen(true);
           },

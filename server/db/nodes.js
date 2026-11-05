@@ -51,6 +51,34 @@ export function upsertPhoto(h, { hash, ext, width, height, bytes, palette, meta,
   );
 }
 
+// the exact position of a photo ({ lat, lon }), or null: kept in photos.meta.where, never sent to visitors
+export const photoWhere = (h, hash) => parse(h.get('SELECT meta FROM photos WHERE hash = ?', hash)?.meta)?.where ?? null;
+
+// remember where a photo was taken (exact); other keys of meta stay. -> false when there is no such photo
+export function setPhotoWhere(h, hash, where) {
+  const row = h.get('SELECT meta FROM photos WHERE hash = ?', hash);
+
+  if(!row) return false;
+
+  h.run('UPDATE photos SET meta = ? WHERE hash = ?', json({ ...parse(row.meta), where }), hash);
+
+  return true;
+}
+
+// when a photo was taken (local text YYYY-MM-DDTHH:MM:SS), or null: photos.meta.taken
+export const photoTaken = (h, hash) => parse(h.get('SELECT meta FROM photos WHERE hash = ?', hash)?.meta)?.taken ?? null;
+
+// remember when a photo was taken; other keys of meta stay. -> false when there is no such photo
+export function setPhotoTaken(h, hash, taken) {
+  const row = h.get('SELECT meta FROM photos WHERE hash = ?', hash);
+
+  if(!row) return false;
+
+  h.run('UPDATE photos SET meta = ? WHERE hash = ?', json({ ...parse(row.meta), taken }), hash);
+
+  return true;
+}
+
 export const getPhoto = (h, hash) => {
   const row = h.get('SELECT * FROM photos WHERE hash = ?', hash);
 

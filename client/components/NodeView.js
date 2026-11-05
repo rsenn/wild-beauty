@@ -1,8 +1,8 @@
-import { useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
-import { useI18n } from '../i18n.js';
+import { FlowTrack } from './FlowTrack.js';
 import { gridPlan } from '../editor/geometry/grid.js';
 import { photoSteps, renderNode } from '../editor/view/render.js';
+import { visibleDoc } from '../editor/core/model.js';
 
 // What the viewer shows of a node, as a list of stages and how to move along it
 // (docs/EDITOR.md E135): `{ flow, axis, list: [{ mode, page, part }] }`.
@@ -29,31 +29,12 @@ export function viewOf(doc) {
 
 // the node as the visitor sees it: one stage, or a track of them that pages
 // (snapping, with Previous and Next) or scrolls, horizontally or vertically
-export const NodeView = ({ doc, photos, label }) => {
-  const { t } = useI18n();
+export const NodeView = ({ doc: whole, photos, label }) => {
+  const doc = visibleDoc(whole);
   const { flow, axis, list } = viewOf(doc);
-  const track = useRef(null);
-  const [at, setAt] = useState(0);
   const draw = item => renderNode(doc, { photos, links: true, ...item });
 
   if(flow === 'fit' || (flow === 'page' && list.length < 2)) return html`<div class="wb-node-view" role="img" aria-label=${label}>${draw(list[0])}</div>`;
 
-  const h = axis === 'h';
-  const size = () => (h ? track.current.clientWidth : track.current.clientHeight);
-  const seen = () => Math.round((h ? track.current.scrollLeft : track.current.scrollTop) / Math.max(1, size()));
-  const go = step => track.current?.scrollBy({ [h ? 'left' : 'top']: step * size(), behavior: 'smooth' });
-
-  return html`
-    <div class=${`wb-node-view wb-flow wb-flow-${flow} wb-flow-${axis}`} role="group" aria-roledescription=${t(flow === 'page' ? 'view.pages' : 'view.scroll')} aria-label=${label}>
-      <div class="wb-flow-track" ref=${track} tabindex="0" onScroll=${() => flow === 'page' && setAt(seen())}>
-        ${list.map((item, i) => html`<div class="wb-flow-item" key=${i} role="img" aria-label=${t('view.item', { n: i + 1, count: list.length })}>${draw(item)}</div>`)}
-      </div>
-    </div>
-    ${flow === 'page' &&
-    html`<p class="wb-flow-nav">
-      <button type="button" class="wb-editor-chip" disabled=${at <= 0} onClick=${() => go(-1)}>${t('view.prev')}</button>
-      <span role="status">${t('view.of', { n: at + 1, count: list.length })}</span>
-      <button type="button" class="wb-editor-chip" disabled=${at >= list.length - 1} onClick=${() => go(1)}>${t('view.next')}</button>
-    </p>`}
-  `;
+  return html`<${FlowTrack} count=${list.length} draw=${i => draw(list[i])} label=${label} flow=${flow} axis=${axis} />`;
 };

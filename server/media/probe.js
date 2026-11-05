@@ -39,19 +39,29 @@ const GPS_TAG = /GPS/i; // exiftool "GPS:GPSLatitude", "Composite:GPSPosition", 
 const clip = v => (typeof v === 'string' && v.length > 500 ? v.slice(0, 500) : v);
 
 // Place of a photo for suggesting a place link (docs/GRAPH.md S1.5). Coordinates
-// are rounded to two decimals (about 1 km); the exact position is neither
-// returned nor kept. -> { lat, lon } | null (missing, out of range or 0,0)
+// are rounded to two decimals (about 1 km), what the clients and the suggestions see.
+// -> { lat, lon } | null (missing, out of range or 0,0)
 export function roundPosition(lat, lon) {
+  return place(lat, lon, 100);
+}
+
+// The exact position of a photo (6 decimals, about 0.1 m), kept private in the
+// photo's meta.where and never sent to a visitor (docs/GRAPH.md S1.5).
+export function exactPosition(lat, lon) {
+  return place(lat, lon, 1e6);
+}
+
+function place(lat, lon, scale) {
   if(!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180 || (lat === 0 && lon === 0)) return null;
 
-  const r = v => Math.round(v * 100) / 100 + 0; // + 0 turns -0 into 0
+  const r = v => Math.round(v * scale) / scale + 0; // + 0 turns -0 into 0
 
   return { lat: r(lat), lon: r(lon) };
 }
 
 // exiftool -n -G1 keys: the signed Composite value, else the GPS group's
 // unsigned value with its N/S/E/W reference
-export function positionFromExiftool(all) {
+export function positionFromExiftool(all, exact = false) {
   const signed = (name, neg) => {
     const composite = all[`Composite:${name}`];
 
@@ -62,7 +72,7 @@ export function positionFromExiftool(all) {
     return typeof raw === 'number' ? (String(all[`GPS:${name}Ref`] ?? '').toUpperCase() === neg ? -Math.abs(raw) : Math.abs(raw)) : NaN;
   };
 
-  return roundPosition(signed('GPSLatitude', 'S'), signed('GPSLongitude', 'W'));
+  return (exact ? exactPosition : roundPosition)(signed('GPSLatitude', 'S'), signed('GPSLongitude', 'W'));
 }
 
 // exiv2 values: `47deg 22' 1.20"` (translated) or `47/1 22/1 12/10` (rational)
@@ -76,13 +86,27 @@ function degrees(text) {
   return rat ? rat[1] / rat[2] + rat[3] / rat[4] / 60 + rat[5] / rat[6] / 3600 : NaN;
 }
 
-export function positionFromExiv2(all) {
+export function positionFromExiv2(all, exact = false) {
   const signed = (name, neg) => (String(all[`Exif.GPSInfo.${name}Ref`] ?? '').trim().toUpperCase() === neg ? -1 : 1) * degrees(all[`Exif.GPSInfo.${name}`]);
 
-  return roundPosition(signed('GPSLatitude', 'S'), signed('GPSLongitude', 'W'));
+  return (exact ? exactPosition : roundPosition)(signed('GPSLatitude', 'S'), signed('GPSLongitude', 'W'));
 }
 
-// a dump without its GPS tags: the exact position does not go into the sidecar
+// the capture time as local text YYYY-MM-DDTHH:MM:SS (an EXIF time has no zone), or null
+const TIME_KEYS = [/DateTimeOriginal$/, /CreateDate$/, /DateTimeDigitized$/, /^IFD0:ModifyDate$|^Exif\.Image\.DateTime$/];
+
+export function takenFrom(all) {
+  for(const re of TIME_KEYS)
+    for(const [key, value] of Object.entries(all)) {
+      const m = re.test(key) && /^(\d{4})[:-](\d\d)[:-](\d\d)[ T](\d\d):(\d\d):(\d\d)/.exec(String(value));
+
+      if(m && +m[1] > 1900) return `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`;
+    }
+
+  return null;
+}
+
+// a dump without its GPS tags: the sidecar's exif field never holds a position, `pos` and `where` do
 const withoutGps = all => Object.fromEntries(Object.entries(all).filter(([k]) => !GPS_TAG.test(k)));
 
 // exiftool -json -n -G1 (numeric values, group-prefixed keys), without the
@@ -95,7 +119,7 @@ async function exiftoolDump(file) {
   try {
     const [all] = JSON.parse(stdout);
 
-    return { value: Object.fromEntries(Object.entries(withoutGps(all)).filter(([k]) => !SKIP_GROUPS.test(k)).slice(0, 400).map(([k, v]) => [k, clip(v)])), pos: positionFromExiftool(all) };
+    return { value: Object.fromEntries(Object.entries(withoutGps(all)).filter(([k]) => !SKIP_GROUPS.test(k)).slice(0, 400).map(([k, v]) => [k, clip(v)])), pos: positionFromExiftool(all), where: positionFromExiftool(all, true), taken: takenFrom(all) };
   } catch {
     return { error: 'exiftool: unreadable output' };
   }
@@ -112,7 +136,7 @@ async function exiv2Dump(file) {
     if(m) value[m[1]] = clip(m[2]);
   }
 
-  return { value: withoutGps(value), pos: positionFromExiv2(value) };
+  return { value: withoutGps(value), pos: positionFromExiv2(value), where: positionFromExiv2(value, true), taken: takenFrom(value) };
 }
 
 export const exif = file => (exifTool() === 'exiftool' ? exiftoolDump(file) : exifTool() === 'exiv2' ? exiv2Dump(file) : Promise.resolve({ error: 'exif: no tool installed' }));

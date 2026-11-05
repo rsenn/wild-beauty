@@ -22,7 +22,7 @@ export async function writtenIds(req, pathname) {
 
     if(!Array.isArray(ops)) return { writes: true, ids: [] };
 
-    return { writes: true, ids: ops.flatMap(op => (op?.op === 'link' || op?.op === 'unlink' ? [op.from] : op?.op === 'group' ? [] : [op?.id])).filter(id => Number.isInteger(id)) };
+    return { writes: true, ids: ops.flatMap(op => (op?.op === 'link' || op?.op === 'unlink' ? [op.from] : op?.op === 'order' ? [op.parent] : op?.op === 'group' ? [] : [op?.id])).filter(id => Number.isInteger(id)) };
   } catch {
     return { writes: true, ids: [] };
   }
@@ -44,5 +44,8 @@ export async function guard(req, pathname, h) {
 
   const rows = h.all(`SELECT id, owner_id, space FROM nodes WHERE id IN (${ids.map(() => '?').join(',')})`, ...ids);
 
-  return rows.every(row => mayWrite(row, viewer)) ? null : refuse(viewer ? 403 : 401, viewer ? 'forbidden' : 'login_required');
+  // the graph ops leave the community nodes (no owner) to the admins; the node editor's own routes stay open
+  const may = row => (row.owner_id === null && !row.space && pathname.startsWith('/api/graph') ? !!viewer?.admin : mayWrite(row, viewer));
+
+  return rows.every(may) ? null : refuse(viewer ? 403 : 401, viewer ? 'forbidden' : 'login_required');
 }

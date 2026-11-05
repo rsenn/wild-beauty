@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { UPLOAD_MIME } from '../files.js';
-import { LIMITS, allIds, emptyNode, findStep, photoSteps, unique } from '../editor/core/model.js';
+import { LIMITS, allIds, countPhotos, emptyNode, findStep, photoLimit, photoSteps, unique } from '../editor/core/model.js';
 import { apply } from '../editor/core/commands.js';
 import { createGesture } from '../editor/input/gesture.js';
 import { aboutPoint } from '../editor/input/gestures.js';
@@ -3207,7 +3207,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       <div class="wb-editor-tabs" role="tablist" aria-label=${t('editor.panel')}>${['select', 'photos', 'sequence', ...(kind === 'gallery' ? ['gallery'] : [])].map(id => html`<button type="button" role="tab" class="wb-editor-chip" aria-selected=${panelTab === id ? 'true' : 'false'} onClick=${() => setPanelTab(id)}>${t('editor.tab.' + id)}</button>`)}</div>
       <div class="wb-editor-frame" inert=${readOnly}>
       <div class="wb-editor-work">
-      ${quickBar && html`<div class="wb-editor-addbar"><${QuickAdd} t=${t} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} onPaste=${pasteClipboard} />${empty && html`<span class="wb-editor-hint">${t('editor.addbar.hint')}</span>`}</div>`}
+      ${quickBar && html`<div class="wb-editor-addbar"><${QuickAdd} t=${t} limit=${photoLimit(mode)} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} onPaste=${pasteClipboard} />${empty && html`<span class="wb-editor-hint">${t('editor.addbar.hint')}</span>`}</div>`}
       <div class="wb-editor-body">
         <div class="wb-editor-tools" role="toolbar" aria-label=${t('editor.tools')}>${SLOTS.map(slot => html`<${ToolSlot} key=${slot.id} t=${t} slot=${slot} tool=${tool} last=${groupLast[slot.id]} disabled=${toolOff} onPick=${setTool} />`)}</div>
         <${Stage}
@@ -3260,11 +3260,11 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       ${paletteTargets && html`<${Palette} t=${t} pal=${pal} used=${usedNow} dropper=${startDropper} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">
-        <${QuickAdd} t=${t} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} />
+        <${QuickAdd} t=${t} limit=${photoLimit(mode)} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} />
         <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} kind=${kind} />
       </div>
       <div class="wb-editor-sec" data-sec="sequence">
-      <${ModeSwitch} t=${t} mode=${mode} onMode=${setMode} layout=${doc.layout} onLayout=${changes => dispatch({ type: 'setLayout', changes })} />
+      <${ModeSwitch} t=${t} mode=${mode} freeOk=${countPhotos(doc) <= LIMITS.photos} onMode=${setMode} layout=${doc.layout} onLayout=${changes => dispatch({ type: 'setLayout', changes })} />
       ${auto
         ? html`<p class="wb-editor-context" role="status">${t('editor.mode.auto')}</p>`
         : html`<${Scrubber} t=${t} count=${count} k=${shown} playing=${playing} onScrub=${scrub} onPlay=${togglePlay} />

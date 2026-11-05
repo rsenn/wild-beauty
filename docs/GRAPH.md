@@ -81,6 +81,8 @@ From `PLAN.md`, `DESIGN.md` S7 and the screenshots:
 | Editing | **one** node editor at a time; every other tile is a read-only rendering (cheap: no tools, no listeners) |
 | Traversal | shallow: root + adjacent lists/trees to depth 1-3, **expand on demand** by tapping a node/list |
 
+Dragging a member of a multi-selection always carries the whole group, also while Shift or Select is on (there a plain tap, without movement, still toggles that node out of the group).
+
 ### 1.1 The typical user's space (brainstorm, 2026-10-22)
 
 ```
@@ -124,6 +126,8 @@ representative node), `series` (project -> its next part), `reply` (comment).
 A node may have several `child` parents (an exhibit is also reachable from the
 shop). An edge is visible to a viewer only when **both** ends are visible to them
 (S3.6). Cross-user edges are allowed when the editor may see the target.
+
+Decided 2026-11-05 (cycles and order): the graph as a whole may have cycles (cross-links like `ref` and `at` can point back), but **`child` edges form no cycle**: the `link` op refuses a `child` link whose source is already reachable from its target (error `cycle`), and refuses self-links as before. Reason: containment is walked recursively (galleries, sites, batch editor), and a cycle there is an endless walk. The order of the members of a list or gallery lives **only on the `sort` of its own outgoing `child` edges**, never in a chain from member to member (a ring of edges is expensive to reorder, breaks silently, and every walk needs guards). The op `order` `{ parent, ids }` rewrites the `sort` of those `child` edges to the given order; `ids` may be a subset, which then takes the places the subset held. A **loop** (the last picture leads on to the first) is a presentation option of the gallery, not an edge: `loop: true` in its document, **not built yet** (open, `docs/GALLERY.md`).
 
 ### 1.3 Visibility
 
@@ -170,8 +174,16 @@ position.
    The **graph editor** has the bulk form: a "suggest places" view listing every
    node of the user with a pending suggestion, accept or dismiss each. Edges are
    made in one place (the ops endpoint), whichever view asks.
-3. **Places are coarse.** A place node stands for a named locality or a rounded cell
-   (about 1 km); exact coordinates are never stored.
+3. **Places are coarse, the photo knows exactly (decided 2026-11-05).** A place node stands
+   for a named locality or a rounded cell (about 1 km), and every lookup, suggestion and
+   client reply uses only the rounded position. The **exact** position of a photo (6 decimals,
+   about 0.1 m) is now kept as well, privately: in `photos.meta.where` (`{ lat, lon }`), from the
+   EXIF GPS of the original or from the browser's "Tag the photo with my location" (high
+   accuracy, sent exact in `X-Position`). It lives in the upload sidecar as `where` until the
+   photo is baked, is stripped from every reply to a client (`shown` in `uploads.js`,
+   `photoInfos`), and is not part of any public route. Before this decision the exact position
+   was dropped at ingest; photos ingested before it get theirs back from their originals with
+   `bun tools/ingest.js --positions-only` (the photo hash is the sha256 of the original).
    A place is titled `Name (KT)` by the **municipality** the federal geoportal says the
    rounded position lies in (`identify` on swissBOUNDARIES3D at `api3.geo.admin.ch`,
    free, no key; the canton in the title tells apart the many municipalities of one
@@ -185,7 +197,7 @@ position.
    dropped from `uploads/` when the node is saved or the upload expires. At save the rounded positions of the node's uploads are kept as
    **suggestions** in `place_suggestions(node_id, lat, lon)` (migration 2) until the owner
    links or dismisses them in the graph editor (`/api/places/suggestions`); a row goes with
-   its answer or with its node, and nothing else stores a position.
+   its answer or with its node. Apart from `photos.meta.where` nothing else stores a position.
 4. **Privacy.** An edge is visible only when both ends are (S1.2), so a public node
    linked to a public place would announce where it was made. Therefore an `at`
    edge is **owner-only until the owner publishes it** (a per-edge `visibility`,
@@ -395,6 +407,16 @@ horizontal); the same data and the same API serve both views; a node with severa
 parents is shown under the parent the user came from; `sells`/`ref` edges appear
 as a second branch kind (a different side or marker) so they stay distinct from
 `child` order.
+
+### 2.8 The tree page for visitors and for editing (decided 2026-11-05)
+
+`/:lang/tree` was one page that was always an editor, also for a visitor, and showed every node at once. It now has two modes.
+
+- **Visitor mode** (the default; the only mode for a visitor who is not logged in): read-only and calm. The bar holds only **Fit** and, for a logged-in user, **Edit**, plus one line of help. No dragging of nodes (a drag pans), no multiple selection, no recording tick box. Only the **roots** are shown at first (nodes that are no one's `child`); a node with members shows a badge `+n` for the members still hidden. A tap on such a node **expands** it (its members join the picture; a tap again folds them) and selects it, the help line then names it and offers **Open**; a tap on a node without members opens its page at once. A graph of 12 nodes or fewer starts fully expanded. Edges are drawn thinner and lighter than in edit mode.
+- **Edit mode**: the page as before (drag and pin, select several, group, link, batch edit, publish, undo), everything visible, the recording tick box. The bar is tidier: **Select several, Group, Ungroup, Link, Remove link, Batch edit, Publish, Open, Undo** stay, the seldom used **Unpin, Suggest places, Fit** are under **More**. It is reached with the **Edit** button (logged-in users, not on a personal site; a personal site keeps its own owner mode). Leaving edit mode folds the graph again.
+- **Community nodes** (no owner) can no longer be changed through the graph ops by anyone but an admin: a visitor was able to move, pin and link them. Editing such a node in the node editor is unchanged.
+- The set of visible nodes is computed on the client from the whole graph (`client/graph/collapse.js`); the server still sends the whole graph the viewer may see (`/api/graph`). For big graphs a windowed fetch (S3.6) remains the plan.
+- **Next**: the spine-and-branch view of S2.7 as the way a visitor *navigates* a list; this page stays the overview.
 
 ---
 

@@ -38,6 +38,15 @@ function dropAnswered(h, node, to) {
   for(const s of h.all('SELECT lat, lon FROM place_suggestions WHERE node_id = ?', node)) if(titleFor(h, s) === title) h.run('DELETE FROM place_suggestions WHERE node_id = ? AND lat = ? AND lon = ?', node, s.lat, s.lon);
 }
 
+// is `to` reachable from `from` over child edges? (a node reaches itself)
+export const reaches = (h, from, to) =>
+  !!h.get(
+    `WITH RECURSIVE below(id) AS (SELECT ?1 UNION SELECT l.to_id FROM node_links l JOIN below b ON l.from_id = b.id WHERE l.label = 'child')
+     SELECT 1 AS ok FROM below WHERE id = ?2 LIMIT 1`,
+    from,
+    to,
+  );
+
 // one operation -> true when it changed something, false when it was a no-op;
 // throws a short code on a malformed one
 export function applyOp(h, op, { viewer = null, site = null } = {}) {
@@ -56,6 +65,9 @@ export function applyOp(h, op, { viewer = null, site = null } = {}) {
       // a link that exists stays where it is, unless `resort` moves it behind the others
       if(!op.resort && h.get('SELECT 1 AS ok FROM node_links WHERE from_id = ? AND to_id = ? AND label = ?', op.from, op.to, label)) return false;
 
+      // containment never loops: refuse a child link whose source is already below its target
+      if(label === 'child' && reaches(h, op.to, op.from)) throw new Error('cycle');
+
       const added = addLink(h, op.from, op.to, label, h.get('SELECT COALESCE(MAX(sort), -1) + 1 AS n FROM node_links WHERE from_id = ?', op.from).n);
 
       // linking a node under the root of a site makes it a page: it gets the path segment it is reached by
@@ -66,6 +78,34 @@ export function applyOp(h, op, { viewer = null, site = null } = {}) {
       }
 
       return added;
+    case 'order': {
+      // the members `ids` of `parent` in this order: their `child` edges take the sort values the set held
+      const ids = op.ids;
+
+      if(!isId(op.parent) || !Array.isArray(ids) || ids.length < 2 || ids.length > MAX_OPS || !ids.every(isId) || new Set(ids).size !== ids.length) throw new Error('bad_op');
+
+      // the whole list in its present order; the members `ids` take, in the new order, the slots the set held
+      const all = h.all("SELECT id, to_id FROM node_links WHERE from_id = ? AND label = 'child' ORDER BY sort, id", op.parent);
+      const held = new Set(ids);
+
+      if(!ids.every(id => all.some(r => r.to_id === id))) throw new Error('not_found');
+
+      const queue = [...ids];
+      const next = all.map(r => (held.has(r.to_id) ? queue.shift() : r.to_id));
+      let changed = false;
+
+      next.forEach((to, i) => {
+        const row = all.find(r => r.to_id === to);
+        const was = h.get('SELECT sort FROM node_links WHERE id = ?', row.id).sort;
+
+        if(was !== i) {
+          h.run('UPDATE node_links SET sort = ? WHERE id = ?', i, row.id);
+          changed = true;
+        }
+      });
+
+      return changed;
+    }
     case 'unlink':
       if(!isId(op.from) || !isId(op.to) || !LABELS.includes(label)) throw new Error('bad_op');
 
@@ -155,7 +195,7 @@ export async function graphRoute(req, h, { site = null } = {}) {
       for(const op of body.ops) applyOp(h, op, { viewer, site });
     });
   } catch(e) {
-    return fail(e.message === 'not_found' ? 404 : 400, ['bad_op', 'not_found'].includes(e.message) ? e.message : 'bad_request');
+    return fail(e.message === 'not_found' ? 404 : 400, ['bad_op', 'not_found', 'cycle'].includes(e.message) ? e.message : 'bad_request');
   }
 
   return Response.json(graph());

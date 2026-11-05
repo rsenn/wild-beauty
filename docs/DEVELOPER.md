@@ -4,7 +4,7 @@ Start here when you are new. One page, kept current.
 Whoever changes the structure, a convention or a gotcha updates this file in the same commit.
 Details live in the big spec files at the root. This file only says where to look.
 
-Last full review: 2026-11-04
+Last full review: 2026-11-05 (the batch editor, profile, /tree visitor mode, /view and grid fill stage were added since; the rest was not re-read)
 Paths are relative to the project root. The spec files live in docs/. No build step anywhere.
 
 
@@ -28,7 +28,9 @@ notes:
 - docs/WAND.md            magic wand, background removal, take out
 - docs/opencv-imgproc.md  contract with the image tool of qjs-opencv
 - docs/GRAPH.md           graph view, groups, locks, visibility
-- docs/GALLERY.md         the walkable 3D gallery
+- docs/BATCH.md           batch editor of the graph view: table, photo tiles, reorder across nodes, disable photos
+- docs/PROFILE.md         user profile: account details, username, artist pseudonym, avatar (root node), title and description patterns
+- docs/GALLERY.md         the walkable 3D gallery, and the Show page /view
 - docs/SITES.md           personal sites, jános.ch and transistorisiert.ch hosting
 - docs/UX.md and docs/UX-REQUIREMENTS.md  what feels right on touch and mouse
 - docs/DARKROOM.md   the tone curve feature
@@ -93,6 +95,21 @@ Files:
 - server/media/raster.js   draws a whole document through rsvg-convert from the same svg the editor uses
 - server/media/lines.js    reads a process stdout line by line
 
+Photo ingest from the command line: tools/ingest.js
+  bun tools/ingest.js --user LOGIN --gallery TITLE [--per N] [--list FILE] [--dry-run] FILE...
+  Files go through the server's own storeFile (upload) and saveNew (save and bake), nothing is written by hand.
+  A gallery gets child nodes of up to --per photos (40 by default, no upper limit), oldest first, titled with their date range. All new nodes are hidden.
+  The photo limit of a node (LIMITS.photos is 40 for a free node, LIMITS.photosSequence 1000 for slides and grid, since 2026-11-05) does not bind this tool: the nodes it saves may hold any number of photos
+  (validate takes maxPhotos, saveNew passes it). The editor cannot save such a node again while it holds more than its limit.
+  --groups FILE (nodes as { title, files }) and --into ID (link them under a gallery) build nodes by place or any rule.
+  --positions-only records the exact position of photos the app has, from their originals (hash = sha256 of the file).
+  Exact positions: photos.meta.where { lat, lon }, 6 decimals, private. Set from EXIF at ingest (upload record `where`,
+  baked in bakePhoto), from "Tag the photo with my location" (X-Position, cleanWhere), or by this tool. Clients only ever
+  get the rounded `pos`. Read it with photoWhere(h, hash) in server/db/nodes.js.
+  It calls detectTools() like server.js, else baking fails with "ImageMagick not installed".
+  Try it on a sandbox first: WB_DATA and WB_UPLOADS point it at other directories, with a user made by saveUser.
+  A free node holds 40 photos at most (LIMITS.photos in client/editor/core/model.js: all are layers of one composite), a slides or grid node 1000 (LIMITS.photosSequence); only this tool may go beyond. photoLimit(doc.mode) gives the one that applies.
+
 External tools in use: ImageMagick, exiftool, mediainfo, jpegtran, rsvg-convert, inkscape for curved text, qjsm, opencv-imgproc, python with onnxruntime for inpainting.
 
 notes:
@@ -124,8 +141,18 @@ html comes from client/html.js, htm over preact.
 - client/components/   pages and widgets, about 45 flat files
 - client/components/NodeEditor.js   3300 lines, the editor shell, split is planned
 - client/editor/       the editor logic, grouped by folder, see its README
+- client/components/FlowTrack.js, GalleryViews.js   shared paged track; gallery carousel, masonry album, view switch
+- client/gallery/presentation.js   view/at helpers (?view=&at=), album paging
 - client/gallery/      3D gallery with three
-- client/graph/        graph view
+- client/editor/geometry/grid.js   grid layouts: loose, tight, and stage (coverCells: squares that cover the whole stage and may stick out)
+- /:lang/view is the Show page (cards of the gallery nodes, server/node/view.js viewCards, docs/GALLERY.md S5b); /gallery redirects there
+- client/graph/        graph view; collapse.js: the visitor view's visible nodes (roots, unfold on tap), docs/GRAPH.md S2.8; /tree is calm and read-only until Edit; graph ops on community nodes need an admin (server/guard.js)
+- client/components/BatchEditor.js   batch editor panel over the graph (loads nodes by GET /api/nodes/:id, saves by PUT, no new server route)
+- client/editor/core/batch.js        its pure document functions: photoRefs, placePhotos, setOff
+- server/api/describe.js geoname.js   POST /api/photos/describe (place + capture time of own photos), offline GeoNames list (tools/gazetteer.js fetches it into data/gazetteer/)
+- docs/PROFILE.md          user profile; server/api/profile.js (GET/PUT /api/profile, POST /api/profile/avatar), client/components/ProfilePage.js, client/editor/core/pattern.js (fillPattern: titles and descriptions from the profile's patterns), users.pseudonym / root_id / prefs (migration 10)
+- photos.meta: where (exact position, private) and taken (EXIF time, local text); tools/ingest.js --positions-only sets both from originals
+- photo step flags: desc (caption, gallery title), off: the viewer skips it (visibleDoc in model.js); the node editor still shows it
 - client/*.js          upload, events recording, i18n, colour, nav, push
 
 Shared code: model.js, render.js, color.js and others are imported by the server too. They must stay pure, no DOM, no Bun apis.

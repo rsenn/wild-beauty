@@ -14,7 +14,7 @@ const HEX = /^#[0-9a-f]{6}$/i;
 
 // the first photo step of the document in page order, or null
 export function firstPhotoStep(doc) {
-  for(const page of doc.pages) for(const step of page.steps) if(step.op === 'photo' && step.role !== 'texture') return step; // a texture is not a picture
+  for(const page of doc.pages) for(const step of page.steps) if(step.op === 'photo' && step.role !== 'texture' && !step.off) return step; // a texture is not a picture
 
   return null;
 }

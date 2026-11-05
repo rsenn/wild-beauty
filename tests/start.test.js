@@ -39,8 +39,8 @@ const where = async (path, language) => {
 };
 
 test('the site opens on the gallery, in the visitor\'s language', async () => {
-  expect(await where('/', 'de')).toEqual([302, '/de/gallery']);
-  expect(await where('/', 'fr')).toEqual([302, '/fr/gallery']);
+  expect(await where('/', 'de')).toEqual([302, '/de/view']);
+  expect(await where('/', 'fr')).toEqual([302, '/fr/view']);
 });
 
 test('the installed app starts on the editor (manifest start_url /new)', async () => {
@@ -49,9 +49,9 @@ test('the installed app starts on the editor (manifest start_url /new)', async (
 });
 
 test('the gallery page is served and is empty before there is a node', async () => {
-  const res = await fetch(base + '/en/gallery');
+  const res = await fetch(base + '/en/view');
   const html = await res.text();
 
   expect(res.status).toBe(200);
-  expect(html).toContain('No nodes with a picture yet.');
+  expect(html).toContain('No galleries yet.');
 });

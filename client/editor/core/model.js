@@ -18,7 +18,8 @@ export const LIMITS = {
   steps: 500,
   points: 2000,
   pathChars: 20000,
-  photos: 40,
+  photos: 40, // in a free node: every photo is a layer of one composite
+  photosSequence: 1000, // in a slides or grid node; tools/ingest.js passes its own maxPhotos
   title: 200,
   textChars: 2000,
   textBoxes: 100,
@@ -54,7 +55,7 @@ export const BLENDS = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lig
 export const KINDS = ['node', 'list', 'album', 'gallery', 'shop', 'page', 'site'];
 // the legacy `fit` of a photo step (before the square crop, docs/EDITOR.md S2.5): only read to migrate
 export const FITS = ['extend', 'cover', 'free'];
-export const FILLS = ['loose', 'tight'];
+export const FILLS = ['loose', 'tight', 'stage'];
 export const FLOWS = ['fit', 'page', 'scroll']; // how the viewer shows a node: all at once (a grid only), page by page, scrolling
 export const AXES = ['h', 'v']; // along which axis it pages or scrolls: horizontal, vertical
 export const COLS_MAX = 12; // the most columns of a grid
@@ -81,7 +82,7 @@ const opt = check => Object.assign(v => v === undefined || check(v), { optional:
 
 // field checks per op; a field not listed is rejected
 const STEPS = {
-  photo: { id: isId, photo: isHash, m: isMatrix, crop: opt(v => isNumber(v) && v >= 0 && v <= 1), fit: opt(oneOf(FITS)), opacity: isNumber, blend: oneOf(BLENDS), clip: opt(isId), role: opt(oneOf(['picture', 'texture'])), orig: opt(isHash), box: opt(v => Array.isArray(v) && v.length === 4 && v.every(n => isNumber(n) && n >= 0 && n <= 1000) && v[0] < v[2] && v[1] < v[3]), edge: opt(v => isObject(v) && EDGE_STYLES.includes(v.style) && isNumber(v.amount) && v.amount >= 0 && v.amount <= 1 && Number.isInteger(v.seed) && v.seed >= 0 && v.seed <= 1e9) },
+  photo: { id: isId, photo: isHash, m: isMatrix, crop: opt(v => isNumber(v) && v >= 0 && v <= 1), fit: opt(oneOf(FITS)), opacity: isNumber, blend: oneOf(BLENDS), clip: opt(isId), role: opt(oneOf(['picture', 'texture'])), off: opt(v => typeof v === 'boolean'), desc: opt(v => isString(v) && v.length <= 500), orig: opt(isHash), box: opt(v => Array.isArray(v) && v.length === 4 && v.every(n => isNumber(n) && n >= 0 && n <= 1000) && v[0] < v[2] && v[1] < v[3]), edge: opt(v => isObject(v) && EDGE_STYLES.includes(v.style) && isNumber(v.amount) && v.amount >= 0 && v.amount <= 1 && Number.isInteger(v.seed) && v.seed >= 0 && v.seed <= 1e9) },
   stroke: { id: isId, pts: isPoints, color: isColour, smooth: opt(v => typeof v === 'boolean') },
   shape: { id: isId, path: isString, closed: v => typeof v === 'boolean', fill: opt(isFill), stroke: opt(isFill), strokeWidth: isNumber, wall: opt(isWall) },
   clip: { target: isId, shape: isId },
@@ -154,7 +155,13 @@ function checkNumbers(value, path, errors) {
 
 const stopsOk = fill => !isObject(fill) || (fill.stops.length >= 2 && fill.stops.length <= LIMITS.gradientStops);
 
-function validateLimits(doc) {
+// how many photos a node of this mode holds
+export const photoLimit = mode => (mode === 'free' ? LIMITS.photos : LIMITS.photosSequence);
+
+// the different photos a document uses
+export const countPhotos = doc => new Set(doc.pages.flatMap(page => page.steps.flatMap(step => (step.op === 'photo' ? [step.photo] : [])))).size;
+
+function validateLimits(doc, maxPhotos = photoLimit(doc.mode)) {
   const errors = [];
   const ids = new Set();
   const photos = new Set();
@@ -240,7 +247,7 @@ function validateLimits(doc) {
     if(!uses.length || !uses.every(step => step.role === 'texture')) errors.push({ code: 'dangling_ref', path: `scene.style.texture.images[${i}]` });
   }
 
-  if(photos.size > LIMITS.photos) errors.push({ code: 'too_many_photos', path: 'pages' });
+  if(photos.size > maxPhotos) errors.push({ code: 'too_many_photos', path: 'pages' });
   if(texts > LIMITS.textBoxes) errors.push({ code: 'too_many_text_boxes', path: 'pages' });
 
   return errors;
@@ -248,10 +255,10 @@ function validateLimits(doc) {
 
 // [{ code, path }]; empty when the document is valid. Structure first: the
 // limit and reference checks need a well-formed document.
-export function validate(doc) {
+export function validate(doc, { maxPhotos } = {}) {
   const errors = validateStructure(doc);
 
-  return errors.length ? errors : validateLimits(doc);
+  return errors.length ? errors : validateLimits(doc, maxPhotos);
 }
 
 // --- commands (E6) ---------------------------------------------------------
@@ -472,7 +479,8 @@ export function movePage(doc, pageId, index) {
   return { ...doc, pages };
 }
 
-export const setMode = (doc, mode) => (MODES.includes(mode) && mode !== doc.mode ? { ...doc, mode } : doc);
+// a node over the limit of a free node cannot become one: its photos would all be layers
+export const setMode = (doc, mode) => (MODES.includes(mode) && mode !== doc.mode && (mode !== 'free' || countPhotos(doc) <= LIMITS.photos) ? { ...doc, mode } : doc);
 
 // Set the matrix a step is drawn with (a gesture, a nudge). A `transform`
 // step that already targets it is updated; else a photo or text box takes it
@@ -638,6 +646,14 @@ function updateStepReplace(doc, at, step) {
   return withSteps(doc, at.page, doc.pages[at.page].steps.map((s, i) => (i === at.index ? step : s)));
 }
 
+// The document as a visitor sees it: the photos switched off (`off`, docs/BATCH.md S5)
+// are gone, with the steps that point at them. The same object when none is off.
+export function visibleDoc(doc) {
+  const off = doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo' && step.off === true));
+
+  return off.reduce((d, step) => removeStep(d, step.id), doc);
+}
+
 // a texture photo is for the 3D scene: not drawn as a picture (docs/EDITOR.md S2.5)
 export const isTexture = step => step?.op === 'photo' && step.role === 'texture';
 
@@ -729,7 +745,7 @@ export function setBox(doc, stepId, box) {
 // a moved crop window shows other pixels: the box no longer fits
 const dropBox = (doc, stepId) => setBox(doc, stepId, null);
 
-// the grid options of the document: { fill: 'loose'|'tight', gap }
+// the grid options of the document: { fill: 'loose'|'tight'|'stage', gap }
 export function setLayout(doc, changes) {
   const layout = { ...doc.layout, ...changes };
 

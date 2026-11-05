@@ -148,3 +148,40 @@ describe('flows (E135)', () => {
     expect(validate(setLayout(doc, { flow: 'page' })).filter(e => e.code === 'bad_layout')).toEqual([]);
   });
 });
+
+describe('fill stage (coverCells)', () => {
+  const cover = n => gridCells(n, gridOptions({ fill: 'stage' }));
+
+  test('n squares, every photo at least 30% on the stage, the whole stage covered but for the gaps', () => {
+    for(const n of [1, 2, 3, 5, 7, 11, 13, 24, 57, 115]) {
+      const cells = cover(n);
+      const gap = gridOptions({ fill: 'stage' }).gap;
+
+      expect(cells.length).toBe(n);
+      expect(new Set(cells.map(c => c.size)).size).toBe(1);
+
+      for(const c of cells) {
+        const fx = Math.max(0, Math.min(c.x + c.size, 1000) - Math.max(c.x, 0)) / c.size;
+        const fy = Math.max(0, Math.min(c.y + c.size, 1000) - Math.max(c.y, 0)) / c.size;
+
+        expect(fx).toBeGreaterThanOrEqual(0.3);
+        expect(fy).toBeGreaterThanOrEqual(0.3);
+      }
+
+      for(let px = 0; px <= 1000; px += 25)
+        for(let py = 0; py <= 1000; py += 25) expect(cells.some(c => px >= c.x - gap && px <= c.x + c.size + gap && py >= c.y - gap && py <= c.y + c.size + gap)).toBe(true);
+    }
+  });
+
+  test('a square count (4, 9, 16) fills the stage exactly, nothing sticks out', () => {
+    for(const n of [4, 9, 16]) for(const c of cover(n)) {
+      expect(c.x).toBeGreaterThanOrEqual(-0.001);
+      expect(c.x + c.size).toBeLessThanOrEqual(1000.001);
+    }
+  });
+
+  test('the fill is a valid layout and the plan uses it only for the fit flow', () => {
+    expect(gridPlan(7, { fill: 'stage' }).pages[0].cells.length).toBe(7);
+    expect(gridPlan(20, { fill: 'stage', flow: 'scroll', cols: 4 }).pages[0].cells[0].x).toBe(0); // like tight: no margin
+  });
+});

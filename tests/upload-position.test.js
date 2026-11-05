@@ -3,7 +3,8 @@ import { afterAll, beforeAll, describe, expect, setDefaultTimeout, test } from '
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { cleanPosition } from '../server/api/uploads.js';
+import { readFileSync } from 'node:fs';
+import { cleanPosition, cleanWhere } from '../server/api/uploads.js';
 import { run } from '../server/media/run.js';
 import { detectTools, imagemagick, tools } from '../server/media/tools.js';
 
@@ -55,6 +56,44 @@ describe('X-Position header', () => {
     expect(cleanPosition('-33.8688,151.2093')).toEqual({ lat: -33.87, lon: 151.21 });
 
     for(const bad of [null, '', '0,0', '95,1', '1,200', 'a,b', '1;2', '47.38', '1,2,3', '1e2,3']) expect(cleanPosition(bad)).toBeNull();
+  });
+});
+
+describe('X-Position header, exact', () => {
+  test('cleanWhere keeps six decimals and refuses the same garbage', () => {
+    expect(cleanWhere('47.3768912345, 8.5416987654')).toEqual({ lat: 47.376891, lon: 8.541699 });
+    expect(cleanWhere('-33.8688,151.2093')).toEqual({ lat: -33.8688, lon: 151.2093 });
+
+    for(const bad of [null, '', '0,0', '95,1', '1,200', 'a,b', '1;2', '47.38', '1,2,3']) expect(cleanWhere(bad)).toBeNull();
+  });
+});
+
+describe('the exact position of an upload', () => {
+  test('is in the sidecar on disk, and never in what the client is sent', async () => {
+    if(!ready) return;
+
+    await run([...imagemagick.convert, '-size', '64x48', 'xc:#aa00aa', resolve(root, 'exact.jpg')]);
+
+    const reply = await (await send(resolve(root, 'exact.jpg'), { 'x-position': '47.3768912,8.5416987' })).json();
+    const sidecar = JSON.parse(readFileSync(resolve(root, 'uploads', `${reply.hash}.json`), 'utf8'));
+
+    expect(sidecar.where).toEqual({ lat: 47.376891, lon: 8.541699 });
+    expect(sidecar.pos).toEqual({ lat: 47.38, lon: 8.54 });
+    expect(reply.pos).toEqual({ lat: 47.38, lon: 8.54 });
+    expect(JSON.stringify(reply)).not.toContain('47.3768');
+    expect('where' in reply).toBe(false);
+  });
+
+  test('an EXIF position is kept exact too, beside the rounded one', async () => {
+    if(!ready || !tools.exiftool) return;
+
+    await run(['exiftool', '-overwrite_original', '-GPSLatitude=46.9481234', '-GPSLatitudeRef=N', '-GPSLongitude=7.4474321', '-GPSLongitudeRef=E', resolve(root, 'geo.jpg')]);
+
+    const reply = await (await send(resolve(root, 'geo.jpg'))).json();
+    const sidecar = JSON.parse(readFileSync(resolve(root, 'uploads', `${reply.hash}.json`), 'utf8'));
+
+    expect(sidecar.where).toEqual({ lat: 46.948123, lon: 7.447432 });
+    expect(sidecar.pos).toEqual({ lat: 46.95, lon: 7.45 });
   });
 });
 

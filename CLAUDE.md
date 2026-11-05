@@ -1,6 +1,6 @@
 # Project Status: legacy code ARCHIVED in `attic/`, rewrite in progress
 
-The original Next.js/Hasura implementation is a frozen historical artifact and lives in `attic/` (also pinned by the git tag and branch `before-rewrite`). The rewrite is a minimal PoC described in `docs/PLAN.md`; library choices and the design source of truth are in `docs/DESIGN.md`; `TODO.md` is the working task list and the authority for the directory layout; `docs/EDITOR.md` specifies the node editor (UX, node data, server, granular tasks E1-E97, incl. the colour palette and text boxes); `docs/GRAPH.md` (graph view, transport, databases, visibility, groups, locks) and `docs/GALLERY.md` (walkable 3D gallery node) are research and decision records for the work after the PoC; `docs/opencv-imgproc.md` specifies the optional background-removal tool; `docs/WAND.md` is the design of the magic wand, background removal and take out (UI and server backend); `attic/HISTORIC.md` is the structural reference for the old code (its paths predate the move, read `components/…` as `attic/components/…`); `attic/README.md` is the old readme.
+The original Next.js/Hasura implementation is a frozen historical artifact and lives in `attic/` (also pinned by the git tag and branch `before-rewrite`). The rewrite is a minimal PoC described in `docs/PLAN.md`; library choices and the design source of truth are in `docs/DESIGN.md`; `TODO.md` is the working task list and the authority for the directory layout; `docs/EDITOR.md` specifies the node editor (UX, node data, server, granular tasks E1-E97, incl. the colour palette and text boxes); `docs/GRAPH.md` (graph view, transport, databases, visibility, groups, locks) and `docs/BATCH.md` (batch editor of the graph view: table, photo tiles, reorder and move across nodes, disable photos) `docs/PROFILE.md` (user profile page: details, username, artist pseudonym, avatar = root node, title and description patterns) and `docs/GALLERY.md` (walkable 3D gallery node) are research and decision records for the work after the PoC; `docs/opencv-imgproc.md` specifies the optional background-removal tool; `docs/WAND.md` is the design of the magic wand, background removal and take out (UI and server backend); `attic/HISTORIC.md` is the structural reference for the old code (its paths predate the move, read `components/…` as `attic/components/…`); `attic/README.md` is the old readme.
 
 ## Hard rule: no changes inside `attic/`
 
@@ -40,7 +40,24 @@ The host runs Postfix and Dovecot for `transistorisiert.ch` and `jános.ch`; reg
 
 ## Track detours in TODO.md
 
-When a task is not yet written down in `TODO.md` or `docs/`, and while doing it we start another task (a detour, nested one level deeper), and by then there are several tasks we still want to do: **record all of them in `TODO.md` before leaving the path**. That means the task being left, the new one, and every other follow-up named so far, each with enough detail (order, files, rules agreed) to be picked up cold. Put them under "Open threads", mark the one in progress, and say what is postponed. Update the entries as they close. Do this at the moment of the detour, not at the end of the session; a detour must not lose the original path.
+The global rule "Track detours" applies. Here the task list is `TODO.md`: put the entries under "Open threads", mark the one in progress, and say what is postponed.
+
+## Record design decisions BEFORE implementing them
+
+Every design decision or spec that is about to be implemented is written down in the project first,
+and only then built. This covers behaviour, UX rules, data shapes, URLs, limits and defaults that the
+user states or that we agree on in conversation (for example "buttons and keys change the slide at
+once, only a touch drag slides it").
+
+- Put it where it belongs: the spec doc of the feature (`docs/EDITOR.md`, `docs/GALLERY.md`,
+  `docs/GRAPH.md`, `docs/WAND.md`, ...), or `docs/DESIGN.md` for cross-cutting choices. State the rule
+  and the reason in a few lines, and mark open questions as open.
+- If it is not clear which document it belongs to, ask, or suggest creating a new doc file under
+  `docs/` (and list it in the doc overview above). Do not skip the record because no place exists.
+- A decision that changes during the work is corrected in the doc in the same change; the doc must
+  never describe something other than what the code does.
+- Tests and `docs/DEVELOPER.md` follow the usual rules; this rule is about the decision itself, not
+  only its description afterwards.
 
 ## attic/HISTORIC.md maintenance
 

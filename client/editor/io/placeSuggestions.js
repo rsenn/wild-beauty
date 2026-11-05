@@ -67,24 +67,26 @@ export async function linkPlace(nodeId, pos, fetcher = fetch) {
   }
 }
 
-// the position the browser reports, rounded to ~1 km before it leaves the device
-// -> { lat, lon } | null (denied, unavailable, timed out: a quiet no-op, docs/EDITOR.md E139)
-export function currentPosition(geo = globalThis.navigator?.geolocation, timeout = 8000) {
+// the position the browser reports, exact (6 decimals, about 0.1 m): the server keeps it
+// private in the photo's meta.where and shows only a rounded one (docs/EDITOR.md E139)
+// -> { lat, lon } | null (denied, unavailable, timed out: a quiet no-op)
+export function currentPosition(geo = globalThis.navigator?.geolocation, timeout = 10000) {
   return new Promise(resolve => {
     if(!geo) return resolve(null);
 
     geo.getCurrentPosition(
-      ({ coords }) => resolve(snapPosition(coords.latitude, coords.longitude)),
+      ({ coords }) => resolve(snapPosition(coords.latitude, coords.longitude, 1e6)),
       () => resolve(null),
-      { timeout, maximumAge: 60000, enableHighAccuracy: false },
+      { timeout, maximumAge: 60000, enableHighAccuracy: true },
     );
   });
 }
 
-export function snapPosition(lat, lon) {
+// `scale` 100 rounds to two decimals (about 1 km), 1e6 keeps the fix
+export function snapPosition(lat, lon, scale = 100) {
   if(!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180 || (lat === 0 && lon === 0)) return null;
 
-  const r = v => Math.round(v * 100) / 100 + 0;
+  const r = v => Math.round(v * scale) / scale + 0;
 
   return { lat: r(lat), lon: r(lon) };
 }

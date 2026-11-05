@@ -8,6 +8,9 @@ import { fitHeight } from '../gallery/fit.js';
 import { Layout } from './Layout.js';
 import { OwnerBar, SiteHead } from './SiteApp.js';
 import { RecordConsent } from './RecordConsent.js';
+import { BatchEditor } from './BatchEditor.js';
+import { Popover } from './Popover.js';
+import { SMALL, collapse, everything } from '../graph/collapse.js';
 
 // on a personal site the graph sits in the site's own chrome
 const SiteChrome = ({ children }) => {
@@ -68,8 +71,9 @@ const GroupFace = ({ node, kids, title }) => html`<g clip-path=${`url(#wb-g-${no
 // /:lang/tree: the graph of the nodes (docs/GRAPH.md S2.7, preliminary demo). A node
 // is a rounded square with its tile; drag moves and pins it. Several nodes can
 // be selected (Shift, or the Select button, then tap or draw a box); dragging
-// one carries the group, gathered under the pointer: dropped on a node it links
-// them all to it in a fan, dropped on empty space it lines them up in a row.
+// one carries the group as it lies: dropped on empty space it stays where it
+// was put (Alt: lined up in a row), dropped on a node it links them all to it
+// in a fan, and over such a node it gathers under the pointer to say so.
 // The line under the tools says what a drop would do, and Undo takes it back.
 export const GraphPage = () => {
   const { t, lang } = useI18n();
@@ -83,11 +87,32 @@ export const GraphPage = () => {
   const [selected, setSelected] = useState(null);
   const [multi, setMulti] = useState([]);
   const [selecting, setSelecting] = useState(false);
+  // docs/GRAPH.md S2.8: the visitor view is calm and read-only (roots, expand on tap); Edit opens the whole editor
+  const [editMode, setEditMode] = useState(false);
+  const [expanded, setExpanded] = useState(() => (graph.nodes.length <= SMALL ? everything(graph) : new Set()));
+  const calm = !site && !editMode;
+  const editing = !readOnly && (!!site || editMode); // a site's owner always edits, everybody else after Edit
+  const canEdit = !!boot.user && !site;
   const [marquee, setMarquee] = useState(null);
   const [carry, setCarry] = useState(null);
   const [note, setNote] = useState(null);
   const [linking, setLinking] = useState(null);
   const [error, setError] = useState(false);
+  // the nodes of the open batch editor (docs/BATCH.md); the address keeps them: /tree?batch=1,2,3
+  const [batch, setBatchNodes] = useState(() => {
+    const ids = (globalThis.location?.search && new URLSearchParams(globalThis.location.search).get('batch')?.split(',').map(Number).filter(Number.isInteger)) || [];
+
+    return ids.length && !site ? ids : null;
+  });
+  const setBatch = ids => {
+    const url = new URL(globalThis.location.href);
+
+    if(ids) url.searchParams.set('batch', ids.join(','));
+    else (url.searchParams.delete('batch'), url.searchParams.delete('bview'));
+
+    globalThis.history.replaceState(null, '', url);
+    setBatchNodes(ids);
+  };
   const [places, setPlaces] = useState(false); // the place suggestions panel (docs/EDITOR.md E140)
   const bodies = useRef(new Map());
   const alpha = useRef(1);
@@ -97,7 +122,8 @@ export const GraphPage = () => {
   const ticks = useRef(0);
   const carrying = useRef(false);
   const fanned = useRef(null); // { target, ids }: members to glide out around a new group
-  const edges = useMemo(() => graph.edges, [graph]);
+  const shown = useMemo(() => (calm ? collapse(graph, expanded) : graph), [graph, calm, expanded]);
+  const edges = useMemo(() => shown.edges, [shown]);
   const latest = useRef({});
 
   latest.current = { edges, view, spread, multi, selecting, graph, linking };
@@ -107,8 +133,8 @@ export const GraphPage = () => {
     const old = bodies.current;
 
     bodies.current = seed(
-      graph.nodes.map(n => (old.has(n.id) ? { ...n, x: old.get(n.id).x, y: old.get(n.id).y } : { ...n, x: n.x * latest.current.spread, y: n.y * latest.current.spread })),
-      graph.edges,
+      shown.nodes.map(n => (old.has(n.id) ? { ...n, x: old.get(n.id).x, y: old.get(n.id).y } : { ...n, x: n.x * latest.current.spread, y: n.y * latest.current.spread })),
+      shown.edges,
       REST * latest.current.spread,
     );
 
@@ -152,7 +178,7 @@ export const GraphPage = () => {
       cancelAnimationFrame(frame.current);
       frame.current = 0;
     };
-  }, [graph]);
+  }, [shown]);
 
   // the simulation runs a frame at a time while something moves: the layout
   // settling, a node easing to a place, a group being carried
@@ -296,14 +322,15 @@ export const GraphPage = () => {
     }
 
     const group = latest.current.multi;
-    const toggle = e.shiftKey || e.ctrlKey || e.metaKey || selecting;
+    const toggle = !calm && (e.shiftKey || e.ctrlKey || e.metaKey || selecting);
 
-    if(id && !toggle && group.length > 1 && group.includes(id)) {
+    if(!calm && id && group.length > 1 && group.includes(id)) {
       const mine = group.map(i => bodies.current.get(i)).filter(Boolean);
       const mid = { x: mine.reduce((n, b) => n + b.x, 0) / mine.length, y: mine.reduce((n, b) => n + b.y, 0) / mine.length };
 
-      gesture.current = { carry: true, id, ids: group, at: world(e), mid, before: mine.map(b => ({ id: b.id, x: b.x, y: b.y, pinned: b.pinned })), moved: false };
-    } else if(id) gesture.current = { node: id, toggle, moved: false, at: world(e) };
+      gesture.current = { carry: true, id, ids: group, at: world(e), mid, before: mine.map(b => ({ id: b.id, x: b.x, y: b.y, pinned: b.pinned })), toggle, moved: false };
+    } else if(id && calm) gesture.current = { pan: true, tap: id, x: e.clientX - view.x, y: e.clientY - view.y, moved: false, start: { x: e.clientX, y: e.clientY } };
+    else if(id) gesture.current = { node: id, toggle, moved: false, at: world(e) };
     else if(toggle) gesture.current = { box: true, from: local(e), add: e.shiftKey || e.ctrlKey || e.metaKey, moved: false };
     else gesture.current = { pan: true, x: e.clientX - view.x, y: e.clientY - view.y, moved: false, start: { x: e.clientX, y: e.clientY } };
   };
@@ -343,19 +370,22 @@ export const GraphPage = () => {
 
       if(!g.moved && Math.hypot(p.x - g.at.x, p.y - g.at.y) * view.k < 5) return;
 
-      // the group gathers under the pointer, the others make room
+      // the group moves as it lies, the others make room; over a node it could link to
+      // it gathers under the pointer instead
       g.moved = true;
       carrying.current = true;
+
+      const over = targetAt(p, g.ids);
 
       for(const o of g.before) {
         const b = bodies.current.get(o.id);
 
         b.hold = true;
-        b.to = { x: p.x + (o.x - g.mid.x) * COMPACT, y: p.y + (o.y - g.mid.y) * COMPACT };
+        b.to = over ? { x: p.x + (o.x - g.mid.x) * COMPACT, y: p.y + (o.y - g.mid.y) * COMPACT } : { x: o.x + (p.x - g.at.x), y: o.y + (p.y - g.at.y) };
       }
 
       alpha.current = 0.5;
-      setCarry({ ids: g.ids, over: targetAt(p, g.ids), x: p.x, y: p.y });
+      setCarry({ ids: g.ids, over, x: p.x, y: p.y });
       wake();
     } else if(g.node) {
       const p = world(e);
@@ -410,7 +440,28 @@ export const GraphPage = () => {
     if(next) setNote({ text: t('graph.done.link', { n: mine.length, title: targetNode?.title || t('node.untitled') }), undo: mine.filter(b => !existing.has(b.id)).map(b => ({ op: 'unlink', from: targetId, to: b.id })) });
   };
 
-  // dropped on empty space: line them up in a row there, pinned
+  // dropped on empty space: the group stays as it lay, moved by how far the pointer went, pinned
+  const moveGroup = async (g, p) => {
+    const [dx, dy] = [p.x - g.at.x, p.y - g.at.y];
+
+    for(const o of g.before) {
+      const b = bodies.current.get(o.id);
+
+      b.hold = false;
+      b.pinned = true;
+      b.to = { x: o.x + dx, y: o.y + dy };
+    }
+
+    wake();
+
+    const next = await send(g.before.map(o => ({ op: 'move', id: o.id, x: unit(o.x + dx), y: unit(o.y + dy), pinned: true })));
+
+    keep(next);
+
+    if(next) setNote({ text: t('graph.done.move', { n: g.before.length }), undo: g.before.map(o => ({ op: 'move', id: o.id, x: unit(o.x), y: unit(o.y), pinned: o.pinned })), tween: g.before });
+  };
+
+  // dropped on empty space with Alt: line them up in a row there, pinned
   const lineUp = async (g, p) => {
     const mine = inOrder(g.ids);
     const gap = SIZE * 1.25;
@@ -447,7 +498,10 @@ export const GraphPage = () => {
       setCarry(null);
 
       if(!g.moved) {
-        // a tap on a member of the group: back to that one node
+        // a tap with Shift or Select on a member takes it out of the group
+        if(g.toggle) return tapNode(g.id, true);
+
+        // a plain tap on a member of the group: back to that one node
         setMulti([]);
         setSelected({ node: g.id });
 
@@ -457,7 +511,8 @@ export const GraphPage = () => {
       const over = targetAt(world(e), g.ids);
 
       if(over) await dropOnNode(g, over);
-      else await lineUp(g, world(e));
+      else if(e.altKey) await lineUp(g, world(e));
+      else await moveGroup(g, world(e));
     } else if(g.node) {
       const body = bodies.current.get(g.node);
 
@@ -485,10 +540,40 @@ export const GraphPage = () => {
         setSelected(null);
       } else if(!g.add) setMulti([]);
     } else if(!g.moved) {
+      if(g.tap) return tapCalm(g.tap);
+
       setSelected(null);
       setLinking(null);
       setMulti([]);
     }
+  };
+
+  // visitor view: a node with members unfolds (and folds again) and is selected, so Open is offered; one without opens
+  const tapCalm = id => {
+    const members = graph.edges.some(e => e.label === 'child' && e.from === id);
+
+    if(!members) return location.assign(`/${lang}/node/${id}`);
+
+    setSelected({ node: id });
+    setExpanded(old => {
+      const next = new Set(old);
+
+      if(next.has(id)) next.delete(id);
+      else next.add(id);
+
+      return next;
+    });
+  };
+
+  // Edit on and off; off folds the graph again
+  const toggleEdit = () => {
+    setSelecting(false);
+    setLinking(null);
+    setMulti([]);
+    setSelected(null);
+    setNote(null);
+    setExpanded(graph.nodes.length <= SMALL ? everything(graph) : new Set());
+    setEditMode(!editMode);
   };
 
   const tapNode = async (id, toggle) => {
@@ -616,6 +701,14 @@ export const GraphPage = () => {
     return () => el?.removeEventListener('wheel', wheel);
   });
 
+  // the batch editor saved something: the tiles and titles of the nodes may have changed
+  const reload = async () => {
+    try {
+      const r = await fetch('/api/graph', { headers: { accept: 'application/json' } });
+
+      if(r.ok) keep(await r.json());
+    } catch {}
+  };
   const nodeOf = id => graph.nodes.find(n => n.id === id);
   // the selected nodes that are the user's own: publish or unpublish them together (visibility: public / hidden)
   const ownSelected = (multi.length > 1 ? multi : selected?.node ? [selected.node] : []).map(nodeOf).filter(n => n && boot.user && n.owner_id === boot.user.id);
@@ -629,7 +722,7 @@ export const GraphPage = () => {
     : carry
     ? carry.over
       ? t('graph.carry.link', { n: carry.ids.length, title: label(nodeOf(carry.over) ?? {}) })
-      : t('graph.carry.line', { n: carry.ids.length })
+      : t('graph.carry.move', { n: carry.ids.length })
     : note
     ? note.text
     : linking
@@ -647,22 +740,33 @@ export const GraphPage = () => {
 
   return html`
     <${Chrome} bleed active="tree" hrefFor=${code => `/${code}/tree`}>
-      ${!readOnly && html`<div class="wb-graph-bar" role="toolbar" aria-label=${t('graph.tools')}>
+      ${calm && html`<div class="wb-graph-bar wb-graph-bar-calm" role="toolbar" aria-label=${t('graph.tools')}>
+        ${canEdit && html`<button type="button" class="wb-editor-chip" onClick=${toggleEdit}>${t('graph.edit')}</button>`}
+        <button type="button" class="wb-editor-chip" onClick=${() => ((touched.current = false), fit(true))}>${t('graph.fit')}</button>
+        ${picked && html`<a class="wb-editor-chip" href=${`/${lang}/node/${picked.id}`}>${t('graph.open')}</a>`}
+        <span class="wb-graph-hint" role="status">${picked ? label(picked) : graph.nodes.length ? t('graph.hint.calm') : t('graph.empty')}</span>
+      </div>`}
+      ${!calm && !readOnly && html`<div class="wb-graph-bar" role="toolbar" aria-label=${t('graph.tools')}>
+        ${canEdit && html`<button type="button" class="wb-editor-chip" aria-pressed="true" onClick=${toggleEdit}>${t('graph.done')}</button>`}
         <button type="button" class="wb-editor-chip" aria-pressed=${selecting ? 'true' : 'false'} onClick=${() => setSelecting(!selecting)}>${t('graph.select')}</button>
         <button type="button" class="wb-editor-chip" disabled=${multi.length < 2} onClick=${makeGroup}>${t('graph.group')}</button>
         <button type="button" class="wb-editor-chip" disabled=${picked?.kind !== 'list'} onClick=${ungroup}>${t('graph.ungroup')}</button>
         <button type="button" class="wb-editor-chip" aria-pressed=${linking ? 'true' : 'false'} disabled=${!picked && !linking} onClick=${() => setLinking(linking ? null : selected.node)}>${t('graph.link')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!selected?.edge} onClick=${async () => keep(await send([{ op: 'unlink', ...selected.edge }]))}>${t('graph.unlink')}</button>
-        <button type="button" class="wb-editor-chip" disabled=${!picked || !picked.pinned} onClick=${async () => keep(await send([{ op: 'pin', id: picked.id, pinned: false }]))}>${t('graph.unpin')}</button>
+        <button type="button" class="wb-editor-chip" hidden=${!!site || !boot.user} disabled=${!(multi.length > 1 || picked)} onClick=${() => setBatch(multi.length > 1 ? multi : [selected.node])}>${t('batch.open')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!ownSelected.length} title=${t('graph.publish.hint')} onClick=${publish}>${t(allPublic ? 'graph.unpublish' : 'graph.publish')}</button>
         <a class=${`wb-editor-chip wb-graph-open${picked ? '' : ' wb-disabled'}`} href=${picked ? (site ? pathOf(picked) : `/${lang}/node/${picked.id}`) : null} aria-disabled=${picked ? null : 'true'}>${t('graph.open')}</a>
         <button type="button" class="wb-editor-chip" disabled=${!note?.undo} onClick=${undo}>${t('graph.undo')}</button>
+        <${Popover} label=${t('graph.more')}>
+        <button type="button" class="wb-editor-chip" disabled=${!picked || !picked.pinned} onClick=${async () => keep(await send([{ op: 'pin', id: picked.id, pinned: false }]))}>${t('graph.unpin')}</button>
         <button type="button" class="wb-editor-chip" hidden=${!!site} aria-pressed=${places ? 'true' : 'false'} onClick=${() => setPlaces(!places)}>${t('graph.places')}</button>
         <button type="button" class="wb-editor-chip" onClick=${() => ((touched.current = false), fit(true))}>${t('graph.fit')}</button>
+        <//>
         <span class=${`wb-graph-hint${carry ? ' wb-graph-hint-live' : ''}`} role="status">${hint}</span>
       </div>`}
-      ${places && html`<${PlaceSuggestions} t=${t} onGraph=${keep} onClose=${() => setPlaces(false)} />`}
-      <svg ref=${svg} class="wb-graph" role="group" aria-label=${t('graph.label')} onPointerDown=${e => (readOnly ? null : down(e, null))} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up}>
+      ${batch && html`<${BatchEditor} ids=${batch.filter(id => nodeOf(id))} nodes=${graph.nodes} edges=${graph.edges} onClose=${() => setBatch(null)} onSaved=${reload} />`}
+      ${editing && places && html`<${PlaceSuggestions} t=${t} onGraph=${keep} onClose=${() => setPlaces(false)} />`}
+      <svg ref=${svg} class=${calm ? 'wb-graph wb-graph-calm' : 'wb-graph'} role="group" aria-label=${t('graph.label')} onPointerDown=${e => (readOnly ? null : down(e, null))} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up}>
         <defs><filter id="wb-g-shadow" x="-10%" y="-10%" width="125%" height="125%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-opacity="0.55" /></filter></defs>
         <g transform=${`translate(${view.x} ${view.y}) scale(${view.k})`}>
           ${edges.map(e => {
@@ -684,7 +788,7 @@ export const GraphPage = () => {
 
             return b && html`<line key=${'p' + id} class="wb-graph-preview" x1=${target.x} y1=${target.y} x2=${b.x} y2=${b.y} />`;
           })}
-          ${graph.nodes.map(n => {
+          ${shown.nodes.map(n => {
             const b = bodies.current.get(n.id);
 
             if(!b) return null;
@@ -695,11 +799,12 @@ export const GraphPage = () => {
               <clipPath id=${`wb-g-${n.id}`}><rect width=${SIZE} height=${SIZE} rx="14" /></clipPath>
               <rect class="wb-graph-ground" width=${SIZE} height=${SIZE} rx="14" fill=${n.color ?? '#e8e2d4'} filter="url(#wb-g-shadow)" />
               ${n.kind === 'list'
-                ? html`<${GroupFace} node=${n} kids=${edges.filter(e => e.from === n.id && e.label === 'child').map(e => nodeOf(e.to)).filter(Boolean)} title=${label(n)} />`
+                ? html`<${GroupFace} node=${n} kids=${graph.edges.filter(e => e.from === n.id && e.label === 'child').map(e => nodeOf(e.to)).filter(Boolean)} title=${label(n)} />`
                 : n.tile
                 ? html`<image href=${`/files/photos/${n.tile}.thumb.jpg`} width=${SIZE} height=${SIZE} preserveAspectRatio="xMidYMid slice" clip-path=${`url(#wb-g-${n.id})`} />`
                 : html`<text class="wb-graph-title" x=${SIZE / 2} y=${SIZE / 2} text-anchor="middle" dominant-baseline="central">${label(n).slice(0, 12)}</text>`}
               <rect class="wb-graph-frame" width=${SIZE} height=${SIZE} rx="14" />
+              ${n.more > 0 && html`<g class="wb-graph-more"><rect x=${SIZE - 30} y=${SIZE - 18} width="34" height="20" rx="10" /><text x=${SIZE - 13} y=${SIZE - 8} text-anchor="middle" dominant-baseline="central">+${n.more}</text></g>`}
             </g>`;
           })}
           ${carry &&
@@ -711,7 +816,7 @@ export const GraphPage = () => {
         </g>
         ${marquee && html`<rect class="wb-graph-marquee" x=${Math.min(marquee.x0, marquee.x1)} y=${Math.min(marquee.y0, marquee.y1)} width=${Math.abs(marquee.x1 - marquee.x0)} height=${Math.abs(marquee.y1 - marquee.y0)} />`}
       </svg>
-      ${!site && html`<${RecordConsent} />`}
+      ${!site && !calm && html`<${RecordConsent} />`}
     <//>
   `;
 };

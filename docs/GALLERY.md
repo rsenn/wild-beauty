@@ -45,7 +45,7 @@ Dates are as of 2026-10-22.
   another; **no corner is sharper than 45 degrees** (interior angle between 45 and
   315 degrees; relaxed from 90 on 2026-10-29 for the room aid, EDITOR.md E136), and every wall run is long enough for at least 2-3 pictures
   before a corner (S5).
-- **Overview first** (2026-10-29): a `kind: gallery` node page shows its gallery at once from above, in real perspective (`client/gallery/overview.js`: the camera 58 degrees up, far enough back to show every wall); the pictures near the first station load meanwhile. "Walk through the 3D gallery" flies the camera down to the first picture (1.8 s, eased position, turn and field of view; `session.js` `blend`), the stage widens to 16:9 across the page (`.wb-gallery-wide`) and the guided tour starts; "Back to the overview" flies up and shrinks the stage. A browser without WebGL keeps the flat poster.
+- **Overview first** (2026-10-29): a `kind: gallery` node page shows its gallery at once from above, in real perspective (`client/gallery/overview.js`: the camera 58 degrees up, far enough back to show every wall, but never further than a window of `OVERVIEW.reach` = 30 m half-width on the west end, about three rooms: a row of thirteen rooms was a speck seen whole, 2026-11-05); the pictures near the first station load meanwhile. "Walk through the 3D gallery" flies the camera down to the first picture (1.8 s, eased position, turn and field of view; `session.js` `blend`), the stage widens to 16:9 across the page (`.wb-gallery-wide`) and the guided tour starts; "Back to the overview" flies up and shrinks the stage. A browser without WebGL keeps the flat poster.
 - **Sequence children** (2026-10-29): a child node that is a slide show or a grid of two or more photos hangs **each of its photos** (thumbnails, the baked photo on zoom, titled `Title i/n`, all opening the child's page) instead of one tile. Order is deterministic: the children in edge order (`sort`, then id), the photos of a child in the node's own order, repeats and missing photos left out (`server/node/view.js` `galleryChild`, `client/gallery/items.js` `childItems`).
 - **Hanging**: automatic, on **one side of a wall only**: the inside of a room.
 - **North** is the top of the editor view; the owner cannot rotate it.
@@ -589,6 +589,80 @@ where the slides or the animation play in the normal viewer.
 by default); a machine as a shallow box with parts at different depths (a shadow
 box); a projector that throws on a wall without a screen frame at an angle (keystone);
 a real 3D machine (this is a vector animation by decision).
+
+---
+
+## 5a. Presentations: 3D, carousel, masonry (asked and built 2026-11-05)
+
+Built: `client/gallery/presentation.js` (pure helpers), `client/components/FlowTrack.js` (the shared track,
+used by `NodeView` and the gallery carousel), `client/components/GalleryViews.js` (`ViewSwitch`,
+`GalleryCarousel`, `GalleryMasonry`), wired in `NodePage.js`; `startGallery(..., startAt)` lands on the
+picture and `onState` reports its id back. The URL is `?view=carousel|masonry&at=<item id>` and the server
+renders the named view. Tests: `tests/gallery-presentation.test.js`. Not built: the owner's default
+presentation, and the own-photos-first question below. The "Parts" list at the end is the original plan.
+
+The same child items (`galleryItems()` in `client/gallery/items.js`) can be shown three ways, and
+the visitor switches between them without losing the place.
+
+| Presentation | What it is | Built from |
+|---|---|---|
+| `3d` | the walkable gallery, the default | `GalleryView`, `client/gallery/` |
+| `carousel` | one picture large, snapping track, Previous / Next, swipe | the paged track of `NodeView` (`flow: page`), one component for both, fed with the gallery items |
+| `masonry` | "album overview": every item at once, square tiles, not bound to the square stage; paged when there are many | new |
+
+**Not square.** The carousel track is not bound to the square stage (`wide` on `FlowTrack`) and has no border, background, shadow or scrollbar (Previous / Next and swipe move it): a button or key changes the slide at once, no glide, while a touch drag moves it with the finger and the browser snaps it on release: full page width, a height that leaves room for the header, each photo contained in its own shape so landscape and portrait both fit. The node view keeps its square.
+
+**No blink on Next.** The slide keeps its thumbnail and the full image loads on top of it (current slide and its two neighbours) and fades in when complete; a slide never swaps one image for another.
+
+**One carousel component.** The track of `NodeView` (snap, Previous / Next, `scrollBy`, the `at` counter) is
+pulled out into a component that takes a list of slides and a draw function. `NodeView` feeds it the
+pages of a node's own doc, the gallery feeds it the gallery items. Same behaviour, same keys, same CSS.
+
+**Which items.** (A node's own photos show their `.small.jpg`, made on the server when first asked for: a photo has no `.thumb`, only a node's tile has, and asking for it gave broken tiles, fixed 2026-11-05.) The nodes connected one level away: the child nodes (`child` edges, in edge order), each
+as its tile, or, when the child is a sequence of photos, every photo of it in the child's own order, each
+leading to the child's page. One level only, no grandchildren. This is what `galleryItems()` already
+collects for the 3D view, so all three presentations show the same list in the same order. Open: a
+node that has children and photos of its own shows only the children today (`galleryItems`), the own
+photos are not hung. Decide whether they come first in all three views.
+
+**One current picture, shared by all three** (the point of the feature):
+
+- The current picture is an item id (`n<node>` or `n<node>:<hash>`), not an index: the three views order
+  the same items the same way, but only the id survives a change of view.
+- 3D to carousel or masonry: the picture the visitor faces (the tour's station, `onState` index).
+- Carousel to 3D: land exactly there, `tour.snap(index)` at the start (today it is `snap(0)`), the
+  station of that picture, facing it.
+- Carousel to masonry: land on the page that holds the picture, scrolled to it, the tile highlighted.
+- Masonry to carousel or 3D: the highlighted tile. A tap on a tile opens it in the carousel, a second
+  control on the tile leads to the node page (the Open button of the 3D view).
+- A move inside a view updates the current picture, so the next switch starts there.
+
+**Where it lives.** A `view` and an `at` in the URL query (`?view=carousel&at=n12:ab12...`) so a link
+shares the place and the server can render the same thing; the default (no `view`) stays `3d`.
+The owner's default presentation is a later step (a doc setting next to `layout.flow`).
+
+**Masonry**: tiles are the thumbnails, always square (`object-fit: cover`), laid out in columns that
+fill the page width (not the 1000 unit stage), 48 tiles a page (a gallery of 300 is 7 pages), with a
+page control; the current tile has a visible ring and is scrolled into view.
+
+**Server rendering**: the node page is rendered into the HTML, so the non-3D presentations render
+there too (the 3D one needs WebGL and starts in the browser, as now). The view named in the URL is
+the one rendered.
+
+Parts: a small focus store (`client/gallery/focus.js`), `Carousel` and `Masonry` components, the
+switch in `GalleryTools`, the start index for `startGallery`, the `onState` link back, four locales,
+tests, DEVELOPER.md.
+
+## 5b. The Show page: /view (decided 2026-11-05)
+
+`/:lang/gallery` ("Show", where `/` leads) listed every saved node with a tile, so the photo containers inside a gallery were shown next to the galleries themselves. It is now **`/:lang/view`** and shows **only gallery nodes** (`kind` `gallery`) the visitor may see, newest first. `/:lang/gallery` stays as a permanent redirect (301) to `/:lang/view`, and `/` leads to `/:lang/view`. No 3D gallery of everything any more: each gallery is entered through its own node page.
+
+One card per gallery, a link to the node page (`/:lang/node/:id`, where the walk, carousel and album views are):
+- **Preview of the actual photos**: up to six square thumbnails, taken at even steps through the gallery's own items (the photos of its children in their order, as the node page hangs them, S5), so the preview shows the whole of it and not only its first corner. With fewer pictures the mosaic gets fewer cells (1: one large, 2-3: a row, 4-5: 2 by 2, 6 and more: 3 by 2).
+- **Title drawing**: when the gallery's document has a text box (the first `text` step with text, in page order), the card shows that text box drawn as it is in the editor (its font, colour, background, curve), cropped to its box. Otherwise the node's title in the page font.
+- The number of pictures ("12 pictures").
+
+Cards sit in a responsive grid (a column of cards on a phone). Computed on the server (`viewCards` in `server/node/view.js`), so the page works without JavaScript. Not built: a floor-plan preview of the room (open).
 
 ---
 

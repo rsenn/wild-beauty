@@ -71,8 +71,19 @@ describe('guard', () => {
     for(const headers of [{}, { cookie: a }]) {
       expect(await run(req('PUT', `/api/nodes/${community}`, { headers }))).toBeNull();
       expect(await run(req('POST', '/api/nodes', { headers }))).toBeNull();
-      expect(await run(req('POST', '/api/graph/ops', { headers, body: { ops: [{ op: 'move', id: community, x: 1, y: 1 }] } }))).toBeNull();
     }
+  });
+
+  test('the graph ops leave the community nodes to the admins', async () => {
+    const { a } = await cookies();
+    const move = headers => req('POST', '/api/graph/ops', { headers, body: { ops: [{ op: 'move', id: community, x: 1, y: 1 }] } });
+
+    expect((await run(move({})))?.status).toBe(401);
+    expect((await run(move({ cookie: a })))?.status).toBe(403);
+
+    h.run('UPDATE users SET is_admin = 1 WHERE id = ?', owner);
+
+    expect(await run(move({ cookie: a }))).toBeNull();
   });
 
   test('a node of a user is written by its owner only', async () => {
@@ -95,6 +106,8 @@ describe('guard', () => {
     expect((await run(ops([{ op: 'link', from: theirs, to: mine }])))?.status).toBe(403);
     expect((await run(ops([{ op: 'move', id: theirs, x: 1, y: 1 }])))?.status).toBe(403);
     expect(await run(ops([{ op: 'group', ids: [community, mine], x: 1, y: 1 }]))).toBeNull();
+    expect((await run(ops([{ op: 'order', parent: theirs, ids: [mine, community] }])))?.status).toBe(403); // the parent is the node it changes
+    expect(await run(ops([{ op: 'order', parent: mine, ids: [theirs, community] }]))).toBeNull();
   });
 });
 

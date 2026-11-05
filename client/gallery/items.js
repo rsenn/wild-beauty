@@ -5,9 +5,14 @@
 // zoomed in and `href` the page the Open button leads to.
 
 import { photoSteps } from '../editor/view/render.js';
+import { visibleDoc } from '../editor/core/model.js';
 
-// the photo thumbnail is the node's tile, a baked photo its own thumbnail
+// the tile of a node: the thumbnail of its first photo
 const thumb = hash => `/files/photos/${hash}.thumb.jpg`;
+
+// a baked photo's picture for a gallery: made on the server when first asked for (a photo has no
+// `.thumb` of its own, that is a node's tile)
+const small = hash => `/files/photos/${hash}.small.jpg`;
 
 // the node's large render, made on the server when first asked for
 const large = id => `/api/nodes/${id}/large`;
@@ -39,7 +44,7 @@ export function galleryItems(node, lang = 'en', photos = () => null) {
 
   const seen = new Set();
 
-  return photoSteps(node.doc ?? { pages: [] }).flatMap(step => (seen.has(step.photo) ? [] : (seen.add(step.photo), [{ id: step.photo, url: thumb(step.photo), ...(photos(step.photo)?.href && { full: photos(step.photo).href }) }])));
+  return photoSteps(visibleDoc(node.doc ?? { pages: [] })).flatMap(step => (seen.has(step.photo) ? [] : (seen.add(step.photo), [{ id: step.photo, url: small(step.photo), ...(step.desc && { title: step.desc }), ...(photos(step.photo)?.href && { full: photos(step.photo).href }) }])));
 }
 
 // every saved node with a tile, as the gallery of all nodes hangs them (the

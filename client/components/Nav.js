@@ -33,11 +33,12 @@ export const Nav = ({ items, active, hrefFor, onLogin }) => {
             ? html`<${LanguageTab} item=${item} hrefFor=${hrefFor} />`
             : item.id === 'login'
             ? html`
-                <li class=${'wb-tab' + (active === 'login' ? ' wb-tab-active' : '')}>
+                <li class=${'wb-tab' + (active === 'login' ? ' wb-tab-active' : '') + (item.profile ? ' wb-tab-user' : '')}>
                   <button type="button" class="wb-tab-button" onClick=${onLogin} aria-haspopup="dialog" aria-expanded=${active === 'login' ? 'true' : 'false'}>
                     <span class="wb-tab-label">${item.label}</span>
                     <span class="wb-tab-caption">${item.caption}</span>
                   </button>
+                  ${item.profile && html`<a class="wb-tab-profile" href=${item.profile.href} aria-current=${active === 'profile' ? 'page' : null}>${item.profile.label}</a>`}
                 </li>
               `
             : html`

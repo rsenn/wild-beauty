@@ -1,6 +1,6 @@
 // bun test: client/editor/core/model.js
 import { describe, expect, test } from 'bun:test';
-import { LIMITS, addPhoto, cropWindow, migrateDoc, setCrop, setLayout, setBlend, setClip, setOpacity, unclip, MODES, VERSION, addPage, addStep, allIds, emptyNode, findStep, movePage, moveStep, newId, removePage, removeStep, setMode, setTitle, unique, updateStep, validate } from '../../client/editor/core/model.js';
+import { LIMITS, photoLimit, addPhoto, cropWindow, migrateDoc, setCrop, setLayout, setBlend, setClip, setOpacity, unclip, MODES, VERSION, addPage, addStep, allIds, emptyNode, findStep, movePage, moveStep, newId, removePage, removeStep, setMode, setTitle, unique, updateStep, validate } from '../../client/editor/core/model.js';
 
 describe('ids', () => {
   test('8 base-36 characters, two thousand are distinct', () => {
@@ -143,6 +143,19 @@ describe('validate, references and limits', () => {
     doc.pages = Array.from({ length: LIMITS.pages + 1 }, (_, i) => ({ id: id(i), steps: [] }));
     expect(codes(doc)).toEqual(['too_many_pages']);
     expect(codes(withSteps(...Array.from({ length: LIMITS.photos + 1 }, (_, i) => photo({ id: id(i), photo: i.toString(16).padStart(64, '0') }))))).toEqual(['too_many_photos']);
+    // a slides or grid node holds many more: only a free node stacks its photos as layers
+    const many = Array.from({ length: LIMITS.photos + 1 }, (_, i) => photo({ id: id(i), photo: i.toString(16).padStart(64, '0') }));
+
+    expect(validate({ ...withSteps(...many), mode: 'grid' })).toEqual([]);
+    expect(validate({ ...withSteps(...many), mode: 'slides' })).toEqual([]);
+    expect(codes({ ...withSteps(...many), mode: 'free' })).toEqual(['too_many_photos']);
+    expect(photoLimit('free')).toBe(LIMITS.photos);
+    expect(photoLimit('grid')).toBe(LIMITS.photosSequence);
+    // such a node cannot become a free one, a small one can
+    expect(setMode({ ...withSteps(...many), mode: 'grid' }, 'free').mode).toBe('grid');
+    expect(setMode({ ...withSteps(photo({ id: id(1) })), mode: 'grid' }, 'free').mode).toBe('free');
+    // a tool may allow more (tools/ingest.js passes Infinity)
+    expect(validate(withSteps(...Array.from({ length: LIMITS.photos + 1 }, (_, i) => photo({ id: id(i), photo: i.toString(16).padStart(64, '0') }))), { maxPhotos: Infinity })).toEqual([]);
     // the same photo twice counts once
     expect(validate(withSteps(photo({ id: id(1) }), photo({ id: id(2) })))).toEqual([]);
     expect(codes(withSteps(...Array.from({ length: LIMITS.textBoxes + 1 }, (_, i) => text(id(i)))))).toEqual(['too_many_text_boxes']);

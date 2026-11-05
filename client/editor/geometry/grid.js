@@ -16,15 +16,18 @@ export function gridOptions(layout = {}) {
   const tight = layout.fill === 'tight';
   const gap = Number.isFinite(layout.gap) ? layout.gap : tight ? TIGHT_GAP : GAP;
 
-  return { gap, margin: tight ? 0 : gap, ...(Number.isInteger(layout.cols) && layout.cols >= 1 && { cols: layout.cols }) };
+  const cover = layout.fill === 'stage';
+
+  return { gap: cover && !Number.isFinite(layout.gap) ? TIGHT_GAP : gap, margin: tight || cover ? 0 : gap, ...(cover && { cover }), ...(Number.isInteger(layout.cols) && layout.cols >= 1 && { cols: layout.cols }) };
 }
 
 // the cells of an n-photo grid: [{ x, y, size }] in reading order. With `cols`
 // the grid has that many columns (at most n); otherwise the column count that
 // gives the biggest cells wins (the wider layout on a tie). An
 // incomplete last row is centred, and the whole grid is centred on the stage.
-export function gridCells(n, { gap = GAP, margin = gap, cols: fixed } = {}) {
+export function gridCells(n, { gap = GAP, margin = gap, cols: fixed, cover = false } = {}) {
   if(!(n >= 1)) return [];
+  if(cover) return coverCells(n, gap) ?? gridCells(n, { gap, margin: 0 });
 
   let cols = 1;
   let size = 0;
@@ -53,6 +56,52 @@ export function gridCells(n, { gap = GAP, margin = gap, cols: fixed } = {}) {
   return cells;
 }
 
+// The least part of a photo that has to stay on the stage in the `stage` fill (docs/EDITOR.md S4 point 9b)
+const SEEN = 0.3;
+
+// the part of [a, a + size] that lies inside [0, STAGE], as a fraction of size
+const seen = (a, size) => Math.max(0, Math.min(a + size, STAGE) - Math.max(a, 0)) / size;
+
+// Cover the whole stage with n equal squares, however many; the grid may stick out of the stage. r rows of q or q + 1 tiles
+// (spread evenly), each row and the block centred; the size is the least that covers the stage both ways. The layout that
+// crops the least photo area wins, a layout that hides (nearly) a whole photo is not used. -> cells, or null
+export function coverCells(n, gap = TIGHT_GAP) {
+  let best = null;
+
+  for(let r = 1; r <= n; r++) {
+    const q = Math.floor(n / r);
+    const extra = n % r;
+
+    if(q < 1) break;
+
+    const size = Math.max((STAGE - (r - 1) * gap) / r, (STAGE - (q - 1) * gap) / q);
+    const top = (STAGE - (r * size + (r - 1) * gap)) / 2;
+    const cells = [];
+    let lost = 0;
+    let ok = true;
+
+    for(let i = 0; i < r && ok; i++) {
+      const count = q + (Math.floor(((i + 1) * extra) / r) - Math.floor((i * extra) / r));
+      const left = (STAGE - (count * size + (count - 1) * gap)) / 2;
+      const y = top + i * (size + gap);
+
+      for(let j = 0; j < count; j++) {
+        const x = left + j * (size + gap);
+        const [fx, fy] = [seen(x, size), seen(y, size)];
+
+        if(fx < SEEN || fy < SEEN) ok = false;
+
+        lost += 1 - fx * fy;
+        cells.push({ x, y, size });
+      }
+    }
+
+    if(ok && (!best || lost < best.lost - 1e-9)) best = { lost, cells };
+  }
+
+  return best?.cells ?? null;
+}
+
 // the matrix of each photo, [a,b,c,d,e,f]: a photo's local space is its
 // 1000 unit square, so photo i only scales by size / 1000 into its cell
 export function gridLayout(n, layout) {
@@ -71,11 +120,11 @@ export const AXES = ['h', 'v'];
 //  scroll  one long stage, `cols` photos across and as many rows as needed;
 //          axis `h` turns it: `cols` photos high, the columns follow
 export function gridPlan(n, layout = {}) {
-  const { gap, margin, cols } = gridOptions(layout);
+  const { gap, margin, cols, cover } = gridOptions(layout);
   const flow = FLOWS.includes(layout.flow) ? layout.flow : 'fit';
   const axis = AXES.includes(layout.axis) ? layout.axis : flow === 'scroll' ? 'v' : 'h';
 
-  if(flow === 'fit' || !(n >= 1)) return { flow: 'fit', axis, pages: [{ from: 0, count: Math.max(0, n), w: STAGE, h: STAGE, cells: gridCells(n, { gap, margin, cols }) }] };
+  if(flow === 'fit' || !(n >= 1)) return { flow: 'fit', axis, pages: [{ from: 0, count: Math.max(0, n), w: STAGE, h: STAGE, cells: gridCells(n, { gap, margin, cols, cover }) }] };
 
   const lines = cols ?? 3;
 

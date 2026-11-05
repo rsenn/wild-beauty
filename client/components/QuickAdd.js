@@ -50,7 +50,7 @@ const useClipboardPicture = () => {
 };
 
 // `onPaste` adds a button that takes a picture from the clipboard (copied in the phone's gallery), where the browser can read it.
-export const QuickAdd = ({ t, have, disabled, onAdd, onPaste = null }) => {
+export const QuickAdd = ({ t, have, disabled, onAdd, onPaste = null, limit = LIMITS.photos }) => {
   const [items, setItems] = useState([]);
   const [skipped, setSkipped] = useState(0);
   const nextId = useRef(1);
@@ -89,7 +89,7 @@ export const QuickAdd = ({ t, have, disabled, onAdd, onPaste = null }) => {
     if(finished) batch.current = Math.random().toString(36).slice(2, 10);
 
     const waiting = finished ? 0 : items.filter(item => !taken.current.has(item.id) && item.state !== 'failed').length;
-    const { take, skipped: over } = fitFiles(files.length, { limit: LIMITS.photos, have, waiting });
+    const { take, skipped: over } = fitFiles(files.length, { limit, have, waiting });
     const added = files.slice(0, take).map(file => ({ id: nextId.current++, file, state: 'queued', progress: 0, error: null, record: null }));
 
     setSkipped(over);
@@ -115,7 +115,7 @@ export const QuickAdd = ({ t, have, disabled, onAdd, onPaste = null }) => {
       ${onPaste && picture && typeof navigator !== 'undefined' && navigator.clipboard?.read && html`<button type="button" class="wb-editor-chip wb-quickadd-paste" disabled=${disabled} onClick=${onPaste}>${t('editor.quickadd.paste')}</button>`}
       ${total > 0 && html`<span class="wb-upload-note" role="status">${t('editor.quickadd.progress', { done, total })}${failed ? ` · ${t('editor.quickadd.failed', { count: failed })}` : ''}</span>`}
       ${failed > 0 && !running && html`<button type="button" class="wb-editor-chip" onClick=${retry}>${t('editor.quickadd.retry')}</button>`}
-      ${skipped > 0 && html`<span class="wb-upload-note" role="status">${t('editor.quickadd.limit', { max: LIMITS.photos, count: skipped })}</span>`}
+      ${skipped > 0 && html`<span class="wb-upload-note" role="status">${t('editor.quickadd.limit', { max: limit, count: skipped })}</span>`}
     </div>
   `;
 };

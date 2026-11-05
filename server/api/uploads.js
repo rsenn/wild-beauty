@@ -11,7 +11,7 @@ import { logFile } from '../log.js';
 import { run } from '../media/run.js';
 import { smallImage } from '../media/thumb.js';
 import { imagemagick } from '../media/tools.js';
-import { roundPosition } from '../media/probe.js';
+import { exactPosition, roundPosition } from '../media/probe.js';
 import { expiringCookie, sessionFor } from '../session.js';
 
 mkdirSync(config.tmpDir, { recursive: true });
@@ -43,8 +43,8 @@ async function writeSidecar(record) {
   logFile('write', sidecarPath(record.hash), `${json.length} bytes`);
 }
 
-// what a client sees of a record: not who owns it, but when it expires for them
-const shown = ({ owners, ...record }, owner) => (owner && owners?.[owner] ? { ...record, expiresAt: owners[owner] } : record);
+// what a client sees of a record: not who owns it, not the exact position, but when it expires for them
+const shown = ({ owners, where, ...record }, owner) => (owner && owners?.[owner] ? { ...record, expiresAt: owners[owner] } : record);
 
 // when a record expires: the last owner's expiry; records from before owners
 // existed have none and age from their upload
@@ -69,6 +69,13 @@ export function cleanPosition(header) {
   return m ? roundPosition(Number(m[1]), Number(m[2])) : null;
 }
 
+// the same header, exact (6 decimals): kept private as the photo's meta.where
+export function cleanWhere(header) {
+  const m = /^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/.exec(header ?? '');
+
+  return m ? exactPosition(Number(m[1]), Number(m[2])) : null;
+}
+
 // POST /api/uploads: raw body, name in X-Filename, optional X-Position
 export async function createUpload(req) {
   const session = sessionFor(req);
@@ -79,6 +86,7 @@ export async function createUpload(req) {
 
   const name = cleanName(req.headers.get('x-filename'));
   const tagged = cleanPosition(req.headers.get('x-position'));
+  const taggedWhere = cleanWhere(req.headers.get('x-position'));
   const hasher = new Bun.CryptoHasher('sha256');
   const tmp = resolve(config.tmpDir, crypto.randomUUID());
   const writer = Bun.file(tmp).writer();
@@ -147,6 +155,7 @@ export async function createUpload(req) {
 
     // the camera's own EXIF position wins; the tag only fills a gap
     record.pos ??= tagged;
+    record.where ??= taggedWhere;
 
     await claim(record, session);
 

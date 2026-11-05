@@ -22,7 +22,9 @@ export async function ingest(original, display) {
     hasAlpha,
     orientation,
     exif: exifResult.value ?? null,
-    pos: exifResult.pos ?? null, // rounded to ~1 km; the only place the GPS tags survive (docs/GRAPH.md S1.5)
+    pos: exifResult.pos ?? null, // rounded to ~1 km: what clients and the place suggestions see (docs/GRAPH.md S1.5)
+    where: exifResult.where ?? null, // exact, private: goes into the photo's meta.where when it is baked
+    taken: exifResult.taken ?? null, // capture time, local text: goes into the photo's meta.taken
     mediainfo: media.value ?? null,
     palette: colors.value ?? [],
     padding: colors.value ? choosePadding(colors.value) : null,

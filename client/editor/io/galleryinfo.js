@@ -4,7 +4,7 @@
 // textures are set. Pure: the gallery context pane (components/GalleryPane.js) draws it.
 import { planFromDoc } from '../../gallery/fromdoc.js';
 import { slots } from '../../gallery/hang.js';
-import { LIMITS } from '../core/model.js';
+import { LIMITS, photoLimit } from '../core/model.js';
 import { DEFAULT_LOOK, textureSlots } from '../core/galleryScene.js';
 import { photoSteps } from '../view/render.js';
 import { wallProblem } from '../core/walls.js';
@@ -55,7 +55,7 @@ export function galleryReport(doc, { children = [] } = {}) {
     capacity: plan ? slots(plan).length : 0,
     hang: { from, count: from === 'children' ? shown.length : own },
     children: { list: children, shown: shown.length },
-    photos: { total: roles.size, pictures: roles.size - textures.length, textures: textures.length, limit: LIMITS.photos },
+    photos: { total: roles.size, pictures: roles.size - textures.length, textures: textures.length, limit: photoLimit(doc.mode) },
     textures: { look: doc.scene?.look ?? DEFAULT_LOOK, slots: textureSlots(doc.scene), candidates: textures },
   };
 }

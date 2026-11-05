@@ -78,9 +78,15 @@ describe('calls', () => {
 describe('current position', () => {
   const geo = (ok, coords) => ({ getCurrentPosition: (yes, no, options) => (ok ? yes({ coords }) : no({ code: 1 }), (geo.options = options)) });
 
-  test('rounded before it leaves the device; low accuracy is enough', async () => {
-    expect(await currentPosition(geo(true, { latitude: 47.37689, longitude: 8.54169 }))).toEqual({ lat: 47.38, lon: 8.54 });
-    expect(geo.options).toMatchObject({ enableHighAccuracy: false });
+  test('exact, at high accuracy: the server keeps it private and shows only a rounded one', async () => {
+    expect(await currentPosition(geo(true, { latitude: 47.37689, longitude: 8.54169 }))).toEqual({ lat: 47.37689, lon: 8.54169 });
+    expect(await currentPosition(geo(true, { latitude: 47.3768912345, longitude: 8.5416987654 }))).toEqual({ lat: 47.376891, lon: 8.541699 });
+    expect(geo.options).toMatchObject({ enableHighAccuracy: true });
+  });
+
+  test('snapPosition still rounds to two decimals unless told otherwise', () => {
+    expect(snapPosition(47.37689, 8.54169)).toEqual({ lat: 47.38, lon: 8.54 });
+    expect(snapPosition(47.37689, 8.54169, 1e6)).toEqual({ lat: 47.37689, lon: 8.54169 });
   });
 
   test('denied, missing or nonsense is null, never an error', async () => {

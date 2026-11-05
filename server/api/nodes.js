@@ -56,7 +56,7 @@ async function bakePhoto(h, hash) {
   const file = `${dest}.${r.ext}`;
   const { width, height } = await identify(file);
 
-  upsertPhoto(h, { hash, ext: r.ext, width, height, bytes: statSync(file).size, palette: record.palette ?? [] });
+  upsertPhoto(h, { hash, ext: r.ext, width, height, bytes: statSync(file).size, palette: record.palette ?? [], meta: record.where || record.taken ? { ...(record.where && { where: record.where }), ...(record.taken && { taken: record.taken }) } : undefined });
 
   return { baked: true };
 }
@@ -182,9 +182,9 @@ function dropUnused(h, hashes) {
 
 // Create a node from `body` ({ doc, kind? }) -> { status, body }. `h` is the database,
 // `viewer` the logged-in user who becomes its owner, `space` the site it is made on.
-export const saveNew = (h, body, { viewer = null, space = null } = {}) =>
+export const saveNew = (h, body, { viewer = null, space = null, maxPhotos } = {}) =>
   serial(async () => {
-    const checked = validateNode(body, { hasPhoto: photoLookup(h) });
+    const checked = validateNode(body, { hasPhoto: photoLookup(h), maxPhotos });
 
     if(!checked.ok) return { status: checked.status, body: { error: checked.code, details: checked.errors } };
 
@@ -196,8 +196,8 @@ export const saveNew = (h, body, { viewer = null, space = null } = {}) =>
       const node = insertNode(h, { title: checked.title, doc: checked.doc, palette: ready.palette, kind: checked.kind });
 
       // a logged-in user's new node is theirs: only they change it (server/guard.js),
-      // and it is hidden until they make it public
-      if(viewer) h.run("UPDATE nodes SET owner_id = ?, visibility = 'hidden' WHERE id = ?", viewer.id, node.id);
+      // and it is hidden until they make it public (their profile can make new nodes public at once)
+      if(viewer) h.run('UPDATE nodes SET owner_id = ?, visibility = ? WHERE id = ?', viewer.id, viewer.prefs?.visibility === 'public' ? 'public' : 'hidden', node.id);
 
       // made on a personal site: a node of that site
       if(viewer && space) h.run('UPDATE nodes SET space = ? WHERE id = ?', space, node.id);

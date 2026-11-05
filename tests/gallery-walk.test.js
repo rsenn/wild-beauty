@@ -31,7 +31,7 @@ describe('galleryItems', () => {
   test('a node without children hangs its own photos, once each, no textures', () => {
     const node = { doc: doc([photo('a'), photo('b'), photo('a'), photo('c', { role: 'texture' })]) };
 
-    expect(galleryItems(node).map(i => i.url)).toEqual(['/files/photos/' + 'a'.repeat(8) + '.thumb.jpg', '/files/photos/' + 'b'.repeat(8) + '.thumb.jpg']);
+    expect(galleryItems(node).map(i => i.url)).toEqual(['/files/photos/' + 'a'.repeat(8) + '.small.jpg', '/files/photos/' + 'b'.repeat(8) + '.small.jpg']);
   });
 
   test('a node\'s own photos carry the baked photo as the sharper picture', () => {

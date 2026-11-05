@@ -8,7 +8,7 @@
 // It starts guided: the visitor stands in front of the first picture and steps
 // from picture to picture (tour.js); walking keys hand over to free walking
 // (walk.js), the Guide button or a tap on a picture takes them back. `onState`
-// hears { mode, index, total, moving, zoomed, title, canOpen } when it changes.
+// hears { mode, index, id, total, moving, zoomed, title, canOpen } when it changes.
 //
 // `items` is items.js: [{ id, url, href? }]. A node without a drawn plan gets
 // the auto plan (autoplan.js). `overview` starts above the gallery (overview.js);
@@ -25,6 +25,7 @@ import { controls } from './controls.js';
 import { hang } from './hang.js';
 import { nearest, stations } from './stations.js';
 import { createTour } from './tour.js';
+import { stationOf } from './presentation.js';
 import { enterScene } from './scene.js';
 import { createTakeover } from './flight/takeover.js';
 import { createWalker } from './walk.js';
@@ -46,7 +47,7 @@ const SHARP = 4;
 // how fast the lens closes and opens, per second
 const LENS = { close: 5, open: 2 };
 
-export async function startGallery(canvas, { items, scene, doc, photos, name = '', overview = false, onOpen, onLock, onLost, onState, onLens, onStick, onNote, onFlight } = {}) {
+export async function startGallery(canvas, { items, scene, doc, photos, name = '', overview = false, startAt = null, onOpen, onLock, onLost, onState, onLens, onStick, onNote, onFlight } = {}) {
   if(!webgl()) throw new Error('webgl');
 
   // `?look=warm|walnut|stone` picks the surfaces of the auto plan (autoplan.js LOOKS)
@@ -60,7 +61,8 @@ export async function startGallery(canvas, { items, scene, doc, photos, name = '
   let mode = list.length ? 'guide' : 'free';
   let shown = '';
 
-  if(mode === 'guide') tour.snap(0);
+  // the picture the visitor was on in another view, else the first
+  if(mode === 'guide') tour.snap(stationOf(list, startAt));
 
   // the bird's-eye view: `blend` is 0 above the plan and 1 at the visitor's eye,
   // moving to `target` over FLY seconds
@@ -89,7 +91,7 @@ export async function startGallery(canvas, { items, scene, doc, photos, name = '
   const state = () => {
     const here = list[tour.index];
 
-    return { mode, index: tour.index, total: list.length, moving: tour.moving, zoomed: tour.zoomTarget > 1.05, title: here?.child?.title ?? '', canOpen: !!here?.child?.href, ...flight.state() };
+    return { mode, index: tour.index, id: here?.child?.id ?? null, total: list.length, moving: tour.moving, zoomed: tour.zoomTarget > 1.05, title: here?.child?.title ?? '', canOpen: !!here?.child?.href, ...flight.state() };
   };
   const emit = () => {
     const now = state();

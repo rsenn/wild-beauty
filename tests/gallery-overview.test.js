@@ -32,6 +32,15 @@ describe('overviewPose', () => {
     expect(overviewPose(box, 16 / 9).distance).toBeLessThan(overviewPose(box, 0.5).distance);
   });
 
+  test('a very long plan is framed by a window on its west end, not seen whole', () => {
+    const row = { cx: 140, cz: 5, rx: 140, rz: 5 }; // thirteen rooms side by side
+    const p = overviewPose(row, 16 / 9);
+
+    expect(p.distance).toBeLessThan(overviewPose({ ...row, rx: 30 }, 16 / 9).distance + 1);
+    expect(p.x).toBe(30); // the window's centre: the west end (0) plus the reach
+    expect(overviewPose(row, 1, { reach: 1000 }).distance).toBeGreaterThan(overviewPose(row, 1).distance * 4);
+  });
+
   test('real perspective: the plan of node 9 fits the stage with room to spare', () => {
     const built = buildGallery(planFromDoc(node9.doc));
     const b = planBounds(built.collision);

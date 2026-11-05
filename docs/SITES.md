@@ -26,8 +26,8 @@ home page: some art, links to social media, contact.
 - nginx: static vhost, `root /var/www/janos` (empty), TLS from acme.sh, no
   proxy to wild-beauty. Port 80 redirects to 443.
 - Server: Bun, `server.js` routes by pathname only; no Host-based routing.
-  `/` redirects to `/<lang>/gallery`. Pages: `/:lang/node/:id`, `/gallery`,
-  `/tree`, `/new`.
+  `/` redirects to `/<lang>/view` (the galleries; `/<lang>/gallery` redirects there, 301). Pages: `/:lang/node/:id`, `/view`,
+  `/tree`, `/new`, `/profile`.
 - Nodes: `nodes(id, title, doc, palette, ...)` plus planned/optional columns
   `owner_id`, `visibility`, `group_id`, `kind`, `x/y/pinned`, `tile`, `rev`
   (`PLAN.md` S8), all unused so far (NULL / default `public`).
@@ -47,7 +47,7 @@ space:
 
 | View | Shows |
 |---|---|
-| wild-beauty `/tree`, `/gallery`, `/api/graph` (anonymous) | `visibility='public'` nodes in the community space only |
+| wild-beauty `/tree`, `/view`, `/api/graph` (anonymous) | `visibility='public'` nodes in the community space only |
 | same, logged in | the above plus the viewer's own nodes (any visibility) |
 | `jános.ch` | the nodes of the site's space only, published ones only |
 

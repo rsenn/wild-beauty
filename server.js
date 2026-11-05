@@ -13,12 +13,14 @@ import { createNode, deleteNodeRoute, largeRoute, listNodesRoute, listedNodes, p
 import { manifestResponse, workerResponse } from './server/pwa.js';
 import { graphOf, graphRoute } from './server/api/graph.js';
 import { placesRoute } from './server/api/places.js';
+import { describeRoute } from './server/api/describe.js';
+import { profileRoute, profileOf } from './server/api/profile.js';
 import { cutoutRoute } from './server/api/cutout.js';
 import { segmentRoute } from './server/api/segment.js';
 import { edgesRoute } from './server/api/edges.js';
 import { servePhoto } from './server/api/photos.js';
-import { galleryChild, photoInfos } from './server/node/view.js';
-import { nodeItems } from './client/gallery/items.js';
+import { galleryChild, photoInfos, viewCards } from './server/node/view.js';
+import { atOf, viewOf } from './client/gallery/presentation.js';
 import { canView } from './server/api/nodes.js';
 import { getNode, linksFrom } from './server/db/nodes.js';
 import { database } from './server/db/db.js';
@@ -127,7 +129,7 @@ async function bootFor(lang, extra = {}, owner = null) {
 // `title` replaces the translated page title
 async function page(lang, titleKey, extra, title, req) {
   const viewer = req ? viewerOf(await database(), req) : null;
-  const boot = await bootFor(lang, { ...(viewer && { user: { id: viewer.id, email: viewer.email, name: viewer.name, ...(viewer.admin && { admin: true }) } }), ...extra }, req ? sessionFor(req).owner : null);
+  const boot = await bootFor(lang, { ...(viewer && { user: { id: viewer.id, email: viewer.email, name: viewer.name, username: viewer.username ?? null, pseudonym: viewer.pseudonym, prefs: viewer.prefs, ...(viewer.admin && { admin: true }) } }), ...extra }, req ? sessionFor(req).owner : null);
   const body = renderPage(html`<${App} boot=${boot} />`, {
     lang,
     dir: boot.messages['meta.dir'],
@@ -156,11 +158,12 @@ async function newPage(lang, req) {
   return page(lang, 'page.title.new', { nodes: listedNodes(h, viewer), ...(wanted && !viewer && { loginRequired: true }), ...(edit !== null && viewer && { edit }) }, undefined, req);
 }
 
-// GET /:lang/gallery: every saved node as a picture of one 3D gallery ("Show")
-async function galleryPage(lang, req) {
+// GET /:lang/view: the galleries as cards with a preview of their photos ("Show", docs/GALLERY.md S5b)
+async function viewPage(lang, req) {
   const h = await database();
+  const viewer = viewerOf(h, req);
 
-  return page(lang, 'page.title.gallery', { gallery: { items: nodeItems(visibleNodes(h, viewerOf(h, req)), lang) } }, undefined, req);
+  return page(lang, 'page.title.gallery', { gallery: { cards: viewCards(h, { canView: node => canView(node, viewer), lang }) } }, undefined, req);
 }
 
 // GET /:lang/admin: the admin panel, for an admin user only (a 404 for everybody else)
@@ -170,6 +173,14 @@ async function adminPage(lang, req) {
   if(!isAdmin(viewerOf(h, req))) return text('not found\n', 404);
 
   return page(lang, 'page.title.admin', { admin: true }, undefined, req);
+}
+
+// GET /:lang/profile: the details of the user's account (docs/PROFILE.md); a visitor is asked to log in
+async function profilePage(lang, req) {
+  const h = await database();
+  const viewer = viewerOf(h, req);
+
+  return page(lang, 'page.title.profile', { profile: viewer ? profileOf(h, viewer.id) : null, ...(!viewer && { loginRequired: true }) }, undefined, req);
 }
 
 // GET /:lang/tree: the graph of the nodes (preliminary demo of docs/GRAPH.md)
@@ -196,7 +207,12 @@ async function nodePage(lang, id, req) {
   const shown = { id: node.id, title: node.title, kind: node.kind, doc: node.doc, rev: node.rev, mine: mayWrite(node, viewer), children };
   const title = `${locales.get(lang)['page.title.node'] ?? 'Wild Beauty'} - ${node.title || locales.get(lang)['node.untitled'] || ''}`;
 
-  return page(lang, 'page.title.node', { node: shown, photos: photoInfos(h, node.doc) }, title, req);
+  // ?view=carousel|masonry and ?at=<item> open the gallery in that view on that picture (docs/GALLERY.md S5a)
+  const query = new URL(req.url).searchParams;
+  const view = viewOf(query.get('view'));
+  const at = atOf(query.get('at'));
+
+  return page(lang, 'page.title.node', { node: shown, photos: photoInfos(h, node.doc), ...(view !== '3d' && { view }), ...(at && { at }) }, title, req);
 }
 
 // A page of a site: the node in a centred stage, the navigation of the sitemap above it
@@ -310,6 +326,8 @@ async function route(req) {
 
   if(pathname === '/api/graph' || pathname === '/api/graph/ops') return graphRoute(req, undefined, { site });
 
+  if(pathname === '/api/photos/describe') return describeRoute(req);
+  if(pathname === '/api/profile' || pathname === '/api/profile/avatar') return profileRoute(req, pathname);
   if(pathname === '/api/places' || pathname === '/api/places/near' || pathname === '/api/places/suggestions') return placesRoute(req);
 
   const edges = /^\/api\/edges\/([^/]+)$/.exec(pathname);
@@ -383,11 +401,11 @@ async function route(req) {
   if(pathname === '/manifest.webmanifest') return manifestResponse();
   if(pathname === '/sw.js') return workerResponse();
 
-  // the site opens on the 3D gallery of all nodes; the installed app starts at
+  // the site opens on the Show page (the galleries); the installed app starts at
   // /new (the manifest's start_url): the upload area and the editor. Both in the
   // visitor's language.
   if(pathname === '/' || pathname === '/new') {
-    const location = new URL(`/${negotiate(locales, { req })}/${pathname === '/' ? 'gallery' : 'new'}`, req.url).href;
+    const location = new URL(`/${negotiate(locales, { req })}/${pathname === '/' ? 'view' : 'new'}`, req.url).href;
 
     return new Response(null, { status: 302, headers: { location, vary: 'Cookie, Accept-Language' } });
   }
@@ -398,13 +416,22 @@ async function route(req) {
 
   if(viewed && locales.has(viewed[1])) return nodePage(viewed[1], Number(viewed[2]), req);
 
-  const shown = /^\/([a-z]{2,3})\/gallery$/.exec(pathname);
+  const shown = /^\/([a-z]{2,3})\/view$/.exec(pathname);
 
-  if(shown && locales.has(shown[1])) return galleryPage(shown[1], req);
+  if(shown && locales.has(shown[1])) return viewPage(shown[1], req);
+
+  // the old address of the Show page
+  const old = /^\/([a-z]{2,3})\/gallery$/.exec(pathname);
+
+  if(old && locales.has(old[1])) return new Response(null, { status: 301, headers: { location: `/${old[1]}/view` } });
 
   const tree = /^\/([a-z]{2,3})\/tree$/.exec(pathname);
 
   if(tree && locales.has(tree[1])) return treePage(tree[1], req);
+
+  const prof = /^\/([a-z]{2,3})\/profile$/.exec(pathname);
+
+  if(prof && locales.has(prof[1])) return profilePage(prof[1], req);
 
   const panel = /^\/([a-z]{2,3})\/admin$/.exec(pathname);
 

@@ -37,17 +37,17 @@ export function photosOf(doc) {
 }
 
 // body: { doc, kind? }; `hasPhoto(hash)` answers whether a photo exists (see
-// photoLookup); `themes` (optional) is the set of known theme ids.
+// photoLookup); `maxPhotos` (optional) replaces LIMITS.photos, for tools only; `themes` (optional) is the set of known theme ids.
 // -> { ok: true, doc, title, kind, photos }
 //  | { ok: false, code, status, errors: [{ code, path }] }
 // `doc` is the document with its style sanitised, `title` the one the node
 // row gets (doc.title, docs/EDITOR.md S3.1).
-export function validateNode(body, { hasPhoto, themes } = {}) {
+export function validateNode(body, { hasPhoto, themes, maxPhotos } = {}) {
   const fail = (code, errors) => ({ ok: false, code, status: STATUS[code], errors });
 
   if(!body || typeof body !== 'object' || Array.isArray(body)) return fail('invalid', [{ code: 'not_object', path: '' }]);
 
-  const errors = validate(body.doc);
+  const errors = validate(body.doc, { maxPhotos });
 
   if(errors.length) return fail(errors.some(e => e.code === 'too_large') ? 'too_large' : 'invalid', errors);
 

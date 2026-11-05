@@ -26,7 +26,7 @@ export const userByLogin = (h, login) => {
 };
 
 // a username: letters, digits, dot, dash and underscore, 2 to 30 characters, starting with a letter or digit
-const USERNAME = /^[A-Za-z0-9][A-Za-z0-9._-]{1,29}$/;
+export const USERNAME = /^[A-Za-z0-9][A-Za-z0-9._-]{1,29}$/;
 
 // give the user with this mail address a username (null takes it away) -> true | 'invalid' | 'taken' | 'no_user'
 export function setUsername(h, email, username) {
@@ -69,19 +69,33 @@ export async function changePassword(h, email, password, { revoke = true } = {})
   return true;
 }
 
+// the defaults a user can set (docs/PROFILE.md S2, S3); `prefs` is the stored JSON or null
+export const DEFAULT_PREFS = { titlePattern: '{date} [{location}] {pseudonym}', descPattern: '{location}, {date}', visibility: 'hidden' };
+
+export function prefsOf(stored) {
+  let given = {};
+
+  try {
+    given = typeof stored === 'string' ? JSON.parse(stored) : (stored ?? {});
+  } catch {}
+
+  return { ...DEFAULT_PREFS, ...Object.fromEntries(Object.entries(given ?? {}).filter(([k, v]) => k in DEFAULT_PREFS && typeof v === 'string')) };
+}
+
 // the logged-in user of a request, or null
 export function viewerOf(h, req, now = Date.now()) {
   const cookie = (req.headers.get('cookie') ?? '').split(';').map(c => c.trim().split('=')).find(([name]) => name === COOKIE)?.[1];
 
   if(!cookie || !/^[0-9a-f]{64}$/.test(cookie)) return null;
 
-  const row = h.get('SELECT u.id, u.email, u.name, u.username, u.is_admin FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?', hash(cookie), now);
+  const row = h.get('SELECT u.id, u.email, u.name, u.username, u.pseudonym, u.prefs, u.is_admin FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?', hash(cookie), now);
 
   if(!row) return null;
 
-  const { is_admin: admin, ...viewer } = row;
+  const { is_admin: admin, prefs, ...viewer } = row;
+  const out = { ...viewer, prefs: prefsOf(prefs) };
 
-  return admin ? { ...viewer, admin: true } : viewer;
+  return admin ? { ...out, admin: true } : out;
 }
 
 const setCookie = (req, token, ms) => `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${Math.floor(ms / 1000)}${req.headers.get('x-forwarded-proto') === 'https' ? '; Secure' : ''}`;

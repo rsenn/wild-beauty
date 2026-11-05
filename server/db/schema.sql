@@ -168,3 +168,9 @@ CREATE TABLE push_sent (
   node_id INTEGER PRIMARY KEY REFERENCES nodes(id) ON DELETE CASCADE,
   at      INTEGER NOT NULL
 );
+
+-- migration 10
+-- The profile (docs/PROFILE.md): the artist's pseudonym, the root node (the avatar) and a few defaults as JSON.
+ALTER TABLE users ADD COLUMN pseudonym TEXT NOT NULL DEFAULT '';
+ALTER TABLE users ADD COLUMN root_id INTEGER REFERENCES nodes(id) ON DELETE SET NULL;
+ALTER TABLE users ADD COLUMN prefs TEXT;

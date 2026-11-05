@@ -2408,6 +2408,132 @@ body {
   margin: var(--wb-editor-gap) auto 0;
 }
 
+/* a wide track is not bound to the square stage and has no frame, background or scrollbar: the page's width, a height that leaves room
+   for the header, each photo contained in its own shape, landscape or portrait */
+.wb-node-view.wb-flow-wide {
+  aspect-ratio: auto;
+  width: 100%;
+  height: calc(100vh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 7em);
+  height: calc(100dvh - var(--wb-logo-height) - 3 * var(--wb-tab-gap) - 7em);
+  min-height: 16rem;
+
+  /* no frame of its own: the photos sit straight on the page */
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+.wb-flow-wide .wb-flow-track {
+  scrollbar-width: none;
+}
+
+.wb-flow-wide .wb-flow-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* the gallery's other presentations (docs/GALLERY.md S5a): a switch beside the title, a
+   carousel in the node's own stage, and a masonry album that is as wide as the page */
+.wb-gallery-views {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--wb-tab-gap);
+}
+
+.wb-gallery-slide {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.wb-gallery-pic {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.wb-gallery-pic img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* the full image fades in over the thumbnail once it has loaded */
+.wb-gallery-full {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.wb-gallery-full.wb-gallery-ready {
+  opacity: 1;
+}
+
+.wb-gallery-slide figcaption {
+  flex: none;
+  padding: 0.3em 0.6em;
+  text-align: center;
+}
+
+.wb-masonry {
+  width: 100%;
+}
+
+.wb-masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+  gap: var(--wb-tab-gap);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.wb-masonry-tile {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--wb-card-ground);
+  border: var(--wb-border-width) solid var(--wb-ink);
+}
+
+.wb-masonry-tile > button {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.wb-masonry-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* the picture the visitor was just on in another view */
+.wb-masonry-current {
+  outline: 0.35em solid var(--wb-accent);
+  outline-offset: -0.35em;
+}
+
+.wb-masonry-open {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0 0.35em;
+  color: var(--wb-ink);
+  text-decoration: none;
+  background: var(--wb-card-ground);
+  border: var(--wb-border-width) solid var(--wb-ink);
+}
+
 /* the loupe above a finger while it places a point (E124) */
 .wb-loupe {
   position: absolute;
@@ -2875,4 +3001,449 @@ body {
 .wb-admin-player {
   max-width: 100%;
   overflow: auto;
+}
+
+/* batch editor of the graph view (docs/BATCH.md): a panel over the graph */
+.wb-batch {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  padding: var(--wb-editor-gap);
+  overflow: auto;
+  color: var(--wb-ink);
+  background-color: var(--wb-wallpaper-color);
+}
+
+.wb-batch-bar {
+  position: sticky;
+  z-index: 3;
+  top: calc(-1 * var(--wb-editor-gap));
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  padding: var(--wb-editor-gap) 0;
+  background-color: var(--wb-wallpaper-color);
+}
+
+.wb-batch-note {
+  min-width: 0;
+  margin-inline-start: auto;
+}
+
+.wb-batch-scroll {
+  overflow-x: auto;
+}
+
+.wb-batch-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.wb-batch-table th,
+.wb-batch-table td {
+  padding: 4px 8px;
+  text-align: start;
+  border-bottom: 1px solid currentColor;
+}
+
+.wb-batch-table th button {
+  font: inherit;
+  font-weight: bold;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.wb-batch-changed td {
+  font-style: italic;
+}
+
+.wb-batch-open {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.wb-batch-open .wb-editor-chip {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.wb-batch-tiles {
+  --wb-batch-tile: clamp(72px, 14vw, 120px);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--wb-batch-tile));
+  gap: 6px;
+  align-items: start;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.wb-batch-head {
+  grid-column: 1 / -1;
+  padding: 4px 8px;
+  margin-top: var(--wb-editor-gap);
+  font-weight: bold;
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border-radius: var(--wb-radius-button);
+}
+
+.wb-batch-head.wb-batch-drop {
+  outline: var(--wb-select-width) solid var(--wb-select);
+}
+
+.wb-batch-tile {
+  position: relative;
+  width: var(--wb-batch-tile);
+  height: var(--wb-batch-tile);
+  overflow: hidden;
+}
+
+.wb-batch-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.wb-batch-tile.wb-selected {
+  outline: var(--wb-select-width) solid var(--wb-select);
+  outline-offset: -3px;
+}
+
+.wb-batch-tile.wb-batch-off img {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+.wb-batch-tile.wb-batch-off::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(to top right, transparent calc(50% - 1.5px), var(--wb-ink) calc(50% - 1.5px) calc(50% + 1.5px), transparent calc(50% + 1.5px));
+}
+
+.wb-batch-tile.wb-batch-locked {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.wb-batch-tile.wb-batch-lifted {
+  opacity: 0.35;
+}
+
+.wb-batch-tile.wb-batch-before {
+  box-shadow: -4px 0 0 0 var(--wb-select);
+}
+
+.wb-batch-tile.wb-batch-after {
+  box-shadow: 4px 0 0 0 var(--wb-select);
+}
+
+.wb-batch-ghost {
+  position: fixed;
+  z-index: 30;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.wb-batch-ghost img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 0 2px 8px var(--wb-ink);
+}
+
+.wb-batch-ghost span {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  padding: 0 4px;
+  text-align: center;
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border-radius: 10px;
+}
+
+.wb-batch-desc {
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  padding-bottom: var(--wb-editor-gap);
+}
+
+.wb-batch-desc input {
+  flex: 1 1 16em;
+  min-width: 0;
+  min-height: 32px;
+  padding: 2px 8px;
+  font: inherit;
+}
+
+.wb-batch-tile.wb-batch-has-desc::before {
+  position: absolute;
+  z-index: 1;
+  right: 4px;
+  bottom: 4px;
+  width: 10px;
+  height: 10px;
+  content: '';
+  background: var(--wb-accent);
+  border: 2px solid var(--wb-accent-ink);
+  border-radius: 50%;
+}
+
+.wb-batch-hit {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  cursor: grab;
+  background: none;
+  border: 0;
+  touch-action: pan-y;
+}
+
+.wb-batch-tile.wb-batch-locked .wb-batch-hit {
+  cursor: default;
+}
+
+.wb-batch-tools {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  right: 4px;
+  display: none;
+  gap: 4px;
+}
+
+.wb-batch-tile:hover .wb-batch-tools,
+.wb-batch-tile:focus-within .wb-batch-tools,
+.wb-batch-tile.wb-selected .wb-batch-tools {
+  display: flex;
+}
+
+@media (hover: none) {
+  .wb-batch-tools {
+    display: flex;
+  }
+}
+
+.wb-batch-tool {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font: inherit;
+  line-height: 1;
+  color: var(--wb-accent-ink);
+  cursor: pointer;
+  background: var(--wb-accent);
+  border: 0;
+  border-radius: 50%;
+}
+
+.wb-batch-pop {
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  flex-flow: column;
+  gap: var(--wb-editor-gap);
+  width: 320px;
+  max-width: calc(100vw - 16px);
+  padding: var(--wb-editor-gap);
+  color: var(--wb-ink);
+  background-color: var(--wb-wallpaper-color);
+  border: var(--wb-border-width) solid var(--wb-ink);
+}
+
+.wb-batch-pop textarea {
+  width: 100%;
+  font: inherit;
+  resize: vertical;
+}
+
+.wb-batch-pop-bar {
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+}
+
+.wb-batch-pop-count {
+  margin-inline-start: auto;
+}
+
+/* the user profile page (docs/PROFILE.md) */
+.wb-tab-user:hover,
+.wb-tab-user:focus-within,
+.wb-tab-user.wb-tab-active {
+  height: calc(var(--wb-tab-size-open) + 1.8em);
+}
+
+.wb-tab > .wb-tab-profile {
+  padding-bottom: 0.4em;
+  font-size: var(--wb-font-size-small);
+  text-align: center;
+  text-decoration: underline;
+}
+
+.wb-profile {
+  display: flex;
+  flex-flow: column;
+  gap: var(--wb-editor-gap);
+  max-width: 36em;
+  margin: 0 auto;
+  padding: var(--wb-editor-gap) 0;
+}
+
+.wb-profile label {
+  display: flex;
+  flex-flow: column;
+  gap: 2px;
+}
+
+.wb-profile input,
+.wb-profile select {
+  min-height: 32px;
+  padding: 2px 8px;
+  font: inherit;
+}
+
+.wb-profile small {
+  opacity: 0.75;
+}
+
+.wb-profile-avatar {
+  display: flex;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+}
+
+.wb-profile-avatar img,
+.wb-profile-noavatar {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border: var(--wb-border-width) solid var(--wb-ink);
+}
+
+.wb-profile-noavatar {
+  display: grid;
+  place-items: center;
+  font-size: 2em;
+}
+
+.wb-profile-bar {
+  display: flex;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+}
+
+/* the calm visitor view of /tree (docs/GRAPH.md S2.8): thin, light edges, nodes that open or unfold, a count for what is folded */
+.wb-graph-calm .wb-graph-edge line:not(.wb-graph-hit) {
+  stroke-opacity: 0.4;
+  stroke-width: 1;
+}
+
+.wb-graph-calm .wb-graph-edge {
+  pointer-events: none;
+}
+
+.wb-graph-calm .wb-graph-node {
+  cursor: pointer;
+}
+
+.wb-graph-more rect {
+  fill: var(--wb-accent);
+  stroke: var(--wb-accent-ink);
+  stroke-width: 2;
+}
+
+.wb-graph-more text {
+  font-size: 12px;
+  fill: var(--wb-accent-ink);
+  pointer-events: none;
+}
+
+/* the Show page: the galleries as cards (docs/GALLERY.md S5b) */
+.wb-view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: calc(2 * var(--wb-editor-gap));
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.wb-view-card > a {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  overflow: hidden;
+  color: var(--wb-ink);
+  text-decoration: none;
+  border: var(--wb-border-width) solid var(--wb-ink);
+  border-radius: var(--wb-radius-button);
+}
+
+.wb-view-mosaic {
+  display: grid;
+  gap: 2px;
+  background: var(--wb-ink);
+}
+
+.wb-view-mosaic img,
+.wb-view-empty {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.wb-view-mosaic:has(> :only-child) > img {
+  aspect-ratio: 4 / 3;
+}
+
+.wb-view-card > a:hover .wb-view-mosaic img,
+.wb-view-card > a:focus-visible .wb-view-mosaic img {
+  filter: brightness(1.08);
+}
+
+.wb-view-caption {
+  display: flex;
+  flex: 1;
+  flex-flow: column;
+  gap: 4px;
+  justify-content: space-between;
+  padding: var(--wb-editor-gap);
+  background: var(--wb-accent);
+  color: var(--wb-accent-ink);
+}
+
+.wb-view-heading {
+  display: block;
+  width: 100%;
+  max-height: 5em;
+}
+
+.wb-view-title {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.wb-view-count {
+  font-size: var(--wb-font-size-small);
+  opacity: 0.85;
 }
