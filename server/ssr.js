@@ -26,7 +26,7 @@ export function renderPage(vnode, { lang, dir = 'ltr', title, theme = 'kraft', b
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>${meta ? `
 ${meta}` : ''}
-<link rel="icon" href="${esc(site ? site.icon : '/static/img/favicon.png')}">
+${site ? `<link rel="icon" href="${esc(site.icon)}">` : '<link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">\n<link rel="icon" href="/static/img/favicon.png" sizes="32x32" type="image/png">'}
 <link rel="manifest" href="/manifest.webmanifest">${site ? `
 <link rel="canonical" href="${esc(site.canonical)}">` : `
 <link rel="apple-touch-icon" href="/static/img/pwa-apple-180.png">`}

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64">
+  <title>Wild Beauty</title>
+  <defs><path id="p" d="M0 0C-22-22-128-72-122-152C-118-204-62-222-24-188Q-7-174 0-146Q7-174 24-188C62-222 118-204 122-152C128-72 22-22 0 0Z"/><path id="l" d="M139.3 0.0L137.7 9.0L133.6 17.6L128.1 25.5L122.5 32.8L118.3 40.1L115.8 47.9L114.8 56.6L114.3 66.0L113.1 75.6L110.0 84.4L104.6 91.7L96.9 96.9L87.9 100.2L78.4 102.2L69.5 104.0L61.4 106.3L53.9 109.2L46.4 112.1L38.4 113.3L29.9 111.4L21.1 106.2L13.0 98.9L6.0 91.7L0.0 87.1L-5.7 86.3L-11.8 89.3L-19.0 95.3L-27.6 103.1L-37.6 110.9L-48.4 116.9L-59.0 119.7L-68.5 118.7L-76.1 113.9L-81.8 106.6L-86.0 98.1L-89.7 89.7L-93.9 82.3L-99.4 76.3L-106.4 71.1L-114.3 66.0L-122.0 60.2L-128.1 53.1L-131.7 44.7L-132.5 35.5L-130.9 26.0L-128.1 16.9L-125.7 8.2L-124.7 0.0L-125.7 -8.2L-128.1 -16.9L-130.9 -26.0L-132.5 -35.5L-131.7 -44.7L-128.1 -53.1L-122.0 -60.2L-114.3 -66.0L-106.4 -71.1L-99.4 -76.3L-93.9 -82.3L-89.7 -89.7L-86.1 -98.2L-82.0 -106.9L-76.7 -114.8L-69.6 -120.6L-61.1 -123.8L-51.6 -124.5L-42.0 -123.7L-32.8 -122.5L-24.4 -122.5L-16.4 -124.2L-8.4 -127.7L-0.0 -132.0L8.9 -135.7L18.1 -137.5L27.1 -136.4L35.5 -132.5L42.9 -126.3L49.5 -119.4L55.7 -113.0L62.4 -108.0L70.0 -104.7L78.7 -102.5L88.0 -100.3L97.0 -97.0L104.6 -91.7L110.0 -84.4L113.1 -75.6L114.3 -66.0L114.8 -56.6L115.8 -47.9L118.3 -40.1L122.5 -32.8L128.1 -25.5L133.6 -17.6L137.7 -9.0Z"/></defs>
+  <g transform="translate(32 28.5) scale(0.106)">
+    <g stroke="#1f5a2f" stroke-width="16" stroke-linejoin="round">
+      <use xlink:href="#l" transform="translate(-128 138) rotate(-145.2)" fill="#4f9a45"/>
+      <use xlink:href="#l" transform="translate(132 126) rotate(143.7)" fill="#2f7d3c"/>
+    </g>
+    <g fill="#a02a9f" stroke="#4b1261" stroke-width="22" stroke-linejoin="round">
+      <use xlink:href="#p"/><use xlink:href="#p" transform="rotate(72)"/><use xlink:href="#p" transform="rotate(144)"/><use xlink:href="#p" transform="rotate(216)"/><use xlink:href="#p" transform="rotate(288)"/>
+    </g>
+    <g fill="#a02a9f">
+      <use xlink:href="#p"/><use xlink:href="#p" transform="rotate(72)"/><use xlink:href="#p" transform="rotate(144)"/><use xlink:href="#p" transform="rotate(216)"/><use xlink:href="#p" transform="rotate(288)"/>
+    </g>
+    <circle r="58" fill="#f6e9d6"/>
+    <circle r="24" fill="#d65fb4"/>
+  </g>
+</svg>
