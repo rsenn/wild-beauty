@@ -15,12 +15,18 @@ const doc = (title = '') => ({ v: 1, style: {}, mode: 'free', title, pages: [{ i
 // a request from a browser that has the session `token` (none: a new one)
 const TOKENS = ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'];
 const as = (who, method = 'POST') => new Request('http://x/api/nodes/1/lock', { method, headers: who === undefined ? {} : { cookie: `wb-session=${TOKENS[who]}` } });
+const OWNER = 'b'.repeat(64);
 const holder = who => sessionFor(as(who)).holder;
 
 beforeEach(async () => {
   h = await open(':memory:');
   id = insertNode(h, { title: 'n', doc: doc() }).id;
   t = 1_000_000;
+
+  // the node's owner: the locks decide between two browsers of the same user (docs/GUESTS.md G8: nobody else may write it)
+  h.run("INSERT INTO users (id, email, pw_hash, created_at) VALUES (1, 'o@example.org', '!', 1)");
+  h.run('UPDATE nodes SET owner_id = 1 WHERE id = ?', id);
+  h.run('INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES (?, 1, 1, 9e15)', new Bun.CryptoHasher('sha256').update(OWNER).digest('hex'));
 });
 
 describe('lock with a fake clock', () => {
@@ -103,7 +109,7 @@ describe('sessions', () => {
 });
 
 describe('a lock held by someone else blocks the node', () => {
-  const opts = who => ({ holder: holder(who), now: clock.now });
+  const opts = who => ({ holder: holder(who), now: clock.now, viewer: { id: 1 } });
 
   test('PUT and DELETE are 423 for the other browser, allowed for the holder and when nobody holds it', async () => {
     takeLock(h, id, holder(0), { now: t });
@@ -134,7 +140,7 @@ describe('a lock held by someone else blocks the node', () => {
   test('over HTTP: the route reads the session cookie', async () => {
     takeLock(h, id, holder(0), { now: Date.now() });
 
-    const req = new Request('http://x/api/nodes/1', { method: 'DELETE', headers: { cookie: `wb-session=${TOKENS[1]}` } });
+    const req = new Request('http://x/api/nodes/1', { method: 'DELETE', headers: { cookie: `wb-session=${TOKENS[1]}; wb-auth=${OWNER}` } });
 
     expect((await deleteNodeRoute(String(id), h, req)).status).toBe(423);
     expect(getNode(h, id)).not.toBeNull();

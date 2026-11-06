@@ -69,6 +69,7 @@ server.js routes by hand, no framework. Add a route there and import its handler
 - server/api/photos.js    serves baked photos, thumb, large, small
 - server/api/graph.js places.js locks.js   graph view, place names, edit locks
 - server/auth.js session.js guard.js   login, cookies, who may write
+- server/guests.js   guest users: made at a visitor's first save, claimed or merged, swept after 30 days (docs/GUESTS.md); an ownerless node is an admin's only
 - server/db/              sqlite through bun, schema.sql has numbered migrations
 - server/node/            validate.js checks a document, view.js feeds the viewer, reconcile.js repairs after crashes
 - server/media/           everything pixel related, see next section

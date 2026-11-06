@@ -1,11 +1,11 @@
-// Who may write a node (docs/SITES.md S13). The nodes of the open public area have
-// no owner and no space: everybody may create and change them, logged in or not.
-// A node of a user (owner_id) is changed by its owner only, and a user's new node
-// is theirs. `tools/adopt.js` gives an ownerless node an owner.
+// Who may write a node (docs/SITES.md S13, docs/GUESTS.md G8). A node of a user (owner_id)
+// is changed by its owner only, and a user's new node is theirs; a visitor's first save
+// makes them a guest, so every new node has an owner. The old ownerless nodes (the former
+// open public area) are changed by an admin only. `tools/adopt.js` gives one an owner.
 import { viewerOf } from './auth.js';
 
 // may `viewer` change `node`?
-export const mayWrite = (node, viewer) => (!!viewer && node.owner_id === viewer.id) || (node.owner_id === null && !node.space);
+export const mayWrite = (node, viewer) => !!viewer && (node.owner_id === viewer.id || (node.owner_id === null && !node.space && !!viewer.admin));
 
 // the ids a write request changes, and whether it changes anything at all
 // -> { writes: bool, ids: [...] }; for the graph view only what an op changes
@@ -44,8 +44,5 @@ export async function guard(req, pathname, h) {
 
   const rows = h.all(`SELECT id, owner_id, space FROM nodes WHERE id IN (${ids.map(() => '?').join(',')})`, ...ids);
 
-  // the graph ops leave the community nodes (no owner) to the admins; the node editor's own routes stay open
-  const may = row => (row.owner_id === null && !row.space && pathname.startsWith('/api/graph') ? !!viewer?.admin : mayWrite(row, viewer));
-
-  return rows.every(may) ? null : refuse(viewer ? 403 : 401, viewer ? 'forbidden' : 'login_required');
+  return rows.every(row => mayWrite(row, viewer)) ? null : refuse(viewer ? 403 : 401, viewer ? 'forbidden' : 'login_required');
 }

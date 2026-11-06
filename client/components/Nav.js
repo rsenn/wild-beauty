@@ -113,7 +113,11 @@ export const Nav = ({ tabs, active, home = false, user = null, hrefFor, loginOpe
           </li>`,
         )}
         <${LanguageMenu} hrefFor=${hrefFor} />
-        ${user
+        ${user?.guest
+          ? html`<li class=${'wb-tab wb-tab-login' + (loginOpen ? ' wb-tab-active' : '')}>
+              <button type="button" class="wb-tab-button" aria-haspopup="dialog" aria-expanded=${loginOpen ? 'true' : 'false'} title=${t('guest.nav.caption')} onClick=${onLogin}><${Icon} name="user" /><span class="wb-tab-label">${t('guest.nav')}</span></button>
+            </li>`
+          : user
           ? html`<${AccountMenu} user=${user} active=${active} onLogout=${onLogout} />`
           : html`<li class=${'wb-tab wb-tab-login' + (loginOpen ? ' wb-tab-active' : '')}>
               <button type="button" class="wb-tab-button" aria-haspopup="dialog" aria-expanded=${loginOpen ? 'true' : 'false'} onClick=${onLogin}><${Icon} name="user" /><span class="wb-tab-label">${t('nav.login')}</span></button>

@@ -41,7 +41,11 @@ export function whoIs(req, session) {
 }
 
 // the logged-in user of a request, as it is logged: the mail address, else nothing
-const userOf = async req => viewerOf(await database(), req)?.email;
+const userOf = async req => {
+  const viewer = viewerOf(await database(), req);
+
+  return viewer?.guest ? `guest:${viewer.id}` : viewer?.email;
+};
 
 // POST /api/events: { events: [{ t, type, ...data }] }
 export async function recordEvents(req) {

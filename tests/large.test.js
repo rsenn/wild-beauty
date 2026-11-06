@@ -43,8 +43,14 @@ beforeEach(async () => {
   upsertPhoto(h, { hash: B, ext: 'png', width: 400, height: 300, bytes: 10 });
 });
 
+const OWNER = 'c'.repeat(64);
 const node = (steps, tile) => {
   const { id } = insertNode(h, { title: 'n', doc: doc(steps), palette: [] });
+
+  // owned by the test user: only an owner saves into a node (docs/GUESTS.md G8)
+  h.run("INSERT OR IGNORE INTO users (id, email, pw_hash, created_at) VALUES (1, 'o@example.org', '!', 1)");
+  h.run('INSERT OR IGNORE INTO sessions (token_hash, user_id, created_at, expires_at) VALUES (?, 1, 1, 9e15)', new Bun.CryptoHasher('sha256').update(OWNER).digest('hex'));
+  h.run('UPDATE nodes SET owner_id = 1 WHERE id = ?', id);
 
   if(tile) h.run('UPDATE nodes SET tile = ? WHERE id = ?', tile, id);
 
@@ -106,7 +112,7 @@ describe('largeRoute', () => {
 });
 
 describe('putLargeRoute', () => {
-  const put = (id, body, type = 'image/jpeg') => putLargeRoute(new Request('http://x/', { method: 'PUT', headers: { 'content-type': type }, body }), id, h);
+  const put = (id, body, type = 'image/jpeg') => putLargeRoute(new Request('http://x/', { method: 'PUT', headers: { 'content-type': type, cookie: `wb-auth=${OWNER}` }, body }), id, h);
   let jpeg;
 
   beforeAll(async () => {

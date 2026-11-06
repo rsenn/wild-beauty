@@ -69,6 +69,9 @@ export async function profileRoute(req, pathname, h) {
 
   if(!viewer) return fail(401, 'login_required');
 
+  // a guest has no profile until they claim the account (docs/GUESTS.md G5)
+  if(viewer.guest) return fail(403, 'account_required');
+
   if(pathname === '/api/profile/avatar') {
     if(req.method !== 'POST') return fail(405, 'method_not_allowed');
 

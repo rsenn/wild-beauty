@@ -8,7 +8,8 @@ import { resolve } from 'node:path';
 import { config } from '../config.js';
 import { log } from '../log.js';
 import { database } from '../db/db.js';
-import { viewerOf } from '../auth.js';
+import { clientOf, startSession, viewerOf } from '../auth.js';
+import { GUEST_LIMITS, createGuest, dropGuest, worksOf } from '../guests.js';
 import { published } from '../push.js';
 import { mayWrite } from '../guard.js';
 import { addSuggestions, deleteNode, deletePhoto, getNode, linksFrom, listNodes, getPhoto, insertNode, nodePhotos, releaseLock, setNodePhotos, updateNode, upsertPhoto } from '../db/nodes.js';
@@ -199,7 +200,7 @@ export const saveNew = (h, body, { viewer = null, space = null, maxPhotos } = {}
 
       // a logged-in user's new node is theirs: only they change it (server/guard.js),
       // and it is hidden until they make it public (their profile can make new nodes public at once)
-      if(viewer) h.run('UPDATE nodes SET owner_id = ?, visibility = ? WHERE id = ?', viewer.id, viewer.prefs?.visibility === 'public' ? 'public' : 'hidden', node.id);
+      if(viewer) h.run('UPDATE nodes SET owner_id = ?, visibility = ? WHERE id = ?', viewer.id, !viewer.guest && viewer.prefs?.visibility === 'public' ? 'public' : 'hidden', node.id);
 
       // made on a personal site: a node of that site
       if(viewer && space) h.run('UPDATE nodes SET space = ? WHERE id = ?', space, node.id);
@@ -384,16 +385,46 @@ async function jsonBody(req) {
   }
 }
 
-// POST /api/nodes
+// POST /api/nodes. A visitor who is not logged in becomes a guest with this first save (docs/GUESTS.md G1): the
+// node is theirs and hidden, and the answer carries their login cookie. Not on a personal site (there a login is
+// needed), and a guest cannot make a site page.
 export async function createNode(req, h, { space = null } = {}) {
   const { body, error } = await jsonBody(req);
 
   if(error) return error;
 
   const db = h ?? (await database());
-  const r = await saveNew(db, body, { viewer: viewerOf(db, req), space });
+  let viewer = viewerOf(db, req);
+  let started = null;
 
-  return reply(r.status, r.body);
+  if(!viewer) {
+    if(space) return fail(401, 'login_required');
+
+    const guest = createGuest(db, clientOf(req));
+
+    if(guest.error) return fail(guest.error === 'full' ? 503 : 429, 'quota');
+
+    started = startSession(db, req, guest.id, Date.now(), { guest: true });
+    viewer = { id: guest.id, email: '', name: '', username: null, pseudonym: '', prefs: {}, guest: true };
+  } else if(viewer.guest) {
+    if(space) return fail(403, 'account_required');
+    if(worksOf(db, viewer.id) >= GUEST_LIMITS.nodes) return fail(429, 'quota');
+  }
+
+  const r = await saveNew(db, body, { viewer, space });
+
+  // a first save that failed leaves no guest behind
+  if(started && r.status !== 201) {
+    dropGuest(db, viewer.id, clientOf(req));
+
+    return reply(r.status, r.body);
+  }
+
+  const res = reply(r.status, r.body);
+
+  if(started) res.headers.append('set-cookie', started);
+
+  return res;
 }
 
 // PUT /api/nodes/:id
@@ -550,7 +581,7 @@ export const visibleNodes = (h, viewer = null) => listNodes(h, 1e6).filter(node 
 // public area (the nodes nobody owns, which everybody may change)
 export const listedNodes = (h, viewer = null) =>
   listNodes(h, 1e6)
-    .filter(node => (viewer ? node.owner_id === viewer.id : node.owner_id === null && !node.space && node.visibility === 'public'))
+    .filter(node => !!viewer && node.owner_id === viewer.id)
     .slice(0, 200)
     .map(node => tileOf(node, viewer));
 
@@ -574,6 +605,9 @@ export async function visibilityRoute(req, idText, h) {
   if(body?.visibility !== 'hidden' && body?.visibility !== 'public') return fail(400, 'invalid');
 
   const db = h ?? (await database());
+
+  // a guest cannot publish: it takes an account (docs/GUESTS.md G3)
+  if(body.visibility === 'public' && viewerOf(db, req)?.guest) return fail(403, 'account_required');
 
   const before = db.get('SELECT visibility FROM nodes WHERE id = ?', Number(idText))?.visibility;
 

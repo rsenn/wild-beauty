@@ -6,6 +6,8 @@ Mechanism: `TODO.md` "Theming rule" and `docs/PLAN.md` S16. A theme is `static/t
 
 Artists and home makers (jewellery, cards, small goods) who already style their work with care, and who should **want to create and publish** here. Mood references from the owner: a bracelet on a kraft card with a caramel pill label in script type, a festival stall (warm wood, brass, soft light); two of the owner's own site designs (a six-colour block tab bar with pale illustrated ground, translucent white cards with a dark outline; small black label chips with colour bars). These are mood, not templates.
 
+**The existing `janos` theme is already the quiet reference (owner, 2026-11-06: "very very good").** It is white, monochrome (`--wb-ink: #111`, accent `#111`, no wallpaper, no paper, no pixel type) and carries János's loud, dense collages without competing with them. So Linen is **not a new start**: it takes janos as the base and adds (a) a warm tint for makers whose work is warm and handmade, (b) the palette accent of T3, and (c) the accent tokens of T5. Open: whether Linen is a separate file or janos itself gains the palette accent and a `--wb-warm` switch (simplest: try the accent on janos first, see whether a second theme is still needed).
+
 Decisions:
 
 - **T1. The theme has little identity of its own.** The user's work dominates and sets the mood, like a gallery wall. No illustration, no mascot, no texture (kraft keeps the paper identity).

@@ -1466,6 +1466,18 @@ body {
   border-radius: var(--wb-radius-frame);
 }
 
+/* the line above the saved works while the user is a guest (docs/GUESTS.md S2) */
+.wb-guest-note {
+  display: flex;
+  flex-flow: row wrap;
+  gap: var(--wb-editor-gap);
+  align-items: center;
+  margin: 0 0 var(--wb-editor-gap);
+  padding: 4px var(--wb-editor-gap);
+  background: var(--wb-editor-banner-bg);
+  border-radius: var(--wb-radius-frame);
+}
+
 /* the picture that follows a finger while a card is dragged by touch (E46) */
 .wb-ghost {
   position: fixed;
@@ -2840,6 +2852,11 @@ body {
 
 .wb-login-button:active {
   transform: translate(1px, 1px);
+}
+
+.wb-login-note {
+  margin: 0;
+  font-size: var(--wb-font-size-small);
 }
 
 .wb-login-status {

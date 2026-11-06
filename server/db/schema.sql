@@ -178,3 +178,10 @@ ALTER TABLE users ADD COLUMN prefs TEXT;
 -- migration 11
 -- Whether search engines may be offered the node (docs/SEO.md): NULL = the default rule (a public collage is findable), 1 = findable, 0 = never.
 ALTER TABLE nodes ADD COLUMN search INTEGER;
+
+-- migration 12
+-- Guests (docs/GUESTS.md): a visitor's first save makes a private user without a mail address or a password.
+-- `guest` = 1 until the visitor claims the account; `last_seen` (ms) renews the 30 days they are kept.
+ALTER TABLE users ADD COLUMN guest INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN last_seen INTEGER;
+CREATE INDEX users_guest ON users(last_seen) WHERE guest = 1;

@@ -9,7 +9,7 @@ import { config } from './server/config.js';
 import { dev, log } from './server/log.js';
 import { clearUploads, createUpload, deleteUpload, listUploads, readUploads, serveUpload, sweepOrphans, sweepUploads } from './server/api/uploads.js';
 import { lockRoute } from './server/api/locks.js';
-import { captionsRoute, createNode, deleteNodeRoute, largeRoute, listNodesRoute, listedNodes, putLargeRoute, readNode, updateNodeRoute, visibilityRoute, visibleNodes } from './server/api/nodes.js';
+import { captionsRoute, createNode, deleteNodeRoute, removeNode, largeRoute, listNodesRoute, listedNodes, putLargeRoute, readNode, updateNodeRoute, visibilityRoute, visibleNodes } from './server/api/nodes.js';
 import { manifestResponse, workerResponse } from './server/pwa.js';
 import { graphOf, graphRoute } from './server/api/graph.js';
 import { placesRoute } from './server/api/places.js';
@@ -30,7 +30,8 @@ import { database } from './server/db/db.js';
 import { reconcile } from './server/node/reconcile.js';
 import { sessionFor } from './server/session.js';
 import { guard, mayWrite } from './server/guard.js';
-import { loginRoute, logoutRoute, meRoute, registerRoute, viewerOf } from './server/auth.js';
+import { claimRoute, loginRoute, logoutRoute, meRoute, registerRoute, viewerOf } from './server/auth.js';
+import { sweepGuests } from './server/guests.js';
 import { isOwner, siteFor } from './server/sites.js';
 import { createPage, pathsOf, resolve as resolvePage, robotsTxt, sitemap, sitemapXml, siteGraph } from './server/site.js';
 import { adminRoute, isAdmin } from './server/admin.js';
@@ -75,6 +76,17 @@ const sweep = () => {
 
 await sweep();
 setInterval(sweep, 10 * 60 * 1000).unref();
+
+// guests nobody has seen for 30 days go with their works, at start and then daily (docs/GUESTS.md G7)
+const sweepGuestArea = async () => {
+  const h = await database();
+  const gone = await sweepGuests(h, (node, guest) => removeNode(h, node, { viewer: { id: guest } }));
+
+  if(gone) log('sweep', `${gone} expired guests removed`);
+};
+
+sweepGuestArea().catch(() => {});
+setInterval(() => sweepGuestArea().catch(() => {}), 86400000).unref();
 
 const text = (body, status) => new Response(body, { status, headers: { 'content-type': 'text/plain; charset=utf-8' } });
 
@@ -335,6 +347,7 @@ async function route(req) {
   } else {
     if(pathname === '/api/login' && req.method === 'POST') return loginRoute(req, h);
     if(pathname === '/api/register' && req.method === 'POST') return registerRoute(req, h);
+    if(pathname === '/api/claim' && req.method === 'POST') return claimRoute(req, h);
     if(pathname === '/api/logout' && req.method === 'POST') return logoutRoute(req, h);
     if(pathname === '/api/me' && req.method === 'GET') return meRoute(req, h);
   }

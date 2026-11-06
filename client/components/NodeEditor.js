@@ -1,3 +1,4 @@
+import { accountChanged, keptUntil, openAccount, useAccount } from '../account.js';
 import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
@@ -292,7 +293,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const [hist, setHist] = useState(() => history.create({ doc: emptyNode(), kind: 'node' }));
   const [photos, setPhotos] = useState({});
   const [panelTab, setPanelTab] = useState('select'); // landscape: which panel section shows
-  const [visibility, setVisibility] = useState(boot.user ? 'hidden' : 'public'); // who else sees this node: a logged-in user's new node starts hidden
+  const [visibility, setVisibility] = useState('hidden'); // who else sees this node: every new node starts hidden, a visitor's first save makes them a guest (docs/GUESTS.md)
+  const account = useAccount(); // the user, a guest after the first save
   const [owned, setOwned] = useState(false); // the node has an owner and it is the user: only then the visibility can be changed
   const [children, setChildren] = useState([]); // the nodes linked under this one (what a gallery hangs), as the server last said
   const [tool, setTool] = useState(DEFAULT_TOOL);
@@ -1020,8 +1022,11 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     setNodeId(r.id);
     setBusy(false);
 
-    // a new node of a logged-in user is theirs and hidden: ask who owns it now
-    if(first && boot.user) loadNode(r.id).then(m => m.ok && (setVisibility(m.visibility), setOwned(m.owned)));
+    // a new node is its maker's and hidden (a visitor became a guest with this save): ask who owns it now
+    if(first) {
+      loadNode(r.id).then(m => m.ok && (setVisibility(m.visibility), setOwned(m.owned)));
+      if(!boot.user) accountChanged();
+    }
 
     // a save releases the lock on the server: take it back (a new node gets one now)
     if(first) startLock(r.id);
@@ -3046,6 +3051,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   // publish or unpublish the saved node of the user's (their own call, not part of the document: no rev, no undo)
   const changeVisibility = async next => {
     if(!remote.current) return;
+    if(next === 'public' && account?.guest) return openAccount(); // publishing takes an account (docs/GUESTS.md G3)
 
     try {
       const res = await fetch(`/api/nodes/${remote.current.id}/visibility`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ visibility: next }) });
@@ -3234,7 +3240,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
         <button type="button" class="wb-editor-chip" disabled=${busy} onClick=${save}>${t('editor.save.retry')}</button>
         <button type="button" class="wb-editor-chip" onClick=${() => setSaveError(null)}>${t('editor.save.dismiss')}</button>
       </p>`}
-      ${savedId !== null && !dirty && !saveError && html`<p class="wb-editor-banner" role="status"><span>${t('editor.saved')} ${t('editor.saved.kept', { count: usedKey.length })}</span> <a href=${viewHref ?? `/${lang}/node/${savedId}`}>${viewHref ? t('site.view') : t('editor.saved.view', { id: savedId })}</a></p>`}
+      ${savedId !== null && !dirty && !saveError && html`<p class="wb-editor-banner" role="status"><span>${t('editor.saved')} ${account?.guest ? t('guest.saved', { date: keptUntil(account, lang) }) : t('editor.saved.kept', { count: usedKey.length })}</span> ${account?.guest && html`<button type="button" class="wb-editor-chip" onClick=${openAccount}>${t('guest.keep')}</button>`} <a href=${viewHref ?? `/${lang}/node/${savedId}`}>${viewHref ? t('site.view') : t('editor.saved.view', { id: savedId })}</a></p>`}
       ${wallNotice && html`<p class="wb-editor-banner wb-editor-banner-error" role="alert"><span>${t(wallNotice.key, wallNotice.params)}</span> <button type="button" class="wb-editor-chip" onClick=${() => setWallNotice(null)}>${t('editor.save.dismiss')}</button></p>`}
       </div>
       <div class="wb-editor-tabs" role="tablist" aria-label=${t('editor.panel')}>${['select', 'photos', 'sequence', ...(kind === 'gallery' ? ['gallery'] : [])].map(id => html`<button type="button" role="tab" class="wb-editor-chip" aria-selected=${panelTab === id ? 'true' : 'false'} onClick=${() => setPanelTab(id)}>${t('editor.tab.' + id)}</button>`)}</div>

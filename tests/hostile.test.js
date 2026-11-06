@@ -27,7 +27,19 @@ let hash;
 const tree = dir => (existsSync(dir) ? readdirSync(dir, { recursive: true, withFileTypes: true }).filter(e => e.isFile()).map(e => resolve(e.parentPath, e.name).slice(root.length)).sort() : []);
 const disk = () => [...tree(resolve(root, 'uploads')), ...tree(resolve(root, 'data'))].filter(f => !f.includes('wb.sqlite3'));
 
-const send = (method, path, { body, type = 'application/json', headers = {} } = {}) => fetch(base + path, { method, body: typeof body === 'object' && !(body instanceof Uint8Array) && !(body instanceof Blob) ? JSON.stringify(body) : body, headers: { ...(type && { 'content-type': type }), ...headers } });
+// the browser of these tests: the first save makes it a guest, its cookies ride along after that (docs/GUESTS.md G1)
+const jar = new Map();
+const send = async (method, path, { body, type = 'application/json', headers = {} } = {}) => {
+  const res = await fetch(base + path, { method, body: typeof body === 'object' && !(body instanceof Uint8Array) && !(body instanceof Blob) ? JSON.stringify(body) : body, headers: { ...(type && { 'content-type': type }), ...(jar.size && { cookie: [...jar].map(([k, v]) => `${k}=${v}`).join('; ') }), ...headers } });
+
+  for(const set of res.headers.getSetCookie()) {
+    const [name, ...value] = set.split(';')[0].split('=');
+
+    jar.set(name, value.join('='));
+  }
+
+  return res;
+};
 const photo = (id, h = hash) => ({ op: 'photo', id, photo: h, m: [1, 0, 0, 1, 0, 0], fit: 'extend', opacity: 1, blend: 'normal' });
 const doc = (steps = [], extra = {}) => ({ v: 1, style: {}, mode: 'free', pages: [{ id: 'page0001', steps }], ...extra });
 const upload = body => send('POST', '/api/uploads', { body, type: 'application/octet-stream', headers: { 'x-filename': 'x.jpg' } });

@@ -1,4 +1,6 @@
-# Guests: try first, keep later (owner 2026-11-06, design written the same day, nothing built)
+# Guests: try first, keep later (owner 2026-11-06; server built the same day, client not yet)
+
+**Status 2026-11-06:** server and client built; tests green (`tests/guests.test.js`, 1151 in all); the dev service runs it (migration 12 applied) and an API check against the live server passed (first save makes a guest with a cookie, hidden, publish 403, stranger 404, list empty for a visitor). Server: migration 12, `server/guests.js`, `viewerOf` guest flag with the sliding 30 days, first-save guest creation in `createNode` (no guest left behind by a failed save), 20 works and 20 guests a day, `POST /api/claim`, register-as-claim, merge on login (`merge: true`), `/api/me` with `works` and `until`, publish and profile refused for guests, the open area retired in `mayWrite`, the daily sweep in `server.js`, usage events as `guest:<id>`. Client: `client/account.js` (`useAccount`, events `wb:account-changed` and `wb:open-account`), Layout and Nav (a guest sees "Guest", which opens the dialog), `LoginDialog` claim mode and the merge note, the editor's save line and publish gate, the banner on the Create page, strings `guest.*` and `claim.*` in four languages. **Not yet:** a look in a private browser window (claim, merge, expiry banner), `tools/guests.js`, the admin list of guests, an upload cap (uploads are still owned by the browser session, `docs/EDITOR.md` S3.5), the wording check of de/fr/es by the owner.
 
 ## 0. Why
 

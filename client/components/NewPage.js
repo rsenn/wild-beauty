@@ -8,6 +8,7 @@ import { NodeEditor } from './NodeEditor.js';
 import { NEW } from '../editor/core/store.js';
 import { ADD_EVENT, SAVED_EVENT } from '../editor/core/pending.js';
 import { useBoot } from '../boot.js';
+import { keptUntil, openAccount, useAccount } from '../account.js';
 import { SavedNodes } from './SavedNodes.js';
 import { RecordConsent } from './RecordConsent.js';
 import { editorStore, useEditor } from '../editor/core/useEditor.js';
@@ -15,9 +16,10 @@ import { editorStore, useEditor } from '../editor/core/useEditor.js';
 // /:lang/new: upload area, then the node editor once the "New node" tile has
 // opened it. Whether an editor is open lives in the editor store (E34).
 export const NewPage = () => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { open: editing, target, openEditor, closeEditor } = useEditor();
   const boot = useBoot();
+  const account = useAccount();
   const [number, setNumber] = useState('');
   const [nodes, setNodes] = useState(boot.nodes ?? []);
 
@@ -78,7 +80,8 @@ export const NewPage = () => {
       <h1 class="wb-sr-only">${t('page.new.heading')}</h1>
       <${RecordConsent} />
       <${UploadArea} extra=${({ count, addSelected }) => html`<${NewNodeTile} open=${editing} count=${count} onAdd=${addSelected} onMake=${addSelected} onToggle=${() => (editing ? closeEditor() : openEditor(NEW))} />`} />
-      <${SavedNodes} nodes=${nodes} editing=${editing ? target : null} onEdit=${id => openEditor(id)} onVisibility=${boot.user ? setVisibility : undefined} />
+      ${account?.guest && html`<p class="wb-guest-note" role="status">${t('guest.list', { date: keptUntil(account, lang) })} <button type="button" class="wb-editor-chip" onClick=${openAccount}>${t('guest.keep')}</button></p>`}
+      <${SavedNodes} nodes=${nodes} editing=${editing ? target : null} onEdit=${id => openEditor(id)} onVisibility=${account ? setVisibility : undefined} />
       <form class="wb-open-node" onSubmit=${e => (e.preventDefault(), /^\d{1,15}$/.test(number) && openEditor(Number(number)))}>
         <label>${t('editor.open.id')} <input type="number" min="1" inputmode="numeric" value=${number} onInput=${e => setNumber(e.target.value)} /></label>
         <button type="submit" class="wb-editor-chip" disabled=${!/^\d{1,15}$/.test(number)}>${t('editor.open')}</button>

@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { config } from '../server/config.js';
 import { open } from '../server/db/db.js';
 import { addLink, getNode, getPhoto, nodePhotos } from '../server/db/nodes.js';
+import { resetGuestRates } from '../server/guests.js';
 import { createNode, deleteNodeRoute, listNodesRoute, mergePalettes, readNode, saveNew, updateNodeRoute } from '../server/api/nodes.js';
 import { servePhoto } from '../server/api/photos.js';
 import { run } from '../server/media/run.js';
@@ -28,7 +29,16 @@ async function upload(hash, ext, ...args) {
 
 const photo = (id, hash, extra = {}) => ({ op: 'photo', id, photo: hash, m: [1, 0, 0, 1, 0, 0], fit: 'extend', opacity: 1, blend: 'normal', ...extra });
 const doc = (steps, extra = {}) => ({ v: 1, style: {}, mode: 'free', pages: [{ id: 'page0001', steps }], ...extra });
-const post = (body, type = 'application/json') => createNode(new Request('http://x/api/nodes', { method: 'POST', headers: { 'content-type': type }, body: typeof body === 'string' ? body : JSON.stringify(body) }), h);
+// the browser of these tests: the first save makes it a guest (docs/GUESTS.md G1), its cookie rides along after that
+let jar = '';
+const asBrowser = (headers = {}) => ({ ...(jar && { cookie: jar }), ...headers });
+const post = async (body, type = 'application/json') => {
+  const res = await createNode(new Request('http://x/api/nodes', { method: 'POST', headers: asBrowser({ 'content-type': type }), body: typeof body === 'string' ? body : JSON.stringify(body) }), h);
+
+  jar = res.headers.getSetCookie().find(c => c.startsWith('wb-auth='))?.split(';')[0] ?? jar;
+
+  return res;
+};
 
 beforeAll(async () => {
   await detectTools();
@@ -44,6 +54,8 @@ afterAll(() => {
 
 beforeEach(async () => {
   h = await open(':memory:');
+  jar = '';
+  resetGuestRates();
   rmSync(resolve(root, 'uploads'), { recursive: true, force: true });
   rmSync(resolve(root, 'data'), { recursive: true, force: true });
   mkdirSync(config.tmpDir, { recursive: true });
@@ -174,7 +186,7 @@ describe('mergePalettes', () => {
 });
 
 describe('GET /api/nodes/:id and /files/photos', () => {
-  const get = (url, headers = {}, method = 'GET') => new Request(`http://x${url}`, { method, headers });
+  const get = (url, headers = {}, method = 'GET') => new Request(`http://x${url}`, { method, headers: asBrowser(headers) });
 
   test('returns the node and its document; the ETag is the rev, 304 on a match', async () => {
     if(!ready) return;
@@ -185,7 +197,7 @@ describe('GET /api/nodes/:id and /files/photos', () => {
 
     expect(res.status).toBe(200);
     expect(body.rev).toBe(1);
-    expect(body.node).toMatchObject({ id, title: 'Hi', kind: 'node', tile: A, visibility: 'public', doc: { v: 1, pages: [{ steps: [{ op: 'photo', photo: A }] }] } });
+    expect(body.node).toMatchObject({ id, title: 'Hi', kind: 'node', tile: A, visibility: 'hidden', doc: { v: 1, pages: [{ steps: [{ op: 'photo', photo: A }] }] } });
     expect(body.node.rev).toBeUndefined();
     expect(res.headers.get('etag')).toBe(`"${id}-1"`);
 
@@ -215,12 +227,12 @@ describe('GET /api/nodes/:id and /files/photos', () => {
 
     const first = (await (await post({ doc: doc([photo('photo001', A)], { title: 'First' }) })).json()).id;
     const second = (await (await post({ doc: doc([photo('photo001', A)], { title: 'Second' }) })).json()).id;
-    const res = await listNodesRoute(h);
+    const res = await listNodesRoute(h, get('/api/nodes'));
     const { nodes } = await res.json();
 
     expect(res.status).toBe(200);
     expect(nodes.map(n => n.id).slice(0, 2)).toEqual([second, first]);
-    expect(nodes[0]).toEqual({ id: second, title: 'Second', kind: 'node', tile: A, updated_at: expect.any(Number), visibility: 'public', mine: true });
+    expect(nodes[0]).toEqual({ id: second, title: 'Second', kind: 'node', tile: A, updated_at: expect.any(Number), visibility: 'hidden', mine: true });
     expect(Object.keys(nodes[0]).sort()).toEqual(['id', 'kind', 'mine', 'tile', 'title', 'updated_at', 'visibility']); // no document, no rev
   });
 
@@ -255,7 +267,7 @@ describe('GET /api/nodes/:id and /files/photos', () => {
 });
 
 describe('PUT /api/nodes/:id', () => {
-  const put = (id, body) => updateNodeRoute(new Request(`http://x/api/nodes/${id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }), String(id), h);
+  const put = (id, body) => updateNodeRoute(new Request(`http://x/api/nodes/${id}`, { method: 'PUT', headers: asBrowser({ 'content-type': 'application/json' }), body: JSON.stringify(body) }), String(id), h);
   const create = async steps => (await (await post({ doc: doc(steps) })).json()).id;
 
   test('saves a new version: rev bumps, document and photos replaced', async () => {
@@ -374,7 +386,7 @@ describe('PUT /api/nodes/:id', () => {
 });
 
 describe('DELETE /api/nodes/:id', () => {
-  const del = id => deleteNodeRoute(String(id), h);
+  const del = id => deleteNodeRoute(String(id), h, new Request('http://x/', { headers: asBrowser() }));
   const create = async steps => (await (await post({ doc: doc(steps) })).json()).id;
 
   test('no orphan is left: row, photo rows, edges, photos and their files are gone', async () => {

@@ -15,13 +15,17 @@ const base = `http://localhost:${PORT}`;
 let root;
 let server;
 let ready = false;
-let cookie = '';
+const jar = new Map();
+const cookieHeader = () => [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
 
 const call = async (path, init = {}) => {
-  const res = await fetch(base + path, { ...init, headers: { ...(cookie && { cookie }), ...init.headers }, redirect: 'manual' });
-  const set = res.headers.get('set-cookie');
+  const res = await fetch(base + path, { ...init, headers: { ...(jar.size && { cookie: cookieHeader() }), ...init.headers }, redirect: 'manual' });
 
-  if(set) cookie = set.split(';')[0];
+  for(const set of res.headers.getSetCookie()) {
+    const [name, ...value] = set.split(';')[0].split('=');
+
+    jar.set(name, value.join('='));
+  }
 
   return res;
 };
@@ -137,8 +141,9 @@ describe('the whole path over HTTP', () => {
     expect((await json('PUT', `/api/nodes/${id}`, { rev: 1, doc: doc([]) })).status).toBe(409);
     expect(await (await call(`/en/node/${id}`)).text()).toContain('Dawn');
 
-    // another browser: no cookie, so another session; the lock is gone after the save
-    expect((await fetch(base + `/api/nodes/${id}`, { method: 'DELETE' })).status).toBe(204);
+    // another browser: no cookie, so not the guest who owns it (docs/GUESTS.md G3); the owner's browser may delete it
+    expect((await fetch(base + `/api/nodes/${id}`, { method: 'DELETE' })).status).toBe(401);
+    expect((await call(`/api/nodes/${id}`, { method: 'DELETE' })).status).toBe(204);
     expect((await call(`/api/nodes/${id}`)).status).toBe(404);
     expect(readdirSync(resolve(root, 'data', 'photos')).filter(n => n.startsWith(hash))).toEqual([]);
   });

@@ -23,7 +23,7 @@ const gradient = () => {
 // `onSubmit(username, password)` -> Promise<{ ok, error }>. The same card makes an
 // account (`onRegister(email, password)`, the same result): a mail address and a
 // password, nothing else.
-export const LoginDialog = ({ open, onClose, onSubmit, onRegister }) => {
+export const LoginDialog = ({ open, onClose, onSubmit, onRegister, onClaim, guest = false, works = 0 }) => {
   const { t } = useI18n();
   const [phase, setPhase] = useState('closed');
   const [background, setBackground] = useState('');
@@ -31,6 +31,7 @@ export const LoginDialog = ({ open, onClose, onSubmit, onRegister }) => {
   const [status, setStatus] = useState(null);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
+  const [mail, setMail] = useState('');
   const [mode, setMode] = useState('login');
   const first = useRef(null);
   const timer = useRef(0);
@@ -41,7 +42,7 @@ export const LoginDialog = ({ open, onClose, onSubmit, onRegister }) => {
     if(open) {
       setBackground(gradient());
       setStatus(null);
-      setMode('login');
+      setMode(guest && onClaim ? 'claim' : 'login');
       setPhase('enter');
       // two frames: the start pose must be painted before the transition begins
       const frame = requestAnimationFrame(() => requestAnimationFrame(() => setPhase('open')));
@@ -61,13 +62,14 @@ export const LoginDialog = ({ open, onClose, onSubmit, onRegister }) => {
 
   if(phase === 'closed') return null;
 
+  const signup = mode === 'register' || mode === 'claim';
+
   const submit = async event => {
     event.preventDefault();
     setBusy(true);
     setStatus(null);
 
-    const signup = mode === 'register';
-    const result = await (signup ? onRegister(user, pass) : onSubmit(user, pass)).catch(() => ({ ok: false }));
+    const result = await (mode === 'claim' ? onClaim(user, pass, mail.trim()) : mode === 'register' ? onRegister(user, pass) : onSubmit(user, pass)).catch(() => ({ ok: false }));
 
     setBusy(false);
     setStatus(result.ok ? { ok: true } : { error: result.error ?? t(signup ? 'register.failed' : 'login.failed') });
@@ -77,18 +79,26 @@ export const LoginDialog = ({ open, onClose, onSubmit, onRegister }) => {
   return html`
     <div class=${`wb-login-overlay wb-login-${phase}`} style=${{ background }} onKeyDown=${e => e.key === 'Escape' && onClose()} onClick=${e => e.target === e.currentTarget && onClose()}>
       <form class="wb-login" role="dialog" aria-modal="true" aria-label=${t('login.label')} onSubmit=${submit}>
-        <div class="wb-login-title">${t(mode === 'register' ? 'register.title' : 'login.title')}</div>
+        <div class="wb-login-title">${t(mode === 'claim' ? 'claim.title' : mode === 'register' ? 'register.title' : 'login.title')}</div>
+        ${mode === 'claim' && html`<p class="wb-login-note">${t('claim.note')}</p>`}
+        ${mode === 'login' && guest && works > 0 && html`<p class="wb-login-note">${t('guest.merge.note', { count: works })}</p>`}
         <label class="wb-login-field">
-          <span>${t(mode === 'register' ? 'register.email' : 'login.username')}</span>
+          <span>${t(mode === 'register' ? 'register.email' : mode === 'claim' ? 'claim.username' : 'login.username')}</span>
           <input ref=${first} name="username" type=${mode === 'register' ? 'email' : 'text'} autocomplete=${mode === 'register' ? 'email' : 'username'} value=${user} onInput=${e => setUser(e.target.value)} />
         </label>
         <label class="wb-login-field">
-          <span>${t(mode === 'register' ? 'register.password' : 'login.password')}</span>
-          <input name="password" type="password" autocomplete=${mode === 'register' ? 'new-password' : 'current-password'} value=${pass} onInput=${e => setPass(e.target.value)} />
+          <span>${t(signup ? 'register.password' : 'login.password')}</span>
+          <input name="password" type="password" autocomplete=${signup ? 'new-password' : 'current-password'} value=${pass} onInput=${e => setPass(e.target.value)} />
         </label>
-        <button class="wb-login-button" disabled=${busy}>${t(mode === 'register' ? 'register.submit' : 'login.submit')}</button>
-        ${onRegister && html`<button type="button" class="wb-login-switch" onClick=${() => (setStatus(null), setMode(m => (m === 'login' ? 'register' : 'login')))}>${t(mode === 'register' ? 'login.switch' : 'register.switch')}</button>`}
-        ${status && html`<div class=${status.ok ? 'wb-login-status' : 'wb-login-status wb-login-error'} role="status">${status.ok ? t(mode === 'register' ? 'register.done' : 'login.logged') : status.error}</div>`}
+        ${mode === 'claim' && html`<label class="wb-login-field">
+          <span>${t('claim.email')}</span>
+          <input name="email" type="email" autocomplete="email" value=${mail} onInput=${e => setMail(e.target.value)} />
+        </label>`}
+        <button class="wb-login-button" disabled=${busy}>${t(mode === 'claim' ? 'claim.submit' : mode === 'register' ? 'register.submit' : 'login.submit')}</button>
+        ${guest && onClaim
+          ? html`<button type="button" class="wb-login-switch" onClick=${() => (setStatus(null), setMode(m => (m === 'claim' ? 'login' : 'claim')))}>${t(mode === 'claim' ? 'login.switch' : 'claim.switch')}</button>`
+          : onRegister && html`<button type="button" class="wb-login-switch" onClick=${() => (setStatus(null), setMode(m => (m === 'login' ? 'register' : 'login')))}>${t(mode === 'register' ? 'login.switch' : 'register.switch')}</button>`}
+        ${status && html`<div class=${status.ok ? 'wb-login-status' : 'wb-login-status wb-login-error'} role="status">${status.ok ? t(signup ? 'register.done' : 'login.logged') : status.error}</div>`}
       </form>
     </div>
   `;

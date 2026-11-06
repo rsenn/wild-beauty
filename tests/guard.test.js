@@ -65,13 +65,16 @@ describe('guard', () => {
   const run = r => guard(r, new URL(r.url).pathname, h);
   const cookies = async () => ({ a: (await cookieFor('a@example.org', 'pw-a')).cookie, b: (await cookieFor('b@example.org', 'pw-b')).cookie });
 
-  test('the open public area: nobody owns it, everybody writes it', async () => {
+  test('the old open public area: a node nobody owns is changed by an admin only; a first save is allowed (it makes a guest)', async () => {
     const { a } = await cookies();
 
-    for(const headers of [{}, { cookie: a }]) {
-      expect(await run(req('PUT', `/api/nodes/${community}`, { headers }))).toBeNull();
-      expect(await run(req('POST', '/api/nodes', { headers }))).toBeNull();
-    }
+    h.run('UPDATE users SET is_admin = 1 WHERE id = ?', owner);
+
+    expect((await run(req('PUT', `/api/nodes/${community}`))).status).toBe(401);
+    expect((await run(req('PUT', `/api/nodes/${community}`, { headers: { cookie: (await cookieFor('b@example.org', 'pw-b')).cookie } }))).status).toBe(403);
+    expect(await run(req('PUT', `/api/nodes/${community}`, { headers: { cookie: a } }))).toBeNull();
+
+    for(const headers of [{}, { cookie: a }]) expect(await run(req('POST', '/api/nodes', { headers }))).toBeNull();
   });
 
   test('the graph ops leave the community nodes to the admins', async () => {
@@ -185,7 +188,7 @@ describe('visibility and the editor list', () => {
     expect(ids(visibleNodes(h, null))).toContain(own);
     expect(ids(visibleNodes(h, asOther))).toContain(own);
     expect(ids(listedNodes(h, asOther))).not.toContain(own); // a user's editor lists their own nodes only
-    expect(ids(listedNodes(h, null))).toEqual([community]); // a visitor's: the open public area
+    expect(ids(listedNodes(h, null))).toEqual([]); // a visitor has no list: their first save makes them a guest
     expect(visibleNodes(h, asOther).find(n => n.id === own).mine).toBe(false);
     expect((await visibilityRoute(req('POST', `/api/nodes/${own}/visibility`, { body: { visibility: 'x' } }), String(own), h)).status).toBe(400);
   });
@@ -242,7 +245,7 @@ describe('the write routes know the user (an owned node can be saved by its owne
     expect((await put(a, mine, { rev: 1, doc: {} })).status).toBe(400);
     expect((await put(b, mine)).status).toBe(403);
     expect((await put(null, mine)).status).toBe(403);
-    expect((await put(null, community, { rev: 1, doc: {} })).status).toBe(400); // the open area
+    expect((await put(null, community, { rev: 1, doc: {} })).status).toBe(403); // the old open area: admins only
   });
 
   test('delete: the owner may, others may not', async () => {
