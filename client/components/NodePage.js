@@ -71,6 +71,7 @@ export const NodePage = () => {
       <div class="wb-node-head">
         <h1 class="wb-node-title">${title}</h1>
         ${isGallery && html`<${ViewSwitch} view=${shown} onView=${choose} />`}
+        ${isGallery && html`<a class="wb-node-book" href=${`/${lang}/node/${node.id}/book`}>${t('book.link')}</a>`}
         ${isGallery && shown === '3d' && html`<${GalleryTools} chrome=${chrome} overview=${open3d.overview} />`}
       </div>
       ${!editingThis && shown === 'carousel' && html`<${GalleryCarousel} key="carousel" items=${items} at=${at.current} onAt=${remember} label=${title} />`}

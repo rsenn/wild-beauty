@@ -3,8 +3,10 @@ import { useEffect, useMemo, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { photoRefs, placePhotos, rotatePhotos, setDesc, setOff } from '../editor/core/batch.js';
-import { setTitle } from '../editor/core/model.js';
-import { dateText, fillPattern } from '../editor/core/pattern.js';
+import { LIMITS, setTitle } from '../editor/core/model.js';
+import { titleOf } from '../editor/core/caption.js';
+import { dateText, fillPattern, isPlaceholder, partsOf } from '../editor/core/pattern.js';
+import { PartButtons, insertAt } from './NoteParts.js';
 import { useBoot } from '../boot.js';
 
 // The batch editor of the graph view (docs/BATCH.md): a table of the selected nodes and a
@@ -41,6 +43,9 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
   const [ghost, setGhost] = useState(null); // { x, y, hash, n } the dragged photos under the pointer
   const [busy, setBusy] = useState(false);
   const [manual, setManual] = useState(null); // the order the user made with the up and down buttons: node ids
+  const [infos, setInfos] = useState({}); // { [hash]: { place, taken } } as POST /api/photos/describe answered (docs/BATCH.md S6a)
+  const asked = useRef(new Set());
+  const area = useRef(null);
   const [pop, setPop] = useState(null); // the annotation popover: { node, id, text, x, y }
   const [draft, setDraft] = useState(''); // the description being typed
   const drag = useRef(null);
@@ -78,6 +83,27 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
     };
   }, []);
 
+  // place and time of photos, asked once per photo: -> the whole table so far
+  const ask = async hashes => {
+    const fresh = [...new Set(hashes)].filter(h => !asked.current.has(h)).slice(0, 2000);
+
+    if(!fresh.length) return infos;
+
+    const r = await fetch('/api/photos/describe', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ hashes: fresh }) });
+
+    if(!r.ok) throw new Error(String(r.status));
+
+    const got = await r.json();
+
+    for(const h of fresh) asked.current.add(h);
+
+    const all = { ...infos, ...got };
+
+    setInfos(all);
+
+    return all;
+  };
+
   const meta = id => nodes.find(n => n.id === id) ?? {};
   // the one parent (gallery, list, album) all the nodes are children of, if there is exactly one: its order can be saved
   const parent = useMemo(() => {
@@ -89,6 +115,7 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
   const orderChanged = parent !== null && sort.key === 'manual' && !!manual && manual.length > 1 && manual.join() !== parentOrder.join();
   const changed = loaded ? ids.filter(id => loaded[id] && work[id] !== loaded[id].doc) : [];
   const editable = id => !!loaded?.[id]?.mine;
+
 
   // the table: the rows, sorted
   const rows = useMemo(() => {
@@ -111,6 +138,15 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
   // the tiles: per node in row order, its photos in node order
   const lists = useMemo(() => rows.map(id => ({ id, refs: photoRefs(work[id]) })), [rows, work]);
   const flat = lists.flatMap(({ id, refs }) => refs.map(r => ({ node: id, ...r })));
+
+  // the photos with a note are asked for their place and time once, to tell placeholder notes from written ones
+  const noted = flat.filter(p => p.desc).map(p => p.hash);
+
+  useEffect(() => {
+    if(view === 'photos' && noted.some(h => !asked.current.has(h))) ask(noted).catch(() => {});
+  }, [view, noted.join(',')]);
+
+  const placeholder = p => !!p.desc && isPlaceholder(p.desc, partsOf(infos[p.hash], lang));
 
   latest.current = { lists, flat, sel, editable, work, state, loaded };
 
@@ -145,16 +181,13 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
   // from where and when: the server names the place and gives the capture time of the photos
   const generate = async () => {
     const list = flat.filter(p => sel.includes(keyOf(p.node, p.id)) && editable(p.node));
-    let info;
+    const blank = list.filter(p => !p.desc); // a photo that has a note keeps it (docs/BATCH.md S6a2)
+    let all;
 
     setNote('');
 
     try {
-      const r = await fetch('/api/photos/describe', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ hashes: [...new Set(list.map(p => p.hash))] }) });
-
-      if(!r.ok) throw new Error(String(r.status));
-
-      info = await r.json();
+      all = await ask(blank.map(p => p.hash));
     } catch {
       return setNote(t('batch.desc.failed'));
     }
@@ -162,8 +195,9 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
     const docs = {};
     let done = 0;
 
-    for(const p of list) {
-      const text = fillPattern(prefs.descPattern ?? '{location}, {date}', { date: dateText(info[p.hash]?.taken, info[p.hash]?.taken, lang), location: info[p.hash]?.place, pseudonym });
+    for(const p of blank) {
+      const parts = partsOf(all[p.hash], lang);
+      const text = fillPattern(prefs.descPattern ?? '{location}, {date}', { ...parts, pseudonym });
 
       if(!text) continue;
 
@@ -173,7 +207,25 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
 
     if(done) commit(docs);
 
-    setNote([t('batch.desc.done', { n: done }), list.length > done && t('batch.desc.none', { n: list.length - done })].filter(Boolean).join('. '));
+    setNote([t('batch.desc.done', { n: done }), blank.length > done && t('batch.desc.none', { n: blank.length - done }), list.length > blank.length && t('batch.desc.kept', { n: list.length - blank.length })].filter(Boolean).join('. '));
+  };
+
+  // select every tile whose note is only what Generate or the Place, Date and Time buttons wrote
+  const findPlaceholders = async () => {
+    setNote('');
+
+    let all;
+
+    try {
+      all = await ask(noted);
+    } catch {
+      return setNote(t('batch.desc.failed'));
+    }
+
+    const found = flat.filter(p => p.desc && isPlaceholder(p.desc, partsOf(all[p.hash], lang)));
+
+    setSel(found.map(p => keyOf(p.node, p.id)));
+    setNote(t('batch.find.done', { n: found.length }));
   };
 
   // turn a photo a quarter, or the whole selection when the photo is part of it
@@ -185,6 +237,21 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
     for(const p of list) docs[p.node] = rotatePhotos(docs[p.node] ?? work[p.node], [p.id], 1);
 
     commit(docs);
+  };
+
+  // the photo of the open popover, its place and time, and the buttons that put them into the text
+  const popHash = pop && flat.find(p => p.node === pop.node && p.id === pop.id)?.hash;
+
+  useEffect(() => {
+    if(popHash && !asked.current.has(popHash)) ask([popHash]).catch(() => {});
+  }, [popHash]);
+
+  const pickPart = value => {
+    const el = area.current;
+    const r = insertAt(pop.text, el?.selectionStart ?? pop.text.length, el?.selectionEnd ?? pop.text.length, value);
+
+    setPop({ ...pop, text: r.text });
+    requestAnimationFrame(() => el?.setSelectionRange(r.at, r.at));
   };
 
   // the annotation popover under a tile
@@ -485,6 +552,7 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
           <button type="button" class="wb-editor-chip" disabled=${!picked.some(p => editable(p.node))} onClick=${toggleOff}>${t(allOff ? 'batch.enable' : 'batch.disable')}</button>
           <button type="button" class="wb-editor-chip" disabled=${!sel.length} onClick=${() => setSel([])}>${t('batch.clear')}</button>
         <//>`}
+        ${loaded && view === 'photos' && html`<button type="button" class="wb-editor-chip" onClick=${findPlaceholders}>${t('batch.find')}</button>`}
         <button type="button" class="wb-editor-chip" disabled=${!state.past.length} onClick=${undo}>${t('batch.undo')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!state.future.length} onClick=${redo}>${t('batch.redo')}</button>
         <button type="button" class="wb-editor-chip" disabled=${(!changed.length && !orderChanged) || busy} onClick=${save}>${t('batch.save')}${changed.length + (orderChanged ? 1 : 0) ? ` (${changed.length + (orderChanged ? 1 : 0)})` : ''}</button>
@@ -493,7 +561,7 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
         <span class="wb-batch-note" role="status">${note || (sort.key === 'manual' && !parent ? t('batch.order.local') : view === 'photos' ? (sel.length ? t('batch.selected', { n: sel.length }) : t('batch.hint')) : '')}</span>
       </div>
       ${loaded && view === 'photos' && sel.length > 0 && html`<div class="wb-batch-desc" role="group" aria-label=${t('batch.desc.label')}>
-        <input type="text" maxlength="500" value=${draft} placeholder=${common === null ? t('batch.desc.differs') : t('batch.desc.label')} aria-label=${t('batch.desc.label')} disabled=${!mayEdit} onInput=${e => setDraft(e.target.value)} />
+        <input type="text" maxlength=${LIMITS.desc} value=${draft} placeholder=${common === null ? t('batch.desc.differs') : t('batch.desc.label')} aria-label=${t('batch.desc.label')} disabled=${!mayEdit} onInput=${e => setDraft(e.target.value)} />
         <button type="button" class="wb-editor-chip" disabled=${!mayEdit} onClick=${() => describe(picked, draft)}>${t('batch.desc.apply')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!mayEdit} onClick=${generate}>${t('batch.desc.generate')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!mayEdit} onClick=${() => describe(picked, '')}>${t('batch.desc.remove')}</button>
@@ -521,10 +589,10 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
           <div class=${`wb-batch-head${drop?.node === id && drop.before === null && !refs.length ? ' wb-batch-drop' : ''}${loaded[id].mine ? '' : ' wb-batch-locked'}`} data-head=${id}>${t('batch.head', { title: work[id].title || loaded[id].title || t('node.untitled'), id, n: refs.length })}${!refs.length ? ` – ${t('batch.empty')}` : ''}</div>
           ${refs.map((p, i) => {
             const key = keyOf(id, p.id);
-            const cls = ['wb-batch-tile', sel.includes(key) && 'wb-selected', p.off && 'wb-batch-off', p.desc && 'wb-batch-has-desc', !loaded[id].mine && 'wb-batch-locked', drag.current?.active && drag.current.picks.some(q => q.node === id && q.id === p.id) && 'wb-batch-lifted', drop?.node === id && drop.before === p.id && 'wb-batch-before', drop?.node === id && drop.before === null && i === refs.length - 1 && 'wb-batch-after'].filter(Boolean).join(' ');
+            const cls = ['wb-batch-tile', sel.includes(key) && 'wb-selected', p.off && 'wb-batch-off', p.desc && 'wb-batch-has-desc', placeholder(p) && 'wb-batch-placeholder', !loaded[id].mine && 'wb-batch-locked', drag.current?.active && drag.current.picks.some(q => q.node === id && q.id === p.id) && 'wb-batch-lifted', drop?.node === id && drop.before === p.id && 'wb-batch-before', drop?.node === id && drop.before === null && i === refs.length - 1 && 'wb-batch-after'].filter(Boolean).join(' ');
 
             return html`<div key=${p.id} class=${cls} data-node=${id} data-step=${p.id}>
-              <button type="button" class="wb-batch-hit" aria-pressed=${sel.includes(key) ? 'true' : 'false'} title=${p.desc || null} aria-label=${t('batch.photo', { n: i + 1, id }) + (p.off ? `, ${t('batch.off')}` : '') + (p.desc ? `, ${t('batch.desc.mark')}: ${p.desc}` : '')} onPointerDown=${e => tileDown(e, id, p.id)}>
+              <button type="button" class="wb-batch-hit" aria-pressed=${sel.includes(key) ? 'true' : 'false'} title=${titleOf(p.desc) || null} aria-label=${t('batch.photo', { n: i + 1, id }) + (p.off ? `, ${t('batch.off')}` : '') + (p.desc ? `, ${t('batch.desc.mark')}: ${titleOf(p.desc)}` : '')} onPointerDown=${e => tileDown(e, id, p.id)}>
                 <img src=${thumb(p.hash)} alt="" loading="lazy" decoding="async" draggable="false" style=${p.rot ? `transform:rotate(${p.rot}deg)` : null} />
               </button>
               ${loaded[id].mine && html`<span class="wb-batch-tools">
@@ -536,12 +604,13 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
         <//>`)}
       </div>`}
       ${pop && html`<div class="wb-batch-pop" role="dialog" aria-label=${t('batch.annotate.hint')} style=${`left:${pop.x}px;top:${pop.y}px`} onKeyDown=${e => e.key === 'Escape' && (e.stopPropagation(), setPop(null))}>
-        <textarea rows="5" maxlength="500" value=${pop.text} aria-label=${t('batch.annotate.hint')} autofocus ref=${el => el && !el.dataset.on && ((el.dataset.on = '1'), el.focus())} onInput=${e => setPop({ ...pop, text: e.target.value })}></textarea>
+        <textarea rows="5" maxlength=${LIMITS.desc} value=${pop.text} aria-label=${t('batch.annotate.hint')} autofocus ref=${el => ((area.current = el), el && !el.dataset.on && ((el.dataset.on = '1'), el.focus()))} onInput=${e => setPop({ ...pop, text: e.target.value })}></textarea>
+        <${PartButtons} parts=${partsOf(infos[popHash], lang)} onPick=${pickPart} />
         <span class="wb-batch-pop-bar">
           <button type="button" class="wb-editor-chip" onClick=${() => (describe([{ node: pop.node, id: pop.id }], pop.text), setPop(null))}>${t('batch.annotate.ok')}</button>
           <button type="button" class="wb-editor-chip" onClick=${() => (describe([{ node: pop.node, id: pop.id }], ''), setPop(null))}>${t('batch.desc.remove')}</button>
           <button type="button" class="wb-editor-chip" onClick=${() => setPop(null)}>${t('batch.annotate.cancel')}</button>
-          <span class="wb-batch-pop-count">${pop.text.length}/500</span>
+          <span class="wb-batch-pop-count">${pop.text.length}/${LIMITS.desc}</span>
         </span>
       </div>`}
       ${ghost && html`<div class="wb-batch-ghost" style=${`left:${ghost.x}px;top:${ghost.y}px`} aria-hidden="true"><img src=${thumb(ghost.hash)} alt="" />${ghost.n > 1 && html`<span>${ghost.n}</span>`}</div>`}

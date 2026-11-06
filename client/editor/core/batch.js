@@ -1,7 +1,7 @@
 // The document side of the batch editor (docs/BATCH.md): list the photos of a
 // node, move photos inside and between nodes, switch photos off. Pure: documents
 // in, new documents out, the input is never touched.
-import { allIds, countPhotos, findStep, isTexture, newId, photoLimit } from './model.js';
+import { LIMITS, allIds, countPhotos, findStep, isTexture, newId, photoLimit } from './model.js';
 import { decompose, multiply } from '../geometry/matrix.js';
 
 // how far a photo is turned, in degrees clockwise (0 to 359)
@@ -73,7 +73,7 @@ export function rotatePhotos(doc, ids, quarters = 1) {
 // give the photo steps `ids` the description `text` (empty: remove it)
 export function setDesc(doc, ids, text) {
   const set = new Set(ids);
-  const next = text.slice(0, 500);
+  const next = text.slice(0, LIMITS.desc);
   let changed = false;
 
   const pages = doc.pages.map(page => {

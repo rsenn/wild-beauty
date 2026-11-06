@@ -24,7 +24,7 @@ Not part of this: a password change (open), language (it is the page's own), the
 
 ## 3. Patterns
 
-Placeholders `{date}`, `{location}`, `{pseudonym}`. Text in square brackets is optional: it is left out, with its brackets, when a placeholder inside it is empty. A placeholder outside brackets that is empty is replaced by nothing, and the spaces and commas around the gap are tidied (no double space, no dangling comma). Examples with date "15 April 2026", location "Plettenberg Bay", pseudonym "Jane Doe":
+Placeholders `{date}`, `{location}`, `{time}` (the photo's capture time, 14:32; for a node title it is left empty), `{pseudonym}`. Text in square brackets is optional: it is left out, with its brackets, when a placeholder inside it is empty. A placeholder outside brackets that is empty is replaced by nothing, and the spaces and commas around the gap are tidied (no double space, no dangling comma). Examples with date "15 April 2026", location "Plettenberg Bay", pseudonym "Jane Doe":
 
 - `{date} [{location}] {pseudonym}` gives "15 April 2026 Plettenberg Bay Jane Doe", and without a location "15 April 2026 Jane Doe";
 - `{location}, {date}` gives "Plettenberg Bay, 15 April 2026".

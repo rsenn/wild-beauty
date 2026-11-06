@@ -4,6 +4,7 @@ import { Boot } from '../boot.js';
 import { NewPage } from './NewPage.js';
 import { GraphPage } from './GraphPage.js';
 import { NodePage } from './NodePage.js';
+import { BookPage } from './BookPage.js';
 import { GalleryPage } from './GalleryPage.js';
 import { SitePage } from './SitePage.js';
 import { SiteTool } from './SiteApp.js';
@@ -16,7 +17,7 @@ import { ProfilePage } from './ProfilePage.js';
 export const App = ({ boot }) => html`
   <${Boot.Provider} value=${boot}>
     <${I18n.Provider} value=${makeI18n(boot)}>
-      ${boot.site ? html`<${SiteTool} page=${html`<${SitePage} />`} />` : boot.admin ? html`<${AdminPage} />` : 'profile' in boot ? html`<${ProfilePage} />` : boot.graph ? html`<${GraphPage} />` : boot.gallery ? html`<${GalleryPage} />` : boot.node ? html`<${NodePage} />` : html`<${NewPage} />`}
+      ${boot.site ? html`<${SiteTool} page=${html`<${SitePage} />`} />` : boot.admin ? html`<${AdminPage} />` : 'profile' in boot ? html`<${ProfilePage} />` : boot.book ? html`<${BookPage} />` : boot.graph ? html`<${GraphPage} />` : boot.gallery ? html`<${GalleryPage} />` : boot.node ? html`<${NodePage} />` : html`<${NewPage} />`}
     <//>
   <//>
 `;

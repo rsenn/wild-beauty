@@ -65,7 +65,12 @@ export const NewPage = () => {
   // replacing an open editor asks first
   useEffect(() => {
     // only unsaved changes are worth a question
-    editorStore.setConfirm((current, next, { dirty }) => !dirty || window.confirm(t('editor.replace.confirm')));
+    // a save that is running ends first (E64b), so a node just saved is not asked about
+    editorStore.setConfirm(async () => {
+      await editorStore.idle();
+
+      return !editorStore.state.dirty || window.confirm(t('editor.replace.confirm'));
+    });
   }, [t]);
 
   return html`

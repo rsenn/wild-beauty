@@ -13,7 +13,8 @@ import { useI18n } from '../i18n.js';
 //  start      the slide shown first (the browser scrolls to it after the page is adopted)
 //  onAt(i)    the slide the track has settled on
 //  itemLabel  (i) -> the accessible name of a slide, else "n of count"
-export const FlowTrack = ({ count, draw, label, flow = 'page', axis = 'h', start = 0, wide = false, onAt, itemLabel }) => {
+//  control    a ref that gets { go(step) }, so a slide can move the track on (the note field's Ctrl+Enter)
+export const FlowTrack = ({ count, draw, label, flow = 'page', axis = 'h', start = 0, wide = false, onAt, itemLabel, control }) => {
   const { t } = useI18n();
   const track = useRef(null);
   const [at, setAt] = useState(start);
@@ -21,6 +22,8 @@ export const FlowTrack = ({ count, draw, label, flow = 'page', axis = 'h', start
   const size = () => (h ? track.current.clientWidth : track.current.clientHeight);
   const seen = () => Math.round((h ? track.current.scrollLeft : track.current.scrollTop) / Math.max(1, size()));
   const go = step => track.current?.scrollBy({ [h ? 'left' : 'top']: step * size(), behavior: wide ? 'instant' : 'smooth' });
+
+  if(control) control.current = { go };
 
   // land on the first slide asked for, at once, not by gliding there
   useEffect(() => {
@@ -32,6 +35,7 @@ export const FlowTrack = ({ count, draw, label, flow = 'page', axis = 'h', start
 
   const key = e => {
     if(!wide || flow !== 'page' || e.altKey || e.ctrlKey || e.metaKey) return;
+    if(e.target.closest?.('textarea, input, select, [contenteditable]')) return; // typing in a slide is not paging
 
     const step = KEYS[e.key];
     const to = step !== undefined ? step : e.key === 'Home' ? -count : e.key === 'End' ? count : 0;

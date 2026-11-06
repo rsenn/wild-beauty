@@ -18,6 +18,8 @@ import { identify } from '../media/probe.js';
 import { firstPhotoStep, thumbnail } from '../media/thumb.js';
 import { needsRender, serverTile } from '../media/raster.js';
 import { photoInfos } from '../node/view.js';
+import { LIMITS, validate, visibleDoc } from '../../client/editor/core/model.js';
+import { photoRefs, setDesc } from '../../client/editor/core/batch.js';
 import { readUpload, removeUpload } from './uploads.js';
 import { lockedBody, lockedByOther } from './locks.js';
 import { sessionCookie, sessionFor } from '../session.js';
@@ -275,6 +277,75 @@ export const saveUpdate = (h, id, body, { holder = null, viewer = null, now = Da
     return { status: 200, body: { rev, photos: photoInfos(h, checked.doc) } };
   });
 
+// The notes of photos (docs/GALLERY.md S5c): `body` is { rev, set: { <stepId>: <text> | null } }.
+// Only the document and its rev change: no tile, no photo rows, the lock stays as it is.
+// -> { status, body }
+export const CAPTIONS_AT_ONCE = 200;
+
+export const saveCaptions = (h, id, body, { holder = null, viewer = null, now = Date.now } = {}) =>
+  serial(async () => {
+    const node = getNode(h, id);
+
+    if(!node) return { status: 404, body: { error: 'not_found' } };
+    if(!canEdit(node, viewer)) return { status: 403, body: { error: 'forbidden' } };
+
+    const locked = lockedByOther(h, id, holder, now());
+
+    if(locked) return { status: 423, body: lockedBody(locked) };
+    if(!Number.isInteger(body?.rev) || body.rev < 1) return { status: 400, body: { error: 'invalid', details: [{ code: 'bad_rev', path: 'rev' }] } };
+    if(body.rev !== node.rev) return { status: 409, body: { error: 'conflict', rev: node.rev } };
+
+    const set = body.set;
+
+    if(!set || typeof set !== 'object' || Array.isArray(set)) return { status: 400, body: { error: 'invalid', details: [{ code: 'bad_set', path: 'set' }] } };
+
+    const entries = Object.entries(set);
+
+    if(!entries.length || entries.length > CAPTIONS_AT_ONCE) return { status: 400, body: { error: 'invalid', details: [{ code: 'bad_set', path: 'set' }] } };
+
+    const known = new Set(photoRefs(node.doc).map(r => r.id));
+    const errors = [];
+    let doc = node.doc;
+
+    for(const [stepId, value] of entries) {
+      if(!known.has(stepId)) errors.push({ code: 'no_step', path: `set.${stepId}` });
+      else if(value !== null && typeof value !== 'string') errors.push({ code: 'bad_text', path: `set.${stepId}` });
+      else {
+        // line ends as \n, no control characters but the line break and the tab, no space at the ends
+        const text = (value ?? '').replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim();
+
+        if(text.length > LIMITS.desc) errors.push({ code: 'too_large', path: `set.${stepId}` });
+        else doc = setDesc(doc, [stepId], text);
+      }
+    }
+
+    if(errors.length) return { status: errors.some(e => e.code === 'too_large') ? 413 : 400, body: { error: errors.some(e => e.code === 'too_large') ? 'too_large' : 'invalid', details: errors } };
+    if(Buffer.byteLength(JSON.stringify(doc)) > LIMITS.docBytes) return { status: 413, body: { error: 'too_large', details: [{ code: 'doc_full', path: 'doc' }] } };
+
+    const checked = validate(doc);
+
+    if(checked.length) return { status: 400, body: { error: 'invalid', details: checked } };
+
+    const rev = updateNode(h, id, { rev: body.rev, title: node.title, doc, palette: node.palette });
+
+    return rev === null ? { status: 409, body: { error: 'conflict', rev: getNode(h, id)?.rev } } : { status: 200, body: { rev } };
+  });
+
+// PATCH /api/nodes/:id/captions
+export async function captionsRoute(req, idText, h) {
+  if(!/^\d{1,15}$/.test(idText)) return fail(404, 'not_found');
+
+  const { body, error } = await jsonBody(req);
+
+  if(error) return error;
+
+  const session = sessionFor(req);
+  const db = h ?? (await database());
+  const r = await saveCaptions(db, Number(idText), body, { holder: session.holder, viewer: viewerOf(db, req) });
+
+  return reply(r.status, r.body, session);
+}
+
 // Delete node `id`: the row, its photo rows, edges and lock go with it, then
 // every photo nobody else uses, with its file and thumbnail. -> { status, body }
 export const removeNode = (h, id, { holder = null, viewer = null, now = Date.now } = {}) =>
@@ -375,7 +446,11 @@ export async function readNode(req, idText, h) {
     return child && canView(child, viewer) ? [{ id: child.id, title: child.title, kind: child.kind, tile: child.tile }] : [];
   });
 
-  return Response.json({ node: publicNode(node), rev: node.rev, photos: photoInfos(db, node.doc), children, mine: mayWrite(node, viewer) }, { headers });
+  // a viewer who may not write sees the node without its disabled photos (docs/BATCH.md S5)
+  const mine = mayWrite(node, viewer);
+  const shown = mine ? node : { ...node, doc: visibleDoc(node.doc) };
+
+  return Response.json({ node: publicNode(shown), rev: node.rev, photos: photoInfos(db, shown.doc), children, mine }, { headers });
 }
 
 // the size of a large render of a tile (zooming in on a picture in the 3D gallery)

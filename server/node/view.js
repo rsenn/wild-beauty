@@ -25,15 +25,18 @@ export function photoInfos(h, doc) {
 // A child of a gallery as the page hands it to the 3D gallery. A child that is a
 // sequence of images (a slide show or a grid) also lists its photos, in the order
 // of the node and without repeats, so the gallery hangs each of them (items.js).
-// -> { id, title, tile, photos?: [{ hash, href }] }
-export function galleryChild(h, child) {
-  const out = { id: child.id, title: child.title, tile: child.tile };
+// -> { id, title, tile, rev?, photos?: [{ hash, href, step, desc? }] }
+// where `step` is the photo step's id and `desc` its note (docs/GALLERY.md S5c), and `rev` is only
+// there when the viewer may change the child (`mine`): the gallery's carousel then writes notes
+// into the child (PATCH /api/nodes/:id/captions) with that rev.
+export function galleryChild(h, child, { mine = false } = {}) {
+  const out = { id: child.id, title: child.title, tile: child.tile, ...(mine && { rev: child.rev }) };
 
   if(!['slides', 'grid'].includes(child.doc?.mode)) return out;
 
   const infos = photoInfos(h, child.doc);
   const seen = new Set();
-  const photos = photoSteps(visibleDoc(child.doc)).flatMap(({ photo }) => (infos[photo] && !seen.has(photo) ? (seen.add(photo), [{ hash: photo, href: infos[photo].href }]) : []));
+  const photos = photoSteps(visibleDoc(child.doc)).flatMap(({ photo, id, desc }) => (infos[photo] && !seen.has(photo) ? (seen.add(photo), [{ hash: photo, href: infos[photo].href, step: id, ...(desc && { desc }) }]) : []));
 
   return photos.length > 1 ? { ...out, photos } : out;
 }
@@ -77,4 +80,27 @@ export function viewCards(h, { canView, lang = 'en', limit = 6 }) {
   }
 
   return cards;
+}
+
+// The chapters of a photo book (docs/ALBUM.md S4c): the child nodes that hold pictures, else the
+// node itself. `children` are the nodes the viewer may see, in edge order. The disabled photos are
+// left out, a photo twice in a chapter counts once.
+// -> [{ id, title, pictures: [{ hash, href, w, h, desc? }] }]
+export function bookChapters(h, node, children) {
+  const chapter = n => {
+    const infos = photoInfos(h, n.doc);
+    const seen = new Set();
+    const pictures = photoSteps(visibleDoc(n.doc)).flatMap(({ photo, desc }) => {
+      if(!infos[photo] || seen.has(photo)) return [];
+
+      seen.add(photo);
+
+      return [{ hash: photo, href: infos[photo].href, w: infos[photo].width, h: infos[photo].height, ...(desc?.trim() && { desc }) }];
+    });
+
+    return { id: n.id, title: n.title ?? '', pictures };
+  };
+  const made = children.map(chapter).filter(c => c.pictures.length);
+
+  return made.length ? made : [chapter(node)].filter(c => c.pictures.length);
 }

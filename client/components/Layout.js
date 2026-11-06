@@ -2,12 +2,12 @@ import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { Nav } from './Nav.js';
 import { LoginDialog } from './LoginDialog.js';
-import { navItems } from '../nav.js';
+import { mainTabs } from '../nav.js';
 import { useBoot } from '../boot.js';
 import { useRef, useState } from '../../vendor/hooks.js';
 
-// page chrome: the tab strip and the content, the logo on the landing page and on special
-// occasions only (`logo`); `hrefFor(code)` is the same page in another language; `bleed`
+// page chrome: the tab strip and the content, the logo (the way home) on the landing page and on
+// special occasions only (`logo`), else a small home tab; `hrefFor(code)` is the same page in another language; `bleed`
 // drops the side padding of the content
 export const Layout = ({ active, hrefFor, bleed, logo = false, children }) => {
   const { t, lang } = useI18n();
@@ -49,7 +49,7 @@ export const Layout = ({ active, hrefFor, bleed, logo = false, children }) => {
     <div class=${logo ? 'wb-page' : 'wb-page wb-page-bare'}>
       <header class="wb-header">
         ${logo && html`<a class="wb-logo" href="/" aria-label="Wild Beauty"></a>`}
-        <${Nav} items=${navItems(t, lang, user)} active=${loginOpen ? 'login' : active} hrefFor=${hrefFor} onLogin=${() => (user ? logout() : !loginRequired && setLoginOpen(o => !o))} />
+        <${Nav} tabs=${mainTabs(t, lang)} active=${active} home=${!logo} user=${user} hrefFor=${hrefFor} loginOpen=${loginOpen} onLogin=${() => !loginRequired && setLoginOpen(o => !o)} onLogout=${logout} />
       </header>
       <main class=${bleed ? 'wb-content wb-content-bleed' : 'wb-content'}>${children}</main>
       <${LoginDialog} open=${loginOpen} onClose=${close} onSubmit=${login} onRegister=${register} />

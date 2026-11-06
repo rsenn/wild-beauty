@@ -150,10 +150,15 @@ html comes from client/html.js, htm over preact.
 - client/components/BatchEditor.js   batch editor panel over the graph (loads nodes by GET /api/nodes/:id, saves by PUT, no new server route)
 - client/editor/core/batch.js        its pure document functions: photoRefs, placePhotos, setOff
 - server/api/describe.js geoname.js   POST /api/photos/describe (place + capture time of own photos), offline GeoNames list (tools/gazetteer.js fetches it into data/gazetteer/)
+- docs/ALBUM.md            photo book (proposed): a node or gallery printed like a photo album
 - docs/PROFILE.md          user profile; server/api/profile.js (GET/PUT /api/profile, POST /api/profile/avatar), client/components/ProfilePage.js, client/editor/core/pattern.js (fillPattern: titles and descriptions from the profile's patterns), users.pseudonym / root_id / prefs (migration 10)
 - photos.meta: where (exact position, private) and taken (EXIF time, local text); tools/ingest.js --positions-only sets both from originals
-- photo step flags: desc (caption, gallery title), off: the viewer skips it (visibleDoc in model.js); the node editor still shows it
+- photo step flags: desc (caption, gallery title), off: the viewer skips it (visibleDoc in model.js); the node editor still shows it; the server leaves off photos out of what it sends to anyone who may not write the node (readNode, nodePage)
+- placeholder notes (docs/BATCH.md S6a2): client/editor/core/pattern.js (timeText, partsOf, isPlaceholder), client/components/NoteParts.js (Place, Date, Time buttons of the carousel's NoteEdit and the batch editor's annotation popover), Generate keeps existing notes, batch button Find placeholder notes
+- photo book: /:lang/node/:id/book (docs/ALBUM.md S4c): bookPage in server.js, bookChapters in server/node/view.js, packing in client/gallery/book.js (pure, tests/book.test.js), BookPage.js, print CSS at the end of layout.css; ?notes=1|0 = only pictures with a note
+- notes of photos (docs/GALLERY.md S5c): photo step field desc, at most LIMITS.desc (5000) plain text; PATCH /api/nodes/:id/captions (saveCaptions, server/api/nodes.js) changes only the document and rev; client/editor/io/captions.js queues the changes; client/editor/core/caption.js has titleOf (first line), paragraphsOf, hasBody; components NoteText.js (everyone) and NoteEdit.js (owner, loaded on demand) inside GalleryCarousel
 - client/*.js          upload, events recording, i18n, colour, nav, push
+- client/nav.js        the three main tabs (mainTabs) and the account name; client/components/Nav.js is the tab strip: fixed height, the language is a flag menu, the account a menu or a Log in button, a small home tab where the page has no logo (docs/DESIGN.md S7.2a)
 
 Shared code: model.js, render.js, color.js and others are imported by the server too. They must stay pure, no DOM, no Bun apis.
 
@@ -350,5 +355,9 @@ notes:
 - the NodeEditor split, see TODO.md
 - hooks/ is empty until then
 - components/ is flat and wants grouping
+
+- save (NodeEditor.js save, saveNow): a free node draws its tile in the browser before the PUT and its large render after it; a grid or slides node draws nothing, the server makes the tile (E64b). Close and Edit of another node wait for a running save through editorStore.setSaving and idle
+
+- gotcha (2026-11-06): node 30 (a tall screenshot, a lighten blend and a cutout) showed in Brave as three repeated bands about 255 px high with the page header painted into each, a browser GPU tile glitch: the same data and code rendered correctly in a second server copy and in Firefox. If it comes back on other nodes: Brave's hardware acceleration, or flatten the blended layers of the node view; no code change was made
 
 notes:

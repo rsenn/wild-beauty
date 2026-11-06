@@ -7,7 +7,7 @@ export const NEW = 'new';
 
 // confirmReplace(current, next, { dirty }) -> boolean | Promise<boolean>
 export function createEditorStore({ confirmReplace = () => false } = {}) {
-  let state = { open: false, target: null, dirty: false, used: [] };
+  let state = { open: false, target: null, dirty: false, saving: false, used: [] };
   const listeners = new Set();
   let hook = confirmReplace;
 
@@ -59,6 +59,27 @@ export function createEditorStore({ confirmReplace = () => false } = {}) {
     // the editor reports unsaved changes so the hook can warn
     setDirty(dirty) {
       if(state.open && state.dirty !== !!dirty) set({ dirty: !!dirty });
+    },
+
+    // the editor reports a save on its way (docs/EDITOR.md E64b): asking to replace or close it waits for the end
+    setSaving(saving) {
+      if(state.saving !== !!saving) set({ saving: !!saving });
+    },
+
+    // -> Promise, resolved when no save is running
+    idle() {
+      if(!state.saving) return Promise.resolve();
+
+      return new Promise(resolve => {
+        const done = next => {
+          if(next.saving) return;
+
+          listeners.delete(done);
+          resolve();
+        };
+
+        listeners.add(done);
+      });
     },
 
     // the photos (hashes) the open editor's node uses, for the upload list

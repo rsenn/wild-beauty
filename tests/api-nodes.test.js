@@ -195,6 +195,21 @@ describe('GET /api/nodes/:id and /files/photos', () => {
     expect(await again.text()).toBe('');
   });
 
+  test('a viewer who may not write gets the node without its disabled photos (docs/BATCH.md S5)', async () => {
+    if(!ready) return;
+
+    const { id } = await (await post({ doc: doc([photo('photo001', A), photo('photo002', B, { off: true })]) })).json();
+    const { node, photos, mine } = await (await readNode(get(`/api/nodes/${id}`), String(id), h)).json();
+    const ids = node.doc.pages[0].steps.map(step => step.id);
+
+    // the test requests carry no login: the owner-less node is shown as to a visitor or as to its owner
+    if(mine) expect(ids).toEqual(['photo001', 'photo002']);
+    else {
+      expect(ids).toEqual(['photo001']);
+      expect(Object.keys(photos)).toEqual([A]);
+    }
+  });
+
   test('GET /api/nodes lists the saved nodes as tiles, newest first (E68)', async () => {
     if(!ready) return;
 

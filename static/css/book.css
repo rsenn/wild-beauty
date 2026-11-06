@@ -1,0 +1,64 @@
+/* The photo book (docs/ALBUM.md S4c): white A4 sheets on screen, only the sheets in print.
+   Its own sheet, loaded only by that page: a printed book is black on white whatever the theme is,
+   so it has literal colours, which layout.css must not have (tests/css.test.js). */
+.wb-book {
+  background: #8a8a8a;
+  min-height: 100vh;
+  padding: 0 0 24px;
+  font-family: 'Helvetica Neue', Arial, 'Liberation Sans', sans-serif;
+  font-size: 11pt;
+  line-height: 1.4;
+  color: #000;
+}
+.wb-book-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 8px 16px;
+  background: #222;
+  color: #eee;
+  font-size: 14px;
+}
+.wb-book-bar a, .wb-book-bar button { color: #fff; }
+.wb-book-bar button { background: #444; border: 1px solid #777; border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.wb-book-count { flex: 1; }
+.wb-book-opt-on { font-weight: bold; }
+.wb-book-page {
+  box-sizing: border-box;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 16px auto;
+  padding: 18mm;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  break-after: page;
+}
+.wb-book-front, .wb-book-title { display: flex; flex-direction: column; justify-content: center; }
+.wb-book-front h1 { font-size: 30pt; margin: 0 0 8mm; }
+.wb-book-title h2 { font-size: 26pt; margin: 0 0 4mm; }
+.wb-book-sub { font-size: 12pt; margin: 0 0 8mm; }
+.wb-book-toc { list-style: none; padding: 0; margin: 0; }
+.wb-book-toc li { display: flex; justify-content: space-between; gap: 8mm; padding: 1mm 0; border-bottom: 0.2mm solid #ccc; }
+.wb-book-page-pics { display: flex; flex-direction: column; }
+/* the pictures share the height of the page: each gets an equal cell, the picture fills it (object-fit) and the note sits below */
+.wb-book-grid { flex: 1; display: flex; flex-direction: column; gap: 6mm; min-height: 0; }
+.wb-book-n4 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 6mm; }
+.wb-book-fig { flex: 1 1 0; min-height: 60mm; margin: 0; display: flex; flex-direction: column; break-inside: avoid; }
+.wb-book-n4 .wb-book-fig { min-height: 0; }
+.wb-book-fig img { flex: 1 1 0; min-height: 0; width: 100%; height: auto; object-fit: contain; }
+.wb-book-fig figcaption { margin-top: 3mm; text-align: center; }
+.wb-book-fig-long figcaption { text-align: left; }
+.wb-book .wb-note-text p { margin: 0 0 2.5mm; }
+.wb-book .wb-note-title { font-size: 14pt; }
+@page { size: A4 portrait; margin: 18mm; }
+@media print {
+  .wb-book { background: none; padding: 0; }
+  .wb-book-bar { display: none; }
+  .wb-book-page { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
+  .wb-book-front, .wb-book-title, .wb-book-page-pics { min-height: 260mm; }
+  .wb-book-page:last-child { break-after: auto; }
+}

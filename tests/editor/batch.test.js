@@ -1,7 +1,7 @@
 // bun test: client/editor/core/batch.js
 import { describe, expect, test } from 'bun:test';
 import { photoRefs, placePhotos, rotatePhotos, setDesc, setOff } from '../../client/editor/core/batch.js';
-import { validate, visibleDoc } from '../../client/editor/core/model.js';
+import { LIMITS, validate, visibleDoc } from '../../client/editor/core/model.js';
 
 const M = [1, 0, 0, 1, 0, 0];
 const hash = c => c.repeat(64);
@@ -106,7 +106,8 @@ describe('setDesc', () => {
     expect(photoRefs(w)[0].desc).toBe('Plettenberg Bay, 15 April 2026');
     expect(setDesc(w, ['aaaaaaa1'], 'Plettenberg Bay, 15 April 2026')).toBe(w);
     expect('desc' in setDesc(w, ['aaaaaaa1'], '').pages[0].steps[0]).toBe(false);
-    expect(setDesc(d, ['aaaaaaa1'], 'x'.repeat(600)).pages[0].steps[0].desc.length).toBe(500);
+    expect(setDesc(d, ['aaaaaaa1'], 'x'.repeat(LIMITS.desc + 100)).pages[0].steps[0].desc.length).toBe(LIMITS.desc);
+    expect(LIMITS.desc).toBe(5000);
   });
 });
 

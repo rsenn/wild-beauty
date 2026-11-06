@@ -5,7 +5,7 @@ import { insertNode, upsertPhoto } from '../server/db/nodes.js';
 import { galleryChild } from '../server/node/view.js';
 
 const H = n => String(n).repeat(64);
-const photo = (id, hash) => ({ op: 'photo', id, photo: hash, m: [1, 0, 0, 1, 0, 0], fit: 'extend', opacity: 1, blend: 'normal' });
+const photo = (id, hash, desc) => ({ op: 'photo', id, photo: hash, m: [1, 0, 0, 1, 0, 0], fit: 'extend', opacity: 1, blend: 'normal', ...(desc && { desc }) });
 let h;
 
 beforeEach(async () => {
@@ -20,11 +20,21 @@ describe('galleryChild', () => {
   test('a slide show lists its photos in order, without repeats, without missing ones', () => {
     const c = child('slides', [photo('a', H(2)), photo('b', H(1)), photo('c', H(2)), photo('d', H(9)), photo('e', H(3))], H(2));
 
-    expect(galleryChild(h, c)).toEqual({ id: 1, title: 't', tile: H(2), photos: [{ hash: H(2), href: `/files/photos/${H(2)}.jpg` }, { hash: H(1), href: `/files/photos/${H(1)}.jpg` }, { hash: H(3), href: `/files/photos/${H(3)}.jpg` }] });
+    expect(galleryChild(h, c)).toEqual({ id: 1, title: 't', tile: H(2), photos: [{ hash: H(2), href: `/files/photos/${H(2)}.jpg`, step: 'a' }, { hash: H(1), href: `/files/photos/${H(1)}.jpg`, step: 'b' }, { hash: H(3), href: `/files/photos/${H(3)}.jpg`, step: 'e' }] });
   });
 
   test('a collage or a slide show of one photo stays one picture', () => {
     expect(galleryChild(h, child('free', [photo('a', H(1)), photo('b', H(2))], H(1))).photos).toBeUndefined();
     expect(galleryChild(h, child('slides', [photo('a', H(1))], H(1))).photos).toBeUndefined();
+  });
+
+  test('a note travels with its photo step; the rev only when the viewer may change the child', () => {
+    const c = child('grid', [photo('a', H(1), 'Table Mountain\n\nUp at dawn.'), photo('b', H(2))], H(1));
+    const asVisitor = galleryChild(h, c);
+    const asOwner = galleryChild(h, { ...c, rev: 7 }, { mine: true });
+
+    expect(asVisitor.rev).toBeUndefined();
+    expect(asVisitor.photos.map(p => [p.step, p.desc])).toEqual([['a', 'Table Mountain\n\nUp at dawn.'], ['b', undefined]]);
+    expect(asOwner.rev).toBe(7);
   });
 });

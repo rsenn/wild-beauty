@@ -21,6 +21,7 @@ export const LIMITS = {
   photos: 40, // in a free node: every photo is a layer of one composite
   photosSequence: 1000, // in a slides or grid node; tools/ingest.js passes its own maxPhotos
   title: 200,
+  desc: 5000, // a photo's note: plain text, paragraphs (docs/GALLERY.md S5c)
   textChars: 2000,
   textBoxes: 100,
   gradientStops: 5,
@@ -82,7 +83,7 @@ const opt = check => Object.assign(v => v === undefined || check(v), { optional:
 
 // field checks per op; a field not listed is rejected
 const STEPS = {
-  photo: { id: isId, photo: isHash, m: isMatrix, crop: opt(v => isNumber(v) && v >= 0 && v <= 1), fit: opt(oneOf(FITS)), opacity: isNumber, blend: oneOf(BLENDS), clip: opt(isId), role: opt(oneOf(['picture', 'texture'])), off: opt(v => typeof v === 'boolean'), desc: opt(v => isString(v) && v.length <= 500), orig: opt(isHash), box: opt(v => Array.isArray(v) && v.length === 4 && v.every(n => isNumber(n) && n >= 0 && n <= 1000) && v[0] < v[2] && v[1] < v[3]), edge: opt(v => isObject(v) && EDGE_STYLES.includes(v.style) && isNumber(v.amount) && v.amount >= 0 && v.amount <= 1 && Number.isInteger(v.seed) && v.seed >= 0 && v.seed <= 1e9) },
+  photo: { id: isId, photo: isHash, m: isMatrix, crop: opt(v => isNumber(v) && v >= 0 && v <= 1), fit: opt(oneOf(FITS)), opacity: isNumber, blend: oneOf(BLENDS), clip: opt(isId), role: opt(oneOf(['picture', 'texture'])), off: opt(v => typeof v === 'boolean'), desc: opt(v => isString(v) && v.length <= LIMITS.desc), orig: opt(isHash), box: opt(v => Array.isArray(v) && v.length === 4 && v.every(n => isNumber(n) && n >= 0 && n <= 1000) && v[0] < v[2] && v[1] < v[3]), edge: opt(v => isObject(v) && EDGE_STYLES.includes(v.style) && isNumber(v.amount) && v.amount >= 0 && v.amount <= 1 && Number.isInteger(v.seed) && v.seed >= 0 && v.seed <= 1e9) },
   stroke: { id: isId, pts: isPoints, color: isColour, smooth: opt(v => typeof v === 'boolean') },
   shape: { id: isId, path: isString, closed: v => typeof v === 'boolean', fill: opt(isFill), stroke: opt(isFill), strokeWidth: isNumber, wall: opt(isWall) },
   clip: { target: isId, shape: isId },

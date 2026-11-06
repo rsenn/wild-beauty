@@ -15,6 +15,9 @@ export function usePopFit(open, { right = true } = {}) {
     if(!open || !el) return;
 
     const place = () => {
+      // a scroll or resize that arrives while the panel is being taken out of the page
+      if(!el.isConnected || !el.parentElement) return;
+
       const anchor = el.parentElement.getBoundingClientRect();
       const vw = document.documentElement.clientWidth;
       const vh = window.innerHeight;

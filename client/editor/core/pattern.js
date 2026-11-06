@@ -41,3 +41,22 @@ export function dateText(from, to = from, lang = 'en') {
     return String(from).slice(0, 10);
   }
 }
+
+// the capture time of a photo as `14:32` from the local time text `YYYY-MM-DDTHH:MM:SS`; '' when there is none
+export const timeText = taken => /^\d{4}-\d\d-\d\dT(\d\d:\d\d)/.exec(taken ?? '')?.[1] ?? '';
+
+// the three values of a photo for patterns and for the note editors' buttons, from the answer of
+// POST /api/photos/describe ({ place, taken }): -> { location, date, time }
+export const partsOf = (info, lang = 'en') => ({ location: info?.place ?? '', date: dateText(info?.taken, info?.taken, lang), time: timeText(info?.taken) });
+
+// Is a note only what the generated place, date and time say (docs/BATCH.md S6a2)? Take the
+// photo's own place, date and time out of it, and what is left is nothing but separators.
+export function isPlaceholder(note, parts) {
+  let rest = String(note ?? '').trim();
+
+  if(!rest) return false;
+
+  for(const value of [parts?.location, parts?.date, parts?.time].filter(Boolean).sort((a, b) => b.length - a.length)) rest = rest.split(value).join(' ');
+
+  return /^[\s,;:.–-]*$/.test(rest);
+}

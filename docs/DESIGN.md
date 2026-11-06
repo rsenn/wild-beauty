@@ -275,6 +275,27 @@ Every page - graph view, login modal, upload grid, editor grid, on both desktop 
 - Labels seen: **Home, Show, Tree, New, Login, Language** (the last two abbreviate to "Log"/"Lan" or "Spr" for Sprache - German-language build also exists). On narrow mobile viewports the tabs are cropped/truncated (e.g., "Home"->"Hon", "Show"->"Sho", "Tree"->"Tre") - this is a genuine responsive bug in the original (tabs don't wrap or shrink text), **not** a style to keep; the rewrite should keep the flat, edge-to-edge crimson tab-bar look but make it responsive (wrap, shrink, or collapse to a menu on narrow widths).
 - The **active tab** gets a soft white glow/highlight behind its label, and can expand to show a one-line description underneath the bar (seen: "New" tab active -> caption "Create a new tile" appears directly below the strip, left-aligned, same background texture).
 
+### 7.2a Navigation redesign (2026-11-05; the owner found the growing tabs confusing for ordinary users)
+
+Problem with the 7.2 behaviour as built (`static/css/layout.css`, `.wb-tab`): a tab grows in height on hover, focus and when active, so the content below jumps, the nav height differs from page to page, `:hover` sticks on touch screens, and the meaning of a tab lives in a caption that is only visible while it is open. Seven entries (Home, Show, Tree, New, Admin, Log out, Lang) look alike although some are pages and some are actions.
+
+Agreed with the owner:
+- **The nav never changes height and nothing below it moves** (no growing, no hover dependence; it works the same with a finger). Rule: no interaction with the nav may shift the content.
+- **Account items are one menu**: Profile, Admin (admins only) and Log out move into a dropdown behind the user's name; logged out, the nav shows a visible "Log in" button instead.
+- **Language is its own small control that shows only the flag of the current language, no word "Lang"** (the flag is the one thing a visitor who cannot read the page yet can find). Its accessible name and tooltip are "Language: <name>". The dropdown lists every language as flag plus its own name (a flag is not a language: English is not one country), the current one marked. Reason it is not inside the account menu: it must work for logged-out visitors and it is the only control that has to be found without reading.
+- Keep the look: crimson tabs, theme variables only (the theming rule in `TODO.md`).
+
+Proposed, the owner has not confirmed these yet:
+- The logo is Home; the Home tab goes away.
+- Three main entries, always visible: Galleries, Explore, Create (labels and captions in `locales/*.json`, `nav.show`, `nav.tree`, `nav.new`), each with a small icon. The caption is not shown in the nav; it becomes the `title` of the link, and each page says what it is for in its own heading or one-line intro.
+- The current page is marked (filled or inverted, `aria-current`).
+- Create stays visible for logged-out visitors and leads to the login prompt when needed.
+- Narrow screens: three labels plus the two small controls must fit in 360 px; if a language's labels do not, they fall back to icons only. To check in all four languages.
+
+Open: the icons (grid, linked dots, plus), whether the dropdowns open on tap only or also on hover on desktop (proposal: tap or Enter only, so nothing opens by accident), whether the page intros are written for all pages at once or one by one.
+
+Built 2026-11-05 (`client/nav.js`, `client/components/Nav.js`, `static/css/layout.css`, `nav.*` in `locales/*.json`): fixed tab height (hover and focus only change the colour), the current page has a bar under its tab, three tabs with icons, the language flag menu (flag plus language name per entry), the account menu or a "Log in" button, tab words become visually hidden at 640 px and narrower (icons stay, the tooltip is the caption). Differences from the proposal: a page without the logo (`Layout` without `logo`, which is most pages) gets a small house tab as Home, since the logo is only shown on the landing page; the menu lists are always in the page and `hidden` while closed, so the language links are in the server's HTML (`tests/e2e.test.js` checks them) and crawlers see the alternates. Looked at in a browser: desktop, a 360 px frame, English and German, the language menu (opens under the flag, Escape closes). Not looked at: the logged-in account menu (Profile, Admin, Log out), the French and Spanish bars, a phone, keyboard use of the menus.
+
 ### 7.3 Typography
 
 A **blocky monospace / bitmap-style pixel font** (looks like a "terminal"/DOS-VGA style face) is used everywhere text appears as UI chrome: nav tab labels, graph node labels, button labels, modal titles, and metadata overlays on content cards. This is used consistently rather than a standard system sans-serif, and is a deliberate retro-terminal accent against the soft paper texture. Keep a single distinctive monospace/pixel display font for all UI labels and node text; body copy (tile title/text content itself) can reasonably use a normal readable font, but chrome and node labels should keep the pixel-font identity.

@@ -19,13 +19,30 @@ describe('galleryItems', () => {
   });
 
   test('a child that is a sequence of images hangs every photo in its own order, between its siblings', () => {
-    const seq = [{ hash: 'p1', href: '/files/photos/p1.jpg' }, { hash: 'p2', href: '/files/photos/p2.png' }, { hash: 'p3', href: '/files/photos/p3.jpg' }];
+    const seq = [{ hash: 'p1', href: '/files/photos/p1.jpg', step: 's1' }, { hash: 'p2', href: '/files/photos/p2.png', step: 's2' }, { hash: 'p3', href: '/files/photos/p3.jpg', step: 's3' }];
     const node = { children: [{ id: 4, title: 'a', tile: 'aa' }, { id: 5, title: 'Roses', tile: 'rr', photos: seq }, { id: 6, title: 'c', tile: null }], doc: doc([]) };
     const items = galleryItems(node, 'fr');
 
     expect(items.map(i => i.id)).toEqual(['n4', 'n5:p1', 'n5:p2', 'n5:p3']);
-    expect(items[2]).toEqual({ id: 'n5:p2', title: 'Roses 2/3', url: '/files/photos/p2.small.jpg', full: '/files/photos/p2.png', href: '/fr/node/5' });
+    expect(items[2]).toEqual({ id: 'n5:p2', node: 5, step: 's2', title: 'Roses 2/3', url: '/files/photos/p2.small.jpg', full: '/files/photos/p2.png', href: '/fr/node/5' });
     expect(galleryItems(node, 'fr')).toEqual(items); // same order every time
+  });
+
+  test('a note titles its picture by its first line and travels with it; the rev only for the owner of the child', () => {
+    const seq = [{ hash: 'p1', href: '/files/photos/p1.jpg', step: 's1', desc: 'Table Mountain\n\nUp at dawn.' }, { hash: 'p2', href: '/files/photos/p2.jpg', step: 's2' }];
+    const visitor = galleryItems({ children: [{ id: 5, title: 'Roses', tile: 'rr', photos: seq }], doc: doc([]) });
+    const owner = galleryItems({ children: [{ id: 5, title: 'Roses', tile: 'rr', rev: 9, photos: seq }], doc: doc([]) });
+
+    expect(visitor.map(i => [i.title, i.desc, i.rev])).toEqual([['Table Mountain', 'Table Mountain\n\nUp at dawn.', undefined], ['Roses 2/2', undefined, undefined]]);
+    expect(owner.map(i => i.rev)).toEqual([9, 9]);
+  });
+
+  test('the own photos of a node of the owner carry node, step, note and rev', () => {
+    const node = { id: 3, mine: true, rev: 4, doc: doc([photo('a', { desc: 'Cape Point' }), photo('b')]) };
+    const items = galleryItems(node);
+
+    expect(items.map(i => [i.node, i.step, i.title, i.rev])).toEqual([[3, 'sa', 'Cape Point', 4], [3, 'sb', undefined, 4]]);
+    expect(galleryItems({ ...node, mine: false }).map(i => i.rev)).toEqual([undefined, undefined]);
   });
 
   test('a node without children hangs its own photos, once each, no textures', () => {

@@ -9,7 +9,7 @@ import { config } from './server/config.js';
 import { dev, log } from './server/log.js';
 import { clearUploads, createUpload, deleteUpload, listUploads, readUploads, serveUpload, sweepOrphans, sweepUploads } from './server/api/uploads.js';
 import { lockRoute } from './server/api/locks.js';
-import { createNode, deleteNodeRoute, largeRoute, listNodesRoute, listedNodes, putLargeRoute, readNode, updateNodeRoute, visibilityRoute, visibleNodes } from './server/api/nodes.js';
+import { captionsRoute, createNode, deleteNodeRoute, largeRoute, listNodesRoute, listedNodes, putLargeRoute, readNode, updateNodeRoute, visibilityRoute, visibleNodes } from './server/api/nodes.js';
 import { manifestResponse, workerResponse } from './server/pwa.js';
 import { graphOf, graphRoute } from './server/api/graph.js';
 import { placesRoute } from './server/api/places.js';
@@ -19,7 +19,8 @@ import { cutoutRoute } from './server/api/cutout.js';
 import { segmentRoute } from './server/api/segment.js';
 import { edgesRoute } from './server/api/edges.js';
 import { servePhoto } from './server/api/photos.js';
-import { galleryChild, photoInfos, viewCards } from './server/node/view.js';
+import { visibleDoc } from './client/editor/core/model.js';
+import { bookChapters, galleryChild, photoInfos, viewCards } from './server/node/view.js';
 import { atOf, viewOf } from './client/gallery/presentation.js';
 import { canView } from './server/api/nodes.js';
 import { getNode, linksFrom } from './server/db/nodes.js';
@@ -202,9 +203,10 @@ async function nodePage(lang, id, req) {
   const children = linksFrom(h, id, 'child').flatMap(({ id: to }) => {
     const child = getNode(h, to);
 
-    return child && canView(child, viewer) ? [galleryChild(h, child)] : [];
+    return child && canView(child, viewer) ? [galleryChild(h, child, { mine: mayWrite(child, viewer) })] : [];
   });
-  const shown = { id: node.id, title: node.title, kind: node.kind, doc: node.doc, rev: node.rev, mine: mayWrite(node, viewer), children };
+  const doc = mayWrite(node, viewer) ? node.doc : visibleDoc(node.doc);
+  const shown = { id: node.id, title: node.title, kind: node.kind, doc, rev: node.rev, mine: mayWrite(node, viewer), children };
   const title = `${locales.get(lang)['page.title.node'] ?? 'Wild Beauty'} - ${node.title || locales.get(lang)['node.untitled'] || ''}`;
 
   // ?view=carousel|masonry and ?at=<item> open the gallery in that view on that picture (docs/GALLERY.md S5a)
@@ -212,7 +214,26 @@ async function nodePage(lang, id, req) {
   const view = viewOf(query.get('view'));
   const at = atOf(query.get('at'));
 
-  return page(lang, 'page.title.node', { node: shown, photos: photoInfos(h, node.doc), ...(view !== '3d' && { view }), ...(at && { at }) }, title, req);
+  return page(lang, 'page.title.node', { node: shown, photos: photoInfos(h, doc), ...(view !== '3d' && { view }), ...(at && { at }) }, title, req);
+}
+
+// GET /:lang/node/:id/book: the photo book of a node or gallery, laid out for printing (docs/ALBUM.md S4c)
+async function bookPage(lang, id, req) {
+  const h = await database();
+  const viewer = viewerOf(h, req);
+  const node = getNode(h, id);
+
+  if(!node || !canView(node, viewer)) return text('not found\n', 404);
+
+  const kids = linksFrom(h, id, 'child').flatMap(({ id: to }) => {
+    const child = getNode(h, to);
+
+    return child && canView(child, viewer) ? [child] : [];
+  });
+  const notes = new URL(req.url).searchParams.get('notes');
+  const title = `${locales.get(lang)['book.title'] ?? 'Photo book'} - ${node.title || locales.get(lang)['node.untitled'] || ''}`;
+
+  return page(lang, 'book.title', { book: { id: node.id, title: node.title, chapters: bookChapters(h, node, kids), ...(notes === '1' || notes === '0' ? { notes: notes === '1' } : {}) } }, title, req);
 }
 
 // A page of a site: the node in a centred stage, the navigation of the sitemap above it
@@ -356,6 +377,10 @@ async function route(req) {
 
   if(visibility) return visibilityRoute(req, visibility[1]);
 
+  const captions = /^\/api\/nodes\/([^/]+)\/captions$/.exec(pathname);
+
+  if(captions) return req.method === 'PATCH' ? captionsRoute(req, captions[1]) : text('method not allowed\n', 405);
+
   const large = /^\/api\/nodes\/([^/]+)\/large$/.exec(pathname);
 
   if(large) return req.method === 'GET' || req.method === 'HEAD' ? largeRoute(large[1], undefined, { viewer: viewerOf(await database(), req) }) : req.method === 'PUT' ? putLargeRoute(req, large[1]) : text('method not allowed\n', 405);
@@ -415,6 +440,10 @@ async function route(req) {
   const viewed = /^\/([a-z]{2,3})\/node\/(\d{1,15})$/.exec(pathname);
 
   if(viewed && locales.has(viewed[1])) return nodePage(viewed[1], Number(viewed[2]), req);
+
+  const booked = /^\/([a-z]{2,3})\/node\/(\d{1,15})\/book$/.exec(pathname);
+
+  if(booked && locales.has(booked[1])) return bookPage(booked[1], Number(booked[2]), req);
 
   const shown = /^\/([a-z]{2,3})\/view$/.exec(pathname);
 

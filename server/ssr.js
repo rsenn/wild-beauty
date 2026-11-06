@@ -33,7 +33,7 @@ export function renderPage(vnode, { lang, dir = 'ltr', title, theme = 'kraft', b
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 ${site ? '' : '<link rel="stylesheet" href="/static/fonts/stylesheet.css">\n'}<link rel="stylesheet" href="/static/css/layout.css">${site ? '\n<link rel="stylesheet" href="/static/css/site.css">' : ''}
-<link rel="stylesheet" id="theme" href="/static/themes/${esc(theme)}.css">
+<link rel="stylesheet" id="theme" href="/static/themes/${esc(theme)}.css">${boot.book ? '\n<link rel="stylesheet" href="/static/css/book.css">' : ''}
 <script type="importmap">${json(IMPORT_MAP)}</script>
 </head>
 <body>

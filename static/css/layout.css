@@ -54,7 +54,8 @@ body {
   background: var(--wb-logo-image) no-repeat left center / contain;
 }
 
-/* tabs: a wrapping row, so labels are never cut off on a phone */
+/* tabs (docs/DESIGN.md S7.2a): a wrapping row of tabs of one fixed height. Nothing here grows, hover
+   or focus changes colour only, so the content below never moves. */
 .wb-tabs {
   display: flex;
   flex-flow: row wrap;
@@ -66,32 +67,32 @@ body {
 }
 
 .wb-tab {
+  position: relative;
+  display: flex;
   min-width: var(--wb-tab-size);
   height: var(--wb-tab-size);
-  overflow: hidden;
   background: var(--wb-accent);
   color: var(--wb-accent-ink);
   border-radius: var(--wb-radius-tab);
-  transition: height var(--wb-tab-time) var(--wb-tab-ease);
 }
 
-.wb-tab:hover,
-.wb-tab:focus-within,
-.wb-tab-active {
-  height: var(--wb-tab-size-open);
+.wb-tab:hover {
+  background: var(--wb-accent-hover);
 }
 
 .wb-tab > a,
-.wb-tab > .wb-tab-button,
-.wb-tab-lang > .wb-tab-label {
-  display: block;
+.wb-tab > .wb-tab-button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
   padding: 0 0.25em;
   color: inherit;
   text-decoration: none;
 }
 
 .wb-tab > .wb-tab-button {
-  width: 100%;
   font: inherit;
   background: none;
   border: 0;
@@ -99,10 +100,23 @@ body {
 }
 
 .wb-tab-label {
-  display: block;
   font-size: min(var(--wb-font-size-tab), 8vw);
   line-height: var(--wb-tab-size);
-  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 7em;
+}
+
+.wb-tab-icon {
+  flex: none;
+  width: calc(var(--wb-tab-size) * 0.5);
+  height: calc(var(--wb-tab-size) * 0.5);
+}
+
+/* the current page: a bar under the label and the glow the tabs always had */
+.wb-tab-active {
+  border-bottom: calc(var(--wb-border-width) * 4) solid var(--wb-accent-ink);
 }
 
 .wb-tab:hover .wb-tab-label,
@@ -110,43 +124,91 @@ body {
   text-shadow: var(--wb-tab-glow);
 }
 
-/* the caption wraps inside the label's width instead of widening the tab */
-.wb-tab-caption {
-  display: block;
-  width: 0;
-  min-width: 100%;
-  padding-bottom: 0.4em;
-  font-size: var(--wb-font-size-small);
-  line-height: 1.2;
-}
-
 .wb-tab:focus-within {
   outline: var(--wb-border-width) solid var(--wb-ink);
 }
 
-/* language tab: one flag per locale */
-.wb-flags {
-  display: flex;
-  padding-top: var(--wb-tab-gap);
-  flex-flow: row wrap;
-  justify-content: center;
-  gap: var(--wb-tab-gap);
-}
-
-.wb-flag {
+/* the language tab shows the flag of the current language */
+.wb-flag-img {
   display: block;
-  color: inherit;
-}
-
-.wb-flag > img {
-  display: block;
-  width: 24px;
+  width: 32px;
   height: auto;
 }
 
-.wb-flag[aria-current] > img {
-  outline: var(--wb-border-width) solid var(--wb-accent-ink);
-  outline-offset: 1px;
+.wb-flag-code {
+  font-size: var(--wb-font-size-button);
+  text-transform: uppercase;
+}
+
+/* the list a menu tab opens; popfit.js places it (fixed, inside the window) */
+.wb-nav-panel {
+  z-index: 100;
+  min-width: 12em;
+  padding: var(--wb-editor-gap);
+  color: var(--wb-ink);
+  background: var(--wb-editor-popover-bg);
+  border: var(--wb-popover-border);
+  border-radius: var(--wb-radius-frame);
+  box-shadow: var(--wb-popover-shadow);
+}
+
+.wb-nav-list {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: calc(var(--wb-editor-gap) / 2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wb-nav-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--wb-editor-gap);
+  padding: calc(var(--wb-editor-gap) / 2) var(--wb-editor-gap);
+  font: inherit;
+  font-size: var(--wb-font-size-button);
+  color: inherit;
+  text-align: start;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: var(--wb-radius-button);
+  cursor: pointer;
+}
+
+.wb-nav-item:hover,
+.wb-nav-item:focus-visible {
+  background: var(--wb-accent);
+  color: var(--wb-accent-ink);
+}
+
+.wb-nav-item[aria-current] {
+  text-decoration: underline;
+}
+
+.wb-nav-item .wb-flag-img {
+  width: 24px;
+}
+
+/* a narrow window: the tabs keep their icons, the words stay for screen readers and as tooltips */
+@media (max-width: 640px) {
+  .wb-tab-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .wb-tab > a,
+  .wb-tab > .wb-tab-button {
+    padding: 0 calc(var(--wb-tab-size) * 0.2);
+  }
 }
 
 .wb-content {
@@ -2431,6 +2493,13 @@ body {
   display: none;
 }
 
+/* the track takes the arrow keys, so it is focusable; the browser's focus ring is not drawn around the
+   whole carousel (the Previous and Next buttons and the counter under it show where you are) */
+.wb-flow-wide .wb-flow-track:focus,
+.wb-flow-wide .wb-flow-track:focus-visible {
+  outline: none;
+}
+
 /* the gallery's other presentations (docs/GALLERY.md S5a): a switch beside the title, a
    carousel in the node's own stage, and a masonry album that is as wide as the page */
 .wb-gallery-views {
@@ -2448,11 +2517,124 @@ body {
   margin: 0;
 }
 
+/* the picture and its note (docs/GALLERY.md S5c): side by side in a landscape window, the note on
+   the right; stacked in a portrait one, the note under the picture */
+.wb-gallery-body {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--wb-editor-gap);
+  min-height: 0;
+}
+
 .wb-gallery-pic {
   position: relative;
   flex: 1 1 0;
   min-height: 0;
 }
+
+.wb-slide-note {
+  flex: none;
+  max-height: 40%;
+  overflow-y: auto;
+  padding: 0 0.6em;
+}
+
+@media (orientation: landscape) {
+  .wb-gallery-body {
+    flex-direction: row;
+  }
+
+  .wb-has-note .wb-gallery-pic {
+    flex: 1 1 0;
+  }
+
+  /* the picture sits at the top of its area, so the note starts level with the picture's top edge */
+  .wb-has-note .wb-gallery-pic img {
+    object-position: center top;
+  }
+
+  .wb-slide-note {
+    flex: 0 0 min(34rem, 38%);
+    max-height: none;
+  }
+}
+
+.wb-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wb-editor-gap);
+}
+
+.wb-note-text p {
+  margin: 0 0 0.8em;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.wb-note-title {
+  font-size: var(--wb-font-size-lead);
+  line-height: 1.25;
+}
+
+/* the small button under a picture without a note: a scroll with a stylus */
+.wb-note-add {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  vertical-align: middle;
+  color: var(--wb-accent-ink);
+  background: var(--wb-accent);
+  border: 0;
+  border-radius: var(--wb-radius-button);
+  cursor: pointer;
+}
+
+.wb-note-add:hover,
+.wb-note-add:focus-visible {
+  background: var(--wb-accent-hover);
+}
+
+.wb-note-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.wb-note-view {
+  cursor: text;
+}
+
+.wb-note-view:hover,
+.wb-note-view:focus-visible {
+  outline: var(--wb-border-width) dashed var(--wb-ink);
+  outline-offset: 2px;
+}
+
+.wb-note-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 6em;
+  max-height: 60vh;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.45;
+}
+
+.wb-note-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--wb-editor-gap);
+  margin: 0;
+  font-size: var(--wb-font-size-small);
+}
+
+.wb-note-status {
+  margin: 0;
+  font-size: var(--wb-font-size-small);
+}
+
 
 .wb-gallery-pic img {
   position: absolute;
@@ -3205,6 +3387,17 @@ body {
   border-radius: 50%;
 }
 
+.wb-batch-tile.wb-batch-placeholder::before {
+  background: transparent;
+  border-color: var(--wb-accent);
+}
+
+.wb-note-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 .wb-batch-hit {
   position: absolute;
   inset: 0;
@@ -3285,19 +3478,6 @@ body {
 }
 
 /* the user profile page (docs/PROFILE.md) */
-.wb-tab-user:hover,
-.wb-tab-user:focus-within,
-.wb-tab-user.wb-tab-active {
-  height: calc(var(--wb-tab-size-open) + 1.8em);
-}
-
-.wb-tab > .wb-tab-profile {
-  padding-bottom: 0.4em;
-  font-size: var(--wb-font-size-small);
-  text-align: center;
-  text-decoration: underline;
-}
-
 .wb-profile {
   display: flex;
   flex-flow: column;

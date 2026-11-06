@@ -11,7 +11,7 @@ export const mayWrite = (node, viewer) => (!!viewer && node.owner_id === viewer.
 // -> { writes: bool, ids: [...] }; for the graph view only what an op changes
 // (the `from` of a link, the node of a move), not what it points at
 export async function writtenIds(req, pathname) {
-  const node = /^\/api\/nodes\/(\d{1,15})(?:\/(?:lock|large|visibility))?$/.exec(pathname);
+  const node = /^\/api\/nodes\/(\d{1,15})(?:\/(?:lock|large|visibility|captions))?$/.exec(pathname);
 
   if(node) return { writes: true, ids: [Number(node[1])] };
 

@@ -389,6 +389,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const loadingRef = useRef(target !== NEW);
   const remote = useRef(null); // { id, rev } once the node is on the server
   const saving = useRef(false);
+  const closeAfterSave = useRef(false); // Close pressed while a save runs (docs/EDITOR.md E64b)
   const lasso = useRef(null); // { from, add, base, moved, geo } while a selection rectangle is dragged round vertices
   const vdrag = useRef(null); // a vertex or handle of the selected shape being dragged
   const shaping = useRef(false); // a vertex of the shape being drawn is being pulled
@@ -960,17 +961,38 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   // Save (E64): POST the first time, PUT after. On success the editor is clean,
   // its photos are the baked ones, and the upload list drops the uploads the
   // node used; a failure keeps everything and offers a retry.
+  // E64b: the tile and the large render of a free node come from the browser (pixel for pixel);
+  // a grid or slides node is drawn by the server, so nothing waits on drawing here.
+  // The store hears of a running save, so Close and "Edit" of another node wait for it.
   const save = async () => {
-    if(saving.current || latest.current.readOnly) return;
+    if(saving.current || latest.current.readOnly) return false;
 
+    editorStore.setSaving(true);
+
+    const ok = await saveNow();
+
+    editorStore.setDirty(isDirty(latest.current.snap, saved.current));
+    editorStore.setSaving(false);
+
+    const closing = closeAfterSave.current;
+
+    closeAfterSave.current = false;
+
+    // a Close pressed meanwhile closes after a save that worked and left nothing unsaved
+    if(closing && ok && !isDirty(latest.current.snap, saved.current)) onClose();
+
+    return ok;
+  };
+
+  const saveNow = async () => {
     saving.current = true;
     setBusy(true);
     setSaveError(null);
 
     const { snap } = latest.current;
+    const free = (snap.doc.mode ?? 'free') === 'free';
     const drawn = { photos: hash => latest.current.photos[hash], page: 0 };
-    const thumb = await documentThumb(snap.doc, drawn);
-    const large = await documentLarge(snap.doc, drawn);
+    const thumb = free ? await documentThumb(snap.doc, drawn) : null;
     const r = await saveNode(snap, remote.current, undefined, { thumb });
 
     saving.current = false;
@@ -981,7 +1003,9 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       if(r.code === 'locked') lockRef.current?.retake();
       if(r.code === 'conflict' && remote.current && Number.isInteger(r.rev)) setConflict({ rev: r.rev });
 
-      return setSaveError(r);
+      setSaveError(r);
+
+      return false;
     }
 
     setConflict(null);
@@ -990,7 +1014,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
     remote.current = { id: r.id, rev: r.rev };
     saved.current = snap;
-    saveLarge(r.id, large);
+    if(free) documentLarge(snap.doc, drawn).then(large => saveLarge(r.id, large)); // after the save: nothing waits on it, the server draws its own when this fails
     setPhotos(old => Object.fromEntries([...Object.entries(old), ...Object.entries(r.photos).map(([hash, info]) => [hash, { ...old[hash], ...info }])]));
     setSavedId(r.id);
     setNodeId(r.id);
@@ -1008,6 +1032,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     if(storage) clearDraft(storage, target);
 
     window.dispatchEvent(new CustomEvent(SAVED_EVENT, { detail: { hashes: snap.doc.pages.flatMap(page => page.steps.filter(step => step.op === 'photo').map(step => step.photo)) } }));
+
+    return true;
   };
 
   // the node changed elsewhere (E65): keep mine saves over it on the newer
@@ -1448,6 +1474,13 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
   // closing a dirty editor asks; its draft stays so the work can be picked up again
   const close = () => {
+    // a save is on its way: close when it has worked (E64b)
+    if(saving.current) {
+      closeAfterSave.current = true;
+
+      return;
+    }
+
     // a running server job is lost with the editor: ask even when nothing else is unsaved
     if((dirty || cutting !== null || busyAt !== null) && !window.confirm(t(dirty ? 'editor.close.confirm' : 'editor.close.job'))) return;
 
