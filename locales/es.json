@@ -779,5 +779,9 @@
   "editor.draft.discardChanges": "Descartar los cambios",
   "editor.draft.ok": "Conservar",
   "editor.draft.failed": "Este dispositivo no puede conservar una copia local de tu trabajo. Guarda ahora.",
-  "resume.note": "De vuelta donde estabas."
+  "resume.note": "De vuelta donde estabas.",
+  "editor.announce.cutOutNow": "Recortado. El borde exacto llega enseguida.",
+  "editor.announce.refined": "El borde exacto ya está.",
+  "editor.announce.refineFailed": "No se pudo hacer el borde exacto; queda el contorno rápido.",
+  "editor.announce.refining": "El borde exacto de esta pieza aún se está haciendo."
 }

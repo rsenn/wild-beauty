@@ -3644,3 +3644,20 @@ body {
   font-size: var(--wb-font-size-small);
   opacity: 0.85;
 }
+
+/* a piece cut out at once whose exact cut is still being made (docs/WAND.md A7) */
+@keyframes wb-refining {
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.wb-editor-stage .wb-refining {
+  animation: wb-refining 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-editor-stage .wb-refining {
+    animation: none;
+  }
+}

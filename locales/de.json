@@ -779,5 +779,9 @@
   "editor.draft.discardChanges": "Änderungen verwerfen",
   "editor.draft.ok": "Behalten",
   "editor.draft.failed": "Dieses Gerät kann keine lokale Kopie deiner Arbeit behalten. Bitte speichere jetzt.",
-  "resume.note": "Wieder dort, wo du warst."
+  "resume.note": "Wieder dort, wo du warst.",
+  "editor.announce.cutOutNow": "Ausgeschnitten. Die genaue Kante folgt gleich.",
+  "editor.announce.refined": "Die genaue Kante ist da.",
+  "editor.announce.refineFailed": "Die genaue Kante konnte nicht gemacht werden; die schnelle Umrisslinie bleibt.",
+  "editor.announce.refining": "Die genaue Kante dieses Teils wird noch gemacht."
 }

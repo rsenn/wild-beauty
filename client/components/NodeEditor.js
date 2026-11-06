@@ -36,7 +36,8 @@ import { eventUnits } from '../editor/geometry/stage.js';
 import { fetchImage } from '../editor/io/preload.js';
 import { visibleBox } from '../editor/tools/cutout/alpha.js';
 import { contentBox, loadAlpha } from '../editor/tools/cutout/alphamap.js';
-import { clampedImagePoint, defaultPick, imagePoint, readLines, regionOf, runStale, selectionPath } from '../editor/tools/wand/wand.js';
+import { clampedImagePoint, defaultPick, imagePoint, readLines, regionOf, resultPolygon, runStale, selectionPath } from '../editor/tools/wand/wand.js';
+import { canRebase, createQueue, refineBlocked } from '../editor/tools/wand/refine.js';
 import { LASSO_SIZE, costFromEdgeMap, createWire, edgeMapUsable, edgeCost, lassoPath, outlineOfSegments, snap, workSize } from '../editor/tools/lasso/lasso.js';
 import { clipFromStroke } from '../editor/tools/clip/clipstroke.js';
 import { contains } from '../editor/geometry/polygon.js';
@@ -386,6 +387,9 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const [typing, setTyping] = useState(null); // id of the text box being typed in
   const [busyAt, setBusyAt] = useState(null); // { x, y, percent } where the server is working, in stage units
   const [cutting, setCutting] = useState(null); // id of the photo whose background is being removed
+  const [refining, setRefining] = useState([]); // ids of photos cut out at once whose exact cut is still being made (docs/WAND.md A7)
+  const refineJobs = useRef(new Map()); // photo id -> { controller, job }
+  const refineQueue = useRef(null);
   const cutRun = useRef(null);
   const wand = useRef(null); // the wand run: { id, photo, points, taps, region, candidates, output, pick, controller, applying }
   const [wireSel, setWireSel] = useState(null); // the magnetic lasso: { id, segments, live, anchors (stage), size, closed }
@@ -465,7 +469,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const tr = (key, params) => latestT.current(key, params);
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
-  latest.current = { loupePref, small, aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, vsels, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null, group, groupBox, auto, addMode };
+  latest.current = { loupePref, small, aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, vsels, editStep, snap: hist.present, doc, slideInfo, cutting, refining, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null, group, groupBox, auto, addMode };
 
   const uiRef = useRef();
 
@@ -497,7 +501,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     if(latest.current?.readOnly) return;
 
     // a photo whose background is being removed cannot be taken away or changed meanwhile
-    if(blocked(latest.current?.snap.doc, latest.current?.cutting, raw)) return setAnnounce(tr('editor.announce.busy'));
+    if(blocked(latest.current?.snap.doc, latest.current?.cutting, raw) || refineBlocked(latest.current?.refining, raw)) return setAnnounce(tr('editor.announce.busy'));
 
     const command = onSlide(raw, latest.current?.slideInfo);
 
@@ -1894,6 +1898,8 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
     setSelected(id);
 
+    if(latest.current.refining.includes(id)) return setAnnounce(tr('editor.announce.refining')); // its exact cut is still being made
+
     const corners = outlineOf(doc, id, { photos: hash => photos[hash], page: at });
     // the photo is drawn as a square window into its image; the server works on the whole image
     const info = photos[photo.photo];
@@ -1956,6 +1962,104 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       .catch(() => {})
       .finally(() => run.controller?.signal === signal && setBusyAt(null));
   };
+  // Cut out, instantly (docs/WAND.md A7 W1): the picked outline becomes the photo's clip now, as one undo step, and the exact cut is
+  // made in the background. -> true when it was done this way, false when there was no outline to clip with (the old, waiting way)
+  const instantCut = run => {
+    const { id } = run;
+    const { doc, photos: info, page: here } = latest.current;
+    const step = findStep(doc, id)?.step;
+    const pinfo = step && info[step.photo];
+    const m = step && matrixOf(doc, id, { page: here });
+
+    if(!step || !pinfo || !m) return false;
+
+    let polygon = null;
+
+    if(run.polygon) polygon = outlinesToStage(run.polygon, pinfo, step.crop, m);
+    else {
+      const corners = outlineOf(doc, id, { photos: hash => info[hash], page: here });
+      const candidate = (run.candidates ?? []).find(c => c.index === run.pick);
+
+      polygon = corners && candidate && resultPolygon({ event: 'result', ok: true, output: run.output, outlines: [{ polygons: candidate.polygons }] }, corners, step.crop);
+    }
+
+    const several = Array.isArray(polygon?.[0]?.[0]);
+
+    if(!polygon || (several ? polygon.length < 1 : polygon.length < 3)) return false;
+
+    const clip = unique(new Set(allIds(doc)));
+    const body = run.polygon ? { photo: run.photo, polygon: run.polygon, action: 'cut', fill: wandFill } : { photo: run.photo, points: run.points, region: run.region ?? undefined, pick: run.pick, action: 'cut', fill: wandFill };
+
+    dispatch({ type: 'clipPolygon', id, polygon, shape: clip, style: { color: latest.current.color, width: 1 }, wand: true });
+    setHist(history.seal);
+    setSelected(id);
+    setTool('select');
+    track('wand-apply', { action: 'cut', instant: true, tool: latest.current.tool, taps: run.points.length, fill: wandFill });
+    setAnnounce(tr('editor.announce.cutOutNow'));
+    wandReset();
+    refineAdd({ id, photo: run.photo, clip, body });
+
+    return true;
+  };
+  // the exact cuts are made two at a time, in the order they were asked for
+  const refineAdd = job => {
+    refineQueue.current ??= createQueue(job => refineRunRef.current(job), { onChange: () => setRefining([...refineJobs.current.keys(), ...queued.current.map(j => j.id)]) });
+    queued.current.push(job);
+    refineQueue.current.add(job);
+  };
+  const queued = useRef([]);
+  const refineEnd = id => {
+    refineJobs.current.delete(id);
+    queued.current = queued.current.filter(j => j.id !== id);
+    setRefining([...refineJobs.current.keys(), ...queued.current.map(j => j.id)]);
+  };
+  // one job: ask the server for the exact cut, then put it in the place of the photo (W3)
+  const refineRun = async job => {
+    if(!queued.current.includes(job)) return; // dropped while it waited
+
+    queued.current = queued.current.filter(j => j !== job);
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    const got = {};
+    let failed = false;
+
+    refineJobs.current.set(job.id, { controller, job });
+    setRefining([...refineJobs.current.keys(), ...queued.current.map(j => j.id)]);
+
+    try {
+      const res = await fetch('/api/segment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(job.body), signal });
+
+      if(res.ok) await readLines(res.body, event => (event.event === 'derived' ? (got[event.role] = event.record) : event.event === 'failed' || (event.event === 'result' && !event.ok) ? (failed = true) : null));
+      else failed = true;
+
+      if(signal.aborted) return;
+      if(failed || !got.cut) return setAnnounce(tr('editor.announce.refineFailed'));
+
+      const info = await arrived(got.cut, true);
+
+      // undone, replaced or clipped again meanwhile: the result no longer fits
+      if(signal.aborted || !canRebase(latest.current.doc, job)) return;
+
+      setPhotos(old => ({ ...old, [got.cut.hash]: info }));
+
+      // the piece keeps whatever the user did with it meanwhile (replacePhoto leaves the matrix, opacity and order alone); the
+      // temporary clip goes, the exact cut has its own soft edge
+      dispatch({ type: 'replacePhoto', id: job.id, hash: got.cut.hash, wand: true, refine: true });
+      dispatch({ type: 'unclip', id: job.id, wand: true, refine: true });
+      fadeIn(job.id);
+      await fitBox(job.id, got.cut, info, { wand: true, refine: true }).catch(() => {});
+      setHist(history.seal);
+      setAnnounce(tr('editor.announce.refined'));
+    } catch {
+      if(!signal.aborted) setAnnounce(tr('editor.announce.refineFailed'));
+    } finally {
+      refineEnd(job.id);
+    }
+  };
+  const refineRunRef = useRef();
+
+  refineRunRef.current = (...args) => refineRun(...args);
   // apply the selection (docs/WAND.md A5), the chosen candidate at full size. Cut out: the photo becomes
   // the cut. Take out: a copy right above it holds the cut and the photo itself gets the hole filled.
   // Erase: the photo gets the hole filled. Without `fill` the hole stays transparent. One undo step;
@@ -1964,6 +2068,10 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     const run = wand.current;
 
     if(!run || run.applying || !(run.polygon || Number.isInteger(run.pick)) || findStep(latest.current.doc, run.id)?.step.photo !== run.photo) return;
+    if(latest.current.refining.includes(run.id)) return setAnnounce(tr('editor.announce.refining'));
+
+    // Cut out is shown at once and made exact in the background (docs/WAND.md A7)
+    if(action === 'cut' && instantCut(run)) return;
 
     const { id } = run;
 
@@ -2083,6 +2191,10 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   // each is a new image for the same photo step, one undo step in all
   // stop the running removal; what arrived so far stays (it is on the undo stack)
   const cancelJob = () => {
+    for(const { controller } of refineJobs.current.values()) controller.abort();
+
+    queued.current = [];
+    refineQueue.current?.drop(() => true);
     cutRun.current?.abort();
     cutRun.current = null;
     wand.current?.controller?.abort();
@@ -2101,7 +2213,16 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   // the photo being worked on is gone (undone away): nothing to wait for
   useEffect(() => {
     if(cutting !== null && !findStep(hist.present.doc, cutting)) cancelJob();
+
+    // a photo deleted while its exact cut is made: the job goes with it
+    for(const [id, { controller }] of refineJobs.current) if(!findStep(hist.present.doc, id)) controller.abort();
   }, [cutting, hist]);
+
+  // the piece whose exact cut is being made pulses a little (static/css/layout.css .wb-refining)
+  useEffect(() => {
+    for(const el of document.querySelectorAll('.wb-editor-stage .wb-refining')) if(!refining.includes(el.dataset.step)) el.classList.remove('wb-refining');
+    for(const id of refining) document.querySelector(`.wb-editor-stage [data-step="${id}"]`)?.classList.add('wb-refining');
+  });
 
   // the subjects the server found become the photo's clip: one photo, one outline each
   const clipToSubjects = (id, event, info) =>

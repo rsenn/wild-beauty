@@ -779,5 +779,9 @@
   "editor.draft.discardChanges": "Discard changes",
   "editor.draft.ok": "Keep",
   "editor.draft.failed": "This device cannot keep a local copy of your work. Please save now.",
-  "resume.note": "Back where you were."
+  "resume.note": "Back where you were.",
+  "editor.announce.cutOutNow": "Cut out. The exact edge follows in a moment.",
+  "editor.announce.refined": "The exact edge is in place.",
+  "editor.announce.refineFailed": "The exact edge could not be made; the quick outline stays.",
+  "editor.announce.refining": "The exact edge of this piece is still being made."
 }

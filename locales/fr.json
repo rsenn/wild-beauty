@@ -779,5 +779,9 @@
   "editor.draft.discardChanges": "Annuler les modifications",
   "editor.draft.ok": "Garder",
   "editor.draft.failed": "Cet appareil ne peut pas garder de copie locale de votre travail. Veuillez enregistrer maintenant.",
-  "resume.note": "De retour là où vous étiez."
+  "resume.note": "De retour là où vous étiez.",
+  "editor.announce.cutOutNow": "Découpé. Le bord exact suit dans un instant.",
+  "editor.announce.refined": "Le bord exact est en place.",
+  "editor.announce.refineFailed": "Le bord exact n’a pas pu être fait ; le contour rapide reste.",
+  "editor.announce.refining": "Le bord exact de cette pièce est encore en cours."
 }

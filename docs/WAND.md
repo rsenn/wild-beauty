@@ -310,7 +310,9 @@ steps above are the recipe.
 
 # Part B: the server backend
 
-## A7. Instant cut, refined in the background (owner, 2026-11-06; proposed, not built)
+## A7. Instant cut, refined in the background (owner, 2026-11-06; built the same day for Cut out, wand and lasso, not yet checked in a browser)
+
+As built: `client/editor/tools/wand/refine.js` (`refineBlocked`, `canRebase`, `createQueue`, `MAX_REFINING` = 2, tests `tests/refine.test.js`), `NodeEditor.js` (`instantCut`, `refineAdd`, `refineRun`, the `refining` state, the guard in `dispatch` and in the wand tap, jobs cancelled with their photo), `static/css/layout.css` (`.wb-refining`), strings `editor.announce.{cutOutNow,refined,refineFailed,refining}`. The instant clip comes from `resultPolygon` (wand, holes kept) or `outlinesToStage` (lasso). Not done: W2 stepped feather, the Refine button for a node reopened with a crisp clip, Take out / Erase / Remove background (still the busy flow), the warm-up and the persistent worker (W8), the browser check.
 
 Problem: after **Cut out** the user waits about 3.7 s (the full-size apply: edge cleanup, a 12 MP PNG written and stored) with a busy ring, and the next wand tap on that photo has to wait; the first tap of a photo also pays the encoder (2.3 s). The wait slows the user's flow more than the numbers say. A GPU (S B9) would help the first tap and the model quality, not this wait.
 
