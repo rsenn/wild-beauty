@@ -184,7 +184,7 @@ async function viewPage(lang, req) {
   const messages = locales.get(lang);
   const meta = headTags(originOf(req), { lang, languages: languages.map(l => l.code), defaultLang: DEFAULT_LANG, path: '/view', title: messages['seo.home.title'], description: messages['seo.home.description'], findable: true });
 
-  return page(lang, 'page.title.gallery', { gallery: { cards: viewCards(h, { canView: node => canView(node, viewer) && listedFor(node, viewer), lang }) } }, messages['seo.home.title'], req, meta);
+  return page(lang, 'page.title.gallery', { gallery: { cards: viewCards(h, { canView: node => canView(node, viewer) && listedFor(node, viewer), canSeeChild: node => canView(node, viewer), lang }) } }, messages['seo.home.title'], req, meta);
 }
 
 // GET /:lang/admin: the admin panel, for an admin user only (a 404 for everybody else)

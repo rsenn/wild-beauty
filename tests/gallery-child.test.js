@@ -1,8 +1,8 @@
 // bun test: the children a gallery page hands to the 3D gallery (server/node/view.js galleryChild)
 import { beforeEach, describe, expect, test } from 'bun:test';
 import { open } from '../server/db/db.js';
-import { insertNode, upsertPhoto } from '../server/db/nodes.js';
-import { galleryChild } from '../server/node/view.js';
+import { addLink, insertNode, upsertPhoto } from '../server/db/nodes.js';
+import { galleryChild, viewCards } from '../server/node/view.js';
 
 const H = n => String(n).repeat(64);
 const photo = (id, hash, desc) => ({ op: 'photo', id, photo: hash, m: [1, 0, 0, 1, 0, 0], fit: 'extend', opacity: 1, blend: 'normal', ...(desc && { desc }) });
@@ -36,5 +36,21 @@ describe('galleryChild', () => {
     expect(asVisitor.rev).toBeUndefined();
     expect(asVisitor.photos.map(p => [p.step, p.desc])).toEqual([['a', 'Table Mountain\n\nUp at dawn.'], ['b', undefined]]);
     expect(asOwner.rev).toBe(7);
+  });
+});
+
+describe('viewCards', () => {
+  test('the preview pictures come from the children the viewer may see, findable or not', () => {
+    const gallery = insertNode(h, { title: 'g', kind: 'gallery', doc: { v: 1, style: {}, mode: 'free', pages: [{ id: 'p0', steps: [] }] }, palette: [] }).id;
+    const kid = insertNode(h, { title: 'k', doc: { v: 1, style: {}, mode: 'free', pages: [{ id: 'p0', steps: [photo('a', H(1))] }] }, palette: [] }).id;
+
+    h.run('UPDATE nodes SET tile = ? WHERE id = ?', H(1), kid);
+    addLink(h, gallery, kid, 'child');
+
+    const only = id => node => node.id === id;
+    const cards = viewCards(h, { canView: only(gallery), canSeeChild: () => true });
+
+    expect(cards.map(c => [c.id, c.count])).toEqual([[gallery, 1]]);
+    expect(viewCards(h, { canView: only(gallery) })[0].count).toBe(0); // the old rule: the child had to pass the listing test
   });
 });

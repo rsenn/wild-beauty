@@ -61,7 +61,7 @@ export const spread = (list, n) => (list.length <= n ? list : Array.from({ lengt
 
 // The cards of the Show page (docs/GALLERY.md S5b): the galleries `canView` lets through, newest first
 // -> [{ id, title, href, count, photos: [{ id, url }], heading: { step, box } | null }]
-export function viewCards(h, { canView, lang = 'en', limit = 6 }) {
+export function viewCards(h, { canView, canSeeChild = canView, lang = 'en', limit = 6 }) {
   const cards = [];
 
   for(const { id } of h.all("SELECT id FROM nodes WHERE kind = 'gallery' ORDER BY id DESC")) {
@@ -72,7 +72,7 @@ export function viewCards(h, { canView, lang = 'en', limit = 6 }) {
     const children = linksFrom(h, id, 'child').flatMap(({ id: to }) => {
       const child = getNode(h, to);
 
-      return child && canView(child) ? [galleryChild(h, child)] : [];
+      return child && canSeeChild(child) ? [galleryChild(h, child)] : [];
     });
     const items = galleryItems({ doc: node.doc, children }, lang, () => null);
 
