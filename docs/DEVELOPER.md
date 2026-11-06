@@ -372,3 +372,5 @@ notes:
 - gotcha (2026-11-06): node 30 (a tall screenshot, a lighten blend and a cutout) showed in Brave as three repeated bands about 255 px high with the page header painted into each, a browser GPU tile glitch: the same data and code rendered correctly in a second server copy and in Firefox. If it comes back on other nodes: Brave's hardware acceleration, or flatten the blended layers of the node view; no code change was made
 
 notes:
+
+Clip cut on cut-outs: client/editor/tools/cutout/alpha.js outlinesFromAlpha traces the visible pixels (256 px scan); NodeEditor clipUp uses them for cut strokes on unclipped photos.

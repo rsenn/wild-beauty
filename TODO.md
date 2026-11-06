@@ -14,6 +14,8 @@ docs/PLAN.md, `D` = docs/DESIGN.md.
 
 ## Open threads (2026-10-29, updated 2026-11-05)
 
+- [done 2026-11-06, owner confirmed in the browser] Clip tool cut mode crosses the opaque outline of a cut-out photo, not its bounding box (docs/EDITOR.md S2.3; `outlinesFromAlpha`/`visibleOutlines` in cutout/alpha.js, wired in NodeEditor `clipUp`).
+
 Work that was started, offered or decided but not finished, so a detour does not lose it.
 
 - [ ] **Guest accounts: try first, keep later** (decided 2026-11-06, design in `docs/GUESTS.md`, nothing built; replaces item (1) and (2) of the post checklist below): a visitor's first save makes a private guest user, claiming needs only a user name and a password, login merges the guest's work, guests expire after 30 days, the open public area ends. Order of work in `docs/GUESTS.md` S6; confirm the numbers of G4 and G7 first.

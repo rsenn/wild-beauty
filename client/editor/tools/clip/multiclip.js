@@ -238,7 +238,7 @@ export function crossedOutline(polys, stroke, reach) {
 // every other outline goes to the piece on its side of the stroke's chord.
 // -> [polys, polys] (each a list of outlines) or null when the stroke splits none.
 export function cutOutlines(polys, stroke, reach) {
-  if(!Array.isArray(polys) || polys.length < 2) return null;
+  if(!Array.isArray(polys) || polys.length < 1) return null;
 
   const found = crossedOutline(polys, stroke, reach);
 

@@ -34,7 +34,7 @@ import { GalleryPane } from './GalleryPane.js';
 import { useBoot } from '../boot.js';
 import { eventUnits } from '../editor/geometry/stage.js';
 import { fetchImage } from '../editor/io/preload.js';
-import { visibleBox } from '../editor/tools/cutout/alpha.js';
+import { visibleBox, visibleOutlines } from '../editor/tools/cutout/alpha.js';
 import { contentBox, loadAlpha } from '../editor/tools/cutout/alphamap.js';
 import { clampedImagePoint, defaultPick, imagePoint, readLines, regionOf, resultPolygon, runStale, selectionPath } from '../editor/tools/wand/wand.js';
 import { canRebase, createQueue, refineBlocked } from '../editor/tools/wand/refine.js';
@@ -2706,6 +2706,23 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       });
     }, 60));
   };
+  // the outlines of the visible pixels of the selected photo while the clip tool is on (docs/EDITOR.md S2.3, cut along the opaque outline)
+  const opaque = useRef({ key: '', polys: null });
+
+  useEffect(() => {
+    const step = editStep;
+
+    if(tool !== 'clip' || step?.op !== 'photo' || !photos[step.photo]) return;
+
+    const key = `${step.photo}:${JSON.stringify(step.crop ?? null)}`;
+
+    if(opaque.current.key === key) return;
+
+    opaque.current = { key, polys: null };
+    visibleOutlines(photoInfo(photos[step.photo]), step.crop).then(polys => {
+      if(opaque.current.key === key) opaque.current = { key, polys };
+    });
+  }, [tool, editStep?.id, editStep?.photo, JSON.stringify(editStep?.crop ?? null)]);
   const clipUp = () => {
     const s = clipStroke.current;
     const { doc, photos, scale, color, size, editStep: step } = latest.current;
@@ -2727,6 +2744,14 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       const pieces = cutOutlines(outlines.polys, s.points, opts.reach);
 
       if(pieces) found = { kind: 'cut', pieces };
+    }
+    // a cut-out photo is cut where the stroke crosses its visible part, not its bounding box
+    else if((found.kind === 'none' || found.kind === 'cut') && !outlines && opaque.current.polys && opaque.current.key === `${step.photo}:${JSON.stringify(step.crop ?? null)}`) {
+      const m = matrixOf(doc, step.id, { page });
+      const stage = m && opaque.current.polys.map(poly => poly.map(q => applyMatrix(m, q)));
+      const pieces = stage && cutOutlines(stage, s.points, opts.reach);
+
+      found = pieces ? { kind: 'cut', pieces } : { kind: 'none' };
     }
     const style = { color, width: Math.max(1, size / 3) };
     const taken = new Set(allIds(doc));
