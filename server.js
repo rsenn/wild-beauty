@@ -23,6 +23,7 @@ import { visibleDoc } from './client/editor/core/model.js';
 import { galleryChild, photoInfos, viewCards } from './server/node/view.js';
 import { atOf, viewOf } from './client/gallery/presentation.js';
 import { bookRoute, chaptersFor } from './server/api/book.js';
+import { descriptionOf, headTags, isFindable, listedFor, originOf, robotsTxt as mainRobotsTxt, sitemapXml as mainSitemapXml } from './server/seo.js';
 import { canView } from './server/api/nodes.js';
 import { getNode, linksFrom } from './server/db/nodes.js';
 import { database } from './server/db/db.js';
@@ -129,7 +130,7 @@ async function bootFor(lang, extra = {}, owner = null) {
 
 // `extra` adds to the boot JSON (the node page: `node` and `photos`);
 // `title` replaces the translated page title
-async function page(lang, titleKey, extra, title, req) {
+async function page(lang, titleKey, extra, title, req, meta) {
   const viewer = req ? viewerOf(await database(), req) : null;
   const boot = await bootFor(lang, { ...(viewer && { user: { id: viewer.id, email: viewer.email, name: viewer.name, username: viewer.username ?? null, pseudonym: viewer.pseudonym, prefs: viewer.prefs, ...(viewer.admin && { admin: true }) } }), ...extra }, req ? sessionFor(req).owner : null);
   const body = renderPage(html`<${App} boot=${boot} />`, {
@@ -137,6 +138,8 @@ async function page(lang, titleKey, extra, title, req) {
     dir: boot.messages['meta.dir'],
     title: title ?? boot.messages[titleKey],
     boot,
+    // every page that does not say otherwise is kept out of search engines (docs/SEO.md S1)
+    meta: meta ?? headTags(req ? originOf(req) : 'http://localhost', { lang, languages: [], defaultLang: DEFAULT_LANG, path: '', title: '', og: false }),
   });
 
   return new Response(body, {
@@ -165,7 +168,11 @@ async function viewPage(lang, req) {
   const h = await database();
   const viewer = viewerOf(h, req);
 
-  return page(lang, 'page.title.gallery', { gallery: { cards: viewCards(h, { canView: node => canView(node, viewer), lang }) } }, undefined, req);
+  // the front page is the one page that is findable without a node: its text is the site's (docs/SEO.md S1, S5)
+  const messages = locales.get(lang);
+  const meta = headTags(originOf(req), { lang, languages: languages.map(l => l.code), defaultLang: DEFAULT_LANG, path: '/view', title: messages['seo.home.title'], description: messages['seo.home.description'], findable: true });
+
+  return page(lang, 'page.title.gallery', { gallery: { cards: viewCards(h, { canView: node => canView(node, viewer) && listedFor(node, viewer), lang }) } }, messages['seo.home.title'], req, meta);
 }
 
 // GET /:lang/admin: the admin panel, for an admin user only (a 404 for everybody else)
@@ -215,7 +222,10 @@ async function nodePage(lang, id, req) {
   const view = viewOf(query.get('view'));
   const at = atOf(query.get('at'));
 
-  return page(lang, 'page.title.node', { node: shown, photos: photoInfos(h, doc), ...(view !== '3d' && { view }), ...(at && { at }) }, title, req);
+  const origin = originOf(req);
+  const meta = headTags(origin, { lang, languages: languages.map(l => l.code), defaultLang: DEFAULT_LANG, path: `/node/${node.id}`, title, description: descriptionOf(node, locales.get(lang)), image: node.tile ? `/files/photos/${node.tile}.thumb.jpg` : undefined, findable: isFindable(node) });
+
+  return page(lang, 'page.title.node', { node: shown, photos: photoInfos(h, doc), ...(view !== '3d' && { view }), ...(at && { at }) }, title, req, node.visibility === 'public' ? meta : headTags(origin, { lang, languages: [], defaultLang: DEFAULT_LANG, path: '', title: '', og: false }));
 }
 
 // GET /:lang/node/:id/book: the photo book of a node or gallery, laid out for printing (docs/ALBUM.md S4c)
@@ -327,6 +337,14 @@ async function route(req) {
     if(pathname === '/api/register' && req.method === 'POST') return registerRoute(req, h);
     if(pathname === '/api/logout' && req.method === 'POST') return logoutRoute(req, h);
     if(pathname === '/api/me' && req.method === 'GET') return meRoute(req, h);
+  }
+
+  if(!site && pathname === '/robots.txt') return new Response(mainRobotsTxt(originOf(req)), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+
+  if(!site && pathname === '/sitemap.xml') {
+    const nodes = h.all("SELECT id FROM nodes WHERE visibility = 'public' AND space IS NULL ORDER BY id").map(({ id }) => getNode(h, id)).filter(isFindable).map(({ id, updated_at }) => ({ id, updated_at }));
+
+    return new Response(mainSitemapXml(originOf(req), nodes, languages.map(l => l.code), DEFAULT_LANG), { headers: { 'content-type': 'application/xml; charset=utf-8' } });
   }
 
   const denied = await guard(req, pathname, h);

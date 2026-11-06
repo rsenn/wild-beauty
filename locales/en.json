@@ -749,5 +749,10 @@
   "book.pdf.working": "Making the PDF, this can take a few minutes...",
   "book.pdf.ready": "Download the PDF",
   "book.pdf.failed": "The PDF could not be made",
-  "book.pdf.login": "Log in to make a PDF"
+  "book.pdf.login": "Log in to make a PDF",
+  "seo.description": "{title}: {n} pictures on Wild Beauty.",
+  "seo.description.single": "{title} on Wild Beauty.",
+  "seo.children": "In this gallery",
+  "seo.home.title": "Wild Beauty - photo collages and galleries",
+  "seo.home.description": "An easy creative tool for everyone: arrange your photos into collages and galleries, annotate them and show them to others."
 }

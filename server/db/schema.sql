@@ -174,3 +174,7 @@ CREATE TABLE push_sent (
 ALTER TABLE users ADD COLUMN pseudonym TEXT NOT NULL DEFAULT '';
 ALTER TABLE users ADD COLUMN root_id INTEGER REFERENCES nodes(id) ON DELETE SET NULL;
 ALTER TABLE users ADD COLUMN prefs TEXT;
+
+-- migration 11
+-- Whether search engines may be offered the node (docs/SEO.md): NULL = the default rule (a public collage is findable), 1 = findable, 0 = never.
+ALTER TABLE nodes ADD COLUMN search INTEGER;

@@ -749,5 +749,10 @@
   "book.pdf.working": "Creando el PDF, puede tardar unos minutos...",
   "book.pdf.ready": "Descargar el PDF",
   "book.pdf.failed": "No se pudo crear el PDF",
-  "book.pdf.login": "Inicia sesión para crear un PDF"
+  "book.pdf.login": "Inicia sesión para crear un PDF",
+  "seo.description": "{title}: {n} fotos en Wild Beauty.",
+  "seo.description.single": "{title} en Wild Beauty.",
+  "seo.children": "En esta galería",
+  "seo.home.title": "Wild Beauty - collages y galerías de fotos",
+  "seo.home.description": "Una herramienta creativa sencilla para todos: organiza tus fotos en collages y galerías, añade notas y muéstralas a otros."
 }

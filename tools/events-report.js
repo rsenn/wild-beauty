@@ -46,9 +46,21 @@ for(const [id, list] of sessions) {
   if(rage.size) console.log(`   RAGE TAPS: ${top(rage)}`);
   console.log(`   uploads: ${uploads.filter(e => e.ok).length} ok, ${uploads.filter(e => !e.ok).length} failed${firstUpload ? `, first ok after ${Math.round(firstUpload.at / 1000)}s into the page` : ''}`);
 
+  const pwa = list.filter(e => e.type === 'pwa').map(e => e.step);
+
+  if(pwa.length || first.standalone) console.log(`   PWA: ${first.standalone ? 'running as an installed app' : 'in a browser tab'}${pwa.length ? `, events: ${pwa.join(', ')}` : ''}`);
+
   const errors = list.filter(e => e.type === 'error');
 
   for(const e of errors.slice(0, 5)) console.log(`   ERROR ${e.message} ${e.at ?? ''}`);
+}
+
+const installs = events.filter(e => e.type === 'pwa');
+
+if(installs.length || [...sessions.values()].some(l => l.some(e => e.standalone))) {
+  const who = step => new Set(installs.filter(e => e.step === step).map(e => e.who)).size;
+
+  console.log(`\nPWA: installable (prompt offered) for ${who('available')} browsers, installed ${who('installed')}, launched from the home screen or desktop ${who('first-launch')}, sessions as an installed app ${[...sessions.values()].filter(l => l.some(e => e.standalone)).length}`);
 }
 
 console.log(`\n${sessions.size} sessions, ${events.length} events (last ${days} days${only ? `, ${only}` : ''})`);

@@ -37,7 +37,8 @@ export async function servePhoto(name, req) {
 
   const file = Bun.file(path);
 
-  const base = { 'content-type': file.type, 'x-content-type-options': 'nosniff' };
+  // no photo is offered to image search (docs/SEO.md S1)
+  const base = { 'x-robots-tag': 'noindex', 'content-type': file.type, 'x-content-type-options': 'nosniff' };
 
   if(m[2] !== '.thumb') return new Response(req.method === 'HEAD' ? null : file, { headers: { ...base, 'content-length': String(file.size), 'cache-control': 'public, max-age=31536000, immutable' } });
 

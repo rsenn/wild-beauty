@@ -49,6 +49,7 @@ notes:
 - locales/           en de es fr json
 - tests/             bun test
 - tools/             one-off scripts, python helpers, reports
+- tools/visitors.js   who looked at the site: reads the nginx access log (needs the group adm) and data/events, lists the real visits of the last N days (--days, --users, --bots, --loose, --own, --json) apart from scanners, your own devices and the chat apps' link previews; read only
 - lib/               git submodule, do not commit inside without being asked
 - data/ uploads/     symlinks to /mnt/data/wild-beauty
 - attic/             frozen old code, never touch
@@ -155,6 +156,8 @@ html comes from client/html.js, htm over preact.
 - photos.meta: where (exact position, private) and taken (EXIF time, local text); tools/ingest.js --positions-only sets both from originals
 - photo step flags: desc (caption, gallery title), off: the viewer skips it (visibleDoc in model.js); the node editor still shows it; the server leaves off photos out of what it sends to anyone who may not write the node (readNode, nodePage)
 - placeholder notes (docs/BATCH.md S6a2): client/editor/core/pattern.js (timeText, partsOf, isPlaceholder), client/components/NoteParts.js (Place, Date, Time buttons of the carousel's NoteEdit and the batch editor's annotation popover), Generate keeps existing notes, batch button Find placeholder notes
+- PWA installs: client/events.js records `pwa` events (`available` = the browser offers installing, `installed` = appinstalled, `first-launch` = first start from the home screen or desktop, once per browser, also for iOS which has no appinstalled) and `standalone: true` on the session event of an installed app; `bun tools/events-report.js` prints a PWA summary line
+- SEO (docs/SEO.md): server/seo.js (isFindable, headTags, descriptionOf, robotsTxt, sitemapXml, originOf), nodes.search column (migration 11: NULL default rule, 1 findable, 0 never), tools/findable.js sets and lists it; every page is noindex unless findable, photo files send X-Robots-Tag noindex; env WB_PUBLIC_URL, WB_SITE_VERIFICATION
 - photo book PDF (docs/ALBUM.md S4d, S4e): server/book/tex.js (LuaLaTeX source, pure), server/book/make.js (job, data/books/<key>.pdf), server/api/book.js (POST/GET /api/nodes/:id/book, login only). Needs lualatex with fontspec, geometry, graphicx, parskip and the Liberation Sans font on the host; ImageMagick converts WebP photos to JPEG for it
 - photo book: /:lang/node/:id/book (docs/ALBUM.md S4c): bookPage in server.js, bookChapters in server/node/view.js, packing in client/gallery/book.js (pure, tests/book.test.js), BookPage.js, print CSS at the end of layout.css; ?notes=1|0 = only pictures with a note
 - notes of photos (docs/GALLERY.md S5c): photo step field desc, at most LIMITS.desc (5000) plain text; PATCH /api/nodes/:id/captions (saveCaptions, server/api/nodes.js) changes only the document and rev; client/editor/io/captions.js queues the changes; client/editor/core/caption.js has titleOf (first line), paragraphsOf, hasBody; components NoteText.js (everyone) and NoteEdit.js (owner, loaded on demand) inside GalleryCarousel

@@ -242,9 +242,29 @@ function startLoad() {
   document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && sample());
 }
 
+// Is the page running as an installed app (the home-screen icon or the desktop window) and not in a browser tab?
+// `display-mode: standalone` for Chrome, Firefox and Edge, `navigator.standalone` for Safari on iOS.
+export const isStandalone = (win = globalThis) => !!(win.navigator?.standalone || win.matchMedia?.('(display-mode: standalone)')?.matches || win.matchMedia?.('(display-mode: window-controls-overlay)')?.matches);
+
+// Installing the PWA (docs/DESIGN.md S7.2b): the browser says `beforeinstallprompt` when the app can be installed, `appinstalled`
+// when it was; Safari on iOS says nothing, so the first launch from the home screen is noted too (once per browser).
+function trackInstall() {
+  addEventListener('beforeinstallprompt', () => track('pwa', { step: 'available' }));
+  addEventListener('appinstalled', () => (track('pwa', { step: 'installed' }), flush()));
+
+  if(isStandalone())
+    try {
+      if(!localStorage.getItem('wb-pwa-launched')) {
+        localStorage.setItem('wb-pwa-launched', '1');
+        track('pwa', { step: 'first-launch' });
+      }
+    } catch {}
+}
+
 export function startTracking() {
-  track('session', { ...view(), dpr: devicePixelRatio, screen: [screen.width, screen.height], touch: matchMedia('(pointer: coarse)').matches, lang: navigator.language, url: location.pathname, cores: navigator.hardwareConcurrency || undefined, mem: navigator.deviceMemory || undefined });
+  track('session', { ...view(), standalone: isStandalone() || undefined, dpr: devicePixelRatio, screen: [screen.width, screen.height], touch: matchMedia('(pointer: coarse)').matches, lang: navigator.language, url: location.pathname, cores: navigator.hardwareConcurrency || undefined, mem: navigator.deviceMemory || undefined });
   startLoad();
+  trackInstall();
 
   let last = { orient: view().orient };
 

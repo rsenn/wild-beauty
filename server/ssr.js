@@ -18,13 +18,14 @@ const json = value => JSON.stringify(value).replace(/</g, '\\u003c');
 // adopts (read back from <script id=boot>), `theme` the id in static/themes/;
 // `site` ({ color, icon, canonical }) is the head of a personal site (server/sites.js)
 // instead of the wild-beauty one: its own icon and colour, no pixel fonts
-export function renderPage(vnode, { lang, dir = 'ltr', title, theme = 'kraft', boot = {}, site = null }) {
+export function renderPage(vnode, { lang, dir = 'ltr', title, theme = 'kraft', boot = {}, site = null, meta = '' }) {
   return `<!doctype html>
 <html lang="${esc(lang)}" dir="${esc(dir)}" data-theme="${esc(theme)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)}</title>
+<title>${esc(title)}</title>${meta ? `
+${meta}` : ''}
 <link rel="icon" href="${esc(site ? site.icon : '/static/img/favicon.png')}">
 <link rel="manifest" href="/manifest.webmanifest">${site ? `
 <link rel="canonical" href="${esc(site.canonical)}">` : `

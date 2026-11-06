@@ -74,6 +74,7 @@ export const NodePage = () => {
         ${isGallery && html`<a class="wb-node-book" href=${`/${lang}/node/${node.id}/book`}>${t('book.link')}</a>`}
         ${isGallery && shown === '3d' && html`<${GalleryTools} chrome=${chrome} overview=${open3d.overview} />`}
       </div>
+      ${isGallery && node.children?.length > 0 && html`<nav class="wb-sr-only" aria-label=${t('seo.children')}><ul>${node.children.map(c => html`<li><a href=${`/${lang}/node/${c.id}`}>${c.title || t('node.untitled')}</a></li>`)}</ul></nav>`}
       ${!editingThis && shown === 'carousel' && html`<${GalleryCarousel} key="carousel" items=${items} at=${at.current} onAt=${remember} label=${title} />`}
       ${!editingThis && shown === 'masonry' && html`<${GalleryMasonry} key="masonry" items=${items} at=${at.current} onAt=${remember} onPick=${id => (remember(id), choose('carousel'))} label=${t('gallery.album')} />`}
       ${!editingThis && shown === '3d' && (isGallery ? html`<${GalleryView} key="3d" items=${items} doc=${node.kind === 'gallery' ? node.doc : undefined} photos=${hash => photos[hash] ?? null} overview=${open3d.overview} startAt=${open3d.at} onAt=${remember} label=${title} chrome=${chrome}>${poster}<//>` : poster)}
