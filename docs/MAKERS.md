@@ -37,6 +37,17 @@ Photos dropped in with a square crop; wand, clip and background removal (cut a p
 - **D2. Align and distribute, snapping guides** for laying out many pieces evenly. To check whether anything exists; she will want it for catalogues too.
 - **D3. Alt text for photos** (accessibility, and better previews): a field next to the note.
 
+## 3b. Further requirements of the same use case (added 2026-11-06, after a second look at the reference posts)
+
+- **E1. Caption text for other platforms.** Her posts carry a long caption with emoji and hashtags, and a series of 6 to 12 pictures. The notes of photos and the work's text must take any Unicode (emoji included) and long text, and a **"copy the text for posting"** button should give the captions of a work as one block (all of them or the chosen ones) to paste into Instagram or Facebook. Together with C1 (all pages as images) this makes Wild Beauty the place where a post is made, wherever it is published.
+- **E2. Contact and "where to find me".** A maker wants visitors to reach her: a contact line on her profile (a mail address, a phone or messenger link, a link to her other pages), shown on her public works only when she chooses to, never taken from the account's mail address. This is not a shop and takes no orders (`docs/ALBUM.md` S6 is parked).
+- **E3. Markets and events.** She shows where she will be (a festival, a market): a work of kind "event" with a place and a date, using the place names that exist (`docs/GRAPH.md`, place chips) and listed on her profile, optional and her choice.
+- **E4. Printed cards.** Her products come on printed cards with a handwritten-style line: the stage formats of A1 must include small print sizes (A6 portrait and landscape, with bleed) and the export must be print quality (300 ppi), so a card made here can be sent to a printer.
+- **E5. A series with one look.** Several works in the same style (same ground, label style, logo): B1 (brand kit) plus "copy a work" (B2) plus a **style copy** between works; test with 10 works in a row.
+- **E6. Language and tone.** German first (Swiss usage), French and Spanish after; sample texts, template names and the empty states say what to do in a warm, plain voice, not in tool language.
+- **E7. Findability by her choice.** Her works are only found by search engines when she says so (`docs/SEO.md` S1); a public gallery of her pieces is a good candidate for the "findable" switch, off by default.
+- **Not wanted (non-goals).** Likes, follower counts, a feed or an algorithm: Wild Beauty is not a social network (`docs/DESIGN.md` S1 spirit). Comments on works are a possible later feature and are not planned.
+
 ## 4. Order
 
 1. Decide A1 (stage formats) in `docs/EDITOR.md`; it touches everything, so first.
