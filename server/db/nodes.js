@@ -162,9 +162,9 @@ export const breakLock = (h, id) => h.run('DELETE FROM node_locks WHERE node_id 
 
 // --- graph view (docs/GRAPH.md S3.5) --------------------------------------------
 
-// every node as the graph draws it: { id, title, kind, tile, x, y, pinned, color }
+// every node as the graph draws it: { id, title, slug, kind, tile, x, y, pinned, color }
 export const graphNodes = h =>
-  h.all('SELECT id, title, kind, tile, space, owner_id, visibility, x, y, pinned, palette FROM nodes ORDER BY id').map(({ palette, pinned, ...row }) => ({ ...row, pinned: !!pinned, color: parse(palette)?.[0]?.hex ?? null }));
+  h.all('SELECT id, title, slug, kind, tile, space, owner_id, visibility, x, y, pinned, palette FROM nodes ORDER BY id').map(({ palette, pinned, ...row }) => ({ ...row, pinned: !!pinned, color: parse(palette)?.[0]?.hex ?? null }));
 
 export const graphEdges = h => h.all('SELECT from_id AS "from", to_id AS "to", label FROM node_links ORDER BY from_id, sort, id');
 

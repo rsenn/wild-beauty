@@ -255,10 +255,17 @@ async function bookPage(lang, id, req) {
 }
 
 // A page of a site: the node in a centred stage, the navigation of the sitemap above it
-async function sitePage(site, map, page, h, owner) {
+async function sitePage(site, map, page, h, owner, req) {
   const { node } = page;
   const nav = map.pages.filter(p => p.node.visibility === 'public').map(p => ({ title: p.node.title, href: p.path, current: p === page }));
-  const boot = await bootFor(site.lang, { site: { id: site.id, title: site.title, nav, owner, node: { id: node.id, title: node.title, slug: node.slug ?? null, doc: node.doc } }, photos: photoInfos(h, node.doc) });
+  // the children as the node page hangs them, for the gallery views of a page that is a gallery
+  const viewer = viewerOf(h, req);
+  const children = linksFrom(h, node.id, 'child').flatMap(({ id: to }) => {
+    const child = getNode(h, to);
+
+    return child && canView(child, viewer) ? [galleryChild(h, child, { mine: mayWrite(child, viewer) })] : [];
+  });
+  const boot = await bootFor(site.lang, { site: { id: site.id, title: site.title, nav, owner, node: { id: node.id, title: node.title, slug: node.slug ?? null, kind: node.kind, doc: node.doc, mine: owner, rev: node.rev, children } }, photos: photoInfos(h, node.doc) });
   const title = page === map.pages[0] ? site.title : `${node.title} - ${site.title}`;
   const body = renderPage(html`<${App} boot=${boot} />`, { lang: site.lang, dir: boot.messages['meta.dir'], title, theme: site.theme, boot, site: { color: site.color, icon: site.icon, canonical: `${site.url}${page.path}` } });
 
@@ -301,7 +308,7 @@ async function siteRoute(req, site, pathname, h) {
   const found = resolvePage(map, pathname);
 
   if(found?.redirect) return new Response(null, { status: 301, headers: { location: found.redirect } });
-  if(found?.page) return sitePage(site, map, found.page, h, owner);
+  if(found?.page) return sitePage(site, map, found.page, h, owner, req);
 
   return text('not found\n', 404);
 }
@@ -318,7 +325,8 @@ async function newSitePage(req, site, h) {
 // /edit (the page list), /edit/<slug> (the editor), /graph (the tree): the same app as the pages, in
 // the site's chrome; a visitor gets a login on /edit and the read-only graph on /graph
 async function siteTool(site, map, tool, slug, owner, h, viewer) {
-  const node = slug ? map?.pages.find(p => p.slug === slug)?.node : null;
+  // any node of the site with that slug, also one below a gallery that is no page of the menu
+  const node = slug ? h.get('SELECT id, title, slug FROM nodes WHERE space = ? AND slug = ?', site.id, slug) : null;
 
   if(tool === 'edit' && slug && !node && owner) return new Response(null, { status: 302, headers: { location: '/edit' } });
 
@@ -326,7 +334,7 @@ async function siteTool(site, map, tool, slug, owner, h, viewer) {
   const graph = tool === 'graph' ? siteGraph(h, site, owner) : undefined;
   const nav = (map?.pages ?? []).filter(p => p.node.visibility === 'public').map(p => ({ title: p.node.title, href: p.path, current: false }));
   const boot = await bootFor(site.lang, {
-    site: { id: site.id, title: site.title, nav, owner, tool, node: node ? { id: node.id, title: node.title, slug: node.slug, path: map.pages.find(p => p.node === node).path } : null, list, paths: pathsOf(map), graph },
+    site: { id: site.id, title: site.title, nav, owner, tool, node: node ? { id: node.id, title: node.title, slug: node.slug, path: map?.pages.find(p => p.node.id === node.id)?.path ?? '/edit' } : null, list, paths: pathsOf(map), graph },
     ...(owner && { user: { id: viewer.id, email: viewer.email, name: viewer.name } }),
   });
   const body = renderPage(html`<${App} boot=${boot} />`, { lang: site.lang, dir: boot.messages['meta.dir'], title: site.title, theme: site.theme, boot, site: { color: site.color, icon: site.icon, canonical: `${site.url}/${tool}` } });

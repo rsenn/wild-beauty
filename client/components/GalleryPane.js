@@ -1,5 +1,6 @@
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
+import { useBoot } from '../boot.js';
 import { galleryReport, planPicture } from '../editor/io/galleryinfo.js';
 import { LOOKS } from '../gallery/autoplan.js';
 import { LOOK_NAMES, TEXTURE_SLOTS } from '../editor/core/galleryScene.js';
@@ -12,6 +13,10 @@ import { LOOK_NAMES, TEXTURE_SLOTS } from '../editor/core/galleryScene.js';
 // (what the gallery hangs); `onScene(patch)` is the `setScene` command.
 export const GalleryPane = ({ doc, children = [], photos = {}, readOnly = false, onScene }) => {
   const { t, lang } = useI18n();
+  // on a site host the tree is /graph and the nodes open in the editor of the site; no /<lang>/ routes there
+  const site = useBoot()?.site;
+  const treeHref = site ? '/graph' : `/${lang}/tree`;
+  const childHref = child => (site ? `/edit/${child.slug ?? ''}` : `/${lang}/node/${child.id}`);
   const report = galleryReport(doc, { children });
   const picture = planPicture(report.plan);
   const { capacity, hang } = report;
@@ -64,11 +69,11 @@ export const GalleryPane = ({ doc, children = [], photos = {}, readOnly = false,
       <p class="wb-gal-note">${t('gallery.pane.children', { count: report.children.list.length })}</p>
       ${report.children.list.length
         ? html`<ul class="wb-gal-children">
-            ${report.children.list.slice(0, 8).map(child => html`<li><a href=${`/${lang}/node/${child.id}`}>${child.tile ? html`<img src=${`/files/photos/${child.tile}.thumb.jpg`} alt="" loading="lazy" />` : html`<span class="wb-gal-blank" aria-hidden="true"></span>`}<span>${child.title || t('node.untitled')}</span></a></li>`)}
+            ${report.children.list.slice(0, 8).map(child => html`<li><a href=${childHref(child)}>${child.tile ? html`<img src=${`/files/photos/${child.tile}.thumb.jpg`} alt="" loading="lazy" />` : html`<span class="wb-gal-blank" aria-hidden="true"></span>`}<span>${child.title || t('node.untitled')}</span></a></li>`)}
             ${report.children.list.length > 8 && html`<li class="wb-gal-note">${t('gallery.pane.children.more', { count: report.children.list.length - 8 })}</li>`}
           </ul>`
         : html`<p class="wb-gal-empty">${t('gallery.pane.children.none')}</p>`}
-      <p><a class="wb-editor-chip" href=${`/${lang}/tree`}>${t('gallery.pane.tree')}</a></p>
+      <p><a class="wb-editor-chip" href=${treeHref}>${t('gallery.pane.tree')}</a></p>
 
       <h4 class="wb-gal-sub">${t('gallery.pane.look')}</h4>
       <div class="wb-gal-looks" role="group" aria-label=${t('gallery.pane.look')}>
