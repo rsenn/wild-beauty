@@ -389,6 +389,8 @@ Open:
 Decided: the app keeps an **open public area** (nodes nobody owns: everybody may
 create and change them, logged in or not) next to the **accounts**.
 
+**Superseded in part (2026-11-06, `docs/GUESTS.md`, design only):** the open public area ends. A visitor's first save makes a **guest** user whose nodes are private to that browser; ownerless nodes can be changed by an admin only. Read what follows with that in mind until the guest accounts are built.
+
 - **Registration (minimal):** the login dialog has a second mode, "Neu hier? Konto
   erstellen": a mail address and a password of 6 characters or more, nothing else
   (`POST /api/register`, `server/auth.js`). No activation mail; the address is

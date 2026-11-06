@@ -107,3 +107,16 @@ How it would work (proposed):
 - The book page shows **Make a PDF** to a logged-in user (it polls every 3 s, then offers **Download the PDF**); a visitor sees "Log in to make a PDF". The print page stays.
 - Checked 2026-11-06: the 17-picture Garden Route book makes a 10-page A4 PDF of 14.9 MB in under 10 s, the JPEGs unchanged.
 - Not yet: a picture limit per book, a progress figure (only queued / running), the wider inner margin for binding, the 300 ppi pass (decided: not by default), sweeping `books-tex`.
+
+## 6. Idea: the book as a catalogue maker (owner, 2026-11-06, idea only, not decided)
+
+**Parked (owner, 2026-11-06): not built before a real user needs it.** It is developed together with that user and their requirements; the list below is only a starting guess to be replaced by what they say.
+
+For makers (jewellery, cards, small goods; `docs/THEMES.md`) the photo book could also make a **product catalogue or lookbook** as a printable PDF to hand out at a market or send to a shop. What a catalogue needs beyond the album, to be decided one by one:
+
+- **An item per picture**: name, price, a short description and a size/material line. The note of a photo (`desc`) is already the caption; a catalogue would give it structured fields (the "price/info tag" preset of `docs/THEMES.md` S2 is the same data), printed in a fixed place instead of as a free note.
+- **Layouts for items**: one large item per page, 2 x 2 or 3 x 3 grids of small items, a cover with the maker's name and logo, a contact page at the end (the maker's profile: name, pseudonym, address the maker chooses to print).
+- **Order of items = order in the node**, as in the album; chapters = child nodes (collections such as "Necklaces", "Earrings"); a table of contents when there are chapters.
+- **Print and share**: the A4 PDF as built (`server/book/`, LuaLaTeX), plus a hand-out size (A5) and a screen-friendly PDF; the owner decides what is public, nothing is printed that the maker has not put in (`docs/DESIGN.md` S3 goal 9).
+- **Open**: whether prices belong in the document model (photo step fields) or stay free text in the note; currency and language; a catalogue as a **mode** of the book (`?mode=catalogue`) or a separate page; which of the layouts above come first (suggestion: one item per page and a 2 x 2 grid, with cover and contact page).
+- Not a shop: nothing here takes orders; the marketplace idea stays unadvertised.
