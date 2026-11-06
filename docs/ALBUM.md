@@ -24,7 +24,7 @@ A candidate for the batch editor, to be gated as in `docs/BATCH.md` S9: a filter
 ## 2. How to get it onto paper (options)
 
 - **A. A print page in the browser (cheapest, first).** A page `/:lang/node/:id/book` laid out with CSS paged media (`@page` size, page breaks, `break-inside: avoid`), shown on screen as spreads, with a "Print / Save as PDF" button. No new server parts. Weakness: browsers differ in how they print 100 big images and no bleed or crop marks.
-- **B. A PDF made on the server.** The same page rendered by a headless browser to a PDF (this host has `/usr/bin/google-chrome`, so `--headless --print-to-pdf` would give the same pages as on screen), a download link. Print shops and the owner's printer get a file that does not depend on the visitor's browser. Weakness: a Chrome dependency on the server, time and memory for 160 photos (to be measured), and an RGB PDF (no CMYK).
+- **B. A PDF made on the server by a headless browser (dropped 2026-11-06, see S4d: no headless Chrome on the server).** The same page rendered by a headless browser to a PDF (this host has `/usr/bin/google-chrome`, so `--headless --print-to-pdf` would give the same pages as on screen), a download link. Print shops and the owner's printer get a file that does not depend on the visitor's browser. Weakness: a Chrome dependency on the server, time and memory for 160 photos (to be measured), and an RGB PDF (no CMYK).
 - **C. SVG pages by `rsvg-convert` or Inkscape** (the tools of the tile render): exact control, but a second layout engine next to the CSS one; only if A and B fall short.
 
 Decided: A only (S4). B stays here as a possibility.
@@ -39,7 +39,7 @@ Decided: A only (S4). B stays here as a possibility.
 
 1. **Paper: A4.**
 2. **Spreads** (a book open shows two pages side by side, the left and the right one, with the fold in the middle): the owner does not need the term. Proposed and simplest: **single A4 pages**. Printed double-sided they can get a wider inner margin on alternate pages (so the holes or the binding do not cut into the picture); to be switched on only if wanted. Orientation: **portrait** (decided 2026-11-06).
-3. **Browser print only.** The server PDF (B in S2) is parked; nothing on the server for it.
+3. **Browser print only** (2026-11-05; changed 2026-11-06: a server PDF is added, made without a browser, see S4d). The print page stays.
 4. **The whole gallery as chapters from the start**: every child node of a gallery is a chapter with its own title page; a node alone is a book of one chapter.
 5. **Look: a plain white page with captions.** Skins (kraft, white-bordered photos) are later.
 6. **Every visitor of a public node can print it** (it is their browser's print; the page needs no login, the owner's private nodes stay private).
@@ -74,6 +74,22 @@ The owner has written notes on the first 21 pictures of the Garden Route, so the
 - **Type**: as S4b (sans-serif system stack, black on white).
 - **Entry**: a "Photo book" link next to the view buttons of a gallery on the node page.
 
+## 4d. The PDF on the server (owner, 2026-11-06: decided and built the same day)
+
+Why: a book of 100 pages is 100 to 250 MB of photos; the browser's print can fail to render all of them (the owner has seen photos missing), and the browser PDF depends on the visitor's browser and settings. So the book gets a **PDF made on the server**, next to the print page (which stays).
+
+**Decided: no headless Chrome on the server** (S2 B is dropped). The PDF is made by other means.
+
+**Proposed engine: LuaLaTeX** (`/usr/bin/lualatex`, TeX Live 2023 on this host, with `fontspec`, `geometry`, `graphicx`, `parskip`). A spike on 2026-11-06 gave a PDF in 3.7 s with: the baked JPEGs embedded **unchanged** (1311 KB in, 1311 KB in the PDF, 332 ppi on the page), Liberation Sans and Liberation Sans Bold embedded as subsets, umlauts and accents right, A4. Tried and not chosen: `rsvg-convert` / Inkscape (cairo re-encodes the pictures, no text flow), ImageMagick (pictures only), `weasyprint`, `typst`, `pandoc` (not installed), a hand-written PDF writer in Bun (needs a font subsetter and a line breaker of its own). Ghostscript (`gs`) is there for an optional pass down to 300 ppi (about a third smaller).
+
+How it would work (proposed):
+- The page plan stays the one function of S4c (`bookOf`, `bookPages`); a pure function turns it into the `.tex` source (text escaped, the note's first line bold 14 pt, body 11 pt, chapters with title pages, the same packing), so the print page and the PDF cannot drift apart and the generator is tested without TeX.
+- What TeX gives that the print page cannot: **real page numbers**, a **table of contents with page numbers**, a **wider inner margin** for binding (`twoside`), chapters starting on a right-hand page, and long notes breaking across pages properly.
+- A job, not a request: `POST` asks for the PDF of (node, options), the server runs `lualatex` in a temporary directory with the pictures linked from `data/photos`, one job at a time, the result is kept in `data/books/<key>.pdf` where the key is made of the node ids, their revs and the options (the same book is not made twice, a changed node makes a new key), the page shows progress and then a download link. Old files are swept.
+- **Decided (owner, 2026-11-06): only a logged-in user may start a job** (it costs a minute and 100 to 250 MB); the print page stays open to every visitor of a public node. The 300 ppi pass is **not** done by default (the pictures are 330 to 470 ppi on the page, recompressing them costs a little quality for a smaller file nobody needs on a USB stick); it stays a possible option if a shop's upload limit asks for it.
+- Open: a limit on the number of pictures, the exact wording and place of the button.
+- Needs on the host: `texlive-luatex`, the `fontspec`, `geometry`, `graphicx`, `parskip` packages and the Liberation fonts; to be listed in `docs/DEVELOPER.md` when it is built.
+
 ## 5. Order if it goes ahead
 
 1. Decide the questions above and write the layout rules here (templates, page numbers, chapters, notes).
@@ -82,3 +98,12 @@ The owner has written notes on the first 21 pictures of the Garden Route, so the
 4. Skins.
 5. The server PDF (B), measured on the Garden Route nodes.
 6. `docs/DEVELOPER.md`, locales, browser check on a real print.
+
+## 4e. The server PDF as built (2026-11-06)
+
+- `server/book/tex.js` (pure, `tests/book-tex.test.js`): `bookTex(chapters, { title, onlyNoted, file, strings })` writes the LuaLaTeX source from the plan of S4c: front page with title, picture count and, for several chapters, a contents list with page numbers (two runs); a title page per chapter; page numbers at the bottom of the picture pages; pictures scaled to a part of the text height by how many share the page and how long the note is (alone: 92 % without note, 80 % with a short note, 55 % with a long one; two on a page 43 % each; four 2 by 2, 42 %); a short note centred, a long one left-aligned; the first line of a note with a body bold 14 pt. Text is escaped (`texEscape`).
+- `server/book/make.js`: `startBook` (one job at a time, a queue), `bookKey` (sha256 of the title, language, option and the pictures with their notes in order), `bookStatus`, `sweepBooks` (files older than 14 days go). The result is `data/books/<key>.pdf`; the work directory holds links to the baked photos (a WebP, which TeX cannot embed, is converted to a JPEG first). `lualatex` runs with `-no-shell-escape`, its font cache in `data/books-tex/`.
+- `server/api/book.js`: `POST /api/nodes/:id/book { notes?, lang? }` (202 with `{ key, status }`), `GET ...?key=K` (status), `GET ...?key=K&download=1` (the PDF). Logged-in users only (401 otherwise), the node must be visible to them (404), the book empty (422). The chapters are the ones the page shows (`chaptersFor`), so disabled photos and hidden nodes are not in it.
+- The book page shows **Make a PDF** to a logged-in user (it polls every 3 s, then offers **Download the PDF**); a visitor sees "Log in to make a PDF". The print page stays.
+- Checked 2026-11-06: the 17-picture Garden Route book makes a 10-page A4 PDF of 14.9 MB in under 10 s, the JPEGs unchanged.
+- Not yet: a picture limit per book, a progress figure (only queued / running), the wider inner margin for binding, the 300 ppi pass (decided: not by default), sweeping `books-tex`.

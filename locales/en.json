@@ -737,11 +737,17 @@
   "book.noted": "Only pictures with a note",
   "book.print": "Print / Save as PDF",
   "book.pictures": "{n} pictures",
-  "batch.desc.kept": "{n} photos already had a note and were left alone",
+  "batch.desc.kept": "Left alone, they already had a note: {n}",
   "batch.find": "Find placeholder notes",
-  "batch.find.done": "{n} placeholder notes found and selected",
+  "batch.find.done": "Placeholder notes found and selected: {n}",
   "note.insert": "Put into the note",
   "note.insert.place": "Place",
   "note.insert.date": "Date",
-  "note.insert.time": "Time"
+  "note.insert.time": "Time",
+  "book.toc": "Contents",
+  "book.pdf": "Make a PDF",
+  "book.pdf.working": "Making the PDF, this can take a few minutes...",
+  "book.pdf.ready": "Download the PDF",
+  "book.pdf.failed": "The PDF could not be made",
+  "book.pdf.login": "Log in to make a PDF"
 }

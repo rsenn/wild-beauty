@@ -20,8 +20,9 @@ import { segmentRoute } from './server/api/segment.js';
 import { edgesRoute } from './server/api/edges.js';
 import { servePhoto } from './server/api/photos.js';
 import { visibleDoc } from './client/editor/core/model.js';
-import { bookChapters, galleryChild, photoInfos, viewCards } from './server/node/view.js';
+import { galleryChild, photoInfos, viewCards } from './server/node/view.js';
 import { atOf, viewOf } from './client/gallery/presentation.js';
+import { bookRoute, chaptersFor } from './server/api/book.js';
 import { canView } from './server/api/nodes.js';
 import { getNode, linksFrom } from './server/db/nodes.js';
 import { database } from './server/db/db.js';
@@ -225,15 +226,10 @@ async function bookPage(lang, id, req) {
 
   if(!node || !canView(node, viewer)) return text('not found\n', 404);
 
-  const kids = linksFrom(h, id, 'child').flatMap(({ id: to }) => {
-    const child = getNode(h, to);
-
-    return child && canView(child, viewer) ? [child] : [];
-  });
   const notes = new URL(req.url).searchParams.get('notes');
   const title = `${locales.get(lang)['book.title'] ?? 'Photo book'} - ${node.title || locales.get(lang)['node.untitled'] || ''}`;
 
-  return page(lang, 'book.title', { book: { id: node.id, title: node.title, chapters: bookChapters(h, node, kids), ...(notes === '1' || notes === '0' ? { notes: notes === '1' } : {}) } }, title, req);
+  return page(lang, 'book.title', { book: { id: node.id, title: node.title, chapters: chaptersFor(h, node, viewer), ...(notes === '1' || notes === '0' ? { notes: notes === '1' } : {}) } }, title, req);
 }
 
 // A page of a site: the node in a centred stage, the navigation of the sitemap above it
@@ -380,6 +376,10 @@ async function route(req) {
   const captions = /^\/api\/nodes\/([^/]+)\/captions$/.exec(pathname);
 
   if(captions) return req.method === 'PATCH' ? captionsRoute(req, captions[1]) : text('method not allowed\n', 405);
+
+  const book = /^\/api\/nodes\/([^/]+)\/book$/.exec(pathname);
+
+  if(book) return bookRoute(req, book[1], { locales });
 
   const large = /^\/api\/nodes\/([^/]+)\/large$/.exec(pathname);
 

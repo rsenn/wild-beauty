@@ -737,11 +737,17 @@
   "book.noted": "Seulement les photos avec une note",
   "book.print": "Imprimer / Enregistrer en PDF",
   "book.pictures": "{n} photos",
-  "batch.desc.kept": "{n} photos avaient déjà une note et sont restées inchangées",
+  "batch.desc.kept": "Laissées telles quelles, elles avaient déjà une note : {n}",
   "batch.find": "Trouver les notes provisoires",
-  "batch.find.done": "{n} notes provisoires trouvées et sélectionnées",
+  "batch.find.done": "Notes provisoires trouvées et sélectionnées : {n}",
   "note.insert": "Insérer dans la note",
   "note.insert.place": "Lieu",
   "note.insert.date": "Date",
-  "note.insert.time": "Heure"
+  "note.insert.time": "Heure",
+  "book.toc": "Sommaire",
+  "book.pdf": "Créer un PDF",
+  "book.pdf.working": "Création du PDF, cela peut prendre quelques minutes...",
+  "book.pdf.ready": "Télécharger le PDF",
+  "book.pdf.failed": "Le PDF n’a pas pu être créé",
+  "book.pdf.login": "Connectez-vous pour créer un PDF"
 }

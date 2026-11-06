@@ -62,3 +62,4 @@
   .wb-book-front, .wb-book-title, .wb-book-page-pics { min-height: 260mm; }
   .wb-book-page:last-child { break-after: auto; }
 }
+.wb-book-pdf { color: #fff; }

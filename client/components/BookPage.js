@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
@@ -15,9 +16,46 @@ const Picture = ({ p }) => html`
   </figure>
 `;
 
+// The server PDF (docs/ALBUM.md S4d): a logged-in user asks for it, the page polls until it is made
+const PdfButton = ({ id, notes }) => {
+  const { t, lang } = useI18n();
+  const [job, setJob] = useState(null); // { key, status, error? }
+  const timer = useRef(null);
+  const url = `/api/nodes/${id}/book`;
+
+  const poll = key =>
+    fetch(`${url}?key=${key}`)
+      .then(r => r.json())
+      .then(s => {
+        setJob({ key, ...s });
+
+        if(s.status === 'queued' || s.status === 'running') timer.current = setTimeout(() => poll(key), 3000);
+      })
+      .catch(() => setJob({ key, status: 'error' }));
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const start = async () => {
+    setJob({ status: 'queued' });
+
+    const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ notes, lang }) }).catch(() => null);
+    const s = r && (await r.json().catch(() => null));
+
+    if(!r?.ok || !s?.key) return setJob({ status: 'error' });
+
+    setJob(s);
+    poll(s.key);
+  };
+
+  if(job?.status === 'done') return html`<a class="wb-book-pdf" href=${`${url}?key=${job.key}&download=1`}>${t('book.pdf.ready')}</a>`;
+  if(job?.status === 'queued' || job?.status === 'running') return html`<span class="wb-book-pdf">${t('book.pdf.working')}</span>`;
+
+  return html`${job?.status === 'error' && html`<span class="wb-book-pdf">${t('book.pdf.failed')}</span>`}<button type="button" onClick=${start}>${t('book.pdf')}</button>`;
+};
+
 export const BookPage = () => {
   const { t, lang } = useI18n();
-  const { book } = useBoot();
+  const { book, user } = useBoot();
   const onlyNoted = book.notes ?? defaultOnlyNoted(book.chapters);
   const shown = bookOf(book.chapters, { onlyNoted });
   const all = bookOf(book.chapters, { onlyNoted: false });
@@ -30,6 +68,7 @@ export const BookPage = () => {
         <a href=${`/${lang}/node/${book.id}`}>${t('book.back')}</a>
         <span class="wb-book-count">${t('book.counts', { pictures: shown.pictures, pages: shown.pages, all: all.pictures, allPages: all.pages })}</span>
         <a class=${'wb-book-opt' + (onlyNoted ? ' wb-book-opt-on' : '')} href=${`${base}?notes=${onlyNoted ? 0 : 1}`}>${onlyNoted ? t('book.all') : t('book.noted')}</a>
+        ${user ? html`<${PdfButton} key=${String(onlyNoted)} id=${book.id} notes=${onlyNoted} />` : html`<span class="wb-book-pdf">${t('book.pdf.login')}</span>`}
         <button type="button" onClick=${() => globalThis.print?.()}>${t('book.print')}</button>
       </div>
       <section class="wb-book-page wb-book-front">

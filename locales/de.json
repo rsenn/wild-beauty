@@ -737,11 +737,17 @@
   "book.noted": "Nur Bilder mit Notiz",
   "book.print": "Drucken / Als PDF speichern",
   "book.pictures": "{n} Bilder",
-  "batch.desc.kept": "{n} Fotos hatten schon eine Notiz und blieben unverändert",
+  "batch.desc.kept": "Unverändert, sie hatten schon eine Notiz: {n}",
   "batch.find": "Platzhalter-Notizen finden",
-  "batch.find.done": "{n} Platzhalter-Notizen gefunden und ausgewählt",
+  "batch.find.done": "Platzhalter-Notizen gefunden und ausgewählt: {n}",
   "note.insert": "In die Notiz einfügen",
   "note.insert.place": "Ort",
   "note.insert.date": "Datum",
-  "note.insert.time": "Uhrzeit"
+  "note.insert.time": "Uhrzeit",
+  "book.toc": "Inhalt",
+  "book.pdf": "PDF erstellen",
+  "book.pdf.working": "Das PDF wird erstellt, das kann einige Minuten dauern...",
+  "book.pdf.ready": "PDF herunterladen",
+  "book.pdf.failed": "Das PDF konnte nicht erstellt werden",
+  "book.pdf.login": "Zum Erstellen eines PDFs anmelden"
 }
