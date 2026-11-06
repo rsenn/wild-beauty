@@ -468,3 +468,16 @@ wild-beauty host still work. Open: PWA `start_url` -> `/edit`.
   at most once a day per page (`push_sent`); endpoints that answer 404 or 410 are dropped. The push carries no
   text: the service worker (`server/pwa.js`) asks `/api/push/latest` and shows the newest page's title; a tap opens it.
 - Not done: notifications for other kinds of change, a per-visitor topic choice, a send-to-all button for the owner.
+
+## 16. Gallery pages on a site (2026-11-06)
+
+- A page of a site whose node is a gallery (or any node that offers the gallery: `galleryable` in
+  `client/gallery/items.js`, at least two pictures from its visible children or its own photos) is shown like the
+  node page of the main host: the 3D gallery, the carousel and the masonry album, switched with the same
+  buttons, in the site's own stage and navigation. Any other page stays the static picture of its node.
+- The server gives the page the children as the node page does (`galleryChild`, visible `child` edges in order,
+  only those the visitor may see).
+- The pictures lead nowhere on a site host: the Open button of a picture (a link to `/<lang>/node/<id>`, a route
+  the site host does not serve) is dropped there. No full-size image either (`/api/nodes/<id>/large` is not served
+  on the site host); the small picture is used.
+- Open: a page for each work (child) on the site; for now a child is a picture only.

@@ -1,10 +1,16 @@
-import { useEffect, useRef } from '../../vendor/hooks.js';
+import { useEffect, useMemo, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useBoot } from '../boot.js';
 import { NodeView } from './NodeView.js';
 import { OwnerBar } from './SiteApp.js';
 import { RecordConsent } from './RecordConsent.js';
 import { PushToggle } from './PushToggle.js';
+import { GalleryView } from './GalleryView.js';
+import { GalleryCarousel, GalleryMasonry, ViewSwitch } from './GalleryViews.js';
+import { GalleryNav, GalleryTools } from './GalleryTools.js';
+import { createChrome } from '../gallery/chrome.js';
+import { galleryItems, galleryable } from '../gallery/items.js';
+import { viewOf } from '../gallery/presentation.js';
 
 // A page of a personal site (docs/SITES.md): the navigation of the sitemap above,
 // the node in a centred stage below. Its own layout, not the app's tab strip.
@@ -33,6 +39,16 @@ export const SitePage = () => {
   const { site, photos = {} } = useBoot();
   const { node, nav } = site;
   const stage = useRef(null);
+  const { lang } = useBoot();
+  // a gallery page offers the three views of the node page (docs/SITES.md S16); no picture leads to a page of its own here
+  const items = galleryItems(node, lang, hash => photos[hash] ?? null).map(({ href, ...item }) => item);
+  const isGallery = galleryable(node, items);
+  const [view, setView] = useState(viewOf(new URLSearchParams(globalThis.location?.search).get('view')));
+  const at = useRef(null);
+  const chrome = useMemo(createChrome, []);
+  const remember = id => id && (at.current = id);
+  const choose = next => setView(next);
+  const poster = html`<${NodeView} doc=${node.doc} photos=${hash => photos[hash] ?? null} label=${node.title} />`;
 
   useEffect(() => {
     const run = () => centre(stage.current);
@@ -55,7 +71,12 @@ export const SitePage = () => {
       </header>
       <main class="site-stage" ref=${stage}>
         <h1 class="site-h1">${node.title}</h1>
-        <${NodeView} doc=${node.doc} photos=${hash => photos[hash] ?? null} label=${node.title} />
+        ${isGallery && html`<div class="wb-node-head"><${ViewSwitch} view=${view} onView=${choose} />${view === '3d' && html`<${GalleryTools} chrome=${chrome} overview=${!at.current} />`}</div>`}
+        ${isGallery && view === 'carousel' && html`<${GalleryCarousel} key="carousel" items=${items} at=${at.current} onAt=${remember} label=${node.title} />`}
+        ${isGallery && view === 'masonry' && html`<${GalleryMasonry} key="masonry" items=${items} at=${at.current} onAt=${remember} onPick=${id => (remember(id), choose('carousel'))} label=${node.title} />`}
+        ${isGallery && view === '3d' && html`<${GalleryView} key="3d" items=${items} doc=${node.kind === 'gallery' ? node.doc : undefined} photos=${hash => photos[hash] ?? null} overview=${!at.current} startAt=${at.current} onAt=${remember} label=${node.title} chrome=${chrome}>${poster}<//>`}
+        ${!isGallery && poster}
+        ${isGallery && view === '3d' && html`<div class="wb-node-foot"><${GalleryNav} chrome=${chrome} /></div>`}
       </main>
       <footer class="site-foot"><${PushToggle} />${site.owner && html`<${RecordConsent} fold=${true} />`}</footer>
       ${site.owner && html`<${OwnerBar} edit=${node.slug ? `/edit/${node.slug}` : '/edit'} />`}
