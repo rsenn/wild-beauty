@@ -11,7 +11,7 @@ export const Filmstrip = ({ t, steps, photos, selected, onSelect, onMove, onRole
   if(steps.length < 2) return null;
 
   return html`
-    <ol class="wb-editor-strip" aria-label=${t('editor.strip')}>
+    <ol class="wb-editor-strip" data-wb-scroll="strip" data-wb-scroll-axis="x" aria-label=${t('editor.strip')}>
       ${steps.map((step, i) => html`
         <li class=${'wb-editor-strip-item' + (step.id === selected ? ' wb-editor-strip-selected' : '') + (step.role === 'texture' ? ' wb-editor-strip-texture' : '') + (drag === step.id ? ' wb-editor-strip-drag' : '')} draggable="true"
           onDragStart=${e => (e.dataTransfer.setData('text/plain', step.id), (e.dataTransfer.effectAllowed = 'move'), setDrag(step.id))}

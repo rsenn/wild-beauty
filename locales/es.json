@@ -774,5 +774,10 @@
   "claim.error.taken": "Este nombre ya está en uso, elige otro",
   "claim.error.taken_email": "Este correo ya está registrado",
   "claim.error.too_many": "Demasiados intentos, inténtalo más tarde",
-  "claim.error.not_guest": "Guarda primero una obra"
+  "claim.error.not_guest": "Guarda primero una obra",
+  "editor.draft.restored": "Se ha restaurado tu trabajo sin guardar de {time}.",
+  "editor.draft.discardChanges": "Descartar los cambios",
+  "editor.draft.ok": "Conservar",
+  "editor.draft.failed": "Este dispositivo no puede conservar una copia local de tu trabajo. Guarda ahora.",
+  "resume.note": "De vuelta donde estabas."
 }

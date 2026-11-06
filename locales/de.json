@@ -774,5 +774,10 @@
   "claim.error.taken": "Dieser Name ist vergeben, bitte wähle einen anderen",
   "claim.error.taken_email": "Diese E-Mail-Adresse ist schon registriert",
   "claim.error.too_many": "Zu viele Versuche, bitte später nochmals probieren",
-  "claim.error.not_guest": "Bitte speichere zuerst ein Werk"
+  "claim.error.not_guest": "Bitte speichere zuerst ein Werk",
+  "editor.draft.restored": "Deine ungespeicherte Arbeit von {time} wurde wiederhergestellt.",
+  "editor.draft.discardChanges": "Änderungen verwerfen",
+  "editor.draft.ok": "Behalten",
+  "editor.draft.failed": "Dieses Gerät kann keine lokale Kopie deiner Arbeit behalten. Bitte speichere jetzt.",
+  "resume.note": "Wieder dort, wo du warst."
 }

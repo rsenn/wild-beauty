@@ -774,5 +774,10 @@
   "claim.error.taken": "Ce nom est déjà pris, veuillez en choisir un autre",
   "claim.error.taken_email": "Cette adresse e-mail est déjà enregistrée",
   "claim.error.too_many": "Trop de tentatives, réessayez plus tard",
-  "claim.error.not_guest": "Veuillez d’abord enregistrer une œuvre"
+  "claim.error.not_guest": "Veuillez d’abord enregistrer une œuvre",
+  "editor.draft.restored": "Votre travail non enregistré de {time} a été restauré.",
+  "editor.draft.discardChanges": "Annuler les modifications",
+  "editor.draft.ok": "Garder",
+  "editor.draft.failed": "Cet appareil ne peut pas garder de copie locale de votre travail. Veuillez enregistrer maintenant.",
+  "resume.note": "De retour là où vous étiez."
 }

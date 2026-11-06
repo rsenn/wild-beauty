@@ -60,7 +60,7 @@ describe('drafts', () => {
 
     expect(loadDraft(s, 'new')).toBeNull();
 
-    for(const bad of ['{nope', 'null', { ...good, v: 2 }, { ...good, kind: 'blog' }, { ...good, doc: { v: 9 } }, { ...good, doc: null }]) {
+    for(const bad of ['{nope', 'null', { ...good, v: 3 }, { ...good, kind: 'blog' }, { ...good, doc: { v: 9 } }, { ...good, doc: null }]) {
       put(bad);
       expect(loadDraft(s, 'new')).toBeNull();
     }

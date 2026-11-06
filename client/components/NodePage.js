@@ -13,6 +13,8 @@ import { GalleryView } from './GalleryView.js';
 import { GalleryCarousel, GalleryMasonry, ViewSwitch } from './GalleryViews.js';
 import { galleryItems, galleryable } from '../gallery/items.js';
 import { atOf, presentationQuery, viewOf } from '../gallery/presentation.js';
+import { browserStorage } from '../editor/core/draft.js';
+import { loadResume, saveResume, scrollWhenReady } from '../editor/core/resume.js';
 
 // /:lang/node/:id: a saved node, read-only. The server renders it into the
 // HTML (no JavaScript needed to see it); the browser adopts the same markup
@@ -46,6 +48,42 @@ export const NodePage = () => {
   useEffect(() => {
     if(node.mine && /[?&]edit(=|&|$)/.test(globalThis.location.search)) openEditor(node.id);
   }, []);
+
+  // The viewer's place for the installed app (docs/EDITOR.md S2.8b R7): the page, the picture and the scroll, nothing else. Written on
+  // every move of the picture and when the page is hidden; not while the editor is open (it writes its own). An app start that sent the
+  // user here (`pending`) scrolls to where they were.
+  useEffect(() => {
+    const storage = browserStorage();
+
+    if(!storage) return;
+
+    const record = loadResume(storage);
+
+    if(record?.kind === 'view' && record.pending && record.view?.node === node.id) {
+      saveResume(storage, { ...record, pending: undefined }, record.at);
+
+      if(record.scrollY) scrollWhenReady(record.scrollY, { scrollTo: top => window.scrollTo({ top, behavior: 'auto' }), height: () => document.documentElement.scrollHeight, view: () => window.innerHeight });
+    }
+
+    const write = () => {
+      if(latestEditing.current) return;
+
+      saveResume(storage, { url: location.pathname + location.search, kind: 'view', view: { node: node.id, ...(at.current && { step: at.current }) }, scrollY: Math.round(window.scrollY) });
+    };
+    const hidden = () => document.visibilityState === 'hidden' && write();
+
+    write();
+    window.addEventListener('pagehide', write);
+    document.addEventListener('visibilitychange', hidden);
+
+    return () => {
+      window.removeEventListener('pagehide', write);
+      document.removeEventListener('visibilitychange', hidden);
+    };
+  }, [node.id]);
+  const latestEditing = useRef(false);
+
+  latestEditing.current = editingThis;
   const items = galleryItems(node, lang, hash => photos[hash] ?? null);
   const chrome = useMemo(createChrome, []); // the buttons of the 3D gallery that sit outside its stage
   const isGallery = !editingThis && galleryable(node, items);
@@ -58,6 +96,10 @@ export const NodePage = () => {
 
     at.current = id;
     writeLocation(shown, id);
+
+    const storage = browserStorage();
+
+    if(storage && !editingThis) saveResume(storage, { url: location.pathname + location.search, kind: 'view', view: { node: node.id, step: id }, scrollY: Math.round(globalThis.scrollY ?? 0) });
   };
   const choose = next => {
     if(next === '3d') setOpen3d(opening());

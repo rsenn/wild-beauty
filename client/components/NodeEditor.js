@@ -15,7 +15,8 @@ import { QuickAdd } from './QuickAdd.js';
 import { deleteNode, errorKey, loadNode, saveLarge, saveNode } from '../editor/io/save.js';
 import { createLock } from '../editor/io/lock.js';
 import * as history from '../editor/core/history.js';
-import { DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, saveDraft } from '../editor/core/draft.js';
+import { DRAFT_DEBOUNCE, DRAFT_INTERVAL, browserStorage, clearDraft, isDirty, loadDraft, pruneDrafts, saveDraft } from '../editor/core/draft.js';
+import { clearResume, pendingResume, saveResume, scrollWhenReady } from '../editor/core/resume.js';
 import { anyMatrixOf, centreOf, hitTest, matrixOf, outlineOf, selectableIds } from '../editor/input/hit.js';
 import { breakVertex, drag as dragVertices, dragMany, geometry, hitVertex, insideRect, joinVertex, removeVertices, verticesOf } from '../editor/tools/shape/vertexedit.js';
 import { emptyDraft, preview, press, pull, shapeStep, undoVertex } from '../editor/tools/shape/shapetool.js';
@@ -47,7 +48,7 @@ import { photoSteps as allPhotoSteps, renderNode, renderPhoto, slideOf, slideVie
 import { clipPolygonsOf, crossedOutline, cutOutlines, insertOnEdge, nearestVertex, outlineCount } from '../editor/tools/clip/multiclip.js';
 import { orderFor, shortcutFor, transformFor } from '../editor/input/shortcuts.js';
 import { CURSOR_START, cycleId, inEditor, moveCursor } from '../editor/input/keyboard.js';
-import { DEFAULT_TOOL, SLOTS, inField, slotOf, toolForKey } from '../editor/input/toolTable.js';
+import { DEFAULT_TOOL, SLOTS, TOOLS, inField, slotOf, toolForKey } from '../editor/input/toolTable.js';
 import { ToolSlot } from './ToolSlot.js';
 import { SMALL, loupeEnabled, loupeShows, readPref, toggled, writePref } from '../editor/input/loupe.js';
 import { editorStore } from '../editor/core/useEditor.js';
@@ -287,6 +288,15 @@ const Selection = ({ outline, scale, px, grips }) => {
   </g>`;
 };
 
+// the editor's state for a draft (docs/EDITOR.md S2.8b R2): what is in `ui`, the window's scroll and the scroll of the lists marked data-wb-scroll
+function captureUi(ui = {}) {
+  const lists = {};
+
+  for(const el of document.querySelectorAll('[data-wb-scroll]')) lists[el.dataset.wbScroll] = el.dataset.wbScrollAxis === 'x' ? el.scrollLeft : el.scrollTop;
+
+  return { ...ui, scrollY: window.scrollY, lists };
+}
+
 export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar = false }) => {
   const boot = useBoot();
   const { t, lang } = useI18n();
@@ -310,7 +320,14 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const [size, setSize] = useState(8);
   const [live, setLive] = useState('');
   const [over, setOver] = useState(false);
-  const [found, setFound] = useState(null); // a stored draft waiting for "restore" or "discard"
+  const [found, setFound] = useState(() => {
+    const storage = browserStorage();
+
+    return storage ? loadDraft(storage, target) : null; // a stored draft of this target: restored at once when the editor is ready (docs/EDITOR.md S2.8b R4)
+  });
+  const [restored, setRestored] = useState(null); // { at } the draft was put back: a note with "Discard changes"
+  const [keepFailed, setKeepFailed] = useState(false); // the device could not keep the local copy (R8)
+  const resumeUi = useRef(null); // the editor state of the restored draft, applied when the page is ready
   const [scale, setScale] = useState(1);
   const [current, setCurrent] = useState(0); // the page being edited
   const [k, setK] = useState(null); // steps of the page shown while scrubbing; null: all
@@ -344,6 +361,17 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   // saved node has loaded, as the editor grows then
   useEffect(() => {
     if(loading) return;
+    if(latest.current?.found?.ui?.scrollY !== undefined || resumeUi.current?.scrollY !== undefined) return; // the restored draft brings its own scroll position (R5b)
+
+    // an app start without a draft: scroll to where the user was, as the resume record says (R5b)
+    if(pendingResume.scrollY !== undefined) {
+      const y = pendingResume.scrollY;
+
+      pendingResume.scrollY = undefined;
+      scrollWhenReady(y, { scrollTo: top => window.scrollTo({ top, behavior: 'auto' }), height: () => document.documentElement.scrollHeight, view: () => window.innerHeight, done: () => window.dispatchEvent(new Event('wb:resumed')) });
+
+      return;
+    }
 
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -438,6 +466,10 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const readOnly = lockState.state === 'locked' || lockState.state === 'lost'; // someone else holds the node
 
   latest.current = { loupePref, small, aid: roomAid && kind === 'gallery', cursor, candidate, readOnly, tool, shape, vsel, vsels, editStep, snap: hist.present, doc, slideInfo, cutting, page, pageId, count, k, shown, scrubbed, previewing, photos, selected: selectedStep?.id ?? null, scale, dirty, found, color, size, typing, dropFor: null, startDropper: null, group, groupBox, auto, addMode };
+
+  const uiRef = useRef();
+
+  uiRef.current = { page: current, tool, selected, multi, panelTab };
 
   // In slides mode a new drawing goes right after the slide's last drawing, and
   // a move in the stack stays between the photo and the next one: the slide a
@@ -1357,14 +1389,6 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
 
   // --- dirty tracking and the local draft (E43) ---
 
-  // a draft of this target from an earlier session is offered once
-  useEffect(() => {
-    const storage = browserStorage();
-    const d = storage && loadDraft(storage, target);
-
-    if(d) setFound(d);
-  }, [target]);
-
   useEffect(() => {
     editorStore.setDirty(dirty);
   }, [dirty]);
@@ -1420,33 +1444,57 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     editorStore.setUsed(usedKey);
   }, [usedKey.join()]);
 
-  // the draft follows the document every 3 s and when the page is hidden; a
-  // clean editor has none. Nothing is written while an old draft is waiting.
+  // The draft follows every change 250 ms after it and, synchronously, when the page is hidden, frozen or left (a phone call, a task
+  // switch, an accidental close: docs/EDITOR.md S2.8b R1); the 3 s timer stays as a safety net. A clean editor has no draft. Nothing is
+  // written while an old draft waits to be restored. The resume record says where the user is (R6).
+  const flushRef = useRef(() => {});
+
+  flushRef.current = () => {
+    const storage = browserStorage();
+
+    if(!storage) return;
+
+    const { snap, photos, dirty, found } = latest.current;
+
+    if(found) return;
+
+    if(dirty) setKeepFailed(!saveDraft(storage, target, snap, photos, Date.now(), captureUi(uiRef.current)));
+    else clearDraft(storage, target);
+
+    if(viewHref === null) saveResume(storage, { url: location.pathname + location.search, kind: 'editor', target: String(target), scrollY: Math.round(window.scrollY) });
+  };
+
   useEffect(() => {
     const storage = browserStorage();
 
     if(!storage) return;
 
-    const write = () => {
-      const { snap, photos, dirty, found } = latest.current;
+    pruneDrafts(storage, Date.now(), target);
 
-      if(found) return;
+    const now = () => flushRef.current();
+    const hidden = () => document.visibilityState === 'hidden' && now();
+    const timer = setInterval(now, DRAFT_INTERVAL);
 
-      if(dirty) saveDraft(storage, target, snap, photos);
-      else clearDraft(storage, target);
-    };
-    const hidden = () => document.visibilityState === 'hidden' && write();
-    const timer = setInterval(write, DRAFT_INTERVAL);
-
-    window.addEventListener('pagehide', write);
+    window.addEventListener('pagehide', now);
+    window.addEventListener('beforeunload', now);
+    document.addEventListener('freeze', now);
     document.addEventListener('visibilitychange', hidden);
 
     return () => {
       clearInterval(timer);
-      window.removeEventListener('pagehide', write);
+      window.removeEventListener('pagehide', now);
+      window.removeEventListener('beforeunload', now);
+      document.removeEventListener('freeze', now);
       document.removeEventListener('visibilitychange', hidden);
     };
   }, [target]);
+
+  // after each change of the document or of the editor's state
+  useEffect(() => {
+    const timer = setTimeout(() => flushRef.current(), DRAFT_DEBOUNCE);
+
+    return () => clearTimeout(timer);
+  }, [hist.present, current, tool, selected, multi, panelTab, found]);
 
   // leaving the page with unsaved changes asks first
   useEffect(() => {
@@ -1462,11 +1510,81 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     return () => window.removeEventListener('beforeunload', on);
   }, [dirty]);
 
-  const restore = () => {
-    setPhotos(old => ({ ...old, ...found.photos }));
-    setHist(history.create(found.snap));
-    setSelected(null);
+  // Put a draft back: the document, the photos it uses and the editor's state (page, tool, selection, panel), and
+  // scroll to where the user was (docs/EDITOR.md S2.8b R2, R4, R5b)
+  const applyDraft = d => {
+    const ui = d.ui ?? {};
+    const doc = d.snap.doc;
+    const exists = id => !!id && !!findStep(doc, id);
+
+    setPhotos(old => ({ ...old, ...d.photos }));
+    setHist(history.create(d.snap));
+    setSelected(exists(ui.selected) ? ui.selected : null);
+
+    const multiNow = (ui.multi ?? []).filter(exists);
+
+    if(multiNow.length > 1) setMulti(multiNow);
+    if(ui.tool && TOOLS.some(x => x.id === ui.tool)) setTool(ui.tool);
+    if(ui.page !== undefined) setCurrent(Math.min(ui.page, doc.pages.length - 1));
+    if(ui.panelTab) setPanelTab(ui.panelTab);
+
+    resumeUi.current = ui;
     setFound(null);
+    setRestored({ at: d.savedAt });
+  };
+
+  const restore = () => applyDraft(found);
+
+  // the draft is put back without a question, as soon as the editor is ready and may be written to
+  useEffect(() => {
+    if(found && !loading && !readOnly) applyDraft(found);
+  }, [found, loading, readOnly]);
+
+  // the scroll: the window and the editor's own lists, kept trying while the page grows (R5b), not once the user moves
+  useEffect(() => {
+    if(!restored) return;
+
+    const ui = resumeUi.current ?? {};
+    let moved = false;
+    const mark = () => (moved = true);
+    const events = ['wheel', 'touchstart', 'keydown'];
+
+    for(const name of events) window.addEventListener(name, mark, { once: true, passive: true });
+
+    const lists = () => {
+      for(const [name, top] of Object.entries(ui.lists ?? {})) {
+        const el = document.querySelector(`[data-wb-scroll="${name}"]`);
+
+        if(el) el[el.dataset.wbScrollAxis === 'x' ? 'scrollLeft' : 'scrollTop'] = top;
+      }
+
+      window.dispatchEvent(new Event('wb:resumed'));
+    };
+
+    if(ui.scrollY === undefined) {
+      document.getElementById('wb-editor')?.scrollIntoView({ behavior: 'auto', block: 'start' });
+      lists();
+
+      return () => events.forEach(name => window.removeEventListener(name, mark));
+    }
+
+    const stop = scrollWhenReady(ui.scrollY, { scrollTo: y => window.scrollTo({ top: y, behavior: 'auto' }), height: () => document.documentElement.scrollHeight, view: () => window.innerHeight, moved: () => moved, done: lists });
+
+    return () => {
+      stop();
+      events.forEach(name => window.removeEventListener(name, mark));
+    };
+  }, [restored]);
+
+  // back to the saved version: the deliberate way to throw the unsaved work away
+  const discardChanges = () => {
+    const storage = browserStorage();
+
+    if(storage) clearDraft(storage, target);
+
+    setHist(history.create(saved.current));
+    setSelected(null);
+    setRestored(null);
   };
 
   const discard = () => {
@@ -1489,10 +1607,12 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     // a running server job is lost with the editor: ask even when nothing else is unsaved
     if((dirty || cutting !== null || busyAt !== null) && !window.confirm(t(dirty ? 'editor.close.confirm' : 'editor.close.job'))) return;
 
-    if(!dirty) {
-      const storage = browserStorage();
+    const storage = browserStorage();
 
-      if(storage) clearDraft(storage, target);
+    if(storage) {
+      if(!dirty) clearDraft(storage, target);
+
+      clearResume(storage); // the user left on purpose: the next start is not a resume
     }
 
     onClose();
@@ -3218,6 +3338,14 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
         <button type="button" class="wb-editor-chip" onClick=${restore}>${t('editor.draft.restore')}</button>
         <button type="button" class="wb-editor-chip" onClick=${discard}>${t('editor.draft.discard')}</button>
       </p>`}
+      ${restored &&
+      html`<p class="wb-editor-banner" role="status">
+        <span>${t('editor.draft.restored', { time: new Date(restored.at).toLocaleString(lang) })}</span>
+        <button type="button" class="wb-editor-chip" onClick=${discardChanges}>${t('editor.draft.discardChanges')}</button>
+        <button type="button" class="wb-editor-chip" aria-label=${t('editor.draft.ok')} onClick=${() => setRestored(null)}>${t('editor.draft.ok')}</button>
+      </p>`}
+      ${keepFailed &&
+      html`<p class="wb-editor-banner wb-editor-banner-error" role="alert"><span>${t('editor.draft.failed')}</span></p>`}
       ${readOnly &&
       html`<p class="wb-editor-banner wb-editor-banner-error" role="alert">
         <span>${lockState.state === 'lost'

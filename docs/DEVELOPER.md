@@ -338,6 +338,12 @@ notes:
 notes:
 
 
+## Drafts and resume
+
+The editor keeps a local draft in localStorage (wb-draft:<id|new>): document, photo infos and the editor state, written 250 ms after a change and at once on hide. The draft is put back without a question. The record wb-resume says where the installed app was (editor target or viewer page, scroll) and is used only when the app starts. Spec: docs/EDITOR.md S2.8b. The cover that hides the page during a resume is in server/ssr.js (RESUME_HEAD) and is lifted by client/editor/core/resume.js.
+
+notes:
+
 ## Gotchas
 
 - a photo step field not listed in STEPS is rejected on save

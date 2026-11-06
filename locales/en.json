@@ -774,5 +774,10 @@
   "claim.error.taken": "This name is taken, please choose another",
   "claim.error.taken_email": "This e-mail address is already registered",
   "claim.error.too_many": "Too many attempts, try again later",
-  "claim.error.not_guest": "Please save a work first"
+  "claim.error.not_guest": "Please save a work first",
+  "editor.draft.restored": "Restored your unsaved work from {time}.",
+  "editor.draft.discardChanges": "Discard changes",
+  "editor.draft.ok": "Keep",
+  "editor.draft.failed": "This device cannot keep a local copy of your work. Please save now.",
+  "resume.note": "Back where you were."
 }

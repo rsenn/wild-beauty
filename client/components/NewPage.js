@@ -9,6 +9,9 @@ import { NEW } from '../editor/core/store.js';
 import { ADD_EVENT, SAVED_EVENT } from '../editor/core/pending.js';
 import { useBoot } from '../boot.js';
 import { keptUntil, openAccount, useAccount } from '../account.js';
+import { browserStorage, loadDraft } from '../editor/core/draft.js';
+import { COVER_MS, isAppLaunch, loadResume, pendingResume, releaseCover, saveResume } from '../editor/core/resume.js';
+import { isStandalone } from '../events.js';
 import { SavedNodes } from './SavedNodes.js';
 import { RecordConsent } from './RecordConsent.js';
 import { editorStore, useEditor } from '../editor/core/useEditor.js';
@@ -21,11 +24,59 @@ export const NewPage = () => {
   const boot = useBoot();
   const account = useAccount();
   const [number, setNumber] = useState('');
+  // The installed app started again (a phone call, a closed task): the editor opens where the user was (docs/EDITOR.md S2.8b R5b, R6)
+  const [resume] = useState(() => {
+    if(typeof window === 'undefined' || boot.edit) return null;
+
+    const storage = browserStorage();
+    const record = storage && loadResume(storage);
+
+    return record && isAppLaunch({ standalone: isStandalone(), referrer: document.referrer, navType: performance.getEntriesByType?.('navigation')?.[0]?.type }) ? record : null;
+  });
+  const [resumed, setResumed] = useState(false);
   const [nodes, setNodes] = useState(boot.nodes ?? []);
 
   // a link with ?edit=<id> (logged in) opens that node at once
   useEffect(() => {
-    if(boot.edit) openEditor(boot.edit);
+    if(boot.edit) return openEditor(boot.edit);
+
+    const storage = browserStorage();
+
+    // the viewer was open: go back to that page and picture (the address holds both, NodePage scrolls)
+    if(resume?.kind === 'view') {
+      saveResume(storage, { ...resume, pending: true }, resume.at);
+      location.replace(resume.url);
+
+      return;
+    }
+
+    if(resume) {
+      pendingResume.scrollY = resume.scrollY;
+      openEditor(resume.target === 'new' ? NEW : Number(resume.target));
+      setResumed(true);
+      setTimeout(() => setResumed(false), 5000);
+
+      return;
+    }
+
+    releaseCover();
+
+    // a node that was never saved and has a draft opens by itself (R5)
+    if(storage && loadDraft(storage, NEW)) openEditor(NEW);
+  }, []);
+
+  // the editor is in place and scrolled (or it took too long): the cover goes
+  useEffect(() => {
+    if(!resume) return;
+
+    window.addEventListener('wb:resumed', releaseCover);
+
+    const timer = setTimeout(releaseCover, COVER_MS);
+
+    return () => {
+      window.removeEventListener('wb:resumed', releaseCover);
+      clearTimeout(timer);
+    };
   }, []);
 
   // an upload card's "add to node" opens the editor when none is open; the
@@ -78,6 +129,7 @@ export const NewPage = () => {
   return html`
     <${Layout} active="new" hrefFor=${code => `/${code}/new`}>
       <h1 class="wb-sr-only">${t('page.new.heading')}</h1>
+      ${resumed && html`<p class="wb-guest-note" role="status">${t('resume.note')}</p>`}
       <${RecordConsent} />
       <${UploadArea} extra=${({ count, addSelected }) => html`<${NewNodeTile} open=${editing} count=${count} onAdd=${addSelected} onMake=${addSelected} onToggle=${() => (editing ? closeEditor() : openEditor(NEW))} />`} />
       ${account?.guest && html`<p class="wb-guest-note" role="status">${t('guest.list', { date: keptUntil(account, lang) })} <button type="button" class="wb-editor-chip" onClick=${openAccount}>${t('guest.keep')}</button></p>`}
