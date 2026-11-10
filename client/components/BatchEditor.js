@@ -23,7 +23,11 @@ const EyeIcon = () => html`<svg viewBox="0 0 24 24" width="18" height="18" aria-
 
 export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
   const { t, lang } = useI18n();
-  const { user } = useBoot();
+  const { user, site } = useBoot();
+  // on a site host the nodes open in the site's editor and pages (docs/SITES.md S17)
+  const slugOf = id => nodes.find(n => n.id === id)?.slug;
+  const editHref = id => (site ? `/edit/${slugOf(id) ?? ''}` : `/${lang}/node/${id}?edit=1`);
+  const showHref = id => (site ? site.paths?.[id] ?? null : `/${lang}/node/${id}`);
   const prefs = user?.prefs ?? {};
   const pseudonym = user?.pseudonym ?? '';
   const [loaded, setLoaded] = useState(null); // { [id]: { rev, kind, title, doc, mine } }
@@ -528,7 +532,7 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
 
     if((changed.length || orderChanged) && !window.confirm(t('batch.discard'))) return;
 
-    globalThis.location.assign(`/${lang}/node/${id}?edit=1&back=${encodeURIComponent(globalThis.location.pathname + globalThis.location.search)}`);
+    globalThis.location.assign(`${editHref(id)}${site ? '?' : '&'}back=${encodeURIComponent(globalThis.location.pathname + globalThis.location.search)}`);
   };
   const revert = () => loaded && (setManual(null), setSort({ key: 'id', down: false }), setState({ work: Object.fromEntries(ids.filter(id => loaded[id]).map(id => [id, loaded[id].doc])), past: [], future: [] }));
   const close = () => ((changed.length || orderChanged) && !window.confirm(t('batch.discard')) ? null : onClose());
@@ -578,8 +582,8 @@ export const BatchEditor = ({ ids, nodes, edges = [], onClose, onSaved }) => {
             <td class="wb-batch-open">
               <button type="button" class="wb-editor-chip" disabled=${rows.indexOf(id) === 0} aria-label=${t('batch.up')} title=${t('batch.up')} onClick=${() => shift(id, -1)}>▲</button>
               <button type="button" class="wb-editor-chip" disabled=${rows.indexOf(id) === rows.length - 1} aria-label=${t('batch.down')} title=${t('batch.down')} onClick=${() => shift(id, 1)}>▼</button>
-              <a class=${`wb-editor-chip${n.mine ? '' : ' wb-disabled'}`} href=${n.mine ? `/${lang}/node/${id}?edit=1` : null} aria-disabled=${n.mine ? null : 'true'} onClick=${e => edit(e, id)} title=${t('batch.edit')} aria-label=${t('batch.edit')}><${EditIcon} /></a>
-              <a class="wb-editor-chip" href=${`/${lang}/node/${id}`} target="_blank" rel="noopener" title=${t('batch.show')} aria-label=${t('batch.show')}><${EyeIcon} /></a>
+              <a class=${`wb-editor-chip${n.mine ? '' : ' wb-disabled'}`} href=${n.mine ? editHref(id) : null} aria-disabled=${n.mine ? null : 'true'} onClick=${e => edit(e, id)} title=${t('batch.edit')} aria-label=${t('batch.edit')}><${EditIcon} /></a>
+              ${showHref(id) && html`<a class="wb-editor-chip" href=${showHref(id)} target="_blank" rel="noopener" title=${t('batch.show')} aria-label=${t('batch.show')}><${EyeIcon} /></a>`}
             </td>
           </tr>`;
         })}</tbody>

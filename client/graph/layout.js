@@ -132,3 +132,42 @@ export function bounds(bodies, pad = 80) {
 
   return { x, y, w: Math.max(...xs) + pad - x, h: Math.max(...ys) + pad - y };
 }
+
+// The nodes far from the rest (docs/GRAPH.md S2.9): with at least 5 nodes, those whose distance from
+// the per-axis median centre is above 1.8 times the 80th percentile distance and above 1.5 rest
+// lengths. -> Set of ids
+export function outliers(bodies, rest = REST) {
+  const list = [...bodies.values()];
+
+  if(list.length < 5) return new Set();
+
+  const median = values => [...values].sort((a, b) => a - b)[list.length >> 1];
+  const cx = median(list.map(b => b.x));
+  const cy = median(list.map(b => b.y));
+  const dist = b => Math.hypot(b.x - cx, b.y - cy);
+  const sorted = list.map(dist).sort((a, b) => a - b);
+  const limit = Math.max(1.8 * sorted[Math.min(list.length - 1, Math.floor(list.length * 0.8))], 1.5 * rest);
+
+  return new Set(list.filter(b => dist(b) > limit).map(b => b.id));
+}
+
+// the box around the nodes that are not outliers, with `pad` around
+export function coreBounds(bodies, pad = 80, rest = REST) {
+  const far = outliers(bodies, rest);
+
+  return bounds(far.size ? new Map([...bodies].filter(([id]) => !far.has(id))) : bodies, pad);
+}
+
+// where a node outside the view is parked: the point on the view's edge (inset by `margin`) on the line
+// from the view's centre to the node, and the angle of that line. `sx, sy` is the node on screen.
+// -> { x, y, angle }
+export function parkAt(sx, sy, width, height, margin = 24) {
+  const cx = width / 2;
+  const cy = height / 2;
+  const dx = sx - cx;
+  const dy = sy - cy;
+  const angle = Math.atan2(dy, dx);
+  const k = Math.min(dx ? (cx - margin) / Math.abs(dx) : Infinity, dy ? (cy - margin) / Math.abs(dy) : Infinity, 1);
+
+  return { x: cx + dx * k, y: cy + dy * k, angle };
+}

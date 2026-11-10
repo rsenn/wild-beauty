@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
 import { useI18n } from '../i18n.js';
 import { useBoot } from '../boot.js';
-import { REST, bounds, seed, settled, step } from '../graph/layout.js';
+import { REST, coreBounds, parkAt, seed, settled, step } from '../graph/layout.js';
 import { afterLift, pinchZoom } from '../graph/pinch.js';
 import { fitHeight } from '../gallery/fit.js';
 import { Layout } from './Layout.js';
@@ -264,7 +264,7 @@ export const GraphPage = () => {
 
     el.style.height = `${fitHeight(el, { min: 280, gap: 8 })}px`; // the space left under the toolbar, so the graph is centred in what is seen
 
-    const box = bounds(bodies.current, FIT_PAD);
+    const box = coreBounds(bodies.current, FIT_PAD, REST * latest.current.spread); // lone far nodes are parked at the edge (GRAPH.md S2.9)
     const k = Math.min(el.clientWidth / box.w, el.clientHeight / box.h, MAX_FIT);
 
     setView({ k, x: (el.clientWidth - box.w * k) / 2 - box.x * k, y: (el.clientHeight - box.h * k) / 2 - box.y * k });
@@ -279,6 +279,17 @@ export const GraphPage = () => {
 
     return () => target.removeEventListener('resize', again);
   }, []);
+
+  // a parked node was tapped: centre the view on it and keep it there until Fit
+  const reveal = id => {
+    const el = svg.current;
+    const b = bodies.current.get(id);
+
+    if(!el || !b) return;
+
+    touched.current = true;
+    setView(v => ({ ...v, x: el.clientWidth / 2 - b.x * v.k, y: el.clientHeight / 2 - b.y * v.k }));
+  };
 
   const world = e => {
     const r = svg.current.getBoundingClientRect();
@@ -753,7 +764,7 @@ export const GraphPage = () => {
         <button type="button" class="wb-editor-chip" disabled=${picked?.kind !== 'list'} onClick=${ungroup}>${t('graph.ungroup')}</button>
         <button type="button" class="wb-editor-chip" aria-pressed=${linking ? 'true' : 'false'} disabled=${!picked && !linking} onClick=${() => setLinking(linking ? null : selected.node)}>${t('graph.link')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!selected?.edge} onClick=${async () => keep(await send([{ op: 'unlink', ...selected.edge }]))}>${t('graph.unlink')}</button>
-        <button type="button" class="wb-editor-chip" hidden=${!!site || !boot.user} disabled=${!(multi.length > 1 || picked)} onClick=${() => setBatch(multi.length > 1 ? multi : [selected.node])}>${t('batch.open')}</button>
+        <button type="button" class="wb-editor-chip" hidden=${!boot.user} disabled=${!(multi.length > 1 || picked)} onClick=${() => setBatch(multi.length > 1 ? multi : [selected.node])}>${t('batch.open')}</button>
         <button type="button" class="wb-editor-chip" disabled=${!ownSelected.length} title=${t('graph.publish.hint')} onClick=${publish}>${t(allPublic ? 'graph.unpublish' : 'graph.publish')}</button>
         <a class=${`wb-editor-chip wb-graph-open${picked ? '' : ' wb-disabled'}`} href=${picked ? (site ? pathOf(picked) : `/${lang}/node/${picked.id}`) : null} aria-disabled=${picked ? null : 'true'}>${t('graph.open')}</a>
         <button type="button" class="wb-editor-chip" disabled=${!note?.undo} onClick=${undo}>${t('graph.undo')}</button>
@@ -814,6 +825,28 @@ export const GraphPage = () => {
             <circle class="wb-graph-count" cx="-6" cy="-24" r="12" /><text class="wb-graph-count-text" x="-6" y="-24" text-anchor="middle" dominant-baseline="central">${carry.ids.length}</text>
           </g>`}
         </g>
+        ${svg.current && shown.nodes.map(n => {
+          const b = bodies.current.get(n.id);
+
+          if(!b) return null;
+
+          const [w, h] = [svg.current.clientWidth, svg.current.clientHeight];
+          const [sx, sy] = [b.x * view.k + view.x, b.y * view.k + view.y];
+
+          if(sx >= 0 && sx <= w && sy >= 0 && sy <= h) return null;
+
+          const at = parkAt(sx, sy, w, h, 40);
+          const away = (at.angle * 180) / Math.PI;
+
+          return html`<g key=${'park' + n.id} class="wb-graph-park" transform=${`translate(${at.x} ${at.y})`} onPointerDown=${e => (e.stopPropagation(), reveal(n.id))}>
+            <title>${label(n)}</title>
+            <clipPath id=${`wb-p-${n.id}`}><circle r="20" /></clipPath>
+            <circle r="20" fill=${n.color ?? '#e8e2d4'} filter="url(#wb-g-shadow)" />
+            ${n.tile && html`<image href=${`/files/photos/${n.tile}.thumb.jpg`} x="-20" y="-20" width="40" height="40" preserveAspectRatio="xMidYMid slice" clip-path=${`url(#wb-p-${n.id})`} />`}
+            <circle class="wb-graph-park-ring" r="20" />
+            <path class="wb-graph-park-arrow" d="M 24 -6 L 33 0 L 24 6 Z" transform=${`rotate(${away})`} />
+          </g>`;
+        })}
         ${marquee && html`<rect class="wb-graph-marquee" x=${Math.min(marquee.x0, marquee.x1)} y=${Math.min(marquee.y0, marquee.y1)} width=${Math.abs(marquee.x1 - marquee.x0)} height=${Math.abs(marquee.y1 - marquee.y0)} />`}
       </svg>
       ${!site && !calm && html`<${RecordConsent} />`}

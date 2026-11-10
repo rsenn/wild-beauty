@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test } from 'bun:test';
 import { open } from '../server/db/db.js';
 import { insertNode } from '../server/db/nodes.js';
 import { applyOp, graphOf, graphRoute } from '../server/api/graph.js';
-import { bounds, seed, settled, step } from '../client/graph/layout.js';
+import { bounds, coreBounds, outliers, parkAt, seed, settled, step } from '../client/graph/layout.js';
 
 const doc = { v: 1, mode: 'free', pages: [{ id: 'page0001', steps: [] }], style: {} };
 let h;
@@ -95,5 +95,45 @@ describe('layout', () => {
     expect(Math.hypot(bodies.get(2).x, bodies.get(2).y)).toBeGreaterThan(50);
     expect(Math.hypot(bodies.get(2).x - bodies.get(3).x, bodies.get(2).y - bodies.get(3).y)).toBeGreaterThan(50);
     expect(bounds(bodies).w).toBeGreaterThan(100);
+  });
+});
+
+describe('outliers, core fit and parking (GRAPH.md S2.9)', () => {
+  const body = (id, x, y) => [id, { id, x, y }];
+  const crowd = () => new Map([...Array(20).keys()].map(i => body(i + 1, 300 + (i % 5) * 60, 300 + Math.floor(i / 5) * 60)));
+
+  test('few nodes have no outliers; a crowd with lone nodes far away has them', () => {
+    expect(outliers(new Map([body(1, 0, 0), body(2, 5000, 5000)])).size).toBe(0);
+
+    const all = crowd();
+
+    all.set(100, { id: 100, x: -2000, y: 400 });
+    all.set(101, { id: 101, x: 400, y: 2500 });
+    expect([...outliers(all)].sort()).toEqual([100, 101]);
+  });
+
+  test('a compact crowd has none', () => {
+    expect(outliers(crowd()).size).toBe(0);
+  });
+
+  test('the core box leaves the outliers out', () => {
+    const all = crowd();
+
+    all.set(100, { id: 100, x: -2000, y: 400 });
+
+    const core = coreBounds(all, 50);
+
+    expect(core.x).toBeGreaterThan(200);
+    expect(bounds(all, 50).x).toBeLessThan(-1900);
+  });
+
+  test('parkAt puts a node on the edge towards it', () => {
+    const p = parkAt(1500, 300, 1000, 600, 24);
+
+    expect(p.x).toBeCloseTo(976, 5);
+    expect(p.y).toBeGreaterThan(24);
+    expect(p.y).toBeLessThan(600 - 24);
+    expect(p.angle).toBeLessThan(0.5);
+    expect(parkAt(500, -900, 1000, 600).y).toBeCloseTo(24, 5);
   });
 });

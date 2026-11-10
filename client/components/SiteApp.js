@@ -106,12 +106,18 @@ const SiteEditor = () => {
   const { t } = useI18n();
   const { site } = useBoot();
   const { node } = site;
+  // the batch editor sends the owner here and wants them back (docs/SITES.md S17): a path under /graph only
+  const back = (() => {
+    const to = new URLSearchParams(globalThis.location?.search).get('back');
+
+    return to && /^\/graph(\?|$)/.test(to) ? to : null;
+  })();
 
   return html`
     <div class="wb-page wb-page-bare site-editing">
-      <header class="wb-header"><a class="site-link" href=${node.path}>${t('site.back')}</a></header>
+      <header class="wb-header"><a class="site-link" href=${back ?? node.path}>${t('site.back')}</a></header>
       <main class="wb-content">
-        <${NodeEditor} key=${node.id} target=${node.id} onClose=${() => location.assign(node.path)} viewHref=${node.path} quickBar=${true} />
+        <${NodeEditor} key=${node.id} target=${node.id} onClose=${() => location.assign(back ?? node.path)} viewHref=${node.path} quickBar=${true} />
       </main>
     </div>
   `;

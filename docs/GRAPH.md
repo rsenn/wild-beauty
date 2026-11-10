@@ -418,6 +418,15 @@ as a second branch kind (a different side or marker) so they stay distinct from
 - The set of visible nodes is computed on the client from the whole graph (`client/graph/collapse.js`); the server still sends the whole graph the viewer may see (`/api/graph`). For big graphs a windowed fetch (S3.6) remains the plan.
 - **Next**: the spine-and-branch view of S2.7 as the way a visitor *navigates* a list; this page stays the overview.
 
+### 2.9 Fit ignores outliers, which are parked at the edge (decided 2026-11-10)
+
+Seen on the live page: a few lone nodes far from the rest made the box of **Fit** huge, so 25 nodes sat in a tenth of the screen at about 30 px each.
+
+- **Outlier** (`layout.js outliers`): with at least 5 nodes, a node whose distance from the per-axis median centre is more than 1.8 times the 80th percentile distance and more than 1.5 rest lengths (`REST * spread`). Few nodes have none.
+- **Fit** (and the first look, and the follow-the-layout fit) takes the box of the non-outliers only (`coreBounds`).
+- **Parked**: a node whose centre lies outside the view is drawn as a small round marker (tile or colour, 20 px radius) on the view's edge, on the line from the view centre to the node, with a small arrow pointing outward. Tapping a marker centres the view on that node (the view then counts as touched, so it stays; **Fit** goes back). Applies to every node that leaves the view, also after panning or zooming, not only to the outliers; the visible edges to it are cut by the view as before.
+- Open: the marker does not show the title; a hover/long-press title is a later step.
+
 ---
 
 ## 3. Getting the stored graph to the browser

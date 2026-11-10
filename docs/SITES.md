@@ -481,3 +481,12 @@ wild-beauty host still work. Open: PWA `start_url` -> `/edit`.
   the site host does not serve) is dropped there. No full-size image either (`/api/nodes/<id>/large` is not served
   on the site host); the small picture is used.
 - Open: a page for each work (child) on the site; for now a child is a picture only.
+
+## 17. The batch editor on a site (2026-11-06)
+
+- The owner's graph on a site host (`/graph`) has the batch editor button (docs/BATCH.md) like the tree of the
+  main host. It uses the same owner-only API routes the site host already serves (`/api/nodes/<id>`,
+  `/api/graph/ops`, `/api/photos/describe`); a visitor never sees the button.
+- The pencil of a row opens `/edit/<slug>` (the node's slug, a node of the site has one), and the editor's
+  Close returns to the batch editor (`?back=/graph?batch=...`, only paths under `/graph` are accepted).
+  The eye of a row opens the page of the node when it is a page of the menu (`site.paths`), otherwise it is left out.
