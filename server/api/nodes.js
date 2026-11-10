@@ -355,6 +355,7 @@ export const removeNode = (h, id, { holder = null, viewer = null, now = Date.now
 
     if(!node) return { status: 404, body: { error: 'not_found' } };
     if(!canEdit(node, viewer)) return { status: 403, body: { error: 'forbidden' } };
+    if(node.kind === 'site') return { status: 409, body: { error: 'site_root' } }; // a site without its home page has no menu (docs/GRAPH.md S2.10)
 
     const locked = lockedByOther(h, id, holder, now());
 

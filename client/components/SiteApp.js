@@ -6,6 +6,7 @@ import { LoginDialog } from './LoginDialog.js';
 import { NodeEditor } from './NodeEditor.js';
 import { GraphPage } from './GraphPage.js';
 import { RecordConsent } from './RecordConsent.js';
+import { ConfirmDelete } from './ConfirmDelete.js';
 
 const post = (url, body) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: body && JSON.stringify(body) });
 
@@ -56,6 +57,7 @@ const SitePages = () => {
   const [list, setList] = useState(site.list.filter(n => n.kind === 'page' || n.kind === 'site'));
   const [title, setTitle] = useState('');
   const [busy, setBusy] = useState(false);
+  const [asking, setAsking] = useState(null); // the page whose deletion is being confirmed
 
   const create = async event => {
     event.preventDefault();
@@ -87,6 +89,7 @@ const SitePages = () => {
               <span class=${node.visibility === 'public' ? 'site-state site-live' : 'site-state'}>${t(node.visibility === 'public' ? 'site.live' : 'site.draft')}</span>
               ${node.slug !== null && html`<a class="site-owner-button" href=${`/edit/${node.slug}`}>${t('site.edit')}</a>`}
               ${node.kind !== 'site' && html`<button type="button" class="site-owner-button" onClick=${() => toggle(node)}>${t(node.visibility === 'public' ? 'site.unpublish' : 'site.publish')}</button>`}
+              ${node.kind !== 'site' && html`<button type="button" class="site-owner-button site-owner-danger" onClick=${() => setAsking(node)}>${t('delete.open')}</button>`}
             </li>`,
           )}
         </ul>
@@ -97,6 +100,7 @@ const SitePages = () => {
       </main>
       <footer class="site-foot"><${RecordConsent} fold=${true} /></footer>
       <${OwnerBar} />
+      ${asking && html`<${ConfirmDelete} nodes=${[{ id: asking.id, title: asking.title, visibility: asking.visibility, members: 0 }]} onClose=${() => setAsking(null)} onDone=${ids => setList(l => l.filter(n => !ids.includes(n.id)))} />`}
     </div>
   `;
 };

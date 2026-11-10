@@ -3675,3 +3675,98 @@ body {
     animation: none;
   }
 }
+
+/* the confirmation before nodes are deleted (docs/GRAPH.md S2.10) */
+.wb-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--wb-ink-soft);
+  backdrop-filter: blur(3px);
+}
+
+.wb-confirm {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 420px);
+  max-height: 90vh;
+  overflow: auto;
+  background: var(--wb-login-card);
+  color: var(--wb-ink);
+  box-shadow: var(--wb-login-shadow);
+}
+
+.wb-confirm-title {
+  margin: 0;
+  padding: 8px 16px 6px;
+  background: var(--wb-danger);
+  color: var(--wb-accent-ink);
+  font-size: var(--wb-font-size-lead);
+  font-weight: inherit;
+}
+
+.wb-confirm-body {
+  padding: 12px 16px 4px;
+  font-size: var(--wb-font-size-label);
+}
+
+.wb-confirm-body p {
+  margin: 0 0 8px;
+}
+
+.wb-confirm-list {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  font-weight: bold;
+}
+
+.wb-confirm-more {
+  font-weight: normal;
+  list-style: none;
+  margin-left: -18px;
+}
+
+.wb-confirm-warn {
+  font-weight: bold;
+}
+
+.wb-confirm-error {
+  border: 2px solid var(--wb-error-frame);
+  padding: 6px 8px;
+}
+
+.wb-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px 16px 14px;
+}
+
+.wb-confirm-actions button {
+  padding: 6px 14px;
+  border: 2px solid var(--wb-ink);
+  background: transparent;
+  color: var(--wb-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.wb-confirm-actions button:focus-visible {
+  outline: 3px solid var(--wb-ink);
+  outline-offset: 2px;
+}
+
+.wb-confirm-actions .wb-confirm-delete {
+  border-color: var(--wb-danger);
+  background: var(--wb-danger);
+  color: var(--wb-accent-ink);
+}
+
+.wb-confirm-actions button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}

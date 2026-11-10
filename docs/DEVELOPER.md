@@ -150,6 +150,7 @@ html comes from client/html.js, htm over preact.
 - /:lang/view is the Show page (cards of the gallery nodes, server/node/view.js viewCards, docs/GALLERY.md S5b); /gallery redirects there
 - client/graph/        graph view; layout.js: force layout, outliers/coreBounds/parkAt (fit ignores lone far nodes, they are parked at the view edge, S2.9); collapse.js: the visitor view's visible nodes (roots, unfold on tap), docs/GRAPH.md S2.8; /tree is calm and read-only until Edit; graph ops on community nodes need an admin (server/guard.js)
 - client/components/BatchEditor.js   batch editor panel over the graph (loads nodes by GET /api/nodes/:id, saves by PUT, no new server route)
+- client/components/ConfirmDelete.js   the modal confirmation before nodes are deleted (graph Delete tool, site /edit list), deleteNodes() calls DELETE /api/nodes/:id one by one; removeNode refuses a site home node (409 site_root); docs/GRAPH.md S2.10
 - client/editor/core/batch.js        its pure document functions: photoRefs, placePhotos, setOff
 - server/api/describe.js geoname.js   POST /api/photos/describe (place + capture time of own photos), offline GeoNames list (tools/gazetteer.js fetches it into data/gazetteer/)
 - docs/ALBUM.md            photo book (proposed): a node or gallery printed like a photo album

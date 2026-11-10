@@ -112,6 +112,12 @@
   cursor: pointer;
 }
 
+.site-owner-danger:hover,
+.site-owner-danger:focus-visible {
+  background: var(--wb-danger);
+  color: var(--wb-accent-ink);
+}
+
 .site-owner-main {
   color: var(--wb-accent-ink);
   background: var(--wb-accent);

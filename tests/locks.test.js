@@ -137,6 +137,16 @@ describe('a lock held by someone else blocks the node', () => {
     expect((await removeNode(h, id, opts(1))).status).toBe(204);
   });
 
+  test('the home node of a site cannot be deleted (docs/GRAPH.md S2.10)', async () => {
+    h.run("UPDATE nodes SET kind = 'site' WHERE id = ?", id);
+
+    const r = await removeNode(h, id, opts(0));
+
+    expect(r.status).toBe(409);
+    expect(r.body.error).toBe('site_root');
+    expect(getNode(h, id)).toBeTruthy();
+  });
+
   test('over HTTP: the route reads the session cookie', async () => {
     takeLock(h, id, holder(0), { now: Date.now() });
 

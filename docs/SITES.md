@@ -490,3 +490,9 @@ wild-beauty host still work. Open: PWA `start_url` -> `/edit`.
 - The pencil of a row opens `/edit/<slug>` (the node's slug, a node of the site has one), and the editor's
   Close returns to the batch editor (`?back=/graph?batch=...`, only paths under `/graph` are accepted).
   The eye of a row opens the page of the node when it is a page of the menu (`site.paths`), otherwise it is left out.
+
+## 18. Deleting pages (2026-11-11)
+
+- `/edit`, the owner's page list, has a *Delete* button on every row except the home page. It opens the shared confirmation of `docs/GRAPH.md` S2.10 (it says when the page is online) and then `DELETE /api/nodes/:id`; the row leaves the list.
+- The owner's graph (`/graph`) has the same *Delete* tool for the selected nodes.
+- The home node of a site cannot be deleted (409 `site_root`).

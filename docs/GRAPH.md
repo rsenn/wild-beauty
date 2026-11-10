@@ -835,3 +835,12 @@ Chrome DevTools protocol, `gbench/ws.mjs` WebSocket pub/sub); they use `bun:sqli
 (a random earlier node as parent, plus a second random link for about half the nodes). They are not in
 the repository because they need `npm install`; say so if they should go under
 `tools/bench/`.
+
+### 2.10 Deleting nodes from the graph and from a site's page list (decided 2026-11-11)
+
+Deleting was only possible inside the node editor (a bare `window.confirm`). It is now also a tool of the graph editor and of the page list `/edit` of a site (docs/SITES.md S18), through one shared confirmation.
+
+- **Confirmation** (`client/components/ConfirmDelete.js`): a modal `role="alertdialog"` over a dimmed page. Escape, a tap on the dimmed part and *Cancel* leave without deleting; *Cancel* has the focus when it opens, so Enter never deletes. It names what goes (the titles, at most 5, then "and n more"), and warns in plain words: the node and its photos that no other node uses go for good, the links to it go, it cannot be undone. Extra lines when they apply: the node is **online** (visitors lose it at once), it has **members** (they stay, only their link to it goes), **several** nodes at once. The confirm button is red and says what it does ("Delete 3 nodes"); while the request runs it is disabled. A failure is shown in the dialog (locked by someone editing it, not yours, gone already); nodes that could be deleted are gone either way.
+- **Graph editor** (edit mode, and the site owner's graph): a *Delete* button at the end of the bar, enabled for a selected node or a multiple selection, never for the home node of a site. It opens the confirmation; on yes each node goes through `DELETE /api/nodes/:id` (one at a time, so the lock, owner and photo clean-up rules of `removeNode` apply unchanged), then the graph is fetched again and the selection cleared. The calm visitor view has no delete.
+- **Server:** `removeNode` refuses the home node of a site (`kind = 'site'`) with 409 `site_root`: a site without its home page has no menu. Nothing else changes.
+- **Not decided:** a trash with undo (not now: deleting is final, as in the editor); the node editor's own delete still uses `window.confirm` and should move to this dialog.

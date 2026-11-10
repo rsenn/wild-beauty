@@ -7,6 +7,7 @@ import { afterLift, pinchZoom } from '../graph/pinch.js';
 import { fitHeight } from '../gallery/fit.js';
 import { Layout } from './Layout.js';
 import { OwnerBar, SiteHead } from './SiteApp.js';
+import { ConfirmDelete } from './ConfirmDelete.js';
 import { RecordConsent } from './RecordConsent.js';
 import { BatchEditor } from './BatchEditor.js';
 import { Popover } from './Popover.js';
@@ -113,6 +114,7 @@ export const GraphPage = () => {
     globalThis.history.replaceState(null, '', url);
     setBatchNodes(ids);
   };
+  const [deleting, setDeleting] = useState(null); // the nodes whose deletion is being confirmed (docs/GRAPH.md S2.10)
   const [places, setPlaces] = useState(false); // the place suggestions panel (docs/EDITOR.md E140)
   const bodies = useRef(new Map());
   const alpha = useRef(1);
@@ -723,6 +725,8 @@ export const GraphPage = () => {
   const nodeOf = id => graph.nodes.find(n => n.id === id);
   // the selected nodes that are the user's own: publish or unpublish them together (visibility: public / hidden)
   const ownSelected = (multi.length > 1 ? multi : selected?.node ? [selected.node] : []).map(nodeOf).filter(n => n && boot.user && n.owner_id === boot.user.id);
+  // what the Delete button would delete: the selection, never the home node of a site
+  const deletable = (multi.length > 1 ? multi : selected?.node ? [selected.node] : []).map(nodeOf).filter(n => n && n.kind !== 'site').map(n => ({ id: n.id, title: n.title, visibility: n.visibility, members: graph.edges.filter(e => e.label === 'child' && e.from === n.id).length }));
   const allPublic = ownSelected.length > 0 && ownSelected.every(n => n.visibility === 'public');
   const pathOf = n => site?.paths[n.id] ?? (n.slug ? `/edit/${n.slug}` : null);
   const publish = async () => keep(await send(ownSelected.map(n => ({ op: 'visibility', id: n.id, visibility: allPublic ? 'hidden' : 'public' }))));
@@ -768,6 +772,7 @@ export const GraphPage = () => {
         <button type="button" class="wb-editor-chip" disabled=${!ownSelected.length} title=${t('graph.publish.hint')} onClick=${publish}>${t(allPublic ? 'graph.unpublish' : 'graph.publish')}</button>
         <a class=${`wb-editor-chip wb-graph-open${picked ? '' : ' wb-disabled'}`} href=${picked ? (site ? pathOf(picked) : `/${lang}/node/${picked.id}`) : null} aria-disabled=${picked ? null : 'true'}>${t('graph.open')}</a>
         <button type="button" class="wb-editor-chip" disabled=${!note?.undo} onClick=${undo}>${t('graph.undo')}</button>
+        <button type="button" class="wb-editor-chip wb-graph-delete" disabled=${!deletable.length} onClick=${() => setDeleting(deletable)}>${t('delete.open')}</button>
         <${Popover} label=${t('graph.more')}>
         <button type="button" class="wb-editor-chip" disabled=${!picked || !picked.pinned} onClick=${async () => keep(await send([{ op: 'pin', id: picked.id, pinned: false }]))}>${t('graph.unpin')}</button>
         <button type="button" class="wb-editor-chip" hidden=${!!site} aria-pressed=${places ? 'true' : 'false'} onClick=${() => setPlaces(!places)}>${t('graph.places')}</button>
@@ -775,6 +780,7 @@ export const GraphPage = () => {
         <//>
         <span class=${`wb-graph-hint${carry ? ' wb-graph-hint-live' : ''}`} role="status">${hint}</span>
       </div>`}
+      ${deleting && html`<${ConfirmDelete} nodes=${deleting} onClose=${() => setDeleting(null)} onDone=${() => (setSelected(null), setMulti([]), reload())} />`}
       ${batch && html`<${BatchEditor} ids=${batch.filter(id => nodeOf(id))} nodes=${graph.nodes} edges=${graph.edges} onClose=${() => setBatch(null)} onSaved=${reload} />`}
       ${editing && places && html`<${PlaceSuggestions} t=${t} onGraph=${keep} onClose=${() => setPlaces(false)} />`}
       <svg ref=${svg} class=${calm ? 'wb-graph wb-graph-calm' : 'wb-graph'} role="group" aria-label=${t('graph.label')} onPointerDown=${e => (readOnly ? null : down(e, null))} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${up}>
