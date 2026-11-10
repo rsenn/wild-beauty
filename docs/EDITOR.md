@@ -361,6 +361,21 @@ Every gesture ends in exactly **one history entry** (S2.6), so a pinch is one un
   works; a pointer-based "ghost" drag on touch, where HTML5 drag is unreliable),
   or press the card's "add to node" button (accessible path). Result: a `photo`
   step, `fit: extend`, centred.
+- **Dropping files and other data on the stage (E155).** The stage takes what the
+  desktop hands it, the same way as a paste: image files dragged from the file
+  explorer (several at once) upload and land in the node exactly like "Add photos"
+  (`QuickAdd`: three at a time, in the order dropped, as one undo step, the node's
+  photo limit applies, the retry rules of `upload.js`); an SVG file is drawn to a PNG
+  first (`rasteriseSvg`); any other drop (html with a step of ours, SVG source,
+  words) goes through the paste path (`classify`). Files that are not pictures are
+  ignored. A read-only node, a slide or the preview ignore the drop, but the browser
+  must still not open the file. Pasting several files (several files copied in the
+  file explorer) takes the same path.
+- **Copy out of the editor (E131, E155).** Copy writes the visible part of the selected
+  step (its wand cut or clip applied, transparent outside, tight box) as `image/png`,
+  so Inkscape, GIMP and office programs paste it as a picture; shapes, strokes and
+  text boxes also carry SVG where the browser can write it. Several steps copy as
+  our own payload only (no picture).
 - **Square crop (decision, replaces the fit modes extend/cover/free).** A photo is
   always clipped to a square: the largest square that fits the picture, whose
   position along the long axis is `crop` (0..1, default 0.5 = centred; nothing to move
@@ -1188,6 +1203,7 @@ Colour first (E84-E87 can start any time after E3), then text.
 - [x] **E152 stable palette, dropper icon and outline, popover look** (2026-10-31): see S2.3a (stable while picking, dropper, popovers and swatches). Open: a visible hint while the dropper is armed (phones show no tooltip); a second click on the dropper cancels it; the colour wheel button gets the swatch hairline.
 - [x] **E153 selection box of a stroke or shape turns with it** (2026-10-31): `hit.js outlineOf` takes the box in the step's own space and carries its four corners through the step's matrix, instead of refitting an upright box round the moved points, so rotating a drawing no longer makes the box jump; handles, rectangle selection and group boxes read it. Test in `tests/editor/hit.test.js`.
 - [x] **E154 gallery context pane** (2026-10-31; built and unit-tested, not yet tried in a browser): a fourth panel section ("Galerie" tab in landscape, inline in portrait) for a node of kind `gallery`, `components/GalleryPane.js` with the pure `editor/io/galleryinfo.js`. It (1) lists four steps with a check (rooms, corridors, pictures, surfaces) and an explanation of how a gallery is set up (open while no room is found); (2) draws the **plan as the editor found it** (rooms, corridors with their width, walls, start point) and warns of shapes and strokes that are not walls and of corners sharper than 45 degrees; (3) says how many pictures fit (`hang.slots`) and where the pictures come from: the linked children when any has a picture, else the node's own photos (the children replace them), with the 40-photo budget (textures count) and the advice to **link pictures as children** (the list of children, a link to the tree); (4) lets the owner pick a default **look** (`scene.look`: warm, walnut, stone, the surfaces of `gallery/autoplan.js`, shown as swatches) and **assign texture photos** (marked with the film-strip button) to the walls, the room floor and the corridor floor. Data: `scene.look` and `scene.style.texture.images` (now `[wall, floor, corridor]` with `null` for a slot left to the look); commands `setScene` (`model.setScene`) and `pruneScene` (a slot whose photo is removed or no longer a texture is dropped, so the document stays valid); `fromdoc.js surfaces()` lays the texture photos over the look, a corridor without its own is floored like the rooms, and the node page passes its photos to the gallery (`GalleryView photos`). `GET /api/nodes/:id` also returns `children` (the visible `child` links). Open: walls split by compass direction (`texture.walls: 'split'`) and the quad editor are not rendered yet, the pane says "one image on all walls"; the pane does not refresh the children after linking in the tree (reopen the node); no button to mark a picture as texture in the pane itself (postponed 2026-10-31, TODO E154b); not tried with the 3D view on a phone.
+- [x] **E155 drop and paste of files** (2026-11-10): see S2.5. Image files dropped on the stage, and several pasted files, go through the `QuickAdd` upload queue (`feed` ref); other drops go through `pasteData`. Tests `tests/quickadd.test.js`, `tests/clipboard.test.js`.
 - [ ] **E79 text boxes**: now phase K (E88-E97).
 - [ ] **E80 fields** (`fields` list in the properties popover).
 - [ ] **E81 cutout and server-side clip buttons** (`opencv-imgproc.md`, only with `capabilities.imgproc`).

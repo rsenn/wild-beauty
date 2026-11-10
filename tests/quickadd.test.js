@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import { apply } from '../client/editor/core/commands.js';
 import * as history from '../client/editor/core/history.js';
 import { emptyNode, photoSteps } from '../client/editor/core/model.js';
-import { fitFiles, readyToAdd } from '../client/editor/io/quickadd.js';
+import { fitFiles, readyToAdd, sortFiles } from '../client/editor/io/quickadd.js';
 
 const item = (id, state, record = null) => ({ id, state, record: state === 'done' ? (record ?? { hash: 'h' + id }) : record });
 
@@ -80,5 +80,20 @@ describe('the addPhotos command', () => {
     }
 
     expect(h.past.length).toBe(2);
+  });
+});
+
+describe('sortFiles (drop and paste of files, E155)', () => {
+  const f = (name, type = '') => ({ name, type });
+
+  test('pictures go to the queue, svgs are drawn first, the rest is ignored', () => {
+    const r = sortFiles([f('a.jpg', 'image/jpeg'), f('b.svg', 'image/svg+xml'), f('c.pdf', 'application/pdf'), f('d.HEIC'), f('e.svg'), f('notes.txt', 'text/plain')]);
+
+    expect(r.pictures.map(x => x.name)).toEqual(['a.jpg', 'd.HEIC']);
+    expect(r.svgs.map(x => x.name)).toEqual(['b.svg', 'e.svg']);
+  });
+
+  test('nothing in, nothing out', () => {
+    expect(sortFiles([])).toEqual({ pictures: [], svgs: [] });
   });
 });

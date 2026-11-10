@@ -33,3 +33,18 @@ export function fitFiles(n, { limit, have = 0, waiting = 0 }) {
 
   return { take: Math.min(n, room), skipped: Math.max(0, n - room) };
 }
+
+// The files of a drop or paste, sorted for the editor (docs/EDITOR.md E155): `pictures` go to the
+// upload queue, `svgs` are drawn to a PNG first, everything else is ignored. An SVG is told by
+// its type or its extension (the explorer reports no type for some).
+export function sortFiles(files) {
+  const pictures = [];
+  const svgs = [];
+
+  for(const file of files) {
+    if(file.type === 'image/svg+xml' || /\.svg$/i.test(file.name ?? '')) svgs.push(file);
+    else if(/^image\//.test(file.type) || /\.(jpe?g|png|heic|heif|webp|gif|avif|tiff?)$/i.test(file.name ?? '')) pictures.push(file);
+  }
+
+  return { pictures, svgs };
+}

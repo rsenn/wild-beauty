@@ -29,6 +29,7 @@ import { LIMITS as TEXT_LIMITS, boxHeight, layout } from '../editor/core/text.js
 import { rasteriseSvg, svgFor, classify, copyPayload, pasteSteps, fromEvent, htmlFor, plainFor, readClipboard, writeClipboard } from '../editor/io/clipboard.js';
 import { sendFile } from '../upload.js';
 import { uploadPayload } from '../files.js';
+import { sortFiles } from '../editor/io/quickadd.js';
 import { scenePalette } from '../editor/view/scenepalette.js';
 import { GalleryPane } from './GalleryPane.js';
 import { useBoot } from '../boot.js';
@@ -321,6 +322,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
   const [size, setSize] = useState(8);
   const [live, setLive] = useState('');
   const [over, setOver] = useState(false);
+  const feed = useRef(null); // QuickAdd's way in for files (E155)
   const [found, setFound] = useState(() => {
     const storage = browserStorage();
 
@@ -1622,18 +1624,30 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     onClose();
   };
 
-  const accepts = e => [...(e.dataTransfer?.types ?? [])].includes(UPLOAD_MIME);
+  // what the stage takes (docs/EDITOR.md E155): an upload card, files from the desktop, or what a
+  // paste would take (html with a step of ours, SVG source, words)
+  const accepts = e => (e.dataTransfer?.types ?? []).some(type => type === UPLOAD_MIME || type === 'Files' || type === 'text/html' || type === 'text/plain');
 
   const drop = e => {
     setOver(false);
 
     if(!accepts(e)) return;
 
-    e.preventDefault();
+    e.preventDefault(); // also when ignored: the browser must not open a dropped file
 
-    try {
-      addUpload(JSON.parse(e.dataTransfer.getData(UPLOAD_MIME)));
-    } catch {}
+    const data = e.dataTransfer;
+
+    if(data.types.includes(UPLOAD_MIME)) {
+      try {
+        addUpload(JSON.parse(data.getData(UPLOAD_MIME)));
+      } catch {}
+
+      return;
+    }
+
+    if(latest.current.readOnly || latest.current.previewing || latest.current.slideInfo) return;
+
+    pasteData(fromEvent(data));
   };
 
   // --- pointer: select with the select tool, draw with the pen ---
@@ -3257,6 +3271,24 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
     const what = classify(data);
 
     if(c.readOnly || c.previewing || c.slideInfo) return; // a paste lands at the end of a page: not on a slide
+    const { pictures, svgs } = sortFiles(data.files ?? []);
+
+    // files from the desktop (dropped, or copied in the file explorer; some report no type) go like "Add photos"
+    if(pictures.length + svgs.length > 0 && feed.current && (!what || what.kind === 'image')) {
+      setAnnounce(tr('editor.announce.pasting'));
+
+      try {
+        const drawn = await Promise.all(svgs.map(async file => new File([await rasteriseSvg(file)], file.name.replace(/\.svg$/i, '') + '.png', { type: 'image/png' })));
+
+        feed.current([...pictures, ...drawn]);
+        setAnnounce(tr('editor.announce.pasted'));
+      } catch {
+        setAnnounce(tr('editor.announce.pasteFailed'));
+      }
+
+      return;
+    }
+
     if(!what) return setAnnounce(tr('editor.announce.pasteNothing'));
 
     const n = ++pasted.current;
@@ -3520,7 +3552,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       <div class="wb-editor-tabs" role="tablist" aria-label=${t('editor.panel')}>${['select', 'photos', 'sequence', ...(kind === 'gallery' ? ['gallery'] : [])].map(id => html`<button type="button" role="tab" class="wb-editor-chip" aria-selected=${panelTab === id ? 'true' : 'false'} onClick=${() => setPanelTab(id)}>${t('editor.tab.' + id)}</button>`)}</div>
       <div class="wb-editor-frame" inert=${readOnly}>
       <div class="wb-editor-work">
-      ${quickBar && html`<div class="wb-editor-addbar"><${QuickAdd} t=${t} limit=${photoLimit(mode)} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} onPaste=${pasteClipboard} />${empty && html`<span class="wb-editor-hint">${t('editor.addbar.hint')}</span>`}</div>`}
+      ${quickBar && html`<div class="wb-editor-addbar"><${QuickAdd} t=${t} limit=${photoLimit(mode)} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} onPaste=${pasteClipboard} feed=${feed} />${empty && html`<span class="wb-editor-hint">${t('editor.addbar.hint')}</span>`}</div>`}
       <div class="wb-editor-body">
         <div class="wb-editor-tools" role="toolbar" aria-label=${t('editor.tools')}>${SLOTS.map(slot => html`<${ToolSlot} key=${slot.id} t=${t} slot=${slot} tool=${tool} last=${groupLast[slot.id]} disabled=${toolOff} onPick=${setTool} />`)}</div>
         <${Stage}
@@ -3573,7 +3605,7 @@ export const NodeEditor = ({ onClose, target = 'new', viewHref = null, quickBar 
       ${paletteTargets && html`<${Palette} t=${t} pal=${pal} used=${usedNow} dropper=${startDropper} target=${paletteTarget} targets=${paletteTargets} onTarget=${setAim} current=${paletteCurrent} onPick=${pick} />`}
       </div>
       <div class="wb-editor-sec" data-sec="photos">
-        <${QuickAdd} t=${t} limit=${photoLimit(mode)} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} />
+        <${QuickAdd} t=${t} limit=${photoLimit(mode)} have=${usedKey.length} disabled=${readOnly} onAdd=${addMany} feed=${feed} />
         <${Filmstrip} t=${t} steps=${strip} photos=${photos} selected=${editStep?.id ?? null} onSelect=${setSelected} onMove=${(id, to) => dispatch({ type: 'movePhoto', id, to })} onRole=${(id, role) => dispatch({ type: 'setRole', id, role })} onRemove=${remove} kind=${kind} />
       </div>
       <div class="wb-editor-sec" data-sec="sequence">

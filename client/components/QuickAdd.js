@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from '../../vendor/hooks.js';
 import { html } from '../html.js';
-import { ACCEPT, isImageFile, uploadPayload } from '../files.js';
+import { ACCEPT, uploadPayload } from '../files.js';
 import { createQueue } from '../upload.js';
-import { fitFiles, readyToAdd } from '../editor/io/quickadd.js';
+import { fitFiles, readyToAdd, sortFiles } from '../editor/io/quickadd.js';
 import { LIMITS } from '../editor/core/model.js';
 
 // "Add photos" of the node editor (docs/EDITOR.md E141). One tap opens the file picker
@@ -50,7 +50,7 @@ const useClipboardPicture = () => {
 };
 
 // `onPaste` adds a button that takes a picture from the clipboard (copied in the phone's gallery), where the browser can read it.
-export const QuickAdd = ({ t, have, disabled, onAdd, onPaste = null, limit = LIMITS.photos }) => {
+export const QuickAdd = ({ t, have, disabled, onAdd, onPaste = null, feed = null, limit = LIMITS.photos }) => {
   const [items, setItems] = useState([]);
   const [skipped, setSkipped] = useState(0);
   const nextId = useRef(1);
@@ -73,10 +73,8 @@ export const QuickAdd = ({ t, have, disabled, onAdd, onPaste = null, limit = LIM
     onAdd(ready.records.map(record => uploadPayload(record)), { batch: batch.current });
   }, [items]);
 
-  const pick = e => {
-    const files = [...e.target.files].filter(isImageFile);
-
-    e.target.value = '';
+  const addFiles = list => {
+    const files = sortFiles(list).pictures;
 
     // a new batch starts when the last one is finished; otherwise the photos join it
     const finished = items.every(item => item.state === 'done' || item.state === 'failed');
@@ -97,6 +95,15 @@ export const QuickAdd = ({ t, have, disabled, onAdd, onPaste = null, limit = LIM
 
     for(const item of added) queue.current.add(item.id, item.file);
   };
+  const pick = e => {
+    const files = [...e.target.files];
+
+    e.target.value = '';
+    addFiles(files);
+  };
+  // the stage's drop and paste feed files in the same way (docs/EDITOR.md E155)
+  if(feed) feed.current = disabled ? null : addFiles;
+
   const retry = () => {
     for(const item of items) if(item.state === 'failed') queue.current.add(item.id, item.file);
   };

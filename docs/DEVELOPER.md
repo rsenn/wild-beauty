@@ -178,6 +178,7 @@ client/editor/README.md has the dependency rule. Folders only import from folder
 - input/      pointer and key meaning. hit testing, handles, gestures, toolTable
 - tools/      one folder per tool. wand lasso clip cutout shape
 - io/         save, clipboard, export, lock, preload
+  files dropped on the stage and pasted files go through the QuickAdd queue (feed ref, E155)
 - view/       render.js turns a document into svg, plus edge, palette, playback
 - overlay/    stateless svg overlays
 - hooks/      feature hooks, still empty, filled by the NodeEditor split
