@@ -34,6 +34,7 @@ notes:
 - docs/SITES.md           personal sites, jános.ch and transistorisiert.ch hosting
 - docs/UX.md and docs/UX-REQUIREMENTS.md  what feels right on touch and mouse
 - docs/DARKROOM.md   the tone curve feature
+- docs/STANDALONE.md  plan: editor and graph editor offline and server-independent (not built)
 - attic/HISTORIC.md  map of the old code
 
 notes:
